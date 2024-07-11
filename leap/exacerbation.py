@@ -1,0 +1,162 @@
+import pandas as pd
+import numpy as np
+import pathlib
+from utils import PROCESSED_DATA_PATH
+from control import ControlLevels
+
+
+class ExacerbationHistory:
+    """A class containing information about the history of asthma exacerbations.
+
+    Attributes:
+        num_current_year (int): the number of exacerbations in the current year.
+        num_prev_year (int): the number of exacerbations in the previous year.
+    """
+    def __init__(self, num_current_year, num_prev_year):
+        self.num_current_year = num_current_year
+        self.num_prev_year = num_prev_year
+
+
+class Exacerbation:
+    """A class containing information about asthma exacerbations.
+
+    Attributes:
+        hyperparameters (dict): A dictionary containing the hyperparameters used to compute
+            ``β0`` from a normal distribution:
+            * ``β0_μ``: float, the mean of the normal distribution.
+            * ``β0_σ``: float, the standard deviation of the normal distribution.
+        parameters (dict): A dictionary containing the following keys:
+            * ``β0``: float, a constant parameter, randomly selected from a normal distribution
+              with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
+            * ``β0_calibration``: float, the parameter for the calibration term.
+            * ``βage``: float, the parameter for the age term.
+            * ``βsex``: float, the parameter for the sex term.
+            * ``βasthmaDx``: float, TODO.
+            * ``βprev_exac1``: float, TODO.
+            * ``βprev_exac2``: float, TODO.
+            * ``βcontrol``: float, the parameter for the asthma control term.
+            * ``βcontrol_C``: float, the parameter for the controlled asthma term.
+            * ``βcontrol_PC``: float, the parameter for the partially-controlled asthma term.
+            * ``βcontrol_UC``: float, the parameter for the uncontrolled asthma term.
+            * ``min_year``: int, the minimum year for which exacerbation data exists + 1.
+              Currently 2001.
+        calibration_table (pd.api.typing.DataFrameGroupBy): A dataframe grouped by year and sex,
+            with the following columns:
+
+            * ``year``: integer year.
+            * ``sex``: 1 = male, 0 = female.
+            * ``age``: integer age.
+            * ``calibrator_multiplier``: float, TODO.
+
+            See ``master_calibrated_exac.csv``.
+
+        initial_rate (float): TODO.
+    """
+    def __init__(
+        self,
+        config: dict | None = None,
+        province: str = "CA",
+        parameters: dict | None = None,
+        hyperparameters: dict | None = None,
+        calibration_table: pd.api.typing.DataFrameGroupBy = None,
+        initial_rate=None
+    ):
+        if config is None and parameters is None and hyperparameters is None:
+            raise ValueError(
+                "Either config dict or parameters and hyperparameters must be provided."
+            )
+        elif config is not None:
+            self.hyperparameters = config["hyperparameters"]
+            self.parameters = config["parameters"]
+            self.initial_rate = config["initial_rate"]
+            self.calibration_table = self.load_exacerbation_calibration(province)
+        else:
+            self.hyperparameters = hyperparameters
+            self.parameters = parameters
+            self.calibration_table = calibration_table
+            self.initial_rate = initial_rate
+
+        self.assign_random_β0()
+        self.parameters["min_year"] = self.calibration_table["year"].min() + 1
+
+    def assign_random_β0(self):
+        """Assign the parameter β0 a random value from a normal distribution."""
+        self.parameters["β0"] = np.random.normal(
+            self.hyperparameters["β0_μ"],
+            self.hyperparameters["β0_σ"]
+        )
+
+    def load_exacerbation_calibration(self, province: str):
+        """Load the exacerbation calibration table.
+
+        Args:
+            province (str): a string indicating the province abbreviation, e.g. "BC".
+                For all of Canada, set province to "CA".
+
+        Returns:
+            pd.api.typing.DataFrameGroupBy: A dataframe grouped by year and sex, with the
+                following columns:
+
+                * ``year``: integer year.
+                * ``sex``: 1 = male, 0 = female.
+                * ``age``: integer age.
+                * ``calibrator_multiplier``: float, TODO.
+        """
+
+        df = pd.read_csv(
+            pathlib.Path(PROCESSED_DATA_PATH, "master_calibrated_exac.csv")
+        )
+        df = df[df["province"] == province]
+        df.drop(["province"], axis=1, inplace=True)
+        grouped_df = df.groupby(["year", "sex"])
+        return grouped_df
+
+    def compute_num_exacerbations(
+        self, agent=None, age: int | None = None, sex: bool | None = None,
+        year: int | None = None, control_levels: ControlLevels | None = None,
+        initial: bool = False
+    ):
+        """Compute the number of asthma exacerbations in a given year.
+
+        Args:
+            agent (Agent): A person in the model.
+            age (int): The age of the person in years.
+            sex (bool): 0 = female, 1 = male.
+            year (int): The calendar year.
+            control_levels (ControlLevels): The asthma control levels.
+            initial (bool): If this is the initial computation.
+
+        Returns:
+            int: the number of asthma exacerbations.
+        """
+
+        if agent is not None:
+            age = agent.age
+            sex = agent.sex
+            year = agent.year
+            control_levels = agent.control_levels
+
+        if initial:
+            year = max(self.parameters["min_year"], year - 1)
+            age = min(age - 1, 90)
+            if age < 3:
+                return 0
+        else:
+            year = max(self.parameters["min_year"], year)
+            age = min(age, 90)
+
+        df = self.calibration_table.get_group((year, int(sex)))
+        calibrator_multiplier = df[df["age"] == age]["calibrator_multiplier"]
+
+        μ = (
+            self.parameters["β0"] +
+            int(not initial) * self.parameters["β0_calibration"] +
+            age * self.parameters["βage"] +
+            sex * self.parameters["βsex"] +
+            control_levels.uncontrolled * self.parameters["βcontrol_UC"] +
+            control_levels.partially_controlled * self.parameters["βcontrol_PC"] +
+            control_levels.fully_controlled * self.parameters["βcontrol_C"] +
+            np.log(calibrator_multiplier)
+        )
+        λ = np.exp(μ)
+        return np.random.poisson(λ)
