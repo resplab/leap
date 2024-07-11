@@ -11,6 +11,10 @@ def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
 
+def logit(x):
+    return np.log(x / (1 - x))
+
+
 def compute_ordinal_regression(
     η: float,
     θ: float | list[float],
