@@ -1,10 +1,17 @@
 import numpy as np
 import pathlib
+import uuid
 from typing import Callable
 
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
 PROCESSED_DATA_PATH = pathlib.Path(LEAP_PATH, "processed_data")
+
+
+class UUID4:
+    def __init__(self, uuid4: uuid.UUID = uuid.uuid4(), short: str = str(uuid.uuid4())[-6:]):
+        self.uuid4 = uuid4
+        self.short = short
 
 
 def sigmoid(x):
