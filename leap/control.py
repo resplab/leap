@@ -1,5 +1,5 @@
 import numpy as np
-from utils import compute_ordinal_regression
+from leap.utils import compute_ordinal_regression
 
 
 class ControlLevels:

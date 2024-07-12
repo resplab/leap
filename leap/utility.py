@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import pathlib
-from utils import PROCESSED_DATA_PATH
+from leap.utils import PROCESSED_DATA_PATH
 
 
 class Utility:
