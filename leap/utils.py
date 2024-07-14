@@ -1,5 +1,6 @@
 import numpy as np
 import pathlib
+import math
 import uuid
 from typing import Callable
 
@@ -12,6 +13,25 @@ class UUID4:
     def __init__(self, uuid4: uuid.UUID = uuid.uuid4(), short: str = str(uuid.uuid4())[-6:]):
         self.uuid4 = uuid4
         self.short = short
+
+
+def round_number(x: float, digits: int = 0, sigdigits: int | None = None) -> float:
+    """Rounds a number to number of significant figures or digits.
+
+    https://mattgosden.medium.com/rounding-to-significant-figures-in-python-2415661b94c3
+
+    Args:
+        x (float): The number to be rounded.
+        digits (int): The number of decimal places to round to.
+        sigdigits (int): The number of significant figures to round to.
+
+    Returns:
+        float: The rounded number.
+    """
+    if sigdigits is not None:
+        return round(x, -int(math.floor(math.log10(abs(x)))) + (sigdigits - 1))
+    else:
+        return round(x, digits)
 
 
 def sigmoid(x):
