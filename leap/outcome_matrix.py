@@ -19,7 +19,7 @@ class OutcomeTable:
         else:
             self.grouped_data = None
 
-    def increment(self, column: str, amount: float | int = 1, filter_columns: dict | None = None):
+    def increment(self, column: str, filter_columns: dict | None = None, amount: float | int = 1):
         """Increment the value of a column in the table.
 
         Args:
