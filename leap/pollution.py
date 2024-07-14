@@ -92,9 +92,9 @@ class GribData:
         day (int): day the data was collected.
         projection (str): which map projection was used. See `gridType` on the
             `GRIB keys <https://confluence.ecmwf.int/display/ECC/GRIB+Keys>`_ page.
-        longitudes (np.array): a list of longitude values.
-        latitudes (np.array): a list of latitude values.
-        values (np.array): a list of the values of interest at a specified longitude and latitude.
+        longitudes (np.ndarray): a list of longitude values.
+        latitudes (np.ndarray): a list of latitude values.
+        values (np.ndarray): a list of the values of interest at a specified longitude and latitude.
             For example, it could be the PM2.5 concentration.
     """
     def __init__(
@@ -104,9 +104,9 @@ class GribData:
         month: int | None = None,
         day: int | None = None,
         projection: str | None = None,
-        longitudes: np.array | None = None,
-        latitudes: np.array | None = None,
-        values: np.array | None = None
+        longitudes: np.ndarray | None = None,
+        latitudes: np.ndarray | None = None,
+        values: np.ndarray | None = None
     ):
         if file_path is not None:
             year, month, day, projection, df = self.load_file(file_path)
@@ -158,7 +158,7 @@ class GribData:
 
 
 def add_record_to_df(
-    df: pd.DataFrame, longitudes: np.array, latitudes: np.array, values: np.array,
+    df: pd.DataFrame, longitudes: np.ndarray, latitudes: np.ndarray, values: np.ndarray,
     index: int
 ):
     """Add a new column to the grib data frame.
@@ -170,9 +170,9 @@ def add_record_to_df(
             * ``value_{index}``: a list of the values of interest at a specified longitude and
                 latitude. For example, it could be the PM2.5 concentration. Each value column
                 corresponds to either a record in the original grib file, or a file in a folder.
-        longitudes (np.array): a list of longitude values.
-        latitudes (np.array): a list of latitude values.
-        values (np.array): a list of the values of interest at a specified longitude and latitude.
+        longitudes (np.ndarray): a list of longitude values.
+        latitudes (np.ndarray): a list of latitude values.
+        values (np.ndarray): a list of the values of interest at a specified longitude and latitude.
             For example, it could be the PM2.5 concentration.
         index (int): the index of the iteration loop.
     """

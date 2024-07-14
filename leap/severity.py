@@ -50,7 +50,7 @@ class ExacerbationSeverity:
         https://juliastats.org/Distributions.jl/stable/multivariate/#Distributions.Dirichlet.
 
         Returns
-            np.array: the probability vector `p`.
+            np.ndarray: the probability vector `p`.
         """
 
         p = np.random.dirichlet(self.hyperparameters["α"] * self.hyperparameters["k"])
@@ -76,7 +76,7 @@ class ExacerbationSeverity:
             age (int): the age of the person in years.
 
         Returns
-            np.array: the distribution of asthma exacerbations by exacerbation type for the
+            np.ndarray: the distribution of asthma exacerbations by exacerbation type for the
             current year.
         """
         p = self.parameters["p"]
