@@ -24,3 +24,20 @@ source env/bin/activate
 pip install -e .
 ```
 
+### Testing
+
+To run all the tests:
+
+```sh
+cd leap
+pytest tests/
+```
+
+To run a single test file:
+
+```sh
+cd leap
+pytest tests/test_name.py
+```
+
+
