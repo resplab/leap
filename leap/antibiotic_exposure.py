@@ -41,14 +41,17 @@ class AntibioticExposure:
             raise ValueError("Either config dict or parameters must be provided.")
         elif config is not None:
             self.parameters = config["parameters"]
-            self.mid_trends = self.load_abx_mid_trends()
         else:
             self.parameters = parameters
+
+        if mid_trends is None:
+            self.mid_trends = self.load_abx_mid_trends()
+        else:
             self.mid_trends = mid_trends
 
     def load_abx_mid_trends(self):
         """Load the antibiotic mid trends table.
-        
+
         Returns:
             pd.api.typing.DataFrameGroupBy: a set of data frames grouped by year and sex.
             Each entry is a DataFrame with a single row with the following columns:
