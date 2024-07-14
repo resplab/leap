@@ -56,7 +56,7 @@ class ExacerbationSeverity:
         p = np.random.dirichlet(self.hyperparameters["α"] * self.hyperparameters["k"])
         self.parameters["p"] = p
 
-    def compute_distribution_exac_severity(self, num_current_year, prev_hosp, age):
+    def compute_distribution(self, num_current_year, prev_hosp, age):
         """Compute the exacerbation severity distribution.
 
         Compute the exacerbation severity distribution for a patient in a given year using the
