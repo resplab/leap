@@ -69,10 +69,10 @@ class AntibioticExposure:
             birth_year (int): The year the agent was born.
         """
         if birth_year < 2001:
-            p = self.antibiotic_exposure_prob(sex=sex, year=2000)
+            p = self.compute_probability(sex=sex, year=2000)
         elif self.parameters["fixyear"] is not None:
             if isinstance(self.parameters["fixyear"], (int, float)):
-                p = self.antibiotic_exposure_prob(
+                p = self.compute_probability(
                     sex=sex,
                     year=self.parameters["fixyear"]
                 )
@@ -83,14 +83,14 @@ class AntibioticExposure:
                 )
                 p = self.parameters["θ"] / (self.parameters["θ"] + μ)
         else:
-            p = self.antibiotic_exposure_prob(
+            p = self.compute_probability(
                 sex=sex,
                 year=birth_year
             )
         r = self.parameters["θ"]
         return np.random.negative_binomial(r, p)
 
-    def antibiotic_exposure_prob(self, sex, year):
+    def compute_probability(self, sex, year):
         """Compute the probability of antibiotic exposure for a given year and sex.
 
         Args:
