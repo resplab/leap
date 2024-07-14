@@ -59,7 +59,7 @@ class Control:
         elif config is not None:
             self.hyperparameters = config["hyperparameters"]
             self.parameters = config["parameters"]
-            self.parameters["θ"] = np.array(self.parameters["θ"])
+            self.parameters["θ"] = list(self.parameters["θ"])
             self.assign_random_β0()
         else:
             self.hyperparameters = hyperparameters
