@@ -46,6 +46,7 @@ class CensusTable:
         else:
             self.year = year
         self.data = self.load_census_data()
+        self.grouped_data = self.data.groupby(["province"])
 
     @property
     def year(self):
@@ -63,8 +64,7 @@ class CensusTable:
         df = pd.read_csv(
             pathlib.Path(PROCESSED_DATA_PATH, "census_divisions/master_census_data_2021.csv")
         )
-        grouped_df = df.groupby(["province"])
-        return grouped_df
+        return df
 
 
 class CensusDivision:
@@ -88,22 +88,23 @@ class CensusDivision:
         cduid: int | None = None,
         name: str | None = None,
         year: int = MIN_CENSUS_YEAR,
-        config: dict | None = None,
         province: str = "CA",
         census_table: CensusTable | None = None
     ):
-        if config is not None:
+        if cduid is None and name is None:
             if census_table is None:
-                census_table = CensusTable(year)
+                census_table = CensusTable(year=year)
             if province == "CA":
                 df = census_table.data
             else:
-                df = census_table.data.get_group((province))
-            census_division_id = np.random.choice(
+                df = census_table.grouped_data.get_group((province))
+
+            probabilities = df["population"] / df["population"].sum()
+            census_division_id = int(np.random.choice(
                 a=df["CDUID"],
-                p=df["population"],
+                p=probabilities,
                 size=1
-            )
+            )[0])
             census_division_name = df[df["CDUID"] == census_division_id]["census_division_name"].values[0]
             self.name = census_division_name
             self.cduid = census_division_id
@@ -163,10 +164,7 @@ class CensusBoundaries:
         false_easting: float | None = None,
         false_northing: float | None = None
     ):
-        if shapefile_data is None:
-            if shapefile_path is None or metadata_path is None:
-                raise ValueError("shapefile_path and metadata_path must be provided.")
-            self.shapefile_data = self.load_census_boundaries(shapefile_path)
+        if metadata_path is not None:
             with open(metadata_path) as file:
                 metadata = json.load(file)
             self.year = metadata["year"]
@@ -179,25 +177,36 @@ class CensusBoundaries:
         else:
             if reference_longitude is None:
                 raise ValueError("reference_longitude must be provided.")
+            else:
+                self.reference_longitude = reference_longitude
             if reference_latitude is None:
                 raise ValueError("reference_latitude must be provided.")
+            else:
+                self.reference_latitude = reference_latitude
             if first_standard_parallel is None:
                 raise ValueError("first_standard_parallel must be provided.")
+            else:
+                self.first_standard_parallel = first_standard_parallel
             if second_standard_parallel is None:
                 raise ValueError("second_standard_parallel must be provided.")
+            else:
+                self.second_standard_parallel = second_standard_parallel
             if false_easting is None:
                 raise ValueError("false_easting must be provided.")
+            else:
+                self.false_easting = false_easting
             if false_northing is None:
                 raise ValueError("false_northing must be provided.")
-
-            self.shapefile_data = shapefile_data
+            else:
+                self.false_northing = false_northing
             self.year = year
-            self.reference_longitude = reference_longitude
-            self.reference_latitude = reference_latitude
-            self.first_standard_parallel = first_standard_parallel
-            self.second_standard_parallel = second_standard_parallel
-            self.false_easting = false_easting
-            self.false_northing = false_northing
+
+        if shapefile_data is None:
+            if shapefile_path is None:
+                raise ValueError("shapefile_path or shapefile_data must be provided.")
+            self.shapefile_data = self.load_census_boundaries(shapefile_path)
+        else:
+            self.shapefile_data = shapefile_data
 
     def load_census_boundaries(self, shapefile_path: str) -> gpd.GeoDataFrame:
         """Load the data from the census boundaries shapefile.
@@ -256,7 +265,7 @@ class CensusBoundaries:
             return census_division
 
     def point_in_polygon(
-        self, point: shapely.Point, polygon: shapely.Polygon | shapely.MultiPolygon
+        self, point: shapely.Point | tuple, polygon: shapely.Polygon | shapely.MultiPolygon
     ):
         """Determine whether or not a given point is within a polygon.
 
@@ -264,6 +273,8 @@ class CensusBoundaries:
             point (shapely.Point): the point we want to check.
             polygon (shapely.Polygon): a polygon object containing the points of its boundary.
         """
+        point = shapely.geometry.Point(point)
+
         if isinstance(polygon, shapely.Polygon):
             return polygon.contains(point)
         else:
