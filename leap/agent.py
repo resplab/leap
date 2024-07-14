@@ -55,7 +55,7 @@ class Agent:
         age: int,
         year: int,
         year_index: int,
-        month, month_index,
+        month: int = 1,
         province: str = "CA",
         uuid: UUID4 = UUID4(),
         alive: bool = True,
@@ -72,9 +72,7 @@ class Agent:
         family_history=None,
         antibiotic_exposure=None,
         census_division=None,
-        census_table=None,
         pollution=None,
-        pollution_table=None,
         ssp: str = "SSP1_2.6"
     ):
         self.uuid = uuid
@@ -83,7 +81,6 @@ class Agent:
         self.year = year
         self.year_index = year_index
         self.month = month
-        self.month_index = month_index
         self.alive = alive
         self.has_asthma = has_asthma
         self.asthma_age = asthma_age
@@ -104,15 +101,11 @@ class Agent:
             self.has_family_history = family_history.has_family_history_of_asthma()
         else:
             self.has_family_history = has_family_history
-        if census_division is None and census_table is None:
-            raise ValueError("census_division or census_table must be provided.")
-        elif census_division is None and census_table is not None:
-            self.census_division = CensusDivision(province, year, census_table)
+        if census_division is None:
+            self.census_division = CensusDivision(province=province, year=year)
         else:
             self.census_division = census_division
-        if pollution is None and pollution_table is None:
-            raise ValueError("pollution or pollution_table must be provided.")
-        elif pollution is None and pollution_table is not None:
-            self.pollution = Pollution(census_division.cduid, year, month, ssp, pollution_table)
+        if pollution is None:
+            self.pollution = Pollution(self.census_division.cduid, year, month, ssp)
         else:
             self.pollution = pollution
