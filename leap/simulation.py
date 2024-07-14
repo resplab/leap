@@ -267,7 +267,7 @@ class Simulation:
             column="n_asthma" if agent.has_asthma else "n_no_asthma",
             filter_columns={
                 "year": agent.year, "age": agent.age, "sex": agent.sex,
-                "fam_history": agent.has_family_hist,
+                "fam_history": agent.has_family_history,
                 "abx_exposure": agent.num_antibiotic_use,
             }
         )
@@ -345,7 +345,7 @@ class Simulation:
                 outcome_matrix.family_history.increment(
                     column="has_family_history",
                     filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                    amount=agent.has_family_hist
+                    amount=agent.has_family_history
                 )
 
                 # if age > 4, we need to generate the initial distribution of asthma related events
@@ -380,7 +380,7 @@ class Simulation:
                         column="n_asthma" if agent.has_asthma else "n_no_asthma",
                         filter_columns={
                             "year": agent.year, "age": agent.age, "sex": agent.sex,
-                            "fam_history": agent.has_family_hist,
+                            "fam_history": agent.has_family_history,
                             "abx_exposure": agent.num_antibiotic_use
                         }
                     )

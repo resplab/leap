@@ -40,7 +40,7 @@ class Agent:
             Number of exacerbations by severity.
         total_hosp (int):
             Total number of very severe asthma exacerbations leading to hospitalization.
-        has_family_hist (bool):
+        has_family_history (bool):
             Is there a family history of asthma?
         asthma_status (bool):
             TODO.
@@ -68,7 +68,7 @@ class Agent:
         exacerbation_history=ExacerbationHistory(0, 0),
         exacerbation_severity_history=ExacerbationSeverityHistory(np.zeros(4), np.zeros(4)),
         total_hosp: int = 0,
-        has_family_hist: bool | None = None,
+        has_family_history: bool | None = None,
         family_history=None,
         antibiotic_exposure=None,
         census_division=None,
@@ -100,10 +100,10 @@ class Agent:
             )
         else:
             self.num_antibiotic_use = num_antibiotic_use
-        if has_family_hist is None and family_history is not None:
-            self.has_family_hist = family_history.has_family_history_of_asthma()
+        if has_family_history is None and family_history is not None:
+            self.has_family_history = family_history.has_family_history_of_asthma()
         else:
-            self.has_family_hist = has_family_hist
+            self.has_family_history = has_family_history
         if census_division is None and census_table is None:
             raise ValueError("census_division or census_table must be provided.")
         elif census_division is None and census_table is not None:

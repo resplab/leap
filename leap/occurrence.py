@@ -103,14 +103,14 @@ class Occurrence:
         grouped_df = df.groupby(["year", "sex", "age"])
         return grouped_df
 
-    def equation(self, sex: bool, age: int, year: int, has_family_hist: bool, dose: int):
+    def equation(self, sex: bool, age: int, year: int, has_family_history: bool, dose: int):
         """Compute the asthma occurrence equation.
 
         Args:
             sex (int): 0 = female, 1 = male.
             age (int): The age of the agent.
             year (int): The calendar year.
-            has_family_hist (bool): Whether the agent has a family history of asthma.
+            has_family_history (bool): Whether the agent has a family history of asthma.
             dose (int): TODO.
         """
         correction_year = min(year, self.max_year + 1)
@@ -118,7 +118,7 @@ class Occurrence:
         p0 = self.crude_occurrence(sex, age, year)
         p = sigmoid(
             logit(p0) +
-            has_family_hist * self.log_OR_family_history(age) +
+            has_family_history * self.log_OR_family_history(age) +
             self.log_OR_abx_exposure(age, dose) +
             self.correction_table.get_group(
                 (correction_year, sex, min(age, 63))
@@ -451,14 +451,14 @@ def agent_has_asthma(
         has_asthma = False
     elif age == 3:
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
-            agent.sex, age, year, agent.has_family_hist, agent.num_antibiotic_use
+            agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
         )))
     elif age > 3 and occurrence_type == "inc":
         has_asthma = bool(np.random.binomial(1, incidence.equation(
-            agent.sex, age, year, agent.has_family_hist, agent.num_antibiotic_use
+            agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
         )))
     elif age > 3 and occurrence_type == "prev":
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
-            agent.sex, age, year, agent.has_family_hist, agent.num_antibiotic_use
+            agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
         )))
     return has_asthma
