@@ -25,14 +25,15 @@ class Death:
         parameters: dict | None = None,
         life_table: pd.api.typing.DataFrameGroupBy | None = None
     ):
-        if config is None and (parameters is None or life_table is None):
-            raise ValueError("Either config dict or parameters and life_table must be provided.")
+        if config is None and parameters is None:
+            raise ValueError("Either config dict or parameters must be provided.")
         elif config is not None:
             self.parameters = config["parameters"]
-            self.life_table = self.load_life_table(starting_year, province)
-        elif parameters is not None and life_table is not None:
+        else:
             self.parameters = parameters
-            self.life_table = life_table
+
+        if life_table is None:
+            self.life_table = self.load_life_table(starting_year, province)
 
     def load_life_table(self, starting_year: int, province: str) -> pd.DataFrame:
         df = pd.read_csv(
