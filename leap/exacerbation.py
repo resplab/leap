@@ -77,7 +77,9 @@ class Exacerbation:
             self.initial_rate = initial_rate
 
         self.assign_random_β0()
-        self.parameters["min_year"] = self.calibration_table["year"].min() + 1
+        self.parameters["min_year"] = min(
+            [key[0] for key in self.calibration_table.groups.keys()]
+        ) + 1
 
     def assign_random_β0(self):
         """Assign the parameter β0 a random value from a normal distribution."""
