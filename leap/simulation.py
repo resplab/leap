@@ -413,7 +413,7 @@ class Simulation:
                         )
                         logger.info(f"Agent has died at age {agent.age}")
                     # emigration
-                    elif self.emigration.compute_prob_emigration(
+                    elif self.emigration.compute_probability(
                         agent.year_index, agent.age, agent.sex
                     ):
                         agent.alive = False

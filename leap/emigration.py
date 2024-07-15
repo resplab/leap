@@ -58,9 +58,9 @@ class Emigration:
         grouped_df = df.groupby(["year"])
         return grouped_df
 
-    def compute_prob_emigration(self, year: int, age: int, sex: bool):
+    def compute_probability(self, year: int, age: int, sex: bool) -> bool:
         """Determine the probability of emigration of an agent (person) in a given year.
-        
+
         Args:
             year (int): The calendar year.
             age (int): Age of the person.
