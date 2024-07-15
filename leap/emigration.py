@@ -73,4 +73,4 @@ class Emigration:
             sex = "M" if sex == 1 else "F"
             df = self.table.get_group((year))
             p = df[df["age"] == min(age, 100)][sex].values[0]
-            return np.random.binomial(1, p)
+            return bool(np.random.binomial(1, p))
