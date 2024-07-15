@@ -36,7 +36,6 @@ def test_death_constructor(config, parameters, province, starting_year):
     assert death.parameters["β2"] == parameters["β2"]
 
 
-
 @pytest.mark.parametrize(
     "parameters, province, starting_year, year, year_index, sex, age, is_dead",
     [
