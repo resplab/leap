@@ -83,6 +83,6 @@ class Immigration:
         """
 
         num_new_immigrants = int(math.ceil(
-            num_new_born * np.sum(self.table.get_group((year))["prop_immigrants_birth"])
+            num_new_born * np.sum(self.table.get_group((year))["n_prop_birth"])
         ))
         return num_new_immigrants
