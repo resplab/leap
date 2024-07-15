@@ -29,7 +29,11 @@ def round_number(x: float, digits: int = 0, sigdigits: int | None = None) -> flo
         float: The rounded number.
     """
     if sigdigits is not None:
-        return round(x, -int(math.floor(math.log10(abs(x)))) + (sigdigits - 1))
+        x = float(x)
+        if x == 0:
+            return round(x, sigdigits - 1)
+        else:
+            return round(x, -int(math.floor(math.log10(abs(x)))) + (sigdigits - 1))
     else:
         return round(x, digits)
 
