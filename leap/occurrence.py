@@ -76,7 +76,7 @@ class Occurrence:
             self.max_age = max_age
 
         if correction_table is None:
-            self.correction_table = self.load_incidence_correction_table()
+            self.correction_table = self.load_occurrence_correction_table()
         else:
             self.correction_table = correction_table
 
@@ -238,7 +238,7 @@ class Incidence(Occurrence):
         self.parameters["βfam_hist"] = np.array(self.parameters["βfam_hist"])
         self.parameters["βabx_exp"] = np.array(self.parameters["βabx_exp"])
 
-    def load_incidence_correction_table(self):
+    def load_occurrence_correction_table(self):
         """Load the asthma incidence correction table.
 
         Returns:
