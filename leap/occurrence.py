@@ -174,7 +174,7 @@ class Occurrence:
         fs[1] = (year - alpha[0]) / np.sqrt(nd[2])
         fs[2] = ((year - alpha[1]) * np.sqrt(nd[2]) * fs[1] - nd[2] / np.sqrt(nd[1]) * fs[0]) / np.sqrt(nd[3])
         return fs[1:]
-    
+
 
 class Incidence(Occurrence):
     """A class containing information about asthma incidence.
@@ -373,7 +373,7 @@ class Prevalence(Occurrence):
     def crude_occurrence(self, sex: bool, age: int, year: int):
         poly_year = self.poly_year_calculator(year)
         poly_age = self.poly_age_calculator(age)
-        poly_yearage = np.outer(poly_year, poly_age)
+        poly_yearage = np.outer(poly_year, poly_age).flatten()
         return np.exp(
             self.parameters["β0"] +
             self.parameters["βsex"] * sex +
