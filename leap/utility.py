@@ -73,7 +73,7 @@ class Utility:
             return baseline
         else:
             disutility_exac = np.sum(
-                agent.exac_sev_hist.current_year * self.parameters["βexac_sev_hist"]
+                agent.exacerbation_severity_history.current_year * self.parameters["βexac_sev_hist"]
             )
             disutility_control = np.sum(
                 agent.control_levels.as_array() * self.parameters["βcontrol"]
