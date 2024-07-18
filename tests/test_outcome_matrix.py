@@ -1,10 +1,5 @@
 import pytest
-import pathlib
-import json
-import numpy as np
-import pandas as pd
 from leap.outcome_matrix import OutcomeMatrix, OutcomeTable
-from tests.utils import __test_dir__
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
