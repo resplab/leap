@@ -44,9 +44,12 @@ class Utility:
             raise ValueError("Either config dict or parameters must be provided.")
         elif config is not None:
             self.parameters = config["parameters"]
-            self.table = self.load_eq5d()
         else:
             self.parameters = parameters
+
+        if table is None:
+            self.table = self.load_eq5d()
+        else:
             self.table = table
 
         self.parameters["βexac_sev_hist"] = np.array(self.parameters["βexac_sev_hist"])
