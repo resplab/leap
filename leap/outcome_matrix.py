@@ -14,6 +14,7 @@ class OutcomeTable:
             group_by (list[str]): The columns to group the data by.
         """
         self.data = data
+        self.group_by = group_by
         if group_by is not None:
             self.grouped_data = data.groupby(group_by)
         else:
@@ -33,6 +34,8 @@ class OutcomeTable:
                 df = df.loc[(df[key] == value)]
         df[column] += amount
         self.data = df
+        if self.group_by is not None:
+            self.grouped_data = self.data.groupby(self.group_by)
 
 
 class OutcomeMatrix:
