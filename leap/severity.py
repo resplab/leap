@@ -1,5 +1,8 @@
 import numpy as np
 from scipy.special import gamma
+from leap.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class ExacerbationSeverity:
@@ -38,10 +41,11 @@ class ExacerbationSeverity:
         elif config is not None:
             self.hyperparameters = config["hyperparameters"]
             self.parameters = config["parameters"]
-            self.parameters["p"] = self.assign_random_p()
         else:
             self.hyperparameters = hyperparameters
             self.parameters = parameters
+
+        self.assign_random_p()
 
     def assign_random_p(self):
         """Compute the probability vector ``p`` from the Dirichlet distribution.
@@ -53,7 +57,7 @@ class ExacerbationSeverity:
             np.ndarray: the probability vector `p`.
         """
 
-        p = np.random.dirichlet(self.hyperparameters["α"] * self.hyperparameters["k"])
+        p = np.random.dirichlet(np.array(self.hyperparameters["α"]) * self.hyperparameters["k"])
         self.parameters["p"] = p
 
     def compute_distribution(self, num_current_year, prev_hosp, age):
