@@ -74,6 +74,11 @@ class OutcomeMatrix:
     def __init__(
         self, until_all_die: bool, min_year: int, max_year: int, max_age: int
     ):
+        self.until_all_die = until_all_die
+        self.min_year = min_year
+        self.max_year = max_year
+        self.max_age = max_age
+
         self.alive = self.create_table(
             ["year", "age", "sex", "n_alive"],
             ["year"],
