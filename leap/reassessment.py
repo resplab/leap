@@ -74,11 +74,11 @@ class Reassessment:
             agent (Agent): Agent module, see `Agent`.
 
         """
-        max_year = len(self.table.groups.keys())
+        max_year = max(np.unique([key for key in self.table.groups.keys()]))
         if agent.age < 4:
             return agent.has_asthma
         else:
-            df = self.table.get_group(min(agent.year_index, max_year))
+            df = self.table.get_group(min(agent.year, max_year))
             df = df[df["age"] == agent.age]
             sex = "F" if agent.sex == 0 else "M"
             probability = df[sex].values[0]
