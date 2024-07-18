@@ -125,9 +125,9 @@ class ExacerbationSeverity:
             year = agent.year - (agent.age - agent.asthma_age)
             total_rate = 0
             for age in range(agent.asthma_age, max_age + 1):
-                control_levels = control.compute_control_levels(sex, age)
+                control_levels = control.compute_control_levels(sex=sex, age=age)
                 total_rate += exacerbation.compute_num_exacerbations(
-                    age, sex, year, control_levels
+                    age=age, sex=sex, year=year, control_levels=control_levels
                 )
                 year += 1
 
