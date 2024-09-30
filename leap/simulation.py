@@ -29,18 +29,42 @@ logger = get_logger(__name__)
 class Simulation:
     """A class containing information about the simulation.
     """
-    def __init__(self, config: dict | None = None):
+    def __init__(
+        self, config: dict | str | None = None, max_age: int | None = None,
+        province: str | None = None, min_year: int | None = None, time_horizon: int | None = None,
+        num_births_initial: int | None = None, population_growth_type: str | None = None
+    ):
         if config is None:
             with open(pathlib.Path(PROCESSED_DATA_PATH, "config.json")) as file:
                 config = json.load(file)
+        elif isinstance(config, str):
+            with open(config) as file:
+                config = json.load(file)
 
-        self.max_age = config["simulation"]["max_age"]
-        self.province = config["simulation"]["province"]
-        self.min_year = config["simulation"]["min_year"]
-        self.max_year = self.min_year + config["simulation"]["time_horizon"] - 1
-        self.time_horizon = config["simulation"]["time_horizon"]
-        self.num_births_initial = config["simulation"]["num_births_initial"]
-        self.population_growth_type = config["simulation"]["population_growth_type"]
+        if max_age is not None:
+            self.max_age = max_age
+        else:
+            self.max_age = config["simulation"]["max_age"]
+        if province is not None:
+            self.province = province
+        else:
+            self.province = config["simulation"]["province"]
+        if min_year is not None:
+            self.min_year = min_year
+        else:
+            self.min_year = config["simulation"]["min_year"]
+        if time_horizon is not None:
+            self.time_horizon = time_horizon
+        else:
+            self.time_horizon = config["simulation"]["time_horizon"]
+        if num_births_initial is not None:
+            self.num_births_initial = num_births_initial
+        else:
+            self.num_births_initial = config["simulation"]["num_births_initial"]
+        if population_growth_type is not None:
+            self.population_growth_type = population_growth_type
+        else:
+            self.population_growth_type = config["simulation"]["population_growth_type"]
         self.agent = None
         self.birth = Birth(self.min_year, self.province, self.population_growth_type, self.max_age)
         self.emigration = Emigration(self.min_year, self.province, self.population_growth_type)
@@ -62,6 +86,62 @@ class Simulation:
         self.pollution_table = PollutionTable()
         self.SSP = config["pollution"]["SSP"]
         self.outcome_matrix = None
+
+    @property
+    def max_age(self) -> int:
+        return self._max_age
+    
+    @max_age.setter
+    def max_age(self, max_age: int):
+        self._max_age = max_age
+
+    @property
+    def province(self) -> str:
+        return self._province
+    
+    @province.setter
+    def province(self, province: str):
+        self._province = province
+
+    @property
+    def min_year(self) -> int:
+        return self._min_year
+    
+    @min_year.setter
+    def min_year(self, min_year: int):
+        self._min_year = min_year
+        try:
+            self.max_year = min_year + self.time_horizon - 1
+        except AttributeError:
+            pass
+
+    @property
+    def time_horizon(self) -> int:
+        return self._time_horizon
+    
+    @time_horizon.setter
+    def time_horizon(self, time_horizon: int):
+        self._time_horizon = time_horizon
+        try:
+            self.max_year = self.min_year + time_horizon - 1
+        except AttributeError:
+            pass
+
+    @property
+    def num_births_initial(self) -> int:
+        return self._num_births_initial
+    
+    @num_births_initial.setter
+    def num_births_initial(self, num_births_initial: int):
+        self._num_births_initial = num_births_initial
+
+    @property
+    def population_growth_type(self) -> str:
+        return self._population_growth_type
+    
+    @population_growth_type.setter
+    def population_growth_type(self, population_growth_type: str):
+        self._population_growth_type = population_growth_type
 
     def get_num_new_agents(
         self, year: int, min_year: int, num_new_born: int, num_immigrants: int
