@@ -180,10 +180,23 @@ class Simulation:
             year: The calendar year.
 
         Returns:
-            A dataframe with the following columns:
+            A dataframe containing a list of new agents to add to the model. The dataframe
+            has the following columns:
                 * ``age``: The age of the agent.
                 * ``sex``: The sex of the agent.
-                * ``immigrant``: Whether or not the agent is an immigrant.
+                * ``immigrant``: Whether or not the agent is an immigrant. If the agent is not
+                  an immigrant, they are a newborn, except if it is the first year of the model.
+                  In that case, the agent is part of the initial population.
+
+        Examples:
+
+            >>> from leap.simulation import Simulation
+            >>> from leap.utils import get_data_path
+            >>> config_path = get_data_path(file_name="config.json")
+            >>> simulation = Simulation(config=config_path, min_year=2027, num_births_initial=5)
+            >>> new_agents_df = simulation.get_new_agents(year=2028)
+            >>> list(new_agents_df["immigrant"]) # doctest: +NORMALIZE_WHITESPACE
+            [True, True, True, True, True, True, False, False, False, False, False]
         """
         # number of newborns and immigrants in a year
         num_new_born = self.birth.get_num_newborn(self.num_births_initial, year)
@@ -201,25 +214,28 @@ class Simulation:
                 "immigrant": [False] * num_new_agents
             })
         else:
-            # for a given year, sample from age/sex distribution
+            # for a given year, sample from age/sex distribution of immigrants
             immigrant_indices = list(np.random.choice(
                 a=range(self.immigration.table.get_group((year)).shape[0]),
                 size=num_immigrants,
                 p=list(self.immigration.table.get_group((year))["prop_immigrants_year"])
             ))
             immigrant_df = self.immigration.table.get_group((year)).iloc[immigrant_indices]
-            new_born_df = self.birth.estimate.get_group((year))
-            sexes_immigrant = immigrant_df["sex"].astype(bool).tolist()
+            sexes_immigrant = immigrant_df["sex"].tolist()
             ages_immigrant = immigrant_df["age"].tolist()
+
+            # for a given year, get the data for the newborns
+            # NOTE: new_born_df is a DataFrame with only one row
+            new_born_df = self.birth.estimate.get_group((year))
             sexes_birth = list(
                 np.random.binomial(n=1, p=new_born_df["prop_male"].iloc[0], size=num_new_born)
             )
+            sexes_birth = ["F" if sex == 0 else "M" for sex in sexes_birth]
             ages_birth = [0] * num_new_born
-            sexes = sexes_immigrant + sexes_birth
-            ages = ages_immigrant + ages_birth
+
             new_agents_df = pd.DataFrame({
-                "age": ages,
-                "sex": sexes,
+                "age": ages_immigrant + ages_birth,
+                "sex": sexes_immigrant + sexes_birth,
                 "immigrant": [True] * num_immigrants + [False] * num_new_born
             })
         return new_agents_df
