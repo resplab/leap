@@ -40,4 +40,11 @@ cd leap
 pytest tests/test_name.py
 ```
 
+To run doctests:
+
+```sh
+cd leap
+pytest leap/ --doctest-modules
+```
+
 
