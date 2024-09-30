@@ -183,3 +183,59 @@ def test_simulation_generate_initial_asthma(
         np.testing.assert_array_equal(agent.control_levels.as_array(), expected_control_levels)
 
 
+@pytest.mark.parametrize(
+    (
+        "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
+        "year, n_new_agents, expected_immigrants"
+    ),
+    [
+        (
+            2024,
+            3,
+            "CA",
+            "M3",
+            10,
+            111,
+            2024,
+            999,
+            pd.Series([False] * 999, dtype=bool, name="immigrant")
+        ),
+        (
+            2024,
+            3,
+            "CA",
+            "M3",
+            10,
+            111,
+            2025,
+            21,
+            pd.Series([True] * 10 + [False] * 11, dtype=bool, name="immigrant")
+        )
+    ]
+)
+def test_simulation_get_new_agents(
+    config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
+    year, n_new_agents, expected_immigrants
+):
+
+    config["simulation"] = {
+        "min_year": min_year,
+        "time_horizon": time_horizon,
+        "province": province,
+        "population_growth_type": population_growth_type,
+        "num_births_initial": num_births_initial,
+        "max_age": max_age
+    }
+    simulation = Simulation(config)
+    year_index = year - min_year
+    new_agents_df = simulation.get_new_agents(year=year, year_index=year_index)
+    assert new_agents_df.shape[0] == n_new_agents
+    assert new_agents_df.shape[1] == time_horizon
+    logger.info(new_agents_df.immigrant)
+    pd.testing.assert_series_equal(
+        new_agents_df.immigrant,
+        expected_immigrants
+    )
+
+
+

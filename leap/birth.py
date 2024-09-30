@@ -11,9 +11,8 @@ class Birth:
     """A class containing information about projected birth rates.
 
     Attributes:
-        estimate (pd.DataFrame): A data frame giving the projected number of births in a given
-            province with the following columns:
-                * ``year``: integer year the range 2000 - 2065.
+        estimate: A grouped data frame giving the projected number of births in a given
+            province, grouped by year. It contains the following columns:
                 * ``province``: A string indicating the province abbreviation, e.g. "BC".
                   For all of Canada, set province to "CA".
                 * ``N``: integer, estimated number of births for that year.
@@ -45,7 +44,7 @@ class Birth:
         province: str | None = None,
         population_growth_type: str | None = None,
         max_age: int = 111,
-        estimate: pd.DataFrame | None = None,
+        estimate: pd.api.typing.DataFrameGroupBy | None = None,
         initial_population: pd.DataFrame | None = None
     ):
         if starting_year is not None and province is not None and population_growth_type is not None:
@@ -63,10 +62,18 @@ class Birth:
                 "Either starting_year, province, and population_growth_type or "
                 "estimate and initial_population must be provided."
             )
+    
+    @property
+    def estimate(self) -> pd.api.typing.DataFrameGroupBy:
+        return self._estimate
+    
+    @estimate.setter
+    def estimate(self, estimate: pd.api.typing.DataFrameGroupBy):
+        self._estimate = estimate
 
     def load_birth_estimate(
         self, starting_year: int, province: str, population_growth_type: str
-    ) -> pd.DataFrame:
+    ) -> pd.api.typing.DataFrameGroupBy:
         df = pd.read_csv(
             pathlib.Path(PROCESSED_DATA_PATH, "master_birth_estimate.csv")
         )
@@ -77,7 +84,8 @@ class Birth:
              (df["projection_scenario"] == "past"))
         ]
         df["N_relative"] = df["N"] / df["N"].iloc[0]
-        return df
+        grouped_df = df.groupby("year")
+        return grouped_df
 
     def load_population_initial_distribution(
         self, starting_year: int, province: str, population_growth_type: str, max_age: int
@@ -129,21 +137,19 @@ class Birth:
             initial_population_indices.extend([age_index] * num_agents)
         return initial_population_indices
 
-    def get_num_newborn(self, num_births_initial: int, year_index: int) -> int:
+    def get_num_newborn(self, num_births_initial: int, year: int) -> int:
         """Get the number of births in a given year.
 
         Args:
-            num_births_initial (int): number of births in the initial year of the simulation.
-            year_index (int): An integer representing the year of the simulation.
-                For example, if the simulation starts in 2023, then the ``year_index`` for 2023
-                is 1, for 2024 is 2, etc.
+            num_births_initial: Number of births in the initial year of the simulation.
+            year: The calendar year.
 
         Returns:
-            int: the number of births for the given year.
+            The number of births for the given year.
         """
         num_new_born = int(
             math.ceil(
-                num_births_initial * self.estimate["N_relative"].iloc[year_index]
+                num_births_initial * self.estimate.get_group((year))["N_relative"]
             )
         )
         return num_new_born

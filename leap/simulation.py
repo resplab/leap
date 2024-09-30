@@ -93,19 +93,21 @@ class Simulation:
         
         return num_new_agents
 
-    def get_new_agents(self, year: int, year_index: int) -> pd.DataFrame:
+    def get_new_agents(self, year: int) -> pd.DataFrame:
         """Get the new agents born/immigrated in a given year.
 
         Args:
-            year (int): The year.
-            year_index (int): The index of the year.
+            year: The calendar year.
 
         Returns:
-            pd.DataFrame: The new agents.
+            A dataframe with the following columns:
+                * ``age``: The age of the agent.
+                * ``sex``: The sex of the agent.
+                * ``immigrant``: Whether or not the agent is an immigrant.
         """
         # number of newborns and immigrants in a year
-        num_new_born = self.birth.get_num_newborn(self.num_births_initial, year_index)
-        num_immigrants = self.immigration.get_num_new_immigrants(num_new_born, year_index)
+        num_new_born = self.birth.get_num_newborn(self.num_births_initial, year)
+        num_immigrants = self.immigration.get_num_new_immigrants(num_new_born, year)
         num_new_agents = self.get_num_new_agents(
             year, self.min_year, num_new_born, num_immigrants
         )
@@ -119,18 +121,20 @@ class Simulation:
                 "immigrant": [False] * num_new_agents
             })
         else:
+            # for a given year, sample from age/sex distribution
             immigrant_indices = list(np.random.choice(
                 a=range(self.immigration.table.get_group((year)).shape[0]),
                 size=num_immigrants,
                 p=list(self.immigration.table.get_group((year))["prop_immigrants_year"])
             ))
-            new_born_indices = list(range(num_immigrants + 1, num_new_agents))
             immigrant_df = self.immigration.table.get_group((year)).iloc[immigrant_indices]
-            new_born_df = self.birth.estimate.get_group((year)).iloc[new_born_indices]
+            new_born_df = self.birth.estimate.get_group((year))
             sexes_immigrant = immigrant_df["sex"].astype(bool).tolist()
             ages_immigrant = immigrant_df["age"].tolist()
-            sexes_birth = list(np.random.binomial(1, np.array(new_born_df["prop_male"])))
-            ages_birth = list(new_born_df["age"])
+            sexes_birth = list(
+                np.random.binomial(n=1, p=new_born_df["prop_male"].iloc[0], size=num_new_born)
+            )
+            ages_birth = [0] * num_new_born
             sexes = sexes_immigrant + sexes_birth
             ages = ages_immigrant + ages_birth
             new_agents_df = pd.DataFrame({
