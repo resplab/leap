@@ -227,8 +227,7 @@ def test_simulation_get_new_agents(
         "max_age": max_age
     }
     simulation = Simulation(config)
-    year_index = year - min_year
-    new_agents_df = simulation.get_new_agents(year=year, year_index=year_index)
+    new_agents_df = simulation.get_new_agents(year=year)
     assert new_agents_df.shape[0] == n_new_agents
     assert new_agents_df.shape[1] == time_horizon
     logger.info(new_agents_df.immigrant)
