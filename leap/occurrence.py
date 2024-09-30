@@ -408,7 +408,14 @@ def compute_asthma_age(
         asthma_age = 3
         year = min(agent.year - current_age + asthma_age, min_year)
         while find_asthma_age and asthma_age < max_asthma_age:
-            has_asthma = agent_has_asthma(agent, incidence, prevalence, asthma_age, year)
+            has_asthma = agent_has_asthma(
+                agent=agent,
+                occurrence_type="inc",
+                incidence=incidence,
+                prevalence=prevalence,
+                age=asthma_age,
+                year=year
+            )
             if has_asthma:
                 return asthma_age
             asthma_age += 1

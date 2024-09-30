@@ -14,7 +14,7 @@ from leap.emigration import Emigration
 from leap.exacerbation import Exacerbation
 from leap.family_history import FamilyHistory
 from leap.immigration import Immigration
-from leap.occurrence import Incidence, Prevalence, agent_has_asthma
+from leap.occurrence import Incidence, Prevalence, agent_has_asthma, compute_asthma_age
 from leap.outcome_matrix import OutcomeMatrix
 from leap.pollution import PollutionTable
 from leap.reassessment import Reassessment
@@ -143,30 +143,41 @@ class Simulation:
     def generate_initial_asthma(self, agent: Agent):
         """Generate the initial asthma status for an agent.
 
+        Mutates the ``agent`` argument.
+
         Args:
-            agent (Agent): The agent.
+            agent: A person in the model.
         """
-        agent.has_asthma = self.prevalence.compute_has_asthma(agent)
+        agent.has_asthma = agent_has_asthma(
+            agent=agent, occurrence_type="prev", prevalence=self.prevalence
+        )
+        logger.info(agent.has_asthma)
 
         if agent.has_asthma:
             agent.asthma_status = True
-            agent.asthma_age = self.incidence.compute_asthma_age(
-                agent, self.prevalence, agent.age
+            agent.asthma_age = compute_asthma_age(
+                agent=agent,
+                incidence=self.incidence,
+                prevalence=self.prevalence,
+                current_age=agent.age
             )
-            agent.total_hosp = self.exacerbation.compute_hospitalization_prob(
-                agent, self.exacerbation_severity, self.control, self.exacerbation
+            agent.total_hosp = self.exacerbation_severity.compute_hospitalization_prob(
+                agent, self.exacerbation, self.control
             )
             agent.control_levels = self.control.compute_control_levels(
-                self.control, agent.sex, agent.age, True
+                sex=agent.sex, age=agent.age, initial=True
             )
-            agent.exacerbation_history.num_current_year = self.exacerbation.compute_num_exacerbations(
-                agent=agent, initial=True
-            )
+            agent.exacerbation_history.num_current_year = \
+                self.exacerbation.compute_num_exacerbations(
+                    agent=agent, initial=True
+                )
             # the number of exacerbations by severity
-            agent.exacerbation_severity_history.current_year = self.exacerbation.compute_distribution_exac_severity(
-                self.exacerbation_severity, agent.exacerbation_history.num_current_year,
-                (agent.total_hosp > 0), agent.age
-            )
+            agent.exacerbation_severity_history.current_year = \
+                self.exacerbation_severity.compute_distribution(
+                    num_current_year=agent.exacerbation_history.num_current_year,
+                    prev_hosp=(agent.total_hosp > 0),
+                    age=agent.age
+                )
             # update total hospitalizations
             agent.total_hosp += agent.exacerbation_severity_history.current_year[3]
 

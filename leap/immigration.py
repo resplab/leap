@@ -65,9 +65,9 @@ class Immigration:
             (df["age"] <= max_age) &
             (df["year"] >= starting_year) &
             (df["province"] == province) &
-            (df["proj_scenario"] == population_growth_type)
+            (df["projection_scenario"] == population_growth_type)
         ]
-        df.drop(columns=["province", "proj_scenario"], inplace=True)
+        df.drop(columns=["province", "projection_scenario"], inplace=True)
         grouped_df = df.groupby(["year"])
         return grouped_df
 
@@ -83,6 +83,6 @@ class Immigration:
         """
 
         num_new_immigrants = int(math.ceil(
-            num_new_born * np.sum(self.table.get_group((year))["n_prop_birth"])
+            num_new_born * np.sum(self.table.get_group((year))["prop_immigrants_birth"])
         ))
         return num_new_immigrants
