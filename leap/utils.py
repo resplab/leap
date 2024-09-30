@@ -2,6 +2,7 @@ import numpy as np
 import pathlib
 import math
 import uuid
+import importlib.resources as pkg_resources
 from typing import Callable
 
 
@@ -77,3 +78,17 @@ def compute_ordinal_regression(
         θ = [-10**5] + θ + [10**5]
 
     return [prob_function(θ[k + 1] - η) - prob_function(θ[k] - η) for k in range(len(θ) - 1)]
+
+
+def get_data_path(file_name: str) -> str:
+    """Get the full path to a file in the tests/data directory.
+
+    Args:
+        file_name: The name of the file.
+
+    Returns:
+        The full path to the file in the tests/data directory.
+    """
+
+    package_path = str(pkg_resources.files("tests.data").joinpath(file_name))
+    return package_path
