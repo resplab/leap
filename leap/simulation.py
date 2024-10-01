@@ -310,7 +310,7 @@ class Simulation:
             outcome_matrix.control.increment(
                 column="prob",
                 filter_columns={"year": agent.year, "level": level, "age": agent.sex},
-                amount=agent.control_levels[level]
+                amount=agent.control_levels.as_array()[level]
             )
 
         agent.exacerbation_history.num_current_year = self.exacerbation.compute_num_exacerbations(

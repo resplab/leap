@@ -28,11 +28,15 @@ class OutcomeTable:
             amount (float | int): The amount to increment the column by.
             filter_columns (dict): A dictionary of columns to filter by.
         """
-        df = self.data.copy()
+        df = self.data.copy(deep=True)
         if filter_columns is not None:
+            df_filtered = df.copy(deep=True)
             for key, value in filter_columns.items():
-                df = df.loc[(df[key] == value)]
-        df[column] += amount
+                df_filtered = df_filtered.loc[(df_filtered[key] == value)]
+            df_filtered[column] += amount
+            df.update(df_filtered)
+        else:
+            df[column] += amount
         self.data = df
         if self.group_by is not None:
             self.grouped_data = self.data.groupby(self.group_by)
