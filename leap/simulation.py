@@ -309,7 +309,7 @@ class Simulation:
         for level in range(3):
             outcome_matrix.control.increment(
                 column="prob",
-                filter_columns={"year": agent.year, "level": level, "age": agent.sex},
+                filter_columns={"year": agent.year, "level": level, "sex": agent.sex, "age": agent.age},
                 amount=agent.control_levels.as_array()[level]
             )
 
