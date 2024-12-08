@@ -458,14 +458,14 @@ def agent_has_asthma(
         has_asthma = False
     elif age == 3:
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
-            agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
+            int(agent.sex), age, year, agent.has_family_history, agent.num_antibiotic_use
         )))
     elif age > 3 and occurrence_type == "inc":
         has_asthma = bool(np.random.binomial(1, incidence.equation(
-            agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
+            int(agent.sex), age, year, agent.has_family_history, agent.num_antibiotic_use
         )))
     elif age > 3 and occurrence_type == "prev":
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
-            agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
+            int(agent.sex), age, year, agent.has_family_history, agent.num_antibiotic_use
         )))
     return has_asthma
