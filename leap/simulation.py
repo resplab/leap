@@ -361,7 +361,7 @@ class Simulation:
             # if they did not have asthma dx in the past, then record it
             agent.asthma_age = agent.age
             outcome_matrix.asthma_incidence.increment(
-                column="asthma_incidence",
+                column="n_new_diagnoses",
                 filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
             )
             self.update_asthma_effects(agent, outcome_matrix)
@@ -370,7 +370,7 @@ class Simulation:
             if not agent.asthma_status:
                 agent.asthma_status = True
                 outcome_matrix.asthma_status.increment(
-                    column="asthma_status",
+                    column="status",
                     filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
                 )
 
