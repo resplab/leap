@@ -41,6 +41,22 @@ class OutcomeTable:
         if self.group_by is not None:
             self.grouped_data = self.data.groupby(self.group_by)
 
+    def get(self, column: str, **kwargs) -> float | int:
+        """Get the value of a column in the table.
+
+        Args:
+            column (str): The column to get the value from.
+            **kwargs (dict): A dictionary of columns to filter by.
+
+        Returns:
+            float | int: The value of the column.
+        """
+        df = self.data.copy(deep=True)
+        for key, value in kwargs.items():
+            df = df.loc[(df[key] == value)]
+        value = df[column].values[0]
+        return value
+
 
 class OutcomeMatrix:
     """A class containing information about the outcomes of the model.
