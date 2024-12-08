@@ -185,6 +185,146 @@ def test_simulation_generate_initial_asthma(
     else:
         np.testing.assert_array_equal(agent.control_levels.as_array(), expected_control_levels)
 
+
+@pytest.mark.parametrize(
+    (
+        "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
+        "antibiotic_exposure_parameters, incidence_parameter_βfam_hist,"
+        "incidence_parameter_βabx_exp, family_history_parameters, sex, age, year_index,"
+        "expected_agent_has_asthma, expected_asthma_age, expected_asthma_status,"
+        "expected_asthma_incidence"
+    ),
+    [
+        (
+            2024,
+            1,
+            "CA",
+            "M3",
+            10,
+            4,
+            {
+                "β0": -100000,
+                "βyear": -0.01,
+                "βsex": -1,
+                "θ": 500,
+                "fixyear": None,
+                "βfloor": 0.0,
+                "β2005": 1,
+                "β2005_year": 1
+            },
+            [100, 0],
+            [1.826, -0.2920745, 0.053],
+            {"p": 1.0},
+            "F",
+            4,
+            0,
+            True,
+            4,
+            True,
+            1
+        ),
+        (
+            2024,
+            1,
+            "CA",
+            "M3",
+            10,
+            4,
+            {
+                "β0": -100000,
+                "βyear": -0.01,
+                "βsex": -1,
+                "θ": 500,
+                "fixyear": None,
+                "βfloor": 0.0,
+                "β2005": 1,
+                "β2005_year": 1
+            },
+            [-100, 0],
+            [0.0, 0.0, 0.0],
+            {"p": 1.0},
+            "F",
+            4,
+            0,
+            False,
+            None,
+            False,
+            0
+        )
+    ]
+)
+def test_check_if_agent_gets_new_asthma_diagnosis(
+    config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
+    antibiotic_exposure_parameters, incidence_parameter_βfam_hist, incidence_parameter_βabx_exp,
+    family_history_parameters, sex, age, year_index, expected_agent_has_asthma, expected_asthma_age,
+    expected_asthma_status, expected_asthma_incidence
+):
+    """
+    Setting the ``time_horizon`` to 1 means that the agents are generated from the initial
+    population table, and that the agents are generated from the initial population table, and
+    that no immigration happens.
+
+    Setting the antibiotic exposure parameters below ensures that the antibiotic use is 0.
+
+    Setting the ``num_births_initial = 10`` and starting in 2024 with growth type "M3", each of the
+    age groups has 10 agents, for a total of 10 x 5 = 50 agents.
+
+    Test 1:
+    Setting the incidence parameter ``βfam_hist = [100, 0]`` and the family history parameter
+    ``p = 1.0`` ensures that the probability of an agent being diagnosed with asthma is 1. The
+    maximum age is set to 4, and the minimum age required for an asthma diagnosis is 3. So all
+    agents aged 4 should receive an asthma diagnosis.
+
+    Test 2:
+    Setting the incidence parameter ``βfam_hist = [-100, 0]`` and the family history parameter
+    ``p = 1.0`` ensures that the probability of an agent being diagnosed with asthma is 0.
+    """
+
+    config["simulation"] = {
+        "min_year": min_year,
+        "time_horizon": time_horizon,
+        "province": province,
+        "population_growth_type": population_growth_type,
+        "num_births_initial": num_births_initial,
+        "max_age": max_age
+    }
+    config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
+    config["incidence"]["parameters"]["βfam_hist"] = incidence_parameter_βfam_hist
+    config["incidence"]["parameters"]["βabx_exp"] = incidence_parameter_βabx_exp
+    config["family_history"]["parameters"] = family_history_parameters
+
+    outcome_matrix = OutcomeMatrix(
+        until_all_die=False,
+        min_year=min_year,
+        max_year=min_year,
+        max_age=max_age
+    )
+
+    simulation = Simulation(config)
+    agent = Agent(
+        sex=sex,
+        age=age,
+        year=min_year,
+        year_index=year_index,
+        family_history=simulation.family_history,
+        antibiotic_exposure=simulation.antibiotic_exposure,
+        province=simulation.province,
+        ssp=simulation.SSP
+    )
+
+    simulation.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
+    assert outcome_matrix.asthma_incidence.get(
+        column="n_new_diagnoses", year=min_year + year_index, age=age, sex=sex
+    ) == expected_asthma_incidence
+    assert outcome_matrix.asthma_status.get(
+        column="status", year=min_year + year_index, age=age, sex=sex
+    ) == expected_asthma_status
+    
+    assert agent.has_asthma == expected_agent_has_asthma
+    assert agent.asthma_age == expected_asthma_age
+    assert agent.asthma_status == expected_asthma_status
+
+
 @pytest.mark.parametrize(
     (
         "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
