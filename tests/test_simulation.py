@@ -485,6 +485,138 @@ def test_simulation_update_asthma_effects(
 @pytest.mark.parametrize(
     (
         "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
+        "antibiotic_exposure_parameters, incidence_parameter_βfam_hist,"
+        "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
+        "sex, age, has_asthma, asthma_age, asthma_status, exacerbation_history, year_index,"
+        "expected_control_levels, expected_exacerbation_history"
+    ),
+    [
+        (
+            2024,
+            1,
+            "BC",
+            "M3",
+            10,
+            100,
+            {
+                "β0": -100000,
+                "βyear": -0.01,
+                "βsex": -1,
+                "θ": 500,
+                "fixyear": None,
+                "βfloor": 0.0,
+                "β2005": 1,
+                "β2005_year": 1
+            },
+            [100, 0],
+            {"p": 1.0},
+            10.0,
+            [-1 * 10**5, -1 * 10**5],
+            "M",
+            53,
+            True,
+            4,
+            True,
+            ExacerbationHistory(20, 0),
+            0,
+            [0.0, 0.0, 1.0],
+            ExacerbationHistory(100, 20)
+        ),
+    ]
+)
+def test_reassess_asthma_diagnosis(
+    config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
+    antibiotic_exposure_parameters, incidence_parameter_βfam_hist, family_history_parameters,
+    exacerbation_hyperparameter_β0_μ, control_parameter_θ, sex, age, has_asthma, asthma_age,
+    asthma_status, exacerbation_history, year_index, expected_control_levels,
+    expected_exacerbation_history
+):
+    """
+    Setting ``time_horizon=1`` means that the agents are generated from the initial population
+    table, and that no immigration happens.
+
+    Setting the antibiotic exposure parameters below ensures that the antibiotic use is 0.
+
+    Setting the ``num_births_initial`` to 10 and starting in 2024 with growth type "M3", each of the
+    age groups has 10 agents, for a total of 10 x 5 = 50 agents.
+
+    Setting the incidence parameter ``βfam_hist=[100, 0]`` and the family history parameter ``p=1.0``
+    ensures that the probability of an agent being diagnosed with asthma is 1. The maximum
+    age is set to 4, and the minimum age required for an asthma diagnosis is 3. So all agents aged 4
+    should receive an asthma diagnosis.
+
+    Setting the control parameter ``θ=[-1e5, -1e5]`` ensures that the ``control_levels`` are:
+        FC: 0.0
+        PC: 0.0
+        UC: 1.0
+
+    Setting the exacerbation parameter ``β0_μ=5.0`` ensures that the number of exacerbations will
+    be large.
+    """
+
+    max_year = min_year + time_horizon - 1
+    config["simulation"] = {
+        "min_year": min_year,
+        "time_horizon": time_horizon,
+        "province": province,
+        "population_growth_type": population_growth_type,
+        "num_births_initial": num_births_initial,
+        "max_age": max_age
+    }
+    config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
+    config["incidence"]["parameters"]["βfam_hist"] = incidence_parameter_βfam_hist
+    config["family_history"]["parameters"] = family_history_parameters
+    config["control"]["parameters"]["θ"] = control_parameter_θ
+    config["exacerbation"]["hyperparameters"]["β0_μ"] = exacerbation_hyperparameter_β0_μ
+
+    outcome_matrix = OutcomeMatrix(
+        until_all_die=False,
+        min_year=min_year,
+        max_year=max_year,
+        max_age=max_age
+    )
+    simulation = Simulation(config)
+    agent = Agent(
+        sex=sex,
+        age=age,
+        year=min_year,
+        year_index=year_index,
+        family_history=simulation.family_history,
+        antibiotic_exposure=simulation.antibiotic_exposure,
+        province=simulation.province,
+        ssp=simulation.SSP,
+        has_asthma=has_asthma,
+        asthma_age=asthma_age,
+        asthma_status=asthma_status,
+        exacerbation_history=exacerbation_history
+    )
+
+    simulation.reassess_asthma_diagnosis(agent, outcome_matrix)
+    assert agent.has_asthma == has_asthma
+    assert agent.asthma_age == asthma_age
+    assert agent.asthma_status == asthma_status
+    np.testing.assert_array_equal(agent.control_levels.as_array(), expected_control_levels)
+    logger.info(outcome_matrix.control.data)
+    assert outcome_matrix.control.get(
+        column="prob", year=min_year + year_index, age=age, sex=sex, level=0
+    ) == expected_control_levels[0]
+    assert outcome_matrix.control.get(
+        column="prob", year=min_year + year_index, age=age, sex=sex, level=1
+    ) == expected_control_levels[1]
+    assert outcome_matrix.control.get(
+        column="prob", year=min_year + year_index, age=age, sex=sex, level=2
+    ) == expected_control_levels[2]
+    assert agent.exacerbation_history.num_prev_year == expected_exacerbation_history.num_prev_year
+    assert agent.exacerbation_history.num_current_year > expected_exacerbation_history.num_current_year
+    assert outcome_matrix.exacerbation.get(
+        column="n_exacerbations", year=min_year + year_index, age=age, sex=sex
+    ) > expected_exacerbation_history.num_current_year
+
+
+
+@pytest.mark.parametrize(
+    (
+        "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
         "year, n_new_agents, expected_immigrants"
     ),
     [
