@@ -2,6 +2,9 @@ import pytest
 import pandas as pd
 from leap.birth import Birth
 from leap.utils import round_number
+from leap.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 @pytest.mark.parametrize(
@@ -24,12 +27,13 @@ def test_birth_constructor(
         province=province,
         population_growth_type=population_growth_type
     )
-    assert birth.estimate["N_relative"].iloc[0] == 1.0
-    assert birth.estimate["province"].iloc[0] == province
-    assert birth.estimate["N"].iloc[0] == expected_N
-    assert round_number(birth.estimate["prop_male"].iloc[0], sigdigits=5) == expected_prop_male
-    assert birth.estimate["projection_scenario"].iloc[0] == population_growth_type
-    assert birth.estimate["year"].iloc[0] == starting_year
+
+    assert birth.estimate.get_group(starting_year)["N_relative"].iloc[0] == 1.0
+    assert birth.estimate["province"].get_group(starting_year).iloc[0] == province
+    assert birth.estimate.get_group(starting_year)["N"].iloc[0] == expected_N
+    assert round_number(birth.estimate.get_group(starting_year)["prop_male"].iloc[0], sigdigits=5) == expected_prop_male
+    assert birth.estimate.get_group(starting_year)["projection_scenario"].iloc[0] == population_growth_type
+    assert birth.estimate.get_group(starting_year)["year"].iloc[0] == starting_year
 
 
 @pytest.mark.parametrize(
@@ -64,7 +68,7 @@ def test_birth_get_initial_population_indices(
 
 @pytest.mark.parametrize(
     (
-        "starting_year, province, population_growth_type, max_age, year_index, num_births_initial,"
+        "starting_year, province, population_growth_type, max_age, year, num_births_initial,"
         "expected_num_newborn"
     ),
     [
@@ -73,14 +77,14 @@ def test_birth_get_initial_population_indices(
             "BC",
             "LG",
             2,
-            2,
+            2024,
             1000,
             982
         ),
     ]
 )
 def test_birth_get_num_newborn(
-    starting_year, province, population_growth_type, max_age, year_index, num_births_initial,
+    starting_year, province, population_growth_type, max_age, year, num_births_initial,
     expected_num_newborn
 ):
 
@@ -89,5 +93,5 @@ def test_birth_get_num_newborn(
         province=province,
         population_growth_type=population_growth_type
     )
-    num_new_born = birth.get_num_newborn(num_births_initial, year_index)
+    num_new_born = birth.get_num_newborn(num_births_initial, year)
     assert num_new_born == expected_num_newborn
