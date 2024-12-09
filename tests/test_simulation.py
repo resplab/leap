@@ -912,3 +912,50 @@ def test_run_simulation_one_year(
             ndigits=1
         )
 
+
+
+@pytest.mark.parametrize(
+    (
+        "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
+    ),
+    [
+        (
+            2024,
+            3,
+            "CA",
+            "M3",
+            10,
+            111,
+        )
+    ]
+)
+def test_run_simulation_full(
+    config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age
+):
+
+    config["simulation"] = {
+        "min_year": min_year,
+        "time_horizon": time_horizon,
+        "province": province,
+        "population_growth_type": population_growth_type,
+        "num_births_initial": num_births_initial,
+        "max_age": max_age
+    }
+    simulation = Simulation(config)
+    outcome_matrix = simulation.run(
+        seed=1,
+        until_all_die=False,
+        verbose=True
+    )
+
+    assert outcome_matrix.immigration.data.shape == (2 * time_horizon * (max_age + 1), 4)
+    pd.testing.assert_frame_equal(
+        outcome_matrix.immigration.get(columns=["year", "sex", "n_immigrants"], year=2024),
+        pd.DataFrame(
+            data={
+                "year": [2024] * (max_age + 1) * 2,
+                "sex": ["F", "M"] * (max_age + 1),
+                "n_immigrants": [0] * (max_age + 1) * 2
+            }
+        )
+    )
