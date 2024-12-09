@@ -92,3 +92,61 @@ def get_data_path(file_name: str) -> str:
 
     package_path = str(pkg_resources.files("tests.data").joinpath(file_name))
     return package_path
+
+
+class Sex:
+    def __init__(self, value: str | int | bool):
+        if isinstance(value, str):
+            if value == "M":
+                value_str = "M"
+                value_int = 1
+                value_bool = True
+            elif value == "F":
+                value_str = "F"
+                value_int = 0
+                value_bool = False
+            else:
+                raise ValueError(f"sex must be 'M' or 'F', received {value}")
+        elif isinstance(value, int) or isinstance(value, np.int64):
+            if value == 1:
+                value_str = "M"
+                value_int = 1
+                value_bool = True
+            elif value == 0:
+                value_str = "F"
+                value_int = 0
+                value_bool = False
+            else:
+                raise ValueError(f"sex must be 0 or 1, received {value}")
+        elif isinstance(value, bool):
+            if value:
+                value_str = "M"
+                value_int = 1
+                value_bool = True
+            else:
+                value_str = "F"
+                value_int = 0
+                value_bool = False
+        else:
+            raise TypeError(f"sex must be str, int, or bool, received {type(value)}")
+        
+        self._value_str = value_str
+        self._value_int = value_int
+        self._value_bool = value_bool
+
+    def __str__(self) -> str:
+        return self._value_str
+    
+    def __int__(self) -> int:
+        return self._value_int
+    
+    def __bool__(self) -> bool:
+        return self._value_bool
+    
+    def __eq__(self, value: str | int | bool) -> bool:
+        if isinstance(value, str):
+            return self._value_str == value
+        elif isinstance(value, int):
+            return self._value_int == value
+        elif isinstance(value, bool):
+            return self._value_bool == value
