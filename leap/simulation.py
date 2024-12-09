@@ -403,8 +403,7 @@ class Simulation:
             year_index = year - min_year
 
             new_agents_df = self.get_new_agents(
-                year=year,
-                year_index=year_index
+                year=year
             )
 
             logger.info(f"Year {year}, year {year_index} of {total_years} years, "
