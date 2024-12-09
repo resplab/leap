@@ -58,7 +58,7 @@ class Emigration:
         grouped_df = df.groupby(["year"])
         return grouped_df
 
-    def compute_probability(self, year: int, age: int, sex: bool) -> bool:
+    def compute_probability(self, year: int, age: int, sex: str) -> bool:
         """Determine the probability of emigration of an agent (person) in a given year.
 
         Args:
@@ -70,7 +70,6 @@ class Emigration:
         if age == 0:
             return False
         else:
-            sex = "M" if sex == 1 else "F"
             df = self.table.get_group((year))
             p = df[df["age"] == min(age, 100)][sex].values[0]
             return bool(np.random.binomial(1, p))
