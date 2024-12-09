@@ -454,7 +454,7 @@ class Simulation:
                     )
 
                 outcome_matrix.antibiotic_exposure.increment(
-                    column="antibiotic_exposure",
+                    column="n_antibiotic_exposure",
                     filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
                     amount=agent.num_antibiotic_use
                 )
