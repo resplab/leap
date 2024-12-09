@@ -406,7 +406,7 @@ def compute_asthma_age(
     else:
         find_asthma_age = True
         asthma_age = 3
-        year = min(agent.year - current_age + asthma_age, min_year)
+        year = min(max(agent.year - current_age + asthma_age, min_year), max_year)
         while find_asthma_age and asthma_age < max_asthma_age:
             has_asthma = agent_has_asthma(
                 agent=agent,
