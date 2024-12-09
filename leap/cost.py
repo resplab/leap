@@ -1,5 +1,4 @@
 import numpy as np
-from leap.control import ControlLevels
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -40,9 +39,7 @@ class AsthmaCost:
             return 0.0
         else:
             control_levels = agent.control_levels
-            if control_levels is None:
-                control_levels = ControlLevels(0.3333, 0.3333, 0.3333)
-                logger.warn(f"Control levels have not been set, default to {control_levels}")
+
             return (
                 np.dot(
                     agent.exacerbation_severity_history.current_year,

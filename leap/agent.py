@@ -1,5 +1,6 @@
 import numpy as np
 from leap.census_division import CensusDivision
+from leap.control import ControlLevels
 from leap.exacerbation import ExacerbationHistory
 from leap.pollution import Pollution
 from leap.severity import ExacerbationSeverityHistory
@@ -64,7 +65,7 @@ class Agent:
         asthma_age=None,
         asthma_status: bool = False,
         severity=None,
-        control_levels=None,
+        control_levels: ControlLevels = ControlLevels(0.3333, 0.3333, 0.3333),
         exacerbation_history=ExacerbationHistory(0, 0),
         exacerbation_severity_history=ExacerbationSeverityHistory(np.zeros(4), np.zeros(4)),
         total_hosp: int = 0,
