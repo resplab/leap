@@ -161,4 +161,4 @@ class Exacerbation:
             np.log(calibrator_multiplier)
         )
         λ = np.exp(μ)
-        return np.random.poisson(λ)
+        return np.random.poisson(λ)[0]
