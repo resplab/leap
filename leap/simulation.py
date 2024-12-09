@@ -262,7 +262,7 @@ class Simulation:
                 current_age=agent.age
             )
             agent.total_hosp = self.exacerbation_severity.compute_hospitalization_prob(
-                agent, self.exacerbation, self.control
+                agent=agent, exacerbation=self.exacerbation, control=self.control
             )
             agent.control_levels = self.control.compute_control_levels(
                 sex=agent.sex, age=agent.age, initial=True
