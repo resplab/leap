@@ -45,8 +45,8 @@ class AsthmaCost:
                 logger.warn(f"Control levels have not been set, default to {control_levels}")
             return (
                 np.dot(
-                    agent.exacerbation_severity_hist.current_year,
-                    self.parameters["exacerbation"]
+                    agent.exacerbation_severity_history.current_year,
+                    self.parameters["exac"]
                 ) +
                 np.dot(control_levels.as_array(), self.parameters["control"])
             )
