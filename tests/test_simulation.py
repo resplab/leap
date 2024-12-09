@@ -669,3 +669,246 @@ def test_simulation_get_new_agents(
 
 
 
+@pytest.mark.parametrize(
+    (
+        "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
+        "antibiotic_exposure_parameters, incidence_parameter_βfam_hist,"
+        "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
+        "death_parameters, prevalence_parameters, utility_parameters, cost_parameters,"
+        "year_index, expected_asthma_incidence_total, expected_asthma_status_total,"
+        "expected_asthma_cost, expected_death, expected_emigration, expected_exacerbation_total,"
+        "expected_family_history, expected_immigration, expected_utility"
+
+    ),
+    [
+        (
+            2024,
+            1,
+            "CA",
+            "M3",
+            10,
+            4,
+            {
+                "β0": -100000,
+                "βyear": -0.01,
+                "βsex": -1,
+                "θ": 500,
+                "fixyear": None,
+                "βfloor": 0.0,
+                "β2005": 1,
+                "β2005_year": 1
+            },
+            [100, 0],
+            {"p": 1.0},
+            5.0,
+            [-1 * 10**5, -1 * 10**5],
+            {
+                "β0": -1,
+                "β1": -1,
+                "β2": -1
+            },
+            {
+                "β0": -20,
+                "βsex": -20,
+                "βage": [0.0, 0.0, 0.0, 0.0, 0.0],
+                "βyear": [0.0, 0.0],
+                "βsexage": [0.0, 0.0, 0.0, 0.0, 0.0],
+                "βsexyear": [0.0, 0.0],
+                "βyearage": [0.0] * 10,
+                "βsexyearage": [0.0] * 10,
+                "βfam_hist": [-100, 0],
+                "βabx_exp": [0.0, 0.0, 0.0]
+            },
+            {
+                "βcontrol": [0.0, 0.0, 0.10],
+                "βexac_sev_hist": [0.0, 0.0, 0.0, 0.0]
+            },
+            {
+                "control": [0.0, 0.0, 100.0],
+                "exac": [0.0, 0.0, 0.0, 0.0]
+            },
+            0,
+            10,
+            10,
+            pd.DataFrame(
+                data={
+                    "year": [2024] * 10,
+                    "age": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4],
+                    "sex": ["F", "M"] * 5,
+                    "cost": [0.0] * 8 + [664, 996]
+                }
+            ),
+            pd.DataFrame(
+                data={
+                    "year": [2024] * 10,
+                    "age": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4],
+                    "sex": ["F", "M"] * 5,
+                    "n_deaths": [0] * 10
+                }
+            ),
+            pd.DataFrame(
+                data={
+                    "year": [2024] * 10,
+                    "age": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4],
+                    "sex": ["F", "M"] * 5,
+                    "n_emigrants": [0] * 10
+                }
+            ),
+            1000,
+            pd.DataFrame(
+                data={
+                    "year": [2024] * 10,
+                    "age": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4],
+                    "sex": ["F", "M"] * 5,
+                    "has_family_history": [2, 8, 4, 6, 4, 6, 3, 7, 6, 4]
+                }
+            ),
+            pd.DataFrame(
+                data={
+                    "year": [2024] * 10,
+                    "age": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4],
+                    "sex": ["F", "M"] * 5,
+                    "n_immigrants": [0] * 10
+                }
+            ),
+            pd.DataFrame(
+                data={
+                    "year": [2024] * 10,
+                    "age": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4],
+                    "sex": ["F", "M"] * 5,
+                    "utility": [2.0, 8.0, 3.97, 5.93, 5.96, 3.94, 5.88, 3.92, 3.47, 5.23]
+                }
+            ),
+        )
+    ]
+)
+def test_run_simulation_one_year(
+    config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
+    antibiotic_exposure_parameters, incidence_parameter_βfam_hist, family_history_parameters,
+    exacerbation_hyperparameter_β0_μ, control_parameter_θ, death_parameters,
+    prevalence_parameters, utility_parameters, cost_parameters, year_index,
+    expected_asthma_incidence_total, expected_asthma_status_total, expected_asthma_cost,
+    expected_death, expected_emigration, expected_exacerbation_total, expected_family_history,
+    expected_immigration, expected_utility
+):
+    """
+    Setting ``num_births_initial = 10`` and starting in 2024 with growth type "M3", each of the
+    age groups has 10 agents, for a total of 10 x 5 = 50 agents.
+
+    Setting the antibiotic exposure parameters below ensures that the antibiotic use is 0.
+
+    Setting the control parameter ``θ = [-1e5, -1e5]`` ensures that the ``control_levels`` are:
+        FC: 0.0
+        PC: 0.0
+        UC: 1.0
+
+    Setting the cost parameters to:
+        {
+            "control": [0.0, 0.0, 100.0],
+            "exac": [0.0, 0.0, 0.0, 0.0]
+        }
+
+    together with the control parameter ``θ = [-1e5, -1e5]`` ensures that the cost for each agent
+    diagnosed with asthma is 100.
+
+    For the year 2024, province "CA", growth type "M3", ages 0 - 4, the probability of emigration
+    is 0. See `master_emigration_table.csv`.
+
+    Setting the exacerbation hyperparameter ``β0_μ = 20.0`` ensures that every agent aged 4 has an
+    asthma exacerbation.
+
+    Setting the ``family_history`` parameter ``p = 1.0`` ensures that every agent has a
+    family history of asthma.
+
+    Setting ``time_horizon=1`` means that the agents are generated from the initial population
+    table, and that no immigration happens.
+
+    Setting the incidence parameter ``βfam_hist=[100, 0]`` and the family history parameter
+    ``p=1.0`` ensures that the probability of an agent being diagnosed with asthma is 1. The
+    maximum age is set to 4, and the minimum age required for an asthma diagnosis is 3. So all
+    agents aged 4 should receive an asthma diagnosis.
+
+    Setting the ``prevalence`` parameters below ensures that the prevalence is 0.
+
+    Setting the ``utility`` parameters to:
+        {
+            "βcontrol": [0.0, 0.0, 0.10],
+            "βexac_sev_hist": [0.0, 0.0, 0.0, 0.0]
+        }
+    
+    ensures that the utility for each agent with asthma is either 0.87222 (male) or 0.87356 (female).
+    For each agent without asthma, it is just the baseline from the EQ-5D table.
+    """
+
+    config["simulation"] = {
+        "min_year": min_year,
+        "time_horizon": time_horizon,
+        "province": province,
+        "population_growth_type": population_growth_type,
+        "num_births_initial": num_births_initial,
+        "max_age": max_age
+    }
+    config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
+    config["incidence"]["parameters"]["βfam_hist"] = incidence_parameter_βfam_hist
+    config["family_history"]["parameters"] = family_history_parameters
+    config["exacerbation"]["hyperparameters"]["β0_μ"] = exacerbation_hyperparameter_β0_μ
+    config["control"]["parameters"]["θ"] = control_parameter_θ
+    config["death"]["parameters"] = death_parameters
+    config["prevalence"]["parameters"] = prevalence_parameters
+    config["utility"]["parameters"] = utility_parameters
+    config["cost"]["parameters"] = cost_parameters
+
+    simulation = Simulation(config)
+    outcome_matrix = simulation.run(
+        seed=1,
+        until_all_die=False,
+        verbose=True
+    )
+    logger.info(outcome_matrix.utility.data)
+    assert outcome_matrix.antibiotic_exposure.data.shape == (2 * 1 * (max_age + 1), 4)
+    np.testing.assert_array_equal(
+        outcome_matrix.antibiotic_exposure.data["n_antibiotic_exposure"],
+        [0] * 2 * 1 * (max_age + 1)
+    )
+    assert outcome_matrix.asthma_incidence.data.shape == (2 * 1 * (max_age + 1), 4)
+    assert outcome_matrix.asthma_incidence.data["n_new_diagnoses"].sum() == expected_asthma_incidence_total
+    assert outcome_matrix.asthma_status.data.shape == (2 * 1 * (max_age + 1), 4)
+    assert outcome_matrix.asthma_status.data["status"].sum() == expected_asthma_status_total
+
+    pd.testing.assert_frame_equal(
+        outcome_matrix.cost.data,
+        expected_asthma_cost,
+        rtol=0.15
+    )
+    assert outcome_matrix.cost.data["cost"].sum() == expected_asthma_cost["cost"].sum()
+
+    pd.testing.assert_frame_equal(
+        outcome_matrix.death.data,
+        expected_death
+    )
+
+    pd.testing.assert_frame_equal(
+        outcome_matrix.emigration.data,
+        expected_emigration
+    )
+
+    assert outcome_matrix.exacerbation.data.shape == (2 * 1 * (max_age + 1), 4)
+    assert outcome_matrix.exacerbation.data["n_exacerbations"].sum() > expected_exacerbation_total
+
+    pd.testing.assert_frame_equal(
+        outcome_matrix.immigration.data,
+        expected_immigration
+    )
+
+    assert outcome_matrix.family_history.data.shape == (2 * 1 * (max_age + 1), 4)
+    for age in range(0, max_age + 1):
+        assert outcome_matrix.family_history.get(
+            column="has_family_history", age=age
+        ).sum() == expected_family_history.loc[expected_family_history["age"] == age]["has_family_history"].sum()
+        assert round(outcome_matrix.utility.get(
+            column="utility", age=age
+        ).sum(), ndigits=1) == round(
+            expected_utility.loc[expected_utility["age"] == age]["utility"].sum(),
+            ndigits=1
+        )
+
