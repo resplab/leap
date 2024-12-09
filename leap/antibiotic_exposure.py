@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import pathlib
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import PROCESSED_DATA_PATH, Sex
 
 
 class AntibioticExposure:
@@ -93,7 +93,7 @@ class AntibioticExposure:
         r = self.parameters["θ"]
         return np.random.negative_binomial(r, p)
 
-    def compute_probability(self, sex, year):
+    def compute_probability(self, sex: Sex | int, year):
         """Compute the probability of antibiotic exposure for a given year and sex.
 
         Args:
@@ -102,7 +102,7 @@ class AntibioticExposure:
         """
         μ = np.exp(
             self.parameters["β0"] +
-            self.parameters["βsex"] * sex +
+            self.parameters["βsex"] * int(sex) +
             self.parameters["βyear"] * year +
             self.parameters["β2005"] * (year > 2005) +
             self.parameters["β2005_year"] * (year > 2005) * year

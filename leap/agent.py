@@ -3,7 +3,7 @@ from leap.census_division import CensusDivision
 from leap.exacerbation import ExacerbationHistory
 from leap.pollution import Pollution
 from leap.severity import ExacerbationSeverityHistory
-from leap.utils import UUID4
+from leap.utils import UUID4, Sex
 
 
 class Agent:
@@ -12,8 +12,8 @@ class Agent:
     Attributes:
         uuid (UUID4):
             A unique identifier for the agent.
-        sex (int):
-            Sex of the agent, 0 = female, 1 = male.
+        sex:
+            Sex of the agent, one of "M", "F".
         age (int):
             Age of the person in years.
         year (int):
@@ -51,7 +51,7 @@ class Agent:
     """
     def __init__(
         self,
-        sex: bool,
+        sex: str | int | bool | Sex,
         age: int,
         year: int,
         year_index: int,
@@ -92,7 +92,7 @@ class Agent:
         self.total_hosp = total_hosp
         if num_antibiotic_use is None and antibiotic_exposure is not None:
             self.num_antibiotic_use = antibiotic_exposure.compute_num_antibiotic_use(
-                sex=sex,
+                sex=int(self.sex),
                 birth_year=year - age
             )
         else:
@@ -109,3 +109,15 @@ class Agent:
             self.pollution = Pollution(self.census_division.cduid, year, month, ssp)
         else:
             self.pollution = pollution
+
+    @property
+    def sex(self) -> Sex:
+        return self._sex
+    
+    @sex.setter
+    def sex(self, value: Sex | str | int | bool):
+        if isinstance(value, Sex):
+            self._sex = value
+        else:
+            self._sex = Sex(value)
+    

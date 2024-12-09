@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import pathlib
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import PROCESSED_DATA_PATH, Sex
 from leap.control import ControlLevels
 
 
@@ -114,7 +114,7 @@ class Exacerbation:
         return grouped_df
 
     def compute_num_exacerbations(
-        self, agent=None, age: int | None = None, sex: bool | None = None,
+        self, agent=None, age: int | None = None, sex: Sex | int | None = None,
         year: int | None = None, control_levels: ControlLevels | None = None,
         initial: bool = False
     ):
@@ -134,7 +134,7 @@ class Exacerbation:
 
         if agent is not None:
             age = agent.age
-            sex = agent.sex
+            sex = int(agent.sex)
             year = agent.year
             control_levels = agent.control_levels
 
@@ -154,7 +154,7 @@ class Exacerbation:
             self.parameters["β0"] +
             int(not initial) * self.parameters["β0_calibration"] +
             age * self.parameters["βage"] +
-            sex * self.parameters["βsex"] +
+            int(sex) * self.parameters["βsex"] +
             control_levels.uncontrolled * self.parameters["βcontrol_UC"] +
             control_levels.partially_controlled * self.parameters["βcontrol_PC"] +
             control_levels.fully_controlled * self.parameters["βcontrol_C"] +

@@ -326,19 +326,20 @@ class Simulation:
             agent.total_hosp += agent.exacerbation_severity_history.current_year[3]
             outcome_matrix.exacerbation.increment(
                 column="n_exacerbations",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
                 amount=agent.exacerbation_history.num_current_year
             )
+
             outcome_matrix.exacerbation_hospital.increment(
                 column="n_hospitalizations",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
                 amount=agent.exacerbation_severity_history.current_year[3]
             )
             for level in range(4):
                 outcome_matrix.exacerbation_by_severity.increment(
                     column="p_exacerbations",
                     filter_columns={
-                        "year": agent.year, "age": agent.age, "sex": agent.sex, "severity": level
+                        "year": agent.year, "age": agent.age, "sex": str(agent.sex), "severity": level
                     },
                     amount=agent.exacerbation_severity_history.current_year[level]
                 )

@@ -1,5 +1,5 @@
 import numpy as np
-from leap.utils import compute_ordinal_regression
+from leap.utils import compute_ordinal_regression, Sex
 
 
 class ControlLevels:
@@ -73,7 +73,7 @@ class Control:
             self.hyperparameters["β0_σ"]
         )
 
-    def compute_control_levels(self, sex: bool, age: int, initial: bool = False) -> dict:
+    def compute_control_levels(self, sex: Sex, age: int, initial: bool = False) -> ControlLevels:
         """Compute the probability that the control level = k for each value of k.
 
         The probability is given by ordinal regression, where y = control level:
@@ -107,9 +107,9 @@ class Control:
         η = (
             self.parameters["β0"] +
             age_scaled * self.parameters["βage"] +
-            sex * self.parameters["βsex"] +
-            age_scaled * sex * self.parameters["βsexage"] +
-            age_scaled ** 2 * sex * self.parameters["βsexage2"] +
+            int(sex) * self.parameters["βsex"] +
+            age_scaled * int(sex) * self.parameters["βsexage"] +
+            age_scaled ** 2 * int(sex) * self.parameters["βsexage2"] +
             age_scaled ** 2 * self.parameters["βage2"]
         )
 
