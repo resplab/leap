@@ -6,7 +6,7 @@ import pandas as pd
 from leap.agent import Agent
 from leap.antibiotic_exposure import AntibioticExposure
 from leap.birth import Birth
-from leap.census_division import CensusTable
+from leap.census_division import CensusTable, CensusDivision
 from leap.control import Control
 from leap.cost import AsthmaCost
 from leap.death import Death
@@ -16,7 +16,7 @@ from leap.family_history import FamilyHistory
 from leap.immigration import Immigration
 from leap.occurrence import Incidence, Prevalence, agent_has_asthma, compute_asthma_age
 from leap.outcome_matrix import OutcomeMatrix
-from leap.pollution import PollutionTable
+from leap.pollution import PollutionTable, Pollution
 from leap.reassessment import Reassessment
 from leap.severity import ExacerbationSeverity
 from leap.utility import Utility
@@ -417,18 +417,25 @@ class Simulation:
                 self.exacerbation.assign_random_β0()
                 self.exacerbation_severity.assign_random_p()
 
+                census_division = CensusDivision(
+                    census_table=self.census_table, province=self.province
+                )
+                pollution = Pollution(
+                    pollution_table=self.pollution_table, SSP=self.SSP, year=year, month=month,
+                    cduid=census_division.cduid
+                )
                 agent = Agent(
                     sex=new_agents_df["sex"].iloc[i],
                     age=new_agents_df["age"].iloc[i],
                     year=year,
                     year_index=year_index,
-                    family_hist=self.family_history,
+                    family_history=self.family_history,
                     antibiotic_exposure=self.antibiotic_exposure,
                     province=self.province,
                     month=month,
-                    SSP=self.SSP,
-                    census_table=self.census_table,
-                    pollution_table=self.pollution_table
+                    ssp=self.SSP,
+                    census_division=census_division,
+                    pollution=pollution
                 )
 
                 logger.info(
