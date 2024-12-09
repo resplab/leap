@@ -1,0 +1,95 @@
+name: tests_workflow
+ 
+# execute this workflow automatically when a we push to any branch
+on: [push]
+ 
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies for tests
+        run: |
+          pip install pytest
+      - name: Install LEAP
+        run: |
+          pip install .
+      - name: Run Python tests agent
+        run: |
+          pytest tests/test_agent.py
+        continue-on-error: false
+      - name: Run Python tests antibiotic_exposure
+        run: |
+          pytest tests/test_antibiotic_exposure.py
+        continue-on-error: false
+      - name: Run Python tests birth
+        run: |
+          pytest tests/test_birth.py
+        continue-on-error: false
+      - name: Run Python tests census_division
+        run: |
+          pytest tests/test_census_division.py
+        continue-on-error: false
+      - name: Run Python tests control
+        run: |
+          pytest tests/test_control.py
+        continue-on-error: false
+      - name: Run Python tests death
+        run: |
+          pytest tests/test_death.py
+        continue-on-error: false
+      - name: Run Python tests emigration
+        run: |
+          pytest tests/test_emigration.py
+        continue-on-error: false
+      - name: Run Python tests exacerbation
+        run: |
+          pytest tests/test_exacerbation.py
+        continue-on-error: false
+      - name: Run Python tests family_history
+        run: |
+          pytest tests/test_family_history.py
+        continue-on-error: false
+      - name: Run Python tests immigration
+        run: |
+          pytest tests/test_immigration.py
+        continue-on-error: false
+      - name: Run Python tests occurrence
+        run: |
+          pytest tests/test_occurrence.py
+        continue-on-error: false
+      - name: Run Python tests outcome_matrix
+        run: |
+          pytest tests/test_outcome_matrix.py
+        continue-on-error: false
+      - name: Run Python tests pollution
+        run: |
+          pytest tests/test_pollution.py
+        continue-on-error: false
+      - name: Run Python tests reassessment
+        run: |
+          pytest tests/test_reassessment.py
+        continue-on-error: false
+      - name: Run Python tests severity
+        run: |
+          pytest tests/test_severity.py
+        continue-on-error: false
+      - name: Run Python tests simulation
+        run: |
+          pytest tests/test_simulation.py
+        continue-on-error: false
+      - name: Run Python tests utility
+        run: |
+          pytest tests/test_utility.py
+        continue-on-error: false
+      - name: Run doctests
+        run: |
+          pytest leap/ --doctest-modules
+        continue-on-error: false
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
