@@ -79,18 +79,19 @@ def compute_ordinal_regression(
     return [prob_function(θ[k + 1] - η) - prob_function(θ[k] - η) for k in range(len(θ) - 1)]
 
 
-def get_data_path(file_name: str) -> str:
-    """Get the full path to a file in the tests/data directory.
+def get_data_path(data_folder: str, file_name: str = "") -> pathlib.Path:
+    """Get the full path to a data file in the ``LEAP`` package.
 
     Args:
         file_name: The name of the file.
+        data_folder: The name of the folder in the ``LEAP`` package.
 
     Returns:
-        The full path to the file in the tests/data directory.
+        The full path to the data file in the ``LEAP`` package.
     """
 
-    package_path = str(pkg_resources.files("tests.data").joinpath(file_name))
-    return package_path
+    package_path = str(pkg_resources.files(data_folder).joinpath(file_name))
+    return pathlib.Path(package_path)
 
 
 class Sex:

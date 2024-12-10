@@ -1,8 +1,7 @@
-import pathlib
 import math
 import pandas as pd
 import numpy as np
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import get_data_path
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -58,7 +57,7 @@ class Immigration:
             province, sex, and growth scenario.
         """
         df = pd.read_csv(
-            pathlib.Path(PROCESSED_DATA_PATH, "migration/master_immigration_table.csv")
+            get_data_path("processed_data/migration", "master_immigration_table.csv")
         )
 
         df = df[

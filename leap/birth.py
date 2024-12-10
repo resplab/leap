@@ -1,7 +1,6 @@
-import pathlib
 import math
 import pandas as pd
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import get_data_path
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -74,7 +73,7 @@ class Birth:
         self, starting_year: int, province: str, population_growth_type: str
     ) -> pd.api.typing.DataFrameGroupBy:
         df = pd.read_csv(
-            pathlib.Path(PROCESSED_DATA_PATH, "master_birth_estimate.csv")
+            get_data_path("processed_data", "master_birth_estimate.csv")
         )
         df = df[
             (df["year"] >= starting_year) &
@@ -90,7 +89,7 @@ class Birth:
         self, starting_year: int, province: str, population_growth_type: str, max_age: int
     ) -> pd.DataFrame:
         df = pd.read_csv(
-            pathlib.Path(PROCESSED_DATA_PATH, "master_initial_pop_distribution_prop.csv")
+            get_data_path("processed_data", "master_initial_pop_distribution_prop.csv")
         )
         df = df[
             (df["age"] <= max_age) &
@@ -148,7 +147,7 @@ class Birth:
         """
         num_new_born = int(
             math.ceil(
-                num_births_initial * self.estimate.get_group((year))["N_relative"]
-            )
-        )
+                num_births_initial * self.estimate.get_group((year))["N_relative"] # type: ignore
+            ) 
+        ) 
         return num_new_born

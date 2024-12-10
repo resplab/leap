@@ -1,8 +1,7 @@
 from __future__ import annotations
 import pandas as pd
 import numpy as np
-import pathlib
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import get_data_path
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -53,7 +52,7 @@ class Emigration:
             age, province, sex, and growth scenario.
         """
         df = pd.read_csv(
-            pathlib.Path(PROCESSED_DATA_PATH, "migration/master_emigration_table.csv")
+            get_data_path("processed_data/migration", "master_emigration_table.csv")
         )
         df = df[
             (df["year"] >= starting_year) &

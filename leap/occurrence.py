@@ -1,9 +1,8 @@
 from __future__ import annotations
-import pathlib
 import abc
 import pandas as pd
 import numpy as np
-from leap.utils import PROCESSED_DATA_PATH, sigmoid, logit
+from leap.utils import get_data_path, sigmoid, logit
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -125,7 +124,7 @@ class Occurrence:
                 * ``correction``: float, TODO.
         """
         df = pd.read_csv(
-            pathlib.Path(PROCESSED_DATA_PATH, "master_asthma_occurrence_correction.csv")
+            get_data_path("processed_data", "master_asthma_occurrence_correction.csv")
         )
         df = df[df["type"] == occurrence_type]
         df.drop(columns=["type"], inplace=True)

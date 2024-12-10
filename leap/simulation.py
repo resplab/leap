@@ -20,7 +20,7 @@ from leap.pollution import PollutionTable, Pollution
 from leap.reassessment import Reassessment
 from leap.severity import ExacerbationSeverity
 from leap.utility import Utility
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import get_data_path
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -35,7 +35,7 @@ class Simulation:
         num_births_initial: int | None = None, population_growth_type: str | None = None
     ):
         if config is None:
-            with open(pathlib.Path(PROCESSED_DATA_PATH, "config.json")) as file:
+            with open(get_data_path("processed_data", "config.json")) as file:
                 config = json.load(file)
         elif isinstance(config, str):
             with open(config) as file:

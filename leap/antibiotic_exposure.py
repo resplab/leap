@@ -1,8 +1,7 @@
 from __future__ import annotations
 import pandas as pd
 import numpy as np
-import pathlib
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import get_data_path
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from leap.utils import Sex
@@ -76,7 +75,7 @@ class AntibioticExposure:
                 * ``sex``: 0 = female, 1 = male
                 * ``rate``: float, TODO.
         """
-        df = pd.read_csv(pathlib.Path(PROCESSED_DATA_PATH, "midtrends.csv"))
+        df = pd.read_csv(get_data_path("processed_data", "midtrends.csv"))
         grouped_df = df.groupby(["year", "sex"])
         return grouped_df
 

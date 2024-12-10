@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import pygrib
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import get_data_path
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -39,7 +39,7 @@ class PollutionTable:
         self._data = data
 
     def load_pollution_data(
-        self, pm25_data_path: pathlib.Path = pathlib.Path(PROCESSED_DATA_PATH, "pollution")
+        self, pm25_data_path: pathlib.Path = get_data_path("processed_data/pollution")
     ) -> pd.api.typing.DataFrameGroupBy:
         """Load the data from the PM2.5 SSP *.csv files.
 

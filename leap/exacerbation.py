@@ -1,8 +1,7 @@
 from __future__ import annotations
 import pandas as pd
 import numpy as np
-import pathlib
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import get_data_path
 from leap.control import ControlLevels
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -110,7 +109,7 @@ class Exacerbation:
         """
 
         df = pd.read_csv(
-            pathlib.Path(PROCESSED_DATA_PATH, "master_calibrated_exac.csv")
+            get_data_path("processed_data", "master_calibrated_exac.csv")
         )
         df = df[df["province"] == province]
         df.drop(["province"], axis=1, inplace=True)

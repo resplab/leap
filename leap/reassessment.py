@@ -1,8 +1,7 @@
 from __future__ import annotations
-import pathlib
 import pandas as pd
 import numpy as np
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import get_data_path
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -57,7 +56,7 @@ class Reassessment:
                         For all of Canada, set province to "CA".
         """
         df = pd.read_csv(
-            pathlib.Path(PROCESSED_DATA_PATH, "master_asthma_reassessment.csv")
+            get_data_path("processed_data", "master_asthma_reassessment.csv")
         )
         df = df[
             (df["year"] >= starting_year) &

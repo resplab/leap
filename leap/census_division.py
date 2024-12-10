@@ -1,10 +1,9 @@
-import pathlib
 import json
 import shapely
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import get_data_path
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -62,7 +61,7 @@ class CensusTable:
 
     def load_census_data(self):
         df = pd.read_csv(
-            pathlib.Path(PROCESSED_DATA_PATH, "census_divisions/master_census_data_2021.csv")
+            get_data_path("processed_data/census_divisions", "master_census_data_2021.csv")
         )
         return df
 
