@@ -6,7 +6,7 @@ from leap.utils import round_number
 @pytest.mark.parametrize(
     (
         "starting_year, year, age, max_age, sex, province, population_growth_type,"
-        "n_prop_birth, weights"
+        "prop_immigrants_birth, prop_immigrants_year"
     ),
     [
         (
@@ -34,7 +34,8 @@ from leap.utils import round_number
     ]
 )
 def test_immigration_constructor(
-    starting_year, year, age, max_age, sex, province, population_growth_type, n_prop_birth, weights
+    starting_year, year, age, max_age, sex, province, population_growth_type,
+    prop_immigrants_birth, prop_immigrants_year
 ):
     immigration = Immigration(
         starting_year=starting_year,
@@ -44,8 +45,8 @@ def test_immigration_constructor(
     )
     df = immigration.table.get_group((year))
     row = df[(df["age"] == age) & (df["sex"] == sex)]
-    assert round_number(row["n_prop_birth"].values[0], sigdigits=4) == n_prop_birth
-    assert round_number(row["weights"].values[0], sigdigits=4) == weights
+    assert round_number(row["prop_immigrants_birth"].values[0], sigdigits=4) == prop_immigrants_birth
+    assert round_number(row["prop_immigrants_year"].values[0], sigdigits=4) == prop_immigrants_year
 
 
 @pytest.mark.parametrize(
