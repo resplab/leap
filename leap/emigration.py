@@ -12,17 +12,7 @@ logger = get_logger(__name__)
 
 
 class Emigration:
-    """A class containing information about emigration from Canada.
-
-    Attributes:
-        table: A dataframe grouped by year, giving the probability of emigration for a given
-            age, province, sex, and growth scenario:
-                * ``year``: integer year the range 2001 - 2065.
-                * ``age``: integer age.
-                * ``M``: the probability of a male emigrating.
-                * ``F``: the probability of a female emigrating.
-            See ``master_emigration_table.csv``.
-    """
+    """A class containing information about emigration from Canada."""
     def __init__(
         self,
         starting_year: int = 2000,
@@ -34,6 +24,22 @@ class Emigration:
             self.table = self.load_emigration_table(starting_year, province, population_growth_type)
         else:
             self.table = table
+
+    @property
+    def table(self) -> DataFrameGroupBy:
+        """Grouped dataframe (by year) giving the probability of emigration for a given age,
+        province, sex, and growth scenario:
+            * ``year``: integer year the range 2001 - 2065.
+            * ``age``: integer age.
+            * ``M``: the probability of a male emigrating.
+            * ``F``: the probability of a female emigrating.
+        See ``master_emigration_table.csv``.
+        """
+        return self._table
+    
+    @table.setter
+    def table(self, table: DataFrameGroupBy):
+        self._table = table
 
     def load_emigration_table(
         self, starting_year: int, province: str, population_growth_type: str
@@ -74,11 +80,18 @@ class Emigration:
 
         Returns:
             ``True`` if the person emigrates, ``False`` otherwise.
+
+        Examples:
+
+            >>> emigration = Emigration()
+            >>> emigration.compute_probability(year=2022, age=0, sex="F")
+            False
+
         """
 
         if age == 0:
             return False
         else:
-            df = self.table.get_group((year))
+            df = self.table.get_group((year,))
             p = df[df["age"] == min(age, 100)][str(sex)].values[0]
             return bool(np.random.binomial(1, p))
