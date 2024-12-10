@@ -13,7 +13,7 @@ class AsthmaCost:
     A class containing information about the cost of asthma.
 
     Attributes:
-        parameters (dict): A dictionary containing the following keys:
+        parameters: A dictionary containing the following keys:
             * ``control``: A vector of numbers.
             * ``exacerbation``: A vector of numbers.
 
@@ -36,7 +36,11 @@ class AsthmaCost:
         fully controlled, partially controlled, and uncontrolled asthma.
 
         Args:
-            agent (Agent): A person in the model.
+            agent: A person in the model.
+
+        Returns:
+            The cost in Canadian dollars for the current year due to asthma exacerbations and
+            control.
         """
 
         if not agent.has_asthma:
