@@ -5,13 +5,8 @@ logger = get_logger(__name__)
 
 
 class FamilyHistory:
-    """
-    A class containing information about family history of asthma.
+    """A class containing information about family history of asthma."""
 
-    Attributes:
-        parameters: A dictionary containing the following keys:
-            * ``p``: float, the probability that an agent has a family history of asthma.
-    """
     def __init__(self, config: dict | None = None, parameters: dict | None = None):
         if config is not None:
             self.parameters = config["parameters"]
@@ -22,6 +17,9 @@ class FamilyHistory:
 
     @property
     def parameters(self) -> dict:
+        """A dictionary containing the following keys:
+            * ``p``: float, the probability that an agent has a family history of asthma.
+        """
         return self._parameters
 
     @parameters.setter
@@ -37,5 +35,13 @@ class FamilyHistory:
 
         Returns:
             Whether or not an agent has a family history of asthma.
+
+        Examples:
+
+            >>> from leap.family_history import FamilyHistory
+            >>> family_history = FamilyHistory(parameters={"p": 1.0})
+            >>> family_history.has_family_history_of_asthma()
+            True
+
         """
         return bool(np.random.binomial(1, self.parameters["p"]))
