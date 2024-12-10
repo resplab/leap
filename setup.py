@@ -12,5 +12,9 @@ setup(
     ],
     extras_require={
         "dev": ["pytest", "flake8"]
+    },
+    include_package_data=True,
+    package_data={
+        "": ["tests/data/", "processed_data/"]
     }
 )
