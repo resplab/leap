@@ -1,8 +1,7 @@
 from __future__ import annotations
 import pandas as pd
 import numpy as np
-import pathlib
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import get_data_path
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from leap.agent import Agent
@@ -60,7 +59,7 @@ class Utility:
         self.parameters["βcontrol"] = np.array(self.parameters["βcontrol"])
 
     def load_eq5d(self) -> pd.api.typing.DataFrameGroupBy:
-        df = pd.read_csv(pathlib.Path(PROCESSED_DATA_PATH, "eq5d_canada.csv"))
+        df = pd.read_csv(get_data_path("processed_data", "eq5d_canada.csv"))
         grouped_df = df.groupby(["age", "sex"])
         return grouped_df
 
