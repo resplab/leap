@@ -4,41 +4,18 @@ import numpy as np
 from leap.utils import get_data_path
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.utils import Sex
 
 
 class AntibioticExposure:
-    """A class containing information about antibiotic use.
+    """A class containing information about antibiotic use."""
 
-    Attributes:
-        parameters: A dictionary containing the following keys:
-            * ``β0``: float, the constant parameter when computing μ.
-            * ``βyear``: float, the parameter to be multiplied by the agent's birth year for
-              computing μ.
-            * ``β2005``: float, an added constant parameter if the agent's birth year > 2005 for
-              computing μ.
-            * ``βsex``: float, the parameter to be multiplied by the agent's sex when computing μ.
-            * ``θ``: int, the number of successes (the r parameter) in the negative binomial
-              distribution.
-            * ``β2005_year``: float, if the agent's birth year is > 2005, ``β2005_year`` will be
-              multiplied by the birth year when computing μ.
-            * ``fixyear``: integer or nothing. If present, replaces the ``year`` parameter when
-              computing the probability for the negative binomial distribution.
-            * ``βfloor``: float, the minimum value of μ.
-
-        mid_trends: A set of data frames grouped by year and sex.
-            Each entry is a DataFrame with a single row with the following columns:
-
-            * ``year``: integer
-            * ``sex``: 0 = female, 1 = male
-            * ``rate``: float, TODO.
-
-    """
     def __init__(
         self,
         config: dict | None = None,
         parameters: dict | None = None,
-        mid_trends: pd.api.typing.DataFrameGroupBy | None = None
+        mid_trends: DataFrameGroupBy | None = None
     ):
         if config is not None:
             self.parameters = config["parameters"]
@@ -54,6 +31,25 @@ class AntibioticExposure:
 
     @property
     def parameters(self) -> dict:
+        """A dictionary containing the following keys:
+
+            * ``β0``: (float); the constant parameter when computing μ.
+            * ``βyear``: (float); the parameter to be multiplied by the agent's birth year for
+              computing ``μ``.
+            * ``β2005``: (float); an added constant parameter if the agent's birth year > 2005 for
+              computing ``μ``. This is to factor in the antibiotic stewardship program that was
+              introduced in BC in 2005.
+            * ``βsex``: (float); the parameter to be multiplied by the agent's sex when computing μ.
+            * ``θ``: int, the number of successes (the r parameter) in the negative binomial
+              distribution.
+            * ``β2005_year``: (float); If the agent's birth year is > 2005, ``β2005_year`` will be
+              multiplied by the birth year when computing ``μ``. This is to factor in the
+              antibiotic stewardship program that was introduced in BC in 2005.
+            * ``fixyear``: (int | None); If present, replaces the ``year`` parameter when
+              computing the probability for the negative binomial distribution.
+            * ``βfloor``: (float); the minimum value of ``μ``.
+
+        """
         return self._parameters
     
     @parameters.setter
@@ -64,11 +60,26 @@ class AntibioticExposure:
                 raise ValueError(f"Key {key} not found in parameters.")
         self._parameters = parameters
 
+    @property
+    def mid_trends(self) -> DataFrameGroupBy:
+        """A set of dataframes grouped by year and sex.
+        Each entry is a dataframe with a single row with the following columns:
+
+            * ``year``: integer
+            * ``sex``: 0 = female, 1 = male
+            * ``rate``: float, TODO.
+        """
+        return self._mid_trends
+    
+    @mid_trends.setter
+    def mid_trends(self, mid_trends: DataFrameGroupBy):
+        self._mid_trends = mid_trends
+
     def load_abx_mid_trends(self):
         """Load the antibiotic mid trends table.
 
         Returns:
-            pd.api.typing.DataFrameGroupBy: a set of data frames grouped by year and sex.
+            A set of data frames grouped by year and sex.
             Each entry is a DataFrame with a single row with the following columns:
 
                 * ``year``: integer
@@ -80,11 +91,27 @@ class AntibioticExposure:
         return grouped_df
 
     def compute_num_antibiotic_use(self, sex: Sex | int, birth_year: int) -> int:
-        """Compute the number of antibiotics used during the first year of life.
+        """Compute the number of courses of antibiotics used during the first year of life.
 
         Args:
             sex: Sex of agent, 1 = male, 0 = female.
             birth_year: The year the agent (person) was born.
+
+        Returns:
+            The number of courses of antibiotics used during the first year of life.
+
+        Examples:
+
+            >>> from leap.antibiotic_exposure import AntibioticExposure
+            >>> from leap.utils import get_data_path
+            >>> import json
+            >>> with open(get_data_path("processed_data", "config.json"), "r") as file:
+            ...     config = json.load(file)["antibiotic_exposure"]
+            >>> antibiotic_exposure = AntibioticExposure(
+            ...     config=config
+            ... )
+            >>> n_abx = antibiotic_exposure.compute_num_antibiotic_use(sex=1, birth_year=2000)
+
         """
         if birth_year < 2001:
             p = self.compute_probability(sex=sex, year=2000)
@@ -113,7 +140,30 @@ class AntibioticExposure:
 
         Args:
             sex: Sex of agent, 1 = male, 0 = female.
-            year: The calendar year.
+            year: The calendar year, e.g. 2024.
+
+        Returns:
+            A probability.
+            TODO: This isn't exactly the probability of antibiotic exposure.
+
+        Examples:
+
+            >>> from leap.antibiotic_exposure import AntibioticExposure
+            >>> parameters = {
+            ...     "β0": -100000,
+            ...     "βyear": -0.01,
+            ...     "βsex": -1,
+            ...     "θ": 500,
+            ...     "fixyear": None,
+            ...     "βfloor": 0.0,
+            ...     "β2005": 1,
+            ...     "β2005_year": 1
+            ... }
+            >>> antibiotic_exposure = AntibioticExposure(
+            ...     parameters=parameters
+            ... )
+            >>> antibiotic_exposure.compute_probability(sex=1, year=2000)
+            1.0
         """
         μ = np.exp(
             self.parameters["β0"] +
@@ -122,5 +172,6 @@ class AntibioticExposure:
             self.parameters["β2005"] * (year > 2005) +
             self.parameters["β2005_year"] * (year > 2005) * year
         )
+
         μ = max(μ, self.parameters["βfloor"] / 1000)
-        return self.parameters["θ"] / (self.parameters["θ"] + μ)
+        return float(self.parameters["θ"] / (self.parameters["θ"] + μ))
