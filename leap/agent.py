@@ -1,3 +1,4 @@
+from __future__ import annotations
 import numpy as np
 from leap.census_division import CensusDivision
 from leap.control import ControlLevels
@@ -5,6 +6,9 @@ from leap.exacerbation import ExacerbationHistory
 from leap.pollution import Pollution
 from leap.severity import ExacerbationSeverityHistory
 from leap.utils import UUID4, Sex
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.family_history import FamilyHistory
 
 
 class Agent:

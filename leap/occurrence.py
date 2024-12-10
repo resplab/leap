@@ -1,9 +1,13 @@
+from __future__ import annotations
 import pathlib
 import abc
 import pandas as pd
 import numpy as np
 from leap.utils import PROCESSED_DATA_PATH, sigmoid, logit
 from leap.logger import get_logger
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.agent import Agent
 
 logger = get_logger(__name__)
 
@@ -387,7 +391,11 @@ class Prevalence(Occurrence):
 
 
 def compute_asthma_age(
-    agent, incidence: Incidence, prevalence: Prevalence, current_age: int, max_asthma_age: int = 110
+    agent: Agent,
+    incidence: Incidence,
+    prevalence: Prevalence,
+    current_age: int,
+    max_asthma_age: int = 110
 ) -> int:
     """Compute the age at which the person (agent) is first diagnosed with asthma.
 
@@ -426,7 +434,7 @@ def compute_asthma_age(
 
 
 def agent_has_asthma(
-    agent,
+    agent: Agent,
     occurrence_type: str,
     prevalence: Prevalence,
     incidence: Incidence | None = None,

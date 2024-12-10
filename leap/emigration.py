@@ -1,8 +1,12 @@
+from __future__ import annotations
 import pandas as pd
 import numpy as np
 import pathlib
 from leap.utils import PROCESSED_DATA_PATH
 from leap.logger import get_logger
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.utils import Sex
 
 logger = get_logger(__name__)
 
@@ -58,7 +62,7 @@ class Emigration:
         grouped_df = df.groupby(["year"])
         return grouped_df
 
-    def compute_probability(self, year: int, age: int, sex: str) -> bool:
+    def compute_probability(self, year: int, age: int, sex: str | Sex) -> bool:
         """Determine the probability of emigration of an agent (person) in a given year.
 
         Args:
@@ -71,5 +75,5 @@ class Emigration:
             return False
         else:
             df = self.table.get_group((year))
-            p = df[df["age"] == min(age, 100)][sex].values[0]
+            p = df[df["age"] == min(age, 100)][str(sex)].values[0]
             return bool(np.random.binomial(1, p))

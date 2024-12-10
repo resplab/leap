@@ -1,7 +1,11 @@
+from __future__ import annotations
 import pandas as pd
 import numpy as np
 import pathlib
 from leap.utils import PROCESSED_DATA_PATH
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.agent import Agent
 
 
 class Utility:
@@ -60,7 +64,7 @@ class Utility:
         grouped_df = df.groupby(["age", "sex"])
         return grouped_df
 
-    def compute_utility(self, agent):
+    def compute_utility(self, agent: Agent) -> float:
         """Compute the utility for the current year due to asthma exacerbations and control.
 
         If the agent (person) doesn't have asthma, return the baseline utility.

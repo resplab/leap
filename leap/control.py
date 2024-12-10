@@ -1,5 +1,9 @@
+from __future__ import annotations
 import numpy as np
-from leap.utils import compute_ordinal_regression, Sex
+from leap.utils import compute_ordinal_regression
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.utils import Sex
 
 
 class ControlLevels:

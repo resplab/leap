@@ -1,8 +1,12 @@
+from __future__ import annotations
 import pathlib
 import pandas as pd
 import numpy as np
 from leap.utils import PROCESSED_DATA_PATH
 from leap.logger import get_logger
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.agent import Agent
 
 logger = get_logger(__name__)
 
@@ -49,7 +53,7 @@ class Death:
         grouped_df = df.groupby(["year"])
         return grouped_df
 
-    def agent_dies(self, agent) -> bool:
+    def agent_dies(self, agent: Agent) -> bool:
         """Determine whether or not the agent dies in a given year, based on age and sex.
 
         Args:
@@ -57,9 +61,8 @@ class Death:
         """
 
         is_dead = False
-        df = self.life_table.get_group((agent.year))
-        sex = "M" if agent.sex == 1 else "F"
-        p = df[df["age"] == agent.age][sex].values[0]
+        df = self.life_table.get_group((agent.year,))
+        p = df[df["age"] == agent.age][str(agent.sex)].values[0]
 
         if p == 1:
             is_dead = True

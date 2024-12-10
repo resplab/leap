@@ -1,8 +1,12 @@
+from __future__ import annotations
 import pathlib
 import pandas as pd
 import numpy as np
 from leap.utils import PROCESSED_DATA_PATH
 from leap.logger import get_logger
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.agent import Agent
 
 logger = get_logger(__name__)
 
@@ -62,7 +66,7 @@ class Reassessment:
         grouped_df = df.groupby(["year"])
         return grouped_df
 
-    def agent_has_asthma(self, agent):
+    def agent_has_asthma(self, agent: Agent) -> bool:
         """If an agent has been diagnosed with asthma, determine whether the agent still has asthma.
 
         Asthma is not curable, but it can be mistaken for other respiratory diseases, and so a

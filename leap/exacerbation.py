@@ -1,8 +1,13 @@
+from __future__ import annotations
 import pandas as pd
 import numpy as np
 import pathlib
-from leap.utils import PROCESSED_DATA_PATH, Sex
+from leap.utils import PROCESSED_DATA_PATH
 from leap.control import ControlLevels
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.agent import Agent
+    from leap.utils import Sex
 
 
 class ExacerbationHistory:
@@ -114,10 +119,14 @@ class Exacerbation:
         return grouped_df
 
     def compute_num_exacerbations(
-        self, agent=None, age: int | None = None, sex: Sex | int | None = None,
-        year: int | None = None, control_levels: ControlLevels | None = None,
+        self,
+        agent: Agent | None = None,
+        age: int | None = None,
+        sex: Sex | int | None = None,
+        year: int | None = None,
+        control_levels: ControlLevels | None = None,
         initial: bool = False
-    ):
+    ) -> int:
         """Compute the number of asthma exacerbations in a given year.
 
         Args:

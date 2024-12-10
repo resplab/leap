@@ -1,7 +1,11 @@
+from __future__ import annotations
 import pandas as pd
 import numpy as np
 import pathlib
-from leap.utils import PROCESSED_DATA_PATH, Sex
+from leap.utils import PROCESSED_DATA_PATH
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.utils import Sex
 
 
 class AntibioticExposure:

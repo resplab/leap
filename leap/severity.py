@@ -1,6 +1,12 @@
+from __future__ import annotations
 import numpy as np
 from scipy.special import gamma
 from leap.logger import get_logger
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.agent import Agent
+    from leap.control import Control
+    from leap.exacerbation import Exacerbation
 
 logger = get_logger(__name__)
 
@@ -101,7 +107,9 @@ class ExacerbationSeverity:
 
             return np.random.multinomial(num_current_year, p)
 
-    def compute_hospitalization_prob(self, agent, control, exacerbation) -> bool:
+    def compute_hospitalization_prob(
+        self, agent: Agent, control: Control, exacerbation: Exacerbation
+    ) -> bool:
         """Determine whether a person has been hospitalized due to an asthma exacerbation.
 
         https://stats.stackexchange.com/questions/174952/marginal-probability-function-of-the-dirichlet-multinomial-distribution

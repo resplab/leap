@@ -1,5 +1,9 @@
+from __future__ import annotations
 import numpy as np
 from leap.logger import get_logger
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.agent import Agent
 
 logger = get_logger(__name__)
 
@@ -25,7 +29,7 @@ class AsthmaCost:
                 self.parameters["control"]
             ) * exchange_rate_usd_cad
 
-    def compute_cost(self, agent) -> float:
+    def compute_cost(self, agent: Agent) -> float:
         """Compute the cost in dollars for the current year due to asthma exacerbations and control.
 
         If ``control_levels`` are not present, will default to equal probability of
