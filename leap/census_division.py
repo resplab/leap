@@ -61,7 +61,7 @@ class CensusTable:
 
     def load_census_data(self):
         df = pd.read_csv(
-            get_data_path("processed_data/census_divisions", "master_census_data_2021.csv")
+            get_data_path("processed_data.census_divisions", "master_census_data_2021.csv")
         )
         return df
 
@@ -96,7 +96,7 @@ class CensusDivision:
             if province == "CA":
                 df = census_table.data
             else:
-                df = census_table.grouped_data.get_group((province))
+                df = census_table.grouped_data.get_group((province,))
 
             probabilities = df["population"] / df["population"].sum()
             census_division_id = int(np.random.choice(
