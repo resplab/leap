@@ -23,14 +23,60 @@ class ExacerbationHistory:
 
 
 class Exacerbation:
-    """A class containing information about asthma exacerbations.
+    """A class containing information about asthma exacerbations."""
 
-    Attributes:
-        hyperparameters (dict): A dictionary containing the hyperparameters used to compute
-            ``β0`` from a normal distribution:
+    def __init__(
+        self,
+        config: dict | None = None,
+        province: str = "CA",
+        parameters: dict | None = None,
+        hyperparameters: dict | None = None,
+        calibration_table: DataFrameGroupBy | None = None,
+        initial_rate: float | None = None
+    ):
+        if config is not None:
+            self.hyperparameters = config["hyperparameters"]
+            self.parameters = config["parameters"]
+            self.initial_rate = config["initial_rate"]
+        elif parameters is not None and hyperparameters is not None:
+            self.hyperparameters = hyperparameters
+            self.parameters = parameters
+            self.initial_rate = initial_rate
+        else:
+            raise ValueError(
+                "Either config dict or parameters and hyperparameters must be provided."
+            )
+        
+        if calibration_table is None:
+            self.calibration_table = self.load_exacerbation_calibration(province)
+        else:
+            self.calibration_table = calibration_table
+
+        self.assign_random_β0()
+        self.parameters["min_year"] = min(
+            [key[0] for key in self.calibration_table.groups.keys()]
+        ) + 1
+
+    @property
+    def hyperparameters(self) -> dict:
+        """A dictionary containing the hyperparameters used to compute ``β0`` from a normal
+        distribution:
             * ``β0_μ``: float, the mean of the normal distribution.
             * ``β0_σ``: float, the standard deviation of the normal distribution.
-        parameters (dict): A dictionary containing the following keys:
+        """
+        return self._hyperparameters
+    
+    @hyperparameters.setter
+    def hyperparameters(self, hyperparameters: dict):
+        KEYS = ["β0_μ", "β0_σ"]
+        for key in KEYS:
+            if key not in hyperparameters:
+                raise ValueError(f"Missing key {key} in hyperparameters.")
+        self._hyperparameters = hyperparameters
+
+    @property
+    def parameters(self) -> dict:
+        """A dictionary containing the following keys:
             * ``β0``: float, a constant parameter, randomly selected from a normal distribution
               with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
             * ``β0_calibration``: float, the parameter for the calibration term.
@@ -45,7 +91,23 @@ class Exacerbation:
             * ``βcontrol_UC``: float, the parameter for the uncontrolled asthma term.
             * ``min_year``: int, the minimum year for which exacerbation data exists + 1.
               Currently 2001.
-        calibration_table: A dataframe grouped by year and sex, with the following columns:
+        """
+        return self._parameters
+    
+    @parameters.setter
+    def parameters(self, parameters: dict):
+        KEYS = [
+            "β0", "β0_calibration", "βage", "βsex", "βasthmaDx", "βprev_exac1", "βprev_exac2",
+            "βcontrol", "βcontrol_C", "βcontrol_PC", "βcontrol_UC", "min_year"
+        ]
+        for key in KEYS:
+            if key not in parameters:
+                raise ValueError(f"Missing key {key} in parameters.")
+        self._parameters = parameters
+
+    @property
+    def calibration_table(self) -> DataFrameGroupBy:
+        """A dataframe grouped by year and sex, with the following columns:
 
             * ``year``: integer year.
             * ``sex``: 1 = male, 0 = female.
@@ -53,37 +115,12 @@ class Exacerbation:
             * ``calibrator_multiplier``: float, TODO.
 
             See ``master_calibrated_exac.csv``.
-
-        initial_rate (float): TODO.
-    """
-    def __init__(
-        self,
-        config: dict | None = None,
-        province: str = "CA",
-        parameters: dict | None = None,
-        hyperparameters: dict | None = None,
-        calibration_table: DataFrameGroupBy | None = None,
-        initial_rate=None
-    ):
-        if config is not None:
-            self.hyperparameters = config["hyperparameters"]
-            self.parameters = config["parameters"]
-            self.initial_rate = config["initial_rate"]
-            self.calibration_table = self.load_exacerbation_calibration(province)
-        elif parameters is not None and hyperparameters is not None:
-            self.hyperparameters = hyperparameters
-            self.parameters = parameters
-            self.calibration_table = calibration_table
-            self.initial_rate = initial_rate
-        else:
-            raise ValueError(
-                "Either config dict or parameters and hyperparameters must be provided."
-            )
-
-        self.assign_random_β0()
-        self.parameters["min_year"] = min(
-            [key[0] for key in self.calibration_table.groups.keys()]
-        ) + 1
+        """
+        return self._calibration_table
+    
+    @calibration_table.setter
+    def calibration_table(self, calibration_table: DataFrameGroupBy):
+        self._calibration_table = calibration_table
 
     def assign_random_β0(self):
         """Assign the parameter β0 a random value from a normal distribution."""
