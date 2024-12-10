@@ -11,35 +11,8 @@ logger = get_logger(__name__)
 
 
 class Birth:
-    """A class containing information about projected birth rates.
+    """A class containing information about projected birth rates."""
 
-    Attributes:
-        estimate: A grouped data frame giving the projected number of births in a given
-            province, grouped by year. It contains the following columns:
-                * ``province``: A string indicating the province abbreviation, e.g. "BC".
-                  For all of Canada, set province to "CA".
-                * ``N``: integer, estimated number of births for that year.
-                * ``prop_male``: proportion of births which are male, a number in ``[0, 1]``.
-                * ``projection_scenario``: Population growth type, one of:
-                    ["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"].
-                    See `StatCan <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
-                * ``N_relative``: number of births relative to the first year of the simulation.
-            See ``master_birth_estimate.csv``.
-        initial_population: A data frame giving the population for the first year of the simulation:
-                * ``year``: integer year the range 2000 - 2065.
-                * ``age``: integer age.
-                * ``province``: a string indicating the province abbreviation, e.g. "BC".
-                  For all of Canada, set province to "CA".
-                * ``n``: estimated number of people in that age category in a given year.
-                * ``n_birth``: the number of people born that year.
-                * ``prop``: the ratio of that age group to the newborn age group (age = 0).
-                * ``prop_male``: proportion of people in that age group who are male, a
-                  number in [0, 1].
-                * ``projection_scenario``: Population growth type, one of:
-                  ``["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"]``.
-                  See `StatCan <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
-            See ``master_population_initial_distribution.csv``.
-    """
     def __init__(
         self,
         starting_year: int | None = None,
@@ -49,29 +22,74 @@ class Birth:
         estimate: DataFrameGroupBy | None = None,
         initial_population: pd.DataFrame | None = None
     ):
-        if starting_year is not None and province is not None and population_growth_type is not None:
+        if estimate is None:
+            if starting_year is None or province is None or population_growth_type is None:
+                raise ValueError(
+                    "Either starting_year, province, and population_growth_type or "
+                    "estimate must be provided."
+                )
             self.estimate = self.load_birth_estimate(
                 starting_year, province, population_growth_type
             )
+        else:
+            self.estimate = estimate
+        if initial_population is None:
+            if starting_year is None or province is None or population_growth_type is None:
+                raise ValueError(
+                    "Either starting_year, province, and population_growth_type or "
+                    "initial_population must be provided."
+                )
             self.initial_population = self.load_population_initial_distribution(
                 starting_year, province, population_growth_type, max_age
             )
-        elif estimate is not None and initial_population is not None:
-            self.estimate = estimate
-            self.initial_population = initial_population
         else:
-            raise ValueError(
-                "Either starting_year, province, and population_growth_type or "
-                "estimate and initial_population must be provided."
-            )
+            self.initial_population = initial_population
     
     @property
     def estimate(self) -> DataFrameGroupBy:
+        """A grouped data frame giving the number of births in a given province, grouped by year.
+        
+        It contains the following columns:
+            * ``province``: A string indicating the province abbreviation, e.g. "BC".
+              For all of Canada, set province to "CA".
+            * ``N``: integer, estimated number of births for that year.
+            * ``prop_male``: proportion of births which are male, a number in ``[0, 1]``.
+            * ``projection_scenario``: Population growth type, one of:
+                ["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"].
+                See `StatCan <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
+            * ``N_relative``: The number of births relative to the first year of the simulation.
+        See ``master_birth_estimate.csv``.
+        """
         return self._estimate
     
     @estimate.setter
-    def estimate(self, estimate: DataFrameGroupBy) -> None:
+    def estimate(self, estimate: DataFrameGroupBy):
         self._estimate = estimate
+
+    @property
+    def initial_population(self) -> pd.DataFrame:
+        """A data frame giving the population for the first year of the simulation.
+
+        It contains the following columns:
+            * ``year``: integer year the range 2000 - 2065.
+            * ``age``: integer age.
+            * ``province``: a string indicating the province abbreviation, e.g. "BC".
+              For all of Canada, set province to "CA".
+            * ``n``: estimated number of people in that age category in a given year.
+            * ``n_birth``: the number of people born that year.
+            * ``prop``: the ratio of that age group to the newborn age group (age = 0).
+            * ``prop_male``: proportion of people in that age group who are male, a
+              number in ``[0, 1]``.
+            * ``projection_scenario``: Population growth type, one of:
+              ``["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"]``.
+              See `StatCan <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
+        See ``master_population_initial_distribution.csv``.
+        """
+        return self._initial_population
+    
+    @initial_population.setter
+    def initial_population(self, initial_population: pd.DataFrame):
+        self._initial_population = initial_population
 
     def load_birth_estimate(
         self, starting_year: int, province: str, population_growth_type: str
@@ -85,7 +103,7 @@ class Birth:
             ((df["projection_scenario"] == population_growth_type) |
              (df["projection_scenario"] == "past"))
         ]
-        df["N_relative"] = df["N"] / df["N"].iloc[0]
+        df["N_relative"] = df["N"] / df.loc[df["year"] == starting_year]["N"].values[0]
         grouped_df = df.groupby("year")
         return grouped_df
 
@@ -107,29 +125,30 @@ class Birth:
     def get_initial_population_indices(self, num_births: int) -> list[int]:
         """Get the indices for the agents from the initial population table, weighted by age.
 
-        Examples:
-            For example, if the number of births is 2, and we have the following
-            initial population table:
-
-            .. code-block::
-
-                age | prop | ...
-                ----------------
-                0     1.0    ...
-                1     2.0    ...
-                2     0.5    ...
-
-            then we will return the following:
-
-            .. code-block::
-
-                [1, 1, 2, 2, 2, 2, 3]
-
         Args:
             num_births: Number of births.
 
         Returns:
             The indices for the initial population table.
+
+        Examples:
+
+            >>> from leap.birth import Birth
+            >>> from leap.utils import get_data_path
+            >>> import pandas as pd
+            >>> initial_population = pd.DataFrame({
+            ...     "age": [0, 1, 2],
+            ...     "prop": [1.0, 2.0, 0.5]
+            ... })
+            >>> birth = Birth(
+            ...     starting_year=2000,
+            ...     province="CA",
+            ...     population_growth_type="LG",
+            ...     initial_population=initial_population
+            ... )
+            >>> birth.get_initial_population_indices(num_births=2)
+            [0, 0, 1, 1, 1, 1, 2]
+
         """
         num_agents_per_age_group = [
             int(round(prop * num_births)) for prop in self.initial_population["prop"]
@@ -148,6 +167,22 @@ class Birth:
 
         Returns:
             The number of births for the given year.
+
+        Examples:
+
+            >>> from leap.birth import Birth
+            >>> from leap.utils import get_data_path
+            >>> birth = Birth(
+            ...     starting_year=2000,
+            ...     province="CA",
+            ...     population_growth_type="LG"
+            ... )
+            >>> birth.get_num_newborn(num_births_initial=100, year=2000)
+            100
+
+            >>> birth.get_num_newborn(num_births_initial=100, year=2001)
+            97
+
         """
         num_new_born = int(
             math.ceil(
