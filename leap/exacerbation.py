@@ -5,6 +5,7 @@ from leap.utils import get_data_path
 from leap.control import ControlLevels
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.agent import Agent
     from leap.utils import Sex
 
@@ -44,8 +45,7 @@ class Exacerbation:
             * ``βcontrol_UC``: float, the parameter for the uncontrolled asthma term.
             * ``min_year``: int, the minimum year for which exacerbation data exists + 1.
               Currently 2001.
-        calibration_table (pd.api.typing.DataFrameGroupBy): A dataframe grouped by year and sex,
-            with the following columns:
+        calibration_table: A dataframe grouped by year and sex, with the following columns:
 
             * ``year``: integer year.
             * ``sex``: 1 = male, 0 = female.
@@ -62,7 +62,7 @@ class Exacerbation:
         province: str = "CA",
         parameters: dict | None = None,
         hyperparameters: dict | None = None,
-        calibration_table: pd.api.typing.DataFrameGroupBy = None,
+        calibration_table: DataFrameGroupBy | None = None,
         initial_rate=None
     ):
         if config is not None:
@@ -92,7 +92,7 @@ class Exacerbation:
             self.hyperparameters["β0_σ"]
         )
 
-    def load_exacerbation_calibration(self, province: str) -> pd.api.typing.DataFrameGroupBy:
+    def load_exacerbation_calibration(self, province: str) -> DataFrameGroupBy:
         """Load the exacerbation calibration table.
 
         Args:

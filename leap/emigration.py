@@ -5,6 +5,7 @@ from leap.utils import get_data_path
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.utils import Sex
 
 logger = get_logger(__name__)
@@ -14,8 +15,8 @@ class Emigration:
     """A class containing information about emigration from Canada.
 
     Attributes:
-        table (pd.api.typing.DataFrameGroupBy): A dataframe grouped by year, giving the probability of
-            emigration for a given age, province, sex, and growth scenario:
+        table: A dataframe grouped by year, giving the probability of emigration for a given
+            age, province, sex, and growth scenario:
                 * ``year``: integer year the range 2001 - 2065.
                 * ``age``: integer age.
                 * ``M``: the probability of a male emigrating.
@@ -27,7 +28,7 @@ class Emigration:
         starting_year: int = 2000,
         province: str = "CA",
         population_growth_type: str = "LG",
-        table: pd.api.typing.DataFrameGroupBy | None = None
+        table: DataFrameGroupBy | None = None
     ):
         if table is None:
             self.table = self.load_emigration_table(starting_year, province, population_growth_type)
@@ -36,7 +37,7 @@ class Emigration:
 
     def load_emigration_table(
         self, starting_year: int, province: str, population_growth_type: str
-    ) -> pd.api.typing.DataFrameGroupBy:
+    ) -> DataFrameGroupBy:
         """Load the data from ``master_emigration_table.csv``.
 
         Args:

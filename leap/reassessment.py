@@ -5,6 +5,7 @@ from leap.utils import get_data_path
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.agent import Agent
 
 logger = get_logger(__name__)
@@ -14,21 +15,20 @@ class Reassessment:
     """A class containing information about asthma diagnosis reassessment.
 
     Attributes:
-        table (pd.api.typing.DataFrameGroupBy): A grouped data frame grouped by year.
-            Each data frame contains the following columns:
-                * ``year`` (int): calendar year.
-                * ``age`` (int): age of person.
-                * ``F`` (float): the probability that a female agent still has asthma.
-                * ``M`` (float): the probability that a male agent still has asthma.
-                * ``province`` (str): a string indicating the province abbreviation, e.g. "BC".
-                    For all of Canada, set province to "CA".
+        table: A grouped data frame grouped by year. Each data frame contains the following columns:
+            * ``year`` (int): calendar year.
+            * ``age`` (int): age of person.
+            * ``F`` (float): the probability that a female agent still has asthma.
+            * ``M`` (float): the probability that a male agent still has asthma.
+            * ``province`` (str): a string indicating the province abbreviation, e.g. "BC".
+                For all of Canada, set province to "CA".
             See ``master_asthma_reassessment.csv``.
     """
     def __init__(
         self,
         starting_year: int = 2000,
         province: str = "CA",
-        table: pd.api.typing.DataFrameGroupBy | None = None
+        table: DataFrameGroupBy | None = None
     ):
         if table is None:
             self.table = self.load_reassessment_table(starting_year, province)
@@ -37,7 +37,7 @@ class Reassessment:
 
     def load_reassessment_table(
         self, starting_year: int, province: str
-    ) -> pd.api.typing.DataFrameGroupBy:
+    ) -> DataFrameGroupBy:
         """Load the asthma diagnosis reassessment table.
 
         Args:
@@ -46,14 +46,13 @@ class Reassessment:
                 For all of Canada, set province to "CA".
 
         Returns:
-            pd.api.typing.DataFrameGroupBy: A grouped data frame grouped by year.
-                Each data frame contains the following columns:
-                    * ``year`` (int): calendar year.
-                    * ``age`` (int): age of person.
-                    * ``F`` (float): the probability that a female agent still has asthma.
-                    * ``M`` (float): the probability that a male agent still has asthma.
-                    * ``province`` (str): a string indicating the province abbreviation, e.g. "BC".
-                        For all of Canada, set province to "CA".
+            A grouped data frame grouped by year. Each data frame contains the following columns:
+                * ``year`` (int): calendar year.
+                * ``age`` (int): age of person.
+                * ``F`` (float): the probability that a female agent still has asthma.
+                * ``M`` (float): the probability that a male agent still has asthma.
+                * ``province`` (str): a string indicating the province abbreviation, e.g. "BC".
+                    For all of Canada, set province to "CA".
         """
         df = pd.read_csv(
             get_data_path("processed_data", "master_asthma_reassessment.csv")

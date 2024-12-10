@@ -5,6 +5,7 @@ from leap.utils import get_data_path
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.agent import Agent
 
 logger = get_logger(__name__)
@@ -18,7 +19,7 @@ class Death:
         province: str = "CA",
         starting_year: int = 2000,
         parameters: dict | None = None,
-        life_table: pd.api.typing.DataFrameGroupBy | None = None
+        life_table: DataFrameGroupBy | None = None
     ):
         if config is not None:
             self.parameters = config["parameters"]
@@ -48,7 +49,7 @@ class Death:
         self._parameters = parameters
 
     @property
-    def life_table(self) -> pd.api.typing.DataFrameGroupBy:
+    def life_table(self) -> DataFrameGroupBy:
         """A grouped data frame grouped by year. Each data frame contains the following columns:
             * ``age`` (int): age of person.
             * ``year`` (int): calendar year.
@@ -59,10 +60,10 @@ class Death:
         return self._life_table
     
     @life_table.setter
-    def life_table(self, life_table: pd.api.typing.DataFrameGroupBy):
+    def life_table(self, life_table: DataFrameGroupBy):
         self._life_table = life_table
 
-    def load_life_table(self, starting_year: int, province: str) -> pd.api.typing.DataFrameGroupBy:
+    def load_life_table(self, starting_year: int, province: str) -> DataFrameGroupBy:
         """Load the life table data.
         
         Args:

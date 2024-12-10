@@ -1,7 +1,11 @@
+from __future__ import annotations
 import math
 import pandas as pd
 from leap.utils import get_data_path
 from leap.logger import get_logger
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from pandas.core.groupby.generic import DataFrameGroupBy
 
 logger = get_logger(__name__)
 
@@ -42,7 +46,7 @@ class Birth:
         province: str | None = None,
         population_growth_type: str | None = None,
         max_age: int = 111,
-        estimate: pd.api.typing.DataFrameGroupBy | None = None,
+        estimate: DataFrameGroupBy | None = None,
         initial_population: pd.DataFrame | None = None
     ):
         if starting_year is not None and province is not None and population_growth_type is not None:
@@ -62,16 +66,16 @@ class Birth:
             )
     
     @property
-    def estimate(self) -> pd.api.typing.DataFrameGroupBy:
+    def estimate(self) -> DataFrameGroupBy:
         return self._estimate
     
     @estimate.setter
-    def estimate(self, estimate: pd.api.typing.DataFrameGroupBy):
+    def estimate(self, estimate: DataFrameGroupBy) -> None:
         self._estimate = estimate
 
     def load_birth_estimate(
         self, starting_year: int, province: str, population_growth_type: str
-    ) -> pd.api.typing.DataFrameGroupBy:
+    ) -> DataFrameGroupBy:
         df = pd.read_csv(
             get_data_path("processed_data", "master_birth_estimate.csv")
         )

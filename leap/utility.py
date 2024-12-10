@@ -4,6 +4,7 @@ import numpy as np
 from leap.utils import get_data_path
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.agent import Agent
 
 
@@ -28,8 +29,8 @@ class Utility:
                 βexac_sev_hist1 * mild + βexac_sev_hist2 * moderate +
                 βexac_sev_hist3 * severe + βexac_sev_hist4 * very_severe
 
-        table: A grouped data frame grouped by age and sex,
-            containing information about EuroQol Group's quality of life metric called the EQ-5D.
+        table: A grouped data frame grouped by age and sex, containing information about
+            EuroQol Group's quality of life metric called the EQ-5D.
             Each data frame contains the following columns:
                 * ``age``: integer age.
                 * ``sex``: sex of a person, 1 = male, 0 = female
@@ -41,7 +42,7 @@ class Utility:
         self,
         config: dict | None = None,
         parameters: dict | None = None,
-        table: pd.api.typing.DataFrameGroupBy | None = None
+        table: DataFrameGroupBy | None = None
     ):
         if config is not None:
             self.parameters = config["parameters"]
@@ -58,7 +59,7 @@ class Utility:
         self.parameters["βexac_sev_hist"] = np.array(self.parameters["βexac_sev_hist"])
         self.parameters["βcontrol"] = np.array(self.parameters["βcontrol"])
 
-    def load_eq5d(self) -> pd.api.typing.DataFrameGroupBy:
+    def load_eq5d(self) -> DataFrameGroupBy:
         df = pd.read_csv(get_data_path("processed_data", "eq5d_canada.csv"))
         grouped_df = df.groupby(["age", "sex"])
         return grouped_df

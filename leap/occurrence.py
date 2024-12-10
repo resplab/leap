@@ -6,6 +6,7 @@ from leap.utils import get_data_path, sigmoid, logit
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.agent import Agent
 
 logger = get_logger(__name__)
@@ -20,7 +21,7 @@ class Occurrence:
         hyperparameters: dict | None = None,
         parameters: dict | None = None,
         max_age: int = 110,
-        correction_table: pd.api.typing.DataFrameGroupBy | None = None
+        correction_table: DataFrameGroupBy | None = None
     ):
         if config is not None:
             self.hyperparameters = config["hyperparameters"]
@@ -71,7 +72,7 @@ class Occurrence:
         self._parameters = parameters
 
     @property
-    def correction_table(self) -> pd.api.typing.DataFrameGroupBy:
+    def correction_table(self) -> DataFrameGroupBy:
         """A dataframe grouped by year, age, and sex.
         
         Each dataframe contains the following columns:
@@ -83,7 +84,7 @@ class Occurrence:
         return self._correction_table
     
     @correction_table.setter
-    def correction_table(self, correction_table: pd.api.typing.DataFrameGroupBy):
+    def correction_table(self, correction_table: DataFrameGroupBy):
         self._correction_table = correction_table
 
     @property
@@ -113,7 +114,7 @@ class Occurrence:
 
     def load_occurrence_correction_table(
         self, occurrence_type: str
-    ) -> pd.api.typing.DataFrameGroupBy:
+    ) -> DataFrameGroupBy:
         """Load the asthma incidence correction table.
 
         Returns:
@@ -215,7 +216,7 @@ class Incidence(Occurrence):
         hyperparameters: dict | None = None,
         parameters: dict | None = None,
         max_age: int = 110,
-        correction_table: pd.api.typing.DataFrameGroupBy | None = None
+        correction_table: DataFrameGroupBy | None = None
     ):
         super().__init__(config, hyperparameters, parameters, max_age, correction_table)
         self.parameters["βage"] = np.array(self.parameters["βage"])
@@ -266,7 +267,7 @@ class Incidence(Occurrence):
                 raise ValueError(f"Missing key {key} in parameters.")
         self._parameters = parameters
 
-    def load_occurrence_correction_table(self) -> pd.api.typing.DataFrameGroupBy:
+    def load_occurrence_correction_table(self) -> DataFrameGroupBy:
         """Load the asthma incidence correction table.
 
         Returns:
@@ -305,7 +306,7 @@ class Prevalence(Occurrence):
         hyperparameters: dict | None = None,
         parameters: dict | None = None,
         max_age: int = 110,
-        correction_table: pd.api.typing.DataFrameGroupBy | None = None
+        correction_table: DataFrameGroupBy | None = None
     ):
         super().__init__(config, hyperparameters, parameters, max_age, correction_table)
         self.parameters["βage"] = np.array(self.parameters["βage"])
@@ -386,7 +387,7 @@ class Prevalence(Occurrence):
                 raise ValueError(f"Missing key {key} in parameters.")
         self._parameters = parameters
 
-    def load_occurrence_correction_table(self) -> pd.api.typing.DataFrameGroupBy:
+    def load_occurrence_correction_table(self) -> DataFrameGroupBy:
         grouped_df = super().load_occurrence_correction_table(occurrence_type="prev")
         return grouped_df
 

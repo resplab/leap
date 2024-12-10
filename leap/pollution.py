@@ -1,3 +1,4 @@
+from __future__ import annotations
 import pathlib
 import os
 import numpy as np
@@ -5,19 +6,22 @@ import pandas as pd
 import pygrib
 from leap.utils import get_data_path
 from leap.logger import get_logger
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from pandas.core.groupby.generic import DataFrameGroupBy
 
 logger = get_logger(__name__)
 
 
 class PollutionTable:
     """A class containing information about PM 2.5 pollution in Canada."""
-    def __init__(self, data: pd.api.typing.DataFrameGroupBy | None = None):
+    def __init__(self, data: DataFrameGroupBy | None = None):
         if data is None:
             data = self.load_pollution_data()
         self.data = data
 
     @property
-    def data(self) -> pd.api.typing.DataFrameGroupBy:
+    def data(self) -> DataFrameGroupBy:
         """A data frame grouped by the SSP scenario, with the following columns:
             * ``CDUID``: the census division identifier.
             * ``year``: the year for the pollution data projection.
@@ -35,12 +39,12 @@ class PollutionTable:
         return self._data
     
     @data.setter
-    def data(self, data: pd.api.typing.DataFrameGroupBy):
+    def data(self, data: DataFrameGroupBy):
         self._data = data
 
     def load_pollution_data(
         self, pm25_data_path: pathlib.Path = get_data_path("processed_data.pollution")
-    ) -> pd.api.typing.DataFrameGroupBy:
+    ) -> DataFrameGroupBy:
         """Load the data from the PM2.5 SSP *.csv files.
 
         Args:

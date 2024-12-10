@@ -1,8 +1,12 @@
+from __future__ import annotations
 import math
 import pandas as pd
 import numpy as np
 from leap.utils import get_data_path
 from leap.logger import get_logger
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from pandas.core.groupby.generic import DataFrameGroupBy
 
 logger = get_logger(__name__)
 
@@ -30,7 +34,7 @@ class Immigration:
         province: str = "CA",
         population_growth_type: str = "LG",
         max_age: int = 111,
-        table: pd.api.typing.DataFrameGroupBy | None = None
+        table: DataFrameGroupBy | None = None
     ):
         if table is None:
             self.table = self.load_immigration_table(
@@ -41,7 +45,7 @@ class Immigration:
 
     def load_immigration_table(
         self, starting_year: int, province: str, population_growth_type: str, max_age: int
-    ) -> pd.api.typing.DataFrameGroupBy:
+    ) -> DataFrameGroupBy:
         """Load the data from ``master_immigration_table.csv``.
 
         Args:

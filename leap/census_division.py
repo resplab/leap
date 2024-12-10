@@ -21,7 +21,7 @@ class CensusTable:
     https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=9810000701
 
     Attributes:
-        data (pd.api.typing.DataFrameGroupBy): A grouped data frame grouped by province.
+        data: A grouped data frame grouped by province.
             Each data frame contains the following columns:
                 * ``year`` (int): the year the census data was collected.
                 * ``census_division_name`` (str): the federal census division name.
