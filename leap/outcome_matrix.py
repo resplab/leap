@@ -41,20 +41,20 @@ class OutcomeTable:
         if self.group_by is not None:
             self.grouped_data = self.data.groupby(self.group_by)
 
-    def get(self, column: str, **kwargs) -> float | int | pd.Series:
+    def get(self, columns: str | list[str], **kwargs) -> float | int | pd.Series | pd.DataFrame:
         """Get the value of a column in the table.
 
         Args:
-            column (str): The column to get the value from.
+            columns: The column(s) to get the value from.
             **kwargs (dict): A dictionary of columns to filter by.
 
         Returns:
-            float | int: The value of the column.
+            The value of the column.
         """
         df = self.data.copy(deep=True)
         for key, value in kwargs.items():
             df = df.loc[(df[key] == value)]
-        return df[column]
+        return df[columns]
 
 
 class OutcomeMatrix:
