@@ -35,20 +35,22 @@ class Emigration:
         else:
             self.table = table
 
-    def load_emigration_table(self, starting_year: int, province: str, population_growth_type: str):
+    def load_emigration_table(
+        self, starting_year: int, province: str, population_growth_type: str
+    ) -> pd.api.typing.DataFrameGroupBy:
         """Load the data from ``master_emigration_table.csv``.
 
         Args:
-            starting_year (int): the year for the data to start at. Must be between 2001-2065.
-            province (str): a string indicating the province abbreviation, e.g. "BC".
+            starting_year: the year for the data to start at. Must be between 2001-2065.
+            province: a string indicating the province abbreviation, e.g. "BC".
                 For all of Canada, set province to "CA".
             population_growth_type: Population growth type, one of:
                 ["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"].
                 See `Stats Canada <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
 
         Returns:
-            pd.api.typing.DataFrameGroupBy: A dataframe grouped by year, giving the probability of
-                emigration for a given age, province, sex, and growth scenario.
+            A dataframe grouped by year, giving the probability of emigration for a given
+            age, province, sex, and growth scenario.
         """
         df = pd.read_csv(
             pathlib.Path(PROCESSED_DATA_PATH, "migration/master_emigration_table.csv")
@@ -66,9 +68,12 @@ class Emigration:
         """Determine the probability of emigration of an agent (person) in a given year.
 
         Args:
-            year (int): The calendar year.
-            age (int): Age of the person.
-            sex (bool): Sex of the person, 1 = male, 0 = female.
+            year: The calendar year, e.g. 2022.
+            age: Age of the person.
+            sex: Sex of the person, "M" = male, "F" = female.
+
+        Returns:
+            ``True`` if the person emigrates, ``False`` otherwise.
         """
 
         if age == 0:

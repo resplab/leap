@@ -21,12 +21,12 @@ class ExacerbationSeverity:
         4 = very severe
 
     Attributes:
-        hyperparameters (dict): A dictionary containing the hyperparameters used
+        hyperparameters: A dictionary containing the hyperparameters used
             in the Dirichlet-multinomial distribution. See
             https://juliastats.org/Distributions.jl/stable/multivariate/#Distributions.Dirichlet.
             * ``k``: integer, number of trials.
             * ``α``: parameter vector, length 4.
-        parameters (dict): A dictionary containing the following keys:
+        parameters: A dictionary containing the following keys:
             * ``p``: a probability vector giving the probability of each exacerbation type,
               using the Dirichlet-multinomial distribution.
             * ``βprev_hosp_ped``: Float64, parameter for previous hospitalizations due to asthma
@@ -40,16 +40,16 @@ class ExacerbationSeverity:
         hyperparameters: dict | None = None,
         parameters: dict | None = None
     ):
-        if config is None and hyperparameters is None and parameters is None:
+        if config is not None:
+            self.hyperparameters = config["hyperparameters"]
+            self.parameters = config["parameters"]
+        elif hyperparameters is not None and parameters is not None:
+            self.hyperparameters = hyperparameters
+            self.parameters = parameters
+        else:
             raise ValueError(
                 "Either config dict or hyperparameters and parameters must be provided."
             )
-        elif config is not None:
-            self.hyperparameters = config["hyperparameters"]
-            self.parameters = config["parameters"]
-        else:
-            self.hyperparameters = hyperparameters
-            self.parameters = parameters
 
         self.assign_random_p()
 
@@ -66,7 +66,7 @@ class ExacerbationSeverity:
         p = np.random.dirichlet(np.array(self.hyperparameters["α"]) * self.hyperparameters["k"])
         self.parameters["p"] = p
 
-    def compute_distribution(self, num_current_year, prev_hosp, age):
+    def compute_distribution(self, num_current_year: int, prev_hosp: bool, age: int) -> np.ndarray:
         """Compute the exacerbation severity distribution.
 
         Compute the exacerbation severity distribution for a patient in a given year using the
@@ -80,14 +80,13 @@ class ExacerbationSeverity:
         2    | 1        | 6      | 1
 
         Args:
-            num_current_year (int): the number of asthma exacerbations the patient has had this year.
+            num_current_year: the number of asthma exacerbations the patient has had this year.
                 Will be used as the number of trials in the Multinomial distribution.
-            prev_hosp (bool): has patient been previously hospitalized for asthma?
-            age (int): the age of the person in years.
+            prev_hosp: has patient been previously hospitalized for asthma?
+            age: the age of the person in years.
 
         Returns
-            np.ndarray: the distribution of asthma exacerbations by exacerbation type for the
-            current year.
+            The distribution of asthma exacerbations by exacerbation type for the current year.
         """
         p = self.parameters["p"]
         index_very_severe = 4
@@ -120,20 +119,23 @@ class ExacerbationSeverity:
         will return Inf. To remedy this, I have added max values for these variables.
 
         Args:
-            agent (Agent): a person in the simulation.
-            control (Control): asthma control module.
-            exacerbation (Exacerbation): asthma exacerbation module.
+            agent: A person in the simulation.
+            control: Asthma control module.
+            exacerbation: Asthma exacerbation module.
 
         Returns:
-            bool: the binary probability of a hospitalization.
+            The binary probability of a hospitalization.
 
         """
         max_age = agent.age - 2
         sex = agent.sex
 
         if max_age < 3:
-            return 0
+            return False
         else:
+            if agent.asthma_age is None:
+                raise ValueError("Asthma age is not set.")
+
             year = agent.year - (agent.age - agent.asthma_age)
             total_rate = 0
             for age in range(agent.asthma_age, max_age + 1):
@@ -143,7 +145,7 @@ class ExacerbationSeverity:
                 )
                 year += 1
 
-            # toss a coin: avg chance of having at least one hosp
+            # toss a coin: avg chance of having at least one hospitalization
             prob_severe_exacerbation = min(self.parameters["p"][3], 0.9999999999999)
             total_rate = min(total_rate, 150)
             zero_prob = (
@@ -166,9 +168,9 @@ class ExacerbationSeverityHistory:
         4 = very severe
 
     Attributes:
-        current_year (np.ndarray): An array of 4 integers indicating the number of exacerbations for
+        current_year: An array of 4 integers indicating the number of exacerbations for
             that severity level in the current year.
-        prev_year (np.ndarray): An array of 4 integers indicating the number of exacerbations for
+        prev_year: An array of 4 integers indicating the number of exacerbations for
             that severity level in the previous year.
     """
     def __init__(self, current_year: np.ndarray, prev_year: np.ndarray):

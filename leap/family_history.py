@@ -9,23 +9,23 @@ class FamilyHistory:
     A class containing information about family history of asthma.
 
     Attributes:
-        parameters (dict): A dictionary containing the following keys:
+        parameters: A dictionary containing the following keys:
             * ``p``: float, the probability that an agent has a family history of asthma.
     """
     def __init__(self, config: dict | None = None, parameters: dict | None = None):
-        if config is None and parameters is None:
-            raise ValueError("Either config dict or parameters must be provided.")
-        elif config is not None:
+        if config is not None:
             self.parameters = config["parameters"]
-        else:
+        elif parameters is not None:
             self.parameters = parameters
+        else:
+            raise ValueError("Either config dict or parameters must be provided.")
 
     @property
-    def parameters(self):
+    def parameters(self) -> dict:
         return self._parameters
 
     @parameters.setter
-    def parameters(self, parameters):
+    def parameters(self, parameters: dict):
         if parameters["p"] > 1 or parameters["p"] < 0:
             raise ValueError(
                 f"p must be a probability between 0 and 1, received {parameters['p']}."
@@ -36,6 +36,6 @@ class FamilyHistory:
         """Use Bernoulli distribution to determine whether an agent has a family history of asthma.
 
         Returns:
-            bool: Whether or not an agent has a family history of asthma.
+            Whether or not an agent has a family history of asthma.
         """
         return bool(np.random.binomial(1, self.parameters["p"]))

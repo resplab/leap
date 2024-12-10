@@ -10,11 +10,15 @@ logger = get_logger(__name__)
 
 
 class PollutionTable:
-    """A class containing information about PM 2.5 pollution in Canada.
+    """A class containing information about PM 2.5 pollution in Canada."""
+    def __init__(self, data: pd.api.typing.DataFrameGroupBy | None = None):
+        if data is None:
+            data = self.load_pollution_data()
+        self.data = data
 
-    Attributes:
-        data (pd.api.typing.DataFrameGroupBy): A data frame grouped by the SSP scenario,
-            with the following columns:
+    @property
+    def data(self) -> pd.api.typing.DataFrameGroupBy:
+        """A data frame grouped by the SSP scenario, with the following columns:
             * ``CDUID``: the census division identifier.
             * ``year``: the year for the pollution data projection.
             * ``month``: the month for the pollution data projection.
@@ -27,11 +31,12 @@ class PollutionTable:
               ``wildfire_pm25_scaled`` + ``background_pm25``.
             * ``SSP``: the SSP scenario, one of ``SSP1_2.6``, ``SSP2_4.5``, ``SSP3_7.0``,
               ``SSP5_8.5``.
-    """
-    def __init__(self, data: pd.api.typing.DataFrameGroupBy | None = None):
-        if data is None:
-            data = self.load_pollution_data()
-        self.data = data
+        """
+        return self._data
+    
+    @data.setter
+    def data(self, data: pd.api.typing.DataFrameGroupBy):
+        self._data = data
 
     def load_pollution_data(
         self, pm25_data_path: pathlib.Path = pathlib.Path(PROCESSED_DATA_PATH, "pollution")
@@ -39,10 +44,10 @@ class PollutionTable:
         """Load the data from the PM2.5 SSP *.csv files.
 
         Args:
-            pm25_data_path (pathlib.Path): full directory path for the PM2.5 *.csv files.
+            pm25_data_path: Full directory path for the PM2.5 ``*.csv`` files.
 
         Returns:
-            pd.api.typing.DataFrameGroupBy: a data frame grouped by the SSP scenario.
+            A data frame grouped by the SSP scenario.
         """
         files = pm25_data_path.glob("*.csv")
         pollution_data = pd.DataFrame()
@@ -63,11 +68,15 @@ class Pollution:
         wildfire_pm25_scaled (float): ``wildfire_pm25`` * ``factor``.
         total_pm25 (float): the total average PM2.5 levels for a given month:
             ``wildfire_pm25_scaled`` + ``background_pm25``.
-        SSP (str): the SSP scenario, one of ``SSP1_2.6``, ``SSP2_4.5``, ``SSP3_7.0``, ``SSP5_8.5``.
+        SSP: the SSP scenario, one of ``SSP1_2.6``, ``SSP2_4.5``, ``SSP3_7.0``, ``SSP5_8.5``.
     """
 
     def __init__(
-        self, cduid: int, year: int, month: int, SSP: str,
+        self,
+        cduid: int,
+        year: int,
+        month: int,
+        SSP: str,
         pollution_table: PollutionTable | None = None
     ):
         if pollution_table is None:
@@ -158,23 +167,29 @@ class GribData:
 
 
 def add_record_to_df(
-    df: pd.DataFrame, longitudes: np.ndarray, latitudes: np.ndarray, values: np.ndarray,
+    df: pd.DataFrame,
+    longitudes: np.ndarray,
+    latitudes: np.ndarray,
+    values: np.ndarray,
     index: int
-):
+) -> pd.DataFrame:
     """Add a new column to the grib data frame.
 
     Args:
-        df (pd.DataFrame): a data frame with the following columns:
+        df: A data frame with the following columns:
             * ``longitudes``: a list of longitude values.
             * ``latitudes``: a list of latitude values.
             * ``value_{index}``: a list of the values of interest at a specified longitude and
                 latitude. For example, it could be the PM2.5 concentration. Each value column
                 corresponds to either a record in the original grib file, or a file in a folder.
-        longitudes (np.ndarray): a list of longitude values.
-        latitudes (np.ndarray): a list of latitude values.
-        values (np.ndarray): a list of the values of interest at a specified longitude and latitude.
+        longitudes: An array of longitude values.
+        latitudes: An array of latitude values.
+        values: An array of the values of interest at a specified longitude and latitude.
             For example, it could be the PM2.5 concentration.
-        index (int): the index of the iteration loop.
+        index: The index of the iteration loop.
+
+    Returns:
+        A dataframe with a new column added.
     """
     colname = f"value_{index}"
     colname_lat = "latitudes"
@@ -188,11 +203,11 @@ def add_record_to_df(
     return df
 
 
-def get_data_average(df: pd.DataFrame):
+def get_data_average(df: pd.DataFrame) -> pd.DataFrame:
     """Find the mean of all the ``value_*`` columns, and return a ``GribData`` object.
 
     Args:
-        df (pd.DataFrame): a data frame with the following columns:
+        df: a data frame with the following columns:
             * ``longitudes``: a list of longitude values.
             * ``latitudes``: a list of latitude values.
             * ``value_{index}``: a list of the values of interest at a specified longitude and
@@ -216,10 +231,10 @@ def invert_longitude(longitude: float) -> float:
     - degrees West of the Prime Meridian.
 
     Args:
-        longitude (float): a number in [0, 360) giving the degrees east or west of the Prime Meridian.
+        longitude: a number in ``[0, 360)`` giving the degrees east or west of the Prime Meridian.
 
     Returns:
-        float: the converted longitude.
+        The converted longitude.
     """
     if longitude > 0:
         return longitude - 360
@@ -230,12 +245,12 @@ def invert_longitude(longitude: float) -> float:
 
 
 def load_grib_files(folder: str, recursive: bool = False) -> GribData:
-    """Load multiple *.grib2 files and almalgamate the data by taking the mean.
+    """Load multiple ``*.grib2`` files and amalgamate the data by taking the mean.
 
     Args:
-        folder (str): the folder containing the .grib2 files to open.
-        recursive (bool): if true, iterate through all subdirectories and compute an
-            aggregate average. If false, only read `.grib2` files in the given directory.
+        folder: The folder containing the ``.grib2`` files to open.
+        recursive: If ``True``, iterate through all subdirectories and compute an
+            aggregate average. If false, only read ``.grib2`` files in the given directory.
     """
     index = 1
     df = pd.DataFrame()

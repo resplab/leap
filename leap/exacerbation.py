@@ -14,10 +14,10 @@ class ExacerbationHistory:
     """A class containing information about the history of asthma exacerbations.
 
     Attributes:
-        num_current_year (int): the number of exacerbations in the current year.
-        num_prev_year (int): the number of exacerbations in the previous year.
+        num_current_year: the number of exacerbations in the current year.
+        num_prev_year: the number of exacerbations in the previous year.
     """
-    def __init__(self, num_current_year, num_prev_year):
+    def __init__(self, num_current_year: int, num_prev_year: int):
         self.num_current_year = num_current_year
         self.num_prev_year = num_prev_year
 
@@ -66,20 +66,20 @@ class Exacerbation:
         calibration_table: pd.api.typing.DataFrameGroupBy = None,
         initial_rate=None
     ):
-        if config is None and parameters is None and hyperparameters is None:
-            raise ValueError(
-                "Either config dict or parameters and hyperparameters must be provided."
-            )
-        elif config is not None:
+        if config is not None:
             self.hyperparameters = config["hyperparameters"]
             self.parameters = config["parameters"]
             self.initial_rate = config["initial_rate"]
             self.calibration_table = self.load_exacerbation_calibration(province)
-        else:
+        elif parameters is not None and hyperparameters is not None:
             self.hyperparameters = hyperparameters
             self.parameters = parameters
             self.calibration_table = calibration_table
             self.initial_rate = initial_rate
+        else:
+            raise ValueError(
+                "Either config dict or parameters and hyperparameters must be provided."
+            )
 
         self.assign_random_β0()
         self.parameters["min_year"] = min(
@@ -93,16 +93,15 @@ class Exacerbation:
             self.hyperparameters["β0_σ"]
         )
 
-    def load_exacerbation_calibration(self, province: str):
+    def load_exacerbation_calibration(self, province: str) -> pd.api.typing.DataFrameGroupBy:
         """Load the exacerbation calibration table.
 
         Args:
-            province (str): a string indicating the province abbreviation, e.g. "BC".
+            province: A string indicating the province abbreviation, e.g. "BC".
                 For all of Canada, set province to "CA".
 
         Returns:
-            pd.api.typing.DataFrameGroupBy: A dataframe grouped by year and sex, with the
-                following columns:
+            A dataframe grouped by year and sex, with the following columns:
 
                 * ``year``: integer year.
                 * ``sex``: 1 = male, 0 = female.
@@ -130,15 +129,15 @@ class Exacerbation:
         """Compute the number of asthma exacerbations in a given year.
 
         Args:
-            agent (Agent): A person in the model.
-            age (int): The age of the person in years.
-            sex (bool): 0 = female, 1 = male.
-            year (int): The calendar year.
-            control_levels (ControlLevels): The asthma control levels.
-            initial (bool): If this is the initial computation.
+            agent: A person in the model.
+            age: The age of the person in years.
+            sex: The sex of the agent (person), 0 = female, 1 = male.
+            year: The calendar year, e.g. 2024.
+            control_levels: The asthma control levels.
+            initial: If this is the initial computation.
 
         Returns:
-            int: the number of asthma exacerbations.
+            The number of asthma exacerbations.
         """
 
         if agent is not None:
@@ -146,6 +145,8 @@ class Exacerbation:
             sex = int(agent.sex)
             year = agent.year
             control_levels = agent.control_levels
+        elif age is None or sex is None or year is None or control_levels is None:
+            raise ValueError("Either agent or age, sex, year, and control_levels must be provided.")
 
         if initial:
             year = max(self.parameters["min_year"], year - 1)

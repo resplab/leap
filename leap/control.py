@@ -10,9 +10,9 @@ class ControlLevels:
     """A class containing the probability of each control level.
 
     Attributes:
-        fully_controlled (float): The probability of being fully controlled.
-        partially_controlled (float): The probability of being partially controlled.
-        uncontrolled (float): The probability of being uncontrolled.
+        fully_controlled: The probability of being fully controlled.
+        partially_controlled: The probability of being partially controlled.
+        uncontrolled: The probability of being uncontrolled.
     """
     def __init__(
         self, fully_controlled: float, partially_controlled: float, uncontrolled: float
@@ -21,7 +21,8 @@ class ControlLevels:
         self.partially_controlled = partially_controlled
         self.uncontrolled = uncontrolled
 
-    def as_array(self):
+    def as_array(self) -> np.ndarray:
+        """Return the control levels as an array."""
         return np.array([self.fully_controlled, self.partially_controlled, self.uncontrolled])
 
 
@@ -52,23 +53,24 @@ class Control:
               regression.
     """
     def __init__(
-        self, config: dict | None = None,
+        self,
+        config: dict | None = None,
         parameters: dict | None = None,
         hyperparameters: dict | None = None
     ):
-        if config is None and parameters is None and hyperparameters is None:
-            raise ValueError(
-                "Either config dict or parameters and hyperparameters must be provided."
-            )
-        elif config is not None:
+        if config is not None:
             self.hyperparameters = config["hyperparameters"]
             self.parameters = config["parameters"]
             self.parameters["θ"] = list(self.parameters["θ"])
             self.assign_random_β0()
-        else:
+        elif parameters is not None and hyperparameters is not None:
             self.hyperparameters = hyperparameters
             self.parameters = parameters
             self.assign_random_β0()
+        else:
+            raise ValueError(
+                "Either config dict or parameters and hyperparameters must be provided."
+            )
 
     def assign_random_β0(self):
         """Assign the parameter β0 a random value from a normal distribution."""
@@ -89,9 +91,9 @@ class Control:
                       = σ(θ_k - η) - σ(θ_(k+1) - η)
 
         Args:
-            sex (bool): Sex of person, true = male, false = female.
-            age (int): The age of the person (agent) in years.
-            initial (bool): If this is the initial computation.
+            sex: Sex of person, 1 = male, 0 = female.
+            age: The age of the person (agent) in years.
+            initial: If this is the initial computation.
 
         Returns:
             ControlLevels: A ``ControlLevel`` object with the probability of each control level.

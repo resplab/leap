@@ -49,11 +49,11 @@ class CensusTable:
         self.grouped_data = self.data.groupby(["province"])
 
     @property
-    def year(self):
+    def year(self) -> int:
         return self._year
 
     @year.setter
-    def year(self, year):
+    def year(self, year: int):
         if year < MIN_CENSUS_YEAR:
             raise ValueError(
                 f"year must be > {MIN_CENSUS_YEAR}, received {year}."
@@ -113,6 +113,14 @@ class CensusDivision:
             self.cduid = cduid
             self.name = name
             self.year = year
+
+    @property
+    def cduid(self) -> int:
+        return self._cduid
+    
+    @cduid.setter
+    def cduid(self, cduid: int):
+        self._cduid = cduid
 
 
 class CensusBoundaries:

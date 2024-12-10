@@ -13,53 +13,8 @@ logger = get_logger(__name__)
 
 
 class Occurrence:
-    """A class containing information about asthma occurrence (incidence or prevalence).
+    """A class containing information about asthma occurrence (incidence or prevalence)."""
 
-    Attributes:
-        hyperparameters (dict): A dictionary containing the hyperparameters used to compute
-            ``β0`` from a normal distribution:
-            * ``β0_μ``: float, the mean of the normal distribution.
-            * ``β0_σ``: float, the standard deviation of the normal distribution.
-        parameters (dict): A dictionary containing the following keys:
-            * ``β0``: float, a constant parameter, randomly selected from a normal distribution
-              with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
-            * ``βsex``: float, the parameter for the sex term, i.e. ``βsex * sex``.
-            * ``βage``: list[float], an array of 5 parameters to be multiplied by functions of age,
-              i.e.
-
-              .. code-block:: python
-
-                βage1 * f1(age) + βage2 * f2(age) + βage3 * f3(age) +
-                βage4 * f4(age) + βage5 * f5(age)
-
-              See ``poly_age_calculator``.
-            * ``βyear``: float, the parameter for the year term, i.e. ``βyear * year``.
-            * ``βsexage``: list[float], an array of 5 parameters to be multiplied by the sex and
-              functions of age, i.e.
-
-              .. code-block:: python
-
-                βsexage1 * f1(age) * sex + βsexage2 * f2(age) * sex + βsexage3 * f3(age) * sex +
-                βsexage4 * f4(age) * sex + βsexage5 * f5(age) * sex
-
-              See ``poly_age_calculator``.
-            * ``βsexyear``: float, the parameter to be multiplied by sex and year,
-              i.e. ``βsexyear * year * sex``.
-            * ``βfam_hist``: list[float], an array of 2 parameters to be multiplied by functions of
-              age. See ``log_OR_family_history``.
-            * ``βabx_exp``: list[float], an array of 3 parameters to be multiplied by functions of
-              age and antibiotic exposure. See ``log_OR_abx_exposure``.
-        min_year (int): TODO.
-        max_year (int): TODO.
-        max_age (int): TODO.
-        correction_table (pd.api.typing.DataFrameGroupBy): A dataframe grouped by year, age, and sex.
-            Each dataframe contains the following columns:
-                * ``year``: integer year.
-                * ``sex``: 0 = female, 1 = male.
-                * ``age``: integer age.
-                * ``correction``: float, TODO.
-            See ``master_occurrence_correction.csv``.
-    """
     def __init__(
         self,
         config: dict | None = None,
@@ -68,16 +23,18 @@ class Occurrence:
         max_age: int = 110,
         correction_table: pd.api.typing.DataFrameGroupBy | None = None
     ):
-        if config is None and (parameters is None or hyperparameters is None):
-            raise ValueError("Either config dict or parameters must be provided.")
-        elif config is not None:
+        if config is not None:
             self.hyperparameters = config["hyperparameters"]
             self.parameters = config["parameters"]
             self.max_age = config["max_age"]
-        else:
+        elif hyperparameters is not None and parameters is not None:
             self.hyperparameters = hyperparameters
             self.parameters = parameters
             self.max_age = max_age
+        else:
+            raise ValueError(
+                "Either config dict or parameters and hyperparameters must be provided."
+            )
 
         if correction_table is None:
             self.correction_table = self.load_occurrence_correction_table()
@@ -88,12 +45,80 @@ class Occurrence:
         self.min_year = int(np.min(years)) + 1
         self.max_year = int(np.max(years))
 
-    def load_occurrence_correction_table(self, occurrence_type: str):
+    @property
+    def hyperparameters(self) -> dict:
+        """A dictionary containing the hyperparameters used to compute ``β0`` from a normal
+        distribution:
+        
+            * ``β0_μ``: float, the mean of the normal distribution.
+            * ``β0_σ``: float, the standard deviation of the normal distribution.
+        """
+        return self._hyperparameters
+    
+    @hyperparameters.setter
+    def hyperparameters(self, hyperparameters: dict):
+        KEYS = ["β0_μ", "β0_σ"]
+        for key in KEYS:
+            if key not in hyperparameters.keys():
+                raise ValueError(f"Missing key {key} in hyperparameters.")
+        self._hyperparameters = hyperparameters
+
+    @property
+    def parameters(self) -> dict:
+        return self._parameters
+    
+    @parameters.setter
+    def parameters(self, parameters: dict):
+        self._parameters = parameters
+
+    @property
+    def correction_table(self) -> pd.api.typing.DataFrameGroupBy:
+        """A dataframe grouped by year, age, and sex.
+        
+        Each dataframe contains the following columns:
+            * ``year``: integer year.
+            * ``sex``: 0 = female, 1 = male.
+            * ``age``: integer age.
+            * ``correction``: float, TODO.
+        See ``master_occurrence_correction.csv``."""
+        return self._correction_table
+    
+    @correction_table.setter
+    def correction_table(self, correction_table: pd.api.typing.DataFrameGroupBy):
+        self._correction_table = correction_table
+
+    @property
+    def max_age(self) -> int:
+        """The maximum age of agents in the model."""
+        return self._max_age
+    
+    @max_age.setter
+    def max_age(self, max_age: int):
+        self._max_age = max_age
+
+    @property
+    def min_year(self) -> int:
+        return self._min_year
+    
+    @min_year.setter
+    def min_year(self, min_year: int):
+        self._min_year = min_year
+
+    @property
+    def max_year(self) -> int:
+        return self._max_year
+    
+    @max_year.setter
+    def max_year(self, max_year: int):
+        self._max_year = max_year
+
+    def load_occurrence_correction_table(
+        self, occurrence_type: str
+    ) -> pd.api.typing.DataFrameGroupBy:
         """Load the asthma incidence correction table.
 
         Returns:
-            pd.api.typing.DataFrameGroupBy: A dataframe grouped by year, age, and sex.
-            Each dataframe contains the following columns:
+            Dataframe grouped by year, age, and sex. Each dataframe contains the following columns:
                 * ``year``: integer year.
                 * ``sex``: 0 = female, 1 = male.
                 * ``age``: integer age.
@@ -107,17 +132,19 @@ class Occurrence:
         grouped_df = df.groupby(["year", "sex", "age"])
         return grouped_df
 
-    def equation(self, sex: bool, age: int, year: int, has_family_history: bool, dose: int):
+    def equation(
+        self, sex: int, age: int, year: int, has_family_history: bool, dose: int
+    ) -> float:
         """Compute the asthma occurrence equation.
 
         Args:
-            sex (int): 0 = female, 1 = male.
-            age (int): The age of the agent.
-            year (int): The calendar year.
-            has_family_history (bool): Whether the agent has a family history of asthma.
-            dose (int): TODO.
+            sex: 0 = female, 1 = male.
+            age: The age of the agent.
+            year: The calendar year.
+            has_family_history: Whether the agent has a family history of asthma.
+            dose: TODO.
         """
-        correction_year = min(year, self.max_year + 1)
+        correction_year = min(year, self.max_year)
         year = min(year, self.max_year)
         p0 = self.crude_occurrence(sex, age, year)
         p = sigmoid(
@@ -131,13 +158,13 @@ class Occurrence:
         return p
 
     @abc.abstractmethod
-    def crude_occurrence(self, sex, age, year: int):
+    def crude_occurrence(self, sex, age: int, year: int):
         return
 
-    def log_OR_family_history(self, age: int):
+    def log_OR_family_history(self, age: int) -> float:
         return self.parameters["βfam_hist"][0] + (min(5, age) - 3) * self.parameters["βfam_hist"][1]
 
-    def log_OR_abx_exposure(self, age: int, dose: int):
+    def log_OR_abx_exposure(self, age: int, dose: int) -> float:
         if age > 7 or dose == 0:
             return 0
         else:
@@ -155,7 +182,7 @@ class Occurrence:
             1, 520, 179636.923076923, 47536813.3328764, 11589923664.2537,
             2683688761696.54, 594554071731935
         ]
-    ):
+    ) -> np.ndarray:
         fs = np.zeros(6)
         fs[0] = 1 / np.sqrt(nd[1])
         fs[1] = (age - alpha[0]) / np.sqrt(nd[2])
@@ -172,7 +199,7 @@ class Occurrence:
         year: int,
         alpha: list[float] = [2009.5, 2009.5],
         nd: list[float] = [1.0, 520.0, 17290.0, 456456.0]
-    ):
+    ) -> np.ndarray:
         fs = np.zeros(3)
         fs[0] = 1 / np.sqrt(nd[1])
         fs[1] = (year - alpha[0]) / np.sqrt(nd[2])
@@ -181,14 +208,26 @@ class Occurrence:
 
 
 class Incidence(Occurrence):
-    """A class containing information about asthma incidence.
+    """A class containing information about asthma incidence."""
 
-    Attributes:
-        hyperparameters (dict): A dictionary containing the hyperparameters used to compute
-            ``β0`` from a normal distribution:
-            * ``β0_μ``: float, the mean of the normal distribution.
-            * ``β0_σ``: float, the standard deviation of the normal distribution.
-        parameters (dict): A dictionary containing the following keys:
+    def __init__(
+        self,
+        config: dict | None = None,
+        hyperparameters: dict | None = None,
+        parameters: dict | None = None,
+        max_age: int = 110,
+        correction_table: pd.api.typing.DataFrameGroupBy | None = None
+    ):
+        super().__init__(config, hyperparameters, parameters, max_age, correction_table)
+        self.parameters["βage"] = np.array(self.parameters["βage"])
+        self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
+        self.parameters["βfam_hist"] = np.array(self.parameters["βfam_hist"])
+        self.parameters["βabx_exp"] = np.array(self.parameters["βabx_exp"])
+
+    @property
+    def parameters(self) -> dict:
+        """A dictionary containing the following keys:
+        
             * ``β0``: float, a constant parameter, randomly selected from a normal distribution
               with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
             * ``βsex``: float, the parameter for the sex term, i.e. ``βsex * sex``.
@@ -217,37 +256,22 @@ class Incidence(Occurrence):
               age. See ``log_OR_family_history``.
             * ``βabx_exp``: list[float], an array of 3 parameters to be multiplied by functions of
               age and antibiotic exposure. See ``log_OR_abx_exposure``.
-        min_year (int): TODO.
-        max_year (int): TODO.
-        max_age (int): TODO.
-        correction_table (pd.api.typing.DataFrameGroupBy): A dataframe grouped by year, age, and sex.
-            Each dataframe contains the following columns:
-                * ``year``: integer year.
-                * ``sex``: 0 = female, 1 = male.
-                * ``age``: integer age.
-                * ``correction``: float, TODO.
-            See ``master_occurrence_correction.csv``.
-    """
-    def __init__(
-        self,
-        config: dict | None = None,
-        hyperparameters: dict | None = None,
-        parameters: dict | None = None,
-        max_age: int = 110,
-        correction_table: pd.api.typing.DataFrameGroupBy | None = None
-    ):
-        super().__init__(config, hyperparameters, parameters, max_age, correction_table)
-        self.parameters["βage"] = np.array(self.parameters["βage"])
-        self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
-        self.parameters["βfam_hist"] = np.array(self.parameters["βfam_hist"])
-        self.parameters["βabx_exp"] = np.array(self.parameters["βabx_exp"])
+        """
+        return self._parameters
+    
+    @parameters.setter
+    def parameters(self, parameters: dict):
+        KEYS = ["β0", "βsex", "βage", "βyear", "βsexage", "βsexyear", "βfam_hist", "βabx_exp"]
+        for key in KEYS:
+            if key not in parameters.keys():
+                raise ValueError(f"Missing key {key} in parameters.")
+        self._parameters = parameters
 
-    def load_occurrence_correction_table(self):
+    def load_occurrence_correction_table(self) -> pd.api.typing.DataFrameGroupBy:
         """Load the asthma incidence correction table.
 
         Returns:
-            pd.api.typing.DataFrameGroupBy: A dataframe grouped by year, age, and sex.
-            Each dataframe contains the following columns:
+            A dataframe grouped by year, age, and sex. Each dataframe contains the following columns:
                 * ``year``: integer year.
                 * ``sex``: 0 = female, 1 = male.
                 * ``age``: integer age.
@@ -256,7 +280,7 @@ class Incidence(Occurrence):
         grouped_df = super().load_occurrence_correction_table(occurrence_type="inc")
         return grouped_df
 
-    def crude_occurrence(self, sex, age, year: int):
+    def crude_occurrence(self, sex, age: int, year: int) -> float:
         poly_age = self.poly_age_calculator(age)
         return np.exp(
             self.parameters["β0"] +
@@ -272,11 +296,30 @@ class Prevalence(Occurrence):
     """A class containing information about asthma prevalence.
 
     Attributes:
-        hyperparameters (dict): A dictionary containing the hyperparameters used
-            to compute ``β0`` from a normal distribution:
-            * ``β0_μ``: float, the mean of the normal distribution.
-            * ``β0_σ``: float, the standard deviation of the normal distribution.
-        parameters (dict): A dictionary containing the following keys:
+        parameters (dict): 
+
+    """
+
+    def __init__(
+        self,
+        config: dict | None = None,
+        hyperparameters: dict | None = None,
+        parameters: dict | None = None,
+        max_age: int = 110,
+        correction_table: pd.api.typing.DataFrameGroupBy | None = None
+    ):
+        super().__init__(config, hyperparameters, parameters, max_age, correction_table)
+        self.parameters["βage"] = np.array(self.parameters["βage"])
+        self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
+        self.parameters["βsexyear"] = np.array(self.parameters["βsexyear"])
+        self.parameters["βyearage"] = np.array(self.parameters["βyearage"])
+        self.parameters["βsexyearage"] = np.array(self.parameters["βsexyearage"])
+        self.parameters["βfam_hist"] = np.array(self.parameters["βfam_hist"])
+        self.parameters["βabx_exp"] = np.array(self.parameters["βabx_exp"])
+
+    @property
+    def parameters(self) -> dict:
+        """A dictionary containing the following keys:
             * ``β0``: float, a constant parameter, randomly selected from a normal distribution
               with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
             * ``βsex``: float, the parameter for the sex term, i.e. ``βsex * sex``.
@@ -330,51 +373,25 @@ class Prevalence(Occurrence):
               age. See ``log_OR_family_history``.
             * ``βabx_exp``: list[float], an array of 3 parameters to be multiplied by functions of
                 age and antibiotic exposure. See ``log_OR_abx_exposure``.
-        min_year (int): TODO.
-        max_year (int): TODO.
-        max_age (int): TODO.
-        correction_table (pd.api.typing.DataFrameGroupBy): A dataframe grouped by year, sex,
-            and age. Each dataframe contains the following columns:
-                * ``year``: integer year.
-                * ``sex``: Sex of person, 0 = female, 1 = male.
-                * ``age``: integer age.
-                * ``correction``: float, TODO.
-            See ``master_occurrence_correction.csv``.
-
-    """
-
-    def __init__(
-        self,
-        config: dict | None = None,
-        hyperparameters: dict | None = None,
-        parameters: dict | None = None,
-        max_age: int = 110,
-        correction_table: pd.api.typing.DataFrameGroupBy | None = None
-    ):
-        super().__init__(config, hyperparameters, parameters, max_age, correction_table)
-        self.parameters["βage"] = np.array(self.parameters["βage"])
-        self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
-        self.parameters["βsexyear"] = np.array(self.parameters["βsexyear"])
-        self.parameters["βyearage"] = np.array(self.parameters["βyearage"])
-        self.parameters["βsexyearage"] = np.array(self.parameters["βsexyearage"])
-        self.parameters["βfam_hist"] = np.array(self.parameters["βfam_hist"])
-        self.parameters["βabx_exp"] = np.array(self.parameters["βabx_exp"])
-
-    def load_occurrence_correction_table(self):
-        """Load the asthma prevalence correction table.
-
-        Returns:
-            pd.api.typing.DataFrameGroupBy: A dataframe grouped by year, age, and sex.
-            Each dataframe contains the following columns:
-                * ``year``: integer year.
-                * ``sex``: 0 = female, 1 = male.
-                * ``age``: integer age.
-                * ``correction``: float, TODO.
         """
+        return self._parameters
+    
+    @parameters.setter
+    def parameters(self, parameters: dict):
+        KEYS = [
+            "β0", "βsex", "βage", "βyear", "βsexage", "βsexyear", "βyearage",
+            "βsexyearage", "βfam_hist", "βabx_exp"
+        ]
+        for key in KEYS:
+            if key not in parameters.keys():
+                raise ValueError(f"Missing key {key} in parameters.")
+        self._parameters = parameters
+
+    def load_occurrence_correction_table(self) -> pd.api.typing.DataFrameGroupBy:
         grouped_df = super().load_occurrence_correction_table(occurrence_type="prev")
         return grouped_df
 
-    def crude_occurrence(self, sex: bool, age: int, year: int):
+    def crude_occurrence(self, sex: bool, age: int, year: int) -> float:
         poly_year = self.poly_year_calculator(year)
         poly_age = self.poly_age_calculator(age)
         poly_yearage = np.outer(poly_year, poly_age).flatten()
@@ -400,10 +417,10 @@ def compute_asthma_age(
     """Compute the age at which the person (agent) is first diagnosed with asthma.
 
     Args:
-        agent (Agent): A person in the model.
-        incidence (Incidence): Asthma incidence.
-        prevalence (Prevalence): Asthma prevalence.
-        current_age (int): The current age of the agent.
+        agent: A person in the model.
+        incidence: Asthma incidence.
+        prevalence: Asthma prevalence.
+        current_age: The current age of the agent.
     """
     # obtain the previous incidence
     min_year = incidence.min_year
@@ -444,12 +461,15 @@ def agent_has_asthma(
     """Determine whether the agent obtains a new asthma diagnosis based on age and sex.
 
     Args:
-        agent (Agent): An agent in the model.
-        incidence (Incidence): Asthma incidence.
-        prevalence (Prevalence): Asthma prevalence.
-        age (int): The age of the agent.
-        year (int): The calendar year.
+        agent: A person in the model.
+        incidence: Asthma incidence.
+        prevalence: Asthma prevalence.
+        age: The age of the agent.
+        year: The calendar year.
     """
+    if occurrence_type == "inc" and incidence is None:
+        raise ValueError("Incidence must be provided for incidence calculations.")
+
     if age is None:
         if occurrence_type == "inc":
             age = min(agent.age, incidence.max_age)
@@ -460,20 +480,25 @@ def agent_has_asthma(
             year = agent.year
         else:
             year = agent.year - 1
-        year = agent.year
 
     if age < 3:
         has_asthma = False
     elif age == 3:
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
-            int(agent.sex), age, year, agent.has_family_history, agent.num_antibiotic_use
-        )))
+            sex=int(agent.sex), age=age, year=year, has_family_history=agent.has_family_history,
+            dose=agent.num_antibiotic_use
+        ))) # type: ignore
     elif age > 3 and occurrence_type == "inc":
-        has_asthma = bool(np.random.binomial(1, incidence.equation(
-            int(agent.sex), age, year, agent.has_family_history, agent.num_antibiotic_use
-        )))
+        has_asthma = bool(
+            np.random.binomial(
+                n=1,
+                p=incidence.equation(
+                    int(agent.sex), age, year, agent.has_family_history, agent.num_antibiotic_use
+                )
+            ) # type: ignore
+        ) 
     elif age > 3 and occurrence_type == "prev":
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
             int(agent.sex), age, year, agent.has_family_history, agent.num_antibiotic_use
-        )))
+        ))) # type: ignore
     return has_asthma

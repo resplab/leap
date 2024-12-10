@@ -22,12 +22,12 @@ def round_number(x: float, digits: int = 0, sigdigits: int | None = None) -> flo
     https://mattgosden.medium.com/rounding-to-significant-figures-in-python-2415661b94c3
 
     Args:
-        x (float): The number to be rounded.
-        digits (int): The number of decimal places to round to.
-        sigdigits (int): The number of significant figures to round to.
+        x: The number to be rounded.
+        digits: The number of decimal places to round to.
+        sigdigits: The number of significant figures to round to.
 
     Returns:
-        float: The rounded number.
+        The rounded number.
     """
     if sigdigits is not None:
         x = float(x)
@@ -39,11 +39,11 @@ def round_number(x: float, digits: int = 0, sigdigits: int | None = None) -> flo
         return round(x, digits)
 
 
-def sigmoid(x):
+def sigmoid(x: float | np.ndarray) -> float | np.ndarray:
     return 1 / (1 + np.exp(-x))
 
 
-def logit(x):
+def logit(x: float | np.ndarray) -> float | np.ndarray:
     return np.log(x / (1 - x))
 
 
@@ -60,10 +60,9 @@ def compute_ordinal_regression(
                   = σ(θ_k - η) - σ(θ_(k+1) - η)
 
     Args:
-        η (float): the weight for the regression.
-        θ (float | list[float]): either a single value or an array of values for the
-            threshold parameter.
-        prob_function (function): A function to apply, default is the sigmoid function.
+        η: The weight for the regression.
+        θ: Either a single value or an array of values for the threshold parameter.
+        prob_function: A function to apply; default is the sigmoid function.
 
     Returns:
         list[float]: a vector with the probability of each value of k.
@@ -95,6 +94,7 @@ def get_data_path(file_name: str) -> str:
 
 
 class Sex:
+    """A class to handle different formats of the ``sex`` variable."""
     def __init__(self, value: str | int | bool):
         if isinstance(value, str):
             if value == "M":

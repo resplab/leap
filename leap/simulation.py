@@ -285,8 +285,8 @@ class Simulation:
         """Reassess if the agent has asthma.
 
         Args:
-            agent (Agent): The agent.
-            outcome_matrix (OutcomeMatrix): The outcome matrix.
+            agent: The agent (person) in the model.
+            outcome_matrix: The outcome matrix.
         """
         agent.has_asthma = self.reassessment.agent_has_asthma(agent)
 

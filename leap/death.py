@@ -12,15 +12,7 @@ logger = get_logger(__name__)
 
 
 class Death:
-    """A class containing information about the probability of death for an agent in a given year.
-
-    Attributes:
-        parameters (dict): A dictionary containing the following keys:
-            * ``β0``: A number.
-            * ``β1``: A number.
-            * ``β2``: A number.
-        life_table (pd.api.typing.DataFrameGroupBy): TODO.
-    """
+    """Contains information about the probability of death for an agent in a given year."""
     def __init__(
         self,
         config: dict | None = None,
@@ -29,17 +21,64 @@ class Death:
         parameters: dict | None = None,
         life_table: pd.api.typing.DataFrameGroupBy | None = None
     ):
-        if config is None and parameters is None:
-            raise ValueError("Either config dict or parameters must be provided.")
-        elif config is not None:
+        if config is not None:
             self.parameters = config["parameters"]
-        else:
+        elif parameters is not None:
             self.parameters = parameters
+        else:
+            raise ValueError("Either config dict or parameters must be provided.")
 
         if life_table is None:
             self.life_table = self.load_life_table(starting_year, province)
 
-    def load_life_table(self, starting_year: int, province: str) -> pd.DataFrame:
+    @property
+    def parameters(self) -> dict:
+        """A dictionary containing the following keys:
+            * ``β0``: A number.
+            * ``β1``: A number.
+            * ``β2``: A number.
+        """
+        return self._parameters
+    
+    @parameters.setter
+    def parameters(self, parameters: dict):
+        KEYS = ["β0", "β1", "β2"]
+        for key in KEYS:
+            if key not in parameters:
+                raise ValueError(f"Parameter {key} is missing.")
+        self._parameters = parameters
+
+    @property
+    def life_table(self) -> pd.api.typing.DataFrameGroupBy:
+        """A grouped data frame grouped by year. Each data frame contains the following columns:
+            * ``age`` (int): age of person.
+            * ``year`` (int): calendar year.
+            * ``F`` (float): the probability of death for a female of a given age in a given
+                year.
+            * ``M`` (float): the probability of death for a male of a given age in a given year.
+        """
+        return self._life_table
+    
+    @life_table.setter
+    def life_table(self, life_table: pd.api.typing.DataFrameGroupBy):
+        self._life_table = life_table
+
+    def load_life_table(self, starting_year: int, province: str) -> pd.api.typing.DataFrameGroupBy:
+        """Load the life table data.
+        
+        Args:
+            starting_year: the year to start the data at.
+            province: a string indicating the province abbreviation, e.g. "BC".
+                For all of Canada, set province to "CA".
+        
+        Returns:
+            A grouped data frame grouped by year. Each data frame contains the following columns:
+                * ``age`` (int): age of person.
+                * ``year`` (int): calendar year.
+                * ``F`` (float): the probability of death for a female of a given age in a given
+                  year.
+                * ``M`` (float): the probability of death for a male of a given age in a given year.
+        """
         df = pd.read_csv(
             pathlib.Path(PROCESSED_DATA_PATH, "master_life_table.csv")
         )
@@ -57,7 +96,10 @@ class Death:
         """Determine whether or not the agent dies in a given year, based on age and sex.
 
         Args:
-            agent (Agent): A person in the model.
+            agent: A person in the model.
+
+        Returns:
+            ``True`` if the agent dies, ``False`` otherwise.
         """
 
         is_dead = False
@@ -74,5 +116,5 @@ class Death:
                 self.parameters["β2"] * agent.age
             )
             p = max(min(odds_ratio / (1 + odds_ratio), 1), 0)
-            is_dead = np.random.binomial(1, p)
+            is_dead = bool(np.random.binomial(1, p))
         return is_dead

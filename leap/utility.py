@@ -12,7 +12,7 @@ class Utility:
     """A class containing information about the disutility from having asthma.
 
     Attributes:
-        parameters (dict): A dictionary containing the following keys:
+        parameters: A dictionary containing the following keys:
             * ``βcontrol``: A vector of 3 parameters to be multiplied by the control levels, i.e.
 
               .. code-block:: python
@@ -29,7 +29,7 @@ class Utility:
                 βexac_sev_hist1 * mild + βexac_sev_hist2 * moderate +
                 βexac_sev_hist3 * severe + βexac_sev_hist4 * very_severe
 
-        table (pd.api.typing.DataFrameGroupBy): A grouped data frame grouped by age and sex,
+        table: A grouped data frame grouped by age and sex,
             containing information about EuroQol Group's quality of life metric called the EQ-5D.
             Each data frame contains the following columns:
                 * ``age``: integer age.
@@ -44,12 +44,12 @@ class Utility:
         parameters: dict | None = None,
         table: pd.api.typing.DataFrameGroupBy | None = None
     ):
-        if config is None and parameters is None:
-            raise ValueError("Either config dict or parameters must be provided.")
-        elif config is not None:
+        if config is not None:
             self.parameters = config["parameters"]
-        else:
+        elif parameters is not None:
             self.parameters = parameters
+        else:
+            raise ValueError("Either config dict or parameters must be provided.")
 
         if table is None:
             self.table = self.load_eq5d()
@@ -59,7 +59,7 @@ class Utility:
         self.parameters["βexac_sev_hist"] = np.array(self.parameters["βexac_sev_hist"])
         self.parameters["βcontrol"] = np.array(self.parameters["βcontrol"])
 
-    def load_eq5d(self):
+    def load_eq5d(self) -> pd.api.typing.DataFrameGroupBy:
         df = pd.read_csv(pathlib.Path(PROCESSED_DATA_PATH, "eq5d_canada.csv"))
         grouped_df = df.groupby(["age", "sex"])
         return grouped_df
@@ -70,7 +70,7 @@ class Utility:
         If the agent (person) doesn't have asthma, return the baseline utility.
 
         Args:
-            agent (Agent): a person in the model.
+            agent: A person in the model.
         """
         baseline = float(self.table.get_group((agent.age, int(agent.sex)))["eq5d"].iloc[0])
         if not agent.has_asthma:

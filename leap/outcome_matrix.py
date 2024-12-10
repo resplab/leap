@@ -10,8 +10,8 @@ class OutcomeTable:
         """Create an outcome table.
 
         Args:
-            data (pd.DataFrame): The data for the table.
-            group_by (list[str]): The columns to group the data by.
+            data: The data for the table.
+            group_by: The columns to group the data by.
         """
         self.data = data
         self.group_by = group_by
@@ -24,9 +24,9 @@ class OutcomeTable:
         """Increment the value of a column in the table.
 
         Args:
-            column (str): The column to increment.
-            amount (float | int): The amount to increment the column by.
-            filter_columns (dict): A dictionary of columns to filter by.
+            column: The column to increment.
+            amount: The amount to increment the column by.
+            filter_columns: A dictionary of columns to filter by.
         """
         df = self.data.copy(deep=True)
         if filter_columns is not None:
@@ -250,8 +250,8 @@ class OutcomeMatrix:
         """Create an outcome table.
 
         Args:
-            columns (list[str]): The list of column names for the table.
-            group_by (list[str]): The list of column names to group by.
+            columns: The list of column names for the table.
+            group_by: The list of column names to group by.
             args: TODO.
         """
         product = itertools.product(

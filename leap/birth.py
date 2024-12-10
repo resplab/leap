@@ -22,8 +22,7 @@ class Birth:
                     See `StatCan <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
                 * ``N_relative``: number of births relative to the first year of the simulation.
             See ``master_birth_estimate.csv``.
-        initial_population (pd.DataFrame): A data frame giving the population for the first year
-            of the simulation:
+        initial_population: A data frame giving the population for the first year of the simulation:
                 * ``year``: integer year the range 2000 - 2065.
                 * ``age``: integer age.
                 * ``province``: a string indicating the province abbreviation, e.g. "BC".
@@ -102,7 +101,7 @@ class Birth:
         ]
         return df
 
-    def get_initial_population_indices(self, num_births: int) -> list:
+    def get_initial_population_indices(self, num_births: int) -> list[int]:
         """Get the indices for the agents from the initial population table, weighted by age.
 
         Examples:
@@ -124,10 +123,10 @@ class Birth:
                 [1, 1, 2, 2, 2, 2, 3]
 
         Args:
-            num_births (int): number of births.
+            num_births: Number of births.
 
         Returns:
-            list: the indices for the initial population table.
+            The indices for the initial population table.
         """
         num_agents_per_age_group = [
             int(round(prop * num_births)) for prop in self.initial_population["prop"]
