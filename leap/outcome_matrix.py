@@ -54,7 +54,11 @@ class OutcomeTable:
         df = self.data.copy(deep=True)
         for key, value in kwargs.items():
             df = df.loc[(df[key] == value)]
-        return df[columns]
+        df = df[columns]
+        if df.shape == (1,):
+            return df.iloc[0]
+        else:
+            return df
 
 
 class OutcomeMatrix:
