@@ -77,6 +77,15 @@ class Immigration:
             (df["projection_scenario"] == population_growth_type)
         ]
         df.drop(columns=["province", "projection_scenario"], inplace=True)
+        df["sex"].replace({"F": 0, "M": 1}, inplace=True)
+        for year in df["year"].unique():
+            prop_immigrants_year = df.loc[df["year"] == year]["prop_immigrants_year"].copy()
+            sum_year = prop_immigrants_year.sum()
+            df["prop_immigrants_year"] = df.apply(
+                lambda x: x["prop_immigrants_year"] / sum_year
+                    if x["year"] == year else x["prop_immigrants_year"],
+                axis=1
+            )
         grouped_df = df.groupby(["year"])
         return grouped_df
 
