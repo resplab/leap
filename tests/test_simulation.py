@@ -68,7 +68,7 @@ def config():
             False,
             None,
             False,
-            None
+            [0.3333, 0.3333, 0.3333]
         ),
         (
             2024,
@@ -174,10 +174,7 @@ def test_simulation_generate_initial_asthma(
     assert agent.has_asthma == expected_has_asthma
     assert agent.asthma_age == expected_asthma_age
     assert agent.asthma_status == expected_asthma_status
-    if expected_control_levels is None:
-        assert agent.control_levels is None
-    else:
-        np.testing.assert_array_equal(agent.control_levels.as_array(), expected_control_levels)
+    np.testing.assert_array_equal(agent.control_levels.as_array(), expected_control_levels)
 
 
 @pytest.mark.parametrize(
