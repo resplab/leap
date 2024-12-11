@@ -12,22 +12,7 @@ logger = get_logger(__name__)
 
 
 class Immigration:
-    """A class containing information about immigration to Canada.
-
-    Attributes:
-        table: A dataframe grouped by year, giving the probability of immigration for a given
-            age, province, sex, and growth scenario:
-                * ``year``: integer year the range 2001 - 2065.
-                * ``age``: integer age.
-                * ``sex``: integer, 0 = female, 1 = male
-                * ``prop_immigrants_birth``: the number of immigrants relative to the number of
-                  births in that year. To compute the number of immigrants in a given year, multiply
-                  the number of births by ``prop_immigrants_birth``.
-                * ``prop_immigrants_year``: the proportion of immigrants for a given age and sex
-                  relative to the total number of immigrants for a given year and
-                  projection scenario.
-            See ``master_immigration_table.csv``.
-    """
+    """A class containing information about immigration to Canada."""
     def __init__(
         self,
         starting_year: int = 2000,
@@ -42,6 +27,27 @@ class Immigration:
             )
         else:
             self.table = table
+
+    @property
+    def table(self) -> DataFrameGroupBy:
+        """Grouped dataframe (by year) giving the probability of immigration for a given age,
+        province, sex, and growth scenario:
+            * ``year``: integer year the range 2001 - 2065.
+            * ``age``: integer age.
+            * ``sex``: integer, 0 = female, 1 = male
+            * ``prop_immigrants_birth``: the number of immigrants relative to the number of
+              births in that year. To compute the number of immigrants in a given year, multiply
+              the number of births by ``prop_immigrants_birth``.
+            * ``prop_immigrants_year``: the proportion of immigrants for a given age and sex
+              relative to the total number of immigrants for a given year and projection scenario.
+
+        See ``master_immigration_table.csv``.
+        """
+        return self._table
+    
+    @table.setter
+    def table(self, table: DataFrameGroupBy):
+        self._table = table
 
     def load_immigration_table(
         self, starting_year: int, province: str, population_growth_type: str, max_age: int
@@ -83,9 +89,20 @@ class Immigration:
 
         Returns:
             The number of new immigrants to Canada in a given year.
+
+        Examples:
+
+            >>> from leap.immigration import Immigration
+            >>> immigration = Immigration(
+            ...     starting_year=2000, province="BC", population_growth_type="LG"
+            ... )
+            >>> n_immigrants = immigration.get_num_new_immigrants(num_new_born=1000, year=2022)
+            >>> print(f"Number of immigrants to BC in 2022 for low growth scenario: {n_immigrants}")
+            Number of immigrants to BC in 2022 for low growth scenario: 974
+
         """
 
         num_new_immigrants = int(math.ceil(
-            num_new_born * np.sum(self.table.get_group((year))["prop_immigrants_birth"])
+            num_new_born * np.sum(self.table.get_group((year,))["prop_immigrants_birth"])
         ))
         return num_new_immigrants
