@@ -7,6 +7,7 @@ from leap.family_history import FamilyHistory
 from leap.antibiotic_exposure import AntibioticExposure
 from leap.control import Control
 from leap.exacerbation import Exacerbation
+from leap.utils import round_number
 from leap.severity import ExacerbationSeverity
 from tests.utils import __test_dir__
 
@@ -41,7 +42,7 @@ def test_exacerbation_severity_constructor(hyperparameters, parameters, p):
     )
     assert exacerbation_severity.hyperparameters["α"] == hyperparameters["α"]
     assert exacerbation_severity.hyperparameters["k"] == hyperparameters["k"]
-    np.testing.assert_array_equal(exacerbation_severity.parameters["p"], p)
+    np.testing.assert_array_equal([round_number(x) for x in exacerbation_severity.parameters["p"]], p)
     assert exacerbation_severity.parameters["βprev_hosp_ped"] == parameters["βprev_hosp_ped"]
     assert exacerbation_severity.parameters["βprev_hosp_adult"] == parameters["βprev_hosp_adult"]
 
