@@ -12,18 +12,7 @@ logger = get_logger(__name__)
 
 
 class Reassessment:
-    """A class containing information about asthma diagnosis reassessment.
-
-    Attributes:
-        table: A grouped data frame grouped by year. Each data frame contains the following columns:
-            * ``year`` (int): calendar year.
-            * ``age`` (int): age of person.
-            * ``F`` (float): the probability that a female agent still has asthma.
-            * ``M`` (float): the probability that a male agent still has asthma.
-            * ``province`` (str): a string indicating the province abbreviation, e.g. "BC".
-                For all of Canada, set province to "CA".
-            See ``master_asthma_reassessment.csv``.
-    """
+    """A class containing information about asthma diagnosis reassessment."""
     def __init__(
         self,
         starting_year: int = 2000,
@@ -35,14 +24,32 @@ class Reassessment:
         else:
             self.table = table
 
+    @property
+    def table(self) -> DataFrameGroupBy:
+        """Grouped dataframe (by year) giving the probability of an agent still having asthma after
+        reassessment for a given age, province, and sex:
+            * ``year``: integer year.
+            * ``age``: integer age.
+            * ``M``: the probability that a male agent still has asthma.
+            * ``F``: the probability that a female agent still has asthma.
+            * ``province``: a string indicating the province abbreviation, e.g. "BC".
+                For all of Canada, set province to "CA".
+        See ``master_asthma_reassessment.csv``.
+        """
+        return self._table
+    
+    @table.setter
+    def table(self, table: DataFrameGroupBy):
+        self._table = table
+
     def load_reassessment_table(
         self, starting_year: int, province: str
     ) -> DataFrameGroupBy:
         """Load the asthma diagnosis reassessment table.
 
         Args:
-            starting_year (int): the year to start the data at.
-            province (str): a string indicating the province abbreviation, e.g. "BC".
+            starting_year: the year to start the data at.
+            province: a string indicating the province abbreviation, e.g. "BC".
                 For all of Canada, set province to "CA".
 
         Returns:
@@ -73,15 +80,38 @@ class Reassessment:
         asthma symptoms.
 
         Args:
-            agent (Agent): Agent module, see `Agent`.
+            agent: A person in the model.
+
+        Returns:
+            Whether the person still has asthma after reassessing the diagnosis.
+
+        Examples:
+
+            >>> from leap.agent import Agent
+            >>> from leap.reassessment import Reassessment
+            >>> reassessment = Reassessment()
+            >>> agent = Agent(
+            ...     age=3,
+            ...     year=2024,
+            ...     year_index=0,
+            ...     sex="F",
+            ...     has_asthma=False,
+            ...     num_antibiotic_use=0,
+            ...     has_family_history=False
+            ... )
+            >>> has_asthma = reassessment.agent_has_asthma(agent)
+            >>> print(
+            ...     f"Agent was not diagnosed with asthma previously, "
+            ...     f"agent reassessed to have asthma?: {has_asthma}"
+            ... )
+            Agent was not diagnosed with asthma previously, agent reassessed to have asthma?: False
 
         """
         max_year = max(np.unique([key for key in self.table.groups.keys()]))
         if agent.age < 4:
             return agent.has_asthma
         else:
-            df = self.table.get_group(min(agent.year, max_year))
+            df = self.table.get_group((min(agent.year, max_year),))
             df = df[df["age"] == agent.age]
-            sex = "F" if agent.sex == 0 else "M"
-            probability = df[sex].values[0]
+            probability = df[str(agent.sex)].values[0]
             return bool(np.random.binomial(1, probability))
