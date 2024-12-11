@@ -17,7 +17,7 @@ def config():
 @pytest.mark.parametrize(
     (
         "sex, age, year, year_index, antibiotic_exposure_parameters, family_history_parameters,"
-        "num_antibiotic_use, has_family_history"
+        "expected_num_antibiotic_use, expected_has_family_history"
     ),
     [
         (
@@ -49,36 +49,41 @@ def config():
             None,
             None,
             None,
-            None
+            False
         )
     ]
 )
 def test_agent_constructor(
     config, sex, age, year, year_index, antibiotic_exposure_parameters, family_history_parameters,
-    num_antibiotic_use, has_family_history
+    expected_num_antibiotic_use, expected_has_family_history
 ):
 
     if antibiotic_exposure_parameters is None:
         antibiotic_exposure = None
+        num_antibiotic_use = 0
     else:
         config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
         antibiotic_exposure = AntibioticExposure(config["antibiotic_exposure"])
+        num_antibiotic_use = None
 
     if family_history_parameters is None:
         family_history = None
+        has_family_history = False
     else:
         config["family_history"]["parameters"]["p"] = family_history_parameters["p"]
         family_history = FamilyHistory(config["family_history"])
+        has_family_history = None
 
     agent = Agent(
         sex=sex, age=age, year=year, year_index=year_index, antibiotic_exposure=antibiotic_exposure,
-        family_history=family_history
+        family_history=family_history, num_antibiotic_use=num_antibiotic_use,
+        has_family_history=has_family_history
     )
 
     assert agent.sex == sex
     assert agent.age == age
     assert agent.year == year
     assert agent.year_index == year_index
-    assert agent.has_family_history == has_family_history
+    assert agent.has_family_history == expected_has_family_history
     if antibiotic_exposure is not None:
-        assert round(agent.num_antibiotic_use, 1) == num_antibiotic_use
+        assert round(agent.num_antibiotic_use, 1) == expected_num_antibiotic_use
