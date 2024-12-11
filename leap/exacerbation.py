@@ -97,8 +97,8 @@ class Exacerbation:
     @parameters.setter
     def parameters(self, parameters: dict):
         KEYS = [
-            "β0", "β0_calibration", "βage", "βsex", "βasthmaDx", "βprev_exac1", "βprev_exac2",
-            "βcontrol", "βcontrol_C", "βcontrol_PC", "βcontrol_UC", "min_year"
+            "β0_calibration", "βage", "βsex", "βasthmaDx", "βprev_exac1", "βprev_exac2",
+            "βcontrol", "βcontrol_C", "βcontrol_PC", "βcontrol_UC"
         ]
         for key in KEYS:
             if key not in parameters:
