@@ -1,5 +1,7 @@
 import pandas as pd
 import itertools
+import pathlib
+from leap.utils import check_file
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -19,6 +21,9 @@ class OutcomeTable:
             self.grouped_data = data.groupby(group_by)
         else:
             self.grouped_data = None
+
+    def __repr__(self):
+        return self.data.__repr__()
 
     def increment(self, column: str, filter_columns: dict | None = None, amount: float | int = 1):
         """Increment the value of a column in the table.
@@ -250,6 +255,14 @@ class OutcomeMatrix:
             [0]
         )
 
+    def __repr__(self):
+        attributes = self.__dict__.keys()
+        string_repr = "OutcomeMatrix"
+        for attribute in attributes:
+            string_repr += f"\n\n{attribute}:\n{self.__getattribute__(attribute)}"
+
+        return string_repr
+
     def create_table(self, columns: list[str], group_by: list[str], *args) -> OutcomeTable:
         """Create an outcome table.
 
@@ -270,3 +283,20 @@ class OutcomeMatrix:
         )
         table = OutcomeTable(df, group_by)
         return table
+    
+    def save(self, path: pathlib.Path):
+        """Save the outcome matrix to ``*.csv`` files.
+
+        Args:
+            path: The full path to the folder where the data will be saved.
+        """
+        if not path.exists():
+            raise Exception(f"Path {path} does not exist.")
+        
+        attributes = [
+            key for key, value in self.__dict__.items() if isinstance(value, OutcomeTable)
+        ]
+        for attribute in attributes:
+            file_path = pathlib.Path(path.resolve(), f"outcome_matrix_{attribute}.csv")
+            self.__getattribute__(attribute).data.to_csv(file_path, index=False)
+            logger.message(f"Saved {attribute} to {file_path}.")
