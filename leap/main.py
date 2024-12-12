@@ -52,6 +52,10 @@ def get_parser() -> argparse.ArgumentParser:
         "-gt", "--population-growth-type", dest="population_growth_type", required=False, type=str,
         help="Population growth type for the simulation."
     )
+    args.add_argument(
+        "-h", "--help", action="help", default=argparse.SUPPRESS,
+        help="Shows function documentation."
+    )
 
     return parser
 
