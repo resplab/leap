@@ -38,6 +38,9 @@ jobs:
       - name: Run Python tests control
         run: |
           pytest tests/test_control.py
+      - name: Run Python tests cost
+        run: |
+          pytest tests/test_cost.py
         continue-on-error: false
       - name: Run Python tests death
         run: |
