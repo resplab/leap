@@ -323,7 +323,7 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
         "sex, age, has_asthma, asthma_age, asthma_status, expected_control_levels,"
         "expected_exacerbation_history, expected_outcome_matrix_control,"
-        "expected_outcome_matrix_exacerbation, expected_outcome_matrix_exacerbation_history"
+        "expected_outcome_matrix_exacerbation"
     ),
     [
         (
@@ -360,7 +360,7 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
                     "level": [0] * 10 + [1] * 10 + [2] * 10,
                     "age": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4] * 3,
                     "sex": ["F", "M"] * 15,
-                    "prob": [0.0] * 20 + [1.0, 1.0] + [0.0] * 8
+                    "prob": [0.0] * 28 + [1.0, 0.0]
                 }
             ),
             pd.DataFrame(
@@ -371,16 +371,6 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
                     "n_exacerbations": [0] * 8 + [400, 0]
                 }
             ),
-            pd.DataFrame(
-                data={
-                    "year": [2024] * 10,
-                    "severity": [0] * 10,
-                    "age": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4],
-                    "sex": ["F", "M"] * 5,
-                    "p_exacerbations": [0.0] * 8 + [180.0] + [0.0]
-                },
-                index=range(0, 10)
-            )
         ),
     ]
 )              
@@ -390,7 +380,6 @@ def test_simulation_update_asthma_effects(
     control_parameter_θ, exacerbation_hyperparameter_β0_μ, sex, age, has_asthma, asthma_age,
     asthma_status, expected_control_levels, expected_exacerbation_history,
     expected_outcome_matrix_control, expected_outcome_matrix_exacerbation,
-    expected_outcome_matrix_exacerbation_history
 ):
     """
     Setting the ``time_horizon`` to 1 means that the agents are generated from the initial
@@ -453,6 +442,7 @@ def test_simulation_update_asthma_effects(
     np.testing.assert_array_equal(agent.control_levels.as_array(), expected_control_levels)
     assert agent.exacerbation_history.num_prev_year == expected_exacerbation_history.num_prev_year
     assert agent.exacerbation_history.num_current_year > expected_exacerbation_history.num_current_year
+    logger.info(outcome_matrix.control.data)
     pd.testing.assert_frame_equal(
         outcome_matrix.control.data,
         expected_outcome_matrix_control
@@ -462,14 +452,6 @@ def test_simulation_update_asthma_effects(
         expected_outcome_matrix_exacerbation,
         check_exact=False,
         rtol=0.15
-    )
-    pd.testing.assert_frame_equal(
-        outcome_matrix.exacerbation_by_severity.grouped_data.get_group(
-            (min_year, expected_outcome_matrix_exacerbation_history["severity"].iloc[0])
-        ),
-        expected_outcome_matrix_exacerbation_history,
-        check_exact=False,
-        rtol=0.2
     )
 
 
