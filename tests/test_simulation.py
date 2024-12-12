@@ -305,10 +305,10 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
 
     simulation.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
     assert outcome_matrix.asthma_incidence.get(
-        column="n_new_diagnoses", year=min_year + year_index, age=age, sex=sex
+        columns="n_new_diagnoses", year=min_year + year_index, age=age, sex=sex
     ) == expected_asthma_incidence
     assert outcome_matrix.asthma_status.get(
-        column="status", year=min_year + year_index, age=age, sex=sex
+        columns="status", year=min_year + year_index, age=age, sex=sex
     ) == expected_asthma_status
     
     assert agent.has_asthma == expected_agent_has_asthma
@@ -589,18 +589,18 @@ def test_reassess_asthma_diagnosis(
     np.testing.assert_array_equal(agent.control_levels.as_array(), expected_control_levels)
     logger.info(outcome_matrix.control.data)
     assert outcome_matrix.control.get(
-        column="prob", year=min_year + year_index, age=age, sex=sex, level=0
+        columns="prob", year=min_year + year_index, age=age, sex=sex, level=0
     ) == expected_control_levels[0]
     assert outcome_matrix.control.get(
-        column="prob", year=min_year + year_index, age=age, sex=sex, level=1
+        columns="prob", year=min_year + year_index, age=age, sex=sex, level=1
     ) == expected_control_levels[1]
     assert outcome_matrix.control.get(
-        column="prob", year=min_year + year_index, age=age, sex=sex, level=2
+        columns="prob", year=min_year + year_index, age=age, sex=sex, level=2
     ) == expected_control_levels[2]
     assert agent.exacerbation_history.num_prev_year == expected_exacerbation_history.num_prev_year
     assert agent.exacerbation_history.num_current_year > expected_exacerbation_history.num_current_year
     assert outcome_matrix.exacerbation.get(
-        column="n_exacerbations", year=min_year + year_index, age=age, sex=sex
+        columns="n_exacerbations", year=min_year + year_index, age=age, sex=sex
     ) > expected_exacerbation_history.num_current_year
 
 
