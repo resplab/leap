@@ -158,7 +158,7 @@ class Occurrence:
         return p
 
     @abc.abstractmethod
-    def crude_occurrence(self, sex, age: int, year: int):
+    def crude_occurrence(self, sex, age: int, year: int) -> float:
         return
 
     def log_OR_family_history(self, age: int) -> float:
@@ -293,12 +293,7 @@ class Incidence(Occurrence):
 
 
 class Prevalence(Occurrence):
-    """A class containing information about asthma prevalence.
-
-    Attributes:
-        parameters (dict): 
-
-    """
+    """A class containing information about asthma prevalence."""
 
     def __init__(
         self,

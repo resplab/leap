@@ -30,16 +30,21 @@ class Simulation:
     """A class containing information about the simulation.
     """
     def __init__(
-        self, config: dict | str | None = None, max_age: int | None = None,
-        province: str | None = None, min_year: int | None = None, time_horizon: int | None = None,
-        num_births_initial: int | None = None, population_growth_type: str | None = None
+        self,
+        config: dict | str | pathlib.Path | None = None,
+        max_age: int | None = None,
+        province: str | None = None,
+        min_year: int | None = None,
+        time_horizon: int | None = None,
+        num_births_initial: int | None = None,
+        population_growth_type: str | None = None
     ):
         if config is None:
             with open(get_data_path("processed_data", "config.json")) as file:
-                config = json.load(file)
-        elif isinstance(config, str):
+                config: dict = json.load(file)
+        elif isinstance(config, str) or isinstance(config, pathlib.Path):
             with open(config) as file:
-                config = json.load(file)
+                config: dict = json.load(file)
 
         if max_age is not None:
             self.max_age = max_age
@@ -89,6 +94,7 @@ class Simulation:
 
     @property
     def max_age(self) -> int:
+        """The maximum age of the agents in the simulation."""
         return self._max_age
     
     @max_age.setter
@@ -97,6 +103,7 @@ class Simulation:
 
     @property
     def province(self) -> str:
+        """The 2-letter abbreviation of the province in the simulation."""
         return self._province
     
     @province.setter
@@ -105,6 +112,7 @@ class Simulation:
 
     @property
     def min_year(self) -> int:
+        """The starting year of the simulation."""
         return self._min_year
     
     @min_year.setter
@@ -117,6 +125,7 @@ class Simulation:
 
     @property
     def time_horizon(self) -> int:
+        """The number of years the simulation will run for."""
         return self._time_horizon
     
     @time_horizon.setter
@@ -129,6 +138,7 @@ class Simulation:
 
     @property
     def num_births_initial(self) -> int:
+        """The number of births in the initial year of the simulation."""
         return self._num_births_initial
     
     @num_births_initial.setter
@@ -137,6 +147,24 @@ class Simulation:
 
     @property
     def population_growth_type(self) -> str:
+        """Population growth type to be used in the simulation.
+
+        One of:
+
+            * ``past``: historical data
+            * ``LG``: low-growth projection
+            * ``HG``: high-growth projection
+            * ``M1``: medium-growth 1 projection
+            * ``M2``: medium-growth 2 projection
+            * ``M3``: medium-growth 3 projection
+            * ``M4``: medium-growth 4 projection
+            * ``M5``: medium-growth 5 projection
+            * ``M6``: medium-growth 6 projection
+            * ``FA``: fast-aging projection
+            * ``SA``: slow-aging projection
+
+        See `StatCan <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
+        """
         return self._population_growth_type
     
     @population_growth_type.setter
@@ -148,15 +176,19 @@ class Simulation:
     ) -> int:
         """Get the number of new agents born/immigrated in a given year.
 
+        For the first year, we generate the initial population.
+        For subsequent years, we generate the sum of the number of newborn babies and
+        the number of immigrants to Canada.
+
         Args:
-            year (int): The calendar year of the current iteration, e.g. 2027.
-            min_year (int): The calendar year of the initial iteration, e.g. 2010.
-            num_new_born (int): The number of babies born in the specified year.
-            num_immigrants (int): The number of immigrants who moved to Canada in the
-                specified year.
+            year: The calendar year of the current iteration, e.g. 2027.
+            min_year: The calendar year of the initial iteration, e.g. 2010.
+            num_new_born: The number of babies born in the specified year.
+            num_immigrants: The number of immigrants who moved to Canada in the specified year.
+
+        Returns:
+            The total number of new agents born/immigrated in the specified year.
         """
-        # for the first/initial year, we generate the initial population
-        # otherwise we generate num_new_born + num_immigrants
 
         df = self.birth.initial_population
 
@@ -170,7 +202,7 @@ class Simulation:
             num_new_agents = len(initial_pop_indices)
         else:
             num_new_agents = num_new_born + num_immigrants
-        
+
         return num_new_agents
 
     def get_new_agents(self, year: int) -> pd.DataFrame:
@@ -251,7 +283,6 @@ class Simulation:
         agent.has_asthma = agent_has_asthma(
             agent=agent, occurrence_type="prev", prevalence=self.prevalence
         )
-        logger.info(agent.has_asthma)
 
         if agent.has_asthma:
             agent.asthma_status = True
@@ -285,7 +316,7 @@ class Simulation:
         """Reassess if the agent has asthma.
 
         Args:
-            agent: The agent (person) in the model.
+            agent: An agent (person) in the model.
             outcome_matrix: The outcome matrix.
         """
         agent.has_asthma = self.reassessment.agent_has_asthma(agent)
@@ -299,8 +330,13 @@ class Simulation:
         """Update the asthma effects for an agent.
 
         Args:
-            agent (Agent): The agent.
-            outcome_matrix (OutcomeMatrix): The outcome matrix.
+            agent: An agent (person) in the model.
+            outcome_matrix: The outcome matrix.
+
+        Mutates:
+            agent: Updates the ``control_levels`` and ``exacerbation_history`` attributes.
+            outcome_matrix: Updates the ``control``, ``exacerbation``, ``exacerbation_hospital``,
+                and ``exacerbation_by_severity`` matrices.
         """
 
         agent.control_levels = self.control.compute_control_levels(
@@ -351,8 +387,8 @@ class Simulation:
         Mutates both the ``agent`` and ``outcome_matrix`` arguments.
 
         Args:
-            agent (Agent): The agent.
-            outcome_matrix (OutcomeMatrix): The outcome matrix.
+            agent: An agent (person) in the model.
+            outcome_matrix: The outcome matrix.
         """
         agent.has_asthma = agent_has_asthma(
             agent, occurrence_type="inc", incidence=self.incidence, prevalence=self.prevalence
@@ -385,6 +421,17 @@ class Simulation:
         )
 
     def run(self, seed=None, until_all_die: bool = False, verbose: bool = True):
+        """Run the simulation.
+        
+        Args:
+            seed: The random seed to use for the simulation.
+            until_all_die: Whether to run the simulation until all agents die.
+            verbose: Whether to print log messages during the simulation.
+            
+        Returns:
+            The outcome matrix.
+        """
+
         if seed is not None:
             np.random.seed(seed)
 
@@ -409,7 +456,7 @@ class Simulation:
 
             logger.info(f"Year {year}, year {year_index} of {total_years} years, "
                         f"{new_agents_df.shape[0]} new agents born/immigrated.")
-            logger.info(new_agents_df)
+            logger.info(f"\n{new_agents_df}")
 
             # for each agent i born/immigrated in year
             for i in range(new_agents_df.shape[0]):
@@ -558,6 +605,6 @@ class Simulation:
                             )
 
         self.outcome_matrix = outcome_matrix
-        logger.info("\n Simulation finished. Check your simulation object for results.")
+        logger.info("\nSimulation finished. Check your simulation object for results.")
 
         return outcome_matrix

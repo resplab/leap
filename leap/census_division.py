@@ -37,7 +37,7 @@ class CensusTable:
                 * ``population`` (int): the number of residents living in the census division.
                 * ``area_km2`` (float): the area of the census division in kilometres squared.
                 * ``population_density_per_square_km`` (float): the population density per square kilometre.
-        year (int): the year the census population data was collected.
+        year: the year the census population data was collected.
     """
     def __init__(self, config: dict | None = None, year: int = MIN_CENSUS_YEAR):
         if config is not None:
@@ -59,7 +59,7 @@ class CensusTable:
             )
         self._year = year
 
-    def load_census_data(self):
+    def load_census_data(self) -> pd.DataFrame:
         df = pd.read_csv(
             get_data_path("processed_data.census_divisions", "master_census_data_2021.csv")
         )
