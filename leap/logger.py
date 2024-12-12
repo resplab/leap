@@ -9,6 +9,7 @@ See:
 
 import logging
 import sys
+import re
 
 MIN_LEVEL = logging.DEBUG
 MESSAGE = 25
@@ -17,7 +18,7 @@ LOGGING_LEVEL = 20
 
 
 class LogFilter(logging.Filter):
-    """Filters (lets through) all messages with level < LEVEL."""
+    """Filters (lets through) all messages with level < LEVEL"""
     def __init__(self, level):
         self.level = level
 
@@ -69,7 +70,7 @@ class ColoredFormatter(logging.Formatter):
         return hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
 
 
-def get_logger(module_name, level=LOGGING_LEVEL):
+def get_logger(module_name, level=LOGGING_LEVEL) -> Logger:
     logging.setLoggerClass(Logger)
     stdout_handler = logging.StreamHandler(sys.stdout)
     stderr_handler = logging.StreamHandler(sys.stderr)
@@ -94,3 +95,11 @@ def get_logger(module_name, level=LOGGING_LEVEL):
     logger.handlers = [stdout_handler, stderr_handler]
     logger.setLevel(level)
     return logger
+
+
+def set_logging_level(level: int):
+    """Set the logging level for all leap loggers."""
+
+    for name in logging.root.manager.loggerDict:
+        if re.compile("leap").match(name) is not None:
+            logging.getLogger(name).setLevel(level)
