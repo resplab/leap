@@ -16,5 +16,8 @@ setup(
     include_package_data=True,
     package_data={
         "": ["tests/data/", "processed_data/"]
-    }
+    },
+    entry_points={
+        "console_scripts": ["leap=leap.main:run_main"]
+    },
 )

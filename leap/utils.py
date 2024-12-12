@@ -1,9 +1,13 @@
 import numpy as np
 import pathlib
 import math
+import os
 import uuid
 import importlib.resources as pkg_resources
 from typing import Callable
+from leap.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
@@ -92,6 +96,28 @@ def get_data_path(data_folder: str, file_name: str = "") -> pathlib.Path:
 
     package_path = str(pkg_resources.files(data_folder).joinpath(file_name))
     return pathlib.Path(package_path)
+
+
+def check_file(file_path: str | pathlib.Path, ext: str):
+    """Check if file is a valid file with correct extension.
+
+    Args:
+        file_path: The full path to the file.
+        ext: A file extension, including the ".", e.g. ".csv".
+
+    Raises:
+        ValueError: If the file is not a valid file with the correct extension.
+    """
+    if isinstance(file_path, str):
+        file_path = pathlib.Path(file_path)
+    if os.path.isfile(file_path):
+        file_path = file_path.resolve()
+        file_ext = file_path.suffix
+        if file_ext != ext:
+            logger.error(f"{file_path} has extension {file_ext}, must be {ext}.")
+            raise ValueError(f"{file_path} has extension {file_ext}, must be {ext}.")
+    else:
+        raise ValueError(f"{file_path} is not a valid file.")
 
 
 class Sex:
