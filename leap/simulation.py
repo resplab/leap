@@ -248,17 +248,18 @@ class Simulation:
         else:
             # for a given year, sample from age/sex distribution of immigrants
             immigrant_indices = list(np.random.choice(
-                a=range(self.immigration.table.get_group((year)).shape[0]),
+                a=range(self.immigration.table.get_group((year,)).shape[0]),
                 size=num_immigrants,
-                p=list(self.immigration.table.get_group((year))["prop_immigrants_year"])
+                p=list(self.immigration.table.get_group((year,))["prop_immigrants_year"])
             ))
-            immigrant_df = self.immigration.table.get_group((year)).iloc[immigrant_indices]
+            
+            immigrant_df = self.immigration.table.get_group((year,)).iloc[immigrant_indices]
             sexes_immigrant = immigrant_df["sex"].tolist()
             ages_immigrant = immigrant_df["age"].tolist()
 
             # for a given year, get the data for the newborns
             # NOTE: new_born_df is a DataFrame with only one row
-            new_born_df = self.birth.estimate.get_group((year))
+            new_born_df = self.birth.estimate.get_group(year)
             sexes_birth = list(
                 np.random.binomial(n=1, p=new_born_df["prop_male"].iloc[0], size=num_new_born)
             )
