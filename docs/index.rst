@@ -8,3 +8,13 @@ LEAP: Lifetime Exposures and Asthma outcomes Projection
 
 Getting Started
 ***************
+
+To get started, check out :doc:`Installation <../installation>`.
+
+.. toctree::
+  :hidden:
+  :maxdepth: 4
+
+  installation
+  cli/index
+  dev/index
