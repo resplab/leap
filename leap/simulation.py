@@ -151,17 +151,17 @@ class Simulation:
 
         One of:
 
-            * ``past``: historical data
-            * ``LG``: low-growth projection
-            * ``HG``: high-growth projection
-            * ``M1``: medium-growth 1 projection
-            * ``M2``: medium-growth 2 projection
-            * ``M3``: medium-growth 3 projection
-            * ``M4``: medium-growth 4 projection
-            * ``M5``: medium-growth 5 projection
-            * ``M6``: medium-growth 6 projection
-            * ``FA``: fast-aging projection
-            * ``SA``: slow-aging projection
+        * ``past``: historical data
+        * ``LG``: low-growth projection
+        * ``HG``: high-growth projection
+        * ``M1``: medium-growth 1 projection
+        * ``M2``: medium-growth 2 projection
+        * ``M3``: medium-growth 3 projection
+        * ``M4``: medium-growth 4 projection
+        * ``M5``: medium-growth 5 projection
+        * ``M6``: medium-growth 6 projection
+        * ``FA``: fast-aging projection
+        * ``SA``: slow-aging projection
 
         See `StatCan <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
         """
@@ -212,13 +212,15 @@ class Simulation:
             year: The calendar year.
 
         Returns:
-            A dataframe containing a list of new agents to add to the model. The dataframe
-            has the following columns:
-                * ``age``: The age of the agent.
-                * ``sex``: The sex of the agent.
-                * ``immigrant``: Whether or not the agent is an immigrant. If the agent is not
-                  an immigrant, they are a newborn, except if it is the first year of the model.
-                  In that case, the agent is part of the initial population.
+            A dataframe containing a list of new agents to add to the model.
+            
+            The dataframe has the following columns:
+
+            * ``age``: The age of the agent.
+            * ``sex``: The sex of the agent.
+            * ``immigrant``: Whether or not the agent is an immigrant. If the agent is not
+              an immigrant, they are a newborn, except if it is the first year of the model.
+              In that case, the agent is part of the initial population.
 
         Examples:
 
@@ -334,10 +336,10 @@ class Simulation:
             agent: An agent (person) in the model.
             outcome_matrix: The outcome matrix.
 
-        Mutates:
-            agent: Updates the ``control_levels`` and ``exacerbation_history`` attributes.
-            outcome_matrix: Updates the ``control``, ``exacerbation``, ``exacerbation_hospital``,
-                and ``exacerbation_by_severity`` matrices.
+        **Mutates**
+            * agent: Updates the ``control_levels`` and ``exacerbation_history`` attributes.
+            * outcome_matrix: Updates the ``control``, ``exacerbation``, ``exacerbation_hospital``,
+              and ``exacerbation_by_severity`` matrices.
         """
 
         agent.control_levels = self.control.compute_control_levels(
