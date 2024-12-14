@@ -88,7 +88,7 @@ html_theme_options = {
         "content.code.annotate"
     ],
     "palette": [
-        {"primary": "cyan"}
+        {"primary": "blue"}
     ],
     "version_dropdown": False,
     "toc_title_is_page_title": True,

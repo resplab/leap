@@ -1,2 +1,19 @@
 
 /* Colors */
+
+:root {
+    --md-primary-fg-color: #02377e;
+    --md-accent-fg-color: #0c2046;
+    --primary-color-light: #d1edf1;
+    --primary-color-hover: #0c2046;
+    --bs-primary-rgb: 57, 188, 206;
+    --bs-link-color: #02377e;
+    --bs-link-hover-color: #0c2046;
+    --md-code-kw-color: #e74c3c;
+}
+
+[data-md-color-primary=blue] {
+    --md-primary-fg-color: #02377e;
+    --md-primary-bg-color: #fff;
+    --md-primary-bg-color--light: hsla(0, 0%, 100%, .7);
+}
