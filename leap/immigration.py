@@ -32,14 +32,15 @@ class Immigration:
     def table(self) -> DataFrameGroupBy:
         """Grouped dataframe (by year) giving the probability of immigration for a given age,
         province, sex, and growth scenario:
-            * ``year``: integer year the range 2001 - 2065.
-            * ``age``: integer age.
-            * ``sex``: integer, 0 = female, 1 = male
-            * ``prop_immigrants_birth``: the number of immigrants relative to the number of
-              births in that year. To compute the number of immigrants in a given year, multiply
-              the number of births by ``prop_immigrants_birth``.
-            * ``prop_immigrants_year``: the proportion of immigrants for a given age and sex
-              relative to the total number of immigrants for a given year and projection scenario.
+
+        * ``year``: integer year the range ``2001 - 2065``.
+        * ``age``: integer age.
+        * ``sex``: integer, ``0 = female``, ``1 = male``.
+        * ``prop_immigrants_birth``: The number of immigrants relative to the number of
+          births in that year. To compute the number of immigrants in a given year, multiply
+          the number of births by ``prop_immigrants_birth``.
+        * ``prop_immigrants_year``: The proportion of immigrants for a given age and sex
+          relative to the total number of immigrants for a given year and projection scenario.
 
         See ``master_immigration_table.csv``.
         """
@@ -55,12 +56,25 @@ class Immigration:
         """Load the data from ``master_immigration_table.csv``.
 
         Args:
-            starting_year: the year for the data to start at. Must be between 2001-2065.
-            province: a string indicating the province abbreviation, e.g. "BC".
-                For all of Canada, set province to "CA".
+            starting_year: The year for the data to start at. Must be between ``2001-2065``.
+            province: A string indicating the province abbreviation, e.g. ``"BC"``.
+                For all of Canada, set province to ``"CA"``.
             population_growth_type: Population growth type, one of:
-                ["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"].
-                See `Stats Canada <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
+
+                * ``past``: historical data
+                * ``LG``: low-growth projection
+                * ``HG``: high-growth projection
+                * ``M1``: medium-growth 1 projection
+                * ``M2``: medium-growth 2 projection
+                * ``M3``: medium-growth 3 projection
+                * ``M4``: medium-growth 4 projection
+                * ``M5``: medium-growth 5 projection
+                * ``M6``: medium-growth 6 projection
+                * ``FA``: fast-aging projection
+                * ``SA``: slow-aging projection
+
+                See: `StatCan Projection Scenarios
+                <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
 
         Returns:
             A dataframe grouped by year, giving the probability of immigration for a given age,
