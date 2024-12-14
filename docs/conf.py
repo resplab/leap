@@ -66,7 +66,7 @@ html_theme_options = {
         "edit": "material/file-edit-outline",
     },
     "site_url": "",
-    "repo_url": "https://github.com/RESP/leap/",
+    "repo_url": "https://github.com/resplab/leap/",
     "repo_name": "leap",
     "edit_uri": "blob/main/docs",
     "globaltoc_collapse": True,
@@ -95,7 +95,7 @@ html_theme_options = {
     "social": [
         {
             "icon": "fontawesome/brands/github",
-            "link": "https://github.com/RESP/leap/",
+            "link": "https://github.com/resplab/leap/",
             "name": "Source on github.com",
         }
     ]
