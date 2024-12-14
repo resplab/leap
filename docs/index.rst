@@ -18,3 +18,5 @@ To get started, check out :doc:`Installation <../installation>`.
   installation
   cli/index
   dev/index
+  references
+
