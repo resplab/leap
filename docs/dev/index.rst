@@ -6,3 +6,4 @@ Developers
   :maxdepth: 1
 
   dev-installation
+  api/leap
