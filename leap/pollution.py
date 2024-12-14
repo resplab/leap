@@ -23,18 +23,23 @@ class PollutionTable:
     @property
     def data(self) -> DataFrameGroupBy:
         """A data frame grouped by the SSP scenario, with the following columns:
-            * ``CDUID``: the census division identifier.
-            * ``year``: the year for the pollution data projection.
-            * ``month``: the month for the pollution data projection.
-            * ``date``: the data for the pollution data projection, first of the month.
-            * ``background_pm25``: the average background PM2.5 levels for a given month.
-            * ``wildfire_pm25``: the average PM2.5 levels due to wildfires for a given month.
-            * ``factor``: the future climate scaling factor, based on the SSP scenario.
-            * ``wildfire_pm25_scaled``: ``wildfire_pm25`` * ``factor``.
-            * ``total_pm25``: the total average PM2.5 levels for a given month:
-              ``wildfire_pm25_scaled`` + ``background_pm25``.
-            * ``SSP``: the SSP scenario, one of ``SSP1_2.6``, ``SSP2_4.5``, ``SSP3_7.0``,
-              ``SSP5_8.5``.
+
+        * ``CDUID``: the census division identifier.
+        * ``year``: the year for the pollution data projection.
+        * ``month``: the month for the pollution data projection.
+        * ``date``: the data for the pollution data projection, first of the month.
+        * ``background_pm25``: the average background PM2.5 levels for a given month.
+        * ``wildfire_pm25``: the average PM2.5 levels due to wildfires for a given month.
+        * ``factor``: the future climate scaling factor, based on the SSP scenario.
+        * ``wildfire_pm25_scaled``: ``wildfire_pm25`` * ``factor``.
+        * ``total_pm25``: the total average PM2.5 levels for a given month:
+            ``wildfire_pm25_scaled + background_pm25``
+        * ``SSP``: The Shared Socioeconomic Pathway (SSP) scenario from the IPCC, one of:
+            
+          - ``SSP1_2.6``: Sustainability - Taking the Green Road, low GHG emissions
+          - ``SSP2_4.5``: Middle of the Road, medium GHG emissions
+          - ``SSP3_7.0``: Regional Rivalry - A Rocky Road, high GHG emissions
+          - ``SSP5_8.5``: Fossil-Driven Development, very high GHG emissions
         """
         return self._data
     
@@ -45,7 +50,7 @@ class PollutionTable:
     def load_pollution_data(
         self, pm25_data_path: pathlib.Path = get_data_path("processed_data.pollution")
     ) -> DataFrameGroupBy:
-        """Load the data from the PM2.5 SSP *.csv files.
+        """Load the data from the PM2.5 SSP ``*.csv`` files.
 
         Args:
             pm25_data_path: Full directory path for the PM2.5 ``*.csv`` files.
@@ -66,13 +71,18 @@ class Pollution:
     """Contains information about PM2.5 pollution for a census division, date, and SSP scenario.
 
     Attributes:
-        cduid (int): the census division identifier.
-        year (int): the year for the pollution data projection.
-        month (int): the month for the pollution data projection.
+        cduid: the census division identifier.
+        year: the year for the pollution data projection.
+        month: the month for the pollution data projection.
         wildfire_pm25_scaled (float): ``wildfire_pm25`` * ``factor``.
         total_pm25 (float): the total average PM2.5 levels for a given month:
             ``wildfire_pm25_scaled`` + ``background_pm25``.
-        SSP: the SSP scenario, one of ``SSP1_2.6``, ``SSP2_4.5``, ``SSP3_7.0``, ``SSP5_8.5``.
+        SSP: The Shared Socioeconomic Pathway (SSP) scenario from the IPCC, one of:
+            
+            - ``SSP1_2.6``: Sustainability - Taking the Green Road, low GHG emissions
+            - ``SSP2_4.5``: Middle of the Road, medium GHG emissions
+            - ``SSP3_7.0``: Regional Rivalry - A Rocky Road, high GHG emissions
+            - ``SSP5_8.5``: Fossil-Driven Development, very high GHG emissions
     """
 
     def __init__(
@@ -100,14 +110,14 @@ class GribData:
     """A class containing GRIB data on air pollution.
 
     Attributes:
-        year (int): year the data was collected.
-        month (int): month the data was collected.
-        day (int): day the data was collected.
-        projection (str): which map projection was used. See `gridType` on the
+        year: year the data was collected.
+        month: month the data was collected.
+        day: day the data was collected.
+        projection: which map projection was used. See `gridType` on the
             `GRIB keys <https://confluence.ecmwf.int/display/ECC/GRIB+Keys>`_ page.
-        longitudes (np.ndarray): a list of longitude values.
-        latitudes (np.ndarray): a list of latitude values.
-        values (np.ndarray): a list of the values of interest at a specified longitude and latitude.
+        longitudes: a list of longitude values.
+        latitudes: a list of latitude values.
+        values: a list of the values of interest at a specified longitude and latitude.
             For example, it could be the PM2.5 concentration.
     """
     def __init__(
@@ -137,10 +147,10 @@ class GribData:
         self.day = day
 
     def load_file(self, file_path: pathlib.Path | str):
-        """Load a *.grib2 file and almalgamate the data by taking the mean.
+        """Load a ``*.grib2`` file and amalgamate the data by taking the mean.
 
         Args:
-            file_path (pathlib.Path or str): full file name of *.csv file to load the data from.
+            file_path: Full file name of ``*.csv`` file to load the data from.
         """
         df = pd.DataFrame()
         with pygrib.open(file_path) as f:
@@ -157,10 +167,10 @@ class GribData:
         return year, month, day, projection, df
 
     def save(self, file_path: pathlib.Path | str):
-        """Save the GribData object to a *.csv file.
+        """Save the GribData object to a ``*.csv`` file.
 
         Args:
-            file_path (pathlib.Path or str): full file name of *.csv file to save the data to.
+            file_path: Full file name of ``*.csv`` file to save the data to.
         """
         df = pd.DataFrame({
             "longitudes": self.longitudes,
@@ -181,11 +191,12 @@ def add_record_to_df(
 
     Args:
         df: A data frame with the following columns:
+
             * ``longitudes``: a list of longitude values.
             * ``latitudes``: a list of latitude values.
             * ``value_{index}``: a list of the values of interest at a specified longitude and
-                latitude. For example, it could be the PM2.5 concentration. Each value column
-                corresponds to either a record in the original grib file, or a file in a folder.
+              latitude. For example, it could be the PM2.5 concentration. Each value column
+              corresponds to either a record in the original grib file, or a file in a folder.
         longitudes: An array of longitude values.
         latitudes: An array of latitude values.
         values: An array of the values of interest at a specified longitude and latitude.
@@ -211,17 +222,13 @@ def get_data_average(df: pd.DataFrame) -> pd.DataFrame:
     """Find the mean of all the ``value_*`` columns, and return a ``GribData`` object.
 
     Args:
-        df: a data frame with the following columns:
+        df: A data frame with the following columns:
+
             * ``longitudes``: a list of longitude values.
             * ``latitudes``: a list of latitude values.
             * ``value_{index}``: a list of the values of interest at a specified longitude and
-                latitude. For example, it could be the PM2.5 concentration. Each value column
-                corresponds to either a record in the original grib file, or a file in a folder.
-        year (int): year the data was collected.
-        month (int): month the data was collected.
-        day (int): day the data was collected.
-        projection (str): which map projection was used. See ``gridType`` on the
-            `GRIB keys <https://confluence.ecmwf.int/display/ECC/GRIB+Keys>`_ page.
+              latitude. For example, it could be the PM2.5 concentration. Each value column
+              corresponds to either a record in the original grib file, or a file in a folder.
     """
     value_columns = df.columns[df.columns.str.startswith("value")]
     df["mean"] = df[value_columns].mean(axis=1)
@@ -254,7 +261,7 @@ def load_grib_files(folder: str, recursive: bool = False) -> GribData:
     Args:
         folder: The folder containing the ``.grib2`` files to open.
         recursive: If ``True``, iterate through all subdirectories and compute an
-            aggregate average. If false, only read ``.grib2`` files in the given directory.
+            aggregate average. If ``False``, only read ``.grib2`` files in the given directory.
     """
     index = 1
     df = pd.DataFrame()
