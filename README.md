@@ -53,7 +53,7 @@ file.
 To run the `LEAP` model from the command line, using the default settings:
 
 ```sh
-leap --run-simulation
+leap --run-simulation --path-output PATH/TO/OUTPUT/FOLDER
 ```
 
 ### Examples
@@ -63,20 +63,20 @@ and 10 new borns in the first year:
 
 ```sh
 leap --run-simulation --time-horizon 1 --num-births-initial 10 --max-age 4 --min-year 2024 \
---path-output PATH/TO/OUTPUT
+--path-output PATH/TO/OUTPUT/FOLDER
 ```
 
 To specify the province and population growth scenario:
 
 ```sh
 leap --run-simulation --time-horizon 1 --num-births-initial 10 --max-age 4 --province "CA" \
---min-year 2024 --population-growth-type "M3" --path-output PATH/TO/OUTPUT
+--min-year 2024 --population-growth-type "M3" --path-output PATH/TO/OUTPUT/FOLDER
 ```
 
 If you would like to use your own `config.json` file instead of the default one:
 
 ```sh
-leap --run-simulation --config PATH/TO/YOUR/CONFIG.json
+leap --run-simulation --config PATH/TO/YOUR/CONFIG.json --path-output PATH/TO/OUTPUT/FOLDER
 ```
 
 
