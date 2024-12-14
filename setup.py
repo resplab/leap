@@ -11,7 +11,8 @@ setup(
       line.strip() for line in open("requirements.txt")
     ],
     extras_require={
-        "dev": ["pytest", "flake8"]
+        "dev": ["pytest", "flake8"],
+        "docs": [line.strip() for line in open("requirements-docs.txt")]
     },
     include_package_data=True,
     package_data={
