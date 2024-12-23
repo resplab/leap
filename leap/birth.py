@@ -50,14 +50,15 @@ class Birth:
         """A grouped data frame giving the number of births in a given province, grouped by year.
         
         It contains the following columns:
-            * ``province``: A string indicating the province abbreviation, e.g. "BC".
-              For all of Canada, set province to "CA".
+            * ``province``: A string indicating the province abbreviation, e.g. ``"BC"``.
+              For all of Canada, set province to ``"CA"``.
             * ``N``: integer, estimated number of births for that year.
             * ``prop_male``: proportion of births which are male, a number in ``[0, 1]``.
             * ``projection_scenario``: Population growth type, one of:
-                ["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"].
+                ``["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"]``.
                 See `StatCan <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
             * ``N_relative``: The number of births relative to the first year of the simulation.
+
         See ``master_birth_estimate.csv``.
         """
         return self._estimate
@@ -71,10 +72,10 @@ class Birth:
         """A data frame giving the population for the first year of the simulation.
 
         It contains the following columns:
-            * ``year``: integer year the range 2000 - 2065.
+            * ``year``: integer year the range ``2000 - 2065``.
             * ``age``: integer age.
-            * ``province``: a string indicating the province abbreviation, e.g. "BC".
-              For all of Canada, set province to "CA".
+            * ``province``: a string indicating the province abbreviation, e.g. ``"BC"``.
+              For all of Canada, set province to ``"CA"``.
             * ``n``: estimated number of people in that age category in a given year.
             * ``n_birth``: the number of people born that year.
             * ``prop``: the ratio of that age group to the newborn age group (age = 0).
