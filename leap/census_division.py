@@ -15,31 +15,28 @@ MIN_CENSUS_YEAR = 2021
 class CensusTable:
     """A class containing information about Canadian census divisions.
 
-    Please see:
-    `Statistics Canada: Table 98-10-0007-01, Population and dwelling counts: Canada and census divisions
-    <https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=9810000701>`_.
+    Please see: Statistics Canada. Table 98-10-0007-01
+    Population and dwelling counts: Canada and census divisions
+
+    https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=9810000701
 
     Attributes:
         data: A grouped data frame grouped by province.
             Each data frame contains the following columns:
-
-            * ``year`` (int): the year the census data was collected.
-            * ``census_division_name`` (str): the federal census division name.
-            * ``CDUID`` (int): the census division identifier.
-            * ``DGUID`` (str): the dissemination geography unique identifier, in the format:
-                .. code-block::
-
+                * ``year`` (int): the year the census data was collected.
+                * ``census_division_name`` (str): the federal census division name.
+                * ``CDUID`` (int): the census division identifier.
+                * ``DGUID`` (str): the dissemination geography unique identifier, in the format:
                     2021 | A | 0003 | CDUID
                     2021 - year the data was collected
                     A - administrative (not important, a StatsCan identifier)
                     0003 - schema indicating census division
                     CDUID - the census division identifier
-
-            * ``geographic_area_type`` (str): the census division region type.
-            * ``province`` (str): the two-letter province identifier.
-            * ``population`` (int): the number of residents living in the census division.
-            * ``area_km2`` (float): the area of the census division in kilometres squared.
-            * ``population_density_per_square_km`` (float): the population density per square kilometre.
+                * ``geographic_area_type`` (str): the census division region type.
+                * ``province`` (str): the two-letter province identifier.
+                * ``population`` (int): the number of residents living in the census division.
+                * ``area_km2`` (float): the area of the census division in kilometres squared.
+                * ``population_density_per_square_km`` (float): the population density per square kilometre.
         year: the year the census population data was collected.
     """
     def __init__(self, config: dict | None = None, year: int = MIN_CENSUS_YEAR):
@@ -72,17 +69,18 @@ class CensusTable:
 class CensusDivision:
     """A class containing information about a Canadian census division.
 
-    Please see:
-    `Statistics Canada: Table 98-10-0007-01, Population and dwelling counts: Canada and census divisions
-    <https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=9810000701>`_.
+    Please see: Statistics Canada. Table 98-10-0007-01
+    Population and dwelling counts: Canada and census divisions
+
+    https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=9810000701
 
     If the user provides only the province and year, a census division will be randomly assigned
     based on population.
 
     Attributes:
-        cduid: The census division identifier.
-        name: The census division name.
-        year: The year the census population data was collected.
+        cduid (int): the census division identifier.
+        name (str): the census division name.
+        year (int): the year the census population data was collected.
     """
     def __init__(
         self,
@@ -127,47 +125,38 @@ class CensusDivision:
 class CensusBoundaries:
     """A class containing information about Canadian census division boundaries.
 
-    Please see:
-    `Statistics Canada Census Boundaries
-    <https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/boundary-limites/index2021-eng.cfm?year=21>`_:
-    
-    .. code-block::
+    Please see: Statistics Canada. 2021 Census – Boundary file.
+    Type: Cartographic Boundary File (CBF)
+    Administrative Boundaries: Census divisions
+    Downloadable: Shapefile (.shp)
 
-        Statistics Canada. 2021 Census – Boundary file.
-        Type: Cartographic Boundary File (CBF)
-        Administrative Boundaries: Census divisions
-        Downloadable: Shapefile (.shp)
+    https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/boundary-limites/index2021-eng.cfm?year=21
 
-    The shapefile given is in the Lambert Conformal Conic projection. For more details, see:
-    `Boundary Files, Reference Guide
-    <https://www150.statcan.gc.ca/n1/en/pub/92-160-g/92-160-g2021002-eng.pdf?st=0cwqeEP1>`_.
+    The shapefile given is in the Lambert Conformal Conic projection. More details here:
+    https://www150.statcan.gc.ca/n1/en/pub/92-160-g/92-160-g2021002-eng.pdf?st=0cwqeEP1
 
     Attributes:
-        shapefile_data: A grouped data frame grouped by province.
+        shapefile_data (pd.api.typing.DataFrameGroupBy): A grouped data frame grouped by province.
             Each data frame contains the following columns:
-
-            * ``geometry``: the ``Shapefile.Polygon`` of the census boundary.
-            * ``CDUID``: the census division identifier.
-            * ``DGUID``: the dissemination geography unique identifier, in the format:
-                .. code-block::
-
+                * ``geometry``: the Shapefile.Polygon of the census boundary.
+                * ``CDUID``: the census division identifier.
+                * ``DGUID``: the dissemination geography unique identifier, in the format:
                     2021 | A | 0003 | CDUID
                     2021 - year the data was collected
                     A - administrative (not important, a StatsCan identifier)
                     0003 - schema indicating census division
                     CDUID - the census division identifier
-
-            * ``CDNAME``: the census division name.
-            * ``CDTYPE``: the census division type.
-            * ``LANDAREA``: the area of the census division in square kilometres.
-            * ``PRUID``: integer, province id.
-        year: the year the census population data was collected.
-        reference_longitude: the reference longitude.
-        reference_latitude: the reference latitude.
-        first_standard_parallel: the first standard parallel in degrees.
-        second_standard_parallel: the second standard parallel in degrees.
-        false_easting: false easting.
-        false_northing: false northing.
+                * ``CDNAME``: the census division name.
+                * ``CDTYPE``: the census division type.
+                * ``LANDAREA``: the area of the census division in square kilometres.
+                * ``PRUID``: integer, province id.
+        year (int): the year the census population data was collected.
+        reference_longitude (float): the reference longitude.
+        reference_latitude (float): the reference latitude.
+        first_standard_parallel (float): the first standard parallel in degrees.
+        second_standard_parallel (float): the second standard parallel in degrees.
+        false_easting (float): false easting.
+        false_northing (float): false northing.
     """
     def __init__(
         self,
@@ -230,10 +219,11 @@ class CensusBoundaries:
         """Load the data from the census boundaries shapefile.
 
         Args:
-            shapefile_path: Full path for the shapefile containing the census division boundaries.
+            shapefile_path (str): full path for the shapefile containing the
+                census division boundaries.
 
         Returns:
-            A data frame containing the census division boundaries.
+            gpd.GeoDataFrame: A data frame containing the census division boundaries.
         """
         df = gpd.read_file(shapefile_path)
         df = df.astype({"CDUID": int})
@@ -243,8 +233,8 @@ class CensusBoundaries:
         """Given a latitude and longitude, find the corresponding census division.
 
         Args:
-            longitude: the longitude.
-            latitude: the latitude.
+            longitude (float): the longitude.
+            latitude (float): the latitude.
         """
         point = self.get_lambert_conformal_from_lat_lon(
             λ=longitude,
@@ -287,8 +277,8 @@ class CensusBoundaries:
         """Determine whether or not a given point is within a polygon.
 
         Args:
-            point: The point we want to check.
-            polygon: A polygon object containing the points of its boundary.
+            point (shapely.Point): the point we want to check.
+            polygon (shapely.Polygon): a polygon object containing the points of its boundary.
         """
         point = shapely.geometry.Point(point)
 
@@ -315,22 +305,18 @@ class CensusBoundaries:
     ) -> tuple[float, float]:
         """Given a latitude and longitude, find the Lamber Conformal Conic projection coordinates.
 
-        See: 
-        
-        1. `Lambert Conformal Conic Transformations
-           <https://www.linz.govt.nz/guidance/geodetic-system/understanding-coordinate-conversions/projection-conversions/lambert-conformal-conic-geographic-transformation-formulae>`_
-        2. `Wikipedia: Geodetic Reference System 1980
-           <https://en.wikipedia.org/wiki/Geodetic_Reference_System_1980>`_.
+        See: https://www.linz.govt.nz/guidance/geodetic-system/understanding-coordinate-conversions/projection-conversions/lambert-conformal-conic-geographic-transformation-formulae
+        also: https://en.wikipedia.org/wiki/Geodetic_Reference_System_1980
 
         Args:
-            λ: the longitude.
-            ϕ: the latitude.
-            λ_0: the reference longitude.
-            ϕ_0: the reference latitude.
-            ϕ_1: the first standard parallel in degrees.
-            ϕ_2: the second standard parallel in degrees.
-            x_0: false easting.
-            y_0: false northing.
+            λ (float): the longitude.
+            ϕ (float): the latitude.
+            λ_0 (float): the reference longitude.
+            ϕ_0 (float): the reference latitude.
+            ϕ_1 (float): the first standard parallel in degrees.
+            ϕ_2 (float): the second standard parallel in degrees.
+            x_0 (float): false easting.
+            y_0 (float): false northing.
         """
         λ = np.deg2rad(λ)
         ϕ = np.deg2rad(ϕ)
