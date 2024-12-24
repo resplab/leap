@@ -1,8 +1,2 @@
 env/
 .DS_Store
-*.ipynb_checkpoints
-__pycache__/
-.pytest_cache/
-*.egg-info/
-*scratch*
-.vscode/
