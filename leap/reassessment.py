@@ -28,14 +28,12 @@ class Reassessment:
     def table(self) -> DataFrameGroupBy:
         """Grouped dataframe (by year) giving the probability of an agent still having asthma after
         reassessment for a given age, province, and sex:
-
-        * ``year``: integer year.
-        * ``age``: integer age.
-        * ``M``: the probability that a male agent still has asthma.
-        * ``F``: the probability that a female agent still has asthma.
-        * ``province``: a string indicating the province abbreviation, e.g. "BC".
-          For all of Canada, set province to "CA".
-
+            * ``year``: integer year.
+            * ``age``: integer age.
+            * ``M``: the probability that a male agent still has asthma.
+            * ``F``: the probability that a female agent still has asthma.
+            * ``province``: a string indicating the province abbreviation, e.g. "BC".
+                For all of Canada, set province to "CA".
         See ``master_asthma_reassessment.csv``.
         """
         return self._table
@@ -55,16 +53,13 @@ class Reassessment:
                 For all of Canada, set province to "CA".
 
         Returns:
-            A grouped data frame grouped by year.
-            
-            Each data frame contains the following columns:
-
-            * ``year (int)``: calendar year.
-            * ``age (int)``: age of person in years.
-            * ``F (float)``: the probability that a female agent still has asthma.
-            * ``M (float)``: the probability that a male agent still has asthma.
-            * ``province (str)``: a string indicating the province abbreviation, e.g. "BC".
-              For all of Canada, set province to "CA".
+            A grouped data frame grouped by year. Each data frame contains the following columns:
+                * ``year`` (int): calendar year.
+                * ``age`` (int): age of person.
+                * ``F`` (float): the probability that a female agent still has asthma.
+                * ``M`` (float): the probability that a male agent still has asthma.
+                * ``province`` (str): a string indicating the province abbreviation, e.g. "BC".
+                    For all of Canada, set province to "CA".
         """
         df = pd.read_csv(
             get_data_path("processed_data", "master_asthma_reassessment.csv")

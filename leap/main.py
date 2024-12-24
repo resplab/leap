@@ -14,7 +14,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(add_help=False)
     command_group = parser.add_mutually_exclusive_group(required=False)
     command_group.add_argument(
-        "-r", "--run-simulation", dest="run", action="store_true",
+        "-r", "--run", dest="run", action="store_true",
         help="Run the simulation."
     )
 
