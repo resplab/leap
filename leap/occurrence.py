@@ -50,8 +50,9 @@ class Occurrence:
         """A dictionary containing the hyperparameters used to compute ``β0`` from a normal
         distribution:
         
-            * ``β0_μ``: float, the mean of the normal distribution.
-            * ``β0_σ``: float, the standard deviation of the normal distribution.
+        * ``β0_μ``: float, the mean of the normal distribution.
+        * ``β0_σ``: float, the standard deviation of the normal distribution.
+
         """
         return self._hyperparameters
     
@@ -76,11 +77,14 @@ class Occurrence:
         """A dataframe grouped by year, age, and sex.
         
         Each dataframe contains the following columns:
-            * ``year``: integer year.
-            * ``sex``: 0 = female, 1 = male.
-            * ``age``: integer age.
-            * ``correction``: float, TODO.
-        See ``master_occurrence_correction.csv``."""
+
+        * ``year``: integer year.
+        * ``sex``: 0 = female, 1 = male.
+        * ``age``: integer age.
+        * ``correction``: float, TODO.
+
+        See ``master_occurrence_correction.csv``.
+        """
         return self._correction_table
     
     @correction_table.setter
@@ -119,10 +123,12 @@ class Occurrence:
 
         Returns:
             Dataframe grouped by year, age, and sex. Each dataframe contains the following columns:
-                * ``year``: integer year.
-                * ``sex``: 0 = female, 1 = male.
-                * ``age``: integer age.
-                * ``correction``: float, TODO.
+
+            * ``year``: integer year.
+            * ``sex``: 0 = female, 1 = male.
+            * ``age``: integer age.
+            * ``correction``: float, TODO.
+
         """
         df = pd.read_csv(
             get_data_path("processed_data", "master_asthma_occurrence_correction.csv")
@@ -228,10 +234,10 @@ class Incidence(Occurrence):
     def parameters(self) -> dict:
         """A dictionary containing the following keys:
         
-            * ``β0``: float, a constant parameter, randomly selected from a normal distribution
+            * ``β0 (float)``: A constant parameter, randomly selected from a normal distribution
               with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
-            * ``βsex``: float, the parameter for the sex term, i.e. ``βsex * sex``.
-            * ``βage``: list[float], an array of 5 parameters to be multiplied by functions of age,
+            * ``βsex (float)``: The parameter for the sex term, i.e. ``βsex * sex``.
+            * ``βage (list[float])``: An array of 5 parameters to be multiplied by functions of age,
               i.e.
 
               .. code-block:: python
@@ -240,8 +246,8 @@ class Incidence(Occurrence):
                 βage4 * f4(age) + βage5 * f5(age)
 
               See ``poly_age_calculator``.
-            * ``βyear``: float, the parameter for the year term, i.e. ``βyear * year``.
-            * ``βsexage``: list[float], an array of 5 parameters to be multiplied by the sex and
+            * ``βyear (float)``: The parameter for the year term, i.e. ``βyear * year``.
+            * ``βsexage (list[float])``: An array of 5 parameters to be multiplied by the sex and
               functions of age, i.e.
 
               .. code-block:: python
@@ -250,12 +256,13 @@ class Incidence(Occurrence):
                 βsexage4 * f4(age) * sex + βsexage5 * f5(age) * sex
 
               See ``poly_age_calculator``.
-            * ``βsexyear``: float, the parameter to be multiplied by sex and year,
+            * ``βsexyear (float)``: The parameter to be multiplied by sex and year,
               i.e. ``βsexyear * year * sex``.
-            * ``βfam_hist``: list[float], an array of 2 parameters to be multiplied by functions of
+            * ``βfam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
               age. See ``log_OR_family_history``.
-            * ``βabx_exp``: list[float], an array of 3 parameters to be multiplied by functions of
+            * ``βabx_exp (list[float])``: An array of 3 parameters to be multiplied by functions of
               age and antibiotic exposure. See ``log_OR_abx_exposure``.
+
         """
         return self._parameters
     
@@ -271,11 +278,14 @@ class Incidence(Occurrence):
         """Load the asthma incidence correction table.
 
         Returns:
-            A dataframe grouped by year, age, and sex. Each dataframe contains the following columns:
-                * ``year``: integer year.
-                * ``sex``: 0 = female, 1 = male.
-                * ``age``: integer age.
-                * ``correction``: float, TODO.
+            A dataframe grouped by year, age, and sex.
+            Each dataframe contains the following columns:
+
+            * ``year``: integer year.
+            * ``sex``: 0 = female, 1 = male.
+            * ``age``: integer age.
+            * ``correction``: float, TODO.
+
         """
         grouped_df = super().load_occurrence_correction_table(occurrence_type="inc")
         return grouped_df
@@ -315,10 +325,11 @@ class Prevalence(Occurrence):
     @property
     def parameters(self) -> dict:
         """A dictionary containing the following keys:
-            * ``β0``: float, a constant parameter, randomly selected from a normal distribution
+
+            * ``β0 (float)``: A constant parameter, randomly selected from a normal distribution
               with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
-            * ``βsex``: float, the parameter for the sex term, i.e. ``βsex * sex``.
-            * ``βage``: list[float], an array of 5 parameters to be multiplied by functions of age,
+            * ``βsex (float)``: The parameter for the sex term, i.e. ``βsex * sex``.
+            * ``βage (list[float])``: An array of 5 parameters to be multiplied by functions of age,
               i.e.
 
               .. code-block:: python
@@ -328,9 +339,9 @@ class Prevalence(Occurrence):
 
               See ``poly_age_calculator``.
 
-            * ``βyear``: list[float], an array of 2 parameters to be multiplied by functions of
+            * ``βyear (list[float])``: An array of 2 parameters to be multiplied by functions of
               year, i.e. ``βyear1 * g1(year) + βyear2 * g2(year)``. See ``poly_year_calculator``.
-            * ``βsexage``: list[float], an array of 5 parameters to be multiplied by the sex and
+            * ``βsexage (list[float])``: An array of 5 parameters to be multiplied by the sex and
               functions of age, i.e.
 
               .. code-block:: python
@@ -339,9 +350,9 @@ class Prevalence(Occurrence):
                 βsexage4 * f4(age) * sex + βsexage5 * f5(age) * sex
 
               See ``poly_age_calculator``.
-            * ``βsexyear``: list[float], an array of 2 parameters to be multiplied by sex and
+            * ``βsexyear (list[float])``: An array of 2 parameters to be multiplied by sex and
               functions of year, i.e. ``βyear1 * g1(year) + βyear2 * g2(year)``.
-            * ``βyearage``: list[float], an array of 10 parameters to be multiplied by functions of
+            * ``βyearage (list[float])``: An array of 10 parameters to be multiplied by functions of
               age and year, i.e.
 
               .. code-block:: python
@@ -353,7 +364,7 @@ class Prevalence(Occurrence):
                 βyearage9 * f5(age) * g1(year) + βyearage10 * f5(age) * g2(year)
 
               See ``poly_age_calculator`` and ``poly_year_calculator``.
-            * ``βsexyearage``: list[float], an array of 10 parameters to be multiplied by sex and
+            * ``βsexyearage (list[float])``: An array of 10 parameters to be multiplied by sex and
               functions of age and year, i.e.
 
               .. code-block:: python
@@ -364,9 +375,9 @@ class Prevalence(Occurrence):
                 βyearagesex7 * f4(age) * g1(year) * sex + βyearagesex8 * f4(age) * g2(year) * sex +
                 βyearagesex9 * f5(age) * g1(year) * sex + βyearagesex10 * f5(age) * g2(year) * sex
 
-            * ``βfam_hist``: list[float], an array of 2 parameters to be multiplied by functions of
+            * ``βfam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
               age. See ``log_OR_family_history``.
-            * ``βabx_exp``: list[float], an array of 3 parameters to be multiplied by functions of
+            * ``βabx_exp (list[float])``: An array of 3 parameters to be multiplied by functions of
                 age and antibiotic exposure. See ``log_OR_abx_exposure``.
         """
         return self._parameters
