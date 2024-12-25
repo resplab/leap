@@ -11,6 +11,11 @@ Getting Started
 
 To get started, check out :doc:`Installation <../installation>`.
 
+Once you have installed the package, you can use the command-line interface (CLI) to run the
+simulation. For more information, see :doc:`CLI <cli/index>`.
+
+For developers, see :doc:`Development <dev/index>`.
+
 .. toctree::
   :hidden:
   :maxdepth: 4
