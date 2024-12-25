@@ -67,7 +67,7 @@ html_theme_options = {
     },
     "site_url": "",
     "repo_url": "https://github.com/resplab/leap/",
-    "repo_name": "leap",
+    "repo_name": "LEAP",
     "edit_uri": "blob/main/docs",
     "globaltoc_collapse": True,
     "features": [
