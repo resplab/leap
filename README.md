@@ -22,29 +22,6 @@ source env/bin/activate
 pip install -e .
 ```
 
-### Testing
-
-To run all the tests:
-
-```sh
-cd leap
-pytest tests/
-```
-
-To run a single test file:
-
-```sh
-cd leap
-pytest tests/test_name.py
-```
-
-To run doctests:
-
-```sh
-cd leap
-pytest leap/ --doctest-modules
-```
-
 ## Running the Simulation
 
 The default simulation configuration options are found in the `LEAP/processed_data/config.json`
@@ -79,5 +56,41 @@ If you would like to use your own `config.json` file instead of the default one:
 leap --run-simulation --config PATH/TO/YOUR/CONFIG.json --path-output PATH/TO/OUTPUT/FOLDER
 ```
 
+## Developers
 
+### Testing
 
+To run all the tests:
+
+```sh
+cd leap
+pytest tests/
+```
+
+To run a single test file:
+
+```sh
+cd leap
+pytest tests/test_name.py
+```
+
+To run doctests:
+
+```sh
+cd leap
+pytest leap/ --doctest-modules
+```
+
+### Documentation
+
+`GitHub` doesn't allow for private pages via `GitHub Pages` unless you're using
+`GitHub Enterprise`. To view the documentation locally instead:
+
+```sh
+cd leap/docs
+make clean
+make html
+```
+
+Now go to `leap/docs/_build/html/index.html`, and open that file in your browser. You should
+now be able to navigate through the documentation webpages.
