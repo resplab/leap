@@ -69,7 +69,6 @@ class Agent:
         has_asthma: bool = False,
         asthma_age: int | None = None,
         asthma_status: bool = False,
-        severity: int | None = None,
         control_levels: ControlLevels = ControlLevels(0.3333, 0.3333, 0.3333),
         exacerbation_history: ExacerbationHistory = ExacerbationHistory(0, 0),
         exacerbation_severity_history: ExacerbationSeverityHistory = ExacerbationSeverityHistory(np.zeros(4), np.zeros(4)),
@@ -91,7 +90,6 @@ class Agent:
         self.has_asthma = has_asthma
         self.asthma_age = asthma_age
         self.asthma_status = asthma_status
-        self.severity = severity
         self.control_levels = control_levels
         self.exacerbation_history = exacerbation_history
         self.exacerbation_severity_history = exacerbation_severity_history
