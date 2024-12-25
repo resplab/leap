@@ -32,6 +32,13 @@ def round_number(x: float, digits: int = 0, sigdigits: int | None = None) -> flo
 
     Returns:
         The rounded number.
+
+    Examples:
+
+        >>> round_number(2.932, digits=2)
+        2.93
+        >>> round_number(2.932, sigdigits=2)
+        2.9
     """
     if sigdigits is not None:
         x = float(x)
@@ -56,12 +63,15 @@ def compute_ordinal_regression(
     θ: float | list[float],
     prob_function: Callable = sigmoid
 ) -> list[float]:
-    """Compute the probability that y = k for each value of k.
+    """Compute the probability that ``y = k`` for each value of ``k``.
 
     The probability is given by ordinal regression:
-        P(y <= k) = σ(θ_k - η)
-        P(y == k) = P(y <= k) - P(y < k + 1)
-                  = σ(θ_k - η) - σ(θ_(k+1) - η)
+
+    .. math::
+
+        P(y <= k) &= σ(θ_k - η) \\\\
+        P(y == k) &= P(y <= k) - P(y < k + 1) \\\\
+                  &= σ(θ_k - η) - σ(θ_{(k+1)} - η)
 
     Args:
         η: The weight for the regression.
@@ -69,10 +79,21 @@ def compute_ordinal_regression(
         prob_function: A function to apply; default is the sigmoid function.
 
     Returns:
-        list[float]: a vector with the probability of each value of k.
-            For example:
+        A vector with the probability of each value of ``k``.
+        
+        For example:
+
+        .. code-block::
+
             k=1 | k=2  | k=2
             0.2 | 0.75 | 0.05
+
+    Examples:
+
+        >>> compute_ordinal_regression(0, 0.5)
+        [0.5, 0.5]
+        >>> compute_ordinal_regression(0, [0.5, 1.5])
+        [0.5, 0.25, 0.25]
     """
 
     if isinstance(θ, float):
@@ -103,7 +124,7 @@ def check_file(file_path: str | pathlib.Path, ext: str):
 
     Args:
         file_path: The full path to the file.
-        ext: A file extension, including the ".", e.g. ".csv".
+        ext: A file extension, including the ``"."``, e.g. ``".csv"``.
 
     Raises:
         ValueError: If the file is not a valid file with the correct extension.
@@ -123,6 +144,30 @@ def check_file(file_path: str | pathlib.Path, ext: str):
 class Sex:
     """A class to handle different formats of the ``sex`` variable."""
     def __init__(self, value: str | int | bool):
+        """Initialize the ``Sex`` class.
+        
+        Args:
+            value: The value of the sex variable. Must be one of:
+                ``"M"``, ``"F"``, ``1``, ``0``, ``True``, or ``False``.
+        
+        Examples:
+
+            >>> sex = Sex("F")
+            >>> str(sex)
+            "F"
+            >>> int(sex)
+            0
+            >>> bool(sex)
+            False
+
+            >>> sex = Sex(True)
+            >>> str(sex)
+            "M"
+            >>> int(sex)
+            1
+            >>> bool(sex)
+            True
+        """
         if isinstance(value, str):
             if value == "M":
                 value_str = "M"
