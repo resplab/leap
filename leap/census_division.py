@@ -19,28 +19,6 @@ class CensusTable:
     `Statistics Canada: Table 98-10-0007-01, Population and dwelling counts: Canada and census divisions
     <https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=9810000701>`_.
 
-    Attributes:
-        data: A grouped data frame grouped by province.
-            Each data frame contains the following columns:
-
-            * ``year`` (int): the year the census data was collected.
-            * ``census_division_name`` (str): the federal census division name.
-            * ``CDUID`` (int): the census division identifier.
-            * ``DGUID`` (str): the dissemination geography unique identifier, in the format:
-                .. code-block::
-
-                    2021 | A | 0003 | CDUID
-                    2021 - year the data was collected
-                    A - administrative (not important, a StatsCan identifier)
-                    0003 - schema indicating census division
-                    CDUID - the census division identifier
-
-            * ``geographic_area_type`` (str): the census division region type.
-            * ``province`` (str): the two-letter province identifier.
-            * ``population`` (int): the number of residents living in the census division.
-            * ``area_km2`` (float): the area of the census division in kilometres squared.
-            * ``population_density_per_square_km`` (float): the population density per square kilometre.
-        year: the year the census population data was collected.
     """
     def __init__(self, config: dict | None = None, year: int = MIN_CENSUS_YEAR):
         if config is not None:
@@ -51,7 +29,39 @@ class CensusTable:
         self.grouped_data = self.data.groupby(["province"])
 
     @property
+    def data(self) -> pd.DataFrame:
+        """A grouped data frame grouped by province containing census population data.
+        
+        Each data frame contains the following columns:
+        
+        * ``year (int)``: the year the census data was collected.
+        * ``census_division_name (str)``: the federal census division name.
+        * ``CDUID (int)``: the census division identifier.
+        * ``DGUID (str)``: the dissemination geography unique identifier, in the format:
+
+          .. code-block::
+
+            2021 | A | 0003 | CDUID
+            2021 - year the data was collected
+            A - administrative (not important, a StatsCan identifier)
+            0003 - schema indicating census division
+            CDUID - the census division identifier
+                
+        * ``geographic_area_type (str)``: the census division region type.
+        * ``province (str)``: the two-letter province identifier.
+        * ``population (int)``: the number of residents living in the census division.
+        * ``area_km2 (float)``: the area of the census division in kilometres squared.
+        * ``population_density_per_square_km (float)``: the population density per square kilometre.
+        """
+        return self._data
+
+    @data.setter
+    def data(self, data: pd.DataFrame):
+        self._data = data
+
+    @property
     def year(self) -> int:
+        """The year the census population data was collected."""
         return self._year
 
     @year.setter
@@ -63,6 +73,8 @@ class CensusTable:
         self._year = year
 
     def load_census_data(self) -> pd.DataFrame:
+        """Load the census data."""
+
         df = pd.read_csv(
             get_data_path("processed_data.census_divisions", "master_census_data_2021.csv")
         )
@@ -78,11 +90,6 @@ class CensusDivision:
 
     If the user provides only the province and year, a census division will be randomly assigned
     based on population.
-
-    Attributes:
-        cduid: The census division identifier.
-        name: The census division name.
-        year: The year the census population data was collected.
     """
     def __init__(
         self,
@@ -92,7 +99,7 @@ class CensusDivision:
         province: str = "CA",
         census_table: CensusTable | None = None
     ):
-        if cduid is None and name is None:
+        if cduid is None or name is None:
             if census_table is None:
                 census_table = CensusTable(year=year)
             if province == "CA":
@@ -117,11 +124,34 @@ class CensusDivision:
 
     @property
     def cduid(self) -> int:
+        """The census division identifier."""
         return self._cduid
     
     @cduid.setter
     def cduid(self, cduid: int):
         self._cduid = cduid
+
+    @property
+    def name(self) -> str:
+        """The census division name."""
+        return self._name
+    
+    @name.setter
+    def name(self, name: str):
+        self._name = name
+
+    @property
+    def year(self) -> int:
+        """The year the census population data was collected."""
+        return self._year
+    
+    @year.setter
+    def year(self, year: int):
+        if year < MIN_CENSUS_YEAR:
+            raise ValueError(
+                f"year must be > {MIN_CENSUS_YEAR}, received {year}."
+            )
+        self._year = year
 
 
 class CensusBoundaries:
@@ -248,11 +278,11 @@ class CensusBoundaries:
         """
         point = self.get_lambert_conformal_from_lat_lon(
             λ=longitude,
-            ϕ=latitude,
+            φ=latitude,
             λ_0=self.reference_longitude,
-            ϕ_0=self.reference_latitude,
-            ϕ_1=self.first_standard_parallel,
-            ϕ_2=self.second_standard_parallel,
+            φ_0=self.reference_latitude,
+            φ_1=self.first_standard_parallel,
+            φ_2=self.second_standard_parallel,
             x_0=self.false_easting,
             y_0=self.false_northing
         )
@@ -305,15 +335,15 @@ class CensusBoundaries:
     def get_lambert_conformal_from_lat_lon(
         self,
         λ: float,
-        ϕ: float,
+        φ: float,
         λ_0: float,
-        ϕ_0: float,
-        ϕ_1: float,
-        ϕ_2: float,
+        φ_0: float,
+        φ_1: float,
+        φ_2: float,
         x_0: float,
         y_0: float
     ) -> tuple[float, float]:
-        """Given a latitude and longitude, find the Lamber Conformal Conic projection coordinates.
+        """Given a latitude and longitude, find the Lambert Conformal Conic projection coordinates.
 
         See: 
         
@@ -324,35 +354,38 @@ class CensusBoundaries:
 
         Args:
             λ: the longitude.
-            ϕ: the latitude.
+            φ: the latitude.
             λ_0: the reference longitude.
-            ϕ_0: the reference latitude.
-            ϕ_1: the first standard parallel in degrees.
-            ϕ_2: the second standard parallel in degrees.
+            φ_0: the reference latitude.
+            φ_1: the first standard parallel in degrees.
+            φ_2: the second standard parallel in degrees.
             x_0: false easting.
             y_0: false northing.
+
+        Returns:
+            The Lambert Conformal Conic projection coordinates.
         """
         λ = np.deg2rad(λ)
-        ϕ = np.deg2rad(ϕ)
+        φ = np.deg2rad(φ)
         λ_0 = np.deg2rad(λ_0)
-        ϕ_0 = np.deg2rad(ϕ_0)
-        ϕ_1 = np.deg2rad(ϕ_1)
-        ϕ_2 = np.deg2rad(ϕ_2)
+        φ_0 = np.deg2rad(φ_0)
+        φ_1 = np.deg2rad(φ_1)
+        φ_2 = np.deg2rad(φ_2)
 
         R = 6378137  # Radius of Earth
 
         f = 0.003352810681183637418  # flattening
         e = np.sqrt(2*f - f**2)  # eccentricity
 
-        m_1 = np.cos(ϕ_1)/(np.sqrt(1 - e**2*np.sin(ϕ_1)**2))
-        m_2 = np.cos(ϕ_2)/(np.sqrt(1 - e**2*np.sin(ϕ_2)**2))
-        t = np.tan(np.pi/4 - ϕ/2) / ((1 - e*np.sin(ϕ))/(1 + e*np.sin(ϕ)))**(e/2)
-        t_0 = np.tan(np.pi/4 - ϕ_0/2) / ((1 - e*np.sin(ϕ_0))/(1 + e*np.sin(ϕ_0)))**(e/2)
-        t_1 = np.tan(np.pi/4 - ϕ_1/2) / ((1 - e*np.sin(ϕ_1))/(1 + e*np.sin(ϕ_1)))**(e/2)
-        t_2 = np.tan(np.pi/4 - ϕ_2/2) / ((1 - e*np.sin(ϕ_2))/(1 + e*np.sin(ϕ_2)))**(e/2)
+        m_1 = np.cos(φ_1)/(np.sqrt(1 - e**2*np.sin(φ_1)**2))
+        m_2 = np.cos(φ_2)/(np.sqrt(1 - e**2*np.sin(φ_2)**2))
+        t = np.tan(np.pi/4 - φ/2) / ((1 - e*np.sin(φ))/(1 + e*np.sin(φ)))**(e/2)
+        t_0 = np.tan(np.pi/4 - φ_0/2) / ((1 - e*np.sin(φ_0))/(1 + e*np.sin(φ_0)))**(e/2)
+        t_1 = np.tan(np.pi/4 - φ_1/2) / ((1 - e*np.sin(φ_1))/(1 + e*np.sin(φ_1)))**(e/2)
+        t_2 = np.tan(np.pi/4 - φ_2/2) / ((1 - e*np.sin(φ_2))/(1 + e*np.sin(φ_2)))**(e/2)
 
-        if ϕ_1 == ϕ_2:
-            n = np.sin(ϕ_1)
+        if φ_1 == φ_2:
+            n = np.sin(φ_1)
         else:
             n = (np.log(m_1) - np.log(m_2))/(np.log(t_1) - np.log(t_2))
 
