@@ -21,10 +21,16 @@ As you update the package, each time you build the documentation, the ``autodoc`
 update the docstrings for existing modules/functions/classes accordingly. However, 
 if you add a new module/function/class, you will need to rerun the initial ``autodoc`` command:
 
+1. Run ``sphinx-apidoc``:
+
 .. code:: bash
 
   cd LEAP/docs
   sphinx-apidoc -o ./dev/api/ ../leap/ --separate
+
+
+2. Delete the automatially generated ``docs/dev/api/modules.rst`` file.
+3. Add the new module to the ``docs/dev/api/leap.rst`` file.
 
 
 Sphinx-Immaterial Theme
