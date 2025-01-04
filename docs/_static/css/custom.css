@@ -17,3 +17,20 @@
     --md-primary-bg-color: #fff;
     --md-primary-bg-color--light: hsla(0, 0%, 100%, .7);
 }
+
+/* Code */
+
+.md-typeset code.notranslate {
+    word-break: keep-all;
+    white-space: nowrap;
+}
+
+.md-typeset code.snippet {
+    word-break: keep-all;
+    white-space: normal;
+    padding: 8px;
+}
+
+.md-typeset code.notranslate {
+    color: var(--md-code-kw-color);
+}
