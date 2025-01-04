@@ -46,7 +46,8 @@ exclude_patterns = []
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_immaterial"
-html_title = "LEAP"
+html_title = ""
+html_logo = "_static/img/logo.png" 
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
