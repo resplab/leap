@@ -66,7 +66,7 @@ def test_emigration_compute_probability(
     )
 
     count = 0
-    for i in range(100000):
+    for _ in range(1000000):
         if emigration.compute_probability(year, age, sex):
             count += 1
 
