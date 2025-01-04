@@ -22,7 +22,8 @@ release = '1.0.0'
 extensions = [
     # 'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    # 'sphinx.ext.mathjax',
+    'sphinx.ext.mathjax',
+    # "sphinx.ext.mathbase",
     'sphinx.ext.viewcode',
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
@@ -38,8 +39,8 @@ extensions = [
 # object_description_options.append(("py:.*", dict(wrap_signatures_with_css=True)))
 
 
-templates_path = ['_templates']
-exclude_patterns = []
+templates_path = ["_templates"]
+exclude_patterns = ["_build", ".DS_Store"]
 
 
 # -- Options for HTML output -------------------------------------------------
