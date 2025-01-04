@@ -1,5 +1,8 @@
 # Lifetime Exposures and Asthma outcomes Projection (LEAP)
 
+For a full guide on how to use this package, please see the documentation at
+https://resplab.github.io/leap/.
+
 ## Installation
 
 1. To install this package on your computer locally, first download it from `GitHub`:
