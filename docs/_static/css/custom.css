@@ -18,6 +18,19 @@
     --md-primary-bg-color--light: hsla(0, 0%, 100%, .7);
 }
 
+
+/* Layout */
+
+.md-sidebar {
+    width: 10rem;
+}
+
+.md-grid {
+    margin-left: 10px;
+    margin-right: 10px;
+    max-width: 1400px;
+}
+
 /* Code */
 
 .md-typeset code.notranslate {
