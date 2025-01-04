@@ -34,3 +34,41 @@
 .md-typeset code.notranslate {
     color: var(--md-code-kw-color);
 }
+
+/* Bootstrap Tables */
+
+.md-typeset table.plot-table.data:not(.plain) td,
+.md-typeset table.plot-table.data:not(.plain) th {
+    padding: 0px;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+}
+
+.table th,
+.table td {
+    padding: 0.5rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 700;
+    text-align: left;
+}
+
+.table tbody+tbody {
+    border-top: 2px solid #dee2e6;
+}
+
+.md-typeset table.data:not(.plain) th {
+    font-weight: 700;
+    min-width: 1rem;
+    padding: .9375em 1.25em;
+    vertical-align: top;
+}
