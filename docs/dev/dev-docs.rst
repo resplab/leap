@@ -52,7 +52,7 @@ action can be found under `.github/workflows/docs_pages_workflow.yml`_:
   # execute this workflow automatically when a we push to main branch
   on:
     push:
-      branches: [ docs ]
+      branches: [ main ]
   
   jobs:
     docs:
@@ -73,7 +73,7 @@ action can be found under `.github/workflows/docs_pages_workflow.yml`_:
             sphinx-build docs _build -E -a
         - name: Deploy to GitHub Pages
           uses: peaceiris/actions-gh-pages@v3
-          if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/docs' }}
+          if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           with:
             publish_branch: gh-pages
             github_token: ${{ secrets.GITHUB_TOKEN }}
