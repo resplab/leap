@@ -1,0 +1,10 @@
+{
+  "year": 2021,
+  "reference_longitude": -91.866667,
+  "reference_latitude": 63.390675,
+  "first_standard_parallel": 49,
+  "second_standard_parallel": 77,
+  "false_easting": 6200000,
+  "false_northing": 3000000,
+  "reference_url": "https://www150.statcan.gc.ca/n1/en/pub/92-160-g/92-160-g2021002-eng.pdf?st=0cwqeEP1"
+}
