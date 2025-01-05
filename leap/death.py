@@ -34,9 +34,10 @@ class Death:
     @property
     def parameters(self) -> dict:
         """A dictionary containing the following keys:
-            * ``β0``: A number.
-            * ``β1``: A number.
-            * ``β2``: A number.
+
+        * ``β0``: A number.
+        * ``β1``: A number.
+        * ``β2``: A number.
         """
         return self._parameters
     
@@ -51,11 +52,12 @@ class Death:
     @property
     def life_table(self) -> DataFrameGroupBy:
         """A grouped data frame grouped by year. Each data frame contains the following columns:
-            * ``age`` (int): age of person.
-            * ``year`` (int): calendar year.
-            * ``F`` (float): the probability of death for a female of a given age in a given
-                year.
-            * ``M`` (float): the probability of death for a male of a given age in a given year.
+        
+        * ``age (int)``: age of person.
+        * ``year (int)``: calendar year.
+        * ``F (float)``: the probability of death for a female of a given age in a given
+          year.
+        * ``M (float)``: the probability of death for a male of a given age in a given year.
         """
         return self._life_table
     
@@ -67,17 +69,20 @@ class Death:
         """Load the life table data.
         
         Args:
-            starting_year: the year to start the data at.
-            province: a string indicating the province abbreviation, e.g. "BC".
-                For all of Canada, set province to "CA".
+            starting_year: The year to start the data at.
+            province: A string indicating the province abbreviation, e.g. ``"BC"``.
+                For all of Canada, set province to ``"CA"``.
         
         Returns:
-            A grouped data frame grouped by year. Each data frame contains the following columns:
-                * ``age`` (int): age of person.
-                * ``year`` (int): calendar year.
-                * ``F`` (float): the probability of death for a female of a given age in a given
-                  year.
-                * ``M`` (float): the probability of death for a male of a given age in a given year.
+            A grouped data frame grouped by year.
+            
+            Each data frame contains the following columns:
+
+            * ``age (int)``: age of person.
+            * ``year (int)``: calendar year.
+            * ``F (float)``: the probability of death for a female of a given age in a given
+                year.
+            * ``M (float)``: the probability of death for a male of a given age in a given year.
         """
         df = pd.read_csv(
             get_data_path("processed_data/master_life_table.csv")

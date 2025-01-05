@@ -51,7 +51,7 @@ class OutcomeTable:
 
         Args:
             columns: The column(s) to get the value from.
-            **kwargs (dict): A dictionary of columns to filter by.
+            kwargs: A dictionary of columns to filter by.
 
         Returns:
             The value of the column.
@@ -67,44 +67,20 @@ class OutcomeTable:
 
 
 class OutcomeMatrix:
-    """A class containing information about the outcomes of the model.
-
-    Attributes:
-        alive (OutcomeTable): A table containing the number of people alive in each
-            year, age, and sex.
-        antibiotic_exposure (OutcomeTable): A table containing the number of antibiotic exposures
-            for each year, age, and sex.
-        asthma_incidence (OutcomeTable): A table containing the number of new asthma diagnoses
-            for each year, age, and sex.
-        asthma_prevalence (OutcomeTable): A table containing the number of people with asthma
-            for a given year, age, and sex.
-        asthma_incidence_contingency_table (OutcomeTable): TODO.
-        asthma_prevalence_contingency_table (OutcomeTable): TODO.
-        asthma_status (OutcomeTable): A table containing the status of asthma.
-        control (OutcomeTable): A table containing the level of asthma control for
-            each year, age, and sex.
-        cost (OutcomeTable): A table containing the cost of asthma for each year, age, and sex.
-        death (OutcomeTable): A table containing the number of people who died in a
-            given year, age, and sex.
-        emigration (OutcomeTable): A table containing the number of people who emigrated to
-            Canada for each year, age, and sex.
-        exacerbation (OutcomeTable): A table containing the number of asthma exacerbations
-            for each year, age, and sex.
-        exacerbation_by_severity (OutcomeTable): A table containing the number of asthma
-            exacerbations by severity.
-        exacerbation_hospital (OutcomeTable): A table containing the number of asthma exacerbations
-            leading to hospitalization.
-        family_history (OutcomeTable): A table containing the number of people with a family history
-            of asthma.
-        immigration (OutcomeTable): A table containing the number of people who immigrated to
-            Canada for each year, age, and sex.
-        utility (OutcomeTable): A table containing the utility due to asthma for each
-            year, age, and sex.
-
-    """
+    """A class containing information about the outcomes of the model."""
     def __init__(
         self, until_all_die: bool, min_year: int, max_year: int, max_age: int
     ):
+        """Initialize the ``OutcomeMatrix`` class.
+        
+        Args:
+            until_all_die: A boolean indicating whether the simulation should run until all
+                people have died.
+            min_year: The minimum year of the simulation.
+            max_year: The maximum year of the simulation.
+            max_age: The maximum age of the people in the simulation.
+        """
+
         self.until_all_die = until_all_die
         self.min_year = min_year
         self.max_year = max_year
@@ -262,6 +238,165 @@ class OutcomeMatrix:
             string_repr += f"\n\n{attribute}:\n{self.__getattribute__(attribute)}"
 
         return string_repr
+
+    @property
+    def alive(self) -> OutcomeTable:
+        """A table containing the number of people alive in each year, age, and sex."""
+        return self._alive
+
+    @alive.setter
+    def alive(self, alive: OutcomeTable):
+        self._alive = alive
+
+    @property
+    def antibiotic_exposure(self) -> OutcomeTable:
+        """A table containing the number of rounds of antibiotics for each year, age, and sex."""
+        return self._antibiotic_exposure
+    
+    @antibiotic_exposure.setter
+    def antibiotic_exposure(self, antibiotic_exposure: OutcomeTable):
+        self._antibiotic_exposure = antibiotic_exposure
+
+    @property
+    def asthma_incidence(self) -> OutcomeTable:
+        """A table containing the number of new asthma diagnoses for each year, age, and sex."""
+        return self._asthma_incidence
+    
+    @asthma_incidence.setter
+    def asthma_incidence(self, asthma_incidence: OutcomeTable):
+        self._asthma_incidence = asthma_incidence
+
+    @property
+    def asthma_prevalence(self) -> OutcomeTable:
+        """A table containing the number of people with asthma for each year, age, and sex."""
+        return self._asthma_prevalence
+    
+    @asthma_prevalence.setter
+    def asthma_prevalence(self, asthma_prevalence: OutcomeTable):
+        self._asthma_prevalence = asthma_prevalence
+
+    @property
+    def asthma_incidence_contingency_table(self) -> OutcomeTable:
+        """TODO."""
+        return self._asthma_incidence_contingency_table
+    
+    @asthma_incidence_contingency_table.setter
+    def asthma_incidence_contingency_table(
+        self, asthma_incidence_contingency_table: OutcomeTable
+    ):
+        self._asthma_incidence_contingency_table = asthma_incidence_contingency_table
+
+    @property
+    def asthma_prevalence_contingency_table(self) -> OutcomeTable:
+        """TODO."""
+        return self._asthma_prevalence_contingency_table
+    
+    @asthma_prevalence_contingency_table.setter
+    def asthma_prevalence_contingency_table(
+        self, asthma_prevalence_contingency_table: OutcomeTable
+    ):
+        self._asthma_prevalence_contingency_table = asthma_prevalence_contingency_table
+
+    @property
+    def asthma_status(self) -> OutcomeTable:
+        """A table containing the status of asthma."""
+        return self._asthma_status
+
+    @asthma_status.setter
+    def asthma_status(self, asthma_status: OutcomeTable):
+        self._asthma_status = asthma_status
+
+    @property
+    def control(self) -> OutcomeTable:
+        """A table containing the level of asthma control for each year, age, and sex."""
+        return self._control
+    
+    @control.setter
+    def control(self, control: OutcomeTable):
+        self._control = control
+
+    @property
+    def cost(self) -> OutcomeTable:
+        """A table containing the cost of asthma for each year, age, and sex."""
+        return self._cost
+    
+    @cost.setter
+    def cost(self, cost: OutcomeTable):
+        self._cost = cost
+
+    @property
+    def death(self) -> OutcomeTable:
+        """A table containing the number of people who died in a given year, age, and sex."""
+        return self._death
+    
+    @death.setter
+    def death(self, death: OutcomeTable):
+        self._death = death
+
+    @property
+    def emigration(self) -> OutcomeTable:
+        """A table containing the number of people who emigrated to Canada for each year, age,
+        and sex."""
+        return self._emigration
+
+    @emigration.setter
+    def emigration(self, emigration: OutcomeTable):
+        self._emigration = emigration
+
+    @property
+    def exacerbation(self) -> OutcomeTable:
+        """A table containing the number of asthma exacerbations for each year, age, and sex."""
+        return self._exacerbation
+
+    @exacerbation.setter
+    def exacerbation(self, exacerbation: OutcomeTable):
+        self._exacerbation = exacerbation
+
+    @property
+    def exacerbation_by_severity(self) -> OutcomeTable:
+        """A table containing the number of asthma exacerbations by severity."""
+        return self._exacerbation_by_severity
+
+    @exacerbation_by_severity.setter
+    def exacerbation_by_severity(self, exacerbation_by_severity: OutcomeTable):
+        self._exacerbation_by_severity = exacerbation_by_severity
+
+    @property
+    def exacerbation_hospital(self) -> OutcomeTable:
+        """A table containing the number of asthma exacerbations leading to hospitalization."""
+        return self._exacerbation_hospital
+    
+    @exacerbation_hospital.setter
+    def exacerbation_hospital(self, exacerbation_hospital: OutcomeTable):
+        self._exacerbation_hospital = exacerbation_hospital
+
+    @property
+    def family_history(self) -> OutcomeTable:
+        """A table containing the number of people with a family history of asthma."""
+        return self._family_history
+    
+    @family_history.setter
+    def family_history(self, family_history: OutcomeTable):
+        self._family_history = family_history
+
+    @property
+    def immigration(self) -> OutcomeTable:
+        """A table containing the number of people who immigrated to Canada for each year, age,
+        and sex."""
+        return self._immigration
+
+    @immigration.setter
+    def immigration(self, immigration: OutcomeTable):
+        self._immigration = immigration
+
+    @property
+    def utility(self) -> OutcomeTable:
+        """A table containing the utility due to asthma for each year, age, and sex."""
+        return self._utility
+    
+    @utility.setter
+    def utility(self, utility: OutcomeTable):
+        self._utility = utility
 
     def create_table(self, columns: list[str], group_by: list[str], *args) -> OutcomeTable:
         """Create an outcome table.

@@ -1,0 +1,87 @@
+
+/* Colors */
+
+:root {
+    --md-primary-fg-color: #02377e;
+    --md-accent-fg-color: #0c2046;
+    --primary-color-light: #d1edf1;
+    --primary-color-hover: #0c2046;
+    --bs-primary-rgb: 57, 188, 206;
+    --bs-link-color: #02377e;
+    --bs-link-hover-color: #0c2046;
+    --md-code-kw-color: #e74c3c;
+}
+
+[data-md-color-primary=blue] {
+    --md-primary-fg-color: #02377e;
+    --md-primary-bg-color: #fff;
+    --md-primary-bg-color--light: hsla(0, 0%, 100%, .7);
+}
+
+
+/* Layout */
+
+.md-sidebar {
+    width: 10rem;
+}
+
+.md-grid {
+    margin-left: 10px;
+    margin-right: 10px;
+    max-width: 1400px;
+}
+
+/* Code */
+
+.md-typeset code.notranslate {
+    word-break: keep-all;
+    white-space: nowrap;
+}
+
+.md-typeset code.snippet {
+    word-break: keep-all;
+    white-space: normal;
+    padding: 8px;
+}
+
+.md-typeset code.notranslate {
+    color: var(--md-code-kw-color);
+}
+
+/* Bootstrap Tables */
+
+.md-typeset table.plot-table.data:not(.plain) td,
+.md-typeset table.plot-table.data:not(.plain) th {
+    padding: 0px;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+}
+
+.table th,
+.table td {
+    padding: 0.5rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 700;
+    text-align: left;
+}
+
+.table tbody+tbody {
+    border-top: 2px solid #dee2e6;
+}
+
+.md-typeset table.data:not(.plain) th {
+    font-weight: 700;
+    min-width: 1rem;
+    padding: .9375em 1.25em;
+    vertical-align: top;
+}

@@ -61,8 +61,9 @@ class Exacerbation:
     def hyperparameters(self) -> dict:
         """A dictionary containing the hyperparameters used to compute ``β0`` from a normal
         distribution:
-            * ``β0_μ``: float, the mean of the normal distribution.
-            * ``β0_σ``: float, the standard deviation of the normal distribution.
+
+        * ``β0_μ``: float, the mean of the normal distribution.
+        * ``β0_σ``: float, the standard deviation of the normal distribution.
         """
         return self._hyperparameters
     
@@ -77,20 +78,21 @@ class Exacerbation:
     @property
     def parameters(self) -> dict:
         """A dictionary containing the following keys:
-            * ``β0``: float, a constant parameter, randomly selected from a normal distribution
-              with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
-            * ``β0_calibration``: float, the parameter for the calibration term.
-            * ``βage``: float, the parameter for the age term.
-            * ``βsex``: float, the parameter for the sex term.
-            * ``βasthmaDx``: float, TODO.
-            * ``βprev_exac1``: float, TODO.
-            * ``βprev_exac2``: float, TODO.
-            * ``βcontrol``: float, the parameter for the asthma control term.
-            * ``βcontrol_C``: float, the parameter for the controlled asthma term.
-            * ``βcontrol_PC``: float, the parameter for the partially-controlled asthma term.
-            * ``βcontrol_UC``: float, the parameter for the uncontrolled asthma term.
-            * ``min_year``: int, the minimum year for which exacerbation data exists + 1.
-              Currently 2001.
+
+        * ``β0``: float, a constant parameter, randomly selected from a normal distribution
+          with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
+        * ``β0_calibration``: float, the parameter for the calibration term.
+        * ``βage``: float, the parameter for the age term.
+        * ``βsex``: float, the parameter for the sex term.
+        * ``βasthmaDx``: float, TODO.
+        * ``βprev_exac1``: float, TODO.
+        * ``βprev_exac2``: float, TODO.
+        * ``βcontrol``: float, the parameter for the asthma control term.
+        * ``βcontrol_C``: float, the parameter for the controlled asthma term.
+        * ``βcontrol_PC``: float, the parameter for the partially-controlled asthma term.
+        * ``βcontrol_UC``: float, the parameter for the uncontrolled asthma term.
+        * ``min_year``: int, the minimum year for which exacerbation data exists + 1.
+          Currently 2001.
         """
         return self._parameters
     
@@ -109,12 +111,12 @@ class Exacerbation:
     def calibration_table(self) -> DataFrameGroupBy:
         """A dataframe grouped by year and sex, with the following columns:
 
-            * ``year``: integer year.
-            * ``sex``: 1 = male, 0 = female.
-            * ``age``: integer age.
-            * ``calibrator_multiplier``: float, TODO.
+        * ``year``: integer year.
+        * ``sex``: 1 = male, 0 = female.
+        * ``age``: integer age.
+        * ``calibrator_multiplier``: float, TODO.
 
-            See ``master_calibrated_exac.csv``.
+        See ``master_calibrated_exac.csv``.
         """
         return self._calibration_table
     
@@ -133,16 +135,18 @@ class Exacerbation:
         """Load the exacerbation calibration table.
 
         Args:
-            province: A string indicating the province abbreviation, e.g. "BC".
-                For all of Canada, set province to "CA".
+            province: A string indicating the province abbreviation, e.g. ``"BC"``.
+                For all of Canada, set province to ``"CA"``.
 
         Returns:
-            A dataframe grouped by year and sex, with the following columns:
+            A dataframe grouped by year and sex.
 
-                * ``year``: integer year.
-                * ``sex``: 1 = male, 0 = female.
-                * ``age``: integer age.
-                * ``calibrator_multiplier``: float, TODO.
+            Each entry is a dataframe with the following columns:
+
+            * ``year``: integer year.
+            * ``sex``: 1 = male, 0 = female.
+            * ``age``: integer age.
+            * ``calibrator_multiplier``: float, TODO.
         """
 
         df = pd.read_csv(

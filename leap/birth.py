@@ -50,14 +50,28 @@ class Birth:
         """A grouped data frame giving the number of births in a given province, grouped by year.
         
         It contains the following columns:
-            * ``province``: A string indicating the province abbreviation, e.g. "BC".
-              For all of Canada, set province to "CA".
+            * ``province``: A string indicating the province abbreviation, e.g. ``"BC"``.
+              For all of Canada, set province to ``"CA"``.
             * ``N``: integer, estimated number of births for that year.
-            * ``prop_male``: proportion of births which are male, a number in ``[0, 1]``.
+            * ``prop_male``: The proportion of births which are male, a number in ``[0, 1]``.
             * ``projection_scenario``: Population growth type, one of:
-                ["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"].
-                See `StatCan <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
+
+              * ``past``: historical data
+              * ``LG``: low-growth projection
+              * ``HG``: high-growth projection
+              * ``M1``: medium-growth 1 projection
+              * ``M2``: medium-growth 2 projection
+              * ``M3``: medium-growth 3 projection
+              * ``M4``: medium-growth 4 projection
+              * ``M5``: medium-growth 5 projection
+              * ``M6``: medium-growth 6 projection
+              * ``FA``: fast-aging projection
+              * ``SA``: slow-aging projection
+
+              See: `StatCan Projection Scenarios
+              <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
             * ``N_relative``: The number of births relative to the first year of the simulation.
+
         See ``master_birth_estimate.csv``.
         """
         return self._estimate
@@ -71,18 +85,32 @@ class Birth:
         """A data frame giving the population for the first year of the simulation.
 
         It contains the following columns:
-            * ``year``: integer year the range 2000 - 2065.
-            * ``age``: integer age.
-            * ``province``: a string indicating the province abbreviation, e.g. "BC".
-              For all of Canada, set province to "CA".
-            * ``n``: estimated number of people in that age category in a given year.
-            * ``n_birth``: the number of people born that year.
-            * ``prop``: the ratio of that age group to the newborn age group (age = 0).
-            * ``prop_male``: proportion of people in that age group who are male, a
+            * ``year``: Integer year the range ``2000 - 2065``.
+            * ``age``: Integer age.
+            * ``province``: A string indicating the province abbreviation, e.g. ``"BC"``.
+              For all of Canada, set province to ``"CA"``.
+            * ``n``: Estimated number of people in that age category in a given year.
+            * ``n_birth``: The number of people born that year.
+            * ``prop``: The ratio of that age group to the newborn age group (age = 0).
+            * ``prop_male``: The proportion of people in that age group who are male, a
               number in ``[0, 1]``.
             * ``projection_scenario``: Population growth type, one of:
-              ``["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"]``.
-              See `StatCan <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
+
+              * ``past``: historical data
+              * ``LG``: low-growth projection
+              * ``HG``: high-growth projection
+              * ``M1``: medium-growth 1 projection
+              * ``M2``: medium-growth 2 projection
+              * ``M3``: medium-growth 3 projection
+              * ``M4``: medium-growth 4 projection
+              * ``M5``: medium-growth 5 projection
+              * ``M6``: medium-growth 6 projection
+              * ``FA``: fast-aging projection
+              * ``SA``: slow-aging projection
+
+              See: `StatCan Projection Scenarios
+              <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
+
         See ``master_population_initial_distribution.csv``.
         """
         return self._initial_population
@@ -94,6 +122,56 @@ class Birth:
     def load_birth_estimate(
         self, starting_year: int, province: str, population_growth_type: str
     ) -> DataFrameGroupBy:
+        """Load the data from ``master_birth_estimate.csv``.
+        
+        Args:
+            starting_year: The year for the data to start at. Must be between ``2000-2065``.
+            province: A string indicating the province abbreviation, e.g. ``"BC"``.
+                For all of Canada, set province to ``"CA"``.
+            population_growth_type: Population growth type, one of:
+
+                * ``past``: historical data
+                * ``LG``: low-growth projection
+                * ``HG``: high-growth projection
+                * ``M1``: medium-growth 1 projection
+                * ``M2``: medium-growth 2 projection
+                * ``M3``: medium-growth 3 projection
+                * ``M4``: medium-growth 4 projection
+                * ``M5``: medium-growth 5 projection
+                * ``M6``: medium-growth 6 projection
+                * ``FA``: fast-aging projection
+                * ``SA``: slow-aging projection
+
+                See: `StatCan Projection Scenarios
+                <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
+        
+        Returns:
+            A grouped dataframe containing the number of births for a given province and
+            projection scenario, grouped by year. Each group contains the following columns:
+
+            * ``year``: Integer year the range ``2000 - 2065``.
+            * ``province``: A string indicating the province abbreviation, e.g. ``"BC"``.
+            * ``N``: Integer, estimated number of births for that year.
+            * ``N_relative``: The number of births relative to the first year of the simulation.
+            * ``prop_male``: The proportion of births which are male, a number in ``[0, 1]``.
+            * ``projection_scenario``: Population growth type, one of:
+
+              * ``past``: historical data
+              * ``LG``: low-growth projection
+              * ``HG``: high-growth projection
+              * ``M1``: medium-growth 1 projection
+              * ``M2``: medium-growth 2 projection
+              * ``M3``: medium-growth 3 projection
+              * ``M4``: medium-growth 4 projection
+              * ``M5``: medium-growth 5 projection
+              * ``M6``: medium-growth 6 projection
+              * ``FA``: fast-aging projection
+              * ``SA``: slow-aging projection
+
+              See: `StatCan Projection Scenarios
+              <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
+        """
+
         df = pd.read_csv(
             get_data_path("processed_data/master_birth_estimate.csv")
         )
@@ -110,6 +188,34 @@ class Birth:
     def load_population_initial_distribution(
         self, starting_year: int, province: str, population_growth_type: str, max_age: int
     ) -> pd.DataFrame:
+        """Load the data from ``master_initial_pop_distribution_prop.csv``.
+        
+        Args:
+            starting_year: The year for the data to start at. Must be between ``2000-2065``.
+            province: A string indicating the province abbreviation, e.g. ``"BC"``.
+                For all of Canada, set province to ``"CA"``.
+            population_growth_type: Population growth type, one of:
+
+                * ``past``: historical data
+                * ``LG``: low-growth projection
+                * ``HG``: high-growth projection
+                * ``M1``: medium-growth 1 projection
+                * ``M2``: medium-growth 2 projection
+                * ``M3``: medium-growth 3 projection
+                * ``M4``: medium-growth 4 projection
+                * ``M5``: medium-growth 5 projection
+                * ``M6``: medium-growth 6 projection
+                * ``FA``: fast-aging projection
+                * ``SA``: slow-aging projection
+
+                See: `StatCan Projection Scenarios
+                <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
+            max_age: The maximum age to include in the data.
+        
+        Returns:
+            A dataframe containing the population for the first year of the simulation.
+        """
+
         df = pd.read_csv(
             get_data_path("processed_data/master_initial_pop_distribution_prop.csv")
         )

@@ -13,6 +13,7 @@ class Utility:
 
     Attributes:
         parameters: A dictionary containing the following keys:
+
             * ``βcontrol``: A vector of 3 parameters to be multiplied by the control levels, i.e.
 
               .. code-block:: python
@@ -32,10 +33,12 @@ class Utility:
         table: A grouped data frame grouped by age and sex, containing information about
             EuroQol Group's quality of life metric called the EQ-5D.
             Each data frame contains the following columns:
-                * ``age``: integer age.
-                * ``sex``: sex of a person, 1 = male, 0 = female
-                * ``eq5d``: float, the quality of life.
-                * ``se``: float, standard error.
+
+            * ``age``: integer age.
+            * ``sex``: sex of a person, 1 = male, 0 = female
+            * ``eq5d``: float, the quality of life.
+            * ``se``: float, standard error.
+
             See ``eq5d_canada.csv``.
     """
     def __init__(

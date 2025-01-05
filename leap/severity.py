@@ -15,24 +15,12 @@ class ExacerbationSeverity:
     """A class containing information about asthma exacerbation severity.
 
     There are four levels of asthma exacerbation severity:
-        1 = mild
-        2 = moderate
-        3 = severe
-        4 = very severe
 
-    Attributes:
-        hyperparameters: A dictionary containing the hyperparameters used
-            in the Dirichlet-multinomial distribution. See
-            https://juliastats.org/Distributions.jl/stable/multivariate/#Distributions.Dirichlet.
-            * ``k``: integer, number of trials.
-            * ``α``: parameter vector, length 4.
-        parameters: A dictionary containing the following keys:
-            * ``p``: a probability vector giving the probability of each exacerbation type,
-              using the Dirichlet-multinomial distribution.
-            * ``βprev_hosp_ped``: Float64, parameter for previous hospitalizations due to asthma
-              in childhood.
-            * ``βprev_hosp_adult``: Float64, parameter for previous hospitalizations due to asthma
-              in adulthood.
+    * 1 = mild
+    * 2 = moderate
+    * 3 = severe
+    * 4 = very severe
+
     """
     def __init__(
         self,
@@ -53,14 +41,58 @@ class ExacerbationSeverity:
 
         self.assign_random_p()
 
+    @property
+    def hyperparameters(self) -> dict:
+        """A dictionary containing the hyperparameters used in the Dirichlet-multinomial distribution.
+        
+        See:
+        `Numpy Dirichlet function
+        <https://numpy.org/doc/2.1/reference/random/generated/numpy.random.dirichlet.html>`_.
+
+        A dictionary containing the following keys:
+
+        * ``k``: integer, number of trials.
+        * ``α``: parameter vector, length 4.
+        """
+        return self._hyperparameters
+
+    @hyperparameters.setter
+    def hyperparameters(self, hyperparameters: dict):
+        KEYS = ["k", "α"]
+        for key in KEYS:
+            if key not in hyperparameters:
+                raise ValueError(f"The key '{key}' is missing in the hyperparameters.")
+        if len(hyperparameters["α"]) != 4:
+            raise ValueError("The length of the 'α' vector must be 4.")
+        self._hyperparameters = hyperparameters
+
+    @property
+    def parameters(self) -> dict:
+        """A dictionary containing the following keys:
+
+        * ``p``: a probability vector giving the probability of each exacerbation type,
+          using the Dirichlet-multinomial distribution.
+        * ``βprev_hosp_ped``: ``float``, parameter for previous hospitalizations due to asthma
+          in childhood.
+        * ``βprev_hosp_adult``: ``float``, parameter for previous hospitalizations due to asthma
+          in adulthood.
+        """
+        return self._parameters
+
+    @parameters.setter
+    def parameters(self, parameters: dict):
+        KEYS = ["βprev_hosp_ped", "βprev_hosp_adult"]
+        for key in KEYS:
+            if key not in parameters:
+                raise ValueError(f"The key '{key}' is missing in the parameters.")
+        self._parameters = parameters
+
     def assign_random_p(self):
         """Compute the probability vector ``p`` from the Dirichlet distribution.
 
-        Compute the probability vector `p` from the Dirichlet distribution. See:
-        https://juliastats.org/Distributions.jl/stable/multivariate/#Distributions.Dirichlet.
-
-        Returns
-            np.ndarray: the probability vector `p`.
+        See:
+        `Numpy Dirichlet function
+        <https://numpy.org/doc/2.1/reference/random/generated/numpy.random.dirichlet.html>`_.
         """
 
         p = np.random.dirichlet(np.array(self.hyperparameters["α"]) * self.hyperparameters["k"])
@@ -70,14 +102,16 @@ class ExacerbationSeverity:
         """Compute the exacerbation severity distribution.
 
         Compute the exacerbation severity distribution for a patient in a given year using the
-        Dirichlet probability vector `p` in the Multinomial distribution. See:
+        Dirichlet probability vector ``p`` in the Multinomial distribution. See:
         https://juliastats.org/Distributions.jl/stable/multivariate/#Distributions.Multinomial.
 
         For example, if the patient has ``num_current_year = 10`` exacerbations in the current year,
         then the output might be:
 
-        mild | moderate | severe | very severe
-        2    | 1        | 6      | 1
+        .. code-block::
+
+            mild | moderate | severe | very severe
+            2    | 1        | 6      | 1
 
         Args:
             num_current_year: the number of asthma exacerbations the patient has had this year.
@@ -85,7 +119,7 @@ class ExacerbationSeverity:
             prev_hosp: has patient been previously hospitalized for asthma?
             age: the age of the person in years.
 
-        Returns
+        Returns:
             The distribution of asthma exacerbations by exacerbation type for the current year.
         """
         p = self.parameters["p"]
@@ -113,10 +147,13 @@ class ExacerbationSeverity:
 
         https://stats.stackexchange.com/questions/174952/marginal-probability-function-of-the-dirichlet-multinomial-distribution
 
-        Note on limits: the Γ(z) function approaches infinity as z -> 0+ and z -> inf.
-        Empirically, when the ``total_rate`` variable is around 150, the Γ(z) function returns Inf.
-        Likewise, if the probability of a severe exacerbation is exactly 1.0, the Γ(z) function
-        will return Inf. To remedy this, I have added max values for these variables.
+        .. note::
+
+            Note on limits: the ``Γ(z)`` function approaches infinity as ``z -> 0+`` and ``z -> inf``.
+            Empirically, when the ``total_rate`` variable is around ``150``, the ``Γ(z)`` function
+            returns ``Inf``. Likewise, if the probability of a severe exacerbation is exactly ``1.0``,
+            the ``Γ(z)`` function will return ``Inf``. To remedy this, I have added max values for
+            these variables.
 
         Args:
             agent: A person in the simulation.
@@ -162,10 +199,11 @@ class ExacerbationSeverityHistory:
     """A class containing information about the history of asthma exacerbations by severity.
 
     There are four levels of asthma exacerbation severity:
-        1 = mild
-        2 = moderate
-        3 = severe
-        4 = very severe
+
+    * 1 = mild
+    * 2 = moderate
+    * 3 = severe
+    * 4 = very severe
 
     Attributes:
         current_year: An array of 4 integers indicating the number of exacerbations for

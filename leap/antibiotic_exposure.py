@@ -42,8 +42,8 @@ class AntibioticExposure:
             * ``βsex``: (float); the parameter to be multiplied by the agent's sex when computing μ.
             * ``θ``: int, the number of successes (the r parameter) in the negative binomial
               distribution.
-            * ``β2005_year``: (float); If the agent's birth year is > 2005, ``β2005_year`` will be
-              multiplied by the birth year when computing ``μ``. This is to factor in the
+            * ``β2005_year``: (float); If the agent's birth year is ``> 2005``, ``β2005_year``
+              will be multiplied by the birth year when computing ``μ``. This is to factor in the
               antibiotic stewardship program that was introduced in BC in 2005.
             * ``fixyear``: (int | None); If present, replaces the ``year`` parameter when
               computing the probability for the negative binomial distribution.
@@ -63,11 +63,12 @@ class AntibioticExposure:
     @property
     def mid_trends(self) -> DataFrameGroupBy:
         """A set of dataframes grouped by year and sex.
+
         Each entry is a dataframe with a single row with the following columns:
 
-            * ``year``: integer
-            * ``sex``: 0 = female, 1 = male
-            * ``rate``: float, TODO.
+        * ``year``: integer
+        * ``sex``: 0 = female, 1 = male
+        * ``rate``: float, TODO.
         """
         return self._mid_trends
     
@@ -80,11 +81,12 @@ class AntibioticExposure:
 
         Returns:
             A set of data frames grouped by year and sex.
+
             Each entry is a DataFrame with a single row with the following columns:
 
-                * ``year``: integer
-                * ``sex``: 0 = female, 1 = male
-                * ``rate``: float, TODO.
+            * ``year``: integer
+            * ``sex``: 0 = female, 1 = male
+            * ``rate``: float, TODO.
         """
         df = pd.read_csv(get_data_path("processed_data/midtrends.csv"))
         grouped_df = df.groupby(["year", "sex"])
