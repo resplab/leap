@@ -81,7 +81,7 @@ class ExacerbationSeverity:
 
     @parameters.setter
     def parameters(self, parameters: dict):
-        KEYS = ["p", "βprev_hosp_ped", "βprev_hosp_adult"]
+        KEYS = ["βprev_hosp_ped", "βprev_hosp_adult"]
         for key in KEYS:
             if key not in parameters:
                 raise ValueError(f"The key '{key}' is missing in the parameters.")
