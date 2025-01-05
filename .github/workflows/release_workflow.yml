@@ -25,7 +25,7 @@ jobs:
         run: python setup.py bdist_wheel
 
       - name: Archive package
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/fix-install' }}
         uses: actions/upload-artifact@v2
         with:
           name: leap
