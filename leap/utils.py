@@ -83,19 +83,30 @@ def compute_ordinal_regression(
     return [prob_function(θ[k + 1] - η) - prob_function(θ[k] - η) for k in range(len(θ) - 1)]
 
 
-def get_data_path(data_folder: str, file_name: str = "") -> pathlib.Path:
-    """Get the full path to a data file in the ``LEAP`` package.
+def get_data_path(data_path: str) -> pathlib.Path:
+    """Get the full path to a data file or folder in the ``LEAP`` package.
 
     Args:
-        file_name: The name of the file.
-        data_folder: The name of the folder in the ``LEAP`` package.
+        data_path: The path to the file or folder.
 
     Returns:
-        The full path to the data file in the ``LEAP`` package.
+        The full path to the file or folder.
     """
 
-    package_path = str(pkg_resources.files(data_folder).joinpath(file_name))
-    return pathlib.Path(package_path)
+    if pathlib.Path(data_path).parts[0] == "tests":
+        data_path = str(pathlib.Path(data_path).relative_to("tests/data"))
+    elif pathlib.Path(data_path).parts[0] == "processed_data":
+        data_path = str(pathlib.Path(data_path).relative_to("processed_data"))
+
+    for data_folder in ["tests.data", "processed_data"]:
+        try:
+            package_path = str(pkg_resources.files(data_folder).joinpath(data_path))
+            if os.path.isfile(package_path) or os.path.isdir(package_path):
+                return pathlib.Path(package_path)
+        except ModuleNotFoundError:
+            pass
+        
+    raise FileNotFoundError(f"Path {data_path} not found.")
 
 
 def check_file(file_path: str | pathlib.Path, ext: str):

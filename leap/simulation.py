@@ -40,7 +40,7 @@ class Simulation:
         population_growth_type: str | None = None
     ):
         if config is None:
-            with open(get_data_path("processed_data", "config.json")) as file:
+            with open(get_data_path("processed_data/config.json")) as file:
                 config: dict = json.load(file)
         elif isinstance(config, str) or isinstance(config, pathlib.Path):
             with open(config) as file:
@@ -224,7 +224,7 @@ class Simulation:
 
             >>> from leap.simulation import Simulation
             >>> from leap.utils import get_data_path
-            >>> config_path = get_data_path(file_name="config.json")
+            >>> config_path = get_data_path("processed_data/config.json")
             >>> simulation = Simulation(config=config_path, min_year=2027, num_births_initial=5)
             >>> new_agents_df = simulation.get_new_agents(year=2028)
             >>> list(new_agents_df["immigrant"]) # doctest: +NORMALIZE_WHITESPACE

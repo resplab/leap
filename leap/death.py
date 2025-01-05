@@ -80,7 +80,7 @@ class Death:
                 * ``M`` (float): the probability of death for a male of a given age in a given year.
         """
         df = pd.read_csv(
-            get_data_path("processed_data", "master_life_table.csv")
+            get_data_path("processed_data/master_life_table.csv")
         )
         df = df[
             (df["year"] >= starting_year) &

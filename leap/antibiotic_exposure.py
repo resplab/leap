@@ -86,7 +86,7 @@ class AntibioticExposure:
                 * ``sex``: 0 = female, 1 = male
                 * ``rate``: float, TODO.
         """
-        df = pd.read_csv(get_data_path("processed_data", "midtrends.csv"))
+        df = pd.read_csv(get_data_path("processed_data/midtrends.csv"))
         grouped_df = df.groupby(["year", "sex"])
         return grouped_df
 
@@ -105,7 +105,7 @@ class AntibioticExposure:
             >>> from leap.antibiotic_exposure import AntibioticExposure
             >>> from leap.utils import get_data_path
             >>> import json
-            >>> with open(get_data_path("processed_data", "config.json"), "r") as file:
+            >>> with open(get_data_path("processed_data/config.json"), "r") as file:
             ...     config = json.load(file)["antibiotic_exposure"]
             >>> antibiotic_exposure = AntibioticExposure(
             ...     config=config

@@ -43,7 +43,7 @@ class PollutionTable:
         self._data = data
 
     def load_pollution_data(
-        self, pm25_data_path: pathlib.Path = get_data_path("processed_data.pollution")
+        self, pm25_data_path: pathlib.Path = get_data_path("processed_data/pollution")
     ) -> DataFrameGroupBy:
         """Load the data from the PM2.5 SSP *.csv files.
 
