@@ -67,7 +67,7 @@ class Reassessment:
               For all of Canada, set province to "CA".
         """
         df = pd.read_csv(
-            get_data_path("processed_data", "master_asthma_reassessment.csv")
+            get_data_path("processed_data/master_asthma_reassessment.csv")
         )
         df = df[
             (df["year"] >= starting_year) &

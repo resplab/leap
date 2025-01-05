@@ -150,7 +150,7 @@ class Exacerbation:
         """
 
         df = pd.read_csv(
-            get_data_path("processed_data", "master_calibrated_exac.csv")
+            get_data_path("processed_data/master_calibrated_exac.csv")
         )
         df = df[df["province"] == province]
         df.drop(["province"], axis=1, inplace=True)

@@ -129,7 +129,7 @@ class Control:
             >>> from leap.control import Control
             >>> from leap.utils import get_data_path
             >>> import json
-            >>> with open(get_data_path("processed_data", "config.json")) as f:
+            >>> with open(get_data_path("processed_data/config.json")) as f:
             ...     config = json.load(f)["control"]
             >>> config["parameters"]["θ"] = [-10**5, -10**5] 
             >>> control = Control(config=config)

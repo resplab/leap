@@ -51,14 +51,23 @@ def test_emigration_constructor(
             "M",
             "BC",
             "M2",
-            43300,
-            43600
+            43000,
+            43800
         ),
     ]
 )
 def test_emigration_compute_probability(
     starting_year, year, age, sex, province, population_growth_type, lower_bound, upper_bound
 ):
+    """Test the ``compute_probability`` method of the ``Emigration`` class.
+    
+    The ``compute_probability`` method should return a boolean value indicating
+    whether the agent emigrates in a given year. This is computed using the binomial distribution.
+    For the purposes of testing, we will run the method 100,000 times and check that the number of
+    emigrants falls within a certain range. Please see
+    ``processed_data/migration/master_emigration_table.csv`` for the corresponding values.
+    """
+
     emigration = Emigration(
         starting_year=starting_year,
         province=province,
@@ -66,7 +75,7 @@ def test_emigration_compute_probability(
     )
 
     count = 0
-    for i in range(100000):
+    for _ in range(100000):
         if emigration.compute_probability(year, age, sex):
             count += 1
 

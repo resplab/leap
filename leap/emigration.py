@@ -74,7 +74,7 @@ class Emigration:
             age, province, sex, and growth scenario.
         """
         df = pd.read_csv(
-            get_data_path("processed_data.migration", "master_emigration_table.csv")
+            get_data_path("processed_data/migration/master_emigration_table.csv")
         )
         df = df[
             (df["year"] >= starting_year) &

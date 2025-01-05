@@ -21,7 +21,7 @@ def get_parser() -> argparse.ArgumentParser:
     args = parser.add_argument_group("ARGUMENTS")
     args.add_argument(
         "-c", "--config", dest="config", required=False, type=str,
-        default=get_data_path("processed_data", "config.json"),
+        default=get_data_path("processed_data/config.json"),
         help="Path to configuration file."
     )
     args.add_argument(

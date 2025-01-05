@@ -173,7 +173,7 @@ class Birth:
         """
 
         df = pd.read_csv(
-            get_data_path("processed_data", "master_birth_estimate.csv")
+            get_data_path("processed_data/master_birth_estimate.csv")
         )
         df = df[
             (df["year"] >= starting_year) &
@@ -217,7 +217,7 @@ class Birth:
         """
 
         df = pd.read_csv(
-            get_data_path("processed_data", "master_initial_pop_distribution_prop.csv")
+            get_data_path("processed_data/master_initial_pop_distribution_prop.csv")
         )
         df = df[
             (df["age"] <= max_age) &

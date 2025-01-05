@@ -76,7 +76,7 @@ class CensusTable:
         """Load the census data."""
 
         df = pd.read_csv(
-            get_data_path("processed_data.census_divisions", "master_census_data_2021.csv")
+            get_data_path("processed_data/census_divisions/master_census_data_2021.csv")
         )
         return df
 

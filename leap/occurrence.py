@@ -131,7 +131,7 @@ class Occurrence:
 
         """
         df = pd.read_csv(
-            get_data_path("processed_data", "master_asthma_occurrence_correction.csv")
+            get_data_path("processed_data/master_asthma_occurrence_correction.csv")
         )
         df = df[df["type"] == occurrence_type]
         df.drop(columns=["type"], inplace=True)
