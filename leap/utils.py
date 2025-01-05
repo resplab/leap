@@ -91,9 +91,9 @@ def compute_ordinal_regression(
     Examples:
 
         >>> compute_ordinal_regression(0, 0.5)
-        [0.5, 0.5]
+        [np.float64(0.6224593312018546), np.float64(0.3775406687981454)]
         >>> compute_ordinal_regression(0, [0.5, 1.5])
-        [0.5, 0.25, 0.25]
+        [np.float64(0.6224593312018546), np.float64(0.19511514499178906), np.float64(0.18242552380635635)]
     """
 
     if isinstance(θ, float):
