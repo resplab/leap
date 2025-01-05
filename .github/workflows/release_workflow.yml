@@ -1,0 +1,32 @@
+name: release_workflow
+
+# execute this workflow automatically when a we create a release
+on:
+  push:
+
+jobs:
+  publish_release:
+    name: Build and publish Python package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install LEAP requirements
+        run: |
+          pip install -r requirements.txt
+      - name: Install wheel
+        run: pip install wheel
+
+      - name: Build a binary wheel and a source tarball
+        run: python setup.py bdist_wheel
+
+      - name: Archive package
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: leap
+          path: dist/
