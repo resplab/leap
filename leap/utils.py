@@ -165,7 +165,7 @@ class Sex:
 
             >>> sex = Sex("F")
             >>> str(sex)
-            "F"
+            'F'
             >>> int(sex)
             0
             >>> bool(sex)
@@ -173,7 +173,7 @@ class Sex:
 
             >>> sex = Sex(True)
             >>> str(sex)
-            "M"
+            'M'
             >>> int(sex)
             1
             >>> bool(sex)
