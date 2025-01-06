@@ -1,5 +1,0 @@
-processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e.dbf filter=lfs diff=lfs merge=lfs -text
-processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e.prj filter=lfs diff=lfs merge=lfs -text
-processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e.shx filter=lfs diff=lfs merge=lfs -text
-processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e.xml filter=lfs diff=lfs merge=lfs -text
-processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e.shp filter=lfs diff=lfs merge=lfs -text
