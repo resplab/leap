@@ -170,7 +170,7 @@ class ExacerbationSeverity:
             ...     num_current_year=10,
             ...     prev_hosp=True,
             ...     age=85
-            ... )
+            ... ) # doctest: +NORMALIZE_WHITESPACE
             array([10, 0, 0, 0])
         """
         severity_levels = self.severity_levels
