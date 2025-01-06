@@ -30,7 +30,7 @@ class Agent:
         year_index: int,
         month: int = 1,
         province: str = "CA",
-        uuid: UUID4 = UUID4(),
+        uuid: UUID4 | None = None,
         alive: bool = True,
         num_antibiotic_use: int | None = None,
         has_asthma: bool = False,
@@ -47,6 +47,8 @@ class Agent:
         pollution: Pollution | None = None,
         ssp: str = "SSP1_2.6"
     ):
+        if uuid is None:
+            uuid = UUID4()
         self.uuid = uuid
         self.sex = sex
         self.age = age
