@@ -151,6 +151,88 @@ def check_file(file_path: str | pathlib.Path, ext: str):
         raise ValueError(f"{file_path} is not a valid file.")
 
 
+def check_age(age: int, df: pd.DataFrame):
+    """Check if the age is valid.
+
+    Args:
+        age: The age.
+        df: The DataFrame to check.
+
+    Raises:
+        ValueError: If the age is not valid.
+    """
+    if age < df["age"].min():
+        raise ValueError(f"age must be >= {df['age'].min()}")
+    elif age > df["age"].max():
+        raise ValueError(f"age must be <= {df['age'].max()}")
+
+
+def check_cduid(cduid: int, df: pd.DataFrame):
+    """Check if the ``CDUID`` is valid.
+
+    Args:
+        cduid: The census division unique identifier.
+        df: The DataFrame to check.
+
+    Raises:
+        ValueError: If the ``CDUID`` is not valid.
+    """
+    if cduid not in df["cduid"].unique():
+        raise ValueError(f"cduid must be one of {df['cduid'].unique()}, received {cduid}")
+
+
+def check_year(year: int, df: pd.DataFrame):
+    """Check if the year is valid.
+
+    Args:
+        year: The minimum year.
+        df: The DataFrame to check.
+
+    Raises:
+        ValueError: If the year is not valid.
+    """
+    if year < df["year"].min():
+        raise ValueError(f"year must be >= {df['year'].min()}")
+    elif year > df["year"].max():
+        raise ValueError(f"year must be <= {df['year'].max()}")
+
+
+def check_province(province: str):
+    """Check if the province is valid.
+    
+    Args:
+        province: The province abbreviation.
+        
+    Raises:
+        ValueError: If the province is not valid.
+    """
+
+    PROVINCES = [
+        "CA", "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"
+    ]
+    if province not in PROVINCES:
+        raise ValueError(f"province must be one of {PROVINCES}, received {province}")
+    
+
+def check_projection_scenario(projection_scenario: str):
+    """Check if the projection scenario is valid.
+    
+    Args:
+        projection_scenario: The projection scenario abbreviation.
+        
+    Raises:
+        ValueError: If the projection scenario is not valid.
+    """
+
+    PROJECTION_SCENARIOS = [
+        "past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", "FA", "SA"
+    ]
+    if projection_scenario not in PROJECTION_SCENARIOS:
+        raise ValueError(
+            f"projection_scenario must be one of {PROJECTION_SCENARIOS}, "
+            f"received {projection_scenario}"
+        )
+
 class Sex:
     """A class to handle different formats of the ``sex`` variable."""
     def __init__(self, value: str | int | bool):
