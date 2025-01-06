@@ -3,6 +3,8 @@ name: release_workflow
 # execute this workflow automatically when a we create a release
 on:
   push:
+    tags:
+      - 'v*'
 
 jobs:
   publish_release:
@@ -31,11 +33,11 @@ jobs:
       - name: Install wheel
         run: pip install wheel
 
-      - name: Build a binary wheel and a source tarball
+      - name: Build a binary wheel
         run: python setup.py bdist_wheel
 
       - name: Archive package
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/fix-install' }}
+        if: ${{ github.event_name == 'push' }}
         uses: actions/upload-artifact@v4
         with:
           name: leap
