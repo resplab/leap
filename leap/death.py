@@ -1,7 +1,7 @@
 from __future__ import annotations
 import pandas as pd
 import numpy as np
-from leap.utils import get_data_path
+from leap.utils import get_data_path, check_year, check_province
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -87,6 +87,9 @@ class Death:
         df = pd.read_csv(
             get_data_path("processed_data/master_life_table.csv")
         )
+        check_year(starting_year, df)
+        check_province(province)
+
         df = df[
             (df["year"] >= starting_year) &
             (df["province"] == province)
