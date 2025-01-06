@@ -178,7 +178,7 @@ def check_cduid(cduid: int, df: pd.DataFrame):
     Raises:
         ValueError: If the ``CDUID`` is not valid.
     """
-    if cduid not in df["cduid"].unique():
+    if cduid not in df["CDUID"].unique():
         raise ValueError(f"cduid must be one of {df['cduid'].unique()}, received {cduid}")
 
 
