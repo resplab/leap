@@ -123,7 +123,7 @@ class ExacerbationSeverity:
             The distribution of asthma exacerbations by exacerbation type for the current year.
         """
         p = self.parameters["p"]
-        index_very_severe = 4
+        index_very_severe = 3
         index_max = index_very_severe
 
         if num_current_year == 0:
