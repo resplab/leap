@@ -11,6 +11,32 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
+class SeverityLevels:
+    """A class containing the probability of each asthma exacerbation severity level.
+
+    Attributes:
+        mild: The probability of an asthma exacerbation being mild.
+        moderate: The probability of an asthma exacerbation being moderate.
+        severe: The probability of an asthma exacerbation being severe.
+        very_severe: The probability of an asthma exacerbation being very severe
+    """
+    def __init__(
+        self,
+        mild: float,
+        moderate: float,
+        severe: float,
+        very_severe: float
+    ):
+        self.mild = mild
+        self.moderate = moderate
+        self.severe = severe
+        self.very_severe = very_severe
+
+    def as_array(self) -> np.ndarray:
+        """Return the severity levels as an array."""
+        return np.array([self.mild, self.moderate, self.severe, self.very_severe])
+
+
 class ExacerbationSeverity:
     """A class containing information about asthma exacerbation severity.
 
@@ -70,8 +96,6 @@ class ExacerbationSeverity:
     def parameters(self) -> dict:
         """A dictionary containing the following keys:
 
-        * ``p``: a probability vector giving the probability of each exacerbation type,
-          using the Dirichlet-multinomial distribution.
         * ``βprev_hosp_ped``: ``float``, parameter for previous hospitalizations due to asthma
           in childhood.
         * ``βprev_hosp_adult``: ``float``, parameter for previous hospitalizations due to asthma
@@ -87,6 +111,19 @@ class ExacerbationSeverity:
                 raise ValueError(f"The key '{key}' is missing in the parameters.")
         self._parameters = parameters
 
+    @property
+    def severity_levels(self) -> SeverityLevels:
+        """The probability of each asthma exacerbation severity level.
+        
+        A probability vector giving the probability of each exacerbation type,
+        computed using the Dirichlet-multinomial distribution.
+        """
+        return self._severity_levels
+    
+    @severity_levels.setter
+    def severity_levels(self, severity_levels: SeverityLevels):
+        self._severity_levels = severity_levels
+
     def assign_random_p(self):
         """Compute the probability vector ``p`` from the Dirichlet distribution.
 
@@ -96,7 +133,7 @@ class ExacerbationSeverity:
         """
 
         p = np.random.dirichlet(np.array(self.hyperparameters["α"]) * self.hyperparameters["k"])
-        self.parameters["p"] = p
+        self.severity_levels = SeverityLevels(p[0], p[1], p[2], p[3])
 
     def compute_distribution(self, num_current_year: int, prev_hosp: bool, age: int) -> np.ndarray:
         """Compute the exacerbation severity distribution.
@@ -121,24 +158,36 @@ class ExacerbationSeverity:
 
         Returns:
             The distribution of asthma exacerbations by exacerbation type for the current year.
+
+        Examples:
+
+            >>> from leap.severity import ExacerbationSeverity
+            >>> exacerbation_severity = ExacerbationSeverity(
+            ...     hyperparameters={"α": [1000, 0.00001, 0.00001, 0.00001], "k": 100},
+            ...     parameters={"βprev_hosp_ped": 1.79, "βprev_hosp_adult": 2.88}
+            ... )
+            >>> exacerbation_severity.compute_distribution(
+            ...     num_current_year=10,
+            ...     prev_hosp=True,
+            ...     age=85
+            ... )
+            array([2, 1, 6, 1])
         """
-        p = self.parameters["p"]
-        index_very_severe = 3
-        index_max = index_very_severe
+        severity_levels = self.severity_levels
+        severity_levels_array = severity_levels.as_array()
 
         if num_current_year == 0:
-            return np.zeros(index_max)
+            return np.zeros(4)
         else:
             if prev_hosp:
-                weight = p[0:3]
-                weight = weight / np.sum(weight)
-                p[index_very_severe] = p[index_very_severe] * (
+                weight = severity_levels_array / np.sum(severity_levels_array)
+                severity_levels.very_severe = severity_levels.very_severe * (
                     self.parameters["βprev_hosp_ped"] if age < 14
                     else self.parameters["βprev_hosp_adult"]
                 )
-                p[0:3] = weight * (1 - p[index_very_severe])
+                severity_levels_array = weight * (1 - severity_levels.very_severe)
 
-            return np.random.multinomial(num_current_year, p)
+            return np.random.multinomial(num_current_year, severity_levels_array)
 
     def compute_hospitalization_prob(
         self, agent: Agent, control: Control, exacerbation: Exacerbation
@@ -183,7 +232,7 @@ class ExacerbationSeverity:
                 year += 1
 
             # toss a coin: avg chance of having at least one hospitalization
-            prob_severe_exacerbation = min(self.parameters["p"][3], 0.9999999999999)
+            prob_severe_exacerbation = min(self.severity_levels.very_severe, 0.9999999999999)
             total_rate = min(total_rate, 150)
             zero_prob = (
                 1 / gamma(total_rate + 1) *
