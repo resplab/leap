@@ -1,7 +1,7 @@
 from __future__ import annotations
 import pandas as pd
 import numpy as np
-from leap.utils import get_data_path
+from leap.utils import get_data_path, check_province
 from leap.control import ControlLevels
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -152,6 +152,8 @@ class Exacerbation:
         df = pd.read_csv(
             get_data_path("processed_data/master_calibrated_exac.csv")
         )
+        check_province(province)
+
         df = df[df["province"] == province]
         df.drop(["province"], axis=1, inplace=True)
         grouped_df = df.groupby(["year", "sex"])

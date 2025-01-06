@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 import pygrib
-from leap.utils import get_data_path
+from leap.utils import get_data_path, check_year, check_cduid
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -97,6 +97,9 @@ class Pollution:
             pollution_table = PollutionTable()
 
         df = pollution_table.data.get_group(SSP)
+        check_year(year, df)
+        check_cduid(cduid, df)
+
         df = df[(df["CDUID"] == cduid) & (df["year"] == year) & (df["month"] == month)]
         self.cduid = cduid
         self.year = year

@@ -2,7 +2,7 @@ from __future__ import annotations
 import math
 import pandas as pd
 import numpy as np
-from leap.utils import get_data_path
+from leap.utils import get_data_path, check_province, check_year, check_projection_scenario
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -83,6 +83,9 @@ class Immigration:
         df = pd.read_csv(
             get_data_path("processed_data/migration/master_immigration_table.csv")
         )
+        check_year(starting_year + 1, df)
+        check_province(province)
+        check_projection_scenario(population_growth_type)
 
         df = df[
             (df["age"] <= max_age) &

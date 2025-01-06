@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 def get_parser() -> argparse.ArgumentParser:
     """Get the command line interface parser."""
 
-    parser = argparse.ArgumentParser(add_help=False)
+    parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
     command_group = parser.add_mutually_exclusive_group(required=False)
     command_group.add_argument(
         "-r", "--run-simulation", dest="run", action="store_true",
@@ -34,11 +34,26 @@ def get_parser() -> argparse.ArgumentParser:
     )
     args.add_argument(
         "-my", "--min-year", dest="min_year", required=False, type=int,
-        help="Starting year for the simulation."
+        help="Starting year for the simulation. Must be >= 2024."
     )
     args.add_argument(
         "-p", "--province", dest="province", required=False, type=str,
-        help="Province for the simulation."
+        help="""Province for the simulation. Must be one of:
+        * "AB": Alberta
+        * "BC": British Columbia
+        * "MB": Manitoba
+        * "NB": New Brunswick
+        * "NL": Newfoundland and Labrador
+        * "NS": Nova Scotia
+        * "NT": Northwest Territories
+        * "NU": Nunavut
+        * "ON": Ontario
+        * "PE": Prince Edward Island
+        * "QC": Quebec
+        * "SK": Saskatchewan
+        * "YT": Yukon
+        * "CA": Canada
+        """
     )
     args.add_argument(
         "-th", "--time-horizon", dest="time_horizon", required=False, type=int,
@@ -50,7 +65,19 @@ def get_parser() -> argparse.ArgumentParser:
     )
     args.add_argument(
         "-gt", "--population-growth-type", dest="population_growth_type", required=False, type=str,
-        help="Population growth type for the simulation."
+        help="""Population growth type for the simulation. Must be one of:
+        * "past": past projection
+        * "LG": low-growth projection
+        * "HG": high-growth projection
+        * "M1": medium-growth 1 projection
+        * "M2": medium-growth 2 projection
+        * "M3": medium-growth 3 projection
+        * "M4": medium-growth 4 projection
+        * "M5": medium-growth 5 projection
+        * "M6": medium-growth 6 projection
+        * "FA": fast-aging projection
+        * "SA": slow-aging projection
+        """
     )
     args.add_argument(
         "-h", "--help", action="help", default=argparse.SUPPRESS,
