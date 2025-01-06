@@ -171,7 +171,7 @@ class ExacerbationSeverity:
             ...     prev_hosp=True,
             ...     age=85
             ... )
-            array([2, 1, 6, 1])
+            array([10, 0, 0, 0])
         """
         severity_levels = self.severity_levels
         severity_levels_array = severity_levels.as_array()
