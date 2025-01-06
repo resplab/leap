@@ -97,6 +97,16 @@ class Pollution:
             pollution_table = PollutionTable()
 
         df = pollution_table.data.get_group(SSP)
+        if year > df["year"].max():
+            raise ValueError(
+                f"Year {year} is greater than the maximum year in the pollution data: "
+                f"{df['year'].max()}."
+            )
+        elif year < df["year"].min():
+            raise ValueError(
+                f"Year {year} is less than the minimum year in the pollution data: "
+                f"{df['year'].min()}."
+            )
         df = df[(df["CDUID"] == cduid) & (df["year"] == year) & (df["month"] == month)]
         self.cduid = cduid
         self.year = year
