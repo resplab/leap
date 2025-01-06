@@ -522,18 +522,18 @@ class Simulation:
                     self.generate_initial_asthma(agent)
 
                     logger.info(
-                        f"Agent age > 3, agent has asthma (prevalence)? {agent.has_asthma}"
+                        f"| ---- Agent age > 3, agent has asthma (prevalence)? {agent.has_asthma}"
                     )
 
                 # go through event processes for each agent
                 while agent.alive and agent.age <= max_age and agent.year_index <= max_time_horizon:
                     if not agent.has_asthma:
                         self.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
-                        logger.info(f"Agent has asthma (incidence)? {agent.has_asthma}")
+                        logger.info(f"| ---- Agent has asthma (incidence)? {agent.has_asthma}")
                     else:
                         self.reassess_asthma_diagnosis(agent, outcome_matrix)
                         logger.info(
-                            "Agent was diagnosed with asthma, is this diagnosis correct? "
+                            "| ---- Agent was diagnosed with asthma, is this diagnosis correct? "
                             f"{agent.has_asthma}"
                         )
 
@@ -555,7 +555,7 @@ class Simulation:
 
                     # compute utility
                     utility = self.utility.compute_utility(agent)
-                    logger.info(f"Utility of asthma: {utility}")
+                    logger.info(f"| ---- Utility of asthma: {utility}")
                     outcome_matrix.utility.increment(
                         column="utility",
                         filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
@@ -564,7 +564,7 @@ class Simulation:
 
                     # compute cost
                     cost = self.cost.compute_cost(agent)
-                    logger.info(f"Cost of asthma: {cost} CAD")
+                    logger.info(f"| ---- Cost of asthma: {cost} CAD")
 
                     outcome_matrix.cost.increment(
                         column="cost",
@@ -579,7 +579,7 @@ class Simulation:
                             column="n_deaths",
                             filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
                         )
-                        logger.info(f"Agent has died at age {agent.age}")
+                        logger.info(f"| ---- Agent has died at age {agent.age}")
                     # emigration
                     elif self.emigration.compute_probability(
                         agent.year, agent.age, str(agent.sex)
@@ -589,7 +589,7 @@ class Simulation:
                             column="n_emigrants",
                             filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
                         )
-                        logger.info(f"Agent has emigrated at age {agent.age}")
+                        logger.info(f"| ---- Agent has emigrated at age {agent.age}")
                     else:
                         # record alive
                         outcome_matrix.alive.increment(
