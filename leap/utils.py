@@ -11,7 +11,6 @@ logger = get_logger(__name__)
 
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
-PROCESSED_DATA_PATH = pathlib.Path(LEAP_PATH, "processed_data")
 
 
 class UUID4:
@@ -119,7 +118,7 @@ def get_data_path(data_path: str) -> pathlib.Path:
     elif pathlib.Path(data_path).parts[0] == "processed_data":
         data_path = str(pathlib.Path(data_path).relative_to("processed_data"))
 
-    for data_folder in ["tests.data", "processed_data"]:
+    for data_folder in ["tests.data", "leap.processed_data"]:
         try:
             package_path = str(pkg_resources.files(data_folder).joinpath(data_path))
             if os.path.isfile(package_path) or os.path.isdir(package_path):

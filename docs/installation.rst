@@ -89,6 +89,16 @@ To install the ``LEAP`` package, type:
   pip3 install git+https://github.com/resplab/leap.git
 
 
+To install a specific release:
+
+.. code:: bash
+
+  pip3 install git+https://github.com/resplab/leap.git@vx.y.z
+
+where ``vx.y.z`` is the release version you would like to install. To see all the releases, go to:
+`LEAP Releases <https://github.com/resplab/leap/releases>`_.
+
+
 *(Optional)* If you set up your ``git`` token in the last step, you will now be asked for you
 username and password. Paste the token in as your password:
 
