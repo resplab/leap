@@ -152,22 +152,6 @@ def check_file(file_path: str | pathlib.Path, ext: str):
         raise ValueError(f"{file_path} is not a valid file.")
 
 
-def check_age(age: int, df: pd.DataFrame):
-    """Check if the age is valid.
-
-    Args:
-        age: The age.
-        df: The DataFrame to check.
-
-    Raises:
-        ValueError: If the age is not valid.
-    """
-    if age < df["age"].min():
-        raise ValueError(f"age must be >= {df['age'].min()}")
-    elif age > df["age"].max():
-        raise ValueError(f"age must be <= {df['age'].max()}")
-
-
 def check_cduid(cduid: int, df: pd.DataFrame):
     """Check if the ``CDUID`` is valid.
 

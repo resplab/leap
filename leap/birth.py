@@ -1,8 +1,7 @@
 from __future__ import annotations
 import math
 import pandas as pd
-from leap.utils import get_data_path, check_year, check_province, check_projection_scenario, \
-    check_age
+from leap.utils import get_data_path, check_year, check_province, check_projection_scenario
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -226,7 +225,6 @@ class Birth:
         )
 
         check_year(starting_year, df)
-        check_age(max_age, df)
         check_province(province)
         check_projection_scenario(population_growth_type)
 
