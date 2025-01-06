@@ -11,7 +11,6 @@ logger = get_logger(__name__)
 
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
-PROCESSED_DATA_PATH = pathlib.Path(LEAP_PATH, "processed_data")
 
 
 class UUID4:

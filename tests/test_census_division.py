@@ -3,7 +3,7 @@ import pathlib
 import json
 import pandas as pd
 from leap.census_division import CensusDivision, CensusBoundaries
-from leap.utils import PROCESSED_DATA_PATH
+from leap.utils import get_data_path
 
 
 @pytest.mark.parametrize(
@@ -39,13 +39,11 @@ def test_census_division_constructor(cduid, name, year, province, census_table):
     [
         (
             None,
-            pathlib.Path(
-                PROCESSED_DATA_PATH,
-                "census_divisions/census_division_boundaries/lcd_000b21a_e.shp"
+            get_data_path(
+                "processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e.shp"
             ),
-            pathlib.Path(
-                PROCESSED_DATA_PATH,
-                "census_divisions/census_division_boundaries/lcd_000b21a_e_metadata.json"
+            get_data_path(
+                "processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e_metadata.json"
             ),
             2021,
             None,
@@ -102,13 +100,11 @@ def test_census_boundaries_constructor(
     ),
     [
         (
-            pathlib.Path(
-                PROCESSED_DATA_PATH,
-                "census_divisions/census_division_boundaries/lcd_000b21a_e.shp"
+            get_data_path(
+                "processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e.shp"
             ),
-            pathlib.Path(
-                PROCESSED_DATA_PATH,
-                "census_divisions/census_division_boundaries/lcd_000b21a_e_metadata.json"
+            get_data_path(
+                "processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e_metadata.json"
             ),
             2021,
             49.262580,
@@ -136,13 +132,11 @@ def test_census_boundaries_get_census_division_from_lat_lon(
     "shapefile_path, metadata_path",
     [
         (
-            pathlib.Path(
-                PROCESSED_DATA_PATH,
-                "census_divisions/census_division_boundaries/lcd_000b21a_e.shp"
+            get_data_path(
+                "processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e.shp"
             ),
-            pathlib.Path(
-                PROCESSED_DATA_PATH,
-                "census_divisions/census_division_boundaries/lcd_000b21a_e_metadata.json"
+            get_data_path(
+                "processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e_metadata.json"
             )
         )
     ]
