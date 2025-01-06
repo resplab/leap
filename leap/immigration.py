@@ -83,7 +83,7 @@ class Immigration:
         df = pd.read_csv(
             get_data_path("processed_data/migration/master_immigration_table.csv")
         )
-        check_year(starting_year, df)
+        check_year(starting_year + 1, df)
         check_province(province)
         check_projection_scenario(population_growth_type)
 
