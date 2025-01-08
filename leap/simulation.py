@@ -424,13 +424,12 @@ class Simulation:
             }
         )
 
-    def run(self, seed=None, until_all_die: bool = False, verbose: bool = True):
+    def run(self, seed=None, until_all_die: bool = False):
         """Run the simulation.
         
         Args:
             seed: The random seed to use for the simulation.
             until_all_die: Whether to run the simulation until all agents die.
-            verbose: Whether to print log messages during the simulation.
             
         Returns:
             The outcome matrix.
