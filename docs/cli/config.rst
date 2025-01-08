@@ -6,7 +6,7 @@
     {
     "simulation": {
         "min_year": 2024,
-        "time_horizon": 19,
+        "time_horizon": 13,
         "province": "BC",
         "population_growth_type": "LG",
         "num_births_initial": 100,
