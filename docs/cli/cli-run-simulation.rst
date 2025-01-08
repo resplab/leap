@@ -28,7 +28,7 @@ Simulation Arguments
     </thead>
     <tbody>
       <tr>
-        <td><code class="notranslate">--path-output</code></td>
+        <td><code class="notranslate">--config</code></td>
         <td>
           <a href="https://github.com/resplab/leap/processed_data/config.json">config.json</a>
         </td>
@@ -38,7 +38,7 @@ Simulation Arguments
         </td>
       </tr>
       <tr>
-        <td><code class="notranslate">--config</code></td>
+        <td><code class="notranslate">--path-output</code></td>
         <td></td>
         <td>Path to output directory.
         </td>
