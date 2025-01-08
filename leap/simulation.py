@@ -3,6 +3,7 @@ import json
 import math
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 from leap.agent import Agent
 from leap.antibiotic_exposure import AntibioticExposure
 from leap.birth import Birth
@@ -450,7 +451,8 @@ class Simulation:
         outcome_matrix = OutcomeMatrix(until_all_die, min_year, max_year, max_age)
 
         # loop by year
-        for year in years:
+        for year in (pbar := tqdm(years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
+            pbar.set_description(f"Year {year}")
             year_index = year - min_year
 
             new_agents_df = self.get_new_agents(
@@ -462,7 +464,7 @@ class Simulation:
             logger.info(f"\n{new_agents_df}")
 
             # for each agent i born/immigrated in year
-            for i in range(new_agents_df.shape[0]):
+            for i in (pbar := tqdm(range(new_agents_df.shape[0]), desc="Agents", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
                 self.control.assign_random_β0()
                 self.exacerbation.assign_random_β0()
                 self.exacerbation_severity.assign_random_p()
@@ -487,6 +489,7 @@ class Simulation:
                     census_division=census_division,
                     pollution=pollution
                 )
+                pbar.set_description(f"Agent {agent.uuid.short}")
 
                 logger.info(
                     f"Agent {agent.uuid.short} born/immigrated in year {year}, "
