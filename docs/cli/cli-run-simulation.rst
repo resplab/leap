@@ -118,6 +118,13 @@ Simulation Arguments
         <code>--time-horizon 2</code>
         </td>
       </tr>
+      <tr>
+        <td><code class="notranslate">--verbose</code></td>
+        <td><code class="notranslate">False</code></td>
+        <td>If this flag is used, the simulation will print out more information about the
+          simulation as it runs. This is useful for debugging purposes.
+        </td>
+      </tr>
     </tbody>
   </table>
 
