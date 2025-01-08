@@ -301,7 +301,7 @@ class Birth:
         """
         num_new_born = int(
             math.ceil(
-                num_births_initial * self.estimate.get_group((year))["N_relative"] # type: ignore
+                num_births_initial * self.estimate.get_group((year))["N_relative"].iloc[0] # type: ignore
             ) 
         ) 
         return num_new_born
