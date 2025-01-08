@@ -52,7 +52,7 @@ Simulation Arguments
       </tr>
       <tr>
         <td><code class="notranslate">--min-year</code></td>
-        <td><code class="notranslate">2001</code></td>
+        <td><code class="notranslate">2024</code></td>
         <td>The year the simulation starts. For example:
         <code>--min-year 2024</code>
         </td>
