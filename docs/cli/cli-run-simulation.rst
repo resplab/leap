@@ -30,7 +30,7 @@ Simulation Arguments
       <tr>
         <td><code class="notranslate">--config</code></td>
         <td>
-          <a href="https://github.com/resplab/leap/processed_data/config.json">config.json</a>
+          <a href="https://github.com/resplab/leap/leap/processed_data/config.json">config.json</a>
         </td>
         <td>
           Path to the <code>config.json</code> file. If none is provided, the default
