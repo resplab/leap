@@ -451,8 +451,8 @@ class Simulation:
         outcome_matrix = OutcomeMatrix(until_all_die, min_year, max_year, max_age)
 
         # loop by year
-        for year in (pbar := tqdm(years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
-            pbar.set_description(f"Year {year}")
+        for year in (pbar_year := tqdm(years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
+            pbar_year.set_description(f"Year {year}")
             year_index = year - min_year
 
             new_agents_df = self.get_new_agents(
