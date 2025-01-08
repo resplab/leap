@@ -4,7 +4,7 @@ import pathlib
 import pprint
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
-from leap.logger import get_logger
+from leap.logger import get_logger, set_logging_level
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -85,6 +85,10 @@ def get_parser() -> argparse.ArgumentParser:
         """
     )
     args.add_argument(
+        "-v", "--verbose", dest="verbose", action="store_true",
+        help="Print all the output."
+    )
+    args.add_argument(
         "-h", "--help", action="help", default=argparse.SUPPRESS,
         help="Shows function documentation."
     )
@@ -114,6 +118,8 @@ def run_main():
     parser = get_parser()
     args = parser.parse_args()
     config = get_config(args.config)
+    if args.verbose:
+        set_logging_level(20)
 
     logger.message(f"Config:\n{pretty_printer.pformat(config)}")
 
