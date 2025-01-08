@@ -5,6 +5,8 @@ import pprint
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
 from leap.logger import get_logger
+import warnings
+warnings.filterwarnings("ignore")
 
 logger = get_logger(__name__)
 pretty_printer = pprint.PrettyPrinter(indent=2, sort_dicts=False)
