@@ -432,6 +432,6 @@ class OutcomeMatrix:
             key for key, value in self.__dict__.items() if isinstance(value, OutcomeTable)
         ]
         for attribute in attributes:
-            file_path = pathlib.Path(path.resolve(), f"outcome_matrix_{attribute}.csv")
+            file_path = pathlib.Path(path.resolve(), f"outcome_matrix_{attribute.removeprefix('_')}.csv")
             self.__getattribute__(attribute).data.to_csv(file_path, index=False)
-            logger.message(f"Saved {attribute} to {file_path}.")
+            logger.message(f"Saved {attribute.removeprefix('_')} to {file_path}.")

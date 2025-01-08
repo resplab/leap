@@ -834,8 +834,7 @@ def test_run_simulation_one_year(
     simulation = Simulation(config)
     outcome_matrix = simulation.run(
         seed=1,
-        until_all_die=False,
-        verbose=True
+        until_all_die=False
     )
     logger.info(outcome_matrix.utility.data)
     assert outcome_matrix.antibiotic_exposure.data.shape == (2 * 1 * (max_age + 1), 4)
@@ -1051,8 +1050,7 @@ def test_run_simulation_two_years(
     simulation = Simulation(config)
     outcome_matrix = simulation.run(
         seed=1,
-        until_all_die=False,
-        verbose=True
+        until_all_die=False
     )
 
     for year, age in zip(range(min_year, min_year + time_horizon), range(max_age + 1)):
@@ -1153,8 +1151,7 @@ def test_run_simulation_full(
     simulation = Simulation(config)
     outcome_matrix = simulation.run(
         seed=1,
-        until_all_die=False,
-        verbose=True
+        until_all_die=False
     )
 
     assert outcome_matrix.immigration.data.shape == (2 * time_horizon * (max_age + 1), 4)

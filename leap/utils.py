@@ -15,7 +15,13 @@ LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
 
 
 class UUID4:
-    def __init__(self, uuid4: uuid.UUID = uuid.uuid4(), short: str = str(uuid.uuid4())[-6:]):
+    def __init__(
+        self, uuid4: uuid.UUID | None = None, short: str | None = None
+    ):
+        if uuid4 is None:
+            uuid4 = uuid.uuid4()
+        if short is None:
+            short = str(uuid4)[-6:]
         self.uuid4 = uuid4
         self.short = short
 

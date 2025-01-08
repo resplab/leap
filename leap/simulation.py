@@ -3,6 +3,7 @@ import json
 import math
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 from leap.agent import Agent
 from leap.antibiotic_exposure import AntibioticExposure
 from leap.birth import Birth
@@ -423,13 +424,12 @@ class Simulation:
             }
         )
 
-    def run(self, seed=None, until_all_die: bool = False, verbose: bool = True):
+    def run(self, seed=None, until_all_die: bool = False):
         """Run the simulation.
         
         Args:
             seed: The random seed to use for the simulation.
             until_all_die: Whether to run the simulation until all agents die.
-            verbose: Whether to print log messages during the simulation.
             
         Returns:
             The outcome matrix.
@@ -450,7 +450,8 @@ class Simulation:
         outcome_matrix = OutcomeMatrix(until_all_die, min_year, max_year, max_age)
 
         # loop by year
-        for year in years:
+        for year in (pbar_year := tqdm(years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
+            pbar_year.set_description(f"Year {year}")
             year_index = year - min_year
 
             new_agents_df = self.get_new_agents(
@@ -462,7 +463,7 @@ class Simulation:
             logger.info(f"\n{new_agents_df}")
 
             # for each agent i born/immigrated in year
-            for i in range(new_agents_df.shape[0]):
+            for i in (pbar := tqdm(range(new_agents_df.shape[0]), desc="Agents", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
                 self.control.assign_random_β0()
                 self.exacerbation.assign_random_β0()
                 self.exacerbation_severity.assign_random_p()
@@ -487,6 +488,7 @@ class Simulation:
                     census_division=census_division,
                     pollution=pollution
                 )
+                pbar.set_description(f"Agent {agent.uuid.short}")
 
                 logger.info(
                     f"Agent {agent.uuid.short} born/immigrated in year {year}, "
@@ -522,18 +524,18 @@ class Simulation:
                     self.generate_initial_asthma(agent)
 
                     logger.info(
-                        f"Agent age > 3, agent has asthma (prevalence)? {agent.has_asthma}"
+                        f"| ---- Agent age > 3, agent has asthma (prevalence)? {agent.has_asthma}"
                     )
 
                 # go through event processes for each agent
                 while agent.alive and agent.age <= max_age and agent.year_index <= max_time_horizon:
                     if not agent.has_asthma:
                         self.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
-                        logger.info(f"Agent has asthma (incidence)? {agent.has_asthma}")
+                        logger.info(f"| ---- Agent has asthma (incidence)? {agent.has_asthma}")
                     else:
                         self.reassess_asthma_diagnosis(agent, outcome_matrix)
                         logger.info(
-                            "Agent was diagnosed with asthma, is this diagnosis correct? "
+                            "| ---- Agent was diagnosed with asthma, is this diagnosis correct? "
                             f"{agent.has_asthma}"
                         )
 
@@ -555,7 +557,7 @@ class Simulation:
 
                     # compute utility
                     utility = self.utility.compute_utility(agent)
-                    logger.info(f"Utility of asthma: {utility}")
+                    logger.info(f"| ---- Utility of asthma: {utility}")
                     outcome_matrix.utility.increment(
                         column="utility",
                         filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
@@ -564,7 +566,7 @@ class Simulation:
 
                     # compute cost
                     cost = self.cost.compute_cost(agent)
-                    logger.info(f"Cost of asthma: {cost} CAD")
+                    logger.info(f"| ---- Cost of asthma: {cost} CAD")
 
                     outcome_matrix.cost.increment(
                         column="cost",
@@ -579,7 +581,7 @@ class Simulation:
                             column="n_deaths",
                             filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
                         )
-                        logger.info(f"Agent has died at age {agent.age}")
+                        logger.info(f"| ---- Agent has died at age {agent.age}")
                     # emigration
                     elif self.emigration.compute_probability(
                         agent.year, agent.age, str(agent.sex)
@@ -589,7 +591,7 @@ class Simulation:
                             column="n_emigrants",
                             filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
                         )
-                        logger.info(f"Agent has emigrated at age {agent.age}")
+                        logger.info(f"| ---- Agent has emigrated at age {agent.age}")
                     else:
                         # record alive
                         outcome_matrix.alive.increment(

@@ -14,7 +14,7 @@ import re
 MIN_LEVEL = logging.DEBUG
 MESSAGE = 25
 logging.addLevelName(MESSAGE, "MESSAGE")
-LOGGING_LEVEL = 20
+LOGGING_LEVEL = 25
 
 
 class LogFilter(logging.Filter):
@@ -101,5 +101,6 @@ def set_logging_level(level: int):
     """Set the logging level for all leap loggers."""
 
     for name in logging.root.manager.loggerDict:
-        if re.compile("leap").match(name) is not None:
+        if re.compile(r"leap\.").match(name) is not None:
             logging.getLogger(name).setLevel(level)
+            logging.getLogger(name).handlers[0].setLevel(level)
