@@ -1,11 +1,14 @@
 import json
 import argparse
 import pathlib
+import pprint
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
+pretty_printer = pprint.PrettyPrinter(indent=2, sort_dicts=False)
+
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -110,7 +113,7 @@ def run_main():
     args = parser.parse_args()
     config = get_config(args.config)
 
-    logger.message(f"Config:\n{config}")
+    logger.message(f"Config:\n{pretty_printer.pformat(config)}")
 
     simulation = Simulation(
         config=config,
