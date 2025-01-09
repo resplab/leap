@@ -113,7 +113,7 @@ Simulation Arguments
       </tr>
       <tr>
         <td><code class="notranslate">--time-horizon</code></td>
-        <td><code class="notranslate">19</code></td>
+        <td><code class="notranslate">13</code></td>
         <td>The number of years to run the simulation for. For example:
         <code>--time-horizon 2</code>
         </td>
