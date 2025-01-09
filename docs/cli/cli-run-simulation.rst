@@ -28,9 +28,9 @@ Simulation Arguments
     </thead>
     <tbody>
       <tr>
-        <td><code class="notranslate">--path-output</code></td>
+        <td><code class="notranslate">--config</code></td>
         <td>
-          <a href="https://github.com/resplab/leap/processed_data/config.json">config.json</a>
+          <a href="https://github.com/resplab/leap/leap/processed_data/config.json">config.json</a>
         </td>
         <td>
           Path to the <code>config.json</code> file. If none is provided, the default
@@ -38,7 +38,7 @@ Simulation Arguments
         </td>
       </tr>
       <tr>
-        <td><code class="notranslate">--config</code></td>
+        <td><code class="notranslate">--path-output</code></td>
         <td></td>
         <td>Path to output directory.
         </td>
@@ -52,7 +52,7 @@ Simulation Arguments
       </tr>
       <tr>
         <td><code class="notranslate">--min-year</code></td>
-        <td><code class="notranslate">2001</code></td>
+        <td><code class="notranslate">2024</code></td>
         <td>The year the simulation starts. For example:
         <code>--min-year 2024</code>
         </td>
@@ -113,7 +113,7 @@ Simulation Arguments
       </tr>
       <tr>
         <td><code class="notranslate">--time-horizon</code></td>
-        <td><code class="notranslate">19</code></td>
+        <td><code class="notranslate">13</code></td>
         <td>The number of years to run the simulation for. For example:
         <code>--time-horizon 2</code>
         </td>

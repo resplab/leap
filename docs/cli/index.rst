@@ -8,7 +8,7 @@ The main function that you can run via command line:
 
 The simulation uses a configuration file to set the simulation parameters. The default
 configuration file is located at
-`leap/processed_data/config.json <https://github.com/resplab/leap/processed_data/config.json>`_.
+`leap/processed_data/config.json <https://github.com/resplab/leap/leap/processed_data/config.json>`_.
 For more information on the configuration file, see: :doc:`config`.
 
 .. toctree::
