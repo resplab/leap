@@ -92,9 +92,11 @@ class Immigration:
             (df["year"] >= starting_year) &
             (df["province"] == province) &
             (df["projection_scenario"] == population_growth_type)
-        ]
+        ].copy()
+        
         df.drop(columns=["province", "projection_scenario"], inplace=True)
-        df["sex"].replace({"F": 0, "M": 1}, inplace=True)
+        df.loc[:, "sex"] = df["sex"].map({"F": 0, "M": 1}).astype(int)
+        
         for year in df["year"].unique():
             prop_immigrants_year = df.loc[df["year"] == year]["prop_immigrants_year"].copy()
             sum_year = prop_immigrants_year.sum()
