@@ -57,7 +57,7 @@ def round_number(x: float, digits: int = 0, sigdigits: int | None = None) -> flo
 
 
 def sigmoid(x: float | np.ndarray) -> float | np.ndarray:
-    return 1 / (1 + np.exp(-x))
+    return 1 / (1 + np.exp(-np.clip(x, -500, 500)))
 
 
 def logit(x: float | np.ndarray) -> float | np.ndarray:
