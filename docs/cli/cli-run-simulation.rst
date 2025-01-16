@@ -2,7 +2,7 @@
 ========================
 
 The default simulation configuration options are found in the
-`leap/processed_data/config.json <https://github.com/resplab/leap/processed_data/config.json>`_
+`leap/processed_data/config.json <https://resplab.github.io/leap/cli/config.html>`_
 file. You can modify these options by creating your own ``config.json`` file and passing it to the
 ``LEAP`` model.
 
@@ -30,7 +30,7 @@ Simulation Arguments
       <tr>
         <td><code class="notranslate">--config</code></td>
         <td>
-          <a href="https://github.com/resplab/leap/leap/processed_data/config.json">config.json</a>
+          <a href="https://resplab.github.io/leap/cli/config.html">config.json</a>
         </td>
         <td>
           Path to the <code>config.json</code> file. If none is provided, the default
