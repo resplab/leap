@@ -2,6 +2,7 @@ import json
 import argparse
 import pathlib
 import pprint
+import sys
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
 from leap.logger import get_logger, set_logging_level
@@ -114,6 +115,11 @@ def get_config(path_config: str) -> dict:
 
 def run_main():
     """The entry point for the command line interface."""
+    
+    # ensure user is running in virtural environment
+    in_venv = sys.prefix != sys.base_prefix
+    if not in_venv:
+        raise Exception("Please run command while in the virtual environment.")
 
     parser = get_parser()
     args = parser.parse_args()
@@ -121,7 +127,7 @@ def run_main():
     if args.verbose:
         set_logging_level(20)
 
-    logger.message(f"Config:\n{pretty_printer.pformat(config)}")
+    #logger.message(f"Config:\n{pretty_printer.pformat(config)}")
 
     simulation = Simulation(
         config=config,
@@ -133,6 +139,7 @@ def run_main():
         population_growth_type=args.population_growth_type
     )
 
+    logger.message(f"data will be saved to <{args.path_output}>")
     if args.run:
         logger.message("Running simulation...")
         outcome_matrix = simulation.run()
