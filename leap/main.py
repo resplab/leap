@@ -128,12 +128,22 @@ def run_main():
 
     # Check if path exists before running
     output_path = pathlib.Path(args.path_output)
-    if not output_path.exists():
-        logger.message(f"<{output_path}> is not a valid path.")
-        logger.message(f"Would you like to create a directory at:")
-        extended_output_path = pathlib.Path(*output_path.parts[:-1],
+    extended_output_path = pathlib.Path(*output_path.parts[:-1],
                                             "output",
                                             output_path.parts[-1])
+    if extended_output_path.exists():
+        logger.message(f"Path <{extended_output_path.absolute()}> already exists.")
+        logger.message(f"Are you sure you would like to continue (WARNING THIS WILL OVERWRITE EXISTING RESULT CSV FILES)?")
+        path_msg = f"""
+          - type y for to overwrite files located at {extended_output_path.absolute()}> 
+          - type n to stop>
+        """
+        response = input(path_msg).strip().lower()
+        if response == 'n':
+            quit()
+    else:
+        logger.message(f"Path <{output_path}> does not exist.")
+        logger.message(f"Would you like to create a directory at:")
         path_msg = f"""
           - type 1 for <{output_path.absolute()}> 
           - type 2 for <{extended_output_path.absolute()}>
@@ -164,7 +174,7 @@ def run_main():
         population_growth_type=args.population_growth_type
     )
 
-    logger.message(f"data will be saved to <{output_path}>")
+    logger.message(f"Results will be saved to <{output_path}>")
     if args.run:
         logger.message("Running simulation...")
         outcome_matrix = simulation.run()
