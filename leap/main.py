@@ -135,8 +135,8 @@ def run_main():
         logger.message(f"Path <{extended_output_path.absolute()}> already exists.")
         logger.message(f"Are you sure you would like to continue (WARNING THIS WILL OVERWRITE EXISTING RESULT CSV FILES)?")
         path_msg = f"""
-          - type y for to overwrite files located at {extended_output_path.absolute()}> 
-          - type n to stop>
+          - type y for to overwrite files located at <{extended_output_path.absolute()}> 
+          - type n to stop
         """
         response = input(path_msg).strip().lower()
         if response == 'n':
@@ -174,12 +174,12 @@ def run_main():
         population_growth_type=args.population_growth_type
     )
 
-    logger.message(f"Results will be saved to <{output_path}>")
+    logger.message(f"Results will be saved to <{extended_output_path}>")
     if args.run:
         logger.message("Running simulation...")
         outcome_matrix = simulation.run()
         logger.message(outcome_matrix)
-        outcome_matrix.save(path=output_path)
+        outcome_matrix.save(path=extended_output_path)
 
 
 if __name__ == "__main__":

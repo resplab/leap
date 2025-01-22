@@ -183,9 +183,9 @@ def check_year(year: int, df: pd.DataFrame):
         ValueError: If the year is not valid.
     """
     if year < df["year"].min():
-        raise ValueError(f"year must be >= {df['year'].min()}")
+        raise ValueError(f"year was {year} and must be >= {df['year'].min()}")
     elif year > df["year"].max():
-        raise ValueError(f"year must be <= {df['year'].max()}")
+        raise ValueError(f"year was {year} and must be <= {df['year'].max()}")
 
 
 def check_province(province: str):
