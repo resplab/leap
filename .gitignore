@@ -6,5 +6,5 @@ __pycache__/
 *.egg-info/
 *scratch*
 .vscode/
-_build/
+build/
 output/
