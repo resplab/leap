@@ -13,7 +13,6 @@ logger = get_logger(__name__)
 pretty_printer = pprint.PrettyPrinter(indent=2, sort_dicts=False)
 
 
-
 def get_parser() -> argparse.ArgumentParser:
     """Get the command line interface parser."""
 
@@ -115,8 +114,8 @@ def get_config(path_config: str) -> dict:
 
 def run_main():
     """The entry point for the command line interface."""
-    
-    # ensure user is running in virtural environment
+
+    # Ensure user is running in virtural environment
     in_venv = sys.prefix != sys.base_prefix
     if not in_venv:
         raise Exception("Please run command while in the virtual environment.")
@@ -127,7 +126,33 @@ def run_main():
     if args.verbose:
         set_logging_level(20)
 
-    #logger.message(f"Config:\n{pretty_printer.pformat(config)}")
+    # Check if path exists before running
+    output_path = pathlib.Path(args.path_output)
+    if not output_path.exists():
+        logger.message(f"<{output_path}> is not a valid path.")
+        logger.message(f"Would you like to create a directory at:")
+        extended_output_path = pathlib.Path(*output_path.parts[:-1],
+                                            "output",
+                                            output_path.parts[-1])
+        path_msg = f"""
+          - type 1 for <{output_path.absolute()}> 
+          - type 2 for <{extended_output_path.absolute()}>
+          - type 3 to quit
+        """
+        response = input(path_msg).strip().lower()
+        if response == '1':
+            output_path.mkdir(parents=True, exist_ok=True)
+            logger.message(f"Directory created at <{output_path.absolute()}>")
+        elif response == '2':
+            extended_output_path.mkdir(parents=True, exist_ok=True)
+            logger.message(f"Directory created at <{extended_output_path.absolute()}>")
+        elif response == '3':
+            quit()
+        else:
+            logger.error("Aborting\n")
+            quit()
+
+    # logger.message(f"Config:\n{pretty_printer.pformat(config)}")
 
     simulation = Simulation(
         config=config,
@@ -139,12 +164,12 @@ def run_main():
         population_growth_type=args.population_growth_type
     )
 
-    logger.message(f"data will be saved to <{args.path_output}>")
+    logger.message(f"data will be saved to <{output_path}>")
     if args.run:
         logger.message("Running simulation...")
         outcome_matrix = simulation.run()
         logger.message(outcome_matrix)
-        outcome_matrix.save(path=pathlib.Path(args.path_output))
+        outcome_matrix.save(path=output_path)
 
 
 if __name__ == "__main__":
