@@ -3,6 +3,7 @@ import argparse
 import pathlib
 import pprint
 import sys
+from datetime import datetime
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
 from leap.logger import get_logger, set_logging_level
@@ -174,12 +175,43 @@ def run_main():
         population_growth_type=args.population_growth_type
     )
 
+    # Get start time of simulation
+    simulation_start_time = datetime.now()
+
     logger.message(f"Results will be saved to <{extended_output_path}>")
     if args.run:
         logger.message("Running simulation...")
         outcome_matrix = simulation.run()
         logger.message(outcome_matrix)
         outcome_matrix.save(path=extended_output_path)
+        
+    # Get end time of simulation
+    simulation_end_time = datetime.now()
+        
+    # Include log file containing additional information
+    # Get the current timestamp
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    # Define the file name
+    log_file_path = extended_output_path.joinpath("logfile.txt")
+    # Write the timestamp to the file
+    with open(log_file_path, "w") as file:
+        log_msg = f"""
+        Metadata:
+        - Simulation Run Date: {current_date}\n
+        - Simulation Start Time: {simulation_start_time}
+        - Simulation End Time: {simulation_end_time}
+        - Simulation Runtime: {simulation_end_time - simulation_start_time}
+        
+        Parameters:
+        - config: {config}
+        - max_age: {simulation.max_age}
+        - min_year: {simulation.max_year}
+        - province: {simulation.province}
+        - time_horizon: {simulation.time_horizon}
+        - num_births_initial: {simulation.num_births_initial}
+        - population_growth_type {simulation.population_growth_type}
+        """
+        file.write(log_msg)
 
 
 if __name__ == "__main__":
