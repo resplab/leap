@@ -39,7 +39,8 @@ class Simulation:
         min_year: int | None = None,
         time_horizon: int | None = None,
         num_births_initial: int | None = None,
-        population_growth_type: str | None = None
+        population_growth_type: str | None = None,
+        ignore_pollution_flag: bool = False
     ):
         if config is None:
             with open(get_data_path("processed_data/config.json")) as file:
@@ -90,6 +91,7 @@ class Simulation:
         self.utility = Utility(config["utility"])
         self.cost = AsthmaCost(config["cost"])
         self.census_table = CensusTable(config["census_table"])
+        self.ignore_pollution_flag = ignore_pollution_flag
         self.pollution_table = PollutionTable()
         self.SSP = config["pollution"]["SSP"]
         self.outcome_matrix = None
@@ -484,10 +486,13 @@ class Simulation:
                 census_division = CensusDivision(
                     census_table=self.census_table, province=self.province
                 )
-                pollution = Pollution(
-                    pollution_table=self.pollution_table, SSP=self.SSP, year=year, month=month,
-                    cduid=census_division.cduid
-                )
+                if self.ignore_pollution_flag:
+                    pollution = None
+                else:
+                    pollution = Pollution(
+                        pollution_table=self.pollution_table, SSP=self.SSP, year=year, month=month,
+                        cduid=census_division.cduid
+                    )
                 agent = Agent(
                     sex=new_agents_df["sex"].iloc[i],
                     age=new_agents_df["age"].iloc[i],
@@ -499,6 +504,7 @@ class Simulation:
                     month=month,
                     ssp=self.SSP,
                     census_division=census_division,
+                    ignore_pollution_flag=self.ignore_pollution_flag,
                     pollution=pollution
                 )
                 pbar.set_description(f"Agent {agent.uuid.short}")

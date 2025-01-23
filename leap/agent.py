@@ -44,6 +44,7 @@ class Agent:
         family_history: FamilyHistory | None = None,
         antibiotic_exposure: AntibioticExposure | None = None,
         census_division: CensusDivision | None = None,
+        ignore_pollution_flag: bool = False,
         pollution: Pollution | None = None,
         ssp: str = "SSP1_2.6"
     ):
@@ -82,7 +83,8 @@ class Agent:
             self.census_division = CensusDivision(province=province, year=year)
         else:
             self.census_division = census_division
-        if pollution is None:
+        self.ignore_pollution_flag = ignore_pollution_flag
+        if not self.ignore_pollution_flag:
             self.pollution = Pollution(self.census_division.cduid, year, month, ssp)
         else:
             self.pollution = pollution

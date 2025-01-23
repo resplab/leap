@@ -90,6 +90,10 @@ def get_parser() -> argparse.ArgumentParser:
         help="Print all the output."
     )
     args.add_argument(
+        "-ip", "--ignore-pollution", dest="ignore_pollution", action="store_true",
+        help="Do not include pollution as an element affecting the simulation."
+    )
+    args.add_argument(
         "-h", "--help", action="help", default=argparse.SUPPRESS,
         help="Shows function documentation."
     )
@@ -167,7 +171,8 @@ def run_main():
         province=args.province,
         time_horizon=args.time_horizon,
         num_births_initial=args.num_births_initial,
-        population_growth_type=args.population_growth_type
+        population_growth_type=args.population_growth_type,
+        ignore_pollution_flag=args.ignore_pollution
     )
 
     # Get start time of simulation
