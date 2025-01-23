@@ -197,6 +197,7 @@ def run_main():
     with open(log_file_path, "w") as file:
         log_msg = f"""
         Metadata:
+        - Simulation Bundle Name: {dir_name}
         - Simulation Run Date: {current_date}
         - Simulation Start Time: {simulation_start_time}
         - Simulation End Time: {simulation_end_time}
@@ -210,6 +211,7 @@ def run_main():
         - time_horizon: {simulation.time_horizon}
         - num_births_initial: {simulation.num_births_initial}
         - population_growth_type: {simulation.population_growth_type}
+        - pollution ignored: {args.ignore_pollution}
         """
         file.write(log_msg)
 
