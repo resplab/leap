@@ -206,7 +206,8 @@ def run_main():
         Parameters:
         - config: {config}
         - max_age: {simulation.max_age}
-        - min_year: {simulation.max_year}
+        - min_year: {simulation.min_year}
+        - max_year: {simulation.max_year}
         - province: {simulation.province}
         - time_horizon: {simulation.time_horizon}
         - num_births_initial: {simulation.num_births_initial}
