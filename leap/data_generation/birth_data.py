@@ -1,38 +1,13 @@
 import pandas as pd
 import pathlib
 from leap.utils import get_data_path
+from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__)
 
 STARTING_YEAR = 1999
-
-
-PROVINCE_MAP = {
-    "Canada": "CA",
-    "British Columbia": "BC",
-    "Alberta": "AB",
-    "Saskatchewan": "SK",
-    "Manitoba": "MB",
-    "Ontario": "ON",
-    "Quebec": "QC",
-    "Newfoundland and Labrador": "NL",
-    "Nova Scotia": "NS",
-    "New Brunswick": "NB",
-    "Prince Edward Island": "PE",
-    "Yukon": "YT",
-    "Northwest Territories": "NT",
-    "Nunavut": "NU"
-}
-
-
-def get_province_id(province: str) -> str:
-    return PROVINCE_MAP[province]
-
-
-def get_sex_id(sex: str) -> str:
-    return sex[0:1]
 
 
 def get_projection_scenario_id(projection_scenario: str) -> str:
@@ -48,18 +23,6 @@ def filter_age_group(age_group: str) -> bool:
             and "All" not in age_group and "Median" not in age_group
             and "Average" not in age_group
         )
-
-
-def format_age_group(age_group: str) -> int:
-    if age_group == "100 years and over":
-        age = 100
-    elif age_group == "Under 1 year":
-        age = 0
-    else:
-        age = age_group.replace(" years", "")
-        age = age.replace(" year", "")
-        age = int(age)
-    return age
 
 
 def load_past_population_data() -> pd.DataFrame:
