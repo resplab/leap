@@ -1,4 +1,3 @@
-from os import replace
 import pandas as pd
 import pathlib
 from leap.utils import get_data_path
@@ -7,7 +6,6 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__)
 
-DATA_PATH = get_data_path("original_data")
 STARTING_YEAR = 1999
 
 
