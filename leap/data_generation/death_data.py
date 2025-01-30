@@ -7,6 +7,62 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__)
 
 STARTING_YEAR = 1996
+def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
+    """Determine the life expectancy for a person born in a given year.
+
+    The life expectancy can be calculated from the death probability using the formulae
+    delineated here: https://www.ssa.gov/oact/HistEst/CohLifeTables/LifeTableDefinitions.pdf.
+    
+    Args:
+        life_table: A dataframe containing the probability of death for a single year,
+            province and sex, for each age. Columns:
+                * ``age``: the integer age.
+                * ``sex``: one of "M" or "F".
+                * ``year``: the integer calendar year.
+                * ``province``: A string indicating the province abbreviation, e.g. "BC".
+                  For all of Canada, set province to "CA".
+                * ``prob_death``: the probability of death for a given age, province, sex, and year.
+    Returns:
+        The life expectancy for a person born in the given year, in a given province,
+        for a given sex.
+    """
+
+    df = life_table.sort_values("age").copy()
+    df.set_index("age", inplace=True)
+    n_alive_by_age_0 = 100000
+    n_alive_by_age = []
+    for age in df.index:
+        if age == 0:
+            n_alive_by_age.append(n_alive_by_age_0)
+        else:
+            n_alive_by_age.append(
+                n_alive_by_age[age - 1] * (1 - df.loc[age - 1, "prob_death"])
+            )
+
+    df["n_alive_by_age"] = n_alive_by_age
+    df["n_person_years_interval"] = df.apply(
+        lambda x: x["n_alive_by_age"] - 0.5 * x["prob_death"] * x["n_alive_by_age"], axis=1
+    )
+
+    df.loc[0, "n_person_years_interval"] = (
+        df.loc[1, "n_person_years_interval"] +
+        0.1 * df.loc[0, "prob_death"] * n_alive_by_age_0
+    )
+
+    df.loc[110, "n_person_years_interval"] = df.loc[110, "n_alive_by_age"] * 1.4
+
+    df["n_person_years_after_age"] = df["n_person_years_interval"].sort_index(ascending=False).cumsum().sort_index()
+
+    df["n_years_left_at_age"] = df.apply(
+        lambda x: x["n_person_years_after_age"] / x["n_alive_by_age"], axis=1
+    )
+
+    life_expectancy = df.loc[0, "n_years_left_at_age"]
+
+    return life_expectancy
+
+
+
 def get_prob_death_projected(
     prob_death: float, year_index: int, beta_year: float
 ) -> float:
