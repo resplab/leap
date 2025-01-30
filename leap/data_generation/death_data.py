@@ -7,6 +7,11 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__)
 
 STARTING_YEAR = 1996
+DESIRED_LIFE_EXPECTANCIES = pd.DataFrame({
+    "province": ["CA", "CA", "BC", "BC"],
+    "sex": ["M", "F", "M", "F"],
+    "life_expectancy": [87.0, 90.1, 84.6, 88.0]
+})
 def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
     """Determine the life expectancy for a person born in a given year.
 
@@ -129,6 +134,59 @@ def get_projected_life_table_single_year(
     df.rename(columns={"prob_death_proj": "prob_death"}, inplace=True)
 
     return df
+
+
+
+def beta_year_optimizer(
+    beta_year: float,
+    life_table: pd.DataFrame,
+    sex: str,
+    province: str, 
+    starting_year: int,
+    year_index: int,
+) -> float:
+    """Calculate the difference between the projected life expectancy and desired life expectancy.
+
+    This function is passed to the ``scipy.optimize.brentq`` function. We want to find ``beta_year``
+    such that the projected life expectancy is as close as possible to the desired life expectancy.
+    
+    Args:
+        beta_year: The beta parameter for the given year.
+        life_table: A dataframe containing the projected probability of death
+            for the calibration year, for a given sex and province. Columns:
+            - ``age``: the integer age.
+            - ``sex``: one of "M" or "F".
+            - ``year``: the calibration calendar year.
+            - ``province``: a string indicating the province abbreviation, e.g. "BC".
+                For all of Canada, set province to "CA".
+            - ``prob_death``: the probability of death for a given age, province, sex, and year.
+        sex: one of "M" or "F".
+        province: A 2-character string indicating the province abbreviation, e.g. "BC".
+            For all of Canada, set province to "CA".
+        starting_year: The calendar year when the projections begin.
+        year_index: The number of years between the current year and the starting year.
+            For example, if our initial year is 2020, and we want to compute the probability of
+            death in 2028, the ``year_index`` would be 8.
+    
+    Returns:
+        The difference between the projected life expectancy of the calibration year
+        and the desired life expectancy.
+    """
+
+    projected_life_table = get_projected_life_table_single_year(
+        beta_year, life_table, starting_year, year_index, sex, province
+    )
+
+    life_expectancy = calculate_life_expectancy(projected_life_table)
+    desired_life_expectancy = DESIRED_LIFE_EXPECTANCIES.loc[
+        (DESIRED_LIFE_EXPECTANCIES["sex"] == sex) &
+        (DESIRED_LIFE_EXPECTANCIES["province"] == province),
+        "life_expectancy"
+    ].values[0]
+
+    return life_expectancy - desired_life_expectancy
+
+
 def load_past_death_data() -> pd.DataFrame:
     """Load the past death data from the StatCan CSV file.
     
