@@ -136,6 +136,7 @@ def run_main():
     output_path = pathlib.Path(*dir_name.parts[:-1],
                                "output",
                                dir_name.parts[-1])
+    # Prompt user to continue with existing path or quit
     if output_path.exists():
         logger.message(f"Path <{output_path.absolute()}> already exists.")
         logger.message(
@@ -145,8 +146,10 @@ def run_main():
           - type n to stop
         """
         response = input(path_msg).strip().lower()
+        # Only really need to check if response is 'y' since any other response will quit
         if not response == 'y':
             quit()
+    # Prompt user to create directory or quit
     else:
         logger.message(f"Path <{dir_name}> does not exist.")
         logger.message(f"Would you like to create a directory?")
@@ -156,14 +159,18 @@ def run_main():
         """
         response = input(path_msg).strip().lower()
         if response == 'y':
+            # Create directory and continue
             output_path.mkdir(parents=True, exist_ok=True)
             logger.message(f"Directory created at <{output_path.absolute()}>")
         else:
+            # Quit
             logger.error("Aborting\n")
             quit()
 
+    # Uncomment line below to print the configuration settings
     # logger.message(f"Config:\n{pretty_printer.pformat(config)}")
 
+    # Create simulation object using arguments
     simulation = Simulation(
         config=config,
         max_age=args.max_age,
@@ -181,6 +188,7 @@ def run_main():
     logger.message(f"Results will be saved to <{output_path}>")
     if args.run:
         logger.message("Running simulation...")
+        # This is the main function that runs the simulation
         outcome_matrix = simulation.run()
         logger.message(outcome_matrix)
         outcome_matrix.save(path=output_path)
