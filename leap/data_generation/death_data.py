@@ -7,6 +7,72 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__)
 
 STARTING_YEAR = 1996
+def get_prob_death_projected(
+    prob_death: float, year_index: int, beta_year: float
+) -> float:
+    """Given the prob death for a past year, calculate the prob death in a future year.
+
+    Args:
+        prob_death: The probability of death for the initial year (determined by past data).
+        year_index: The number of years between the current year and the initial year.
+            For example, if our initial year is 2020, and we want to compute the probability of
+            death in 2028, the ``year_index`` would be 8.
+        beta_year: The beta parameter for the given year.
+
+    Returns:
+        The projected probability of death for the current year.
+    """
+    prob_death = min(prob_death, 0.9999999999)
+    odds = (prob_death / (1 - prob_death)) * np.exp(year_index * beta_year)
+    prob_death_projected = max(min(odds / (1 + odds), 1), 0)
+    return prob_death_projected
+
+
+
+def get_projected_life_table_single_year(
+    beta_year: float, life_table: pd.DataFrame, starting_year: int, year_index: int,
+    sex: str, province: str
+) -> pd.DataFrame:
+    """Get the life table for a single year.
+
+    Args:
+        beta_year: The beta parameter for the given year.
+        life_table: A dataframe containing the projected probability of death
+            for the starting year, for a given sex and province. Columns:
+
+            - ``age``: the integer age.
+            - ``sex``: one of "M" or "F".
+            - ``year``: the starting calendar year.
+            - ``province``: a string indicating the province abbreviation, e.g. "BC".
+                For all of Canada, set province to "CA".
+            - ``prob_death``: the probability of death for a given age, province, sex, and year.
+
+        starting_year: The calendar year when the projections begin.
+        year_index: The number of years between the current year and the starting year.
+            For example, if our initial year is 2020, and we want to compute the probability of
+            death in 2028, the ``year_index`` would be 8.
+        sex: one of "M" or "F".
+        province: a string indicating the province abbreviation, e.g. "BC".
+            For all of Canada, set province to "CA".
+
+    Returns:
+        A dataframe containing the projected probability of death for the given year,
+        sex, and province.
+    """
+    df = life_table.loc[(life_table["sex"] == sex) & (life_table["province"] == province)].copy()
+    df["prob_death_proj"] = df["prob_death"].apply(
+        lambda x: get_prob_death_projected(x, year_index, beta_year)
+    )
+
+    df["year"] = [starting_year + year_index - 1] * df.shape[0]
+
+    df["se"] = df.apply(
+        lambda x: (x["prob_death_proj"] * x["se"]) / x["prob_death"], axis=1
+    )
+    df.drop(columns=["prob_death"], inplace=True)
+    df.rename(columns={"prob_death_proj": "prob_death"}, inplace=True)
+
+    return df
 def load_past_death_data() -> pd.DataFrame:
     """Load the past death data from the StatCan CSV file.
     
