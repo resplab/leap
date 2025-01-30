@@ -40,6 +40,6 @@ python3 leap/data_generation/birth_data.py
 
 This will update the following data files: 
 
-1. `leap/processed_data/master_birth_estimate.csv`
-2. `leap/processed_data/master_initial_pop_distribution_prop.csv`
+1. `leap/processed_data/birth_estimate.csv`
+2. `leap/processed_data/initial_pop_distribution_prop.csv`
 
