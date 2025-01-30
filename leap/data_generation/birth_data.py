@@ -193,12 +193,12 @@ def load_past_initial_population_data() -> pd.DataFrame:
 
     # get the total number of births for a given year and province
     df_birth = df.loc[df["age"] == 0]
-    df_birth["N_birth"] = df_birth["n_age"].values
+    df_birth["n_birth"] = df_birth["n_age"].values
     df_birth.drop(columns=["age", "N", "n_age", "prop_male"], inplace=True)
 
     # add the births column to the main df
     df = pd.merge(df, df_birth, on=["province", "sex", "year"], how="left")
-    df["prop"] = df.apply(lambda x: x["n_age"] / x["N_birth"], axis=1)
+    df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
@@ -262,12 +262,12 @@ def load_projected_initial_population_data(min_year: int) -> pd.DataFrame:
 
     # get the total number of births for a given year, province, and projection scenario
     df_birth = df.loc[df["age"] == 0]
-    df_birth["N_birth"] = df_birth["n_age"].values
+    df_birth["n_birth"] = df_birth["n_age"].values
     df_birth.drop(columns=["age", "N", "n_age", "prop_male"], inplace=True)
 
     # add the births column to the main df
     df = pd.merge(df, df_birth, on=["province", "sex", "year", "projection_scenario"], how="left")
-    df["prop"] = df.apply(lambda x: x["n_age"] / x["N_birth"], axis=1)
+    df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
