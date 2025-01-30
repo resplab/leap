@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+from scipy import optimize
 from leap.utils import get_data_path
 from leap.logger import get_logger
 from leap.data_generation.utils import format_age_group, get_province_id, get_sex_id
@@ -7,11 +9,32 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__)
 
 STARTING_YEAR = 1996
+FINAL_YEAR = 2068
+
 DESIRED_LIFE_EXPECTANCIES = pd.DataFrame({
     "province": ["CA", "CA", "BC", "BC"],
     "sex": ["M", "F", "M", "F"],
     "life_expectancy": [87.0, 90.1, 84.6, 88.0]
 })
+
+CALIBRATION_YEARS = {
+    "CA": 2068,
+    "BC": 2043,
+    "AB": None,
+    "SK": None,
+    "MB": None,
+    "ON": None,
+    "QC": None,
+    "NL": None,
+    "NS": None,
+    "NB": None,
+    "PE": None,
+    "YT": None,
+    "NT": None,
+    "NU": None
+}
+
+
 def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
     """Determine the life expectancy for a person born in a given year.
 
@@ -251,5 +274,84 @@ def load_past_death_data() -> pd.DataFrame:
     df = pd.merge(df_prob, df_se, on=["year", "province", "sex", "age"], how="left")
 
     return df
+
+
+def load_projected_death_data(
+    past_life_table: pd.DataFrame,
+    a: float = -0.03,
+    b: float = -0.01,
+    xtol: float = 0.00001
+) -> pd.DataFrame:
+
+    projected_life_table = pd.DataFrame({
+        "year": np.array([], dtype=int),
+        "province": [],
+        "age": np.array([], dtype=int),
+        "sex": [],
+        "prob_death": [],
+        "se": []
+    })
+    for province in past_life_table["province"].unique():
+        calibration_year = CALIBRATION_YEARS[province]
+        life_table = past_life_table[past_life_table["province"] == province]
+        starting_year = life_table["year"].max() + 1
+        life_table = life_table[life_table["year"] == starting_year - 1]
+        n_years = FINAL_YEAR - starting_year + 1
+
+        beta_year_female = optimize.brentq(
+            beta_year_optimizer,
+            a=a,
+            b=b,
+            args=(
+                life_table,
+                "F",
+                province,
+                starting_year,
+                calibration_year - starting_year + 1
+            ),
+            xtol=xtol
+        )
+
+        beta_year_male = optimize.brentq(
+            beta_year_optimizer,
+            a=a,
+            b=b,
+            args=(
+                life_table,
+                "M",
+                province,
+                starting_year,
+                calibration_year - starting_year + 1
+            ),
+            xtol=xtol
+        )
+
+        projected_life_table_province = pd.DataFrame({
+            "year": np.array([], dtype=int),
+            "province": [],
+            "age": np.array([], dtype=int),
+            "sex": [],
+            "prob_death": [],
+            "se": []
+        })
+        for year_index in range(1, n_years + 1):
+            df_female = get_projected_life_table_single_year(
+                beta_year_female, life_table, starting_year, year_index, "F", province
+            )
+            df_male = get_projected_life_table_single_year(
+                beta_year_male, life_table, starting_year, year_index, "M", province
+            )
+            projected_life_table_single_year = pd.concat([df_female, df_male], axis=0)
+            projected_life_table_province = pd.concat(
+                [projected_life_table_province, projected_life_table_single_year],
+                axis=0
+            )
+
+        projected_life_table = pd.concat(
+            [projected_life_table, projected_life_table_province],
+            axis=0
+        )
+
+    return projected_life_table
 
 
