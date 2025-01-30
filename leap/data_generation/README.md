@@ -43,3 +43,32 @@ This will update the following data files:
 1. `leap/processed_data/master_birth_estimate.csv`
 2. `leap/processed_data/master_initial_pop_distribution_prop.csv`
 
+## Death Data
+
+To obtain the mortality data for each year, we used one table from `StatCan`:
+
+1. 1996 - 2021
+
+For past years, we used
+[Table 13-10-00837-01 from StatCan](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310083701).
+
+The `*.csv` file can be downloaded from here:
+[13100837-eng.zip](https://www150.statcan.gc.ca/n1/tbl/csv/13100837-eng.zip).
+
+and is saved as:
+`LEAP/leap/original_data/13100837.csv`
+
+2. 2021 - 2068
+
+TODO.
+
+To run the data generation for the mortality data:
+
+```sh
+cd LEAP
+python3 leap/data_generation/death_data.py
+```
+
+This will update the following data file: 
+
+1. `leap/processed_data/master_life_table.csv`
