@@ -5,7 +5,7 @@ from leap.data_generation.utils import get_province_id, get_sex_id, format_age_g
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
-logger = get_logger(__name__)
+logger = get_logger(__name__, 20)
 
 STARTING_YEAR = 1999
 
@@ -294,3 +294,8 @@ def generate_initial_population_data():
     file_path = get_data_path("processed_data/master_initial_pop_distribution_prop.csv")
     logger.info(f"Saving data to {file_path}")
     initial_population.to_csv(file_path, index=False)
+
+
+if __name__ == "__main__":
+    generate_initial_population_data()
+    generate_birth_estimate_data()
