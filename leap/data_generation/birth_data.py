@@ -1,5 +1,4 @@
 import pandas as pd
-import pathlib
 from leap.utils import get_data_path
 from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group
 from leap.logger import get_logger
