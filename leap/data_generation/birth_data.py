@@ -276,7 +276,7 @@ def load_projected_initial_population_data(min_year: int) -> pd.DataFrame:
     return df
 
 
-def process_birth_estimate_data():
+def generate_birth_estimate_data():
     past_population_data = load_past_population_data()
     min_year = past_population_data["year"].max() + 1
     projected_population_data = load_projected_population_data(min_year)
@@ -286,7 +286,7 @@ def process_birth_estimate_data():
     birth_estimate.to_csv(file_path, index=False)
 
 
-def process_initial_population_data():
+def generate_initial_population_data():
     past_population_data = load_past_initial_population_data()
     min_year = past_population_data["year"].max()
     projected_population_data = load_projected_initial_population_data(min_year)
