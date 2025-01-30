@@ -355,3 +355,13 @@ def load_projected_death_data(
     return projected_life_table
 
 
+
+def generate_death_data():
+    past_life_table = load_past_death_data()
+    projected_life_table = load_projected_death_data(past_life_table)
+    life_table = pd.concat([past_life_table, projected_life_table], axis=0)
+
+    # save the data
+    file_path = get_data_path("processed_data/master_life_table.csv")
+    logger.info(f"Saving data to {file_path}")
+    life_table.to_csv(file_path, index=False)
