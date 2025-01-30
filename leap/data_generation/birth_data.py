@@ -60,6 +60,7 @@ def load_past_population_data() -> pd.DataFrame:
 
     # add :projection_scenario column, all values = "past"
     df["projection_scenario"] = ["past"] * df.shape[0]
+    df.sort_values(["province", "year", "projection_scenario"], inplace=True)
 
     return df
 
@@ -122,6 +123,7 @@ def load_projected_population_data(min_year: int) -> pd.DataFrame:
     # drop N and sex columns
     df = df.drop(columns=["N", "sex", "age"])
     df.rename(columns={"max_N": "N", "prop": "prop_male"}, inplace=True)
+    df.sort_values(["province", "year", "projection_scenario"], inplace=True)
 
     return df
 
