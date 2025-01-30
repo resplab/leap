@@ -6,7 +6,7 @@ from leap.logger import get_logger
 from leap.data_generation.utils import format_age_group, get_province_id, get_sex_id
 pd.options.mode.copy_on_write = True
 
-logger = get_logger(__name__)
+logger = get_logger(__name__, 20)
 
 STARTING_YEAR = 1996
 FINAL_YEAR = 2068
@@ -365,3 +365,7 @@ def generate_death_data():
     file_path = get_data_path("processed_data/master_life_table.csv")
     logger.info(f"Saving data to {file_path}")
     life_table.to_csv(file_path, index=False)
+
+
+if __name__ == "__main__":
+    generate_death_data()
