@@ -42,7 +42,8 @@ def load_past_population_data() -> pd.DataFrame:
     logger.info("Loading past population data from CSV file...")
     df = pd.read_csv(get_data_path("original_data/17100005.csv"))
 
-    df = df.loc[(df["REF_DATE"] >= STARTING_YEAR) & (df["AGE_GROUP"] == "0 years")][["REF_DATE", "GEO", "SEX", "VALUE"]]
+    df = df.loc[(df["REF_DATE"] >= STARTING_YEAR) & (df["AGE_GROUP"] == "0 years")]
+    df = df[["REF_DATE", "GEO", "SEX", "VALUE"]]
     df.rename(
         columns={"REF_DATE": "year", "GEO": "province", "SEX": "sex", "VALUE": "N"},
         inplace=True
@@ -154,7 +155,9 @@ def load_past_initial_population_data() -> pd.DataFrame:
 
     # rename the columns
     df.rename(
-        columns={"REF_DATE": "year", "GEO": "province", "SEX": "sex", "AGE_GROUP": "age", "VALUE": "N"},
+        columns={
+            "REF_DATE": "year", "GEO": "province", "SEX": "sex", "AGE_GROUP": "age", "VALUE": "N"
+        },
         inplace=True
     )
 
