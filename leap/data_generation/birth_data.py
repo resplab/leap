@@ -1,5 +1,4 @@
 import pandas as pd
-import pathlib
 from leap.utils import get_data_path
 from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group
 from leap.logger import get_logger
@@ -60,6 +59,7 @@ def load_past_population_data() -> pd.DataFrame:
 
     # add :projection_scenario column, all values = "past"
     df["projection_scenario"] = ["past"] * df.shape[0]
+    df.sort_values(["province", "year", "projection_scenario"], inplace=True)
 
     return df
 
@@ -122,6 +122,7 @@ def load_projected_population_data(min_year: int) -> pd.DataFrame:
     # drop N and sex columns
     df = df.drop(columns=["N", "sex", "age"])
     df.rename(columns={"max_N": "N", "prop": "prop_male"}, inplace=True)
+    df.sort_values(["province", "year", "projection_scenario"], inplace=True)
 
     return df
 
@@ -192,12 +193,12 @@ def load_past_initial_population_data() -> pd.DataFrame:
 
     # get the total number of births for a given year and province
     df_birth = df.loc[df["age"] == 0]
-    df_birth["N_birth"] = df_birth["n_age"].values
+    df_birth["n_birth"] = df_birth["n_age"].values
     df_birth.drop(columns=["age", "N", "n_age", "prop_male"], inplace=True)
 
     # add the births column to the main df
     df = pd.merge(df, df_birth, on=["province", "sex", "year"], how="left")
-    df["prop"] = df["N"] / df["N_birth"]
+    df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
@@ -261,12 +262,12 @@ def load_projected_initial_population_data(min_year: int) -> pd.DataFrame:
 
     # get the total number of births for a given year, province, and projection scenario
     df_birth = df.loc[df["age"] == 0]
-    df_birth["N_birth"] = df_birth["n_age"].values
+    df_birth["n_birth"] = df_birth["n_age"].values
     df_birth.drop(columns=["age", "N", "n_age", "prop_male"], inplace=True)
 
     # add the births column to the main df
     df = pd.merge(df, df_birth, on=["province", "sex", "year", "projection_scenario"], how="left")
-    df["prop"] = df["N"] / df["N_birth"]
+    df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
@@ -281,7 +282,7 @@ def generate_birth_estimate_data():
     min_year = past_population_data["year"].max() + 1
     projected_population_data = load_projected_population_data(min_year)
     birth_estimate = pd.concat([past_population_data, projected_population_data], axis=0)
-    file_path = get_data_path("processed_data/master_birth_estimate.csv")
+    file_path = get_data_path("processed_data/birth/birth_estimate.csv")
     logger.info(f"Saving data to {file_path}")
     birth_estimate.to_csv(file_path, index=False)
 
@@ -291,7 +292,7 @@ def generate_initial_population_data():
     min_year = past_population_data["year"].max()
     projected_population_data = load_projected_initial_population_data(min_year)
     initial_population = pd.concat([past_population_data, projected_population_data], axis=0)
-    file_path = get_data_path("processed_data/master_initial_pop_distribution_prop.csv")
+    file_path = get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
     logger.info(f"Saving data to {file_path}")
     initial_population.to_csv(file_path, index=False)
 

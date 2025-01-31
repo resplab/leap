@@ -72,7 +72,7 @@ class Birth:
               <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
             * ``N_relative``: The number of births relative to the first year of the simulation.
 
-        See ``master_birth_estimate.csv``.
+        See ``birth_estimate.csv``.
         """
         return self._estimate
     
@@ -122,7 +122,7 @@ class Birth:
     def load_birth_estimate(
         self, starting_year: int, province: str, population_growth_type: str
     ) -> DataFrameGroupBy:
-        """Load the data from ``master_birth_estimate.csv``.
+        """Load the data from ``birth_estimate.csv``.
         
         Args:
             starting_year: The year for the data to start at. Must be between ``2000-2065``.
@@ -173,7 +173,7 @@ class Birth:
         """
 
         df = pd.read_csv(
-            get_data_path("processed_data/master_birth_estimate.csv")
+            get_data_path("processed_data/birth/birth_estimate.csv")
         )
         check_year(starting_year, df)
         check_province(province)
@@ -192,7 +192,7 @@ class Birth:
     def load_population_initial_distribution(
         self, starting_year: int, province: str, population_growth_type: str, max_age: int
     ) -> pd.DataFrame:
-        """Load the data from ``master_initial_pop_distribution_prop.csv``.
+        """Load the data from ``initial_pop_distribution_prop.csv``.
         
         Args:
             starting_year: The year for the data to start at. Must be between ``2000-2065``.
@@ -221,7 +221,7 @@ class Birth:
         """
 
         df = pd.read_csv(
-            get_data_path("processed_data/master_initial_pop_distribution_prop.csv")
+            get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
         )
 
         check_year(starting_year, df)
