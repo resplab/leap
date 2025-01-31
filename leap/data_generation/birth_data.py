@@ -14,14 +14,19 @@ def get_projection_scenario_id(projection_scenario: str) -> str:
 
 
 def filter_age_group(age_group: str) -> bool:
+    """Filter out grouped categories such as "Median", "Average", "All", "to", "over".
+
+    Args:
+        age_group: The age group string.
+
+    Returns:
+        ``True`` if the age group is not a grouped category, ``False`` otherwise.
+    """
+    FILTER_WORDS = ["Median", "Average", "All", "to", "over"]
     if "100" in age_group:
         return True
     else:
-        return (
-            "to" not in age_group and "over" not in age_group
-            and "All" not in age_group and "Median" not in age_group
-            and "Average" not in age_group
-        )
+        return not any(word in age_group for word in FILTER_WORDS)
 
 
 def load_past_population_data() -> pd.DataFrame:
