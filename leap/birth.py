@@ -173,7 +173,7 @@ class Birth:
         """
 
         df = pd.read_csv(
-            get_data_path("processed_data/birth_estimate.csv")
+            get_data_path("processed_data/birth/birth_estimate.csv")
         )
         check_year(starting_year, df)
         check_province(province)
@@ -221,7 +221,7 @@ class Birth:
         """
 
         df = pd.read_csv(
-            get_data_path("processed_data/initial_pop_distribution_prop.csv")
+            get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
         )
 
         check_year(starting_year, df)

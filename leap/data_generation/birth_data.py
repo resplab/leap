@@ -282,7 +282,7 @@ def generate_birth_estimate_data():
     min_year = past_population_data["year"].max() + 1
     projected_population_data = load_projected_population_data(min_year)
     birth_estimate = pd.concat([past_population_data, projected_population_data], axis=0)
-    file_path = get_data_path("processed_data/birth_estimate.csv")
+    file_path = get_data_path("processed_data/birth/birth_estimate.csv")
     logger.info(f"Saving data to {file_path}")
     birth_estimate.to_csv(file_path, index=False)
 
@@ -292,7 +292,7 @@ def generate_initial_population_data():
     min_year = past_population_data["year"].max()
     projected_population_data = load_projected_initial_population_data(min_year)
     initial_population = pd.concat([past_population_data, projected_population_data], axis=0)
-    file_path = get_data_path("processed_data/initial_pop_distribution_prop.csv")
+    file_path = get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
     logger.info(f"Saving data to {file_path}")
     initial_population.to_csv(file_path, index=False)
 
