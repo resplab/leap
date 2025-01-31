@@ -10,6 +10,15 @@ STARTING_YEAR = 1999
 
 
 def get_projection_scenario_id(projection_scenario: str) -> str:
+    """Convert the long form of the projection scenario to the 2-letter ID.
+    
+    Args:
+        projection_scenario: The long form of the projection scenario, e.g.
+            ``Projection scenario M1``.
+        
+    Returns:
+        The 2-letter ID of the projection scenario, e.g. ``M1``.
+    """
     return projection_scenario.replace("Projection scenario ", "")[0:2]
 
 
