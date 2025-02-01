@@ -38,10 +38,23 @@ def filter_age_group(age_group: str) -> bool:
         return not any(word in age_group for word in FILTER_WORDS)
 
 
-def load_past_population_data() -> pd.DataFrame:
+def load_past_births_population_data() -> pd.DataFrame:
+    """Load the past birth data from the CSV file.
+    
+    Returns:
+        The past birth data, with the following columns:
+        
+        * year: The year of the data.
+        * province: The 2-letter province ID.
+        * N: The total number of births in that year.
+        * prop_male: The proportion of births in that year that are male.
+        * projection_scenario: The projection scenario; all values are "past".
+    """
+
     logger.info("Loading past population data from CSV file...")
     df = pd.read_csv(get_data_path("original_data/17100005.csv"))
 
+    # select only the age = 0 age group and the years >= STARTING_YEAR
     df = df.loc[(df["REF_DATE"] >= STARTING_YEAR) & (df["AGE_GROUP"] == "0 years")]
     df = df[["REF_DATE", "GEO", "SEX", "VALUE"]]
     df.rename(
@@ -72,14 +85,40 @@ def load_past_population_data() -> pd.DataFrame:
     # rename max_N to N and prop to prop_male
     df.rename(columns={"max_N": "N", "prop": "prop_male"}, inplace=True)
 
-    # add :projection_scenario column, all values = "past"
+    # add projection_scenario column, all values = "past"
     df["projection_scenario"] = ["past"] * df.shape[0]
     df.sort_values(["province", "year", "projection_scenario"], inplace=True)
 
     return df
 
 
-def load_projected_population_data(min_year: int) -> pd.DataFrame:
+def load_projected_births_population_data(min_year: int) -> pd.DataFrame:
+    """Load the projected births data from the CSV file from ``StatCan``.
+
+    Args:
+        min_year: The starting year for the projected data.
+    
+    Returns:
+        The projected births data, with the following columns:
+        
+        * year: The year of the data.
+        * province: The 2-letter province ID.
+        * N: The total number of births predicted for that year.
+        * prop_male: The proportion of predicted births in that year that are male.
+        * projection_scenario: The projection scenario, one of:
+
+            * ``LG``: low-growth projection
+            * ``HG``: high-growth projection
+            * ``M1``: medium-growth 1 projection
+            * ``M2``: medium-growth 2 projection
+            * ``M3``: medium-growth 3 projection
+            * ``M4``: medium-growth 4 projection
+            * ``M5``: medium-growth 5 projection
+            * ``M6``: medium-growth 6 projection
+            * ``FA``: fast-aging projection
+            * ``SA``: slow-aging projection
+
+    """
     logger.info("Loading projected population data from CSV file...")
     
     df = pd.read_csv(get_data_path("original_data/17100057.csv"))
@@ -295,9 +334,9 @@ def load_projected_initial_population_data(min_year: int) -> pd.DataFrame:
 
 
 def generate_birth_estimate_data():
-    past_population_data = load_past_population_data()
+    past_population_data = load_past_births_population_data()
     min_year = past_population_data["year"].max() + 1
-    projected_population_data = load_projected_population_data(min_year)
+    projected_population_data = load_projected_births_population_data(min_year)
     birth_estimate = pd.concat([past_population_data, projected_population_data], axis=0)
     file_path = get_data_path("processed_data/birth/birth_estimate.csv")
     logger.info(f"Saving data to {file_path}")
