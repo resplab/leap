@@ -124,7 +124,7 @@ def get_prob_death_projected(
         The projected probability of death for the current year.
     """
     prob_death = min(prob_death, 0.9999999999)
-    odds = (prob_death / (1 - prob_death)) * np.exp(year_index * beta_year)
+    odds = (prob_death / (1 - prob_death)) * np.exp((year_index + 1) * beta_year)
     prob_death_projected = max(min(odds / (1 + odds), 1), 0)
     return prob_death_projected
 
@@ -165,7 +165,7 @@ def get_projected_life_table_single_year(
         lambda x: get_prob_death_projected(x, year_index, beta_year)
     )
 
-    df["year"] = [starting_year + year_index - 1] * df.shape[0]
+    df["year"] = [starting_year + year_index] * df.shape[0]
 
     df["se"] = df.apply(
         lambda x: (x["prob_death_proj"] * x["se"]) / x["prob_death"], axis=1
@@ -355,7 +355,7 @@ def load_projected_death_data(
                 "F",
                 province,
                 starting_year,
-                calibration_year - starting_year + 1
+                calibration_year - starting_year
             ),
             xtol=xtol
         )
@@ -369,7 +369,7 @@ def load_projected_death_data(
                 "M",
                 province,
                 starting_year,
-                calibration_year - starting_year + 1
+                calibration_year - starting_year
             ),
             xtol=xtol
         )
@@ -382,7 +382,7 @@ def load_projected_death_data(
             "prob_death": [],
             "se": []
         })
-        for year_index in range(1, n_years + 1):
+        for year_index in range(n_years):
             df_female = get_projected_life_table_single_year(
                 beta_year_female, life_table, starting_year, year_index, "F", province
             )
