@@ -8,6 +8,7 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
+
 STARTING_YEAR = 1996
 FINAL_YEAR = 2068
 
@@ -57,38 +58,54 @@ def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
 
     df = life_table.sort_values("age").copy()
     df.set_index("age", inplace=True)
-    n_alive_by_age_0 = 100000
-    n_alive_by_age = []
+
+    # l(x): calculate the number of people alive up to age x
+    n_alive_by_age_0 = 100000 # l(0): initial number of people at age 0
+    n_alive_by_age = [] # l(x)
     for age in df.index:
         if age == 0:
             n_alive_by_age.append(n_alive_by_age_0)
         else:
+            # l(x) = l(x-1) * (1 - q(x)-1); q(x) = prob_death at age x
             n_alive_by_age.append(
                 n_alive_by_age[age - 1] * (1 - df.loc[age - 1, "prob_death"])
             )
-
     df["n_alive_by_age"] = n_alive_by_age
+
+    # L(x): calculate the number of person-years lived between ages [x, x+1)
+    # L(x) = l(x) - 0.5 * d(x)
+    # d(x) = l(x) * q(x)
     df["n_person_years_interval"] = df.apply(
         lambda x: x["n_alive_by_age"] - 0.5 * x["prob_death"] * x["n_alive_by_age"], axis=1
     )
 
+    # L(0): calculate the number of person-years lived between ages [0, 1)
+    # L(0) = L(1) - f(0) * d(0)
+    # d(0) = l(0) * q(0)
     df.loc[0, "n_person_years_interval"] = (
         df.loc[1, "n_person_years_interval"] +
         0.1 * df.loc[0, "prob_death"] * n_alive_by_age_0
     )
 
+    # L(110): calculate the number of person-years lived between ages [110, 111)
     df.loc[110, "n_person_years_interval"] = df.loc[110, "n_alive_by_age"] * 1.4
 
-    df["n_person_years_after_age"] = df["n_person_years_interval"].sort_index(ascending=False).cumsum().sort_index()
+    # T(x): calculate the total number of person-years lived after age x
+    # T(x) = sum(L(x) for x in [x, 110])
+    df["n_person_years_after_age"] = df["n_person_years_interval"].sort_index(
+        ascending=False
+    ).cumsum().sort_index()
 
+    # E(x): calculate the number of years left to live at age x
+    # E(x) = T(x) / l(x)
     df["n_years_left_at_age"] = df.apply(
         lambda x: x["n_person_years_after_age"] / x["n_alive_by_age"], axis=1
     )
 
+    # E(0): calculate the number of years left to live at age 0, aka life expectancy
     life_expectancy = df.loc[0, "n_years_left_at_age"]
 
     return life_expectancy
-
 
 
 def get_prob_death_projected(
@@ -199,6 +216,7 @@ def beta_year_optimizer(
     projected_life_table = get_projected_life_table_single_year(
         beta_year, life_table, starting_year, year_index, sex, province
     )
+    logger.info(projected_life_table)
 
     life_expectancy = calculate_life_expectancy(projected_life_table)
     desired_life_expectancy = DESIRED_LIFE_EXPECTANCIES.loc[
@@ -211,18 +229,19 @@ def beta_year_optimizer(
 
 
 def load_past_death_data() -> pd.DataFrame:
-    """Load the past death data from the StatCan CSV file.
+    """Load the past death data from the ``StatCan`` CSV file.
     
     Returns:
         A dataframe containing the probability of death and the standard error
         for each year, province, age, and sex. Columns:
-            * ``year``: the integer calendar year.
-            * ``province``: a string indicating the province abbreviation, e.g. "BC".
-            For all of Canada, set province to "CA".
-            * ``sex``: one of "M" or "F".
-            * ``age``: the integer age.
-            * ``prob_death``: the probability of death.
-            * ``se``: the standard error of the probability of death.
+            * ``year``: The integer calendar year.
+            * ``province``: A string indicating the 2-letter province abbreviation, e.g. "BC".
+              For all of Canada, set province to "CA".
+            * ``sex``: One of "M" or "F".
+            * ``age``: The integer age.
+            * ``prob_death``: The probability that a person of the given age, sex, and province
+              will die in the given year.
+            * ``se``: The standard error of the probability of death.
     """ 
     logger.info("Loading mortality data from CSV file...")
     df = pd.read_csv(get_data_path("original_data/13100837.csv"))
@@ -282,6 +301,35 @@ def load_projected_death_data(
     b: float = -0.01,
     xtol: float = 0.00001
 ) -> pd.DataFrame:
+    """Load the projected death data from ``StatCan`` CSV file.
+    
+    Args:
+        past_life_table: A dataframe containing the probability of death and the standard error
+            for each year, province, age, and sex. Columns:
+            
+            * ``year``: the integer calendar year.
+            * ``province``: a string indicating the province abbreviation, e.g. "BC".
+                For all of Canada, set province to "CA".
+            * ``sex``: one of "M" or "F".
+            * ``age``: the integer age.
+            * ``prob_death``: the probability of death.
+            * ``se``: the standard error of the probability of death.
+        a: The lower bound for the beta parameter.
+        b: The upper bound for the beta parameter.
+        xtol: The tolerance for the beta parameter.
+    
+    Returns:
+        A dataframe containing the predicted probability of death and the standard error
+        for each year, province, age, and sex. Columns:
+            * ``year``: The integer calendar year.
+            * ``province``: A string indicating the 2-letter province abbreviation, e.g. "BC".
+              For all of Canada, set province to "CA".
+            * ``sex``: One of "M" or "F".
+            * ``age``: The integer age.
+            * ``prob_death``: The probability that a person of the given age, sex, and province
+              will die in the given year.
+            * ``se``: The standard error of the probability of death.
+    """
 
     projected_life_table = pd.DataFrame({
         "year": np.array([], dtype=int),
