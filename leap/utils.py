@@ -57,7 +57,7 @@ def round_number(x: float, digits: int = 0, sigdigits: int | None = None) -> flo
 
 
 def sigmoid(x: float | np.ndarray) -> float | np.ndarray:
-    return 1 / (1 + np.exp(-x))
+    return 1 / (1 + np.exp(-np.clip(x, -500, 500)))
 
 
 def logit(x: float | np.ndarray) -> float | np.ndarray:
@@ -188,9 +188,9 @@ def check_year(year: int, df: pd.DataFrame):
         ValueError: If the year is not valid.
     """
     if year < df["year"].min():
-        raise ValueError(f"year must be >= {df['year'].min()}")
+        raise ValueError(f"year was {year} and must be >= {df['year'].min()}")
     elif year > df["year"].max():
-        raise ValueError(f"year must be <= {df['year'].max()}")
+        raise ValueError(f"year was {year} and must be <= {df['year'].max()}")
 
 
 def check_province(province: str):

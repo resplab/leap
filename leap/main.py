@@ -2,6 +2,8 @@ import json
 import argparse
 import pathlib
 import pprint
+import sys
+from datetime import datetime
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
 from leap.logger import get_logger, set_logging_level
@@ -10,7 +12,6 @@ warnings.filterwarnings("ignore")
 
 logger = get_logger(__name__)
 pretty_printer = pprint.PrettyPrinter(indent=2, sort_dicts=False)
-
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -89,6 +90,10 @@ def get_parser() -> argparse.ArgumentParser:
         help="Print all the output."
     )
     args.add_argument(
+        "-ip", "--ignore-pollution", dest="ignore_pollution", action="store_true",
+        help="Do not include pollution as an element affecting the simulation."
+    )
+    args.add_argument(
         "-h", "--help", action="help", default=argparse.SUPPRESS,
         help="Shows function documentation."
     )
@@ -115,14 +120,57 @@ def get_config(path_config: str) -> dict:
 def run_main():
     """The entry point for the command line interface."""
 
+    # Ensure user is running in virtural environment
+    in_venv = sys.prefix != sys.base_prefix
+    if not in_venv:
+        raise Exception("Please run command while in the virtual environment.")
+
     parser = get_parser()
     args = parser.parse_args()
     config = get_config(args.config)
     if args.verbose:
         set_logging_level(20)
 
-    logger.message(f"Config:\n{pretty_printer.pformat(config)}")
+    # Check if path exists before running
+    dir_name = pathlib.Path(args.path_output)
+    output_path = pathlib.Path(*dir_name.parts[:-1],
+                               "output",
+                               dir_name.parts[-1])
+    # Prompt user to continue with existing path or quit
+    if output_path.exists():
+        logger.message(f"Path <{output_path.absolute()}> already exists.")
+        logger.message(
+            f"Are you sure you would like to continue (WARNING THIS WILL OVERWRITE EXISTING RESULT CSV FILES)?")
+        path_msg = f"""
+          - type y for to overwrite files located at <{output_path.absolute()}> 
+          - type n to stop
+        """
+        response = input(path_msg).strip().lower()
+        # Only really need to check if response is 'y' since any other response will quit
+        if not response == 'y':
+            quit()
+    # Prompt user to create directory or quit
+    else:
+        logger.message(f"Path <{dir_name}> does not exist.")
+        logger.message(f"Would you like to create a directory?")
+        path_msg = f"""
+          - type y for to create directory <{output_path.absolute()}> 
+          - type n to quit
+        """
+        response = input(path_msg).strip().lower()
+        if response == 'y':
+            # Create directory and continue
+            output_path.mkdir(parents=True, exist_ok=True)
+            logger.message(f"Directory created at <{output_path.absolute()}>")
+        else:
+            # Quit
+            logger.error("Aborting\n")
+            quit()
 
+    # Uncomment line below to print the configuration settings
+    # logger.message(f"Config:\n{pretty_printer.pformat(config)}")
+
+    # Create simulation object using arguments
     simulation = Simulation(
         config=config,
         max_age=args.max_age,
@@ -130,14 +178,51 @@ def run_main():
         province=args.province,
         time_horizon=args.time_horizon,
         num_births_initial=args.num_births_initial,
-        population_growth_type=args.population_growth_type
+        population_growth_type=args.population_growth_type,
+        ignore_pollution_flag=args.ignore_pollution
     )
 
+    # Get start time of simulation
+    simulation_start_time = datetime.now()
+
+    logger.message(f"Results will be saved to <{output_path}>")
     if args.run:
         logger.message("Running simulation...")
+        # This is the main function that runs the simulation
         outcome_matrix = simulation.run()
         logger.message(outcome_matrix)
-        outcome_matrix.save(path=pathlib.Path(args.path_output))
+        outcome_matrix.save(path=output_path)
+
+    # Get end time of simulation
+    simulation_end_time = datetime.now()
+
+    # Include log file containing additional information
+    # Get the current timestamp
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    # Define the file name
+    log_file_path = output_path.joinpath("logfile.txt")
+    # Write the timestamp to the file
+    with open(log_file_path, "w") as file:
+        log_msg = f"""
+        Metadata:
+        - Simulation Bundle Name: {dir_name}
+        - Simulation Run Date: {current_date}
+        - Simulation Start Time: {simulation_start_time}
+        - Simulation End Time: {simulation_end_time}
+        - Simulation Runtime: {simulation_end_time - simulation_start_time}
+        
+        Parameters:
+        - config: {config}
+        - max_age: {simulation.max_age}
+        - min_year: {simulation.min_year}
+        - max_year: {simulation.max_year}
+        - province: {simulation.province}
+        - time_horizon: {simulation.time_horizon}
+        - num_births_initial: {simulation.num_births_initial}
+        - population_growth_type: {simulation.population_growth_type}
+        - pollution ignored: {args.ignore_pollution}
+        """
+        file.write(log_msg)
 
 
 if __name__ == "__main__":
