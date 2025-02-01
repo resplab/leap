@@ -183,6 +183,23 @@ def load_projected_births_population_data(min_year: int) -> pd.DataFrame:
 
 
 def load_past_initial_population_data() -> pd.DataFrame:
+    """Load the past initial population data from the CSV file.
+    
+    Returns:
+        The past initial population data, with the following columns:
+        
+        * ``year``: The calendar year.
+        * ``province``: The 2-letter province ID, e.g. ``BC``.
+        * ``age``: The age of the population.
+        * ``prop_male``: The proportion of the population in that age group that are male.
+        * ``n_age``: The total number of people in that age group for the given year, province, and
+          projection scenario.
+        * ``n_birth``: The total number of births in the given year, province, and
+          projection scenario.
+        * ``prop``: The proportion of the total number of people in that age group
+          to the total number of births in that year.
+        * ``projection_scenario``: The projection scenario; all values are "past".
+    """
     logger.info("Loading past population data from CSV file...")
     df = pd.read_csv(get_data_path("original_data/17100005.csv"))
 
@@ -267,6 +284,38 @@ def load_past_initial_population_data() -> pd.DataFrame:
 
 
 def load_projected_initial_population_data(min_year: int) -> pd.DataFrame:
+    """Load the projected initial population data from the CSV file.
+
+    Args:
+        min_year: The starting year for the projected data.
+
+    Returns:
+        The projected initial population data, with the following columns:
+
+        * ``year``: The calendar year.
+        * ``province``: The 2-letter province ID, e.g. ``BC``.
+        * ``age``: The age of the population.
+        * ``prop_male``: The proportion of the population in that age group that are male.
+        * ``n_age``: The total number of people in that age group for the given year, province, and
+          projection scenario.
+        * ``n_birth``: The total number of births in the given year, province, and
+          projection scenario.
+        * ``prop``: The proportion of the total number of people in that age group to the total
+          number of births in that year.
+        * ``projection_scenario``: The projection scenario, one of:
+
+            * ``LG``: low-growth projection
+            * ``HG``: high-growth projection
+            * ``M1``: medium-growth 1 projection
+            * ``M2``: medium-growth 2 projection
+            * ``M3``: medium-growth 3 projection
+            * ``M4``: medium-growth 4 projection
+            * ``M5``: medium-growth 5 projection
+            * ``M6``: medium-growth 6 projection
+            * ``FA``: fast-aging projection
+            * ``SA``: slow-aging projection
+    """
+
     logger.info("Loading projected population data from CSV file...")
     df = pd.read_csv(get_data_path("original_data/17100057.csv"))
 
@@ -334,6 +383,7 @@ def load_projected_initial_population_data(min_year: int) -> pd.DataFrame:
 
 
 def generate_birth_estimate_data():
+    """Create/update the ``birth_estimate.csv`` file."""
     past_population_data = load_past_births_population_data()
     min_year = past_population_data["year"].max() + 1
     projected_population_data = load_projected_births_population_data(min_year)
@@ -344,6 +394,7 @@ def generate_birth_estimate_data():
 
 
 def generate_initial_population_data():
+    """Create/update the ``initial_pop_distribution_prop.csv`` file."""
     past_population_data = load_past_initial_population_data()
     min_year = past_population_data["year"].max()
     projected_population_data = load_projected_initial_population_data(min_year)
