@@ -71,4 +71,4 @@ python3 leap/data_generation/death_data.py
 
 This will update the following data file: 
 
-1. `leap/processed_data/master_life_table.csv`
+1. `leap/processed_data/life_table.csv`
