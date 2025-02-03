@@ -164,7 +164,7 @@ def generate_migration_data():
             # get the number of births in each year
             df_birth = df_proj.loc[df_proj["age"] == 0]
             grouped_df = df_birth.groupby("year")
-            df_birth["n_birth"] = grouped_df["N"].sum().reset_index()
+            df_birth["n_birth"] = grouped_df.transform("sum")["N"]
             df_birth = df_birth.loc[df_birth["sex"] == "F", ["year", "n_birth"]]
 
             # get the next year and age for each entry
