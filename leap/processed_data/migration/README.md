@@ -15,8 +15,8 @@ Since StatsCan does not provide a breakdown of population projections/estimates 
 or immigration, we calculated the average number of individuals required to emigrate/immigrate to
 match the projected demographics. These results are saved in:
 
-`master_emigration_table.csv`
-`master_immigration_table.csv`
+`emigration_table.csv`
+`immigration_table.csv`
 
 ### Emigration Table
 

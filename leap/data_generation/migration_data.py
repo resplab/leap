@@ -232,11 +232,11 @@ def generate_migration_data():
             df_immigration = pd.concat([df_immigration, df_immigration_proj], axis=0)
             df_emigration = pd.concat([df_emigration, df_emigration_proj], axis=0)
     
-    file_path = get_data_path("processed_data/migration/master_immigration_table.csv")
+    file_path = get_data_path("processed_data/migration/immigration_table.csv")
     logger.info(f"Saving data to {file_path}")
     df_immigration.to_csv(file_path, index=False)
 
-    file_path = get_data_path("processed_data/migration/master_emigration_table.csv")
+    file_path = get_data_path("processed_data/migration/emigration_table.csv")
     logger.info(f"Saving data to {file_path}")
     df_emigration.to_csv(file_path, index=False)
 
