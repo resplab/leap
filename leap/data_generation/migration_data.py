@@ -120,23 +120,27 @@ def load_migration_data():
 
     for province in PROVINCES:
         logger.info(f"Processing migration data for province {province}...")
+
+        # Select only the data for the given province and the years after the starting year
         df = df_population.loc[
             (df_population["year"] >= STARTING_YEAR) & 
             (df_population["province"] == province)
         ]
         df = df[["year", "age", "province", "n_age", "prop_male", "projection_scenario"]]
 
+        # Get the total number of M / F for each year, age, and projection scenario
         df_male = df.copy()
         df_female = df.copy()
         df_male["N"] = df_male.apply(
-            lambda x: x["n_age"] * x["prop_male"], axis=1
+            lambda x: int(x["n_age"] * x["prop_male"]), axis=1
         )
         df_female["N"] = df_female.apply(
-            lambda x: x["n_age"] * (1 - x["prop_male"]), axis=1
+            lambda x: int(x["n_age"] * (1 - x["prop_male"])), axis=1
         )
         df = pd.concat([df_male, df_female], axis=0)
         df.drop(columns=["n_age", "prop_male"], inplace=True)
 
+        # Get the list of projection scenarios, excluding "past"
         projection_scenarios = df.loc[df["projection_scenario"] != "past", "projection_scenario"].unique()
         min_year = df["year"].min()
         min_age = 0
@@ -176,7 +180,7 @@ def load_migration_data():
             )
 
             # add the n_birth column to df_proj
-            df_proj = df_proj.merge(df_birth, on="year", how="left")
+            df_proj = pd.merge(df_proj, df_birth, on="year", how="left")
 
             # get the number of immigrants/emigrants
             df_migration_proj = df_proj.copy()
