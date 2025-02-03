@@ -134,9 +134,11 @@ def generate_migration_data():
         df_male["N"] = df_male.apply(
             lambda x: int(x["n_age"] * x["prop_male"]), axis=1
         )
+        df_male["sex"] = ["M"] * df_male.shape[0]
         df_female["N"] = df_female.apply(
             lambda x: int(x["n_age"] * (1 - x["prop_male"])), axis=1
         )
+        df_female["sex"] = ["F"] * df_female.shape[0]
         df = pd.concat([df_male, df_female], axis=0)
         df.drop(columns=["n_age", "prop_male"], inplace=True)
 
