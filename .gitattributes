@@ -3,3 +3,5 @@ leap/processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e.pr
 leap/processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e.shp filter=lfs diff=lfs merge=lfs -text
 leap/processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e.shx filter=lfs diff=lfs merge=lfs -text
 leap/processed_data/census_divisions/census_division_boundaries/lcd_000b21a_e.xml filter=lfs diff=lfs merge=lfs -text
+leap/original_data/17100005.csv filter=lfs diff=lfs merge=lfs -text
+leap/original_data/17100057.csv filter=lfs diff=lfs merge=lfs -text

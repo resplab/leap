@@ -121,19 +121,24 @@ def get_data_path(data_path: str) -> pathlib.Path:
     """
 
     if pathlib.Path(data_path).parts[0] == "tests":
+        data_folder = "tests.data"
         data_path = str(pathlib.Path(data_path).relative_to("tests/data"))
     elif pathlib.Path(data_path).parts[0] == "processed_data":
+        data_folder = "leap.processed_data"
         data_path = str(pathlib.Path(data_path).relative_to("processed_data"))
+    elif pathlib.Path(data_path).parts[0] == "original_data":
+        data_path = str(pathlib.Path(data_path).relative_to("original_data"))
+        data_folder = "leap.original_data"
 
-    for data_folder in ["tests.data", "leap.processed_data"]:
-        try:
-            package_path = str(pkg_resources.files(data_folder).joinpath(data_path))
-            if os.path.isfile(package_path) or os.path.isdir(package_path):
-                return pathlib.Path(package_path)
-        except ModuleNotFoundError:
-            pass
+
+    package_path = str(pkg_resources.files(data_folder).joinpath(data_path))
+    
+    if os.path.isfile(package_path) or os.path.isdir(package_path):
+        return pathlib.Path(package_path)
+    else:
+        raise FileNotFoundError(f"Path {data_path} not found.")
         
-    raise FileNotFoundError(f"Path {data_path} not found.")
+    
 
 
 def check_file(file_path: str | pathlib.Path, ext: str):
