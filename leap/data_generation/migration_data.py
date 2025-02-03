@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from typing import Tuple
 from leap.utils import get_data_path
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
@@ -66,7 +65,7 @@ def get_delta_n(n: float, n_prev: float, prob_death: float) -> float:
     return n - n_prev * (1 - prob_death)
 
 
-def get_n_migrants(delta_N: float) -> Tuple[float, float]:
+def get_n_migrants(delta_N: float) -> pd.Series:
     """Get the number of immigrants and emigrants in a single year for a given age and sex.
 
     TODO: This function is wrong. delta_N is the change in population due to migration. This
@@ -83,7 +82,10 @@ def get_n_migrants(delta_N: float) -> Tuple[float, float]:
         A vector containing two values, the number of immigrants in a single year and the number
         of emigrants in a single year.
     """
-    return (0 if delta_N < 0 else delta_N, 0 if delta_N > 0 else -delta_N)
+    return pd.Series(
+        [0 if delta_N < 0 else delta_N, 0 if delta_N > 0 else -delta_N],
+        index=["n_immigrants", "n_emigrants",]
+    )
 
 
 def load_migration_data():
@@ -170,7 +172,7 @@ def load_migration_data():
 
             # compute the change in population
             df_proj["delta_N"] = df_proj.apply(
-                lambda x: get_delta_n(x["N"], x["n_prev"], x["prob_death"]), axis=1
+                lambda x: get_delta_n(x["N"], x["n_prev"], x["prob_death_prev"]), axis=1
             )
 
             # add the n_birth column to df_proj
