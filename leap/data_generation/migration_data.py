@@ -15,7 +15,7 @@ PROVINCES = ["CA", "BC"]
 
 def get_prev_year_population(
     df: pd.DataFrame, sex: str, year: int, age: int, min_year: int, min_age: int
-) -> pd.DataFrame:
+) -> pd.Series:
     """Get the age, sex, probability of death, and population for the previous year.
 
     Args:
@@ -30,15 +30,21 @@ def get_prev_year_population(
         The age, sex, probability of death, and population for the previous year.
     """
     if year == min_year or age == min_age:
-        return pd.DataFrame(
-            {"year": np.nan, "age": np.nan, "N": np.nan, "prob_death": np.nan}
+        return pd.Series(
+            [np.nan, np.nan, np.nan, np.nan],
+            index=["year_prev", "age_prev", "n_prev", "prob_death_prev"]
         )
     else:
         return df.loc[
             (df["sex"] == sex) & 
             (df["year"] == year - 1) & 
             (df["age"] == age - 1)
-        ][["year", "age", "N", "prob_death"]]
+        ][["year", "age", "N", "prob_death"]].iloc[0].rename({
+            "year": "year_prev",
+            "age": "age_prev",
+            "N": "n_prev",
+            "prob_death": "prob_death_prev"
+        })
     
 
 def get_delta_n(n: float, n_prev: float, prob_death: float) -> float:
@@ -154,7 +160,7 @@ def load_migration_data():
             df_birth = df_birth.loc[df_birth["sex"] == "F", ["year", "n_birth"]]
 
             # get the next year and age for each entry
-            df_proj = df_proj.apply(
+            df_proj[["year_prev", "age_prev", "n_prev", "prob_death_prev"]] = df_proj.apply(
                 lambda x: get_prev_year_population(df_proj, x["sex"], x["year"], x["age"], min_year, min_age),
                 axis=1
             )
