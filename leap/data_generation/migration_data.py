@@ -88,7 +88,7 @@ def get_n_migrants(delta_N: float) -> pd.Series:
     )
 
 
-def load_migration_data():
+def generate_migration_data():
     logger.info("Loading initial population data from CSV file...")
     df_population = pd.read_csv(
         get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
@@ -240,4 +240,4 @@ def load_migration_data():
 
 
 if __name__ == "__main__":
-    load_migration_data()
+    generate_migration_data()
