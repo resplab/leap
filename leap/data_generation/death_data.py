@@ -12,6 +12,7 @@ logger = get_logger(__name__, 20)
 STARTING_YEAR = 1996
 FINAL_YEAR = 2068
 
+# The projected life expectencies as given by StatCan for the M3 projection scenario
 DESIRED_LIFE_EXPECTANCIES = pd.DataFrame({
     "province": ["CA", "CA", "BC", "BC"],
     "sex": ["M", "F", "M", "F"],
@@ -111,7 +112,12 @@ def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
 def get_prob_death_projected(
     prob_death: float, year_index: int, beta_year: float
 ) -> float:
-    """Given the prob death for a past year, calculate the prob death in a future year.
+    """Given the (known) prob death for a past year, calculate the prob death in a future year.
+
+    .. math::
+
+        \sigma^{-1}(p(sex, age, year)) = \sigma^{-1}(p(sex, age, year_0)) - 
+            e^{\beta(sex)(year - year_0)}
 
     Args:
         prob_death: The probability of death for the initial year (determined by past data).
@@ -383,12 +389,14 @@ def load_projected_death_data(
             "se": []
         })
         for year_index in range(n_years):
+            # get the prob_death projections for the year and add to dataframe
             df_female = get_projected_life_table_single_year(
                 beta_year_female, life_table, starting_year, year_index, "F", province
             )
             df_male = get_projected_life_table_single_year(
                 beta_year_male, life_table, starting_year, year_index, "M", province
             )
+            # combine the dataframes
             projected_life_table_single_year = pd.concat([df_female, df_male], axis=0)
             projected_life_table_province = pd.concat(
                 [projected_life_table_province, projected_life_table_single_year],
