@@ -349,7 +349,6 @@ def load_projected_death_data(
         life_table = past_life_table[past_life_table["province"] == province]
         starting_year = life_table["year"].max() + 1
         life_table = life_table[life_table["year"] == starting_year - 1]
-        n_years = FINAL_YEAR - starting_year + 1
 
         beta_year_female = optimize.brentq(
             beta_year_optimizer,
@@ -387,7 +386,7 @@ def load_projected_death_data(
             "prob_death": [],
             "se": []
         })
-        for year in range(starting_year, starting_year + n_years):
+        for year in range(starting_year, FINAL_YEAR + 1):
             # get the prob_death projections for the year and add to dataframe
             df_female = get_projected_life_table_single_year(
                 beta_year_female, life_table, starting_year - 1, year, "F", province
