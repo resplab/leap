@@ -211,7 +211,9 @@ def load_migration_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
 
             # get the next year and age for each entry
             df_proj[["year_prev", "age_prev", "n_prev", "prob_death_prev"]] = df_proj.apply(
-                lambda x: get_prev_year_population(df_proj, x["sex"], x["year"], x["age"], min_year, min_age),
+                lambda x: get_prev_year_population(
+                    df_proj, x["sex"], x["year"], x["age"], min_year, min_age
+                ),
                 axis=1
             )
 
