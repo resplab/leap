@@ -50,9 +50,11 @@ def get_delta_n(n: float, n_prev: float, prob_death: float) -> float:
     """Get the population change due to migration for a given age and sex in a single year.
 
     Args:
-        n: The number of people living in Canada for a single age, sex, and year.
-        n_prev: The number of people living in Canada for the same sex as ``n``, in the
-            previous year and age. So if ``n`` is the number of females aged ``10`` in the year
+        n: The number of people living in Canada for a single age, sex, year, province, and
+            projection scenario.
+        n_prev: The number of people living in Canada in the previous year for the same
+            age, sex, province, and projection scenario as defined for ``n``.
+            So if ``n`` is the number of females aged ``10`` in the year
             ``2020``, ``n_prev`` is the number of females aged ``9`` in the year ``2019``.
         prob_death: The probability that a person with a given age and sex in a given
             year will die between the previous year and this year. So if the person is
@@ -76,11 +78,12 @@ def get_n_migrants(delta_N: float) -> pd.Series:
         separate PR.
 
     Args:
-        delta_N: The change in population for a given year, age, and sex due to migration.
+        delta_N: The change in population for a given year, age, sex, province, and
+            projection scenario due to migration.
 
     Returns:
-        A vector containing two values, the number of immigrants in a single year and the number
-        of emigrants in a single year.
+        A ``pd.Series`` containing two values, the number of immigrants in a single year and the
+        number of emigrants in a single year.
     """
     return pd.Series(
         [0 if delta_N < 0 else delta_N, 0 if delta_N > 0 else -delta_N],
@@ -176,7 +179,7 @@ def generate_migration_data():
             # remove the missing data
             df_proj = df_proj.dropna(subset=["n_prev"])
 
-            # compute the change in population
+            # compute the change in population due to migration, delta_N
             df_proj["delta_N"] = df_proj.apply(
                 lambda x: get_delta_n(x["N"], x["n_prev"], x["prob_death_prev"]), axis=1
             )
