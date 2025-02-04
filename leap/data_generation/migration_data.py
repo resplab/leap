@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from typing import Tuple
 from leap.utils import get_data_path
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
@@ -91,7 +92,45 @@ def get_n_migrants(delta_N: float) -> pd.Series:
     )
 
 
-def generate_migration_data():
+def load_migration_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Generate migration data for the given provinces and years.
+    
+    Returns:
+        A tuple containing two dataframes. The first dataframe contains the immigration data:
+        
+        * ``year``: The calendar year.
+        * ``province``: A string indicating the 2-letter province abbreviation, e.g. "BC".
+            For all of Canada, set province to "CA".
+        * ``sex``: One of "M" or "F".
+        * ``age``: The integer age.
+        * ``projection_scenario``: The projection scenario.
+        * ``n_immigrants``: The number of immigrants for a given year, province, sex, age, and
+          projection scenario.
+        * ``prop_immigrants_birth``: The proportion of immigrants for a given year, province,
+          sex, age, and projection scenario, relative to the total number of births in that year
+          for the given province and projection scenario.
+        * ``prop_immigrants_year``: The proportion of immigrants for a given year, province,
+          sex, age, and projection scenario, relative to the total number of immigrants in that
+          year for the given province and projection scenario.
+
+        The second dataframe contains the emigration data:
+
+        * ``year``: The calendar year.
+        * ``province``: A string indicating the 2-letter province abbreviation, e.g. "BC".
+            For all of Canada, set province to "CA".
+        * ``sex``: One of "M" or "F".
+        * ``age``: The integer age.
+        * ``projection_scenario``: The projection scenario.
+        * ``n_emigrants``: The number of emigrants for a given year, province, sex, age, and
+          projection scenario.
+        * ``prop_emigrants_birth``: The proportion of emigrants for a given year, province,
+          sex, age, and projection scenario, relative to the total number of births in that year
+          for the given province and projection scenario.
+        * ``prop_emigrants_year``: The proportion of emigrants for a given year, province,
+          sex, age, and projection scenario, relative to the total number of emigrants in that
+          year for the given province and projection scenario.
+
+    """
     logger.info("Loading initial population data from CSV file...")
     df_population = pd.read_csv(
         get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
@@ -235,6 +274,11 @@ def generate_migration_data():
             df_immigration = pd.concat([df_immigration, df_immigration_proj], axis=0)
             df_emigration = pd.concat([df_emigration, df_emigration_proj], axis=0)
     
+    return df_immigration, df_emigration
+
+
+def generate_migration_data():
+    df_immigration, df_emigration = load_migration_data()
     file_path = get_data_path("processed_data/migration/immigration_table.csv")
     logger.info(f"Saving data to {file_path}")
     df_immigration.to_csv(file_path, index=False)
