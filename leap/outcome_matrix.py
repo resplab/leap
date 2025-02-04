@@ -39,7 +39,8 @@ class OutcomeTable:
             for key, value in filter_columns.items():
                 df_filtered = df_filtered.loc[(df_filtered[key] == value)]
             df_filtered[column] += amount
-            df_filtered[column] = df_filtered[column].astype(df[column].dtype)
+            # This causes test_run_simulation_one_year to fail
+            # df_filtered[column] = df_filtered[column].astype(df[column].dtype)
             df.update(df_filtered)
         else:
             df[column] += amount
