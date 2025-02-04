@@ -121,7 +121,7 @@ def test_simulation_generate_initial_asthma(
     expected_control_levels
 ):
     """
-    
+
     Setting the ``time_horizon = 1`` means that the agents are generated from the initial population
     table, and that no immigration happens.
 
@@ -310,7 +310,7 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
     assert outcome_matrix.asthma_status.get(
         columns="status", year=min_year + year_index, age=age, sex=sex
     ) == expected_asthma_status
-    
+
     assert agent.has_asthma == expected_agent_has_asthma
     assert agent.asthma_age == expected_asthma_age
     assert agent.asthma_status == expected_asthma_status
@@ -373,7 +373,7 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
             ),
         ),
     ]
-)              
+)
 def test_simulation_update_asthma_effects(
     config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
     antibiotic_exposure_parameters, incidence_parameter_βfam_hist, family_history_parameters,
@@ -586,7 +586,6 @@ def test_reassess_asthma_diagnosis(
     ) > expected_exacerbation_history.num_current_year
 
 
-
 @pytest.mark.parametrize(
     (
         "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
@@ -639,7 +638,6 @@ def test_simulation_get_new_agents(
         new_agents_df.immigrant,
         expected_immigrants
     )
-
 
 
 @pytest.mark.parametrize(
@@ -808,7 +806,7 @@ def test_run_simulation_one_year(
             "βcontrol": [0.0, 0.0, 0.10],
             "βexac_sev_hist": [0.0, 0.0, 0.0, 0.0]
         }
-    
+
     ensures that the utility for each agent with asthma is either 0.87222 (male) or 0.87356 (female).
     For each agent without asthma, it is just the baseline from the EQ-5D table.
     """
@@ -843,7 +841,8 @@ def test_run_simulation_one_year(
         [0] * 2 * 1 * (max_age + 1)
     )
     assert outcome_matrix.asthma_incidence.data.shape == (2 * 1 * (max_age + 1), 4)
-    assert outcome_matrix.asthma_incidence.data["n_new_diagnoses"].sum() == expected_asthma_incidence_total
+    assert outcome_matrix.asthma_incidence.data["n_new_diagnoses"].sum(
+    ) == expected_asthma_incidence_total
     assert outcome_matrix.asthma_status.data.shape == (2 * 1 * (max_age + 1), 4)
     assert outcome_matrix.asthma_status.data["status"].sum() == expected_asthma_status_total
 
@@ -874,16 +873,23 @@ def test_run_simulation_one_year(
 
     assert outcome_matrix.family_history.data.shape == (2 * 1 * (max_age + 1), 4)
     for age in range(0, max_age + 1):
-        assert outcome_matrix.family_history.get(
-            columns="has_family_history", age=age
-        ).sum() == expected_family_history.loc[expected_family_history["age"] == age]["has_family_history"].sum()
-        assert round(outcome_matrix.utility.get(
-            columns="utility", age=age
-        ).sum(), ndigits=1) == round(
+        # Test family history status
+        om_fh = outcome_matrix.family_history.get(
+            columns="has_family_history", age=age).sum()
+        test_fh = expected_family_history.loc[
+            expected_family_history["age"] == age]["has_family_history"].sum()
+        assert om_fh == test_fh
+    
+        # Test utility
+        om_utility = round(
+            outcome_matrix.utility.get(columns="utility", age=age).sum(),
+            ndigits=1)
+        test_utility = round(
             expected_utility.loc[expected_utility["age"] == age]["utility"].sum(),
             ndigits=1
         )
-
+        # TODO SEE WHY THIS TEST IS FAILING
+        assert om_utility == test_utility
 
 
 @pytest.mark.parametrize(
@@ -1118,7 +1124,6 @@ def test_run_simulation_two_years(
     #     (expected_asthma_cost["age"] == max_age) &
     #     (expected_asthma_cost["year"] == min_year)
     # ]["cost"].sum()
-
 
 
 @pytest.mark.parametrize(
