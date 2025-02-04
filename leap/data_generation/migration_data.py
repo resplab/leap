@@ -19,7 +19,13 @@ def get_prev_year_population(
     """Get the age, sex, probability of death, and population for the previous year.
 
     Args:
-        df: TODO.
+        df: A dataframe with the following columns:
+            * ``year``: The calendar year.
+            * ``sex``: One of "M" or "F".
+            * ``age``: The integer age.
+            * ``N``: The population for a given year, age, sex, province, and projection scenario.
+            * ``prob_death``: The probability that a person in the given year, age, sex,
+              province, and projection scenario will die within the year.
         sex: One of "F" = female, "M" = male.
         year: The calendar year.
         age: The integer age.
