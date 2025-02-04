@@ -120,11 +120,6 @@ def get_config(path_config: str) -> dict:
 def run_main():
     """The entry point for the command line interface."""
 
-    # Ensure user is running in virtural environment
-    in_venv = sys.prefix != sys.base_prefix
-    if not in_venv:
-        raise Exception("Please run command while in the virtual environment.")
-
     parser = get_parser()
     args = parser.parse_args()
     config = get_config(args.config)
