@@ -490,7 +490,10 @@ class Simulation:
                     pollution = None
                 else:
                     pollution = Pollution(
-                        pollution_table=self.pollution_table, SSP=self.SSP, year=year, month=month,
+                        pollution_table=self.pollution_table,
+                        SSP=self.SSP,
+                        year=year,
+                        month=month,
                         cduid=census_division.cduid
                     )
                 agent = Agent(
@@ -504,7 +507,6 @@ class Simulation:
                     month=month,
                     ssp=self.SSP,
                     census_division=census_division,
-                    ignore_pollution_flag=self.ignore_pollution_flag,
                     pollution=pollution
                 )
                 pbar.set_description(f"Agent {agent.uuid.short}")
