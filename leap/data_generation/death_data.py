@@ -110,7 +110,7 @@ def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
 
 
 def get_prob_death_projected(
-    prob_death: float, year_index: int, beta_year: float
+    prob_death: float, year_initial: int, year: int, beta_year: float
 ) -> float:
     """Given the (known) prob death for a past year, calculate the prob death in a future year.
 
@@ -120,24 +120,25 @@ def get_prob_death_projected(
             e^{\beta(sex)(year - year_0)}
 
     Args:
-        prob_death: The probability of death for the initial year (determined by past data).
-        year_index: The number of years between the current year and the initial year.
-            For example, if our initial year is 2020, and we want to compute the probability of
-            death in 2028, the ``year_index`` would be 8.
-        beta_year: The beta parameter for the given year.
+        prob_death: The probability of death for ``year_initial``, the last year that past data was
+            collected, for a given age, sex, province, and projection scenario.
+        year_initial: The initial year with a known probability of death. This is the last year
+            that the past data was collected.
+        year: The current year.
+        beta_year: The beta parameter for the given sex, province, and projection scenario.
 
     Returns:
         The projected probability of death for the current year.
     """
     prob_death = min(prob_death, 0.9999999999)
-    odds = (prob_death / (1 - prob_death)) * np.exp((year_index + 1) * beta_year)
+    odds = (prob_death / (1 - prob_death)) * np.exp((year - year_initial) * beta_year)
     prob_death_projected = max(min(odds / (1 + odds), 1), 0)
     return prob_death_projected
 
 
 
 def get_projected_life_table_single_year(
-    beta_year: float, life_table: pd.DataFrame, starting_year: int, year_index: int,
+    beta_year: float, life_table: pd.DataFrame, year_initial: int, year: int,
     sex: str, province: str
 ) -> pd.DataFrame:
     """Get the life table for a single year.
@@ -154,10 +155,9 @@ def get_projected_life_table_single_year(
                 For all of Canada, set province to "CA".
             - ``prob_death``: the probability of death for a given age, province, sex, and year.
 
-        starting_year: The calendar year when the projections begin.
-        year_index: The number of years between the current year and the starting year.
-            For example, if our initial year is 2020, and we want to compute the probability of
-            death in 2028, the ``year_index`` would be 8.
+        starting_year: The initial year with a known probability of death. This is the last year
+            that the past data was collected.
+        year_index: The current year.
         sex: one of "M" or "F".
         province: a string indicating the province abbreviation, e.g. "BC".
             For all of Canada, set province to "CA".
@@ -168,10 +168,10 @@ def get_projected_life_table_single_year(
     """
     df = life_table.loc[(life_table["sex"] == sex) & (life_table["province"] == province)].copy()
     df["prob_death_proj"] = df["prob_death"].apply(
-        lambda x: get_prob_death_projected(x, year_index, beta_year)
+        lambda x: get_prob_death_projected(x, year_initial, year, beta_year)
     )
 
-    df["year"] = [starting_year + year_index] * df.shape[0]
+    df["year"] = [year] * df.shape[0]
 
     df["se"] = df.apply(
         lambda x: (x["prob_death_proj"] * x["se"]) / x["prob_death"], axis=1
@@ -188,8 +188,8 @@ def beta_year_optimizer(
     life_table: pd.DataFrame,
     sex: str,
     province: str, 
-    starting_year: int,
-    year_index: int,
+    year_initial: int,
+    year: int,
 ) -> float:
     """Calculate the difference between the projected life expectancy and desired life expectancy.
 
@@ -209,10 +209,9 @@ def beta_year_optimizer(
         sex: one of "M" or "F".
         province: A 2-character string indicating the province abbreviation, e.g. "BC".
             For all of Canada, set province to "CA".
-        starting_year: The calendar year when the projections begin.
-        year_index: The number of years between the current year and the starting year.
-            For example, if our initial year is 2020, and we want to compute the probability of
-            death in 2028, the ``year_index`` would be 8.
+        year_initial: The initial year with a known probability of death. This is the last year
+            that the past data was collected.
+        year: The current year.
     
     Returns:
         The difference between the projected life expectancy of the calibration year
@@ -220,7 +219,7 @@ def beta_year_optimizer(
     """
 
     projected_life_table = get_projected_life_table_single_year(
-        beta_year, life_table, starting_year, year_index, sex, province
+        beta_year, life_table, year_initial, year, sex, province
     )
     logger.info(projected_life_table)
 
@@ -360,8 +359,8 @@ def load_projected_death_data(
                 life_table,
                 "F",
                 province,
-                starting_year,
-                calibration_year - starting_year
+                starting_year - 1,
+                calibration_year
             ),
             xtol=xtol
         )
@@ -374,8 +373,8 @@ def load_projected_death_data(
                 life_table,
                 "M",
                 province,
-                starting_year,
-                calibration_year - starting_year
+                starting_year - 1,
+                calibration_year
             ),
             xtol=xtol
         )
@@ -388,13 +387,13 @@ def load_projected_death_data(
             "prob_death": [],
             "se": []
         })
-        for year_index in range(n_years):
+        for year in range(starting_year, starting_year + n_years):
             # get the prob_death projections for the year and add to dataframe
             df_female = get_projected_life_table_single_year(
-                beta_year_female, life_table, starting_year, year_index, "F", province
+                beta_year_female, life_table, starting_year - 1, year, "F", province
             )
             df_male = get_projected_life_table_single_year(
-                beta_year_male, life_table, starting_year, year_index, "M", province
+                beta_year_male, life_table, starting_year - 1, year, "M", province
             )
             # combine the dataframes
             projected_life_table_single_year = pd.concat([df_female, df_male], axis=0)
