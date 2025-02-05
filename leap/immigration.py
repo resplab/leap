@@ -42,7 +42,7 @@ class Immigration:
         * ``prop_immigrants_year``: The proportion of immigrants for a given age and sex
           relative to the total number of immigrants for a given year and projection scenario.
 
-        See ``master_immigration_table.csv``.
+        See ``processed_data/migration/immigration_table.csv``.
         """
         return self._table
     
@@ -53,7 +53,7 @@ class Immigration:
     def load_immigration_table(
         self, starting_year: int, province: str, population_growth_type: str, max_age: int
     ) -> DataFrameGroupBy:
-        """Load the data from ``master_immigration_table.csv``.
+        """Load the data from ``processed_data/migration/immigration_table.csv``.
 
         Args:
             starting_year: The year for the data to start at. Must be between ``2001-2065``.
@@ -81,7 +81,7 @@ class Immigration:
             province, sex, and growth scenario.
         """
         df = pd.read_csv(
-            get_data_path("processed_data/migration/master_immigration_table.csv")
+            get_data_path("processed_data/migration/immigration_table.csv")
         )
         check_year(starting_year + 1, df)
         check_province(province)

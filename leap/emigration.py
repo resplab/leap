@@ -35,7 +35,7 @@ class Emigration:
         * ``M``: the probability of a male emigrating.
         * ``F``: the probability of a female emigrating.
 
-        See ``master_emigration_table.csv``.
+        See ``processed_data/migration/emigration_table.csv``.
         """
         return self._table
     
@@ -46,7 +46,7 @@ class Emigration:
     def load_emigration_table(
         self, starting_year: int, province: str, population_growth_type: str
     ) -> DataFrameGroupBy:
-        """Load the data from ``master_emigration_table.csv``.
+        """Load the data from ``processed_data/migration/emigration_table.csv``.
 
         Args:
             starting_year: the year for the data to start at. Must be between 2001-2065.
@@ -74,7 +74,7 @@ class Emigration:
             age, province, sex, and growth scenario.
         """
         df = pd.read_csv(
-            get_data_path("processed_data/migration/master_emigration_table.csv")
+            get_data_path("processed_data/migration/emigration_table.csv")
         )
         check_year(starting_year + 1, df)
         check_province(province)
