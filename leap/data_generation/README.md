@@ -74,7 +74,7 @@ the collected data ends (in our case, 2020), and $p(sex, age, year)$ is the prob
 for a person of that age/sex in a future year.
 
 The parameter $\beta(sex)$ is unknown, and so we first need to calculate it.
-To do so, we set $year = \text{calibration\_year}$, and use the `Brent` root-finding algorithm to
+To do so, we set $year = \text{calibration\\_year}$, and use the `Brent` root-finding algorithm to
 optimize $\beta(sex)$ such that the life expectancy in the calibration year (which is known)
 matches the predicted life expectancy.
 
