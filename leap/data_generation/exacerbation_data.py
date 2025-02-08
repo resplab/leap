@@ -73,6 +73,77 @@ def parse_age(x: str):
         return int(x.split("_")[1])
     else:
         return np.nan
+    
+
+def load_hospitalization_data(province: str = "CA", starting_year: int = 2000) -> pd.DataFrame:
+    """Load the hospitalization data for the given province and starting year.
+
+    The data is from the ``Hospital Morbidity Database (HMDB)`` from the
+    ``Canadian Institute for Health Information (CIHI)``:
+    https://www.cihi.ca/en/hospital-morbidity-database-hmdb-metadata
+
+    The hospitalization data was collected from patients presenting to a hospital in Canada
+    due to an asthma exacerbation. We will use this data to calibrate the exacerbation model.
+    
+    Args:
+        province (str): The province for which to load the hospitalization data.
+        starting_year (int): The starting year for which to load the hospitalization data.
+        
+    Returns:
+        A dataframe with the following columns:
+        * year: The year of the data.
+        * sex: One of "M" or "F".
+        * age: Integer age, a value in ``[3, 90]``.
+        * true_rate: The true rate of hospitalization for the given year, age, and sex.
+    """
+
+    # Load the hospitalization data
+    df = pd.read_csv(get_data_path(f"processed_data/asthma_hosp/{province}/tab1_rate.csv"))
+    df.rename(columns={"fiscal_year": "year"}, inplace=True)
+    df = df[df["year"] >= starting_year]
+
+    # Convert the columns M, F, N, M_1, M_2, etc to single column "type"
+    df = df.melt(id_vars=["year"], var_name="type", value_name="true_rate")
+    df["type"] = df.apply(
+        lambda x: x["type"].replace("+", ""), axis=1
+    )
+
+    # Remove NA values from the true_rate column
+    df = df.dropna(subset=["true_rate"])
+
+    # Remove "+" from the type column
+    df["type"] = df.apply(
+        lambda x: x["type"].replace("+", ""), axis=1
+    )
+
+    # Parse sex from the type column
+    df["sex"] = df["type"].apply(
+        lambda x: parse_sex(x)
+    )
+
+    # Remove rows with sex = NA
+    df = df.dropna(subset=["sex"])
+
+    # Parse age from the type column
+    df["age"] = df["type"].apply(
+        lambda x: parse_age(x)
+    )
+
+    # Remove rows with age = NA
+    df = df.dropna(subset=["age"])
+    df["age"] = df["age"].astype(int)
+
+    # Drop the type column
+    df.drop(columns=["type"], inplace=True)
+
+    # Filter out age < 3
+    df = df.loc[df["age"] >= 3]
+
+    # Sort by year, sex, and age
+    df = df.sort_values(by=["year", "sex", "age"])
+
+    return df
+
 
 def exacerbation_calibrator(
     province: str = "CA", starting_year: int = 2000, max_cal_year: int = 2065,
@@ -87,47 +158,8 @@ def exacerbation_calibrator(
     df_prev_inc = pd.read_csv(get_data_path("processed_data/master_asthma_prev_inc.csv"))
     df_prev = df_prev_inc[["year", "age", "sex", "prev"]]
 
-    # target population
-    df_cihi = pd.read_csv(get_data_path(f"processed_data/asthma_hosp/{province}/tab1_rate.csv"))
-    df_cihi.rename(columns={"fiscal_year": "year"}, inplace=True)
-    df_cihi = df_cihi[df_cihi["year"] >= starting_year]
-
-    # Convert the columns M, F, N, M_1, M_2, etc to single column "type"
-    df_cihi = df_cihi.melt(id_vars=["year"], var_name="type", value_name="true_rate")
-
-    # Remove NA values from the true_rate column
-    df_cihi = df_cihi.dropna(subset=["true_rate"])
-
-    # Remove "+" from the type column
-    df_cihi["type"] = df_cihi.apply(
-        lambda x: x["type"].replace("+", ""), axis=1
-    )
-
-    # Parse sex from the type column
-    df_cihi["sex"] = df_cihi["type"].apply(
-        lambda x: parse_sex(x)
-    )
-
-    # Remove rows with sex = NA
-    df_cihi = df_cihi.dropna(subset=["sex"])
-
-    # Parse age from the type column
-    df_cihi["age"] = df_cihi["type"].apply(
-        lambda x: parse_age(x)
-    )
-
-    # Remove rows with age = NA
-    df_cihi = df_cihi.dropna(subset=["age"])
-    df_cihi["age"] = df_cihi["age"].astype(int)
-
-    # Drop the type column
-    df_cihi.drop(columns=["type"], inplace=True)
-
-    # Filter out age < 3
-    df_cihi = df_cihi.loc[df_cihi["age"] >= 3]
-
-    # Sort by year, sex, and age
-    df_cihi = df_cihi.sort_values(by=["year", "sex", "age"])
+    # Canada Institute for Health Information (CIHI) data on hospitalizations due to asthma
+    df_cihi = load_hospitalization_data(province, starting_year)
 
     final_year = max(df_cihi["year"])
     future_years = list(range(final_year + 1, max_cal_year + 1))
