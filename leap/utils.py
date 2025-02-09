@@ -4,6 +4,7 @@ import pathlib
 import math
 import os
 import uuid
+from scipy.stats import logistic
 import importlib.resources as pkg_resources
 from typing import Callable
 from leap.logger import get_logger
@@ -56,10 +57,6 @@ def round_number(x: float, digits: int = 0, sigdigits: int | None = None) -> flo
         return round(x, digits)
 
 
-def sigmoid(x: float | np.ndarray) -> float | np.ndarray:
-    return 1 / (1 + np.exp(-x))
-
-
 def logit(x: float | np.ndarray) -> float | np.ndarray:
     return np.log(x / (1 - x))
 
@@ -67,7 +64,7 @@ def logit(x: float | np.ndarray) -> float | np.ndarray:
 def compute_ordinal_regression(
     η: float,
     θ: float | list[float],
-    prob_function: Callable = sigmoid
+    prob_function: Callable = logistic.cdf
 ) -> list[float]:
     """Compute the probability that ``y = k`` for each value of ``k``.
 
