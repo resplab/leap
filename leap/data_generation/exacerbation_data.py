@@ -94,7 +94,8 @@ def load_hospitalization_data(province: str = "CA", starting_year: int = 2000) -
         * year: The year of the data.
         * sex: One of "M" or "F".
         * age: Integer age, a value in ``[3, 90]``.
-        * true_rate: The true rate of hospitalization for the given year, age, and sex.
+        * hospitalization_rate: The observed number of hospitalizations relative to the number
+          of people in a given year, age, and sex.
     """
 
     # Load the hospitalization data
@@ -103,13 +104,13 @@ def load_hospitalization_data(province: str = "CA", starting_year: int = 2000) -
     df = df[df["year"] >= starting_year]
 
     # Convert the columns M, F, N, M_1, M_2, etc to single column "type"
-    df = df.melt(id_vars=["year"], var_name="type", value_name="true_rate")
+    df = df.melt(id_vars=["year"], var_name="type", value_name="hospitalization_rate")
     df["type"] = df.apply(
         lambda x: x["type"].replace("+", ""), axis=1
     )
 
-    # Remove NA values from the true_rate column
-    df = df.dropna(subset=["true_rate"])
+    # Remove NA values from the hospitalization_rate column
+    df = df.dropna(subset=["hospitalization_rate"])
 
     # Remove "+" from the type column
     df["type"] = df.apply(
@@ -220,13 +221,16 @@ def exacerbation_calibrator(
     )
 
     # Sum the max_age rows to a single value of n
-    grouped_df = df_population.groupby(["year", "sex", "age"])
-    df_population["n"] = grouped_df["n"].transform(lambda x: sum(x))
-    df_population.drop_duplicates(inplace=True)
-
+    grouped_df = df.groupby(["year", "sex", "age"])
+    df["n"] = grouped_df["n"].transform(lambda x: sum(x))
+    df.drop_duplicates(inplace=True)
+    # Calculate the number of hospitalizations per 100 000 people
+    # hospitalization_rate: The observed number of hospitalizations relative to the number
+    # of people in a given year, age, and sex.
+    # n: The number of people in a given year, age, and sex.
     df_target = pd.merge(df_population, df_cihi, on=["year", "sex", "age"], how="left")
     df_target["true_n"] = df_target.apply(
-        lambda x: x["true_rate"] * x["n"] / 100000, axis=1
+        lambda x: x["hospitalization_rate"] * x["n"] / 100000, axis=1
     )
     df_target = pd.merge(df_target, df_prev, on=["year", "sex", "age"], how="left")
     df_target["n_asthma"] = df_target.apply(
@@ -243,7 +247,7 @@ def exacerbation_calibrator(
         lambda x: prob_hosp * x["expected_exacerbations"], axis=1
     )
     df_target["calibrator_multiplier"] = df_target.apply(
-        lambda x: x["true_n"] / x["expected_n"], axis=1
+        lambda x: x["true_n"] / x["n_hosp_per_100000_pred"], axis=1
     )
 
     df = df_target[["year", "sex", "age", "calibrator_multiplier"]]
