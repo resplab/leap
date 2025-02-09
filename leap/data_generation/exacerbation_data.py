@@ -271,7 +271,7 @@ def exacerbation_calibrator(
     # of people in a given year, age, and sex.
     # n: The number of people in a given year, age, and sex.
     df_target = pd.merge(df_population, df_cihi, on=["year", "sex", "age"], how="left")
-    df_target["true_n"] = df_target.apply(
+    df_target["n_hosp_per_100000"] = df_target.apply(
         lambda x: x["hospitalization_rate"] * x["n"] / 100000, axis=1
     )
     df_target = pd.merge(df_target, df_prev, on=["year", "sex", "age"], how="left")
@@ -288,8 +288,11 @@ def exacerbation_calibrator(
     df_target["expected_n"] = df_target.apply(
         lambda x: prob_hosp * x["expected_exacerbations"], axis=1
     )
+
+    # Calculate the ratio between the observed and predicted number of hospitalizations
+    # per 100 000 people
     df_target["calibrator_multiplier"] = df_target.apply(
-        lambda x: x["true_n"] / x["n_hosp_per_100000_pred"], axis=1
+        lambda x: x["n_hosp_per_100000"] / x["expected_n"], axis=1
     )
 
     df = df_target[["year", "sex", "age", "calibrator_multiplier"]]
