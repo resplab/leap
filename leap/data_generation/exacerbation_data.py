@@ -158,24 +158,104 @@ def load_hospitalization_data(
     return df
 
 
+def load_population_data(
+    province: str,
+    starting_year: int,
+    projection_scenario: str,
+    max_year: int,
+    min_age: int = 3,
+    max_age: int = 90
+) -> pd.DataFrame:
+    df = pd.read_csv(
+        get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
+    )
+
+    # Filter the population data by province and starting year
+    df = df.loc[
+        (df["province"] == province) & (df["year"] >= starting_year)
+    ]
+
+    # Add a sex column and compute n_age for each sex (n_age_sex)
+    df_male = df.copy()
+    df_male["sex"] = ["M"] * df.shape[0]
+    df_male["n_age_sex"] = df.apply(
+        lambda x: x["n_age"] * x["prop_male"], axis=1
+    )
+    df_female = df.copy()
+    df_female["sex"] = ["F"] * df.shape[0]
+    df_female["n_age_sex"] = df.apply(
+        lambda x: x["n_age"] * (1 - x["prop_male"]), axis=1
+    )
+    df = pd.concat([df_female, df_male])
+    df["n_age_sex"] = df["n_age_sex"].astype(int)
+
+    # Filter the population data by projection scenario and year
+    df = df.loc[
+        (df["projection_scenario"] == "past") & (df["year"] <= 2021)
+        | (
+            (df["projection_scenario"] == projection_scenario)
+            & (df["year"] > 2021)
+        )
+    ]
+
+    # Remove unnecessary columns
+    df.drop(
+        columns=["projection_scenario", "n_age", "prop_male", "prop", "n_birth"],
+        inplace=True
+    )
+    df.rename(columns={"n_age_sex": "n"}, inplace=True)
+
+
+    df = df.loc[df["year"] <= max_year]
+    df = df.loc[df["age"] >= min_age]
+
+    # Set any age > max_age to the max_age
+    df["age"] = df["age"].apply(
+        lambda x: min(x, max_age)
+    )
+
+    # Sum the max_age rows to a single value of n
+    grouped_df = df.groupby(["year", "sex", "age"])
+    df["n"] = grouped_df["n"].transform(lambda x: sum(x))
+    df.drop_duplicates(inplace=True)
+
+    return df
+
+
 def exacerbation_calibrator(
-    province: str = "CA", starting_year: int = 2000, max_cal_year: int = 2065,
+    province: str = "CA", starting_year: int = 2000, max_year: int = 2065,
     stablization_year: int = 2025, min_age: int = MIN_AGE, max_age: int = MAX_AGE,
-    prob_hosp: float = 0.026, projection_scenario: str = "M3"
+    prob_hosp: float = PROB_HOSP, projection_scenario: str = "M3"
 ):
+    """TODO.
+    
+    Args:
+        province (str): The 2-letter abbreviation for the province.
+        starting_year (int): The starting year for the calibration.
+        max_year (int): The maximum year for the calibration.
+        stablization_year (int): The year at which the calibration stabilizes.
+        min_age (int): The minimum age for the calibration.
+        max_age (int): The maximum age for the calibration.
+        prob_hosp (float): The probability of a very severe exacerbation, defined as an
+            exacerbation that requires hospitalization.
+        projection_scenario (str): The projection scenario for the population data.
+    """
     if province == "CA":
-        max_cal_year = 2065
+        max_year = 2065
     else:
-        max_cal_year = 2043
+        max_year = 2043
 
     df_prev_inc = pd.read_csv(get_data_path("processed_data/master_asthma_prev_inc.csv"))
     df_prev = df_prev_inc[["year", "age", "sex", "prev"]]
+    df_prev["sex"] = df_prev.apply(
+        lambda x: "F" if x["sex"]==0 else "M", axis=1
+    )
 
     # Canada Institute for Health Information (CIHI) data on hospitalizations due to asthma
-    df_cihi = load_hospitalization_data(province, starting_year)
+    df_cihi = load_hospitalization_data(province, starting_year, min_age)
 
     final_year = max(df_cihi["year"])
-    future_years = list(range(final_year + 1, max_cal_year + 1))
+    future_years = list(range(final_year + 1, max_year + 1))
     
     # Append a copy of the final year data for each of the future years, changing the year column
     for year in future_years:
@@ -184,58 +264,8 @@ def exacerbation_calibrator(
         df_cihi = pd.concat([df_cihi, df_cihi_year])
 
     # Load population data
-    df_population = pd.read_csv(
-        get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
-    )
+    df_population = load_population_data(province, starting_year, projection_scenario, max_year)
 
-    # Filter the population data by province and starting year
-    df_population = df_population.loc[
-        (df_population["province"] == province) & (df_population["year"] >= starting_year)
-    ]
-
-    # Add a sex column and compute n_age for each sex (n_age_sex)
-    df_population_male = df_population.copy()
-    df_population_male["sex"] = ["M"] * df_population.shape[0]
-    df_population_male["n_age_sex"] = df_population.apply(
-        lambda x: x["n_age"] * x["prop_male"], axis=1
-    )
-    df_population_female = df_population.copy()
-    df_population_female["sex"] = ["F"] * df_population.shape[0]
-    df_population_female["n_age_sex"] = df_population.apply(
-        lambda x: x["n_age"] * (1 - x["prop_male"]), axis=1
-    )
-    df_population = pd.concat([df_population_female, df_population_male])
-    df_population["n_age_sex"] = df_population["n_age_sex"].astype(int)
-
-    # Filter the population data by projection scenario and year
-    df_population = df_population.loc[
-        (df_population["projection_scenario"] == "past") & (df_population["year"] <= 2021)
-        | (
-            (df_population["projection_scenario"] == projection_scenario)
-            & (df_population["year"] > 2021)
-        )
-    ]
-
-    # Remove unnecessary columns
-    df_population.drop(
-        columns=["projection_scenario", "n_age", "prop_male", "prop", "n_birth"],
-        inplace=True
-    )
-    df_population.rename(columns={"n_age_sex": "n"}, inplace=True)
-
-
-    df_population = df_population.loc[df_population["year"] <= max_cal_year]
-    df_population = df_population.loc[df_population["age"] >= min_age]
-
-    # Set any age > max_age to the max_age
-    df_population["age"] = df_population["age"].apply(
-        lambda x: min(x, max_age)
-    )
-
-    # Sum the max_age rows to a single value of n
-    grouped_df = df.groupby(["year", "sex", "age"])
-    df["n"] = grouped_df["n"].transform(lambda x: sum(x))
-    df.drop_duplicates(inplace=True)
     # Calculate the number of hospitalizations per 100 000 people
     # hospitalization_rate: The observed number of hospitalizations relative to the number
     # of people in a given year, age, and sex.
