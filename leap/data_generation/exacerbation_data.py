@@ -33,7 +33,7 @@ PROB_HOSP = 0.026
 # asthma prev
 
 
-def control_prediction(sex: int, age: int, theta: list | None = None):
+def compute_control_levels(sex: int, age: int, theta: list | None = None):
     if theta is None:
         theta = THETA
 
@@ -60,9 +60,9 @@ def exacerbation_prediction(
         return 0
     else:
         if sex == "M":
-            control = control_prediction(1, age)
+            control = compute_control_levels(1, age)
         else:
-            control = control_prediction(0, age)
+            control = compute_control_levels(0, age)
         return np.exp(np.sum(control * np.log(beta_control)))
 
 
