@@ -47,29 +47,31 @@ class Control:
             self.parameters = config["parameters"]
             self.parameters["θ"] = list(self.parameters["θ"])
             self.assign_random_β0()
-        elif parameters is not None and hyperparameters is not None:
+        elif parameters is not None:
             self.hyperparameters = hyperparameters
             self.parameters = parameters
-            self.assign_random_β0()
+            if "β0" not in self.parameters:
+                self.assign_random_β0()
         else:
             raise ValueError(
                 "Either config dict or parameters and hyperparameters must be provided."
             )
         
     @property
-    def hyperparameters(self) -> dict:
+    def hyperparameters(self) -> dict | None:
         """Hyperparameters used to compute ``β0`` from a normal distribution:
             * ``β0_μ``: float, the mean of the normal distribution.
             * ``β0_σ``: float, the standard deviation of the normal distribution.
         """
         return self._hyperparameters
-    
+
     @hyperparameters.setter
-    def hyperparameters(self, hyperparameters: dict):
-        KEYS = ["β0_μ", "β0_σ"]
-        for key in KEYS:
-            if key not in hyperparameters:
-                raise ValueError(f"Missing key {key} in hyperparameters.")
+    def hyperparameters(self, hyperparameters: dict | None):
+        if hyperparameters is not None:
+            KEYS = ["β0_μ", "β0_σ"]
+            for key in KEYS:
+                if key not in hyperparameters:
+                    raise ValueError(f"Missing key {key} in hyperparameters.")
         self._hyperparameters = hyperparameters
 
     @property
@@ -98,6 +100,9 @@ class Control:
 
     def assign_random_β0(self):
         """Assign the parameter β0 a random value from a normal distribution."""
+        if self.hyperparameters is None:
+            raise ValueError("Hyperparameters must be provided.")
+
         self.parameters["β0"] = np.random.normal(
             self.hyperparameters["β0_μ"],
             self.hyperparameters["β0_σ"]
