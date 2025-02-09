@@ -8,11 +8,19 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
+
+# We assume that asthma diagnoses are made at age 3 and older
 MIN_AGE = 3
+# The CIHI data only goes up to age 90
 MAX_AGE = 90
 BETA_CONTROL = [0.1880058, 0.3760116, 0.5640174]
 THETA = [-1e5, -0.3950, 2.754, 1e5]
 PROVINCES = ["BC", "CA"]
+# Probability of a very severe exacerbation:
+# The number of exacerbations per year per person with asthma.
+# Very severe exacerbations are defined as exacerbations that require hospitalization.
+# Source: Symbicort Given as Needed in Mild Asthma (SYGMA) II study (Bateman et al., 2018).
+PROB_HOSP = 0.026 
 
 # we need: 
 # 1) asthma prev
