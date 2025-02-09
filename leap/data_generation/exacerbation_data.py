@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import re
-from scipy.stats import logistic
-from leap.utils import get_data_path
+from leap.control import ControlLevels
+from leap.utils import get_data_path, compute_ordinal_regression
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
@@ -33,21 +33,42 @@ PROB_HOSP = 0.026
 # asthma prev
 
 
-def compute_control_levels(sex: int, age: int, theta: list | None = None):
-    if theta is None:
-        theta = THETA
+def compute_control_levels(
+    sex: int,
+    age: int,
+    parameters: dict = {
+        "β0": 0.0,
+        "βage": 3.543038,
+        "βsex": 0.234780,
+        "βsexage": -0.8161495,
+        "βsexage2": -1.1654264,
+        "βage2": -3.4980710,
+        "θ": [-1e5, -0.3950, 2.754, 1e5]
+    },
+    initial: bool = False
+) -> ControlLevels:
 
+    if initial:
+        age_scaled = (age - 1) / 100
+    else:
+        age_scaled = age / 100
     age_scaled = age / 100
-    eta = (
-        age_scaled * 3.543038 + sex * 0.234780 + age_scaled * sex * -0.8161495 +
-        age_scaled ** 2 * sex * -1.1654264 + age_scaled ** 2 * -3.4980710
+    η = (
+        parameters["β0"] +
+        age_scaled * parameters["βage"] +
+        int(sex) * parameters["βsex"] +
+        age_scaled * int(sex) * parameters["βsexage"] +
+        age_scaled ** 2 * int(sex) * parameters["βsexage2"] +
+        age_scaled ** 2 * parameters["βage2"]
     )
-    control_probabilities = []
-    for i in range(len(theta) - 1):
-        control_probabilities.append(
-            logistic.cdf(theta[i + 1] - eta) - logistic.cdf(theta[i] - eta)
-        )
-    return control_probabilities
+
+    control_levels_prob = compute_ordinal_regression(η, parameters["θ"])
+    control_levels = ControlLevels(
+        fully_controlled=control_levels_prob[0],
+        partially_controlled=control_levels_prob[1],
+        uncontrolled=control_levels_prob[2]
+    )
+    return control_levels
 
 
 def exacerbation_prediction(
@@ -60,10 +81,10 @@ def exacerbation_prediction(
         return 0
     else:
         if sex == "M":
-            control = compute_control_levels(1, age)
+            control_levels = compute_control_levels(1, age)
         else:
-            control = compute_control_levels(0, age)
-        return np.exp(np.sum(control * np.log(beta_control)))
+            control_levels = compute_control_levels(0, age)
+        return np.exp(np.sum(control_levels.as_array() * np.log(beta_control)))
 
 
 def parse_sex(x: str):
