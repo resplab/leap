@@ -32,21 +32,21 @@ CONTROL_PARAMETERS = {
 }
 BETA_CONTROL = [0.1880058, 0.3760116, 0.5640174]
 
-# we need: 
-# 1) asthma prev
-# 2) target rate (this is in per pop)
-# 3) population 
-# 4) 2) + 3) => annual number of severe hospitalizations needed
-# 5) 1) + exacerbation module => annual number of exacerbations
-# 6) so we can identify a tuner to do this
-
-# asthma prev
-
 
 def exacerbation_prediction(
     sex: str, age: int, beta_control: list[float] | None = None
 ):
-    """"""
+    """TODO.
+    
+    Args:
+        sex: One of "M" or "F".
+        age: Integer age, a value in ``[3, 90]``.
+        beta_control: A list of three floats, the control parameters.
+
+    Returns:
+        The predicted number of exacerbations per year per person with asthma.
+    """
+
     if beta_control is None:
         beta_control = BETA_CONTROL
     if age < 3:
@@ -58,6 +58,7 @@ def exacerbation_prediction(
 
 
 def parse_sex(x: str):
+    """Reformat a string containing sex information."""
     if "M" in x:
         return "M"
     elif "F" in x:
@@ -308,8 +309,12 @@ def exacerbation_calibrator(
         lambda x: x["n_hosp_per_100000"] / x["expected_n"], axis=1
     )
 
+    # Drop unnecessary columns
     df = df_target[["year", "sex", "age", "calibrator_multiplier"]]
+
+    # Add province column
     df["province"] = [province] * df.shape[0]
+
     return df
 
 
