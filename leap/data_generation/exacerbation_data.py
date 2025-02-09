@@ -35,7 +35,7 @@ def control_prediction(sex: int, age: int, theta: list | None = None):
         age_scaled ** 2 * sex * -1.1654264 + age_scaled ** 2 * -3.4980710
     )
     control_probabilities = []
-    for i in range(len(theta)):
+    for i in range(len(theta) - 1):
         control_probabilities.append(
             logistic.cdf(theta[i + 1] - eta) - logistic.cdf(theta[i] - eta)
         )
