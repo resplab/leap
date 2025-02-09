@@ -224,7 +224,7 @@ def load_population_data(
 
 def exacerbation_calibrator(
     province: str = "CA", starting_year: int = 2000, max_year: int = 2065,
-    stablization_year: int = 2025, min_age: int = MIN_AGE, max_age: int = MAX_AGE,
+    min_age: int = MIN_AGE, max_age: int = MAX_AGE,
     prob_hosp: float = PROB_HOSP, projection_scenario: str = "M3"
 ):
     """TODO.
@@ -233,7 +233,6 @@ def exacerbation_calibrator(
         province (str): The 2-letter abbreviation for the province.
         starting_year (int): The starting year for the calibration.
         max_year (int): The maximum year for the calibration.
-        stablization_year (int): The year at which the calibration stabilizes.
         min_age (int): The minimum age for the calibration.
         max_age (int): The maximum age for the calibration.
         prob_hosp (float): The probability of a very severe exacerbation, defined as an
