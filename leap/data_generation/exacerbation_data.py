@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import re
-from leap.control import ControlLevels
-from leap.utils import get_data_path, compute_ordinal_regression
+from leap.control import ControlLevels, Control
+from leap.utils import get_data_path, compute_ordinal_regression, Sex
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
@@ -13,14 +13,24 @@ logger = get_logger(__name__, 20)
 MIN_AGE = 3
 # The CIHI data only goes up to age 90
 MAX_AGE = 90
-BETA_CONTROL = [0.1880058, 0.3760116, 0.5640174]
-THETA = [-1e5, -0.3950, 2.754, 1e5]
+
 PROVINCES = ["BC", "CA"]
 # Probability of a very severe exacerbation:
 # The number of exacerbations per year per person with asthma.
 # Very severe exacerbations are defined as exacerbations that require hospitalization.
 # Source: Symbicort Given as Needed in Mild Asthma (SYGMA) II study (Bateman et al., 2018).
-PROB_HOSP = 0.026 
+PROB_HOSP = 0.026
+
+CONTROL_PARAMETERS = {
+    "β0": 0.0,
+    "βage": 3.543038,
+    "βsex": 0.234780,
+    "βsexage": -0.8161495,
+    "βsexage2": -1.1654264,
+    "βage2": -3.4980710,
+    "θ": [-1e5, -0.3950, 2.754, 1e5]
+}
+BETA_CONTROL = [0.1880058, 0.3760116, 0.5640174]
 
 # we need: 
 # 1) asthma prev
@@ -33,44 +43,6 @@ PROB_HOSP = 0.026
 # asthma prev
 
 
-def compute_control_levels(
-    sex: int,
-    age: int,
-    parameters: dict = {
-        "β0": 0.0,
-        "βage": 3.543038,
-        "βsex": 0.234780,
-        "βsexage": -0.8161495,
-        "βsexage2": -1.1654264,
-        "βage2": -3.4980710,
-        "θ": [-1e5, -0.3950, 2.754, 1e5]
-    },
-    initial: bool = False
-) -> ControlLevels:
-
-    if initial:
-        age_scaled = (age - 1) / 100
-    else:
-        age_scaled = age / 100
-    age_scaled = age / 100
-    η = (
-        parameters["β0"] +
-        age_scaled * parameters["βage"] +
-        int(sex) * parameters["βsex"] +
-        age_scaled * int(sex) * parameters["βsexage"] +
-        age_scaled ** 2 * int(sex) * parameters["βsexage2"] +
-        age_scaled ** 2 * parameters["βage2"]
-    )
-
-    control_levels_prob = compute_ordinal_regression(η, parameters["θ"])
-    control_levels = ControlLevels(
-        fully_controlled=control_levels_prob[0],
-        partially_controlled=control_levels_prob[1],
-        uncontrolled=control_levels_prob[2]
-    )
-    return control_levels
-
-
 def exacerbation_prediction(
     sex: str, age: int, beta_control: list[float] | None = None
 ):
@@ -80,10 +52,8 @@ def exacerbation_prediction(
     if age < 3:
         return 0
     else:
-        if sex == "M":
-            control_levels = compute_control_levels(1, age)
-        else:
-            control_levels = compute_control_levels(0, age)
+        control = Control(parameters=CONTROL_PARAMETERS, hyperparameters=None)
+        control_levels = control.compute_control_levels(sex=Sex(sex), age=age)
         return np.exp(np.sum(control_levels.as_array() * np.log(beta_control)))
 
 
