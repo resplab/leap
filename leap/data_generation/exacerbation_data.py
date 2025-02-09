@@ -83,7 +83,9 @@ def parse_age(x: str):
         return np.nan
     
 
-def load_hospitalization_data(province: str = "CA", starting_year: int = 2000) -> pd.DataFrame:
+def load_hospitalization_data(
+    province: str = "CA", starting_year: int = 2000, min_age: int = 3
+) -> pd.DataFrame:
     """Load the hospitalization data for the given province and starting year.
 
     The data is from the ``Hospital Morbidity Database (HMDB)`` from the
@@ -96,6 +98,8 @@ def load_hospitalization_data(province: str = "CA", starting_year: int = 2000) -
     Args:
         province (str): The province for which to load the hospitalization data.
         starting_year (int): The starting year for which to load the hospitalization data.
+        min_age (int): The minimum age for to be used in the data. We are assuming that
+            asthma diagnoses are made at age 3 and older, so the default is 3.
         
     Returns:
         A dataframe with the following columns:
@@ -146,7 +150,7 @@ def load_hospitalization_data(province: str = "CA", starting_year: int = 2000) -
     df.drop(columns=["type"], inplace=True)
 
     # Filter out age < 3
-    df = df.loc[df["age"] >= 3]
+    df = df.loc[df["age"] >= min_age]
 
     # Sort by year, sex, and age
     df = df.sort_values(by=["year", "sex", "age"])
