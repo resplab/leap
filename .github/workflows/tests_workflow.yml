@@ -1,3 +1,7 @@
+# Tests Workflow: Main Test Suite (no LFS)
+# This workflow is triggered by a push to any branch with any tag except 'test-lfs' or 'v*'.
+# It runs the entire test suite, excluding tests that require large files stored in Git LFS.
+
 name: tests_workflow
  
 # execute this workflow automatically when a we push to any branch

@@ -1,6 +1,11 @@
+# Tests Workflow: Entire Test Suite with LFS
+# This workflow is triggered by a push to any branch with the tag 'test-lfs'.
+# It runs the entire test suite, including tests that require large files stored in Git LFS.
+# To conserve LFS bandwidth, this test suite should only be run when necessary.
+
 name: tests_workflow_lfs
  
-# execute this workflow automatically when tag a commit with 'test-lfs'
+# execute this workflow automatically on a push with tag 'test-lfs'
 on:
   push:
     tags:
