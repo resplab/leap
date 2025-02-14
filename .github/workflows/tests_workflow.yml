@@ -2,7 +2,12 @@ name: tests_workflow
  
 # execute this workflow automatically when a we push to any branch
 on:
-  [push]
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - 'v*'
+      - 'test-lfs'
  
 jobs:
   tests:
