@@ -1,9 +1,9 @@
-name: tests_workflow
+name: tests_workflow_lfs
  
-# execute this workflow automatically when a we push to any branch
+# execute this workflow automatically when tag a commit with 'test-lfs'
 on:
   push:
-    tags-ignore:
+    tags:
       - 'test-lfs'
  
 jobs:
@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
@@ -37,7 +39,7 @@ jobs:
         continue-on-error: false
       - name: Run Python tests census_division
         run: |
-          pytest tests/test_census_division.py -k "test_census_division"
+          pytest tests/test_census_division.py
         continue-on-error: false
       - name: Run Python tests control
         run: |
