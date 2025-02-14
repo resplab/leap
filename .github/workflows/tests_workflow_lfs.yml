@@ -3,6 +3,8 @@
 # It runs the entire test suite, including tests that require large files stored in Git LFS.
 # To conserve LFS bandwidth, this test suite should only be run when necessary.
 
+# test
+
 name: tests_workflow_lfs
  
 # execute this workflow automatically on a push with tag 'test-lfs'
