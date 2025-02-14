@@ -1,23 +1,23 @@
-# Tests Workflow: Main Test Suite (no LFS)
-# This workflow is triggered by a push to any branch with any tag except 'test-lfs' or 'v*'.
-# It runs the entire test suite, excluding tests that require large files stored in Git LFS.
+# Tests Workflow: Entire Test Suite with LFS
+# This workflow is triggered by a push to any branch with the tag 'test-lfs'.
+# It runs the entire test suite, including tests that require large files stored in Git LFS.
+# To conserve LFS bandwidth, this test suite should only be run when necessary.
 
-name: tests_workflow
+name: tests_workflow_lfs
  
-# execute this workflow automatically when a we push to any branch
+# execute this workflow automatically on a push with tag 'test-lfs'
 on:
   push:
-    branches:
-      - '**'
-    tags-ignore:
-      - v*
-      - test-lfs
+    tags:
+      - 'test-lfs'
  
 jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true # enable Git LFS
       - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
@@ -44,7 +44,7 @@ jobs:
         continue-on-error: false
       - name: Run Python tests census_division
         run: |
-          pytest tests/test_census_division.py -k "not test_census_boundaries"
+          pytest tests/test_census_division.py
         continue-on-error: false
       - name: Run Python tests control
         run: |
