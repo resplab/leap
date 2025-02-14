@@ -10,8 +10,8 @@ on:
     branches:
       - '**'
     tags-ignore:
-      - 'v*'
-      - 'test-lfs'
+      - v*
+      - test-lfs
  
 jobs:
   tests:
