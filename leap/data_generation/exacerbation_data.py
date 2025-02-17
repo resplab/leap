@@ -124,7 +124,7 @@ def load_hospitalization_data(
     """
 
     # Load the hospitalization data
-    df = pd.read_csv(get_data_path(f"processed_data/asthma_hosp/{province}/tab1_rate.csv"))
+    df = pd.read_csv(get_data_path(f"original_data/asthma_hosp/{province}/tab1_rate.csv"))
     df.rename(columns={"fiscal_year": "year"}, inplace=True)
     df = df[df["year"] >= starting_year]
 
