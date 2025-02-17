@@ -57,8 +57,15 @@ def exacerbation_prediction(
         return np.exp(np.sum(control_levels.as_array() * np.log(beta_control)))
 
 
-def parse_sex(x: str):
-    """Reformat a string containing sex information."""
+def parse_sex(x: str) -> str | float:
+    """Reformat a string containing sex information.
+    
+    Args:
+        x: A string containing sex information. For example, ``Female``, ``Male``, ``M``, or ``F``.
+        
+    Returns:
+        Either ``M`` or ``F``, or ``np.nan`` if the string does not contain sex information.
+    """
     if "M" in x:
         return "M"
     elif "F" in x:
@@ -67,7 +74,16 @@ def parse_sex(x: str):
         return np.nan
     
 
-def parse_age(x: str):
+def parse_age(x: str) -> int | float:
+    """Reformat a string containing age information.
+    
+    Args:
+        x: A string containing age information. If the string is in the format
+            ``{sex}_{age}``, we parse the integer age. For example, ``F_90`` or ``M_1``.
+            
+    Returns:
+        The integer age, or ``np.nan`` if the string does not contain age information.
+    """
     regex = re.compile(r"^([MF])_[0-9]{1,2}$")
     if regex.match(x) is not None:
         return int(x.split("_")[1])
@@ -88,9 +104,9 @@ def load_hospitalization_data(
     due to an asthma exacerbation. We will use this data to calibrate the exacerbation model.
     
     Args:
-        province (str): The province for which to load the hospitalization data.
-        starting_year (int): The starting year for which to load the hospitalization data.
-        min_age (int): The minimum age for to be used in the data. We are assuming that
+        province: The province for which to load the hospitalization data.
+        starting_year: The starting year for which to load the hospitalization data.
+        min_age: The minimum age for to be used in the data. We are assuming that
             asthma diagnoses are made at age 3 and older, so the default is 3.
         
     Returns:
@@ -238,21 +254,39 @@ def load_population_data(
 
 
 def exacerbation_calibrator(
-    province: str = "CA", starting_year: int = 2000, max_year: int = 2065,
-    min_age: int = MIN_AGE, max_age: int = MAX_AGE,
-    prob_hosp: float = PROB_HOSP, projection_scenario: str = "M3"
+    province: str = "CA",
+    starting_year: int = 2000,
+    max_year: int = 2065,
+    min_age: int = MIN_AGE,
+    max_age: int = MAX_AGE,
+    prob_hosp: float = PROB_HOSP,
+    projection_scenario: str = "M3"
 ):
     """TODO.
     
     Args:
-        province (str): The 2-letter abbreviation for the province.
-        starting_year (int): The starting year for the calibration.
-        max_year (int): The maximum year for the calibration.
-        min_age (int): The minimum age for the calibration.
-        max_age (int): The maximum age for the calibration.
-        prob_hosp (float): The probability of a very severe exacerbation, defined as an
+        province: The 2-letter abbreviation for the province.
+        starting_year: The starting year for the calibration.
+        max_year: The maximum year for the calibration.
+        min_age: The minimum age for the calibration.
+        max_age: The maximum age for the calibration.
+        prob_hosp: The probability of a very severe exacerbation, defined as an
             exacerbation that requires hospitalization.
-        projection_scenario (str): The projection scenario for the population data.
+        projection_scenario: The projection scenario for the population data. One of:
+
+            * ``LG``: low-growth projection
+            * ``HG``: high-growth projection
+            * ``M1``: medium-growth 1 projection
+            * ``M2``: medium-growth 2 projection
+            * ``M3``: medium-growth 3 projection
+            * ``M4``: medium-growth 4 projection
+            * ``M5``: medium-growth 5 projection
+            * ``M6``: medium-growth 6 projection
+            * ``FA``: fast-aging projection
+            * ``SA``: slow-aging projection
+
+            See: `StatCan Projection Scenarios
+            <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
     """
     if province == "CA":
         max_year = 2065
