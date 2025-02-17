@@ -116,7 +116,7 @@ class Exacerbation:
         * ``age``: integer age.
         * ``calibrator_multiplier``: float, TODO.
 
-        See ``master_calibrated_exac.csv``.
+        See ``exacerbation_calibration.csv``.
         """
         return self._calibration_table
     
@@ -150,7 +150,7 @@ class Exacerbation:
         """
 
         df = pd.read_csv(
-            get_data_path("processed_data/master_calibrated_exac.csv")
+            get_data_path("processed_data/exacerbation_calibration.csv")
         )
         check_province(province)
 

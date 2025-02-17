@@ -386,7 +386,7 @@ def generate_exacerbation_calibration_data():
         df_province = exacerbation_calibrator(province, max_year=MAX_YEARS[province])
         df = pd.concat([df, df_province], axis=0)
 
-    df.to_csv(get_data_path("processed_data/master_calibrated_exac.csv"), index=False)
+    df.to_csv(get_data_path("processed_data/exacerbation_calibration.csv"), index=False)
 
 
 if __name__ == "__main__":
