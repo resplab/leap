@@ -375,7 +375,7 @@ def exacerbation_calibrator(
 
 
 
-def generate_exacerbation_calibration():
+def generate_exacerbation_calibration_data():
     df = pd.DataFrame({
         "year": np.array([], dtype=int),
         "sex": [],
@@ -390,4 +390,4 @@ def generate_exacerbation_calibration():
 
 
 if __name__ == "__main__":
-    generate_exacerbation_calibration()
+    generate_exacerbation_calibration_data()
