@@ -15,6 +15,11 @@ MIN_AGE = 3
 MAX_AGE = 90
 
 PROVINCES = ["BC", "CA"]
+MAX_YEARS = {
+    "BC": 2043,
+    "CA": 2065
+}
+
 # Probability of a very severe exacerbation:
 # The number of exacerbations per year per person with asthma.
 # Very severe exacerbations are defined as exacerbations that require hospitalization.
@@ -288,10 +293,6 @@ def exacerbation_calibrator(
             See: `StatCan Projection Scenarios
             <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
     """
-    if province == "CA":
-        max_year = 2065
-    else:
-        max_year = 2043
 
     df_prev_inc = pd.read_csv(get_data_path("processed_data/master_asthma_prev_inc.csv"))
     df_prev = df_prev_inc[["year", "age", "sex", "prev"]]
@@ -373,7 +374,7 @@ def generate_exacerbation_calibration():
         "calibrator_multiplier": []
     })
     for province in PROVINCES:
-        df_province = exacerbation_calibrator(province)
+        df_province = exacerbation_calibrator(province, max_year=MAX_YEARS[province])
         df = pd.concat([df, df_province], axis=0)
 
     df.to_csv(get_data_path("processed_data/master_calibrated_exac.csv"), index=False)
