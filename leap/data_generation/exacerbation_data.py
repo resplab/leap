@@ -266,8 +266,8 @@ def exacerbation_calibrator(
     max_age: int = MAX_AGE,
     prob_hosp: float = PROB_HOSP,
     projection_scenario: str = "M3"
-):
-    """TODO.
+) -> pd.DataFrame:
+    """Compute the ratio between the observed and predicted hospitalization rates.
     
     Args:
         province: The 2-letter abbreviation for the province.
@@ -292,6 +292,15 @@ def exacerbation_calibrator(
 
             See: `StatCan Projection Scenarios
             <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
+
+    Returns:
+        A dataframe with the following columns:
+
+        * ``year``: The year of the data, a value in ``[starting_year, max_year]``.
+        * ``age``: The integer age, a value in ``[min_age, max_age]``.
+        * ``sex``: One of ``M`` or ``F``.
+        * ``calibrator_multiplier``: The ratio between the observed and predicted number of
+          hospitalizations.
     """
 
     df_prev_inc = pd.read_csv(get_data_path("processed_data/master_asthma_prev_inc.csv"))
