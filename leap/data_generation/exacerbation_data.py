@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import re
-from leap.control import ControlLevels, Control
-from leap.utils import get_data_path, compute_ordinal_regression, Sex
+from leap.control import Control
+from leap.utils import get_data_path, Sex
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
