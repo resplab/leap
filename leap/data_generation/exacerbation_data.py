@@ -313,7 +313,9 @@ def exacerbation_calibrator(
         df_cihi = pd.concat([df_cihi, df_cihi_year])
 
     # Load population data
-    df_population = load_population_data(province, starting_year, projection_scenario, max_year)
+    df_population = load_population_data(
+        province, starting_year, projection_scenario, max_year, min_age, max_age
+    )
 
     # Calculate the number of hospitalizations per 100 000 people
     # hospitalization_rate: The observed number of hospitalizations relative to the number
