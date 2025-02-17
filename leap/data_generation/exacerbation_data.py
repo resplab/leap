@@ -119,8 +119,8 @@ def load_hospitalization_data(
         * year: The year of the data.
         * sex: One of "M" or "F".
         * age: Integer age, a value in ``[3, 90]``.
-        * hospitalization_rate: The observed number of hospitalizations relative to the number
-          of people in a given year, age, and sex.
+        * hospitalization_rate: The observed number of hospitalizations per 100 000 people for
+          a given year, age, and sex.
     """
 
     # Load the hospitalization data
@@ -317,17 +317,16 @@ def exacerbation_calibrator(
         province, starting_year, projection_scenario, max_year, min_age, max_age
     )
 
-    # Calculate the number of hospitalizations per 100 000 people
-    # hospitalization_rate: The observed number of hospitalizations relative to the number
-    # of people in a given year, age, and sex.
+    # Calculate the number of hospitalizations for a given year, age, and sex
+    # hospitalization_rate: The observed number of hospitalizations per 100 000 people.
     # n: The number of people in a given year, age, and sex.
     df_target = pd.merge(df_population, df_cihi, on=["year", "sex", "age"], how="left")
-    df_target["n_hosp_per_100000"] = df_target.apply(
+    df_target["n_hosp"] = df_target.apply(
         lambda x: x["hospitalization_rate"] * x["n"] / 100000, axis=1
     )
 
-    # Calculate the number of people with asthma per 100 people
-    # prev: The prevalence of asthma in a given year, age, and sex per 100 people.
+    # Calculate the number of people with asthma for a given year, age, and sex
+    # prev: The prevalence of asthma for a given year, age, and sex.
     # n: The number of people in a given year, age, and sex.
     df_target = pd.merge(df_target, df_prev, on=["year", "sex", "age"], how="left")
     df_target["n_asthma"] = df_target.apply(
@@ -338,24 +337,23 @@ def exacerbation_calibrator(
         lambda x: exacerbation_prediction(x["sex"], x["age"]), axis=1
     )
 
-    # Calculate the predicted number of exacerbations per 100 000 people
-    # mean_annual_exacerbation: The mean number of exacerbations per 1000 people.
+    # Calculate the predicted number of exacerbations for a given year, age, and sex
+    # mean_annual_exacerbation: The mean number of exacerbations for a given year, age, and sex.
     # n_asthma: The number of people with asthma for a given age, sex, and year.
-    df_target["n_exacerbations_per_100000_pred"] = df_target.apply(
+    df_target["n_exacerbations_pred"] = df_target.apply(
         lambda x: x["mean_annual_exacerbation"] * x["n_asthma"], axis=1
     )
 
-    # Calculate the predicted number of hospitalizations per 100 000 people
+    # Calculate the predicted number of hospitalizations for a given year, age, and sex.
     # prob_hosp: the number of exacerbations per year per person with asthma.
-    # n_exacerbations_per_100000_pred: the predicted number of exacerbations per 100 000 people.
-    df_target["n_hosp_per_100000_pred"] = df_target.apply(
-        lambda x: prob_hosp * x["n_exacerbations_per_100000_pred"], axis=1
+    # n_exacerbations_pred: The predicted number of exacerbations for a given year, age, and sex.
+    df_target["n_hosp_pred"] = df_target.apply(
+        lambda x: prob_hosp * x["n_exacerbations_pred"], axis=1
     )
 
     # Calculate the ratio between the observed and predicted number of hospitalizations
-    # per 100 000 people
     df_target["calibrator_multiplier"] = df_target.apply(
-        lambda x: x["n_hosp_per_100000"] / x["n_hosp_per_100000_pred"], axis=1
+        lambda x: x["n_hosp"] / x["n_hosp_pred"], axis=1
     )
 
     # Drop unnecessary columns
