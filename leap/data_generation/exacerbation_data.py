@@ -310,16 +310,16 @@ def exacerbation_calibrator(
     )
 
     # Canada Institute for Health Information (CIHI) data on hospitalizations due to asthma
-    df_cihi = load_hospitalization_data(province, starting_year, min_age)
+    df_hosp = load_hospitalization_data(province, starting_year, min_age)
 
-    final_year = max(df_cihi["year"])
+    final_year = max(df_hosp["year"])
     future_years = list(range(final_year + 1, max_year + 1))
     
     # Append a copy of the final year data for each of the future years, changing the year column
     for year in future_years:
-        df_cihi_year = df_cihi[df_cihi["year"] == final_year].copy()
-        df_cihi_year["year"] = [year] * df_cihi_year.shape[0]
-        df_cihi = pd.concat([df_cihi, df_cihi_year])
+        df_hosp_year = df_hosp[df_hosp["year"] == final_year].copy()
+        df_hosp_year["year"] = [year] * df_hosp_year.shape[0]
+        df_hosp = pd.concat([df_hosp, df_hosp_year])
 
     # Load population data
     df_population = load_population_data(
@@ -329,7 +329,7 @@ def exacerbation_calibrator(
     # Calculate the number of hospitalizations for a given year, age, and sex
     # hospitalization_rate: The observed number of hospitalizations per 100 000 people.
     # n: The number of people in a given year, age, and sex.
-    df_target = pd.merge(df_population, df_cihi, on=["year", "sex", "age"], how="left")
+    df_target = pd.merge(df_population, df_hosp, on=["year", "sex", "age"], how="left")
     df_target["n_hosp"] = df_target.apply(
         lambda x: x["hospitalization_rate"] * x["n"] / 100000, axis=1
     )
