@@ -35,31 +35,31 @@ CONTROL_PARAMETERS = {
     "βage2": -3.4980710,
     "θ": [-1e5, -0.3950, 2.754, 1e5]
 }
-BETA_CONTROL = [0.1880058, 0.3760116, 0.5640174]
+GAMMA_CONTROL = [0.1880058, 0.3760116, 0.5640174]
 
 
 def exacerbation_prediction(
-    sex: str, age: int, beta_control: list[float] | None = None
+    sex: str, age: int, gamma_control: list[float] | None = None
 ):
     """TODO.
     
     Args:
         sex: One of "M" or "F".
         age: Integer age, a value in ``[3, 90]``.
-        beta_control: A list of three floats, the control parameters.
+        gamma_control: A list of three floats, the control parameters.
 
     Returns:
         The predicted number of exacerbations per year per person with asthma.
     """
 
-    if beta_control is None:
-        beta_control = BETA_CONTROL
+    if gamma_control is None:
+        gamma_control = GAMMA_CONTROL
     if age < 3:
         return 0
     else:
         control = Control(parameters=CONTROL_PARAMETERS, hyperparameters=None)
         control_levels = control.compute_control_levels(sex=Sex(sex), age=age)
-        return np.exp(np.sum(control_levels.as_array() * np.log(beta_control)))
+        return np.exp(np.sum(control_levels.as_array() * np.log(gamma_control)))
 
 
 def parse_sex(x: str) -> str | float:
