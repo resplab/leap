@@ -142,7 +142,9 @@ N_{\text{exacerbations}} &\sim \text{Poisson}(\lambda) = \dfrac{\lambda^k e^{-\l
 \end{align}
 ```
 
-Here $\lambda$ is the expected number of exacerbations per year. To obtain $\lambda$, we must perform a Poisson regression. The Poisson regression assumes that the value we are interested in can be approximated using the following formula:
+Here $\lambda$ is the expected number of exacerbations per year. To obtain $\lambda$, we must
+perform a Poisson regression. The Poisson regression assumes that the value we are interested in
+can be approximated using the following formula:
 
 ```math
 \begin{align}
@@ -161,7 +163,8 @@ where:
 * $\beta_i$: control level constant
 
 
-In the `exacerbation_data.py` file, we are interested in calculating $\alpha$. If we rewrite the equation, the meaning of $\alpha$ becomes more apparent:
+In the `exacerbation_data.py` file, we are interested in calculating $\alpha$. If we rewrite the
+equation, the meaning of $\alpha$ becomes more apparent:
 
 ```math
 \begin{align}
@@ -212,8 +215,10 @@ N_{\text{hosp}}^{\text{(pred)}} &= N_{\text{exac}}^{\text{(pred)}} \cdot P(\text
 \end{align}
 ```
 
-* $N_{\text{exac}}^{\text{(pred)}}$: the predicted number of exacerbations (of any severity) for a given year, age, and sex
-* $P(\text{hosp})$: the probability of hospitalization due to asthma given the patient has an asthma exacerbation
+* $N_{\text{exac}}^{\text{(pred)}}$: the predicted number of exacerbations (of any severity) for a
+  given year, age, and sex
+* $P(\text{hosp})$: the probability of hospitalization due to asthma given the patient has an
+  asthma exacerbation
 
 Finally, $\alpha$ can be computed:
 
