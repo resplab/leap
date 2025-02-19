@@ -83,8 +83,6 @@ class Control:
             * ``βsexage``: float, the parameter for the ``sex * age`` term.
             * ``βsexage2``: float, the parameter for the ``sex * age^2`` term.
             * ``βage2``: float, the parameter for the ``age^2`` term.
-            * ``βDx2``: float, unused?
-            * ``βDx3``: float, unused?
             * ``θ``: list of two numbers, which are used as the thresholds to compute the ordinal
               regression.
         """
@@ -92,7 +90,7 @@ class Control:
     
     @parameters.setter
     def parameters(self, parameters: dict):
-        KEYS = ["βage", "βsex", "βsexage", "βsexage2", "βage2", "βDx2", "βDx3", "θ"]
+        KEYS = ["βage", "βsex", "βsexage", "βsexage2", "βage2", "θ"]
         for key in KEYS:
             if key not in parameters:
                 raise ValueError(f"Missing key {key} in parameters.")
