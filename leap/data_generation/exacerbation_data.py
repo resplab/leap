@@ -35,14 +35,39 @@ CONTROL_PARAMETERS = {
     "βage2": -3.4980710,
     "θ": [-1e5, -0.3950, 2.754, 1e5]
 }
+
+# The probability of a person with asthma having an exacerbation within a year given control levels.
 GAMMA_CONTROL = [0.1880058, 0.3760116, 0.5640174]
 
 
 def exacerbation_prediction(
     sex: str, age: int, gamma_control: list[float] | None = None
 ):
-    """TODO.
-    
+    r"""Calculate the mean number of exacerbations for a given age and sex.
+
+    .. math::
+
+        \ln(\lambda_{C}) = \sum_{i=1}^3 \gamma_i c_i
+
+    where:
+
+    * :math:`\lambda_{C}` is the predicted average number of asthma exacerbations per year.
+    * :math:`\gamma_i` is the control parameter.
+    * :math:`c_i` is the relative time spent in control level :math:`i`.
+
+    Here the :math:`\gamma_i` values were calculated from the
+    `Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
+    and are given by:
+
+    .. math::
+        :nowrap:
+
+        \begin{align*}
+        \gamma_1 &:= 0.1880058 & \text{rate(exacerbation | fully controlled)}\\
+        \gamma_2 &:= 0.3760116 & \text{rate(exacerbation | partially controlled)}\\
+        \gamma_3 &:= 0.5640174 & \text{rate(exacerbation | uncontrolled)}
+        \end{align*}
+
     Args:
         sex: One of "M" or "F".
         age: Integer age, a value in ``[3, 90]``.
@@ -342,6 +367,7 @@ def exacerbation_calibrator(
         lambda x: x["prev"] * x["n"], axis=1
     )
 
+    # Calculate the mean number of exacerbations for a given age and sex
     df_target["mean_annual_exacerbation"] = df_target.apply(
         lambda x: exacerbation_prediction(x["sex"], x["age"]), axis=1
     )
@@ -376,6 +402,8 @@ def exacerbation_calibrator(
 
 
 def generate_exacerbation_calibration_data():
+    """Generate the exacerbation calibration data for all provinces."""
+
     df = pd.DataFrame({
         "year": np.array([], dtype=int),
         "sex": [],
