@@ -84,9 +84,6 @@ class Exacerbation:
         * ``β0_calibration``: float, the parameter for the calibration term.
         * ``βage``: float, the parameter for the age term.
         * ``βsex``: float, the parameter for the sex term.
-        * ``βasthmaDx``: float, TODO.
-        * ``βprev_exac1``: float, TODO.
-        * ``βprev_exac2``: float, TODO.
         * ``βcontrol``: float, the parameter for the asthma control term.
         * ``βcontrol_C``: float, the parameter for the controlled asthma term.
         * ``βcontrol_PC``: float, the parameter for the partially-controlled asthma term.
@@ -99,8 +96,7 @@ class Exacerbation:
     @parameters.setter
     def parameters(self, parameters: dict):
         KEYS = [
-            "β0_calibration", "βage", "βsex", "βasthmaDx", "βprev_exac1", "βprev_exac2",
-            "βcontrol", "βcontrol_C", "βcontrol_PC", "βcontrol_UC"
+            "β0_calibration", "βage", "βsex", "βcontrol", "βcontrol_C", "βcontrol_PC", "βcontrol_UC"
         ]
         for key in KEYS:
             if key not in parameters:
