@@ -42,13 +42,14 @@ def load_past_births_population_data() -> pd.DataFrame:
     """Load the past birth data from the CSV file.
     
     Returns:
-        The past birth data, with the following columns:
+        The past birth data.
+        Columns:
         
-        * year: The year of the data.
-        * province: The 2-letter province ID.
-        * N: The total number of births in that year.
-        * prop_male: The proportion of births in that year that are male.
-        * projection_scenario: The projection scenario; all values are "past".
+        * ``year``: The year of the data.
+        * ``province``: The 2-letter province ID.
+        * ``N``: The total number of births in that year.
+        * ``prop_male``: The proportion of births in that year that are male.
+        * ``projection_scenario``: The projection scenario; all values are ``"past"``.
     """
 
     logger.info("Loading past population data from CSV file...")
@@ -99,24 +100,25 @@ def load_projected_births_population_data(min_year: int) -> pd.DataFrame:
         min_year: The starting year for the projected data.
     
     Returns:
-        The projected births data, with the following columns:
+        The projected births data.
+        Columns:
         
-        * year: The year of the data.
-        * province: The 2-letter province ID.
-        * N: The total number of births predicted for that year.
-        * prop_male: The proportion of predicted births in that year that are male.
-        * projection_scenario: The projection scenario, one of:
+        * ``year``: The year of the data.
+        * ``province``: The 2-letter province ID.
+        * ``N``: The total number of births predicted for that year.
+        * ``prop_male``: The proportion of predicted births in that year that are male.
+        * ``projection_scenario``: The projection scenario, one of:
 
-            * ``LG``: low-growth projection
-            * ``HG``: high-growth projection
-            * ``M1``: medium-growth 1 projection
-            * ``M2``: medium-growth 2 projection
-            * ``M3``: medium-growth 3 projection
-            * ``M4``: medium-growth 4 projection
-            * ``M5``: medium-growth 5 projection
-            * ``M6``: medium-growth 6 projection
-            * ``FA``: fast-aging projection
-            * ``SA``: slow-aging projection
+          * ``LG``: low-growth projection
+          * ``HG``: high-growth projection
+          * ``M1``: medium-growth 1 projection
+          * ``M2``: medium-growth 2 projection
+          * ``M3``: medium-growth 3 projection
+          * ``M4``: medium-growth 4 projection
+          * ``M5``: medium-growth 5 projection
+          * ``M6``: medium-growth 6 projection
+          * ``FA``: fast-aging projection
+          * ``SA``: slow-aging projection
 
     """
     logger.info("Loading projected population data from CSV file...")
@@ -186,7 +188,8 @@ def load_past_initial_population_data() -> pd.DataFrame:
     """Load the past initial population data from the CSV file.
     
     Returns:
-        The past initial population data, with the following columns:
+        The past initial population data.
+        Columns:
         
         * ``year``: The calendar year.
         * ``province``: The 2-letter province ID, e.g. ``BC``.
@@ -290,7 +293,8 @@ def load_projected_initial_population_data(min_year: int) -> pd.DataFrame:
         min_year: The starting year for the projected data.
 
     Returns:
-        The projected initial population data, with the following columns:
+        The projected initial population data.
+        Columns:
 
         * ``year``: The calendar year.
         * ``province``: The 2-letter province ID, e.g. ``BC``.
@@ -304,16 +308,16 @@ def load_projected_initial_population_data(min_year: int) -> pd.DataFrame:
           number of births in that year.
         * ``projection_scenario``: The projection scenario, one of:
 
-            * ``LG``: low-growth projection
-            * ``HG``: high-growth projection
-            * ``M1``: medium-growth 1 projection
-            * ``M2``: medium-growth 2 projection
-            * ``M3``: medium-growth 3 projection
-            * ``M4``: medium-growth 4 projection
-            * ``M5``: medium-growth 5 projection
-            * ``M6``: medium-growth 6 projection
-            * ``FA``: fast-aging projection
-            * ``SA``: slow-aging projection
+          * ``LG``: low-growth projection
+          * ``HG``: high-growth projection
+          * ``M1``: medium-growth 1 projection
+          * ``M2``: medium-growth 2 projection
+          * ``M3``: medium-growth 3 projection
+          * ``M4``: medium-growth 4 projection
+          * ``M5``: medium-growth 5 projection
+          * ``M6``: medium-growth 6 projection
+          * ``FA``: fast-aging projection
+          * ``SA``: slow-aging projection
     """
 
     logger.info("Loading projected population data from CSV file...")

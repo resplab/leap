@@ -9,4 +9,4 @@ Developers
   dev-testing
   dev-docs
   dev-releases
-  api/leap
+  api/index
