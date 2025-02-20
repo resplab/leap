@@ -28,7 +28,14 @@ To obtain the mortality data for each year, we used one table from ``StatCan``:
 
    where:
    
-   * :math:`\sigma^{-1}` is the inverse logit function
+   * :math:`\sigma^{-1}` is the inverse sigmoid function, also known as the logit function:
+
+   .. math::
+
+      \sigma^{-1}(p) = \ln\left(\dfrac{p}{1-p}\right)
+
+   and:
+
    * :math:`a` is the age
    * :math:`s` is the sex
    * :math:`y_0` is the year the collected data ends (in our case, 2020)
