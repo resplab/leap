@@ -33,7 +33,7 @@ CONTROL_PARAMETERS = {
     "βsexage": -0.8161495,
     "βsexage2": -1.1654264,
     "βage2": -3.4980710,
-    "θ": [-1e5, -0.3950, 2.754, 1e5]
+    "θ": [-0.3950, 2.754]
 }
 
 # The probability of a person with asthma having an exacerbation within a year given control levels.
