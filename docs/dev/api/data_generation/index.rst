@@ -1,6 +1,10 @@
 Data Generation
 ================
 
+In this module, we generate the datasets used for the ``LEAP`` model. This only needs to be
+run once, and in general, users may ignore this folder. It is mainly for developers to reference
+and update if new data needs to be added.
+
 .. toctree::
   :maxdepth: 1
 
