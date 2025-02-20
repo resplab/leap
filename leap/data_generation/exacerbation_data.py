@@ -127,8 +127,8 @@ def load_hospitalization_data(
     """Load the hospitalization data for the given province and starting year.
 
     The data is from the ``Hospital Morbidity Database (HMDB)`` from the
-    ``Canadian Institute for Health Information (CIHI)``:
-    https://www.cihi.ca/en/hospital-morbidity-database-hmdb-metadata
+    `Canadian Institute for Health Information (CIHI) 
+    <https://www.cihi.ca/en/hospital-morbidity-database-hmdb-metadata>`_.
 
     The hospitalization data was collected from patients presenting to a hospital in Canada
     due to an asthma exacerbation. We will use this data to calibrate the exacerbation model.
@@ -140,12 +140,14 @@ def load_hospitalization_data(
             asthma diagnoses are made at age 3 and older, so the default is 3.
         
     Returns:
-        A dataframe with the following columns:
-        * year: The year of the data.
-        * sex: One of "M" or "F".
-        * age: Integer age, a value in ``[3, 90]``.
-        * hospitalization_rate: The observed number of hospitalizations per 100 000 people for
-          a given year, age, and sex.
+        The hospitalization data for the given province and starting year.
+        Columns:
+
+        * ``year``: The year of the data.
+        * ``sex``: One of ``M`` = male, ``F`` = female.
+        * ``age``: Integer age, a value in ``[3, 90]``.
+        * ``hospitalization_rate``: The observed number of hospitalizations per ``100 000`` people
+          for a given year, age, and sex.
     """
 
     # Load the hospitalization data
@@ -217,13 +219,14 @@ def load_population_data(
         max_age: The maximum age for the population data.
     
     Returns:
-        A dataframe with the following columns:
+        A dataframe containing the Canadian population data.
+        Columns:
 
-        * year: The year of the data.
-        * age: A value in ``[min_age, max_age]``.
-        * province: The 2-letter province abbreviation.
-        * sex: One of "M" or "F".
-        * n: The number of people in a given year, age, sex, province, and projection scenario.
+        * ``year``: The year of the data.
+        * ``age``: A value in ``[min_age, max_age]``.
+        * ``province``: The 2-letter province abbreviation.
+        * ``sex``: One of ``M`` = male, ``F`` = female.
+        * ``n``: The number of people in a given year, age, sex, province, and projection scenario.
 
     """
 

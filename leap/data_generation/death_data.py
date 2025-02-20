@@ -41,17 +41,20 @@ def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
     """Determine the life expectancy for a person born in a given year.
 
     The life expectancy can be calculated from the death probability using the formulae
-    delineated here: https://www.ssa.gov/oact/HistEst/CohLifeTables/LifeTableDefinitions.pdf.
+    delineated here:
+    `Life Table Definitions <https://www.ssa.gov/oact/HistEst/CohLifeTables/LifeTableDefinitions.pdf>`_
     
     Args:
         life_table: A dataframe containing the probability of death for a single year,
             province and sex, for each age. Columns:
-                * ``age``: the integer age.
-                * ``sex``: one of "M" or "F".
-                * ``year``: the integer calendar year.
-                * ``province``: A string indicating the province abbreviation, e.g. "BC".
-                  For all of Canada, set province to "CA".
-                * ``prob_death``: the probability of death for a given age, province, sex, and year.
+
+            * ``age``: the integer age.
+            * ``sex``: One of ``M`` = male, ``F`` = female.
+            * ``year``: the integer calendar year.
+            * ``province``: A string indicating the province abbreviation, e.g. ``"BC"``.
+                For all of Canada, set province to ``"CA"``.
+            * ``prob_death``: the probability of death for a given age, province, sex, and year.
+
     Returns:
         The life expectancy for a person born in the given year, in a given province,
         for a given sex.
@@ -112,12 +115,13 @@ def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
 def get_prob_death_projected(
     prob_death: float, year_initial: int, year: int, beta_year: float
 ) -> float:
-    """Given the (known) prob death for a past year, calculate the prob death in a future year.
+    r"""Given the (known) prob death for a past year, calculate the prob death in a future year.
 
     .. math::
 
-        \sigma^{-1}(p(sex, age, year)) = \sigma^{-1}(p(sex, age, year_0)) - 
-            e^{\beta(sex)(year - year_0)}
+        \sigma^{-1}(p(\text{sex}, \text{age}, \text{year})) =
+            \sigma^{-1}(p(\text{sex}, \text{age}, \text{year}_0)) - 
+            e^{\beta(\text{sex})(\text{year} - \text{year}_0)}
 
     Args:
         prob_death: The probability of death for ``year_initial``, the last year that past data was
@@ -148,19 +152,19 @@ def get_projected_life_table_single_year(
         life_table: A dataframe containing the projected probability of death
             for the starting year, for a given sex and province. Columns:
 
-            - ``age``: the integer age.
-            - ``sex``: one of "M" or "F".
-            - ``year``: the starting calendar year.
-            - ``province``: a string indicating the province abbreviation, e.g. "BC".
-                For all of Canada, set province to "CA".
-            - ``prob_death``: the probability of death for a given age, province, sex, and year.
+            * ``age``: the integer age.
+            * ``sex``: One of ``M`` = male, ``F`` = female.
+            * ``year``: the starting calendar year.
+            * ``province``: a string indicating the province abbreviation, e.g. ``"BC"``.
+              For all of Canada, set province to ``"CA"``.
+            * ``prob_death``: the probability of death for a given age, province, sex, and year.
 
-        starting_year: The initial year with a known probability of death. This is the last year
+        year_initial: The initial year with a known probability of death. This is the last year
             that the past data was collected.
-        year_index: The current year.
-        sex: one of "M" or "F".
-        province: a string indicating the province abbreviation, e.g. "BC".
-            For all of Canada, set province to "CA".
+        year: The current year.
+        sex: One of ``M`` = male, ``F`` = female.
+        province: a string indicating the province abbreviation, e.g. ``"BC"``.
+            For all of Canada, set province to ``"CA"``.
 
     Returns:
         A dataframe containing the projected probability of death for the given year,
@@ -182,7 +186,6 @@ def get_projected_life_table_single_year(
     return df
 
 
-
 def beta_year_optimizer(
     beta_year: float,
     life_table: pd.DataFrame,
@@ -200,15 +203,17 @@ def beta_year_optimizer(
         beta_year: The beta parameter for the given year.
         life_table: A dataframe containing the projected probability of death
             for the calibration year, for a given sex and province. Columns:
-            - ``age``: the integer age.
-            - ``sex``: one of "M" or "F".
-            - ``year``: the calibration calendar year.
-            - ``province``: a string indicating the province abbreviation, e.g. "BC".
-                For all of Canada, set province to "CA".
-            - ``prob_death``: the probability of death for a given age, province, sex, and year.
-        sex: one of "M" or "F".
-        province: A 2-character string indicating the province abbreviation, e.g. "BC".
-            For all of Canada, set province to "CA".
+
+            * ``age``: the integer age.
+            * ``sex``: one of ``M`` = male, ``F`` = female.
+            * ``year``: the calibration calendar year.
+            * ``province``: a 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+              For all of Canada, set province to ``"CA"``.
+            * ``prob_death``: the probability of death for a given age, province, sex, and year.
+
+        sex: one of ``M`` = male, ``F`` = female.
+        province: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+            For all of Canada, set province to ``"CA"``.
         year_initial: The initial year with a known probability of death. This is the last year
             that the past data was collected.
         year: The current year.
@@ -238,15 +243,17 @@ def load_past_death_data() -> pd.DataFrame:
     
     Returns:
         A dataframe containing the probability of death and the standard error
-        for each year, province, age, and sex. Columns:
-            * ``year``: The integer calendar year.
-            * ``province``: A string indicating the 2-letter province abbreviation, e.g. "BC".
-              For all of Canada, set province to "CA".
-            * ``sex``: One of "M" or "F".
-            * ``age``: The integer age.
-            * ``prob_death``: The probability that a person of the given age, sex, and province
-              will die in the given year.
-            * ``se``: The standard error of the probability of death.
+        for each year, province, age, and sex.
+        Columns:
+
+        * ``year``: The integer calendar year.
+        * ``province``: a 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+          For all of Canada, set province to ``"CA"``.
+        * ``sex``: One of ``M`` = male, ``F`` = female.
+        * ``age``: The integer age.
+        * ``prob_death``: The probability that a person of the given age, sex, and province
+          will die in the given year.
+        * ``se``: The standard error of the probability of death.
     """ 
     logger.info("Loading mortality data from CSV file...")
     df = pd.read_csv(get_data_path("original_data/13100837.csv"))
@@ -313,27 +320,30 @@ def load_projected_death_data(
             for each year, province, age, and sex. Columns:
             
             * ``year``: the integer calendar year.
-            * ``province``: a string indicating the province abbreviation, e.g. "BC".
-                For all of Canada, set province to "CA".
-            * ``sex``: one of "M" or "F".
+            * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+              For all of Canada, set province to ``"CA"``.
+            * ``sex``: One of ``M`` = male, ``F`` = female.
             * ``age``: the integer age.
             * ``prob_death``: the probability of death.
             * ``se``: the standard error of the probability of death.
+
         a: The lower bound for the beta parameter.
         b: The upper bound for the beta parameter.
         xtol: The tolerance for the beta parameter.
     
     Returns:
         A dataframe containing the predicted probability of death and the standard error
-        for each year, province, age, and sex. Columns:
-            * ``year``: The integer calendar year.
-            * ``province``: A string indicating the 2-letter province abbreviation, e.g. "BC".
-              For all of Canada, set province to "CA".
-            * ``sex``: One of "M" or "F".
-            * ``age``: The integer age.
-            * ``prob_death``: The probability that a person of the given age, sex, and province
-              will die in the given year.
-            * ``se``: The standard error of the probability of death.
+        for each year, province, age, and sex.
+        Columns:
+
+        * ``year``: The integer calendar year.
+        * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+          For all of Canada, set province to ``"CA"``.
+        * ``sex``: One of ``M`` = male, ``F`` = female.
+        * ``age``: The integer age.
+        * ``prob_death``: The probability that a person of the given age, sex, and province
+          will die in the given year.
+        * ``se``: The standard error of the probability of death.
     """
 
     projected_life_table = pd.DataFrame({
@@ -411,6 +421,7 @@ def load_projected_death_data(
 
 
 def generate_death_data():
+    """Generate the mortality data CSV."""
     past_life_table = load_past_death_data()
     projected_life_table = load_projected_death_data(past_life_table)
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
