@@ -15,20 +15,29 @@ Since StatsCan does not provide a breakdown of population projections/estimates 
 or immigration, we calculated the average number of individuals required to emigrate/immigrate to
 match the projected demographics. These results are saved in:
 
-`master_emigration_table.csv`
-`master_immigration_table.csv`
+`emigration_table.csv`
+`immigration_table.csv`
 
 ### Emigration Table
 
 The emigration table has the following columns:
 
-`year`: integer year the range 2001-2065.
-`age`: integer age.
-`province`: a string indicating the province abbreviation, e.g. "BC". For all of Canada,
+`year`: Integer year in the range 2001-2065.
+`age`: Integer age.
+`sex`: String, "F" = female, "M" = male.
+`province`: A string indicating the province abbreviation, e.g. "BC". For all of Canada,
   set province to "CA".
-`M`: the probability of a male emigrating.
-`F`: the probability of a female emigrating.
-`proj_scenario`: Population growth type, one of:
+`n_emigrants`: The number of immigrants for a given year, sex, age, province, and projection
+    scenario.
+`prop_emigrants_birth`: The proportion of emigrants for a given age and sex relative to the total
+  number of births for a given year and projection scenario. To compute the number of emigrants
+  for a given year, projection scenario, age, and sex, multiply the number of births by
+  `prop_emigrants_birth`.
+`prop_emigrants_year`: The proportion of emigrants for a given age and sex relative to the total
+  number of emigrants for a given year and projection scenario. To compute the number of emigrants
+  for a given year, projection scenario, age, and sex, multiply the total number of emigrants for
+  that year and projection scenario by `prop_emigrants_year`.
+`projection_scenario`: Population growth type, one of:
   ["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"].
   See [Stats Canada](https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm).
 
@@ -40,6 +49,8 @@ The immigration table has the following columns:
 `year`: Integer year in the range 2001-2065.
 `age`: Integer age.
 `sex`: String, "F" = female, "M" = male.
+`province`: A string indicating the province abbreviation, e.g. "BC". For all of Canada,
+  set province to "CA".
 `n_immigrants`: The number of immigrants for a given year, sex, age, province, and projection
     scenario.
 `prop_immigrants_birth`: The proportion of immigrants for a given age and sex relative to the total
@@ -50,8 +61,6 @@ The immigration table has the following columns:
   number of immigrants for a given year and projection scenario. To compute the number of immigrants
   for a given year, projection scenario, age, and sex, multiply the total number of immigrants for
   that year and projection scenario by `prop_immigrants_year`.
-`province`: A string indicating the province abbreviation, e.g. "BC". For all of Canada,
-  set province to "CA".
-`proj_scenario`: Population growth type, one of:
+`projection_scenario`: Population growth type, one of:
   ["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"].
   See [Stats Canada](https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm).

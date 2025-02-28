@@ -28,8 +28,6 @@ def config():
                 "βsexage2": -1.1654264,
                 "βsex": 0.2347807,
                 "θ": [-0.3950, 2.754],
-                "βDx2": None,
-                "βDx3": None,
                 "β0": 0.0
             }
         ),
@@ -47,8 +45,6 @@ def test_control_constructor(
     assert control.parameters["βsexage2"] == parameters["βsexage2"]
     assert control.parameters["βsex"] == parameters["βsex"]
     np.testing.assert_array_equal(control.parameters["θ"], parameters["θ"])
-    assert control.parameters["βDx2"] == parameters["βDx2"]
-    assert control.parameters["βDx3"] == parameters["βDx3"]
     assert control.parameters["β0"] > -50
     assert control.parameters["β0"] < 50
 

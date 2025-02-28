@@ -2,7 +2,8 @@ from __future__ import annotations
 import abc
 import pandas as pd
 import numpy as np
-from leap.utils import get_data_path, sigmoid, logit
+from scipy.stats import logistic
+from leap.utils import get_data_path, logit
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -153,7 +154,7 @@ class Occurrence:
         correction_year = min(year, self.max_year)
         year = min(year, self.max_year)
         p0 = self.crude_occurrence(sex, age, year)
-        p = sigmoid(
+        p = logistic.cdf(
             logit(p0) +
             has_family_history * self.log_OR_family_history(age) +
             self.log_OR_abx_exposure(age, dose) +
