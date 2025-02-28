@@ -68,11 +68,12 @@ class OutcomeTable:
 
 class OutcomeMatrix:
     """A class containing information about the outcomes of the model."""
+
     def __init__(
         self, until_all_die: bool, min_year: int, max_year: int, max_age: int
     ):
         """Initialize the ``OutcomeMatrix`` class.
-        
+
         Args:
             until_all_die: A boolean indicating whether the simulation should run until all
                 people have died.
@@ -252,7 +253,7 @@ class OutcomeMatrix:
     def antibiotic_exposure(self) -> OutcomeTable:
         """A table containing the number of rounds of antibiotics for each year, age, and sex."""
         return self._antibiotic_exposure
-    
+
     @antibiotic_exposure.setter
     def antibiotic_exposure(self, antibiotic_exposure: OutcomeTable):
         self._antibiotic_exposure = antibiotic_exposure
@@ -261,7 +262,7 @@ class OutcomeMatrix:
     def asthma_incidence(self) -> OutcomeTable:
         """A table containing the number of new asthma diagnoses for each year, age, and sex."""
         return self._asthma_incidence
-    
+
     @asthma_incidence.setter
     def asthma_incidence(self, asthma_incidence: OutcomeTable):
         self._asthma_incidence = asthma_incidence
@@ -270,7 +271,7 @@ class OutcomeMatrix:
     def asthma_prevalence(self) -> OutcomeTable:
         """A table containing the number of people with asthma for each year, age, and sex."""
         return self._asthma_prevalence
-    
+
     @asthma_prevalence.setter
     def asthma_prevalence(self, asthma_prevalence: OutcomeTable):
         self._asthma_prevalence = asthma_prevalence
@@ -279,7 +280,7 @@ class OutcomeMatrix:
     def asthma_incidence_contingency_table(self) -> OutcomeTable:
         """TODO."""
         return self._asthma_incidence_contingency_table
-    
+
     @asthma_incidence_contingency_table.setter
     def asthma_incidence_contingency_table(
         self, asthma_incidence_contingency_table: OutcomeTable
@@ -290,7 +291,7 @@ class OutcomeMatrix:
     def asthma_prevalence_contingency_table(self) -> OutcomeTable:
         """TODO."""
         return self._asthma_prevalence_contingency_table
-    
+
     @asthma_prevalence_contingency_table.setter
     def asthma_prevalence_contingency_table(
         self, asthma_prevalence_contingency_table: OutcomeTable
@@ -310,7 +311,7 @@ class OutcomeMatrix:
     def control(self) -> OutcomeTable:
         """A table containing the level of asthma control for each year, age, and sex."""
         return self._control
-    
+
     @control.setter
     def control(self, control: OutcomeTable):
         self._control = control
@@ -319,7 +320,7 @@ class OutcomeMatrix:
     def cost(self) -> OutcomeTable:
         """A table containing the cost of asthma for each year, age, and sex."""
         return self._cost
-    
+
     @cost.setter
     def cost(self, cost: OutcomeTable):
         self._cost = cost
@@ -328,7 +329,7 @@ class OutcomeMatrix:
     def death(self) -> OutcomeTable:
         """A table containing the number of people who died in a given year, age, and sex."""
         return self._death
-    
+
     @death.setter
     def death(self, death: OutcomeTable):
         self._death = death
@@ -365,7 +366,7 @@ class OutcomeMatrix:
     def exacerbation_hospital(self) -> OutcomeTable:
         """A table containing the number of asthma exacerbations leading to hospitalization."""
         return self._exacerbation_hospital
-    
+
     @exacerbation_hospital.setter
     def exacerbation_hospital(self, exacerbation_hospital: OutcomeTable):
         self._exacerbation_hospital = exacerbation_hospital
@@ -374,7 +375,7 @@ class OutcomeMatrix:
     def family_history(self) -> OutcomeTable:
         """A table containing the number of people with a family history of asthma."""
         return self._family_history
-    
+
     @family_history.setter
     def family_history(self, family_history: OutcomeTable):
         self._family_history = family_history
@@ -393,7 +394,7 @@ class OutcomeMatrix:
     def utility(self) -> OutcomeTable:
         """A table containing the utility due to asthma for each year, age, and sex."""
         return self._utility
-    
+
     @utility.setter
     def utility(self, utility: OutcomeTable):
         self._utility = utility
@@ -418,20 +419,22 @@ class OutcomeMatrix:
         )
         table = OutcomeTable(df, group_by)
         return table
-    
+
     def save(self, path: pathlib.Path):
         """Save the outcome matrix to ``*.csv`` files.
 
         Args:
-            path: The full path to the folder where the data will be saved.
+            path: The path to the folder where the data will be saved.
         """
         if not path.exists():
-            raise Exception(f"Path {path} does not exist.")
-        
+            raise Exception(f"Path <{path}> does not exist.")
+
         attributes = [
             key for key, value in self.__dict__.items() if isinstance(value, OutcomeTable)
         ]
         for attribute in attributes:
-            file_path = pathlib.Path(path.resolve(), f"outcome_matrix_{attribute.removeprefix('_')}.csv")
+            file_path = pathlib.Path(
+                path.resolve(), f"outcome_matrix_{attribute.removeprefix('_')}.csv"
+            )
             self.__getattribute__(attribute).data.to_csv(file_path, index=False)
             logger.message(f"Saved {attribute.removeprefix('_')} to {file_path}.")

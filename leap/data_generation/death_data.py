@@ -43,6 +43,7 @@ def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
     The life expectancy can be calculated from the death probability using the formulae
     delineated here:
     `Life Table Definitions <https://www.ssa.gov/oact/HistEst/CohLifeTables/LifeTableDefinitions.pdf>`_
+
     
     Args:
         life_table: A dataframe containing the probability of death for a single year,
@@ -254,6 +255,7 @@ def load_past_death_data() -> pd.DataFrame:
         * ``prob_death``: The probability that a person of the given age, sex, and province
           will die in the given year.
         * ``se``: The standard error of the probability of death.
+
     """ 
     logger.info("Loading mortality data from CSV file...")
     df = pd.read_csv(get_data_path("original_data/13100837.csv"))
@@ -344,6 +346,7 @@ def load_projected_death_data(
         * ``prob_death``: The probability that a person of the given age, sex, and province
           will die in the given year.
         * ``se``: The standard error of the probability of death.
+
     """
 
     projected_life_table = pd.DataFrame({

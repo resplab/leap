@@ -22,6 +22,7 @@ class Agent:
             An integer representing the year of the simulation. For example, if
             the simulation starts in 2023, then the ``year_index`` for 2023 is 1, for 2024 is 2, etc.
     """
+
     def __init__(
         self,
         sex: str | int | bool | Sex,
@@ -38,7 +39,8 @@ class Agent:
         asthma_status: bool = False,
         control_levels: ControlLevels = ControlLevels(0.3333, 0.3333, 0.3333),
         exacerbation_history: ExacerbationHistory = ExacerbationHistory(0, 0),
-        exacerbation_severity_history: ExacerbationSeverityHistory = ExacerbationSeverityHistory(np.zeros(4), np.zeros(4)),
+        exacerbation_severity_history: ExacerbationSeverityHistory = ExacerbationSeverityHistory(
+            np.zeros(4), np.zeros(4)),
         total_hosp: int = 0,
         has_family_history: bool | None = None,
         family_history: FamilyHistory | None = None,
@@ -82,10 +84,7 @@ class Agent:
             self.census_division = CensusDivision(province=province, year=year)
         else:
             self.census_division = census_division
-        if pollution is None:
-            self.pollution = Pollution(self.census_division.cduid, year, month, ssp)
-        else:
-            self.pollution = pollution
+        self.pollution = pollution
 
     @property
     def age(self) -> int:
@@ -109,7 +108,7 @@ class Agent:
     def asthma_age(self) -> int | None:
         """The age at which the person was diagnosed with asthma."""
         return self._asthma_age
-    
+
     @asthma_age.setter
     def asthma_age(self, asthma_age: int | None):
         self._asthma_age = asthma_age
@@ -118,7 +117,7 @@ class Agent:
     def asthma_status(self) -> bool:
         """TODO."""
         return self._asthma_status
-    
+
     @asthma_status.setter
     def asthma_status(self, asthma_status: bool):
         self._asthma_status = asthma_status
@@ -127,7 +126,7 @@ class Agent:
     def census_division(self) -> CensusDivision:
         """The Canadian census division where the person resides."""
         return self._census_division
-    
+
     @census_division.setter
     def census_division(self, census_division: CensusDivision):
         self._census_division = census_division
@@ -135,7 +134,7 @@ class Agent:
     @property
     def control_levels(self) -> ControlLevels:
         """The control levels for the person's asthma.
-        
+
         This refers to how well the condition is managed. There are three levels of asthma control:
 
         * 1 = fully-controlled
@@ -152,14 +151,14 @@ class Agent:
     @property
     def exacerbation_history(self) -> ExacerbationHistory:
         """The asthma exacerbation history of the person.
-        
+
         The exacerbation history object contains the total number of asthma exacerbations for
         the current year (``num_current_year``) and the total number of asthma exacerbations
         for the previous year (``num_previous_year``).
 
         """
         return self._exacerbation_history
-    
+
     @exacerbation_history.setter
     def exacerbation_history(self, exacerbation_history: ExacerbationHistory):
         self._exacerbation_history = exacerbation_history
@@ -167,7 +166,7 @@ class Agent:
     @property
     def exacerbation_severity_history(self) -> ExacerbationSeverityHistory:
         """The number of asthma exacerbations by severity.
-        
+
         The exacerbation severity history object contains the number of asthma exacerbations
         by severity for the current year (``current_year``) and the number of asthma exacerbations
         by severity for the previous year (``previous_year``). There are 4 levels of severity:
@@ -176,7 +175,7 @@ class Agent:
         * 1 = moderate
         * 2 = severe
         * 3 = very severe
-        
+
         """
         return self._exacerbation_severity_history
 
@@ -199,7 +198,7 @@ class Agent:
     def has_family_history(self) -> bool:
         """Whether or not the person has a family history of asthma."""
         return self._has_family_history
-    
+
     @has_family_history.setter
     def has_family_history(self, has_family_history: bool):
         self._has_family_history = has_family_history
@@ -208,26 +207,26 @@ class Agent:
     def num_antibiotic_use(self) -> int:
         """The number of times the person has used a round of antibiotics."""
         return self._num_antibiotic_use
-    
+
     @num_antibiotic_use.setter
     def num_antibiotic_use(self, num_antibiotic_use: int):
         self._num_antibiotic_use = num_antibiotic_use
 
     @property
-    def pollution(self) -> Pollution:
+    def pollution(self) -> Pollution | None:
         """The pollution data for the person's census division."""
         return self._pollution
 
     @pollution.setter
-    def pollution(self, pollution: Pollution):
+    def pollution(self, pollution: Pollution | None):
         self._pollution = pollution
 
     @property
     def province(self) -> str:
         """The province where the person resides.
-        
+
         This is a two-letter abbreviation, e.g. ``BC`` for British Columbia:
-        
+
         * ``CA``: All of Canada
         * ``AB``: Alberta
         * ``BC``: British Columbia
@@ -245,7 +244,7 @@ class Agent:
 
         """
         return self._province
-    
+
     @province.setter
     def province(self, province: str):
         self._province = province
@@ -254,7 +253,7 @@ class Agent:
     def sex(self) -> Sex:
         """The sex of the person."""
         return self._sex
-    
+
     @sex.setter
     def sex(self, value: Sex | str | int | bool):
         if isinstance(value, Sex):
@@ -265,12 +264,12 @@ class Agent:
     @property
     def ssp(self) -> str:
         """The shared socioeconomic pathway (SSP) scenario.
-        
+
         Used for determining the pollution data in the agent's census division if the pollution
         data is not provided.
         """
         return self._ssp
-    
+
     @ssp.setter
     def ssp(self, ssp: str):
         self._ssp = ssp
@@ -292,4 +291,3 @@ class Agent:
     @uuid.setter
     def uuid(self, uuid: UUID4):
         self._uuid = uuid
-    
