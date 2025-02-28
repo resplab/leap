@@ -12,7 +12,6 @@ logger = get_logger(__name__)
 pretty_printer = pprint.PrettyPrinter(indent=2, sort_dicts=False)
 
 
-
 def get_parser() -> argparse.ArgumentParser:
     """Get the command line interface parser."""
 
@@ -89,6 +88,10 @@ def get_parser() -> argparse.ArgumentParser:
         help="Print all the output."
     )
     args.add_argument(
+        "-ip", "--ignore-pollution", dest="ignore_pollution", action="store_true",
+        help="Do not include pollution as an element affecting the simulation."
+    )
+    args.add_argument(
         "-h", "--help", action="help", default=argparse.SUPPRESS,
         help="Shows function documentation."
     )
@@ -121,8 +124,6 @@ def run_main():
     if args.verbose:
         set_logging_level(20)
 
-    logger.message(f"Config:\n{pretty_printer.pformat(config)}")
-
     simulation = Simulation(
         config=config,
         max_age=args.max_age,
@@ -130,7 +131,8 @@ def run_main():
         province=args.province,
         time_horizon=args.time_horizon,
         num_births_initial=args.num_births_initial,
-        population_growth_type=args.population_growth_type
+        population_growth_type=args.population_growth_type,
+        ignore_pollution_flag=args.ignore_pollution
     )
 
     if args.run:

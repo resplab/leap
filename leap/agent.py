@@ -82,10 +82,7 @@ class Agent:
             self.census_division = CensusDivision(province=province, year=year)
         else:
             self.census_division = census_division
-        if pollution is None:
-            self.pollution = Pollution(self.census_division.cduid, year, month, ssp)
-        else:
-            self.pollution = pollution
+        self.pollution = pollution
 
     @property
     def age(self) -> int:
@@ -214,12 +211,12 @@ class Agent:
         self._num_antibiotic_use = num_antibiotic_use
 
     @property
-    def pollution(self) -> Pollution:
+    def pollution(self) -> Pollution | None:
         """The pollution data for the person's census division."""
         return self._pollution
 
     @pollution.setter
-    def pollution(self, pollution: Pollution):
+    def pollution(self, pollution: Pollution | None):
         self._pollution = pollution
 
     @property
