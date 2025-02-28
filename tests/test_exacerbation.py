@@ -29,9 +29,6 @@ def config():
                 "βcontrol_PC": -0.9781,
                 "βcontrol_UC": -0.5727,
                 "β0_calibration": 0.0,
-                "βasthmaDx": 0.0,
-                "βprev_exac1": 0.0,
-                "βprev_exac2": 0.0,
                 "min_year": 2001
             },
             "BC"
@@ -56,9 +53,6 @@ def test_exacerbation_constructor(config, hyperparameters, parameters, province)
     assert exacerbation.parameters["β0"] < 50
     assert exacerbation.parameters["β0"] > -50
     assert exacerbation.parameters["β0_calibration"] == parameters["β0_calibration"]
-    assert exacerbation.parameters["βasthmaDx"] == parameters["βasthmaDx"]
-    assert exacerbation.parameters["βprev_exac1"] == parameters["βprev_exac1"]
-    assert exacerbation.parameters["βprev_exac2"] == parameters["βprev_exac2"]
     assert exacerbation.parameters["min_year"] == parameters["min_year"]
     assert exacerbation.calibration_table.get_group(
         (parameters["min_year"] - 1, 0)

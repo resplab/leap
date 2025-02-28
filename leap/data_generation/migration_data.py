@@ -20,13 +20,15 @@ def get_prev_year_population(
 
     Args:
         df: A dataframe with the following columns:
+
             * ``year``: The calendar year.
-            * ``sex``: One of "M" or "F".
+            * ``sex``: One of ``M`` = male, ``F`` = female.
             * ``age``: The integer age.
             * ``N``: The population for a given year, age, sex, province, and projection scenario.
             * ``prob_death``: The probability that a person in the given year, age, sex,
               province, and projection scenario will die within the year.
-        sex: One of "F" = female, "M" = male.
+
+        sex: One of ``F`` = female, ``M`` = male.
         year: The calendar year.
         age: The integer age.
         min_year: The minimum year in the dataframe.
@@ -77,9 +79,11 @@ def get_delta_n(n: float, n_prev: float, prob_death: float) -> float:
 def get_n_migrants(delta_N: float) -> pd.Series:
     """Get the number of immigrants and emigrants in a single year for a given age and sex.
 
-    TODO: This function is wrong. delta_N is the change in population due to migration. This
-        function currently assumes that if delta_N is less than zero, 100% of migration is
-        emigration, and if it is greater than zero, 100% of migration is immigration. This has
+    .. important::
+    
+        **TODO**: This function is wrong. ``delta_N`` is the change in population due to migration.
+        This function currently assumes that if ``delta_N < 0``, 100% of migration is
+        emigration, and if ``delta_N > 0``, 100% of migration is immigration. This has
         led to the data being very inaccurate (for example, it appears as though people in their
         90s are emigrating a lot and people in their 20s are not). This will be remedied in a
         separate PR.
@@ -102,12 +106,13 @@ def load_migration_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Generate migration data for the given provinces and years.
     
     Returns:
-        A tuple containing two dataframes. The first dataframe contains the immigration data:
+        A tuple containing two dataframes.
+        The first dataframe contains the immigration data:
         
         * ``year``: The calendar year.
-        * ``province``: A string indicating the 2-letter province abbreviation, e.g. "BC".
-            For all of Canada, set province to "CA".
-        * ``sex``: One of "M" or "F".
+        * ``province``: A string indicating the 2-letter province abbreviation, e.g. ``"BC"``.
+          For all of Canada, set province to ``"CA"``.
+        * ``sex``: One of ``M`` = male, ``F`` = female.
         * ``age``: The integer age.
         * ``projection_scenario``: The projection scenario.
         * ``n_immigrants``: The number of immigrants for a given year, province, sex, age, and
@@ -122,9 +127,9 @@ def load_migration_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
         The second dataframe contains the emigration data:
 
         * ``year``: The calendar year.
-        * ``province``: A string indicating the 2-letter province abbreviation, e.g. "BC".
-            For all of Canada, set province to "CA".
-        * ``sex``: One of "M" or "F".
+        * ``province``: A string indicating the 2-letter province abbreviation, e.g. ``"BC"``.
+          For all of Canada, set province to ``"CA"``.
+        * ``sex``: One of ``M`` = male, ``F`` = female.
         * ``age``: The integer age.
         * ``projection_scenario``: The projection scenario.
         * ``n_emigrants``: The number of emigrants for a given year, province, sex, age, and

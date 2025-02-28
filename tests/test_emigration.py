@@ -65,7 +65,7 @@ def test_emigration_compute_probability(
     whether the agent emigrates in a given year. This is computed using the binomial distribution.
     For the purposes of testing, we will run the method 100,000 times and check that the number of
     emigrants falls within a certain range. Please see
-    ``processed_data/migration/master_emigration_table.csv`` for the corresponding values.
+    ``processed_data/migration/emigration_table.csv`` for the corresponding values.
     """
 
     emigration = Emigration(
