@@ -213,12 +213,12 @@ class Agent:
         self._num_antibiotic_use = num_antibiotic_use
 
     @property
-    def pollution(self) -> Pollution:
+    def pollution(self) -> Pollution | None:
         """The pollution data for the person's census division."""
         return self._pollution
 
     @pollution.setter
-    def pollution(self, pollution: Pollution):
+    def pollution(self, pollution: Pollution | None):
         self._pollution = pollution
 
     @property
