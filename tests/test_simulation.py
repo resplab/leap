@@ -841,8 +841,8 @@ def test_run_simulation_one_year(
         [0] * 2 * 1 * (max_age + 1)
     )
     assert outcome_matrix.asthma_incidence.data.shape == (2 * 1 * (max_age + 1), 4)
-    assert outcome_matrix.asthma_incidence.data["n_new_diagnoses"].sum(
-    ) == expected_asthma_incidence_total
+    assert outcome_matrix.asthma_incidence.data["n_new_diagnoses"].sum() \
+        == expected_asthma_incidence_total
     assert outcome_matrix.asthma_status.data.shape == (2 * 1 * (max_age + 1), 4)
     assert outcome_matrix.asthma_status.data["status"].sum() == expected_asthma_status_total
 
@@ -873,23 +873,24 @@ def test_run_simulation_one_year(
 
     assert outcome_matrix.family_history.data.shape == (2 * 1 * (max_age + 1), 4)
     for age in range(0, max_age + 1):
-        # Test family history status
-        om_fh = outcome_matrix.family_history.get(
-            columns="has_family_history", age=age).sum()
-        test_fh = expected_family_history.loc[
+        # Test family history status total for a given age
+        has_family_history_age = outcome_matrix.family_history.get(
+            columns="has_family_history", age=age
+        ).sum()
+        expected_has_family_history_age = expected_family_history.loc[
             expected_family_history["age"] == age]["has_family_history"].sum()
-        assert om_fh == test_fh
+        assert has_family_history_age == expected_has_family_history_age
     
-        # Test utility
-        om_utility = round(
+        # Test utility total for a given age
+        utility_age = round(
             outcome_matrix.utility.get(columns="utility", age=age).sum(),
-            ndigits=1)
-        test_utility = round(
+            ndigits=1
+        )
+        expected_utility_age = round(
             expected_utility.loc[expected_utility["age"] == age]["utility"].sum(),
             ndigits=1
         )
-        # TODO SEE WHY THIS TEST IS FAILING
-        assert om_utility == test_utility
+        assert utility_age == expected_utility_age
 
 
 @pytest.mark.parametrize(

@@ -434,6 +434,7 @@ class OutcomeMatrix:
         ]
         for attribute in attributes:
             file_path = pathlib.Path(
-                path.resolve(), f"outcome_matrix_{attribute.removeprefix('_')}.csv")
+                path.resolve(), f"outcome_matrix_{attribute.removeprefix('_')}.csv"
+            )
             self.__getattribute__(attribute).data.to_csv(file_path, index=False)
             logger.message(f"Saved {attribute.removeprefix('_')} to {file_path}.")
