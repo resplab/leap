@@ -2,6 +2,7 @@ import json
 import argparse
 import pathlib
 import pprint
+from datetime import datetime
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
 from leap.logger import get_logger, set_logging_level
@@ -136,7 +137,7 @@ def run_main():
         logger.message(
             f"Are you sure you would like to continue (WARNING THIS WILL OVERWRITE EXISTING RESULT CSV FILES)?")
         path_msg = f"""
-          - type y for to overwrite files located at <{output_path.absolute()}> 
+          - type y for to overwrite files located at <{output_path.absolute()}>
           - type n to stop
         """
         response = input(path_msg).strip().lower()
@@ -148,7 +149,7 @@ def run_main():
         logger.message(f"Path <{dir_name}> does not exist.")
         logger.message(f"Would you like to create a directory?")
         path_msg = f"""
-          - type y for to create directory <{output_path.absolute()}> 
+          - type y for to create directory <{output_path.absolute()}>
           - type n to quit
         """
         response = input(path_msg).strip().lower()
@@ -173,6 +174,8 @@ def run_main():
         ignore_pollution_flag=args.ignore_pollution
     )
 
+    # Get start time of simulation
+    simulation_start_time = datetime.now()
 
     if args.run:
         logger.message(f"Results will be saved to <{output_path}>")
@@ -180,6 +183,37 @@ def run_main():
         outcome_matrix = simulation.run()
         logger.message(outcome_matrix)
         outcome_matrix.save(path=pathlib.Path(args.path_output))
+
+    # Get end time of simulation
+    simulation_end_time = datetime.now()
+
+    # Include log file containing additional information
+    # Get the current timestamp
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    # Define the file name
+    log_file_path = output_path.joinpath("logfile.txt")
+    # Write the timestamp to the file
+    with open(log_file_path, "w") as file:
+        log_msg = f"""
+        Metadata:
+        - Simulation Bundle Name: {dir_name}
+        - Simulation Run Date: {current_date}
+        - Simulation Start Time: {simulation_start_time}
+        - Simulation End Time: {simulation_end_time}
+        - Simulation Runtime: {simulation_end_time - simulation_start_time}
+        
+        Parameters:
+        - config: {config}
+        - max_age: {simulation.max_age}
+        - min_year: {simulation.min_year}
+        - max_year: {simulation.max_year}
+        - province: {simulation.province}
+        - time_horizon: {simulation.time_horizon}
+        - num_births_initial: {simulation.num_births_initial}
+        - population_growth_type: {simulation.population_growth_type}
+        - pollution ignored: {args.ignore_pollution}
+        """
+        file.write(log_msg)
 
 
 if __name__ == "__main__":
