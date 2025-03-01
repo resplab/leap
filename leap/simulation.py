@@ -96,6 +96,17 @@ class Simulation:
         self.SSP = config["pollution"]["SSP"]
         self.outcome_matrix = None
 
+    def __repr__(self):
+        return (
+            f"Simulation("
+            f"max_age={self.max_age}, "
+            f"province='{self.province}', "
+            f"min_year={self.min_year}, "
+            f"time_horizon={self.time_horizon}, "
+            f"num_births_initial={self.num_births_initial}, "
+            f"population_growth_type='{self.population_growth_type}')"
+        )
+
     @property
     def max_age(self) -> int:
         """The maximum age of the agents in the simulation."""
