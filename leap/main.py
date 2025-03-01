@@ -124,6 +124,44 @@ def run_main():
     if args.verbose:
         set_logging_level(20)
 
+    # Check if path exists before running
+    dir_name = pathlib.Path(args.path_output)
+    output_path = pathlib.Path(*dir_name.parts[:-1],
+                               "output",
+                               dir_name.parts[-1])
+
+    # Prompt user to continue with existing path or quit
+    if output_path.exists():
+        logger.message(f"Path <{output_path.absolute()}> already exists.")
+        logger.message(
+            f"Are you sure you would like to continue (WARNING THIS WILL OVERWRITE EXISTING RESULT CSV FILES)?")
+        path_msg = f"""
+          - type y for to overwrite files located at <{output_path.absolute()}> 
+          - type n to stop
+        """
+        response = input(path_msg).strip().lower()
+        # Only really need to check if response is 'y' since any other response will quit
+        if not response == 'y':
+            quit()
+    # Prompt user to create directory or quit
+    else:
+        logger.message(f"Path <{dir_name}> does not exist.")
+        logger.message(f"Would you like to create a directory?")
+        path_msg = f"""
+          - type y for to create directory <{output_path.absolute()}> 
+          - type n to quit
+        """
+        response = input(path_msg).strip().lower()
+        if response == 'y':
+            # Create directory and continue
+            output_path.mkdir(parents=True, exist_ok=True)
+            logger.message(f"Directory created at <{output_path.absolute()}>")
+        else:
+            # Quit
+            logger.error("Aborting\n")
+            quit()
+
+    # Create simulation object using arguments
     simulation = Simulation(
         config=config,
         max_age=args.max_age,
@@ -135,7 +173,9 @@ def run_main():
         ignore_pollution_flag=args.ignore_pollution
     )
 
+
     if args.run:
+        logger.message(f"Results will be saved to <{output_path}>")
         logger.message("Running simulation...")
         outcome_matrix = simulation.run()
         logger.message(outcome_matrix)
