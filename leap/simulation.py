@@ -30,6 +30,7 @@ logger = get_logger(__name__)
 class Simulation:
     """A class containing information about the simulation.
     """
+
     def __init__(
         self,
         config: dict | str | pathlib.Path | None = None,
@@ -38,7 +39,8 @@ class Simulation:
         min_year: int | None = None,
         time_horizon: int | None = None,
         num_births_initial: int | None = None,
-        population_growth_type: str | None = None
+        population_growth_type: str | None = None,
+        ignore_pollution_flag: bool = False
     ):
         if config is None:
             with open(get_data_path("processed_data/config.json")) as file:
@@ -89,15 +91,27 @@ class Simulation:
         self.utility = Utility(config["utility"])
         self.cost = AsthmaCost(config["cost"])
         self.census_table = CensusTable(config["census_table"])
+        self.ignore_pollution_flag = ignore_pollution_flag
         self.pollution_table = PollutionTable()
         self.SSP = config["pollution"]["SSP"]
         self.outcome_matrix = None
+
+    def __repr__(self):
+        return (
+            f"Simulation("
+            f"max_age={self.max_age}, "
+            f"province='{self.province}', "
+            f"min_year={self.min_year}, "
+            f"time_horizon={self.time_horizon}, "
+            f"num_births_initial={self.num_births_initial}, "
+            f"population_growth_type='{self.population_growth_type}')"
+        )
 
     @property
     def max_age(self) -> int:
         """The maximum age of the agents in the simulation."""
         return self._max_age
-    
+
     @max_age.setter
     def max_age(self, max_age: int):
         self._max_age = max_age
@@ -106,7 +120,7 @@ class Simulation:
     def province(self) -> str:
         """The 2-letter abbreviation of the province in the simulation."""
         return self._province
-    
+
     @province.setter
     def province(self, province: str):
         self._province = province
@@ -115,7 +129,7 @@ class Simulation:
     def min_year(self) -> int:
         """The starting year of the simulation."""
         return self._min_year
-    
+
     @min_year.setter
     def min_year(self, min_year: int):
         self._min_year = min_year
@@ -128,7 +142,7 @@ class Simulation:
     def time_horizon(self) -> int:
         """The number of years the simulation will run for."""
         return self._time_horizon
-    
+
     @time_horizon.setter
     def time_horizon(self, time_horizon: int):
         self._time_horizon = time_horizon
@@ -141,7 +155,7 @@ class Simulation:
     def num_births_initial(self) -> int:
         """The number of births in the initial year of the simulation."""
         return self._num_births_initial
-    
+
     @num_births_initial.setter
     def num_births_initial(self, num_births_initial: int):
         self._num_births_initial = num_births_initial
@@ -167,7 +181,7 @@ class Simulation:
         See `StatCan <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
         """
         return self._population_growth_type
-    
+
     @population_growth_type.setter
     def population_growth_type(self, population_growth_type: str):
         self._population_growth_type = population_growth_type
@@ -214,7 +228,7 @@ class Simulation:
 
         Returns:
             A dataframe containing a list of new agents to add to the model.
-            
+
             The dataframe has the following columns:
 
             * ``age``: The age of the agent.
@@ -255,7 +269,7 @@ class Simulation:
                 size=num_immigrants,
                 p=list(self.immigration.table.get_group((year,))["prop_immigrants_year"])
             ))
-            
+
             immigrant_df = self.immigration.table.get_group((year,)).iloc[immigrant_indices]
             sexes_immigrant = immigrant_df["sex"].tolist()
             ages_immigrant = immigrant_df["age"].tolist()
@@ -349,7 +363,12 @@ class Simulation:
         for level in range(3):
             outcome_matrix.control.increment(
                 column="prob",
-                filter_columns={"year": agent.year, "level": level, "sex": agent.sex, "age": agent.age},
+                filter_columns={
+                    "year": agent.year,
+                    "level": level,
+                    "sex": agent.sex,
+                    "age": agent.age
+                },
                 amount=agent.control_levels.as_array()[level]
             )
 
@@ -426,11 +445,11 @@ class Simulation:
 
     def run(self, seed=None, until_all_die: bool = False):
         """Run the simulation.
-        
+
         Args:
             seed: The random seed to use for the simulation.
             until_all_die: Whether to run the simulation until all agents die.
-            
+
         Returns:
             The outcome matrix.
         """
@@ -471,10 +490,16 @@ class Simulation:
                 census_division = CensusDivision(
                     census_table=self.census_table, province=self.province
                 )
-                pollution = Pollution(
-                    pollution_table=self.pollution_table, SSP=self.SSP, year=year, month=month,
-                    cduid=census_division.cduid
-                )
+                if self.ignore_pollution_flag:
+                    pollution = None
+                else:
+                    pollution = Pollution(
+                        pollution_table=self.pollution_table,
+                        SSP=self.SSP,
+                        year=year,
+                        month=month,
+                        cduid=census_division.cduid
+                    )
                 agent = Agent(
                     sex=new_agents_df["sex"].iloc[i],
                     age=new_agents_df["age"].iloc[i],
@@ -549,7 +574,9 @@ class Simulation:
                     outcome_matrix.asthma_prevalence_contingency_table.increment(
                         column="n_asthma" if agent.has_asthma else "n_no_asthma",
                         filter_columns={
-                            "year": agent.year, "age": agent.age, "sex": agent.sex,
+                            "year": agent.year,
+                            "age": agent.age,
+                            "sex": agent.sex,
                             "fam_history": agent.has_family_history,
                             "abx_exposure": agent.num_antibiotic_use
                         }
