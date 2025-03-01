@@ -116,17 +116,19 @@ def get_config(path_config: str) -> dict:
     return config
 
 
-def run_main():
-    """The entry point for the command line interface."""
+def handle_output_path(dir_name: str) -> pathlib.Path | None:
+    """Handles user input through CLI prompts depending on dir_name.
+    - Assuming `leaproot` is the root of the project, then `leaproot/output/dir_name` is checked
+    - If that path exists then user is prompted to continue (overwriting the current outputs)
+    - If that path doesn't exist then user is prompted whether to create it
 
-    parser = get_parser()
-    args = parser.parse_args()
-    config = get_config(args.config)
-    if args.verbose:
-        set_logging_level(20)
+    Args:
+        dir_name: The name of the directory to store the outputs in
 
-    # Check if path exists before running
-    dir_name = pathlib.Path(args.path_output)
+    Returns:
+        output_path: either the path to the output folder, or None, signifying to abort
+    """
+
     output_path = pathlib.Path(*dir_name.parts[:-1],
                                "output",
                                dir_name.parts[-1])
@@ -141,9 +143,9 @@ def run_main():
           - type n to stop
         """
         response = input(path_msg).strip().lower()
-        # Only really need to check if response is 'y' since any other response will quit
+        # Only need to check if response is 'y' since any other response will quit
         if not response == 'y':
-            quit()
+            return None
     # Prompt user to create directory or quit
     else:
         logger.message(f"Path <{dir_name}> does not exist.")
@@ -158,9 +160,30 @@ def run_main():
             output_path.mkdir(parents=True, exist_ok=True)
             logger.message(f"Directory created at <{output_path.absolute()}>")
         else:
-            # Quit
-            logger.error("Aborting\n")
-            quit()
+            return None
+
+     # Return output_path if successful and continuing with program
+    return output_path
+
+
+def run_main():
+    """The entry point for the command line interface."""
+
+    parser = get_parser()
+    args = parser.parse_args()
+    config = get_config(args.config)
+    if args.verbose:
+        set_logging_level(20)
+
+    # Check if path exists before running
+    dir_name = pathlib.Path(args.path_output)
+
+    # Prompt user with CLI instructions to handle output path
+    output_path = handle_output_path(dir_name)
+    # If output_path is None and user decides to quit, then exit the program
+    if output_path is None:
+        logger.error("Aborting\n")
+        quit()
 
     # Create simulation object using arguments
     simulation = Simulation(
@@ -182,7 +205,7 @@ def run_main():
         logger.message("Running simulation...")
         outcome_matrix = simulation.run()
         logger.message(outcome_matrix)
-        outcome_matrix.save(path=pathlib.Path(args.path_output))
+        outcome_matrix.save(path=output_path)
 
     # Get end time of simulation
     simulation_end_time = datetime.now()
