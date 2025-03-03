@@ -7,6 +7,7 @@ from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
 from leap.logger import get_logger, set_logging_level
 import warnings
+
 warnings.filterwarnings("ignore")
 
 logger = get_logger(__name__)
@@ -16,33 +17,58 @@ pretty_printer = pprint.PrettyPrinter(indent=2, sort_dicts=False)
 def get_parser() -> argparse.ArgumentParser:
     """Get the command line interface parser."""
 
-    parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(
+        add_help=False, formatter_class=argparse.RawTextHelpFormatter
+    )
     command_group = parser.add_mutually_exclusive_group(required=False)
     command_group.add_argument(
-        "-r", "--run-simulation", dest="run", action="store_true",
-        help="Run the simulation."
+        "-r",
+        "--run-simulation",
+        dest="run",
+        action="store_true",
+        help="Run the simulation.",
     )
 
     args = parser.add_argument_group("ARGUMENTS")
     args.add_argument(
-        "-c", "--config", dest="config", required=False, type=str,
+        "-c",
+        "--config",
+        dest="config",
+        required=False,
+        type=str,
         default=get_data_path("processed_data/config.json"),
-        help="Path to configuration file."
+        help="Path to configuration file.",
     )
     args.add_argument(
-        "-o", "--path-output", dest="path_output", required=True, type=str,
-        help="Path to output file."
+        "-o",
+        "--path-output",
+        dest="path_output",
+        required=False,
+        type=str,
+        help="Path to output file.",
     )
     args.add_argument(
-        "-ma", "--max-age", dest="max_age", required=False, type=int,
-        help="Maximum age for agents in the model."
+        "-ma",
+        "--max-age",
+        dest="max_age",
+        required=False,
+        type=int,
+        help="Maximum age for agents in the model.",
     )
     args.add_argument(
-        "-my", "--min-year", dest="min_year", required=False, type=int,
-        help="Starting year for the simulation. Must be >= 2024."
+        "-my",
+        "--min-year",
+        dest="min_year",
+        required=False,
+        type=int,
+        help="Starting year for the simulation. Must be >= 2024.",
     )
     args.add_argument(
-        "-p", "--province", dest="province", required=False, type=str,
+        "-p",
+        "--province",
+        dest="province",
+        required=False,
+        type=str,
         help="""Province for the simulation. Must be one of:
         * "AB": Alberta
         * "BC": British Columbia
@@ -58,18 +84,30 @@ def get_parser() -> argparse.ArgumentParser:
         * "SK": Saskatchewan
         * "YT": Yukon
         * "CA": Canada
-        """
+        """,
     )
     args.add_argument(
-        "-th", "--time-horizon", dest="time_horizon", required=False, type=int,
-        help="Time horizon for the simulation."
+        "-th",
+        "--time-horizon",
+        dest="time_horizon",
+        required=False,
+        type=int,
+        help="Time horizon for the simulation.",
     )
     args.add_argument(
-        "-nb", "--num-births-initial", dest="num_births_initial", required=False, type=int,
-        help="Number of initial births for the simulation."
+        "-nb",
+        "--num-births-initial",
+        dest="num_births_initial",
+        required=False,
+        type=int,
+        help="Number of initial births for the simulation.",
     )
     args.add_argument(
-        "-gt", "--population-growth-type", dest="population_growth_type", required=False, type=str,
+        "-gt",
+        "--population-growth-type",
+        dest="population_growth_type",
+        required=False,
+        type=str,
         help="""Population growth type for the simulation. Must be one of:
         * "past": past projection
         * "LG": low-growth projection
@@ -82,19 +120,28 @@ def get_parser() -> argparse.ArgumentParser:
         * "M6": medium-growth 6 projection
         * "FA": fast-aging projection
         * "SA": slow-aging projection
-        """
+        """,
     )
     args.add_argument(
-        "-v", "--verbose", dest="verbose", action="store_true",
-        help="Print all the output."
+        "-v",
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+        help="Print all the output.",
     )
     args.add_argument(
-        "-ip", "--ignore-pollution", dest="ignore_pollution", action="store_true",
-        help="Do not include pollution as an element affecting the simulation."
+        "-ip",
+        "--ignore-pollution",
+        dest="ignore_pollution",
+        action="store_true",
+        help="Do not include pollution as an element affecting the simulation.",
     )
     args.add_argument(
-        "-h", "--help", action="help", default=argparse.SUPPRESS,
-        help="Shows function documentation."
+        "-h",
+        "--help",
+        action="help",
+        default=argparse.SUPPRESS,
+        help="Shows function documentation.",
     )
 
     return parser
@@ -129,22 +176,21 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
         output_path: either the path to the output folder, or None, signifying to abort
     """
 
-    output_path = pathlib.Path(*dir_name.parts[:-1],
-                               "output",
-                               dir_name.parts[-1])
+    output_path = pathlib.Path(*dir_name.parts[:-1], "output", dir_name.parts[-1])
 
     # Prompt user to continue with existing path or quit
     if output_path.exists():
         logger.message(f"Path <{output_path.absolute()}> already exists.")
         logger.message(
-            f"Are you sure you would like to continue (WARNING THIS WILL OVERWRITE EXISTING RESULT CSV FILES)?")
+            f"Are you sure you would like to continue (WARNING THIS WILL OVERWRITE EXISTING RESULT CSV FILES)?"
+        )
         path_msg = f"""
           - type y for to overwrite files located at <{output_path.absolute()}>
           - type n to stop
         """
         response = input(path_msg).strip().lower()
         # Only need to check if response is 'y' since any other response will quit
-        if not response == 'y':
+        if not response == "y":
             return None
     # Prompt user to create directory or quit
     else:
@@ -155,14 +201,14 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
           - type n to quit
         """
         response = input(path_msg).strip().lower()
-        if response == 'y':
+        if response == "y":
             # Create directory and continue
             output_path.mkdir(parents=True, exist_ok=True)
             logger.message(f"Directory created at <{output_path.absolute()}>")
         else:
             return None
 
-     # Return output_path if successful and continuing with program
+    # Return output_path if successful and continuing with program
     return output_path
 
 
@@ -175,16 +221,7 @@ def run_main():
     if args.verbose:
         set_logging_level(20)
 
-    # Check if path exists before running
-    dir_name = pathlib.Path(args.path_output)
-
-    # Prompt user with CLI instructions to handle output path
-    output_path = handle_output_path(dir_name)
-    # If output_path is None and user decides to quit, then exit the program
-    if output_path is None:
-        logger.error("Aborting\n")
-        quit()
-
+    logger.message(f"Initializing simulation object.")
     # Create simulation object using arguments
     simulation = Simulation(
         config=config,
@@ -194,8 +231,26 @@ def run_main():
         time_horizon=args.time_horizon,
         num_births_initial=args.num_births_initial,
         population_growth_type=args.population_growth_type,
-        ignore_pollution_flag=args.ignore_pollution
+        ignore_pollution_flag=args.ignore_pollution,
     )
+    logger.message(f"Simulation object initialized.")
+
+    # Check if path_output argument is supplied or not
+    if args.path_output is None or args.path_output == "":
+        dir_name = pathlib.Path(
+            f"{simulation.min_year}-{simulation.time_horizon}-{simulation.province}-{simulation.population_growth_type}-{simulation.num_births_initial}-{simulation.max_age}"
+        )
+    else:
+        # Get the name of the dir to store outputs in
+        dir_name = pathlib.Path(args.path_output)
+
+    # Prompt user with CLI instructions to handle output path
+    output_path = handle_output_path(dir_name)
+
+    # If output_path is None and user decides to quit, then exit the program
+    if output_path is None:
+        logger.error("Aborting\n")
+        quit()
 
     # Get start time of simulation
     simulation_start_time = datetime.now()
