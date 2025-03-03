@@ -148,7 +148,7 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
             return None
     # Prompt user to create directory or quit
     else:
-        logger.message(f"Path <{dir_name}> does not exist.")
+        logger.message(f"Path <{output_path.absolute()}> does not exist.")
         logger.message(f"Would you like to create a directory?")
         path_msg = f"""
           - type y for to create directory <{output_path.absolute()}>
