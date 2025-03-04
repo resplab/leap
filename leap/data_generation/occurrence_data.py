@@ -423,6 +423,26 @@ def generate_occurrence_data():
         prevalence_model, "prevalence", max_age=110, max_year=2065
     )
     df = pd.merge(df_incidence, df_prevalence, on=["year", "sex", "age"], how="left")
+    plot_occurrence(
+        df,
+        y="incidence",
+        title="Predicted Asthma Incidence per 100 in BC",
+        min_year=2000,
+        max_year=2025,
+        year_interval=5,
+        max_age=63,
+        file_path=get_data_path("data_generation/figures/asthma_incidence_predicted.png")
+    )
+    plot_occurrence(
+        df,
+        y="prevalence",
+        title="Predicted Asthma Prevalence per 100 in BC",
+        min_year=2000,
+        max_year=2025,
+        year_interval=5,
+        max_age=63,
+        file_path=get_data_path("data_generation/figures/asthma_prevalence_predicted.png")
+    )
 
 
 if __name__ == "__main__":
