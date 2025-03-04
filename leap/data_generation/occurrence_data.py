@@ -443,6 +443,7 @@ def generate_occurrence_data():
         max_age=63,
         file_path=get_data_path("data_generation/figures/asthma_prevalence_predicted.png")
     )
+    df.to_csv(get_data_path("processed_data/asthma_occurrence_predictions.csv"), index=False)
 
 
 if __name__ == "__main__":
