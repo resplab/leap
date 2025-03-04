@@ -238,6 +238,7 @@ def run_main():
 
     # Check if path_output argument is supplied or not
     if args.path_output is None or args.path_output == "":
+        # Default dir name based on simulation arguments
         dir_name = pathlib.Path(
             f"{simulation.min_year}-{simulation.time_horizon}-{simulation.province}-{simulation.population_growth_type}-{simulation.num_births_initial}-{simulation.max_age}"
         )
@@ -283,15 +284,17 @@ def run_main():
         - Simulation Runtime: {simulation_end_time - simulation_start_time}
         
         Parameters:
-        - config: {config}
-        - max_age: {simulation.max_age}
         - min_year: {simulation.min_year}
+        - time_horizon: {simulation.time_horizon}
         - max_year: {simulation.max_year}
         - province: {simulation.province}
-        - time_horizon: {simulation.time_horizon}
-        - num_births_initial: {simulation.num_births_initial}
         - population_growth_type: {simulation.population_growth_type}
+        - num_births_initial: {simulation.num_births_initial}
+        - max_age: {simulation.max_age}
         - pollution ignored: {args.ignore_pollution}
+        
+        Config:
+        - config: {config}
         """
         file.write(log_msg)
 
