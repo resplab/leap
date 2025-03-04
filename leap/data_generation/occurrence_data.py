@@ -1,6 +1,7 @@
 import pathlib
 import pandas as pd
 import numpy as np
+import itertools
 import plotly.express as px
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
@@ -207,6 +208,26 @@ def generate_occurrence_model(
     results = model.fit(maxiter=maxiter)
 
     print(results.summary())
+
+    # Create prediction dataframe
+    df_pred = pd.DataFrame(
+        data=list(itertools.product(list(range(2000, 2066)), [0, 1], list(range(3, 65)))),
+        columns=["year", "sex", "age"]
+    )
+
+    occurrence_pred = np.exp(results.predict(df_pred, which="linear", transform=True))
+    df_pred[f"{occ_type}_pred"] = occurrence_pred
+
+    df = pd.merge(df, df_pred, on=["year", "sex", "age"], how="outer")
+    df["sex"] = df.apply(
+        lambda x: "F" if x["sex"] == 0 else "M",
+        axis=1
+    )
+
+    plot_occurrence(
+        df, y=occ_type, title=f"Asthma {occ_type.capitalize()} per 100 in BC",
+        file_path=get_data_path(f"data_generation/figures/asthma_{occ_type}_comparison.png")
+    )
 
     return results
 
