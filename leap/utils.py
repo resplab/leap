@@ -124,9 +124,9 @@ def get_data_path(data_path: str) -> pathlib.Path:
         data_folder = "leap.processed_data"
         data_path = str(pathlib.Path(data_path).relative_to("processed_data"))
     elif pathlib.Path(data_path).parts[0] == "original_data":
-        data_path = str(pathlib.Path(data_path).relative_to("original_data"))
-        data_folder = "leap.original_data"
-
+        data_folder = "leap.original_data" + "." + ".".join(pathlib.Path(data_path).parts[1:-1])
+        data_path = str(pathlib.Path(data_path).parts[-1])
+        
 
     package_path = str(pkg_resources.files(data_folder).joinpath(data_path))
     
