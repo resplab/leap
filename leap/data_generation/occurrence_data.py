@@ -292,6 +292,54 @@ def generate_prevalence_model(
     )
     return results
 
+def get_predicted_data(
+    model: GLMResultsWrapper,
+    pred_col: str,
+    min_age: int = 3,
+    max_age: int = 100,
+    min_year: int = STARTING_YEAR,
+    max_year: int = MAX_YEAR
+) -> pd.DataFrame:
+    """Get predicted data from a GLM model.
+
+    The GLM model must be fitted on the following columns:
+
+    * ``year (int)``: The calendar year.
+    * ``sex (int)``: One of ``0`` = female, ``1`` = male.
+    * ``age (int)``: The age in years.
+    
+    Args:
+        model: The fitted GLM model.
+        pred_col: The name of the column to store the predicted data.
+        min_age: The minimum age to predict.
+        max_age: The maximum age to predict.
+        min_year: The minimum year to predict.
+        max_year: The maximum year to predict.
+        
+    Returns:
+        A dataframe containing the predicted data.
+        Columns:
+        
+        * ``year (int)``: The calendar year.
+        * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+        * ``age (int)``: The age in years.
+        * ``pred_col (float)``: The predicted data.
+    """
+
+    df = pd.DataFrame(
+        data=list(itertools.product(
+            list(range(min_year, max_year)), [0, 1], list(range(min_age, max_age))
+        )),
+        columns=["year", "sex", "age"]
+    )
+
+    df[pred_col] = np.exp(model.predict(df, which="linear"))
+    df["sex"] = df.apply(
+        lambda x: "F" if x["sex"] == 0 else "M",
+        axis=1
+    )
+    return df
+
 
 def plot_occurrence(
     df: pd.DataFrame,
@@ -366,6 +414,13 @@ def generate_occurrence_data():
     df_asthma = load_asthma_df()
     incidence_model = generate_incidence_model(df_asthma)
     prevalence_model = generate_prevalence_model(df_asthma)
+    df_incidence = get_predicted_data(
+        incidence_model, "incidence", max_age=110, max_year=2065
+    )
+    df_prevalence = get_predicted_data(
+        prevalence_model, "prevalence", max_age=110, max_year=2065
+    )
+    df = pd.merge(df_incidence, df_prevalence, on=["year", "sex", "age"], how="left")
 
 
 if __name__ == "__main__":
