@@ -1,5 +1,7 @@
+import pathlib
 import pandas as pd
 import numpy as np
+import plotly.express as px
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from leap.utils import get_data_path
@@ -13,6 +15,7 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 STARTING_YEAR = 2000
+MAX_YEAR = 2019
 MAX_AGE = 65
 
 def poly(
@@ -267,6 +270,75 @@ def generate_prevalence_model(
         df_asthma, formula=formula, occ_type="prevalence", maxiter=maxiter
     )
     return results
+
+
+def plot_occurrence(
+    df: pd.DataFrame,
+    y: str,
+    title: str = "",
+    file_path: pathlib.Path | None = None,
+    min_year: int = STARTING_YEAR,
+    max_year: int = MAX_YEAR,
+    year_interval: int = 2,
+    max_age: int = 110,
+    width: int = 1000,
+    height: int = 800
+):
+    """Plot the incidence or prevalence of asthma.
+    
+    Args:
+        df: A dataframe containing either incidence or prevalence data. Must have columns:
+
+            * ``year (int)``: The calendar year.
+            * ``sex (str)``: One of ``F`` = female, ``M`` = male.
+            * ``age (int)``: The age in years.
+            * y: Specified by the ``y`` argument, this will be the y data.
+            * y_pred: Optional, the predicted y data. If this column is present, it will be plotted
+              alongside the actual data. The column name must be the same as ``y`` with ``_pred``
+              appended. For example, if ``y`` is ``incidence``, then the predicted data must be
+              ``incidence_pred``.
+
+        y: The name of the column in the dataframe which will be plotted as the y data.
+        title: The title of the plot.
+        file_path: The path to save the plot to. If ``None``, the plot will be displayed.
+        min_year: The minimum year to plot.
+        max_year: The maximum year to plot.
+        year_interval: The interval between years. This is used if you don't want to plot every year.
+        max_age: The maximum age to plot.
+        width: The width of the plot.
+        height: The height of the plot.
+        
+    Returns:
+        If ``file_path`` is ``None``, the plot will be displayed. Otherwise, the plot will be saved
+        to the specified path.
+    """
+
+    years = np.arange(min_year, max_year + 1, step=year_interval)
+    fig = px.line(
+        df.loc[(df["year"].isin(years)) & (df["age"] <= max_age)].dropna(),
+        x="age",
+        y=y,
+        color="year",
+        markers=True,
+        facet_col="sex",
+        title=title
+    )
+    if f"{y}_pred" in df.columns:
+        fig.add_traces(
+            px.line(
+                df.loc[(df["year"].isin(years)) & (df["age"] <= max_age)],
+                x="age",
+                y=f"{y}_pred",
+                color="year",
+                markers=True,
+                facet_col="sex",
+                title=title
+            ).data
+        )
+    if file_path is None:
+        fig.show()
+    else:
+        fig.write_image(str(file_path), width=width, height=height, scale=2)
 
 
 def generate_occurrence_data():
