@@ -255,7 +255,8 @@ def generate_incidence_model(
 
     _, alpha, norm2 = poly(df_asthma["age"].to_list(), degree=5, orthogonal=True)
 
-    formula = "np.log(incidence) ~ sex*year + sex*poly(age, degree=5, alpha=alpha, norm2=norm2)"
+    formula = "np.log(incidence) ~ sex*year + " + \
+        f"sex*poly(age, degree=5, alpha={list(alpha)}, norm2={list(norm2)}"
     results = generate_occurrence_model(
         df_asthma, formula=formula, occ_type="incidence", maxiter=maxiter
     )
@@ -285,8 +286,9 @@ def generate_prevalence_model(
 
     _, alpha_age, norm2_age = poly(df_asthma["age"].to_list(), degree=5, orthogonal=True)
     _, alpha_year, norm2_year = poly(df_asthma["year"].to_list(), degree=2, orthogonal=True)
-    formula = "np.log(prevalence) ~ sex*poly(year, degree=2, alpha=alpha_year, norm2=norm2_year)" + \
-        "*poly(age, degree=5, alpha=alpha_age, norm2=norm2_age)"
+    formula = "np.log(prevalence) ~ " + \
+        f"sex*poly(year, degree=2, alpha={list(alpha_year)}, norm2={list(norm2_year)})" + \
+        f"*poly(age, degree=5, alpha={list(alpha_age)}, norm2={list(norm2_age)})"
     results = generate_occurrence_model(
         df_asthma, formula=formula, occ_type="prevalence", maxiter=maxiter
     )
