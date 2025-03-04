@@ -2,6 +2,7 @@ import json
 import argparse
 import pathlib
 import pprint
+import socket
 from datetime import datetime
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
@@ -274,6 +275,7 @@ def run_main():
     with open(log_file_path, "w") as file:
         log_msg = f"""
         Metadata:
+        - Hostname: {socket.gethostname()}
         - Simulation Bundle Name: {dir_name}
         - Simulation Run Date: {current_date}
         - Simulation Start Time: {simulation_start_time}
