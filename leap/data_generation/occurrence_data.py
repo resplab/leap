@@ -32,7 +32,7 @@ def parse_age_group(x: str, max_age: int = MAX_AGE) -> Tuple[int, int]:
         >>> parse_age_group("5-9 years")
         (5, 9)
         >>> parse_age_group("10+")
-        (10, 100)
+        (10, 65)
         >>> parse_age_group("<1 year")
         (0, 1)
     """
