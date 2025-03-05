@@ -3,6 +3,9 @@ import argparse
 import pathlib
 import pprint
 import socket
+import textwrap
+import numpy as np
+from typing import Union
 from datetime import datetime
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
@@ -213,6 +216,30 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
     return output_path
 
 
+def convert_non_serializable(obj: Union[np.ndarray, object]) -> Union[list, str]:
+    """
+    Convert non-serializable objects into JSON-friendly formats.
+
+    This function is intended to be used with `json.dumps(..., default=convert_non_serializable)`.
+    It handles cases where objects cannot be directly serialized into JSON:
+
+    - NumPy arrays (`numpy.ndarray`) are converted to Python lists.
+    - Other unsupported types are converted to their string representation.
+
+    Args:
+        obj (Union[np.ndarray, object]): The object to be converted.
+
+    Returns:
+        Union[list, str]: A JSON-serializable equivalent of `obj`:
+            - A list if `obj` is an ndarray.
+            - A string representation otherwise.
+    """
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    # Default for unsupported types
+    return str(obj)
+
+
 def run_main():
     """The entry point for the command line interface."""
 
@@ -272,30 +299,39 @@ def run_main():
     current_date = datetime.now().strftime("%Y-%m-%d")
     # Define the file name
     log_file_path = output_path.joinpath("logfile.txt")
-    # Write the timestamp to the file
+
+    # Get text to include in the logfile
+    # Create dict to store metadata info
+    metadata = {
+        "Hostname": socket.gethostname(),
+        "Simulation Bundle Name": str(dir_name),
+        "Simulation Run Date": current_date,
+        "Simulation Start Time": str(simulation_start_time),
+        "Simulation End Time": str(simulation_end_time),
+        "Simulation Runtime": str(simulation_end_time - simulation_start_time),
+    }
+    # Create dict to store parameter info
+    parameters = {
+        "min_year": simulation.min_year,
+        "time_horizon": simulation.time_horizon,
+        "max_year": simulation.max_year,
+        "province": simulation.province,
+        "population_growth_type": simulation.population_growth_type,
+        "num_births_initial": simulation.num_births_initial,
+        "max_age": simulation.max_age,
+        "pollution ignored": args.ignore_pollution,
+    }
+
+    # Combine metadata and parameters into the log message
+    log_data = {
+        "Metadata": metadata,
+        "Parameters": parameters,
+        "Config": config
+    }
+    log_msg = json.dumps(log_data, indent=4, default=convert_non_serializable, ensure_ascii=False)
+
     with open(log_file_path, "w") as file:
-        log_msg = f"""
-        Metadata:
-        - Hostname: {socket.gethostname()}
-        - Simulation Bundle Name: {dir_name}
-        - Simulation Run Date: {current_date}
-        - Simulation Start Time: {simulation_start_time}
-        - Simulation End Time: {simulation_end_time}
-        - Simulation Runtime: {simulation_end_time - simulation_start_time}
-        
-        Parameters:
-        - min_year: {simulation.min_year}
-        - time_horizon: {simulation.time_horizon}
-        - max_year: {simulation.max_year}
-        - province: {simulation.province}
-        - population_growth_type: {simulation.population_growth_type}
-        - num_births_initial: {simulation.num_births_initial}
-        - max_age: {simulation.max_age}
-        - pollution ignored: {args.ignore_pollution}
-        
-        Config:
-        - config: {config}
-        """
+        # Write message to logfile
         file.write(log_msg)
 
 
