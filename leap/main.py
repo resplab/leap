@@ -3,7 +3,6 @@ import argparse
 import pathlib
 import pprint
 import socket
-import textwrap
 import numpy as np
 from typing import Union
 from datetime import datetime
@@ -134,6 +133,13 @@ def get_parser() -> argparse.ArgumentParser:
         help="Print all the output.",
     )
     args.add_argument(
+        "-f",
+        "--force",
+        dest="force",
+        action="store_true",
+        help="Stores outputs at provided or default destination, without prompting for confirmation.",
+    )
+    args.add_argument(
         "-ip",
         "--ignore-pollution",
         dest="ignore_pollution",
@@ -215,6 +221,27 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
     # Return output_path if successful and continuing with program
     return output_path
 
+def force_output_path(dir_name: str) -> pathlib.Path:
+    """Provides path for output data without user input.
+    - Assuming `leaproot` is the root of the project, then `leaproot/output/dir_name` is checked
+    - If that path exists then that dir is used (overwriting any existsing data)
+    - If that path doesn't exist then is created and used
+
+    Args:
+        dir_name: The name of the directory to store the outputs in
+
+    Returns:
+        output_path: either the path to the output folder
+    """
+
+    output_path = pathlib.Path(*dir_name.parts[:-1], "output", dir_name.parts[-1])
+
+    # Prompt user to continue with existing path or quit
+    if not output_path.exists():
+        output_path.mkdir(parents=True, exist_ok=True)
+
+    # Return output_path if successful and continuing with program
+    return output_path
 
 def convert_non_serializable(obj: Union[np.ndarray, object]) -> Union[list, str]:
     """
@@ -277,8 +304,13 @@ def run_main():
         # Get the name of the dir to store outputs in
         dir_name = pathlib.Path(args.path_output)
 
-    # Prompt user with CLI instructions to handle output path
-    output_path = handle_output_path(dir_name)
+    # If --force flag is given, just 
+    if args.force:
+        output_path = force_output_path(dir_name)
+        logger.message(f"--force flag included, so output directory not checked.")
+    else:
+        # Prompt user with CLI instructions to handle output path
+        output_path = handle_output_path(dir_name)
 
     # If output_path is None and user decides to quit, then exit the program
     if output_path is None:
@@ -289,12 +321,12 @@ def run_main():
     simulation_start_time = datetime.now()
 
     if args.run:
-        logger.message(f"Results will be saved to <{output_path}>")
+        logger.message(f"Results will be saved to <{output_path.absolute()}>")
         logger.message("Running simulation...")
-        
+
         # This is the main function that runs the entire simulation
         outcome_matrix = simulation.run()
-        
+
         logger.message(outcome_matrix)
         outcome_matrix.save(path=output_path)
 
@@ -330,13 +362,11 @@ def run_main():
     }
 
     # Combine metadata and parameters into the log message
-    log_data = {
-        "Metadata": metadata,
-        "Parameters": parameters,
-        "Config": config
-    }
+    log_data = {"Metadata": metadata, "Parameters": parameters, "Config": config}
     # json.dumps lays out the data in a nice indented format for the log file
-    log_msg = json.dumps(log_data, indent=4, default=convert_non_serializable, ensure_ascii=False)
+    log_msg = json.dumps(
+        log_data, indent=4, default=convert_non_serializable, ensure_ascii=False
+    )
 
     with open(log_file_path, "w") as file:
         # Write message to logfile
