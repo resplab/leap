@@ -218,6 +218,8 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
 
 def convert_non_serializable(obj: Union[np.ndarray, object]) -> Union[list, str]:
     """
+    Description
+    ---
     Convert non-serializable objects into JSON-friendly formats.
 
     This function is intended to be used with `json.dumps(..., default=convert_non_serializable)`.
@@ -226,11 +228,13 @@ def convert_non_serializable(obj: Union[np.ndarray, object]) -> Union[list, str]
     - NumPy arrays (`numpy.ndarray`) are converted to Python lists.
     - Other unsupported types are converted to their string representation.
 
-    Args:
-        obj (Union[np.ndarray, object]): The object to be converted.
+    Args
+    ---
+        obj (`Union[np.ndarray, object]`): The object to be converted.
 
-    Returns:
-        Union[list, str]: A JSON-serializable equivalent of `obj`:
+    Returns
+    ---
+        `Union[list, str]`: A JSON-serializable equivalent of `obj`:
             - A list if `obj` is an ndarray.
             - A string representation otherwise.
     """
@@ -287,7 +291,10 @@ def run_main():
     if args.run:
         logger.message(f"Results will be saved to <{output_path}>")
         logger.message("Running simulation...")
+        
+        # This is the main function that runs the entire simulation
         outcome_matrix = simulation.run()
+        
         logger.message(outcome_matrix)
         outcome_matrix.save(path=output_path)
 
@@ -328,6 +335,7 @@ def run_main():
         "Parameters": parameters,
         "Config": config
     }
+    # json.dumps lays out the data in a nice indented format for the log file
     log_msg = json.dumps(log_data, indent=4, default=convert_non_serializable, ensure_ascii=False)
 
     with open(log_file_path, "w") as file:
