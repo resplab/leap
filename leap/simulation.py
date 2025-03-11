@@ -34,12 +34,12 @@ class Simulation:
     def __init__(
         self,
         config: dict | str | pathlib.Path | None = None,
-        max_age: int | None = None,
         province: str | None = None,
+        max_age: int | None = None,
         min_year: int | None = None,
         time_horizon: int | None = None,
-        num_births_initial: int | None = None,
         population_growth_type: str | None = None,
+        num_births_initial: int | None = None,
         ignore_pollution_flag: bool = False
     ):
         if config is None:
@@ -49,14 +49,14 @@ class Simulation:
             with open(config) as file:
                 config: dict = json.load(file)
 
-        if max_age is not None:
-            self.max_age = max_age
-        else:
-            self.max_age = config["simulation"]["max_age"]
         if province is not None:
             self.province = province
         else:
             self.province = config["simulation"]["province"]
+        if max_age is not None:
+            self.max_age = max_age
+        else:
+            self.max_age = config["simulation"]["max_age"]
         if min_year is not None:
             self.min_year = min_year
         else:
@@ -65,14 +65,14 @@ class Simulation:
             self.time_horizon = time_horizon
         else:
             self.time_horizon = config["simulation"]["time_horizon"]
-        if num_births_initial is not None:
-            self.num_births_initial = num_births_initial
-        else:
-            self.num_births_initial = config["simulation"]["num_births_initial"]
         if population_growth_type is not None:
             self.population_growth_type = population_growth_type
         else:
             self.population_growth_type = config["simulation"]["population_growth_type"]
+        if num_births_initial is not None:
+            self.num_births_initial = num_births_initial
+        else:
+            self.num_births_initial = config["simulation"]["num_births_initial"]
         self.agent = None
         self.birth = Birth(self.min_year, self.province, self.population_growth_type, self.max_age)
         self.emigration = Emigration(self.min_year, self.province, self.population_growth_type)
@@ -99,22 +99,13 @@ class Simulation:
     def __repr__(self):
         return (
             f"Simulation("
-            f"max_age={self.max_age}, "
             f"province='{self.province}', "
+            f"max_age={self.max_age}, "
             f"min_year={self.min_year}, "
             f"time_horizon={self.time_horizon}, "
-            f"num_births_initial={self.num_births_initial}, "
             f"population_growth_type='{self.population_growth_type}')"
+            f"num_births_initial={self.num_births_initial}, "
         )
-
-    @property
-    def max_age(self) -> int:
-        """The maximum age of the agents in the simulation."""
-        return self._max_age
-
-    @max_age.setter
-    def max_age(self, max_age: int):
-        self._max_age = max_age
 
     @property
     def province(self) -> str:
@@ -124,6 +115,15 @@ class Simulation:
     @province.setter
     def province(self, province: str):
         self._province = province
+
+    @property
+    def max_age(self) -> int:
+        """The maximum age of the agents in the simulation."""
+        return self._max_age
+
+    @max_age.setter
+    def max_age(self, max_age: int):
+        self._max_age = max_age
 
     @property
     def min_year(self) -> int:
@@ -152,15 +152,6 @@ class Simulation:
             pass
 
     @property
-    def num_births_initial(self) -> int:
-        """The number of births in the initial year of the simulation."""
-        return self._num_births_initial
-
-    @num_births_initial.setter
-    def num_births_initial(self, num_births_initial: int):
-        self._num_births_initial = num_births_initial
-
-    @property
     def population_growth_type(self) -> str:
         """Population growth type to be used in the simulation.
 
@@ -185,6 +176,15 @@ class Simulation:
     @population_growth_type.setter
     def population_growth_type(self, population_growth_type: str):
         self._population_growth_type = population_growth_type
+
+    @property
+    def num_births_initial(self) -> int:
+        """The number of births in the initial year of the simulation."""
+        return self._num_births_initial
+
+    @num_births_initial.setter
+    def num_births_initial(self, num_births_initial: int):
+        self._num_births_initial = num_births_initial
 
     def get_num_new_agents(
         self, year: int, min_year: int, num_new_born: int, num_immigrants: int

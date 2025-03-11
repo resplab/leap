@@ -51,22 +51,6 @@ def get_parser() -> argparse.ArgumentParser:
         help="Path to output file.",
     )
     args.add_argument(
-        "-ma",
-        "--max-age",
-        dest="max_age",
-        required=False,
-        type=int,
-        help="Maximum age for agents in the model.",
-    )
-    args.add_argument(
-        "-my",
-        "--min-year",
-        dest="min_year",
-        required=False,
-        type=int,
-        help="Starting year for the simulation. Must be >= 2024.",
-    )
-    args.add_argument(
         "-p",
         "--province",
         dest="province",
@@ -90,20 +74,28 @@ def get_parser() -> argparse.ArgumentParser:
         """,
     )
     args.add_argument(
+        "-ma",
+        "--max-age",
+        dest="max_age",
+        required=False,
+        type=int,
+        help="Maximum age for agents in the model.",
+    )
+    args.add_argument(
+        "-my",
+        "--min-year",
+        dest="min_year",
+        required=False,
+        type=int,
+        help="Starting year for the simulation. Must be >= 2024.",
+    )
+    args.add_argument(
         "-th",
         "--time-horizon",
         dest="time_horizon",
         required=False,
         type=int,
         help="Time horizon for the simulation.",
-    )
-    args.add_argument(
-        "-nb",
-        "--num-births-initial",
-        dest="num_births_initial",
-        required=False,
-        type=int,
-        help="Number of initial births for the simulation.",
     )
     args.add_argument(
         "-gt",
@@ -126,6 +118,21 @@ def get_parser() -> argparse.ArgumentParser:
         """,
     )
     args.add_argument(
+        "-nb",
+        "--num-births-initial",
+        dest="num_births_initial",
+        required=False,
+        type=int,
+        help="Number of initial births for the simulation.",
+    )
+    args.add_argument(
+        "-ip",
+        "--ignore-pollution",
+        dest="ignore_pollution",
+        action="store_true",
+        help="Do not include pollution as an element affecting the simulation.",
+    )
+    args.add_argument(
         "-v",
         "--verbose",
         dest="verbose",
@@ -138,13 +145,6 @@ def get_parser() -> argparse.ArgumentParser:
         dest="force",
         action="store_true",
         help="Stores outputs at provided or default destination, without prompting for confirmation.",
-    )
-    args.add_argument(
-        "-ip",
-        "--ignore-pollution",
-        dest="ignore_pollution",
-        action="store_true",
-        help="Do not include pollution as an element affecting the simulation.",
     )
     args.add_argument(
         "-h",
@@ -284,12 +284,12 @@ def run_main():
     # Create simulation object using arguments
     simulation = Simulation(
         config=config,
+        province=args.province,
         max_age=args.max_age,
         min_year=args.min_year,
-        province=args.province,
         time_horizon=args.time_horizon,
-        num_births_initial=args.num_births_initial,
         population_growth_type=args.population_growth_type,
+        num_births_initial=args.num_births_initial,
         ignore_pollution_flag=args.ignore_pollution,
     )
     logger.message(f"Simulation object initialized.")
@@ -298,7 +298,7 @@ def run_main():
     if args.path_output is None or args.path_output == "":
         # Default dir name based on simulation arguments
         dir_name = pathlib.Path(
-            f"{simulation.min_year}-{simulation.time_horizon}-{simulation.province}-{simulation.population_growth_type}-{simulation.num_births_initial}-{simulation.max_age}"
+            f"{simulation.province}-{simulation.max_age}-{simulation.min_year}-{simulation.time_horizon}-{simulation.population_growth_type}-{simulation.num_births_initial}"
         )
     else:
         # Get the name of the dir to store outputs in
@@ -351,14 +351,14 @@ def run_main():
     }
     # Create dict to store parameter info
     parameters = {
+        "province": simulation.province,
+        "max_age": simulation.max_age,
         "min_year": simulation.min_year,
         "time_horizon": simulation.time_horizon,
-        "max_year": simulation.max_year,
-        "province": simulation.province,
         "population_growth_type": simulation.population_growth_type,
         "num_births_initial": simulation.num_births_initial,
-        "max_age": simulation.max_age,
         "pollution ignored": args.ignore_pollution,
+        "max_year": simulation.max_year,
     }
 
     # Combine metadata and parameters into the log message
