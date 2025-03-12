@@ -43,14 +43,6 @@ def get_parser() -> argparse.ArgumentParser:
         help="Path to configuration file.",
     )
     args.add_argument(
-        "-o",
-        "--path-output",
-        dest="path_output",
-        required=False,
-        type=str,
-        help="Path to output file.",
-    )
-    args.add_argument(
         "-p",
         "--province",
         dest="province",
@@ -133,11 +125,12 @@ def get_parser() -> argparse.ArgumentParser:
         help="Do not include pollution as an element affecting the simulation.",
     )
     args.add_argument(
-        "-v",
-        "--verbose",
-        dest="verbose",
-        action="store_true",
-        help="Print all the output.",
+        "-o",
+        "--path-output",
+        dest="path_output",
+        required=False,
+        type=str,
+        help="Path to output file.",
     )
     args.add_argument(
         "-f",
@@ -145,6 +138,13 @@ def get_parser() -> argparse.ArgumentParser:
         dest="force",
         action="store_true",
         help="Stores outputs at provided or default destination, without prompting for confirmation.",
+    )
+    args.add_argument(
+        "-v",
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+        help="Print all the output.",
     )
     args.add_argument(
         "-h",
