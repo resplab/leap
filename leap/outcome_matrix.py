@@ -87,40 +87,40 @@ class OutcomeMatrix:
         self.max_age = max_age
 
         self.alive = self.create_table(
-            ["year", "age", "sex", "n_alive"],
-            ["year"],
+            ["year", "month", "age", "sex", "n_alive"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.antibiotic_exposure = self.create_table(
-            ["year", "age", "sex", "n_antibiotic_exposure"],
-            ["year"],
+            ["year", "month", "age", "sex", "n_antibiotic_exposure"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.asthma_incidence = self.create_table(
-            ["year", "age", "sex", "n_new_diagnoses"],
-            ["year"],
+            ["year", "month", "age", "sex", "n_new_diagnoses"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.asthma_prevalence = self.create_table(
-            ["year", "age", "sex", "n_asthma"],
-            ["year"],
+            ["year", "month", "age", "sex", "n_asthma"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.asthma_incidence_contingency_table = self.create_table(
-            ["year", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
-            ["year", "sex", "fam_history", "abx_exposure"],
+            ["year", "month", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
+            ["year", "month", "sex", "fam_history", "abx_exposure"],
             range(min_year, max_year + 1),
             range(0, 2),
             range(0, max_age + 2),
@@ -130,8 +130,8 @@ class OutcomeMatrix:
             [0]
         )
         self.asthma_prevalence_contingency_table = self.create_table(
-            ["year", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
-            ["year", "sex", "fam_history", "abx_exposure"],
+            ["year", "month", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
+            ["year", "month", "sex", "fam_history", "abx_exposure"],
             range(min_year, max_year + 1),
             range(0, 2),
             range(0, max_age + 2),
@@ -141,16 +141,16 @@ class OutcomeMatrix:
             [0]
         )
         self.asthma_status = self.create_table(
-            ["year", "age", "sex", "status"],
-            ["year"],
+            ["year", "month", "age", "sex", "status"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.control = self.create_table(
-            ["year", "level", "age", "sex", "prob"],
-            ["year", "level"],
+            ["year", "month", "level", "age", "sex", "prob"],
+            ["year", "month", "level"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(3),
             range(max_age + 1),
@@ -158,40 +158,40 @@ class OutcomeMatrix:
             [0.0]
         )
         self.cost = self.create_table(
-            ["year", "age", "sex", "cost"],
-            ["year"],
+            ["year", "month", "age", "sex", "cost"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
             [0.0]
         )
         self.death = self.create_table(
-            ["year", "age", "sex", "n_deaths"],
-            ["year"],
+            ["year", "month", "age", "sex", "n_deaths"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.emigration = self.create_table(
-            ["year", "age", "sex", "n_emigrants"],
-            ["year"],
+            ["year", "month", "age", "sex", "n_emigrants"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.exacerbation = self.create_table(
-            ["year", "age", "sex", "n_exacerbations"],
-            ["year"],
+            ["year", "month", "age", "sex", "n_exacerbations"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.exacerbation_by_severity = self.create_table(
-            ["year", "severity", "age", "sex", "p_exacerbations"],
-            ["year", "severity"],
+            ["year", "month", "severity", "age", "sex", "p_exacerbations"],
+            ["year", "month", "severity"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(4),
             range(max_age + 1),
@@ -199,32 +199,32 @@ class OutcomeMatrix:
             [0.0]
         )
         self.exacerbation_hospital = self.create_table(
-            ["year", "age", "sex", "n_hospitalizations"],
-            ["year"],
+            ["year", "month", "age", "sex", "n_hospitalizations"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.family_history = self.create_table(
-            ["year", "age", "sex", "has_family_history"],
-            ["year"],
+            ["year", "month", "age", "sex", "has_family_history"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.immigration = self.create_table(
-            ["year", "age", "sex", "n_immigrants"],
-            ["year"],
+            ["year", "month", "age", "sex", "n_immigrants"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.utility = self.create_table(
-            ["year", "age", "sex", "utility"],
-            ["year"],
+            ["year", "month", "age", "sex", "utility"],
+            ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -241,7 +241,7 @@ class OutcomeMatrix:
 
     @property
     def alive(self) -> OutcomeTable:
-        """A table containing the number of people alive in each year, age, and sex."""
+        """A table containing the number of people alive in each year, month, age, and sex."""
         return self._alive
 
     @alive.setter
@@ -250,7 +250,7 @@ class OutcomeMatrix:
 
     @property
     def antibiotic_exposure(self) -> OutcomeTable:
-        """A table containing the number of rounds of antibiotics for each year, age, and sex."""
+        """A table containing the number of rounds of antibiotics for each year, month, age, and sex."""
         return self._antibiotic_exposure
     
     @antibiotic_exposure.setter
@@ -259,7 +259,7 @@ class OutcomeMatrix:
 
     @property
     def asthma_incidence(self) -> OutcomeTable:
-        """A table containing the number of new asthma diagnoses for each year, age, and sex."""
+        """A table containing the number of new asthma diagnoses for each year, month, age, and sex."""
         return self._asthma_incidence
     
     @asthma_incidence.setter
@@ -268,7 +268,7 @@ class OutcomeMatrix:
 
     @property
     def asthma_prevalence(self) -> OutcomeTable:
-        """A table containing the number of people with asthma for each year, age, and sex."""
+        """A table containing the number of people with asthma for each year, month, age, and sex."""
         return self._asthma_prevalence
     
     @asthma_prevalence.setter
@@ -308,7 +308,7 @@ class OutcomeMatrix:
 
     @property
     def control(self) -> OutcomeTable:
-        """A table containing the level of asthma control for each year, age, and sex."""
+        """A table containing the level of asthma control for each year, month, age, and sex."""
         return self._control
     
     @control.setter
@@ -317,7 +317,7 @@ class OutcomeMatrix:
 
     @property
     def cost(self) -> OutcomeTable:
-        """A table containing the cost of asthma for each year, age, and sex."""
+        """A table containing the cost of asthma for each year, month, age, and sex."""
         return self._cost
     
     @cost.setter
@@ -326,7 +326,7 @@ class OutcomeMatrix:
 
     @property
     def death(self) -> OutcomeTable:
-        """A table containing the number of people who died in a given year, age, and sex."""
+        """A table containing the number of people who died in a given year, month, age, and sex."""
         return self._death
     
     @death.setter
@@ -335,7 +335,7 @@ class OutcomeMatrix:
 
     @property
     def emigration(self) -> OutcomeTable:
-        """A table containing the number of people who emigrated to Canada for each year, age,
+        """A table containing the number of people who emigrated to Canada for each year, month, age,
         and sex."""
         return self._emigration
 
@@ -345,7 +345,7 @@ class OutcomeMatrix:
 
     @property
     def exacerbation(self) -> OutcomeTable:
-        """A table containing the number of asthma exacerbations for each year, age, and sex."""
+        """A table containing the number of asthma exacerbations for each year, month, age, and sex."""
         return self._exacerbation
 
     @exacerbation.setter
@@ -381,7 +381,7 @@ class OutcomeMatrix:
 
     @property
     def immigration(self) -> OutcomeTable:
-        """A table containing the number of people who immigrated to Canada for each year, age,
+        """A table containing the number of people who immigrated to Canada for each year, month, age,
         and sex."""
         return self._immigration
 
@@ -391,7 +391,7 @@ class OutcomeMatrix:
 
     @property
     def utility(self) -> OutcomeTable:
-        """A table containing the utility due to asthma for each year, age, and sex."""
+        """A table containing the utility due to asthma for each year, month, age, and sex."""
         return self._utility
     
     @utility.setter
