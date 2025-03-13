@@ -28,8 +28,7 @@ logger = get_logger(__name__)
 
 
 class Simulation:
-    """A class containing information about the simulation.
-    """
+    """A class containing information about the simulation."""
 
     def __init__(
         self,
@@ -40,7 +39,7 @@ class Simulation:
         time_horizon: int | None = None,
         population_growth_type: str | None = None,
         num_births_initial: int | None = None,
-        ignore_pollution_flag: bool = False
+        ignore_pollution_flag: bool = False,
     ):
         if config is None:
             with open(get_data_path("processed_data/config.json")) as file:
@@ -208,11 +207,7 @@ class Simulation:
         df = self.birth.initial_population
 
         if year == min_year:
-            num_new_agents = int(math.ceil(
-                num_new_born / np.sum(
-                    df[df["age"] == 0]["prop"]
-                )
-            ))
+            num_new_agents = int(math.ceil(num_new_born / np.sum(df[df["age"] == 0]["prop"])))
             initial_pop_indices = self.birth.get_initial_population_indices(self.num_births_initial)
             num_new_agents = len(initial_pop_indices)
         else:
@@ -250,25 +245,29 @@ class Simulation:
         # number of newborns and immigrants in a year
         num_new_born = self.birth.get_num_newborn(self.num_births_initial, year)
         num_immigrants = self.immigration.get_num_new_immigrants(num_new_born, year)
-        num_new_agents = self.get_num_new_agents(
-            year, self.min_year, num_new_born, num_immigrants
-        )
+        num_new_agents = self.get_num_new_agents(year, self.min_year, num_new_born, num_immigrants)
 
         if year == self.min_year:
             initial_pop_indices = self.birth.get_initial_population_indices(self.num_births_initial)
             initial_population_df = self.birth.initial_population.iloc[initial_pop_indices]
-            new_agents_df = pd.DataFrame({
-                "age": list(initial_population_df["age"]),
-                "sex": list(np.random.binomial(1, np.array(initial_population_df["prop_male"]))),
-                "immigrant": [False] * num_new_agents
-            })
+            new_agents_df = pd.DataFrame(
+                {
+                    "age": list(initial_population_df["age"]),
+                    "sex": list(
+                        np.random.binomial(1, np.array(initial_population_df["prop_male"]))
+                    ),
+                    "immigrant": [False] * num_new_agents,
+                }
+            )
         else:
             # for a given year, sample from age/sex distribution of immigrants
-            immigrant_indices = list(np.random.choice(
-                a=range(self.immigration.table.get_group((year,)).shape[0]),
-                size=num_immigrants,
-                p=list(self.immigration.table.get_group((year,))["prop_immigrants_year"])
-            ))
+            immigrant_indices = list(
+                np.random.choice(
+                    a=range(self.immigration.table.get_group((year,)).shape[0]),
+                    size=num_immigrants,
+                    p=list(self.immigration.table.get_group((year,))["prop_immigrants_year"]),
+                )
+            )
 
             immigrant_df = self.immigration.table.get_group((year,)).iloc[immigrant_indices]
             sexes_immigrant = immigrant_df["sex"].tolist()
@@ -283,11 +282,13 @@ class Simulation:
             sexes_birth = ["F" if sex == 0 else "M" for sex in sexes_birth]
             ages_birth = [0] * num_new_born
 
-            new_agents_df = pd.DataFrame({
-                "age": ages_immigrant + ages_birth,
-                "sex": sexes_immigrant + sexes_birth,
-                "immigrant": [True] * num_immigrants + [False] * num_new_born
-            })
+            new_agents_df = pd.DataFrame(
+                {
+                    "age": ages_immigrant + ages_birth,
+                    "sex": sexes_immigrant + sexes_birth,
+                    "immigrant": [True] * num_immigrants + [False] * num_new_born,
+                }
+            )
         return new_agents_df
 
     def generate_initial_asthma(self, agent: Agent):
@@ -308,7 +309,7 @@ class Simulation:
                 agent=agent,
                 incidence=self.incidence,
                 prevalence=self.prevalence,
-                current_age=agent.age
+                current_age=agent.age,
             )
             agent.total_hosp = self.exacerbation_severity.compute_hospitalization_prob(
                 agent=agent, exacerbation=self.exacerbation, control=self.control
@@ -316,17 +317,17 @@ class Simulation:
             agent.control_levels = self.control.compute_control_levels(
                 sex=agent.sex, age=agent.age, initial=True
             )
-            agent.exacerbation_history.num_current_year = \
-                self.exacerbation.compute_num_exacerbations(
-                    agent=agent, initial=True
-                )
+            agent.exacerbation_history.num_current_year = (
+                self.exacerbation.compute_num_exacerbations(agent=agent, initial=True)
+            )
             # the number of exacerbations by severity
-            agent.exacerbation_severity_history.current_year = \
+            agent.exacerbation_severity_history.current_year = (
                 self.exacerbation_severity.compute_distribution(
                     num_current_year=agent.exacerbation_history.num_current_year,
                     prev_hosp=(agent.total_hosp > 0),
-                    age=agent.age
+                    age=agent.age,
                 )
+            )
             # update total hospitalizations
             agent.total_hosp += agent.exacerbation_severity_history.current_year[3]
 
@@ -341,7 +342,9 @@ class Simulation:
 
         if agent.has_asthma:
             agent.exacerbation_history.num_prev_year = agent.exacerbation_history.num_current_year
-            agent.exacerbation_severity_history.prev_year = agent.exacerbation_severity_history.current_year
+            agent.exacerbation_severity_history.prev_year = (
+                agent.exacerbation_severity_history.current_year
+            )
             self.update_asthma_effects(agent, outcome_matrix)
 
     def update_asthma_effects(self, agent: Agent, outcome_matrix: OutcomeMatrix):
@@ -357,9 +360,7 @@ class Simulation:
               and ``exacerbation_by_severity`` matrices.
         """
 
-        agent.control_levels = self.control.compute_control_levels(
-            agent.sex, agent.age
-        )
+        agent.control_levels = self.control.compute_control_levels(agent.sex, agent.age)
         for level in range(3):
             outcome_matrix.control.increment(
                 column="prob",
@@ -367,9 +368,9 @@ class Simulation:
                     "year": agent.year,
                     "level": level,
                     "sex": agent.sex,
-                    "age": agent.age
+                    "age": agent.age,
                 },
-                amount=agent.control_levels.as_array()[level]
+                amount=agent.control_levels.as_array()[level],
             )
 
         agent.exacerbation_history.num_current_year = self.exacerbation.compute_num_exacerbations(
@@ -377,30 +378,33 @@ class Simulation:
         )
 
         if agent.exacerbation_history.num_current_year != 0:
-            agent.exacerbation_severity_history.current_year = self.exacerbation_severity.compute_distribution(
-                agent.exacerbation_history.num_current_year,
-                agent.total_hosp > 0,
-                agent.age
+            agent.exacerbation_severity_history.current_year = (
+                self.exacerbation_severity.compute_distribution(
+                    agent.exacerbation_history.num_current_year, agent.total_hosp > 0, agent.age
+                )
             )
             agent.total_hosp += agent.exacerbation_severity_history.current_year[3]
             outcome_matrix.exacerbation.increment(
                 column="n_exacerbations",
                 filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
-                amount=agent.exacerbation_history.num_current_year
+                amount=agent.exacerbation_history.num_current_year,
             )
 
             outcome_matrix.exacerbation_hospital.increment(
                 column="n_hospitalizations",
                 filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
-                amount=agent.exacerbation_severity_history.current_year[3]
+                amount=agent.exacerbation_severity_history.current_year[3],
             )
             for level in range(4):
                 outcome_matrix.exacerbation_by_severity.increment(
                     column="p_exacerbations",
                     filter_columns={
-                        "year": agent.year, "age": agent.age, "sex": str(agent.sex), "severity": level
+                        "year": agent.year,
+                        "age": agent.age,
+                        "sex": str(agent.sex),
+                        "severity": level,
                     },
-                    amount=agent.exacerbation_severity_history.current_year[level]
+                    amount=agent.exacerbation_severity_history.current_year[level],
                 )
 
     def check_if_agent_gets_new_asthma_diagnosis(self, agent: Agent, outcome_matrix: OutcomeMatrix):
@@ -422,7 +426,7 @@ class Simulation:
             agent.asthma_age = agent.age
             outcome_matrix.asthma_incidence.increment(
                 column="n_new_diagnoses",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
             )
             self.update_asthma_effects(agent, outcome_matrix)
 
@@ -431,16 +435,18 @@ class Simulation:
                 agent.asthma_status = True
                 outcome_matrix.asthma_status.increment(
                     column="status",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
                 )
 
         outcome_matrix.asthma_incidence_contingency_table.increment(
             column="n_asthma" if agent.has_asthma else "n_no_asthma",
             filter_columns={
-                "year": agent.year, "age": agent.age, "sex": agent.sex,
+                "year": agent.year,
+                "age": agent.age,
+                "sex": agent.sex,
                 "fam_history": agent.has_family_history,
                 "abx_exposure": agent.num_antibiotic_use,
-            }
+            },
         )
 
     def run(self, seed=None, until_all_die: bool = False):
@@ -468,23 +474,31 @@ class Simulation:
         outcome_matrix = OutcomeMatrix(until_all_die, min_year, max_year, max_age)
 
         # loop by year
-        for year in (pbar_year := tqdm(years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
+        for year in (
+            pbar_year := tqdm(years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")
+        ):
             pbar_year.set_description(f"Year {year}")
             year_index = year - min_year
 
-            new_agents_df = self.get_new_agents(
-                year=year
-            )
+            new_agents_df = self.get_new_agents(year=year)
 
-            logger.info(f"Year {year}, year {year_index} of {total_years} years, "
-                        f"{new_agents_df.shape[0]} new agents born/immigrated.")
+            logger.info(
+                f"Year {year}, year {year_index} of {total_years} years, "
+                f"{new_agents_df.shape[0]} new agents born/immigrated."
+            )
             logger.info(f"\n{new_agents_df}")
-            
+
             # January = 1, February = 2...
             for month in range(1, 13):
-                
+
                 # for each agent i born/immigrated in year
-                for i in (pbar := tqdm(range(new_agents_df.shape[0]), desc="Agents", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
+                for i in (
+                    pbar := tqdm(
+                        range(new_agents_df.shape[0]),
+                        desc="Agents",
+                        bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
+                    )
+                ):
                     self.control.assign_random_β0()
                     self.exacerbation.assign_random_β0()
                     self.exacerbation_severity.assign_random_p()
@@ -500,7 +514,7 @@ class Simulation:
                             SSP=self.SSP,
                             year=year,
                             month=month,
-                            cduid=census_division.cduid
+                            cduid=census_division.cduid,
                         )
                     agent = Agent(
                         sex=new_agents_df["sex"].iloc[i],
@@ -513,7 +527,7 @@ class Simulation:
                         month=month,
                         ssp=self.SSP,
                         census_division=census_division,
-                        pollution=pollution
+                        pollution=pollution,
                     )
                     pbar.set_description(f"Agent {agent.uuid.short}")
 
@@ -524,29 +538,43 @@ class Simulation:
                         f"newborn: {not new_agents_df['immigrant'].iloc[i]}"
                     )
                     logger.info(
-                        f"| -- Year: {agent.year_index + min_year - 1}, "
-                        f"age: {agent.age}"
+                        f"| -- Year: {agent.year_index + min_year - 1}, " f"age: {agent.age}"
                     )
 
                     if new_agents_df["immigrant"].iloc[i]:
                         outcome_matrix.immigration.increment(
-                            "n_immigrants", {"year": agent.year, "age": agent.age, "sex": agent.sex}
+                            "n_immigrants",
+                            {
+                                "year": agent.year,
+                                "month": month,
+                                "age": agent.age,
+                                "sex": agent.sex,
+                            },
                         )
 
                     outcome_matrix.antibiotic_exposure.increment(
                         column="n_antibiotic_exposure",
-                        filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                        amount=agent.num_antibiotic_use
+                        filter_columns={
+                            "year": agent.year,
+                            "month": month,
+                            "age": agent.age,
+                            "sex": agent.sex,
+                        },
+                        amount=agent.num_antibiotic_use,
                     )
 
                     outcome_matrix.family_history.increment(
                         column="has_family_history",
-                        filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                        amount=agent.has_family_history
+                        filter_columns={
+                            "year": agent.year,
+                            "month": month,
+                            "age": agent.age,
+                            "sex": agent.sex,
+                        },
+                        amount=agent.has_family_history,
                     )
 
                     # if age > 4, we need to generate the initial distribution of asthma related events
-
                     if agent.age > 3:
                         self.generate_initial_asthma(agent)
 
@@ -555,7 +583,11 @@ class Simulation:
                         )
 
                     # go through event processes for each agent
-                    while agent.alive and agent.age <= max_age and agent.year_index <= max_time_horizon:
+                    while (
+                        agent.alive
+                        and agent.age <= max_age
+                        and agent.year_index <= max_time_horizon
+                    ):
                         if not agent.has_asthma:
                             self.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
                             logger.info(f"| ---- Agent has asthma (incidence)? {agent.has_asthma}")
@@ -570,18 +602,24 @@ class Simulation:
                         if agent.has_asthma:
                             outcome_matrix.asthma_prevalence.increment(
                                 column="n_asthma",
-                                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+                                filter_columns={
+                                    "year": agent.year,
+                                    "month": month,
+                                    "age": agent.age,
+                                    "sex": agent.sex,
+                                },
                             )
 
                         outcome_matrix.asthma_prevalence_contingency_table.increment(
                             column="n_asthma" if agent.has_asthma else "n_no_asthma",
                             filter_columns={
                                 "year": agent.year,
+                                "month": month,
                                 "age": agent.age,
                                 "sex": agent.sex,
                                 "fam_history": agent.has_family_history,
-                                "abx_exposure": agent.num_antibiotic_use
-                            }
+                                "abx_exposure": agent.num_antibiotic_use,
+                            },
                         )
 
                         # compute utility
@@ -589,8 +627,13 @@ class Simulation:
                         logger.info(f"| ---- Utility of asthma: {utility}")
                         outcome_matrix.utility.increment(
                             column="utility",
-                            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                            amount=utility
+                            filter_columns={
+                                "year": agent.year,
+                                "month": month,
+                                "age": agent.age,
+                                "sex": agent.sex,
+                            },
+                            amount=utility,
                         )
 
                         # compute cost
@@ -599,8 +642,13 @@ class Simulation:
 
                         outcome_matrix.cost.increment(
                             column="cost",
-                            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                            amount=cost
+                            filter_columns={
+                                "year": agent.year,
+                                "month": month,
+                                "age": agent.age,
+                                "sex": agent.sex,
+                            },
+                            amount=cost,
                         )
 
                         # death or emigration, assume death occurs first
@@ -608,7 +656,12 @@ class Simulation:
                             agent.alive = False
                             outcome_matrix.death.increment(
                                 column="n_deaths",
-                                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                                filter_columns={
+                                    "year": agent.year,
+                                    "month": month,
+                                    "age": agent.age,
+                                    "sex": agent.sex,
+                                },
                             )
                             logger.info(f"| ---- Agent has died at age {agent.age}")
                         # emigration
@@ -618,14 +671,24 @@ class Simulation:
                             agent.alive = False
                             outcome_matrix.emigration.increment(
                                 column="n_emigrants",
-                                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                                filter_columns={
+                                    "year": agent.year,
+                                    "month": month,
+                                    "age": agent.age,
+                                    "sex": agent.sex,
+                                },
                             )
                             logger.info(f"| ---- Agent has emigrated at age {agent.age}")
                         else:
                             # record alive
                             outcome_matrix.alive.increment(
                                 column="n_alive",
-                                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                                filter_columns={
+                                    "year": agent.year,
+                                    "month": month,
+                                    "age": agent.age,
+                                    "sex": agent.sex,
+                                },
                             )
 
                             # update the patient stats
