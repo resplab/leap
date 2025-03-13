@@ -90,6 +90,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "n_alive"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
@@ -98,6 +99,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "n_antibiotic_exposure"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
@@ -106,6 +108,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "n_new_diagnoses"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
@@ -114,6 +117,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "n_asthma"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
@@ -122,6 +126,7 @@ class OutcomeMatrix:
             ["year", "month", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
             ["year", "month", "sex", "fam_history", "abx_exposure"],
             range(min_year, max_year + 1),
+            range(1, 13),
             range(0, 2),
             range(0, max_age + 2),
             range(0, 2),
@@ -133,6 +138,7 @@ class OutcomeMatrix:
             ["year", "month", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
             ["year", "month", "sex", "fam_history", "abx_exposure"],
             range(min_year, max_year + 1),
+            range(1, 13),
             range(0, 2),
             range(0, max_age + 2),
             range(0, 2),
@@ -144,6 +150,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "status"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
@@ -152,6 +159,7 @@ class OutcomeMatrix:
             ["year", "month", "level", "age", "sex", "prob"],
             ["year", "month", "level"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(3),
             range(max_age + 1),
             ["F", "M"],
@@ -161,6 +169,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "cost"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0.0]
@@ -169,6 +178,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "n_deaths"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
@@ -177,6 +187,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "n_emigrants"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
@@ -185,6 +196,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "n_exacerbations"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
@@ -193,6 +205,7 @@ class OutcomeMatrix:
             ["year", "month", "severity", "age", "sex", "p_exacerbations"],
             ["year", "month", "severity"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(4),
             range(max_age + 1),
             ["F", "M"],
@@ -202,6 +215,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "n_hospitalizations"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
@@ -210,6 +224,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "has_family_history"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
@@ -218,6 +233,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "n_immigrants"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
@@ -226,6 +242,7 @@ class OutcomeMatrix:
             ["year", "month", "age", "sex", "utility"],
             ["year", "month"],
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
