@@ -182,13 +182,14 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
 
     Returns:
         output_path: either the path to the output folder, or None, signifying to abort
-        
+
     Examples:
-        >>> pwd
-        ... '/home/user/misc'
-        >>> handle_output_path('mydir')
-        ... # Assuming directory is used or created
-        ... '/home/user/misc/leap_output/mydir'
+        ```
+        # assuming /home/user/WORKSPACE is the currect working directory
+        force_output_path('mydir')
+        # assuming the user confirmed to use or create the directory
+        -> '/home/user/WORKSPACE/leap_output/mydir'
+        ```
     """
 
     # pathlib automatically prefixes the path with the current working directory
@@ -239,12 +240,13 @@ def force_output_path(dir_name: str) -> pathlib.Path:
 
     Returns:
         output_path: either the path to the output folder
-        
+
     Examples:
-        >>> pwd
-        ... '/home/user/misc'
-        >>> force_output_path('mydir')
-        ... '/home/user/misc/leap_output/mydir'
+        ```
+        # assuming /home/user/WORKSPACE is the currect working directory
+        force_output_path('mydir')
+        -> '/home/user/WORKSPACE/leap_output/mydir'
+        ```
     """
 
     # pathlib automatically prefixes the path with the current working directory
