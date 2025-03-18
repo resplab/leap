@@ -20,9 +20,7 @@ pretty_printer = pprint.PrettyPrinter(indent=2, sort_dicts=False)
 def get_parser() -> argparse.ArgumentParser:
     """Get the command line interface parser."""
 
-    parser = argparse.ArgumentParser(
-        add_help=False, formatter_class=argparse.RawTextHelpFormatter
-    )
+    parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
     command_group = parser.add_mutually_exclusive_group(required=False)
     command_group.add_argument(
         "-r",
@@ -175,7 +173,7 @@ def get_config(path_config: str) -> dict:
 
 def handle_output_path(dir_name: str) -> pathlib.Path | None:
     """Handles user input through CLI prompts depending on dir_name.
-    - Assuming `leaproot` is the root of the project, then `leaproot/output/dir_name` is checked
+    - Assuming `WORKSPACE` is directory where `leap` was called, then `WORKSPACE/leap_output/dir_name` is checked
     - If that path exists then user is prompted to continue (overwriting the current outputs)
     - If that path doesn't exist then user is prompted whether to create it
 
@@ -184,9 +182,17 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
 
     Returns:
         output_path: either the path to the output folder, or None, signifying to abort
+        
+    Examples:
+        >>> pwd
+        ... '/home/user/misc'
+        >>> handle_output_path('mydir')
+        ... # Assuming directory is used or created
+        ... '/home/user/misc/leap_output/mydir'
     """
 
-    output_path = pathlib.Path(*dir_name.parts[:-1], "output", dir_name.parts[-1])
+    # pathlib automatically prefixes the path with the current working directory
+    output_path = pathlib.Path("leap_output", dir_name)
 
     # Prompt user to continue with existing path or quit
     if output_path.exists():
@@ -221,9 +227,10 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
     # Return output_path if successful and continuing with program
     return output_path
 
+
 def force_output_path(dir_name: str) -> pathlib.Path:
     """Provides path for output data without user input.
-    - Assuming `leaproot` is the root of the project, then `leaproot/output/dir_name` is checked
+    - Assuming `WORKSPACE` is the directory where `leap` was called, then `WORKSPACE/leap_output/dir_name` is checked
     - If that path exists then that dir is used (overwriting any existsing data)
     - If that path doesn't exist then is created and used
 
@@ -232,9 +239,16 @@ def force_output_path(dir_name: str) -> pathlib.Path:
 
     Returns:
         output_path: either the path to the output folder
+        
+    Examples:
+        >>> pwd
+        ... '/home/user/misc'
+        >>> force_output_path('mydir')
+        ... '/home/user/misc/leap_output/mydir'
     """
 
-    output_path = pathlib.Path(*dir_name.parts[:-1], "output", dir_name.parts[-1])
+    # pathlib automatically prefixes the path with the current working directory
+    output_path = pathlib.Path("leap_output", dir_name)
 
     # Prompt user to continue with existing path or quit
     if not output_path.exists():
@@ -242,6 +256,7 @@ def force_output_path(dir_name: str) -> pathlib.Path:
 
     # Return output_path if successful and continuing with program
     return output_path
+
 
 def convert_non_serializable(obj: Union[np.ndarray, object]) -> Union[list, str]:
     """
@@ -297,14 +312,12 @@ def run_main():
     # Check if path_output argument is supplied or not
     if args.path_output is None or args.path_output == "":
         # Default dir name based on simulation arguments
-        dir_name = pathlib.Path(
-            f"{simulation.province}-{simulation.max_age}-{simulation.min_year}-{simulation.time_horizon}-{simulation.population_growth_type}-{simulation.num_births_initial}"
-        )
+        dir_name = f"{simulation.province}-{simulation.max_age}-{simulation.min_year}-{simulation.time_horizon}-{simulation.population_growth_type}-{simulation.num_births_initial}"
     else:
         # Get the name of the dir to store outputs in
-        dir_name = pathlib.Path(args.path_output)
+        dir_name = args.path_output
 
-    # If --force flag is given, just 
+    # If --force flag is given, just
     if args.force:
         output_path = force_output_path(dir_name)
         logger.message(f"--force flag included, so output directory not checked.")
@@ -337,7 +350,7 @@ def run_main():
     # Get the current timestamp
     current_date = datetime.now().strftime("%Y-%m-%d")
     # Define the file name
-    log_file_path = output_path.joinpath("logfile.txt")
+    log_file_path = output_path.joinpath("logfile.json")
 
     # Get text to include in the logfile
     # Create dict to store metadata info
@@ -364,9 +377,7 @@ def run_main():
     # Combine metadata and parameters into the log message
     log_data = {"Metadata": metadata, "Parameters": parameters, "Config": config}
     # json.dumps lays out the data in a nice indented format for the log file
-    log_msg = json.dumps(
-        log_data, indent=4, default=convert_non_serializable, ensure_ascii=False
-    )
+    log_msg = json.dumps(log_data, indent=4, default=convert_non_serializable, ensure_ascii=False)
 
     with open(log_file_path, "w") as file:
         # Write message to logfile
