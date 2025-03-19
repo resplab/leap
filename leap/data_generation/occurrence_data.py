@@ -197,9 +197,9 @@ def generate_occurrence_model(
     # Create occurrence dataframe
     df = df_asthma[["year", "sex", "age", occ_type]].copy()
 
-    # Convert sex string to 0 or 1
+    # Convert sex string to 1 or 2
     df["sex"] = df.apply(
-        lambda x: 0 if x["sex"] == "F" else 1,
+        lambda x: 1 if x["sex"] == "F" else 2,
         axis=1
     )
 
@@ -211,7 +211,7 @@ def generate_occurrence_model(
 
     # Create prediction dataframe
     df_pred = pd.DataFrame(
-        data=list(itertools.product(list(range(2000, 2066)), [0, 1], list(range(3, 65)))),
+        data=list(itertools.product(list(range(2000, 2066)), [1, 2], list(range(3, 65)))),
         columns=["year", "sex", "age"]
     )
 
@@ -220,7 +220,7 @@ def generate_occurrence_model(
 
     df = pd.merge(df, df_pred, on=["year", "sex", "age"], how="outer")
     df["sex"] = df.apply(
-        lambda x: "F" if x["sex"] == 0 else "M",
+        lambda x: "F" if x["sex"] == 1 else "M",
         axis=1
     )
 
@@ -330,14 +330,14 @@ def get_predicted_data(
 
     df = pd.DataFrame(
         data=list(itertools.product(
-            list(range(min_year, max_year)), [0, 1], list(range(min_age, max_age))
+            list(range(min_year, max_year)), [1, 2], list(range(min_age, max_age))
         )),
         columns=["year", "sex", "age"]
     )
 
     df[pred_col] = np.exp(model.predict(df, which="linear"))
     df["sex"] = df.apply(
-        lambda x: "F" if x["sex"] == 0 else "M",
+        lambda x: "F" if x["sex"] == 1 else "M",
         axis=1
     )
     return df
