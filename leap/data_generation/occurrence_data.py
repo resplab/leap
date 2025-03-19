@@ -204,7 +204,7 @@ def generate_occurrence_model(
     )
 
     # Fit the GLM model
-    model = smf.glm(formula=formula, data=df, family=sm.families.Gaussian())
+    model = smf.glm(formula=formula, data=df, family=sm.families.Poisson())
     results = model.fit(maxiter=maxiter)
 
     print(results.summary())
@@ -215,7 +215,7 @@ def generate_occurrence_model(
         columns=["year", "sex", "age"]
     )
 
-    occurrence_pred = np.exp(results.predict(df_pred, which="linear", transform=True))
+    occurrence_pred = results.predict(df_pred, which="mean", transform=True)
     df_pred[f"{occ_type}_pred"] = occurrence_pred
 
     df = pd.merge(df, df_pred, on=["year", "sex", "age"], how="outer")
@@ -255,8 +255,8 @@ def generate_incidence_model(
 
     _, alpha, norm2 = poly(df_asthma["age"].to_list(), degree=5, orthogonal=True)
 
-    formula = "np.log(incidence) ~ sex*year + " + \
-        f"sex*poly(age, degree=5, alpha={list(alpha)}, norm2={list(norm2)}"
+    formula = "incidence ~ sex*year + " + \
+        f"sex*poly(age, degree=5, alpha={list(alpha)}, norm2={list(norm2)})"
     results = generate_occurrence_model(
         df_asthma, formula=formula, occ_type="incidence", maxiter=maxiter
     )
@@ -286,7 +286,7 @@ def generate_prevalence_model(
 
     _, alpha_age, norm2_age = poly(df_asthma["age"].to_list(), degree=5, orthogonal=True)
     _, alpha_year, norm2_year = poly(df_asthma["year"].to_list(), degree=2, orthogonal=True)
-    formula = "np.log(prevalence) ~ " + \
+    formula = "prevalence ~ " + \
         f"sex*poly(year, degree=2, alpha={list(alpha_year)}, norm2={list(norm2_year)})" + \
         f"*poly(age, degree=5, alpha={list(alpha_age)}, norm2={list(norm2_age)})"
     results = generate_occurrence_model(
