@@ -6,3 +6,4 @@ geopandas
 pygrib
 tqdm
 plotly
+statsmodels
