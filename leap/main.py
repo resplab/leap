@@ -352,17 +352,17 @@ def run_main():
     # Get the current timestamp
     current_date = datetime.now().strftime("%Y-%m-%d")
     # Define the file name
-    log_file_path = output_path.joinpath("logfile.json")
+    log_file_path = output_path.joinpath("log.json")
 
     # Get text to include in the logfile
     # Create dict to store metadata info
     metadata = {
-        "Hostname": socket.gethostname(),
-        "Simulation Bundle Name": str(dir_name),
-        "Simulation Run Date": current_date,
-        "Simulation Start Time": str(simulation_start_time),
-        "Simulation End Time": str(simulation_end_time),
-        "Simulation Runtime": str(simulation_end_time - simulation_start_time),
+        "hostname": socket.gethostname(),
+        "simulation_bundle_name": str(dir_name),
+        "simulation_run_date": current_date,
+        "simulation_start_time": str(simulation_start_time),
+        "simulation_end_time": str(simulation_end_time),
+        "simulation_runtime": str(simulation_end_time - simulation_start_time),
     }
     # Create dict to store parameter info
     parameters = {
@@ -377,7 +377,7 @@ def run_main():
     }
 
     # Combine metadata and parameters into the log message
-    log_data = {"Metadata": metadata, "Parameters": parameters, "Config": config}
+    log_data = {"metadata": metadata, "parameters": parameters, "config": config}
     # json.dumps lays out the data in a nice indented format for the log file
     log_msg = json.dumps(log_data, indent=4, default=convert_non_serializable, ensure_ascii=False)
 
