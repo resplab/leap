@@ -172,7 +172,8 @@ def get_config(path_config: str) -> dict:
 
 def handle_output_path(dir_name: str) -> pathlib.Path | None:
     """Handles user input through CLI prompts depending on dir_name.
-    - Assuming `WORKSPACE` is directory where `leap` was called, then `WORKSPACE/leap_output/dir_name` is checked
+    - Assuming `WORKSPACE` is directory where `leap` was called,
+      then `WORKSPACE/leap_output/dir_name` is checked
     - If that path exists then user is prompted to continue (overwriting the current outputs)
     - If that path doesn't exist then user is prompted whether to create it
 
@@ -183,12 +184,27 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
         output_path: either the path to the output folder, or None, signifying to abort
 
     Examples:
-        ```
-        # assuming /home/user/WORKSPACE is the currect working directory
-        force_output_path('mydir')
-        # assuming the user confirmed to use or create the directory
-        -> '/home/user/WORKSPACE/leap_output/mydir'
-        ```
+    
+    (assuming `/home/user/WORKSPACE` is the currect working directory)
+    
+    .. code-block:: python
+    
+        handle_output_path('mydir1')
+        # assuming the user confirmed to create mydir1
+        > '/home/user/WORKSPACE/leap_output/mydir1'
+        
+        handle_output_path('mydir1')
+        # assuming the user confirmed to continue with existing mydir1
+        > '/home/user/WORKSPACE/leap_output/mydir1'
+        
+        handle_output_path('mydir1')
+        # assuming the user did not confirm to continue with existing mydir1
+        > None
+        
+        handle_output_path('mydir2')
+        # assuming the user did not confirm to create mydir2
+        > None
+    
     """
 
     # pathlib automatically prefixes the path with the current working directory
@@ -230,7 +246,8 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
 
 def force_output_path(dir_name: str) -> pathlib.Path:
     """Provides path for output data without user input.
-    - Assuming `WORKSPACE` is the directory where `leap` was called, then `WORKSPACE/leap_output/dir_name` is checked
+    - Assuming `WORKSPACE` is the directory where `leap` was called,
+      then `WORKSPACE/leap_output/dir_name` is checked
     - If that path exists then that dir is used (overwriting any existsing data)
     - If that path doesn't exist then is created and used
 
@@ -241,15 +258,18 @@ def force_output_path(dir_name: str) -> pathlib.Path:
         output_path: either the path to the output folder
 
     Examples:
-        ```
-        # assuming /home/user/WORKSPACE is the currect working directory
+    
+    (assuming `/home/user/WORKSPACE` is the currect working directory)
+    
+    .. code-block:: python
+    
         force_output_path('mydir')
-        -> '/home/user/WORKSPACE/leap_output/mydir'
-        ```
+        > '/home/user/WORKSPACE/leap_output/mydir'
+        
     """
 
-    # pathlib automatically prefixes the path with the current working directory
-    output_path = pathlib.Path("leap_output", dir_name)
+    # Use resolve() to normalize the path and make it absolute
+    output_path = pathlib.Path("leap_output", dir_name).resolve()
 
     # Prompt user to continue with existing path or quit
     if not output_path.exists():
@@ -273,11 +293,11 @@ def convert_non_serializable(obj: np.ndarray | object) -> list | str:
 
     Args
     ---
-        obj (`Union[np.ndarray, object]`): The object to be converted.
+        obj (`np.ndarray | object`): The object to be converted.
 
     Returns
     ---
-        `Union[list, str]`: A JSON-serializable equivalent of `obj`:
+        `list | str`: A JSON-serializable equivalent of `obj`:
             - A list if `obj` is an ndarray.
             - A string representation otherwise.
     """
@@ -319,7 +339,7 @@ def run_main():
         # Get the name of the dir to store outputs in
         dir_name = args.path_output
 
-    # If --force flag is given, just
+    # If --force flag is given, then use dir name regardless of user input
     if args.force:
         output_path = force_output_path(dir_name)
         logger.message(f"--force flag included, so output directory not checked.")
