@@ -7,9 +7,8 @@ import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from leap.utils import get_data_path
 from leap.logger import get_logger
-from typing import Tuple, TYPE_CHECKING
-if TYPE_CHECKING:
-    from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
+from typing import Tuple
+from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 
 pd.options.mode.copy_on_write = True
 
