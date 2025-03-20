@@ -234,3 +234,100 @@ To run the data generation for the exacerbation data:
 cd LEAP
 python3 leap/data_generation/exacerbation_data.py
 ```
+
+## Asthma Incidence / Prevalence (Occurrence) Data
+
+Initially there was a BC dataset and a Canadian dataset, but the incidence and prevalence rates
+were very close, so we decided to just use the BC dataset and apply it to all provinces.
+
+### British Columbia Ministry of Health Administrative Data
+
+The asthma incidence and prevalence data was originally from a private database under the
+BC Ministry of Health. This data had the following columns:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `fiscal_year` | `str` | format "XXXX[A-z0-9]" |
+| `age_group_desc` | `str` | format "X-Y years" or "<1 year" |
+| `gender` | `str` | "M" or "F" |
+| `incidence_numerator` | `float` | TODO |
+| `prevalence_numerator` | `float` | TODO |
+| `pop` | `int` | the number of people for a given age group, gender, and year |
+
+TODO: prevalence / incidence calculation
+
+This data was then processed and saved as `leap/original_data/private/asthma_inc_prev.csv`.
+
+<div class="note" style='padding:15px; background-color:#E9D8FD; color:#69337A'>
+<span>
+<p style='text-align:left'>
+<b>Note:</b></p>
+<p>
+This dataset is private, so please contact the developers regarding access.
+</p>
+</span>
+</div>
+</br>
+
+The data is formatted as follows:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `fiscal_year` | `int` | format `XXXX`, e.g `2000`, range `[2000, 2019]` |
+| `age_group_desc` | `str` | format `"X-Y years"`, 5 year intervals |
+| `gender` | `str` | `"M"` or `"F"` |
+| `incidence` | `float` | the incidence of asthma in BC for a given year, age group, and sex, per 100 people |
+| `prevalence` | `float` | the prevalence of asthma in BC for a given year, age group, and sex, per 100 people |
+
+i.e.:
+
+| fiscal_year | gender | age_group_desc | incidence | prevalence |
+| --- | --- | --- | --- | --- |
+| 2000 | F | 1-5 years | | |
+| 2000 | F | 6-10 years | | |
+| 2000 | F | 11-15 years | | |
+| 2000 | F | 16-20 years | | |
+| 2000 | F | 21-25 years | | |
+| 2000 | F | 26-30 years | | |
+| 2000 | F | 31-35 years | | |
+| 2000 | F | 35-40 years | | |
+| 2000 | F | 41-45 years | | |
+| 2000 | F | 45-50 years | | |
+| 2000 | F | 51-55 years | | |
+| 2000 | F | 55-60 years | | |
+| 2000 | F | 61-65 years | | |
+| 2000 | M | 1-5 years | | |
+| ... | ... | ... | | |
+| 2019 | M | 61-65 years | | |
+
+### Processing the Data
+
+The BC Ministry of Health Administrative Dataset contains asthma incidence and prevalence data
+for the years `2000-2019`, in 5-year age intervals. Since our model projects into the future, we
+would like to be able to extend this data beyond `2019`. Our model also makes predictions at
+1-year age intervals, not 5-year age intervals. To obtain these projections, we use a
+`Generalized Linear Model (GLM)`. A `GLM` is a type of regression analysis which is a
+generalized form of linear regression.
+See the [GLM Documentation](https://resplab.github.io/leap/model/model-glm.html) for more
+information on `GLMs`, and the
+[Occurrence Model Documentation](https://resplab.github.io/leap/model/model-occurrence.html)
+for more details on the `GLM` used for the occurrence data.
+
+
+### Generating the Data
+
+To run the data generation for the incidence/prevalence data:
+
+```sh
+cd LEAP
+python3 leap/data_generation/occurrence_data.py
+```
+
+This will update the file `leap/processed_data/asthma_occurrence_predictions.csv`. This file
+contains the predicted 
+This will also create 4 figures:
+
+1. `leap/data_generation/figures/asthma_incidence_comparison.png`
+2. `leap/data_generation/figures/asthma_incidence_predicted.png`
+3. `leap/data_generation/figures/asthma_prevalence_comparison.png`
+4. `leap/data_generation/figures/asthma_prevalence_predicted.png`

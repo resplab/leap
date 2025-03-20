@@ -9,3 +9,4 @@ __pycache__/
 _build/
 output/
 build/
+leap/original_data/private/*

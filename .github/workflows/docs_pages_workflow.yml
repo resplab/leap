@@ -16,6 +16,10 @@ jobs:
       - name: Install dependencies for docs
         run: |
           pip install -r requirements-docs.txt
+      - name: Install pandoc
+        run: |
+          wget https://github.com/jgm/pandoc/releases/download/3.6.4/pandoc-3.6.4-1-amd64.deb
+          sudo dpkg -i pandoc-3.6.4-1-amd64.deb
       - name: Install LEAP requirements
         run: |
           pip install -r requirements.txt

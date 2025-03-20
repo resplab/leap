@@ -22,6 +22,7 @@ For developers, see :doc:`Development <dev/index>`.
 
   installation
   cli/index
+  model/index
   dev/index
   references
 
