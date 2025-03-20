@@ -4,7 +4,6 @@ import pathlib
 import pprint
 import socket
 import numpy as np
-from typing import Union
 from datetime import datetime
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
@@ -260,7 +259,7 @@ def force_output_path(dir_name: str) -> pathlib.Path:
     return output_path
 
 
-def convert_non_serializable(obj: Union[np.ndarray, object]) -> Union[list, str]:
+def convert_non_serializable(obj: np.ndarray | object) -> list | str:
     """
     Description
     ---
@@ -282,6 +281,7 @@ def convert_non_serializable(obj: Union[np.ndarray, object]) -> Union[list, str]
             - A list if `obj` is an ndarray.
             - A string representation otherwise.
     """
+
     if isinstance(obj, np.ndarray):
         return obj.tolist()
     # Default for unsupported types
