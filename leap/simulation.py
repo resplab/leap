@@ -479,7 +479,6 @@ class Simulation:
         logger.info("\nSimulation finished. Check your simulation object for results.")
         return self.outcome_matrix
 
-
     def _process_year(self, year):
         """Process each year in the simulation."""
         year_index = year - self.min_year
@@ -494,15 +493,15 @@ class Simulation:
         for month in range(1, 13):
             self._process_month(year, year_index, month, new_agents_df)
 
-
     def _process_month(self, year, year_index, month, new_agents_df):
         """Process each month in the simulation."""
         pbar = tqdm(
-            range(new_agents_df.shape[0]), desc="Agents", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}"
+            range(new_agents_df.shape[0]),
+            desc="Agents",
+            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
         )
         for i in pbar:
             self._process_agent(year, year_index, month, new_agents_df, i)
-
 
     def _process_agent(self, year, year_index, month, new_agents_df, i):
         """Process each agent in the simulation."""
@@ -557,7 +556,6 @@ class Simulation:
 
         self._process_agent_outcome_events(agent, month)
 
-
     def _process_agent_outcome_events(self, agent, month):
         """Process events for each agent to update outcome matrix."""
         self.outcome_matrix.antibiotic_exposure.increment(
@@ -586,7 +584,9 @@ class Simulation:
             self.generate_initial_asthma(agent)
             logger.info(f"| ---- Agent age > 3, agent has asthma (prevalence)? {agent.has_asthma}")
 
-        while agent.alive and agent.age <= self.max_age and agent.year_index <= self.max_time_horizon:
+        while (
+            agent.alive and agent.age <= self.max_age and agent.year_index <= self.max_time_horizon
+        ):
             if not agent.has_asthma:
                 self.check_if_agent_gets_new_asthma_diagnosis(agent, self.outcome_matrix)
                 logger.info(f"| ---- Agent has asthma (incidence)? {agent.has_asthma}")
@@ -686,4 +686,6 @@ class Simulation:
                 agent.year_index += 1
 
                 if agent.age <= self.max_age and agent.year_index <= self.max_time_horizon:
-                    logger.info(f"| -- Year: {agent.year_index + self.min_year - 1}, age: {agent.age}")
+                    logger.info(
+                        f"| -- Year: {agent.year_index + self.min_year - 1}, age: {agent.age}"
+                    )
