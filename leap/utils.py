@@ -217,10 +217,7 @@ def check_projection_scenario(projection_scenario: str):
 
 
 def convert_non_serializable(obj: np.ndarray | object) -> list | str:
-    """
-    Description
-    ---
-    Convert non-serializable objects into JSON-friendly formats.
+    """Convert non-serializable objects into JSON-friendly formats.
 
     This function is intended to be used with ``json.dumps(..., default=convert_non_serializable)``.
     It handles cases where objects cannot be directly serialized into JSON:
@@ -228,13 +225,11 @@ def convert_non_serializable(obj: np.ndarray | object) -> list | str:
     - NumPy arrays (``numpy.ndarray``) are converted to Python lists.
     - Other unsupported types are converted to their string representation.
 
-    Args
-    ---
-        obj (``np.ndarray | object``): The object to be converted.
+    Args:
+        obj: The object to be converted.
 
-    Returns
-    ---
-        ``list | str``: A JSON-serializable equivalent of ``obj``:
+    Returns:
+        out: A JSON-serializable equivalent of ``obj``:
             - A list if ``obj`` is an ndarray.
             - A string representation otherwise.
     """
