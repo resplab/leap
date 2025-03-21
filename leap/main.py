@@ -8,6 +8,7 @@ from datetime import datetime
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
 from leap.logger import get_logger, set_logging_level
+from leap.utils import convert_non_serializable
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -184,23 +185,23 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
         ``output_path``: either the path to the output folder, or None, signifying to abort
 
     Examples:
-    
+
     (assuming ``/home/user/WORKSPACE`` is the currect working directory)
-    
+
     .. code-block:: python
-    
+
         handle_output_path('mydir1')
         # assuming the user confirmed to create mydir1
         > '/home/user/WORKSPACE/leap_output/mydir1'
-        
+
         handle_output_path('mydir1')
         # assuming the user confirmed to continue with existing mydir1
         > '/home/user/WORKSPACE/leap_output/mydir1'
-        
+
         handle_output_path('mydir1')
         # assuming the user did not confirm to continue with existing mydir1
         > None
-        
+
         handle_output_path('mydir2')
         # assuming the user did not confirm to create mydir2
         > None
@@ -257,11 +258,11 @@ def force_output_path(dir_name: str) -> pathlib.Path:
         ``output_path``: either the path to the output folder
 
     Examples:
-    
+
     (assuming ``/home/user/WORKSPACE`` is the currect working directory)
-    
+
     .. code-block:: python
-    
+
         force_output_path('mydir')
         > '/home/user/WORKSPACE/leap_output/mydir'
     """
@@ -275,35 +276,6 @@ def force_output_path(dir_name: str) -> pathlib.Path:
 
     # Return output_path if successful and continuing with program
     return output_path
-
-
-def convert_non_serializable(obj: np.ndarray | object) -> list | str:
-    """
-    Description
-    ---
-    Convert non-serializable objects into JSON-friendly formats.
-
-    This function is intended to be used with ``json.dumps(..., default=convert_non_serializable)``.
-    It handles cases where objects cannot be directly serialized into JSON:
-
-    - NumPy arrays (``numpy.ndarray``) are converted to Python lists.
-    - Other unsupported types are converted to their string representation.
-
-    Args
-    ---
-        obj (``np.ndarray | object``): The object to be converted.
-
-    Returns
-    ---
-        ``list | str``: A JSON-serializable equivalent of ``obj``:
-            - A list if ``obj`` is an ndarray.
-            - A string representation otherwise.
-    """
-
-    if isinstance(obj, np.ndarray):
-        return obj.tolist()
-    # Default for unsupported types
-    return str(obj)
 
 
 def run_main():
