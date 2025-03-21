@@ -172,20 +172,20 @@ def get_config(path_config: str) -> dict:
 
 def handle_output_path(dir_name: str) -> pathlib.Path | None:
     """Handles user input through CLI prompts depending on dir_name.
-    - Assuming `WORKSPACE` is directory where `leap` was called,
-      then `WORKSPACE/leap_output/dir_name` is checked
+    - Assuming ``WORKSPACE`` is directory where ``leap`` was called,
+      then ``WORKSPACE/leap_output/dir_name`` is checked
     - If that path exists then user is prompted to continue (overwriting the current outputs)
     - If that path doesn't exist then user is prompted whether to create it
 
     Args:
-        dir_name: The name of the directory to store the outputs in
+        ``dir_name``: The name of the directory to store the outputs in
 
     Returns:
-        output_path: either the path to the output folder, or None, signifying to abort
+        ``output_path``: either the path to the output folder, or None, signifying to abort
 
     Examples:
     
-    (assuming `/home/user/WORKSPACE` is the currect working directory)
+    (assuming ``/home/user/WORKSPACE`` is the currect working directory)
     
     .. code-block:: python
     
@@ -204,7 +204,6 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
         handle_output_path('mydir2')
         # assuming the user did not confirm to create mydir2
         > None
-    
     """
 
     # pathlib automatically prefixes the path with the current working directory
@@ -246,26 +245,25 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
 
 def force_output_path(dir_name: str) -> pathlib.Path:
     """Provides path for output data without user input.
-    - Assuming `WORKSPACE` is the directory where `leap` was called,
-      then `WORKSPACE/leap_output/dir_name` is checked
+    - Assuming ``WORKSPACE`` is the directory where ``leap`` was called,
+      then ``WORKSPACE/leap_output/dir_name`` is checked
     - If that path exists then that dir is used (overwriting any existsing data)
     - If that path doesn't exist then is created and used
 
     Args:
-        dir_name: The name of the directory to store the outputs in
+        ``dir_name``: The name of the directory to store the outputs in
 
     Returns:
-        output_path: either the path to the output folder
+        ``output_path``: either the path to the output folder
 
     Examples:
     
-    (assuming `/home/user/WORKSPACE` is the currect working directory)
+    (assuming ``/home/user/WORKSPACE`` is the currect working directory)
     
     .. code-block:: python
     
         force_output_path('mydir')
         > '/home/user/WORKSPACE/leap_output/mydir'
-        
     """
 
     # Use resolve() to normalize the path and make it absolute
@@ -285,20 +283,20 @@ def convert_non_serializable(obj: np.ndarray | object) -> list | str:
     ---
     Convert non-serializable objects into JSON-friendly formats.
 
-    This function is intended to be used with `json.dumps(..., default=convert_non_serializable)`.
+    This function is intended to be used with ``json.dumps(..., default=convert_non_serializable)``.
     It handles cases where objects cannot be directly serialized into JSON:
 
-    - NumPy arrays (`numpy.ndarray`) are converted to Python lists.
+    - NumPy arrays (``numpy.ndarray``) are converted to Python lists.
     - Other unsupported types are converted to their string representation.
 
     Args
     ---
-        obj (`np.ndarray | object`): The object to be converted.
+        obj (``np.ndarray | object``): The object to be converted.
 
     Returns
     ---
-        `list | str`: A JSON-serializable equivalent of `obj`:
-            - A list if `obj` is an ndarray.
+        ``list | str``: A JSON-serializable equivalent of ``obj``:
+            - A list if ``obj`` is an ndarray.
             - A string representation otherwise.
     """
 
