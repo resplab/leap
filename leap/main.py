@@ -247,7 +247,7 @@ def force_output_path(dir_name: str) -> pathlib.Path:
     """Provides path for output data without user input.
     - Assuming ``WORKSPACE`` is the directory where ``leap`` was called,
       then ``WORKSPACE/leap_output/dir_name`` is checked
-    - If that path exists then that dir is used (overwriting any existsing data)
+    - If that path exists then that dir is used (overwriting any existing data)
     - If that path doesn't exist then is created and used
 
     Args:
