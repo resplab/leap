@@ -173,6 +173,7 @@ def get_config(path_config: str) -> dict:
 
 def handle_output_path(dir_name: str) -> pathlib.Path | None:
     """Handles user input through CLI prompts depending on dir_name.
+    
     - Assuming ``WORKSPACE`` is directory where ``leap`` was called,
       then ``WORKSPACE/leap_output/dir_name`` is checked
     - If that path exists then user is prompted to continue (overwriting the current outputs)
@@ -246,6 +247,7 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
 
 def force_output_path(dir_name: str) -> pathlib.Path:
     """Provides path for output data without user input.
+    
     - Assuming ``WORKSPACE`` is the directory where ``leap`` was called,
       then ``WORKSPACE/leap_output/dir_name`` is checked
     - If that path exists then that dir is used (overwriting any existing data)
