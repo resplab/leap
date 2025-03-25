@@ -16,7 +16,9 @@ LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
 
 
 class UUID4:
-    def __init__(self, uuid4: uuid.UUID | None = None, short: str | None = None):
+    def __init__(
+        self, uuid4: uuid.UUID | None = None, short: str | None = None
+    ):
         if uuid4 is None:
             uuid4 = uuid.uuid4()
         if short is None:
@@ -60,7 +62,9 @@ def logit(x: float | np.ndarray) -> float | np.ndarray:
 
 
 def compute_ordinal_regression(
-    η: float, θ: float | list[float], prob_function: Callable = logistic.cdf
+    η: float,
+    θ: float | list[float],
+    prob_function: Callable = logistic.cdf
 ) -> list[float]:
     """Compute the probability that ``y = k`` for each value of ``k``.
 
@@ -96,9 +100,9 @@ def compute_ordinal_regression(
     """
 
     if isinstance(θ, float):
-        θ = [-(10**5), θ, 10**5]
+        θ = [-10**5, θ, 10**5]
     else:
-        θ = [-(10**5)] + θ + [10**5]
+        θ = [-10**5] + θ + [10**5]
 
     return [prob_function(θ[k + 1] - η) - prob_function(θ[k] - η) for k in range(len(θ) - 1)]
 
@@ -124,7 +128,7 @@ def get_data_path(data_path: str) -> pathlib.Path:
         data_folder = "leap.original_data"
 
     package_path = str(pkg_resources.files(data_folder).joinpath(data_path))
-    
+
     if os.path.isfile(package_path) or os.path.isdir(package_path):
         return pathlib.Path(package_path)
     else:
@@ -193,7 +197,9 @@ def check_province(province: str):
         ValueError: If the province is not valid.
     """
 
-    PROVINCES = ["CA", "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"]
+    PROVINCES = [
+        "CA", "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"
+    ]
     if province not in PROVINCES:
         raise ValueError(f"province must be one of {PROVINCES}, received {province}")
 
@@ -208,7 +214,9 @@ def check_projection_scenario(projection_scenario: str):
         ValueError: If the projection scenario is not valid.
     """
 
-    PROJECTION_SCENARIOS = ["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", "FA", "SA"]
+    PROJECTION_SCENARIOS = [
+        "past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", "FA", "SA"
+    ]
     if projection_scenario not in PROJECTION_SCENARIOS:
         raise ValueError(
             f"projection_scenario must be one of {PROJECTION_SCENARIOS}, "
