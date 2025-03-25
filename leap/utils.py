@@ -229,9 +229,7 @@ def convert_non_serializable(obj: np.ndarray | object) -> list | str:
         obj: The object to be converted.
 
     Returns:
-        out: A JSON-serializable equivalent of ``obj``:
-            - A list if ``obj`` is an ndarray.
-            - A string representation otherwise.
+        A JSON-serializable equivalent of ``obj``.
     """
 
     if isinstance(obj, np.ndarray):

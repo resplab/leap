@@ -172,7 +172,7 @@ def get_config(path_config: str) -> dict:
 
 
 def handle_output_path(dir_name: str) -> pathlib.Path | None:
-    """Handles user input through CLI prompts depending on dir_name.
+    """Provides path for output data by handling user input through CLI prompts.
     
     - Assuming ``WORKSPACE`` is directory where ``leap`` was called,
       then ``WORKSPACE/leap_output/dir_name`` is checked
@@ -180,32 +180,32 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
     - If that path doesn't exist then user is prompted whether to create it
 
     Args:
-        ``dir_name``: The name of the directory to store the outputs in
+        dir_name: The name of the directory to store the outputs in.
 
     Returns:
-        ``output_path``: either the path to the output folder, or None, signifying to abort
+        Either the path to the output folder, or ``None``, signifying to abort
 
     Examples:
 
-    (assuming ``/home/user/WORKSPACE`` is the currect working directory)
+        (assuming ``/home/user/WORKSPACE`` is the currect working directory)
 
-    .. code-block:: python
+        .. code-block:: python
 
-        handle_output_path('mydir1')
-        # assuming the user confirmed to create mydir1
-        > '/home/user/WORKSPACE/leap_output/mydir1'
+            handle_output_path('mydir1')
+            # assuming the user confirmed to create mydir1
+            > '/home/user/WORKSPACE/leap_output/mydir1'
 
-        handle_output_path('mydir1')
-        # assuming the user confirmed to continue with existing mydir1
-        > '/home/user/WORKSPACE/leap_output/mydir1'
+            handle_output_path('mydir1')
+            # assuming the user confirmed to continue with existing mydir1
+            > '/home/user/WORKSPACE/leap_output/mydir1'
 
-        handle_output_path('mydir1')
-        # assuming the user did not confirm to continue with existing mydir1
-        > None
+            handle_output_path('mydir1')
+            # assuming the user did not confirm to continue with existing mydir1
+            > None
 
-        handle_output_path('mydir2')
-        # assuming the user did not confirm to create mydir2
-        > None
+            handle_output_path('mydir2')
+            # assuming the user did not confirm to create mydir2
+            > None
     """
 
     # pathlib automatically prefixes the path with the current working directory
@@ -254,19 +254,19 @@ def force_output_path(dir_name: str) -> pathlib.Path:
     - If that path doesn't exist then is created and used
 
     Args:
-        ``dir_name``: The name of the directory to store the outputs in
+        dir_name: The name of the directory to store the outputs in
 
     Returns:
-        ``output_path``: either the path to the output folder
+        Either the path to the output folder or ``None``, signifying to abort
 
     Examples:
 
-    (assuming ``/home/user/WORKSPACE`` is the currect working directory)
+        (assuming ``/home/user/WORKSPACE`` is the currect working directory)
 
-    .. code-block:: python
+        .. code-block:: python
 
-        force_output_path('mydir')
-        > '/home/user/WORKSPACE/leap_output/mydir'
+            force_output_path('mydir')
+            > '/home/user/WORKSPACE/leap_output/mydir'
     """
 
     # Use resolve() to normalize the path and make it absolute
