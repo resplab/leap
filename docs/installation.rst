@@ -13,10 +13,10 @@ open a terminal and type:
   python3 --version
 
 
-If the output is ``command not found: python3``, or the version is lower than ``Python 3.9``,
-then you will need to install Python version 3.10 or higher.
+If the output is ``command not found: python3``, then you will need to install Python.
+LEAP requires Python 3.10 or higher.
 
-Mac OS
+macOS
 ******
 
 To install Python, download the installer from:
@@ -55,7 +55,7 @@ Once the installation has finished, check to make sure that it's using the corre
 Step 2: Choose Folder to Install LEAP
 -------------------------------
 
-You can install ``LEAP`` in any folder. For this example, we'll use ``my_folder``. To
+Create a directory to install ``LEAP``. In this example, we'll use ``my_folder``. To
 create this folder, open a terminal and type:
 
 .. code-block:: bash
@@ -70,7 +70,7 @@ When working with Python, it's best to create a virtual environment to keep your
 separate from the system Python. You will want to use your same Python version so if you
 installed ``python3.10`` with the installer above, the command would be:
 
-Linux/Mac
+Linux/macOS
 ******
 
 .. code-block:: bash
@@ -89,10 +89,12 @@ Windows Command Prompt
 Windows PowerShell
 ******
 
+For PowerShell, you may need to allow scripts temporarily:
+
 .. code-block:: powershell
 
   python -m venv env
-  Set-ExecutionPolicy Unrestricted -Scope Process
+  Set-ExecutionPolicy Unrestricted -Scope Process # You may need to include this command
   .\env\Scripts\Activate.ps1
 
 Step 4: (Optional) Setup Git Token
@@ -109,7 +111,7 @@ token. This is so you can install the ``LEAP`` package from ``GitHub``. To do th
 4. Tick all the boxes available, and click ``Generate token``.
 5. Copy this token to a secure file on your system. **You won't be shown it again.**
 
-Mac
+macOS
 ******
 
 6. In your terminal, type:
@@ -160,24 +162,14 @@ Step 5: Install ``LEAP``
 
 To install the ``LEAP`` package, type:
 
-Linux/Mac
-******
 
 .. code-block:: bash
 
   pip3 install git+https://github.com/resplab/leap.git
 
-Windows Command Prompt
-******
+Windows users may need to run the following command if the one above does not work:
 
 .. code-block:: cmd
-
-  python -m pip install git+https://github.com/resplab/leap.git
-
-Windows PowerShell
-******
-
-.. code-block:: powershell
 
   python -m pip install git+https://github.com/resplab/leap.git
 
@@ -186,8 +178,6 @@ To install a specific release, append ``@vx.y.z`` at the end like:
 .. code-block:: bash
 
   pip3 install git+https://github.com/resplab/leap.git@vx.y.z
-  # or
-  python -m pip install git+https://github.com/resplab/leap.git@vx.y.z
 
 Here, ``vx.y.z`` is the release version you would like to install. To see all the releases, go to:
 `LEAP Releases <https://github.com/resplab/leap/releases>`_.
@@ -204,8 +194,15 @@ username and password. Paste the token in as your password:
 Step 6: Install Success!
 --------------------------
 
-Now that you've successfully installed the ``LEAP`` package, you can start using it. To get
-started, see the :doc:`Command-Line Interface <cli/index>` documentation.
+Now that you've successfully installed the ``LEAP`` package, you can start using it.
+To verify the installation was a success, type:
+
+.. code-block:: bash
+
+  leap --help
+
+You should see various options appear of how to use the LEAP command.
+To get started running a simulation, see the :doc:`Command-Line Interface <cli/index>` documentation.
 
 To get out of the virtual environment:
 
