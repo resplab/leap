@@ -29,6 +29,18 @@ To install Python, download the installer from:
 `Windows Installer Python 3.10
 <https://www.python.org/downloads/release/python-31016/>`_.
 
+Linux
+******
+
+To install Python, use your package manager. For example, on Ubuntu, type:
+
+.. code-block:: bash
+
+  sudo apt update
+  sudo apt install python3.10
+
+For other distributions, refer to your distribution's documentation.
+
 Confirming Installation
 ******
 
