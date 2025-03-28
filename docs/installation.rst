@@ -71,23 +71,6 @@ above, you installed ``python3.10``, so the command would be:
   python3.10 -m venv env
   source env/bin/activate
 
-Windows Command Prompt
-******
-
-.. code-block:: cmd
-
-  python -m venv env
-  env\Scripts\activate
-
-Windows PowerShell
-******
-
-.. code-block:: powershell
-
-  python -m venv env
-  Set-ExecutionPolicy Unrestricted -Scope Process
-  .\env\Scripts\Activate.ps1
-
 Step 4: (Optional) Setup Git Token
 -----------------------------------
 
@@ -101,66 +84,26 @@ token. This is so you can install the ``LEAP`` package from ``GitHub``. To do th
    security, set an earlier date.
 4. Tick all the boxes available, and click ``Generate token``.
 5. Copy this token to a secure file on your system. **You won't be shown it again.**
-
-Mac
-******
-
 6. In your terminal, type:
 
 .. code:: bash
 
   git config --global credential.helper osxkeychain
 
-Linux
-******
-
-6. In your terminal, either type:
-
-.. code-block:: bash
-
-  git config --global credential.helper cache
-
-Use this for temporary storage of credentials in memory (default 15 minutes). Add a note about setting a custom timeout with ``cache --timeout=3600`` for longer sessions.
-
-.. code-block:: bash
-
-  git config --global credential.helper store
-
-Use this for persistent storage of credentials in plain text. Add a security warning that credentials are stored in ``~/.git-credentials`` and should only be used on trusted machines.
-
-Windows
-******
-
-6. In your terminal, type:
-
-.. code-block:: cmd
-
-  git config --global credential.helper manager
-
-7. Test your setup by cloning a private repository or running a Git command like:
-
-.. code-block:: bash
-
-  git ls-remote https://github.com/YOUR_USERNAME/YOUR_PRIVATE_REPO.git
-
-  # Replace YOUR_USERNAME and YOUR_PRIVATE_REPO with your GitHub username and a private repository name.
-
-*(Optional)* If you encounter issues, ensure that Git is installed on your system. You can download it from:
-`Git Downloads <https://git-scm.com/downloads>`_.
 
 Step 5: Install ``LEAP``
 -------------------------------
 
 To install the ``LEAP`` package, type:
 
-.. code:: bash
+.. code-block:: bash
 
   pip3 install git+https://github.com/resplab/leap.git
 
 
-To install a specific release:
+To install a specific release, append ``@vx.y.z`` at the end:
 
-.. code:: bash
+.. code-block:: bash
 
   pip3 install git+https://github.com/resplab/leap.git@vx.y.z
 
@@ -175,6 +118,7 @@ username and password. Paste the token in as your password:
 
   Username for 'https://github.com': YOUR_GIT_USERNAME # not your email address
   Password: YOUR_TOKEN # not your GitHub password
+  
 
 
 Step 6: Install Success!
@@ -433,6 +377,7 @@ Windows PowerShell
 .. code-block:: powershell
 
   python -m venv env
+  Set-ExecutionPolicy Unrestricted -Scope Process
   .\env\Scripts\Activate.ps1
 
 .. warning::
@@ -478,22 +423,26 @@ Step 5: Install ``LEAP``
 
 To install the ``LEAP`` package, type:
 
-.. code:: bash
+Windows Command Prompt
+~~~~~~~~~~~~~~~~~~~~~~
 
-  pip3 install git+https://github.com/resplab/leap.git
+.. code-block:: cmd
 
-Windows users may need to run the following command if the one above does not work:
+  python -m pip install git+https://github.com/resplab/leap.git
 
-.. code-block:: bash
+Windows PowerShell
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: powershell
 
   python -m pip install git+https://github.com/resplab/leap.git
 
 
 To install a specific release:
 
-.. code:: bash
+.. code-block:: bash
 
-  pip3 install git+https://github.com/resplab/leap.git@vx.y.z
+  python -m pip install git+https://github.com/resplab/leap.git@vx.y.z
 
 where ``vx.y.z`` is the release version you would like to install. To see all the releases, go to:
 `LEAP Releases <https://github.com/resplab/leap/releases>`_.
