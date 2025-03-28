@@ -54,8 +54,9 @@ create this folder, open a terminal and type:
 Step 3: Create a Virtual Environment
 --------------------------------------
 
-When working with Python, it's best to create a virtual environment to keep your packages separate
-from the system Python. To create a virtual environment, type:
+When working with Python, it's best to create a virtual environment to keep your packages
+separate from the system Python. You will want to use your same Python version so if you
+installed ``python3.10`` with the installer above, the command would be:
 
 .. code:: bash
 
@@ -70,6 +71,22 @@ above, you installed ``python3.10``, so the command would be:
   python3.10 -m venv env
   source env/bin/activate
 
+Windows Command Prompt
+******
+
+.. code-block:: cmd
+
+  python -m venv env
+  env\Scripts\activate
+
+Windows PowerShell
+******
+
+.. code-block:: powershell
+
+  python -m venv env
+  Set-ExecutionPolicy Unrestricted -Scope Process
+  .\env\Scripts\Activate.ps1
 
 Step 4: (Optional) Setup Git Token
 -----------------------------------
