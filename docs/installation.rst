@@ -43,7 +43,7 @@ Once the install has finished, check to make sure that it's using the correct ve
 Step 2: Choose Install Folder
 -------------------------------
 
-You can install ``LEAP`` in any folder. For this example, we'll use ``my_folder``. To
+Create a directory to install ``LEAP``. In this example, we'll use ``my_folder``. To
 create this folder, open a terminal and type:
 
 .. code:: bash
@@ -374,10 +374,12 @@ Windows Command Prompt
 Windows PowerShell
 ~~~~~~~~~~~~~~~~~~~
 
+For PowerShell, you may need to allow scripts temporarily:
+
 .. code-block:: powershell
 
   python -m venv env
-  Set-ExecutionPolicy Unrestricted -Scope Process
+  Set-ExecutionPolicy Unrestricted -Scope Process # You may need to include this command
   .\env\Scripts\Activate.ps1
 
 .. warning::
@@ -479,8 +481,15 @@ After running ``leap --help``, you should see:
   ARGUMENTS:
     ...
 
-Now that you've successfully installed the ``LEAP`` package, you can start using it. To get
-started, see the :doc:`Command-Line Interface <cli/index>` documentation.
+Now that you've successfully installed the ``LEAP`` package, you can start using it.
+To verify the installation was a success, type:
+
+.. code-block:: bash
+
+  leap --help
+
+You should see various options appear of how to use the LEAP command.
+To get started running a simulation, see the :doc:`Command-Line Interface <cli/index>` documentation.
 
 To get out of the virtual environment:
 
