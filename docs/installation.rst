@@ -160,20 +160,37 @@ Step 5: Install ``LEAP``
 
 To install the ``LEAP`` package, type:
 
+Linux/Mac
+******
+
 .. code-block:: bash
 
   pip3 install git+https://github.com/resplab/leap.git
 
+Windows Command Prompt
+******
 
-To install a specific release:
+.. code-block:: cmd
+
+  python -m pip install git+https://github.com/resplab/leap.git
+
+Windows PowerShell
+******
+
+.. code-block:: powershell
+
+  python -m pip install git+https://github.com/resplab/leap.git
+
+To install a specific release, append ``@vx.y.z`` at the end like:
 
 .. code-block:: bash
 
   pip3 install git+https://github.com/resplab/leap.git@vx.y.z
+  # or
+  python -m pip install git+https://github.com/resplab/leap.git@vx.y.z
 
-where ``vx.y.z`` is the release version you would like to install. To see all the releases, go to:
+Here, ``vx.y.z`` is the release version you would like to install. To see all the releases, go to:
 `LEAP Releases <https://github.com/resplab/leap/releases>`_.
-
 
 *(Optional)* If you set up your ``git`` token in the last step, you will now be asked for you
 username and password. Paste the token in as your password:
