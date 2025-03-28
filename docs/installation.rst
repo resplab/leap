@@ -1,9 +1,6 @@
 Installation
 ==============
 
-MacOS
-******
-
 Step 1: Install Python
 ----------------------------
 
@@ -11,31 +8,45 @@ If you already have ``Python`` installed, you can skip this step. To check your 
 open a terminal and type:
 
 
-.. code:: bash
+.. code-block:: bash
 
   python3 --version
 
 
 If the output is ``command not found: python3``, or the version is lower than ``Python 3.9``,
-then you will need to install Python.
+then you will need to install Python version 3.10 or higher.
+
+Mac OS
+******
 
 To install Python, download the installer from:
 `Mac Installer Python 3.10
 <https://www.python.org/ftp/python/3.10.0/python-3.10.0post2-macos11.pkg>`_.
 
-Once the install has finished, check to make sure that it's using the correct version:
+Windows
+******
+To install Python, download the installer from:
+`Windows Installer Python 3.10
+<https://www.python.org/downloads/release/python-31016/>`_.
 
-.. code:: bash
+Confirming Installation
+******
 
-  python3 --version
+Once the installation has finished, check to make sure that it's using the correct version:
 
-Step 2: Choose Install Folder
+.. code-block:: bash
+
+   python3 --version
+   # Expected output:
+   # Python 3.10.*
+
+Step 2: Choose Folder to Install LEAP
 -------------------------------
 
 You can install ``LEAP`` in any folder. For this example, we'll use ``my_folder``. To
 create this folder, open a terminal and type:
 
-.. code:: bash
+.. code-block:: bash
 
   mkdir my_folder
   cd my_folder
@@ -46,7 +57,7 @@ Step 3: Create a Virtual Environment
 When working with Python, it's best to create a virtual environment to keep your packages separate
 from the system Python. To create a virtual environment, type:
 
-.. code:: bash
+.. code-block:: bash
 
   python3.x -m venv env
   source env/bin/activate
@@ -54,7 +65,7 @@ from the system Python. To create a virtual environment, type:
 where ``python3.x`` is your Python version. For example, if you installed Python with the installer
 above, you installed ``python3.10``, so the command would be:
 
-.. code:: bash
+.. code-block:: bash
 
   python3.10 -m venv env
   source env/bin/activate
@@ -75,7 +86,7 @@ token. This is so you can install the ``LEAP`` package from ``GitHub``. To do th
 5. Copy this token. You won't be shown it again.
 6. In your terminal, type:
 
-.. code:: bash
+.. code-block:: bash
 
   git config --global credential.helper osxkeychain
 
@@ -84,14 +95,14 @@ Step 5: Install ``LEAP``
 
 To install the ``LEAP`` package, type:
 
-.. code:: bash
+.. code-block:: bash
 
   pip3 install git+https://github.com/resplab/leap.git
 
 
 To install a specific release:
 
-.. code:: bash
+.. code-block:: bash
 
   pip3 install git+https://github.com/resplab/leap.git@vx.y.z
 
@@ -102,7 +113,7 @@ where ``vx.y.z`` is the release version you would like to install. To see all th
 *(Optional)* If you set up your ``git`` token in the last step, you will now be asked for you
 username and password. Paste the token in as your password:
 
-.. code:: bash
+.. code-block:: bash
 
   Username for 'https://github.com': YOUR_GIT_USERNAME # not your email address
   Password: YOUR_TOKEN # not your GitHub password
@@ -116,7 +127,7 @@ started, see the :doc:`Command-Line Interface <cli/index>` documentation.
 
 To get out of the virtual environment:
 
-.. code:: bash
+.. code-block:: bash
 
   deactivate
 
