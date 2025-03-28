@@ -107,12 +107,53 @@ token. This is so you can install the ``LEAP`` package from ``GitHub``. To do th
 3. Set the expiration to ``No expiration`` so you don't have to do this again. If you want more
    security, set an earlier date.
 4. Tick all the boxes available, and click ``Generate token``.
-5. Copy this token. You won't be shown it again.
+5. Copy this token to a secure file on your system. **You won't be shown it again.**
+
+Mac
+******
+
 6. In your terminal, type:
 
 .. code-block:: bash
 
   git config --global credential.helper osxkeychain
+
+Linux
+******
+
+6. In your terminal, either type:
+
+.. code-block:: bash
+
+  git config --global credential.helper cache
+
+Use this for temporary storage of credentials in memory (default 15 minutes). Add a note about setting a custom timeout with ``cache --timeout=3600`` for longer sessions.
+
+.. code-block:: bash
+
+  git config --global credential.helper store
+
+Use this for persistent storage of credentials in plain text. Add a security warning that credentials are stored in ``~/.git-credentials`` and should only be used on trusted machines.
+
+Windows
+******
+
+6. In your terminal, type:
+
+.. code-block:: cmd
+
+  git config --global credential.helper manager
+
+7. Test your setup by cloning a private repository or running a Git command like:
+
+.. code-block:: bash
+
+  git ls-remote https://github.com/YOUR_USERNAME/YOUR_PRIVATE_REPO.git
+
+  # Replace YOUR_USERNAME and YOUR_PRIVATE_REPO with your GitHub username and a private repository name.
+
+*(Optional)* If you encounter issues, ensure that Git is installed on your system. You can download it from:
+`Git Downloads <https://git-scm.com/downloads>`_.
 
 Step 5: Install ``LEAP``
 -------------------------------
