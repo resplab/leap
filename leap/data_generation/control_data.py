@@ -74,7 +74,7 @@ def load_control_data() -> pd.DataFrame:
         A dataframe containing the control data from the ``EBA`` study.
         Columns:
 
-        * ``study_id (int)``: The 8-digit study ID.
+        * ``patient_id (int)``: The 8-digit patient ID.
         * ``visit (int)``: The visit number. Visits were scheduled every 3 months for a year.
           A value in ``[1, 5]``.
         * ``age (float)``: The age of the person in years.
@@ -110,7 +110,7 @@ def load_control_data() -> pd.DataFrame:
 
     # Convert the column names to snake_case
     df.rename(columns={
-        "studyId": "study_id",
+        "studyId": "patient_id",
         "daytimeSymptoms": "daytime_symptoms",
         "nocturnalSymptoms": "nocturnal_symptoms",
         "inhalerUse": "inhaler_use",
@@ -157,12 +157,12 @@ def load_control_data() -> pd.DataFrame:
         axis=1
     )
 
-    # Reassign the study_id
-    study_id_map = {
-        study_id: i for i, study_id in enumerate(df["study_id"].unique())
+    # Reassign the patient_id
+    patient_id_map = {
+        patient_id: i for i, patient_id in enumerate(df["patient_id"].unique())
     }
-    df["study_id"] = df["study_id"].apply(
-        lambda x: study_id_map[x]
+    df["patient_id"] = df["patient_id"].apply(
+        lambda x: patient_id_map[x]
     )
     return df
 
@@ -173,7 +173,7 @@ def fit_ordinal_regression_model(df: pd.DataFrame) -> Tuple[dict, dict, dict]:
     Args:
         df: A dataframe containing information about asthma control levels from the EBA study:
 
-            * ``study_id (int)``: The 8-digit study ID.
+            * ``patient_id (int)``: The 8-digit patient ID.
             * ``visit (int)``: The visit number. Visits were scheduled every 3 months for a year.
               A value in ``[1, 5]``.
             * ``age (float)``: The age of the person in years.
@@ -243,7 +243,7 @@ def fit_ordinal_regression_model(df: pd.DataFrame) -> Tuple[dict, dict, dict]:
     coefficients, std = ordinal_regression_r(
         formula=formula,
         df=df,
-        random="study_id",
+        random="patient_id",
         hessian=True,
         link="logistic",
         nAGQ=5
