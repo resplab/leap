@@ -246,7 +246,7 @@ def fit_ordinal_regression_model(df: pd.DataFrame) -> Tuple[dict, dict, dict]:
         random="patient_id",
         hessian=True,
         link="logistic",
-        nAGQ=5
+        nagq=5
     )
     
     beta_coefficients = {
