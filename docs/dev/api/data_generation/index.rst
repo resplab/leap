@@ -12,6 +12,7 @@ and update if new data needs to be added.
   leap.data_generation.death_data
   leap.data_generation.exacerbation_data
   leap.data_generation.migration_data
+  leap.data_generation.occurrence_data
   leap.data_generation.utils
 
 
