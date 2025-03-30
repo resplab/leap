@@ -8,3 +8,4 @@ Model
 
   model-glm
   model-occurrence
+  model-control
