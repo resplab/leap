@@ -7,6 +7,7 @@ Prerequisites
 - Administrator or ``sudo`` privileges (Linux/macOS).
 - ``GitHub`` account created.
 - ``git`` installed on your system.
+- Ensure ``pip`` is installed.
 - Internet access to download dependencies.
 
 
@@ -29,8 +30,7 @@ If the output is ``command not found: python3``, or the version is lower than ``
 then you will need to install Python.
 
 To install Python, download the installer from:
-`Mac Installer Python 3.10
-<https://www.python.org/ftp/python/3.10.0/python-3.10.0post2-macos11.pkg>`_.
+`Mac Installer Python 3.10 <https://www.python.org/ftp/python/3.10.0/python-3.10.0post2-macos11.pkg>`_.
 
 Once the install has finished, check to make sure that it's using the correct version:
 
@@ -50,6 +50,8 @@ create this folder, open a terminal and type:
 
   mkdir my_folder
   cd my_folder
+
+This folder will serve as the workspace where you install and manage the LEAP package.
 
 Step 3: Create a Virtual Environment
 --------------------------------------
