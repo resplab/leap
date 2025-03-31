@@ -38,7 +38,9 @@ To install Python, use your package manager. For example, on Ubuntu, type:
     sudo apt update
     sudo apt install python3.10
 
-For other distributions, refer to your distribution's documentation.
+.. note::
+
+    For other distributions, refer to your distribution's documentation.
 
 Windows
 ~~~~~~~
@@ -68,18 +70,18 @@ Troubleshooting
 
       python3 -m ensurepip --upgrade
 
-Step 2: Choose Folder to Install LEAP
+Step 2: Choose Directory to Install LEAP
 --------------------------------------
 
-Create a directory to install ``LEAP``. In this example, we'll use ``my_folder``. To
-create this folder, open a terminal and type:
+Create a directory to install ``LEAP``. In this example, we'll use ``my_folder``.
+To create this directory, open a terminal and type:
 
 .. code-block:: bash
 
     mkdir my_folder
     cd my_folder
 
-This folder will serve as the workspace where you install and manage the LEAP package.
+This directory will serve as the workspace where you install and manage the LEAP package.
 
 Step 3: Create a Virtual Environment
 -------------------------------------
@@ -107,13 +109,17 @@ Windows Command Prompt
 Windows PowerShell
 ~~~~~~
 
-For PowerShell, you may need to allow scripts temporarily:
-
 .. code-block:: powershell
 
     python -m venv env
-    Set-ExecutionPolicy Unrestricted -Scope Process # You may need to include this command
     .\env\Scripts\Activate.ps1
+
+.. warning::
+
+    For PowerShell, you may need to allow scripts temporarily:
+
+    If you get an error, run ``Set-ExecutionPolicy Unrestricted -Scope Process``
+    before running ``.\env\Scripts\Activate.ps1``
 
 Step 4: (Optional) Setup Git Token
 -----------------------------------
