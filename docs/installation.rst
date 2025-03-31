@@ -4,7 +4,9 @@ Installation
 Prerequisites
 ----------------------------
 - Administrator or ``sudo`` privileges (Linux/macOS).
-- Ensure ``pip`` is installed.
+- ``GitHub`` account created.
+- ``git`` installed on your system.
+- Internet access to download dependencies.
 
 Step 1: Install Python
 ----------------------------
@@ -55,7 +57,14 @@ Once the installation has finished, check to make sure that it's using the corre
    # Expected output:
    # Python 3.10.*
 
-If the output does not show Python 3.10 or higher, ensure that Python 3.10 is installed and that the `python3` command points to the correct version.
+Troubleshooting
+***************
+- If ``python3 --version`` does not return Python 3.10 or higher, ensure Python 3.10 is installed and that the ``python3`` command points to the correct version.
+- If ``pip`` is not installed, you can install it manually:
+
+  .. code-block:: bash
+
+    python3 -m ensurepip --upgrade
 
 Step 2: Choose Folder to Install LEAP
 -------------------------------
