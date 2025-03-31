@@ -490,7 +490,21 @@ To verify the installation was a success, type:
 
   leap --help
 
-You should see various options appear of how to use the LEAP command.
+Expected Output
+******
+After running ``leap --help``, you should see:
+
+.. code-block:: bash
+
+  usage: leap [-r] [-c CONFIG] [-p PROVINCE] [-ma MAX_AGE] [-my MIN_YEAR] [-th TIME_HORIZON]
+  [-gt POPULATION_GROWTH_TYPE] [-nb NUM_BIRTHS_INITIAL] [-ip] [-o PATH_OUTPUT] [-f] [-v] [-h]
+
+  options:
+    -r, --run-simulation  Run the simulation.
+
+  ARGUMENTS:
+    ...
+
 To get started running a simulation, see the :doc:`Command-Line Interface <cli/index>` documentation.
 
 To get out of the virtual environment:
