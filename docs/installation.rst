@@ -23,7 +23,7 @@ open a terminal and type:
 
 .. code:: bash
 
-  python3 --version
+    python3 --version
 
 
 If the output is ``command not found: python3``, or the version is lower than ``Python 3.9``,
@@ -48,8 +48,8 @@ create this folder, open a terminal and type:
 
 .. code:: bash
 
-  mkdir my_folder
-  cd my_folder
+    mkdir my_folder
+    cd my_folder
 
 This folder will serve as the workspace where you install and manage the LEAP package.
 
@@ -70,8 +70,8 @@ above, you installed ``python3.10``, so the command would be:
 
 .. code:: bash
 
-  python3.10 -m venv env
-  source env/bin/activate
+    python3.10 -m venv env
+    source env/bin/activate
 
 Step 4: (Optional) Setup Git Token
 -----------------------------------
@@ -90,7 +90,7 @@ token. This is so you can install the ``LEAP`` package from ``GitHub``. To do th
 
 .. code:: bash
 
-  git config --global credential.helper osxkeychain
+    git config --global credential.helper osxkeychain
 
 
 Step 5: Install ``LEAP``
@@ -100,14 +100,14 @@ To install the ``LEAP`` package, type:
 
 .. code-block:: bash
 
-  pip3 install git+https://github.com/resplab/leap.git
+    pip3 install git+https://github.com/resplab/leap.git
 
 
 To install a specific release, append ``@vx.y.z`` at the end:
 
 .. code-block:: bash
 
-  pip3 install git+https://github.com/resplab/leap.git@vx.y.z
+    pip3 install git+https://github.com/resplab/leap.git@vx.y.z
 
 where ``vx.y.z`` is the release version you would like to install. To see all the releases, go to:
 `LEAP Releases <https://github.com/resplab/leap/releases>`_.
@@ -130,20 +130,20 @@ To verify the installation was a success, type:
 
 .. code-block:: bash
 
-  leap --help
+    leap --help
 
 After running ``leap --help``, you should see:
 
 .. code-block:: bash
 
-  usage: leap [-r] [-c CONFIG] [-p PROVINCE] [-ma MAX_AGE] [-my MIN_YEAR] [-th TIME_HORIZON]
-  [-gt POPULATION_GROWTH_TYPE] [-nb NUM_BIRTHS_INITIAL] [-ip] [-o PATH_OUTPUT] [-f] [-v] [-h]
+    usage: leap [-r] [-c CONFIG] [-p PROVINCE] [-ma MAX_AGE] [-my MIN_YEAR] [-th TIME_HORIZON]
+    [-gt POPULATION_GROWTH_TYPE] [-nb NUM_BIRTHS_INITIAL] [-ip] [-o PATH_OUTPUT] [-f] [-v] [-h]
 
-  options:
-    -r, --run-simulation  Run the simulation.
+    options:
+      -r, --run-simulation  Run the simulation.
 
-  ARGUMENTS:
-    ...
+    ARGUMENTS:
+      ...
 
 Now that you've successfully installed the ``LEAP`` package, you can start using it. To get
 started, see the :doc:`Command-Line Interface <cli/index>` documentation.
@@ -249,8 +249,8 @@ Use this for persistent storage of credentials in plain text.
 
 .. warning::
 
-  This command should only be used on trusted machines.
-  Add a security warning that credentials are stored in ``~/.git-credentials`` 
+    This command should only be used on trusted machines.
+    Add a security warning that credentials are stored in ``~/.git-credentials`` 
 
 
 Step 5: Install ``LEAP``
@@ -497,7 +497,7 @@ To get out of the virtual environment:
 
 .. code:: bash
 
-  deactivate
+    deactivate
 
 
 Developers
