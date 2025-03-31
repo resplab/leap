@@ -151,7 +151,12 @@ Use this for temporary storage of credentials in memory (default 15 minutes). Ad
 
   git config --global credential.helper store
 
-Use this for persistent storage of credentials in plain text. Add a security warning that credentials are stored in ``~/.git-credentials`` and should only be used on trusted machines.
+Use this for persistent storage of credentials in plain text.
+
+.. warning::
+
+  This command should only be used on trusted machines.
+  Add a security warning that credentials are stored in ``~/.git-credentials`` 
 
 Windows
 ******
@@ -217,7 +222,21 @@ To verify the installation was a success, type:
 
   leap --help
 
-You should see various options appear of how to use the LEAP command.
+Expected Output
+******
+After running ``leap --help``, you should see:
+
+.. code-block:: bash
+
+  usage: leap [-r] [-c CONFIG] [-p PROVINCE] [-ma MAX_AGE] [-my MIN_YEAR] [-th TIME_HORIZON]
+  [-gt POPULATION_GROWTH_TYPE] [-nb NUM_BIRTHS_INITIAL] [-ip] [-o PATH_OUTPUT] [-f] [-v] [-h]
+
+  options:
+    -r, --run-simulation  Run the simulation.
+
+  ARGUMENTS:
+    ...
+
 To get started running a simulation, see the :doc:`Command-Line Interface <cli/index>` documentation.
 
 To get out of the virtual environment:
