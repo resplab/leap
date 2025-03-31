@@ -17,7 +17,7 @@ open a terminal and type:
 
 .. code-block:: bash
 
-  python3 --version
+    python3 --version
 
 If the output is ``command not found: python3``, then you will need to install Python.
 LEAP requires Python 3.10 or higher.
@@ -28,13 +28,6 @@ macOS
 To install Python, download the installer from:
 `Mac Installer Python 3.10 <https://www.python.org/ftp/python/3.10.0/python-3.10.0post2-macos11.pkg>`_.
 
-Windows
-~~~~~~~
-
-To install Python, download the installer from:
-`Windows Installer Python 3.10
-<https://www.python.org/downloads/release/python-31016/>`_.
-
 Linux
 ~~~~~~
 
@@ -42,10 +35,17 @@ To install Python, use your package manager. For example, on Ubuntu, type:
 
 .. code-block:: bash
 
-  sudo apt update
-  sudo apt install python3.10
+    sudo apt update
+    sudo apt install python3.10
 
 For other distributions, refer to your distribution's documentation.
+
+Windows
+~~~~~~~
+
+To install Python, download the installer from:
+`Windows Installer Python 3.10
+<https://www.python.org/downloads/release/python-31016/>`_.
 
 Confirming Installation
 ~~~~~~
@@ -54,9 +54,9 @@ Once the installation has finished, check to make sure that it's using the corre
 
 .. code-block:: bash
 
-   python3 --version
-   # Expected output:
-   # Python 3.10.*
+    python3 --version
+    # Expected output:
+    # Python 3.10.*
 
 Troubleshooting
 ~~~~~~~~~~~~~~~
@@ -66,7 +66,7 @@ Troubleshooting
 
   .. code-block:: bash
 
-    python3 -m ensurepip --upgrade
+      python3 -m ensurepip --upgrade
 
 Step 2: Choose Folder to Install LEAP
 --------------------------------------
@@ -76,8 +76,8 @@ create this folder, open a terminal and type:
 
 .. code-block:: bash
 
-  mkdir my_folder
-  cd my_folder
+    mkdir my_folder
+    cd my_folder
 
 This folder will serve as the workspace where you install and manage the LEAP package.
 
@@ -88,21 +88,21 @@ When working with Python, it's best to create a virtual environment to keep your
 separate from the system Python. You will want to use your same Python version so if you
 installed ``python3.10`` with the installer above, the command would be:
 
-Linux/macOS
+macOS/Linux
 ~~~~~~
 
 .. code-block:: bash
 
-  python3.10 -m venv env
-  source env/bin/activate
+    python3.10 -m venv env
+    source env/bin/activate
 
 Windows Command Prompt
 ~~~~~~
 
 .. code-block:: cmd
 
-  python -m venv env
-  env\Scripts\activate
+    python -m venv env
+    env\Scripts\activate
 
 Windows PowerShell
 ~~~~~~
@@ -111,9 +111,9 @@ For PowerShell, you may need to allow scripts temporarily:
 
 .. code-block:: powershell
 
-  python -m venv env
-  Set-ExecutionPolicy Unrestricted -Scope Process # You may need to include this command
-  .\env\Scripts\Activate.ps1
+    python -m venv env
+    Set-ExecutionPolicy Unrestricted -Scope Process # You may need to include this command
+    .\env\Scripts\Activate.ps1
 
 Step 4: (Optional) Setup Git Token
 -----------------------------------
@@ -136,7 +136,7 @@ macOS
 
 .. code-block:: bash
 
-  git config --global credential.helper osxkeychain
+    git config --global credential.helper osxkeychain
 
 Linux
 ~~~~~~
@@ -145,20 +145,20 @@ Linux
 
 .. code-block:: bash
 
-  git config --global credential.helper cache
+    git config --global credential.helper cache
 
 Use this for temporary storage of credentials in memory (default 15 minutes). Add a note about setting a custom timeout with ``cache --timeout=3600`` for longer sessions.
 
 .. code-block:: bash
 
-  git config --global credential.helper store
+    git config --global credential.helper store
 
 Use this for persistent storage of credentials in plain text.
 
 .. warning::
 
-  This command should only be used on trusted machines.
-  Add a security warning that credentials are stored in ``~/.git-credentials`` 
+    This command should only be used on trusted machines.
+    Add a security warning that credentials are stored in ``~/.git-credentials`` 
 
 Windows
 ~~~~~~
@@ -167,15 +167,15 @@ Windows
 
 .. code-block:: cmd
 
-  git config --global credential.helper manager
+    git config --global credential.helper manager
 
 7. Test your setup by cloning a private repository or running a Git command like:
 
 .. code-block:: bash
 
-  git ls-remote https://github.com/YOUR_USERNAME/YOUR_PRIVATE_REPO.git
+    git ls-remote https://github.com/YOUR_USERNAME/YOUR_PRIVATE_REPO.git
 
-  # Replace YOUR_USERNAME and YOUR_PRIVATE_REPO with your GitHub username and a private repository name.
+    # Replace YOUR_USERNAME and YOUR_PRIVATE_REPO with your GitHub username and a private repository name.
 
 *(Optional)* If you encounter issues, ensure that Git is installed on your system. You can download it from:
 `Git Downloads <https://git-scm.com/downloads>`_.
@@ -187,19 +187,19 @@ To install the ``LEAP`` package, type:
 
 .. code-block:: bash
 
-  pip3 install git+https://github.com/resplab/leap.git
+    pip3 install git+https://github.com/resplab/leap.git
 
 Windows users may need to run the following command if the one above does not work:
 
 .. code-block:: cmd
 
-  python -m pip install git+https://github.com/resplab/leap.git
+    python -m pip install git+https://github.com/resplab/leap.git
 
 To install a specific release, append ``@vx.y.z`` at the end like:
 
 .. code-block:: bash
 
-  pip3 install git+https://github.com/resplab/leap.git@vx.y.z
+    pip3 install git+https://github.com/resplab/leap.git@vx.y.z
 
 Here, ``vx.y.z`` is the release version you would like to install. To see all the releases, go to:
 `LEAP Releases <https://github.com/resplab/leap/releases>`_.
@@ -209,8 +209,8 @@ username and password. Paste the token in as your password:
 
 .. code-block:: bash
 
-  Username for 'https://github.com': YOUR_GIT_USERNAME # not your email address
-  Password: YOUR_TOKEN # not your GitHub password
+    Username for 'https://github.com': YOUR_GIT_USERNAME # not your email address
+    Password: YOUR_TOKEN # not your GitHub password
 
 Step 6: Install Success!
 -------------------------
@@ -220,7 +220,7 @@ To verify the installation was a success, type:
 
 .. code-block:: bash
 
-  leap --help
+    leap --help
 
 Expected Output
 ~~~~~~
@@ -229,14 +229,14 @@ After running ``leap --help``, you should see:
 
 .. code-block:: bash
 
-  usage: leap [-r] [-c CONFIG] [-p PROVINCE] [-ma MAX_AGE] [-my MIN_YEAR] [-th TIME_HORIZON]
-  [-gt POPULATION_GROWTH_TYPE] [-nb NUM_BIRTHS_INITIAL] [-ip] [-o PATH_OUTPUT] [-f] [-v] [-h]
+    usage: leap [-r] [-c CONFIG] [-p PROVINCE] [-ma MAX_AGE] [-my MIN_YEAR] [-th TIME_HORIZON]
+    [-gt POPULATION_GROWTH_TYPE] [-nb NUM_BIRTHS_INITIAL] [-ip] [-o PATH_OUTPUT] [-f] [-v] [-h]
 
-  options:
-    -r, --run-simulation  Run the simulation.
+    options:
+      -r, --run-simulation  Run the simulation.
 
-  ARGUMENTS:
-    ...
+    ARGUMENTS:
+      ...
 
 To get started running a simulation, see the :doc:`Command-Line Interface <cli/index>` documentation.
 
@@ -244,7 +244,7 @@ To get out of the virtual environment:
 
 .. code-block:: bash
 
-  deactivate
+    deactivate
 
 Developers
 -------------------------
