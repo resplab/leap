@@ -1,6 +1,11 @@
 Installation
 ==============
 
+Prerequisites
+----------------------------
+- Administrator or ``sudo`` privileges (Linux/macOS).
+- Ensure ``pip`` is installed.
+
 Step 1: Install Python
 ----------------------------
 
@@ -18,10 +23,8 @@ LEAP requires Python 3.10 or higher.
 
 macOS
 ******
-
 To install Python, download the installer from:
-`Mac Installer Python 3.10
-<https://www.python.org/ftp/python/3.10.0/python-3.10.0post2-macos11.pkg>`_.
+`Mac Installer Python 3.10 <https://www.python.org/ftp/python/3.10.0/python-3.10.0post2-macos11.pkg>`_.
 
 Windows
 ******
@@ -52,6 +55,8 @@ Once the installation has finished, check to make sure that it's using the corre
    # Expected output:
    # Python 3.10.*
 
+If the output does not show Python 3.10 or higher, ensure that Python 3.10 is installed and that the `python3` command points to the correct version.
+
 Step 2: Choose Folder to Install LEAP
 -------------------------------
 
@@ -62,6 +67,8 @@ create this folder, open a terminal and type:
 
   mkdir my_folder
   cd my_folder
+
+This folder will serve as the workspace where you install and manage the LEAP package.
 
 Step 3: Create a Virtual Environment
 --------------------------------------
