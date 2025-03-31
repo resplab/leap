@@ -4,11 +4,11 @@ import pathlib
 import pprint
 import socket
 import numpy as np
-from typing import Union
 from datetime import datetime
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
 from leap.logger import get_logger, set_logging_level
+from leap.utils import convert_non_serializable
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -20,9 +20,7 @@ pretty_printer = pprint.PrettyPrinter(indent=2, sort_dicts=False)
 def get_parser() -> argparse.ArgumentParser:
     """Get the command line interface parser."""
 
-    parser = argparse.ArgumentParser(
-        add_help=False, formatter_class=argparse.RawTextHelpFormatter
-    )
+    parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
     command_group = parser.add_mutually_exclusive_group(required=False)
     command_group.add_argument(
         "-r",
@@ -174,19 +172,44 @@ def get_config(path_config: str) -> dict:
 
 
 def handle_output_path(dir_name: str) -> pathlib.Path | None:
-    """Handles user input through CLI prompts depending on dir_name.
-    - Assuming `leaproot` is the root of the project, then `leaproot/output/dir_name` is checked
+    """Provides path for output data by handling user input through CLI prompts.
+    
+    - Assuming ``WORKSPACE`` is directory where ``leap`` was called,
+      then ``WORKSPACE/leap_output/dir_name`` is checked
     - If that path exists then user is prompted to continue (overwriting the current outputs)
     - If that path doesn't exist then user is prompted whether to create it
 
     Args:
-        dir_name: The name of the directory to store the outputs in
+        dir_name: The name of the directory to store the outputs in.
 
     Returns:
-        output_path: either the path to the output folder, or None, signifying to abort
+        Either the path to the output folder, or ``None``, signifying to abort
+
+    Examples:
+
+        (assuming ``/home/user/WORKSPACE`` is the currect working directory)
+
+        .. code-block:: python
+
+            handle_output_path('mydir1')
+            # assuming the user confirmed to create mydir1
+            > '/home/user/WORKSPACE/leap_output/mydir1'
+
+            handle_output_path('mydir1')
+            # assuming the user confirmed to continue with existing mydir1
+            > '/home/user/WORKSPACE/leap_output/mydir1'
+
+            handle_output_path('mydir1')
+            # assuming the user did not confirm to continue with existing mydir1
+            > None
+
+            handle_output_path('mydir2')
+            # assuming the user did not confirm to create mydir2
+            > None
     """
 
-    output_path = pathlib.Path(*dir_name.parts[:-1], "output", dir_name.parts[-1])
+    # pathlib automatically prefixes the path with the current working directory
+    output_path = pathlib.Path("leap_output", dir_name)
 
     # Prompt user to continue with existing path or quit
     if output_path.exists():
@@ -221,20 +244,33 @@ def handle_output_path(dir_name: str) -> pathlib.Path | None:
     # Return output_path if successful and continuing with program
     return output_path
 
+
 def force_output_path(dir_name: str) -> pathlib.Path:
     """Provides path for output data without user input.
-    - Assuming `leaproot` is the root of the project, then `leaproot/output/dir_name` is checked
-    - If that path exists then that dir is used (overwriting any existsing data)
+    
+    - Assuming ``WORKSPACE`` is the directory where ``leap`` was called,
+      then ``WORKSPACE/leap_output/dir_name`` is checked
+    - If that path exists then that dir is used (overwriting any existing data)
     - If that path doesn't exist then is created and used
 
     Args:
         dir_name: The name of the directory to store the outputs in
 
     Returns:
-        output_path: either the path to the output folder
+        Either the path to the output folder or ``None``, signifying to abort
+
+    Examples:
+
+        (assuming ``/home/user/WORKSPACE`` is the currect working directory)
+
+        .. code-block:: python
+
+            force_output_path('mydir')
+            > '/home/user/WORKSPACE/leap_output/mydir'
     """
 
-    output_path = pathlib.Path(*dir_name.parts[:-1], "output", dir_name.parts[-1])
+    # Use resolve() to normalize the path and make it absolute
+    output_path = pathlib.Path("leap_output", dir_name).resolve()
 
     # Prompt user to continue with existing path or quit
     if not output_path.exists():
@@ -242,33 +278,6 @@ def force_output_path(dir_name: str) -> pathlib.Path:
 
     # Return output_path if successful and continuing with program
     return output_path
-
-def convert_non_serializable(obj: Union[np.ndarray, object]) -> Union[list, str]:
-    """
-    Description
-    ---
-    Convert non-serializable objects into JSON-friendly formats.
-
-    This function is intended to be used with `json.dumps(..., default=convert_non_serializable)`.
-    It handles cases where objects cannot be directly serialized into JSON:
-
-    - NumPy arrays (`numpy.ndarray`) are converted to Python lists.
-    - Other unsupported types are converted to their string representation.
-
-    Args
-    ---
-        obj (`Union[np.ndarray, object]`): The object to be converted.
-
-    Returns
-    ---
-        `Union[list, str]`: A JSON-serializable equivalent of `obj`:
-            - A list if `obj` is an ndarray.
-            - A string representation otherwise.
-    """
-    if isinstance(obj, np.ndarray):
-        return obj.tolist()
-    # Default for unsupported types
-    return str(obj)
 
 
 def run_main():
@@ -297,14 +306,12 @@ def run_main():
     # Check if path_output argument is supplied or not
     if args.path_output is None or args.path_output == "":
         # Default dir name based on simulation arguments
-        dir_name = pathlib.Path(
-            f"{simulation.province}-{simulation.max_age}-{simulation.min_year}-{simulation.time_horizon}-{simulation.population_growth_type}-{simulation.num_births_initial}"
-        )
+        dir_name = f"{simulation.province}-{simulation.max_age}-{simulation.min_year}-{simulation.time_horizon}-{simulation.population_growth_type}-{simulation.num_births_initial}"
     else:
         # Get the name of the dir to store outputs in
-        dir_name = pathlib.Path(args.path_output)
+        dir_name = args.path_output
 
-    # If --force flag is given, just 
+    # If --force flag is given, then use dir name regardless of user input
     if args.force:
         output_path = force_output_path(dir_name)
         logger.message(f"--force flag included, so output directory not checked.")
@@ -337,17 +344,17 @@ def run_main():
     # Get the current timestamp
     current_date = datetime.now().strftime("%Y-%m-%d")
     # Define the file name
-    log_file_path = output_path.joinpath("logfile.txt")
+    log_file_path = output_path.joinpath("log.json")
 
     # Get text to include in the logfile
     # Create dict to store metadata info
     metadata = {
-        "Hostname": socket.gethostname(),
-        "Simulation Bundle Name": str(dir_name),
-        "Simulation Run Date": current_date,
-        "Simulation Start Time": str(simulation_start_time),
-        "Simulation End Time": str(simulation_end_time),
-        "Simulation Runtime": str(simulation_end_time - simulation_start_time),
+        "hostname": socket.gethostname(),
+        "simulation_bundle_name": str(dir_name),
+        "simulation_run_date": current_date,
+        "simulation_start_time": str(simulation_start_time),
+        "simulation_end_time": str(simulation_end_time),
+        "simulation_runtime": str(simulation_end_time - simulation_start_time),
     }
     # Create dict to store parameter info
     parameters = {
@@ -362,11 +369,9 @@ def run_main():
     }
 
     # Combine metadata and parameters into the log message
-    log_data = {"Metadata": metadata, "Parameters": parameters, "Config": config}
+    log_data = {"metadata": metadata, "parameters": parameters, "config": config}
     # json.dumps lays out the data in a nice indented format for the log file
-    log_msg = json.dumps(
-        log_data, indent=4, default=convert_non_serializable, ensure_ascii=False
-    )
+    log_msg = json.dumps(log_data, indent=4, default=convert_non_serializable, ensure_ascii=False)
 
     with open(log_file_path, "w") as file:
         # Write message to logfile

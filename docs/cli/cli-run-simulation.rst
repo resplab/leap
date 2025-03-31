@@ -144,7 +144,7 @@ Simulation Arguments
       <tr>
         <td><code class="notranslate">--force</code></td>
         <td><code class="notranslate">False</code></td>
-        <td>If this flag is used, then <code>PATH_OUTPUT</code> will be used as the destination folder without prompting for confirmation, overwritting any existing data located there.
+        <td>If this flag is used, then <code>PATH_OUTPUT</code> will be used as the destination folder without prompting for confirmation, overwriting any existing data located there.
         </td>
       </tr>
 
