@@ -32,6 +32,7 @@ Linux (Ubuntu/Debian)
 
   wget https://github.com/jgm/pandoc/releases/download/3.6.4/pandoc-3.6.4-1-amd64.deb
   sudo dpkg -i pandoc-3.6.4-1-amd64.deb
+  sudo apt-get install -f
   pandoc --version
 
 
