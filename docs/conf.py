@@ -31,6 +31,7 @@ extensions = [
     # 'sphinx.ext.graphviz'
     "sphinx_immaterial",
     "sphinxcontrib.bibtex",
+    "nbsphinx",
     # "sphinx_immaterial.apidoc.python.apigen"
 ]
 
