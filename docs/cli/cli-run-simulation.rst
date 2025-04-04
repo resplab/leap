@@ -10,7 +10,7 @@ To run the ``LEAP`` model from the command line, using the default settings:
 
 .. code:: bash
 
-  leap --run-simulation --path-output PATH/TO/OUTPUT/FOLDER
+  leap --run-simulation
 
 
 Simulation Arguments
@@ -37,12 +37,31 @@ Simulation Arguments
           <code>config.json</code> will be used.
         </td>
       </tr>
+
       <tr>
-        <td><code class="notranslate">--path-output</code></td>
-        <td></td>
-        <td>Path to output directory.
+        <td><code class="notranslate">--province</code></td>
+        <td><code class="notranslate">"BC"</code></td>
+        <td>The province in which to run the simulation. Must be the 2-letter abbreviation for
+          the province. One of:
+          <ul>
+            <li><code class="notranslate">CA</code>: All of Canada</li>
+            <li><code class="notranslate">AB</code>: Alberta</li>
+            <li><code class="notranslate">BC</code>: British Columbia</li>
+            <li><code class="notranslate">MB</code>: Manitoba</li>
+            <li><code class="notranslate">NB</code>: New Brunswick</li>
+            <li><code class="notranslate">NL</code>: Newfoundland and Labrador</li>
+            <li><code class="notranslate">NS</code>: Nova Scotia</li>
+            <li><code class="notranslate">NT</code>: Northwest Territories</li>
+            <li><code class="notranslate">NU</code>: Nunavut</li>
+            <li><code class="notranslate">ON</code>: Ontario</li>
+            <li><code class="notranslate">PE</code>: Prince Edward Island</li>
+            <li><code class="notranslate">QC</code>: Quebec</li>
+            <li><code class="notranslate">SK</code>: Saskatchewan</li>
+            <li><code class="notranslate">YT</code>: Yukon</li>
+          </ul>
         </td>
       </tr>
+
       <tr>
         <td><code class="notranslate">--max-age</code></td>
         <td><code class="notranslate">111</code></td>
@@ -50,20 +69,23 @@ Simulation Arguments
         <code>--max-age 100</code>
         </td>
       </tr>
+
       <tr>
         <td><code class="notranslate">--min-year</code></td>
         <td><code class="notranslate">2024</code></td>
         <td>The year the simulation starts. For example:
-        <code>--min-year 2024</code>
+        <code>--min-year 2001</code>
         </td>
       </tr>
+
       <tr>
-        <td><code class="notranslate">--num-births-initial</code></td>
-        <td><code class="notranslate">100</code></td>
-        <td>The number of new babies born in the first year of the simulation. For example:
-        <code>--num-births-initial 10</code>
+        <td><code class="notranslate">--time-horizon</code></td>
+        <td><code class="notranslate">13</code></td>
+        <td>The number of years to run the simulation for. For example:
+        <code>--time-horizon 2</code>
         </td>
       </tr>
+
       <tr>
         <td><code class="notranslate">--population-growth-type</code></td>
         <td><code class="notranslate">"LG"</code></td>
@@ -88,36 +110,44 @@ Simulation Arguments
         <code>--population-growth-type "M3"</code>
         </td>
       </tr>
+
       <tr>
-        <td><code class="notranslate">--province</code></td>
-        <td><code class="notranslate">"BC"</code></td>
-        <td>The province in which to run the simulation. Must be the 2-letter abbreviation for
-          the province. One of:
-          <ul>
-            <li><code class="notranslate">CA</code>: All of Canada</li>
-            <li><code class="notranslate">AB</code>: Alberta</li>
-            <li><code class="notranslate">BC</code>: British Columbia</li>
-            <li><code class="notranslate">MB</code>: Manitoba</li>
-            <li><code class="notranslate">NB</code>: New Brunswick</li>
-            <li><code class="notranslate">NL</code>: Newfoundland and Labrador</li>
-            <li><code class="notranslate">NS</code>: Nova Scotia</li>
-            <li><code class="notranslate">NT</code>: Northwest Territories</li>
-            <li><code class="notranslate">NU</code>: Nunavut</li>
-            <li><code class="notranslate">ON</code>: Ontario</li>
-            <li><code class="notranslate">PE</code>: Prince Edward Island</li>
-            <li><code class="notranslate">QC</code>: Quebec</li>
-            <li><code class="notranslate">SK</code>: Saskatchewan</li>
-            <li><code class="notranslate">YT</code>: Yukon</li>
-          </ul>
+        <td><code class="notranslate">--num-births-initial</code></td>
+        <td><code class="notranslate">100</code></td>
+        <td>The number of new babies born in the first year of the simulation. For example:
+        <code>--num-births-initial 10</code>
         </td>
       </tr>
+
       <tr>
-        <td><code class="notranslate">--time-horizon</code></td>
-        <td><code class="notranslate">13</code></td>
-        <td>The number of years to run the simulation for. For example:
-        <code>--time-horizon 2</code>
+        <td><code class="notranslate">--ignore-pollution</code></td>
+        <td><code class="notranslate">False</code></td>
+        <td>If this flag is used, the simulation will not include air pollution as a factor affecting the model.
         </td>
       </tr>
+
+      <tr>
+        <td><code class="notranslate">--path-output</code></td>
+        <td>
+          <code class="notranslate">PROVINCE-</code><br>
+          <code class="notranslate">MAX_AGE-</code><br>
+          <code class="notranslate">MIN_YEAR-</code><br>
+          <code class="notranslate">TIME_HORIZON-</code><br>
+          <code class="notranslate">POPULATION_GROWTH_TYPE-</code><br>
+          <code class="notranslate">NUM_BIRTHS_INITIAL</code><br>
+        </td>
+        <td>The name of the output directory where the results will be saved. For example: <code>--path-output simulation1</code> will save the outputs to <code>LEAP/output/simulation1</code>.
+        </td>
+        </td>
+      </tr>
+
+      <tr>
+        <td><code class="notranslate">--force</code></td>
+        <td><code class="notranslate">False</code></td>
+        <td>If this flag is used, then <code>PATH_OUTPUT</code> will be used as the destination folder without prompting for confirmation, overwriting any existing data located there.
+        </td>
+      </tr>
+
       <tr>
         <td><code class="notranslate">--verbose</code></td>
         <td><code class="notranslate">False</code></td>
