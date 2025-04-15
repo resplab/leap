@@ -8,6 +8,7 @@ from leap.pollution import Pollution
 from leap.severity import ExacerbationSeverityHistory
 from leap.utils import UUID4, Sex
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from leap.family_history import FamilyHistory
 
@@ -22,6 +23,30 @@ class Agent:
             An integer representing the year of the simulation. For example, if
             the simulation starts in 2023, then the ``year_index`` for 2023 is 1, for 2024 is 2, etc.
     """
+
+    # Predefine agent attributes for faster lookups
+    __slots__ = [
+        "_uuid",
+        "_sex",
+        "_age",
+        "_year",
+        "_year_index",
+        "_month",
+        "_alive",
+        "_has_asthma",
+        "_asthma_age",
+        "_asthma_status",
+        "_control_levels",
+        "_exacerbation_history",
+        "_exacerbation_severity_history",
+        "_total_hosp",
+        "_has_family_history",
+        "_num_antibiotic_use",
+        "_census_division",
+        "_pollution",
+        "_ssp",
+        "_province",
+    ]
 
     def __init__(
         self,
@@ -40,51 +65,58 @@ class Agent:
         control_levels: ControlLevels = ControlLevels(0.3333, 0.3333, 0.3333),
         exacerbation_history: ExacerbationHistory = ExacerbationHistory(0, 0),
         exacerbation_severity_history: ExacerbationSeverityHistory = ExacerbationSeverityHistory(
-            np.zeros(4), np.zeros(4)),
+            np.zeros(4), np.zeros(4)
+        ),
         total_hosp: int = 0,
         has_family_history: bool | None = None,
         family_history: FamilyHistory | None = None,
         antibiotic_exposure: AntibioticExposure | None = None,
         census_division: CensusDivision | None = None,
         pollution: Pollution | None = None,
-        ssp: str = "SSP1_2.6"
+        ssp: str = "SSP1_2.6",
     ):
-        if uuid is None:
-            uuid = UUID4()
-        self.uuid = uuid
-        self.sex = sex
-        self.age = age
-        self.year = year
-        self.year_index = year_index
-        self.month = month
-        self.alive = alive
-        self.has_asthma = has_asthma
-        self.asthma_age = asthma_age
-        self.asthma_status = asthma_status
-        self.control_levels = control_levels
-        self.exacerbation_history = exacerbation_history
-        self.exacerbation_severity_history = exacerbation_severity_history
-        self.total_hosp = total_hosp
+        self._uuid = uuid or UUID4()
+        # Ensure `sex` is always a `Sex` object
+        if not isinstance(sex, Sex):
+            self._sex = Sex(sex)
+        else:
+            self._sex = sex
+        self._age = age
+        self._year = year
+        self._year_index = year_index
+        self._month = month
+        self._alive = alive
+        self._has_asthma = has_asthma
+        self._asthma_age = asthma_age
+        self._asthma_status = asthma_status
+        self._control_levels = control_levels
+        self._exacerbation_history = exacerbation_history
+        self._exacerbation_severity_history = exacerbation_severity_history
+        self._total_hosp = total_hosp
+        self._ssp = ssp
+        self._pollution = pollution
+        self._province = province
+
         if num_antibiotic_use is None and antibiotic_exposure is not None:
-            self.num_antibiotic_use = antibiotic_exposure.compute_num_antibiotic_use(
-                sex=int(self.sex),
-                birth_year=year - age
+            self._num_antibiotic_use = antibiotic_exposure.compute_num_antibiotic_use(
+                sex=int(self._sex), birth_year=year - age
             )
         elif num_antibiotic_use is not None:
-            self.num_antibiotic_use = num_antibiotic_use
+            self._num_antibiotic_use = num_antibiotic_use
         else:
             raise ValueError("Either num_antibiotic_use or antibiotic_exposure must be provided.")
+
         if has_family_history is None and family_history is not None:
-            self.has_family_history = family_history.has_family_history_of_asthma()
+            self._has_family_history = family_history.has_family_history_of_asthma()
         elif has_family_history is not None:
-            self.has_family_history = has_family_history
+            self._has_family_history = has_family_history
         else:
             raise ValueError("Either has_family_history or family_history must be provided.")
+
         if census_division is None:
-            self.census_division = CensusDivision(province=province, year=year)
+            self._census_division = CensusDivision(province=province, year=year)
         else:
-            self.census_division = census_division
-        self.pollution = pollution
+            self._census_division = census_division
 
     @property
     def age(self) -> int:
@@ -291,3 +323,21 @@ class Agent:
     @uuid.setter
     def uuid(self, uuid: UUID4):
         self._uuid = uuid
+
+    @property
+    def year(self) -> int:
+        """The current year of the simulation."""
+        return self._year
+    
+    @year.setter
+    def year(self, year: int):
+        self._year = year
+
+    @property
+    def year_index(self) -> int:
+        """The index number of the current year from the starting year."""
+        return self._year_index
+    
+    @year_index.setter
+    def year_index(self, year_index: int):
+        self._year_index = year_index
