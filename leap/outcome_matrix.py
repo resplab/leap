@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import itertools
 import pathlib
 from leap.utils import check_file
@@ -35,14 +36,12 @@ class OutcomeTable:
         """
         df = self.data.copy(deep=True)
         if filter_columns is not None:
-            df_filtered = df.copy(deep=True)
+            mask = np.ones(len(self.data), dtype=bool)
             for key, value in filter_columns.items():
-                df_filtered = df_filtered.loc[(df_filtered[key] == value)]
-            df_filtered[column] += amount
-            df.update(df_filtered)
+                mask &= (self.data[key] == value)
+            self.data.loc[mask, column] += amount
         else:
-            df[column] += amount
-        self.data = df
+            self.data[column] += amount
         if self.group_by is not None:
             self.grouped_data = self.data.groupby(self.group_by)
 
