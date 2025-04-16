@@ -3,7 +3,8 @@ import argparse
 import pathlib
 import pprint
 import socket
-import numpy as np
+import cProfile
+import pstats
 from datetime import datetime
 from leap.simulation import Simulation
 from leap.utils import check_file, get_data_path
@@ -331,10 +332,21 @@ def run_main():
         logger.message(f"Results will be saved to <{output_path.absolute()}>")
         logger.message("Running simulation...")
 
+        # Initialize and enable the profiler
+        profiler = cProfile.Profile()
+        profiler.enable()
+
         # This is the main function that runs the entire simulation
         outcome_matrix = simulation.run()
 
-        logger.message(outcome_matrix)
+        # Disable the profiler
+        profiler.disable()
+
+        # Create a Stats object and print sorted stats
+        stats = pstats.Stats(profiler).sort_stats("cumtime")
+        stats.print_stats(50)  # adjust the number of functions you want to display
+
+        #logger.message(outcome_matrix)
         outcome_matrix.save(path=output_path)
 
     # Get end time of simulation
