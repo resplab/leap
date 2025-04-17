@@ -80,7 +80,7 @@ discrete probability distribution. The ``Poisson distribution`` is a good choice
 
 .. math::
 
-    p(y^{(i)} = y; \mu^{(i)}) = \dfrac{(\mu^{(i)})^{y} ~ e^{-\mu^{(i)}}}{y!}
+    P(Y = y) = p(y; \mu^{(i)}) = \dfrac{(\mu^{(i)})^{y} ~ e^{-\mu^{(i)}}}{y!}
 
 We also need to choose a ``link function``. Recall that the link function :math:`g(\mu^{(i)})`
 is used to relate the mean to the predicted value :math:`\eta^{(i)}`:

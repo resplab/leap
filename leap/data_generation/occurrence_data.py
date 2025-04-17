@@ -38,8 +38,8 @@ def poly(
         
     Returns:
         The polynomial basis, as a 2D Numpy array. If ``orthogonal`` is ``True``, the function
-        will return a tuple of three Numpy arrays: the orthogonal polynomial basis, the alpha
-        values, and the norm2 values.
+        will return a tuple of three Numpy arrays: the orthogonal polynomial basis, the ``alpha``
+        values, and the ``norm2`` values.
 
     Examples:
 
@@ -182,7 +182,7 @@ def generate_occurrence_model(
             * ``incidence (float)``: The incidence of asthma.
             * ``prevalence (float)``: The prevalence of asthma.
             
-        formula: The formula for the GLM model. See the ```statsmodels`` documentation 
+        formula: The formula for the GLM model. See the `statsmodels documentation 
             <https://www.statsmodels.org/stable/examples/notebooks/generated/glm_formula.html>`_
             for more information.
         occ_type: The type of occurrence data to model. Must be one of ``"incidence"`` or
@@ -362,13 +362,13 @@ def plot_occurrence(
             * ``year (int)``: The calendar year.
             * ``sex (str)``: One of ``F`` = female, ``M`` = male.
             * ``age (int)``: The age in years.
-            * y: Specified by the ``y`` argument, this will be the y data.
-            * y_pred: Optional, the predicted y data. If this column is present, it will be plotted
-              alongside the actual data. The column name must be the same as ``y`` with ``_pred``
-              appended. For example, if ``y`` is ``incidence``, then the predicted data must be
-              ``incidence_pred``.
+            * ``y (float)``: Specified by the ``y`` argument, this will be the y data.
+            * ``y_pred (float)``: Optional, the predicted y data. If this column is present, it will
+              be plotted alongside the actual data. The column name must be the same as ``y`` with
+              ``_pred`` appended. For example, if ``y`` is ``incidence``, then the predicted data
+              must be ``incidence_pred``.
 
-        y: The name of the column in the dataframe which will be plotted as the y data.
+        y: The name of the column in the dataframe which will be plotted as the ``y`` data.
         title: The title of the plot.
         file_path: The path to save the plot to. If ``None``, the plot will be displayed.
         min_year: The minimum year to plot.
@@ -412,6 +412,18 @@ def plot_occurrence(
 
 
 def generate_occurrence_data():
+    """Generate the asthma incidence and prevalence data.
+    
+    Saves the data to a CSV file: ``processed_data/asthma_occurrence_predictions.csv``.
+
+    The data is also plotted and saved to the following files:
+    
+    * ``data_generation/figures/asthma_incidence_predicted.png``: The predicted asthma
+      incidence per 100 in BC.
+    * ``data_generation/figures/asthma_prevalence_predicted.png``: The predicted asthma
+      prevalence per 100 in BC.
+
+    """
     df_asthma = load_asthma_df()
     incidence_model = generate_incidence_model(df_asthma)
     prevalence_model = generate_prevalence_model(df_asthma)
