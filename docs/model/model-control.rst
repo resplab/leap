@@ -181,7 +181,7 @@ Then we defined the asthma control level as follows:
 
   \text{control_level} = \begin{cases}
     1 & \text{control_score} = 0 \\
-    1 &  0 ~ < \text{control_score} < 3 \\
+    2 &  0 ~ < \text{control_score} < 3 \\
     3 & \text{control_score} \geq 3
   \end{cases}
 
