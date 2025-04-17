@@ -16,20 +16,19 @@ More females were in the cohort as expected (adult asthma is more prevalent amon
 Asthma control level changed during the follow-up for ``79%`` of the patients.
 
 We followed the 2020 GINA guidelines to define asthma control level by using the sum of the
-four indicator variables (0 if no and 1 if yes):
+four indicator variables (0 if no and 1 if yes) in the last 3 months before each measurement:
 
 1. daily symptoms
 2. nocturnal symptoms
 3. inhaler use
 4. limited activities
 
-in the last 3 months before each measurement. If the sum is zero, then the asthma control level is
-controlled. If it is less than 3, then it is partially controlled. Otherwise, it is uncontrolled.
-For responses with *do not know* to the indicator variables, we treated them as a *no*.
-In this analysis, we did not consider treatment nor whether a patient experienced an exacerbation
-in the last 3 months before the visit. We excluded two patients whose asthma diagnosis dates were
-earlier than they were born and three patients who had no asthma diagnosis dates, for a final
-count of 613 patients.
+If the sum is zero, then the asthma control level is controlled. If it is less than 3, then it is
+partially-controlled. Otherwise, it is uncontrolled. For responses with *do not know* to the
+indicator variables, we treated them as a *no*. In this analysis, we did not consider treatment
+nor whether a patient experienced an exacerbation in the last 3 months before the visit.
+We excluded two patients whose asthma diagnosis dates were earlier than they were born and three
+patients who had no asthma diagnosis dates, for a final count of 613 patients.
 
 .. raw:: html
 
