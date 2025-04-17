@@ -8,12 +8,12 @@ Data
 Raw Data
 ***********
 
-``EBA``	was	a	prospective representative observational study of ``618`` participants aged ``1-85``
+``EBA``	was	a	prospective representative observational study of 618 participants aged 1-85
 years (74% were >= 18 years old) with self-reported, physician-diagnosed asthma from BC.
-The measurements were taken every 3 months for a year. Among ``613`` patients, only 6% were lost
-during the one-year follow-up. There were at least ``500`` cases for each asthma control level.
+The measurements were taken every 3 months for a year. Among 613 patients, only 6% were lost
+during the one-year follow-up. There were at least 500 cases for each asthma control level.
 More females were in the cohort as expected (adult asthma is more prevalent among females).
-Asthma control level changed during the follow-up for ``79%`` of the patients.
+Asthma control level changed during the follow-up for 79% of the patients.
 
 We followed the 2020 GINA guidelines to define asthma control level by using the sum of the
 four indicator variables (0 if no and 1 if yes) in the last 3 months before each measurement:
