@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 import numpy as np
 from scipy.special import gamma
 from leap.logger import get_logger
@@ -173,40 +174,21 @@ class ExacerbationSeverity:
             ... ) # doctest: +NORMALIZE_WHITESPACE
             array([10, 0, 0, 0])
         """
-        severity_levels = self.severity_levels
+        severity_levels = copy.deepcopy(self.severity_levels)
         severity_levels_array = severity_levels.as_array()
-
-        if len(severity_levels_array) != 4:
-            raise ValueError("Severity levels array must have exactly 4 elements.")
 
         if num_current_year == 0:
             return np.zeros(4)
-
-         # Handle NaN values
-        if np.any(np.isnan(severity_levels_array)):
-            severity_levels_array = np.nan_to_num(severity_levels_array)
-
-        # Check for negative or out-of-range values
-        severity_levels_array = np.clip(severity_levels_array, 0, 1)
-
-        if prev_hosp:
-            weight = severity_levels_array / np.sum(severity_levels_array)
-            severity_levels.very_severe = severity_levels.very_severe * (
-                self.parameters["βprev_hosp_ped"] if age < 14
-                else self.parameters["βprev_hosp_adult"]
-            )
-            severity_levels_array = weight * (1 - severity_levels.very_severe)
-
-        # Normalize the array if it sums to a positive value
-        total = np.sum(severity_levels_array)
-        if total > 0:
-            severity_levels_array /= total
         else:
-            sva_len = len(severity_levels_array)
-            # Assign equal probabilities if the sum is zero
-            severity_levels_array = np.ones(sva_len) / sva_len
+            if prev_hosp:
+                weights = severity_levels_array[0:3] / np.sum(severity_levels_array[0:3])
+                severity_levels.very_severe = severity_levels.very_severe * (
+                    self.parameters["βprev_hosp_ped"] if age < 14
+                    else self.parameters["βprev_hosp_adult"]
+                )
+                severity_levels_array[0:3] = weights * (1 - severity_levels.very_severe)
+                severity_levels_array[3] = severity_levels.very_severe
 
-        # Return the multinomial distribution
         return np.random.multinomial(num_current_year, severity_levels_array)
 
     def compute_hospitalization_prob(
