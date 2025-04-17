@@ -56,11 +56,11 @@ def compute_control_level(control_score: int) -> int:
     """
 
     if control_score == 0:
-        control_level = 1
-    elif control_score < 3 and control_score > 0:
-        control_level = 2
+        control_level = 1 # fully-controlled
+    elif control_score >= 1 and control_score <= 2:
+        control_level = 2 # partially-controlled
     elif control_score >= 3:
-        control_level = 3
+        control_level = 3 # uncontrolled
     else:
         raise ValueError(f"Invalid control score: {control_score}")
     return control_level
