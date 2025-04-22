@@ -107,7 +107,7 @@ def compute_ordinal_regression(
     return [prob_function(θ[k + 1] - η) - prob_function(θ[k] - η) for k in range(len(θ) - 1)]
 
 
-def get_data_path(data_path: str) -> pathlib.Path:
+def get_data_path(data_path: str | pathlib.Path) -> pathlib.Path:
     """Get the full path to a data file or folder in the ``LEAP`` package.
 
     Args:
@@ -117,20 +117,21 @@ def get_data_path(data_path: str) -> pathlib.Path:
         The full path to the file or folder.
     """
 
-    if pathlib.Path(data_path).parts[0] == "tests":
+    data_path = pathlib.Path(data_path)
+    if data_path.parts[0] == "tests":
         data_folder = "tests.data"
-        data_path = str(pathlib.Path(data_path).relative_to("tests/data"))
-    elif pathlib.Path(data_path).parts[0] == "processed_data":
+        data_path = data_path.relative_to("tests/data")
+    elif data_path.parts[0] == "processed_data":
         data_folder = "leap.processed_data"
-        data_path = str(pathlib.Path(data_path).relative_to("processed_data"))
-    elif pathlib.Path(data_path).parts[0] == "data_generation":
-        data_folder = "leap.data_generation" + "." + ".".join(pathlib.Path(data_path).parts[1:-1])
-        data_path = str(pathlib.Path(data_path).parts[-1])
-    elif pathlib.Path(data_path).parts[0] == "original_data":
-        data_folder = "leap.original_data" + "." + ".".join(pathlib.Path(data_path).parts[1:-1])
-        data_path = str(pathlib.Path(data_path).parts[-1])
-
-    package_path = str(pkg_resources.files(data_folder).joinpath(data_path))
+        data_path = data_path.relative_to("processed_data")
+    elif data_path.parts[0] == "data_generation":
+        data_folder = "leap.data_generation" + "." + ".".join(data_path.parts[1:-1])
+        data_path = data_path.parts[-1]
+    elif data_path.parts[0] == "original_data":
+        data_folder = "leap.original_data" + "." + ".".join(data_path.parts[1:-1])
+        data_path = data_path.parts[-1]
+  
+    package_path = str(pkg_resources.files(data_folder).joinpath(str(data_path)))
 
     if os.path.isfile(package_path) or os.path.isdir(package_path):
         return pathlib.Path(package_path)
