@@ -12,8 +12,8 @@ sys.path.insert(0, os.path.abspath(".."))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'leap'
-copyright = '2024, Tae Yoon (Harry) Lee, Ainsleigh Hill'
-author = 'Tae Yoon (Harry) Lee, Ainsleigh Hill'
+copyright = '2024, Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert'
+author = 'Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert'
 release = '1.0.0'
 
 # -- General configuration ---------------------------------------------------
