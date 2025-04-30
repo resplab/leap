@@ -120,6 +120,33 @@ def load_reassessment_data(
     return df_reassessment
 
 
+def load_family_history_data() -> pd.DataFrame:
+    """Load the family history data for the given province.
+
+    Returns:
+        A dataframe containing the family history odds ratios.
+        It contains the following columns:
+
+            * ``age (int)``: The age of the individual. Ranges from ``3`` to ``5``.
+            * ``fam_history (int)``: Whether or not there is a family history of asthma.
+              ``0`` = one or more parents has asthma, 
+              ``1`` = neither parent has asthma.
+            * ``odds_ratio (float)``: The odds ratio for asthma prevalence based on family
+                history and age. The odds ratio is calculated based on the CHILD study data.
+    """
+
+    df_fam_history_or = pd.DataFrame(
+        list(itertools.product(range(3, 6), [0, 1])),
+        columns=["age", "fam_history"]
+    )
+    df_fam_history_or["odds_ratio"] = [
+        1, OR_ASTHMA_AGE_3,
+        1, np.exp((np.log(OR_ASTHMA_AGE_3) + np.log(OR_ASTHMA_AGE_5)) / 2),
+        1, OR_ASTHMA_AGE_5
+    ]
+
+    return df_fam_history_or
+
 
     
 
