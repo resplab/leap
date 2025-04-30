@@ -100,5 +100,26 @@ def load_occurrence_data(
     return df_incidence, df_prevalence
 
 
+def load_reassessment_data(
+    province: str = PROVINCE
+) -> pd.DataFrame:
+    """Load the asthma reassessment data for the given province.
+
+    Args:
+        province: The province to load data for.
+
+    Returns:
+        A DataFrame containing the reassessment data.
+    """
+
+    df_reassessment = pd.read_csv(get_data_path("processed_data/asthma_reassessment.csv"))
+    df_reassessment = df_reassessment.loc[df_reassessment["province"] == province]
+
+    df_reassessment = df_reassessment.drop(columns=["province"])
+
+    return df_reassessment
+
+
+
     
 
