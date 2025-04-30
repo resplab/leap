@@ -32,6 +32,29 @@ INC_BETA_PARAMS = [(np.log(OR_ASTHMA_AGE_5) - np.log(OR_ASTHMA_AGE_3)) / 2, BETA
 # the probability that one or more parents have asthma (CHILD Study)
 PROB_FAM_HIST = 0.2927242
 
+DF_OCC_PRED = pd.read_csv(get_data_path("processed_data/asthma_occurrence_predictions.csv"))
+
+
+def asthma_predictor(age: int, sex: str, year: int, occurrence_type: str) -> float:
+    """
+    Predicts the asthma prevalence or incidence based on the given parameters.
+    Args:
+        age: Age of the individual.
+        sex: One of "M" or "F".
+        year: Year of the prediction.
+        occurrence_type: One of "prevalence" or "incidence".
+    Returns:
+        A float representing the predicted asthma prevalence or incidence.
+    """
+
+    age = min(age, MAX_ASTHMA_AGE)
+    year = min(year, STABILIZATION_YEAR)
+
+    return DF_OCC_PRED.loc[
+        (DF_OCC_PRED["age"] == age) &
+        (DF_OCC_PRED["year"] == year) &
+        (DF_OCC_PRED["sex"] == sex)
+    ][occurrence_type].values[0]
 
     
 
