@@ -6,6 +6,7 @@ import itertools
 from leap.utils import get_data_path
 from leap.logger import get_logger
 from typing import Tuple
+from scipy.stats import logistic
 
 pd.options.mode.copy_on_write = True
 
@@ -411,6 +412,38 @@ def risk_factor_generator(
         ["fam_history", "abx_exposure", "year", "sex", "age", "prob", "odds_ratio"]
     ]
     return df_risk_factors
+
+
+def compute_asthma_prev_risk_factors(
+    asthma_prev_risk_factor_params: list[float],
+    odds_ratio_target: list[float],
+    risk_factor_prev: list[float],
+    beta0: float
+) -> float:
+    """Compute the asthma prevalence based on the risk factors and the parameters provided.
+
+    Args:
+        asthma_prev_risk_factor_params: A vector of parameters for the risk factors, with
+            shape ``(n - 1, 1)``.
+        odds_ratio_target: A vector of odds ratios between the risk factors and asthma, with
+            shape ``(n, 1)``.
+        risk_factor_prev: A vector of the prevalence of the risk factor levels, with shape
+            ``(n, 1)``.
+        beta0: The intercept of the logistic regression model.
+    
+    Returns:
+        The calibrated asthma prevalence.
+    """
+
+    n = len(odds_ratio_target)
+    # asthma_prev_x: asthma prevalence at risk factor level x
+    asthma_prev_x = logistic.cdf(
+        beta0 * np.ones(n) + 
+        np.log(odds_ratio_target) - 
+        np.dot(risk_factor_prev[1:], asthma_prev_risk_factor_params) * np.ones(n)
+    )
+    return(np.dot(asthma_prev_x, risk_factor_prev))
+ 
 
 
 
