@@ -180,5 +180,40 @@ def load_abx_exposure_data() -> pd.DataFrame:
 
     df_abx_or = df_abx_or.melt(id_vars=["age"], var_name="abx_dose", value_name="odds_ratio")
     return df_abx_or
+
+
+def OR_abx_calculator(
+    age: int,
+    dose: int,
+    params: list[float] | None = None
+) -> float:
+    """Calculate the odds ratio for asthma prevalence based on antibiotic exposure.
+
+    Args:
+        age: The age of the individual in years.
+        dose: The number of antibiotic courses taken in the first year of life,
+            an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
+        params: The parameters for the odds ratio calculation. If ``None``, the default
+            parameters are used. The default parameters are:
+
+            * ``BETA_ABX_0``: The beta parameter for the constant term in the odds
+                ratio equation for antibiotic courses.
+            * ``BETA_ABX_AGE``: The beta parameter for the age term in the odds
+                ratio equation for antibiotic courses.
+            * ``BETA_ABX_DOSE``: The beta parameter for the dose term in the odds
+                ratio equation for antibiotic courses.
+
+    Returns:
+        A float representing the odds ratio for asthma prevalence based on antibiotic
+        exposure and age.
+    """
+    if params is None:
+        params = [BETA_ABX_0, BETA_ABX_AGE, BETA_ABX_DOSE]
+
+    if dose == 0:
+        return 1.0
+    else:
+        return np.exp(np.sum(np.dot(params, [1, min(age, 7), min(dose, 3)])))
+
     
 
