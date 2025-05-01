@@ -1,6 +1,7 @@
 import pathlib
 import pandas as pd
 import numpy as np
+from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 import itertools
 from leap.utils import get_data_path
 from leap.logger import get_logger
@@ -284,5 +285,132 @@ def OR_risk_factor_calculator(
             np.log(OR_fam_calculator(age, fam_hist, family_history_params)) +
             np.log(OR_abx_calculator(age, dose, abx_params))
         )
+    
+
+def risk_factor_generator(
+    year: int,
+    age: int,
+    sex: str,
+    model_abx: GLMResultsWrapper,
+    p_fam_distribution: pd.DataFrame,
+    df_fam_history_or: pd.DataFrame,
+    df_abx_or: pd.DataFrame
+) -> pd.DataFrame:
+    """Compute the combined antibiotic exposure and family history odds ratio.
+
+    Args:
+        year: The current year.
+        age: The age of the person in years.
+        sex: One of ``M`` or ``F``.
+        model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
+        p_fam_distribution: A dataframe with the probability of family history of asthma, given
+            that the person has asthma. Columns:
+            * ``fam_history (int)``: Whether or not there is a family history of asthma.
+              ``0`` = one or more parents has asthma
+              ``1`` = neither parent has asthma
+            * ``prob_fam``: The probability of family history of asthma, given that the person
+              has asthma.
+        df_fam_history_or: A dataframe with the odds ratio of family history of asthma, given
+            the age of the person. Columns:
+            * ``age (int)``: An integer in ``[3, 5]``.
+            * ``fam_history (int)``: Whether or not there is a family history of asthma.
+              ``0`` = one or more parents has asthma
+              ``1`` = neither parent has asthma
+            * ``odds_ratio (float)``: The odds ratio of family history of asthma, given that the
+              person has asthma. The odds ratio is calculated based on the CHILD study data.
+        df_abx_or: A dataframe with the odds ratio of antibiotic exposure, given
+            the age of the person. Columns:
+            * ``age (int)``: An integer in ``[3, 8]``.
+            * ``abx_exposure (int)``: The number of antibiotic courses taken in the first year of
+              life; an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
+            * ``odds_ratio (float)``: The odds ratio of antibiotic exposure, given that the person
+              has asthma.
+
+    Returns:
+        A dataframe with the combined probabilities and odds ratios for the antibiotic exposure
+        and family history risk factors.
+        Columns:
+
+            * ``fam_history (int)``: Whether or not there is a family history of asthma.
+              ``0`` = one or more parents has asthma
+              ``1`` = neither parent has asthma
+            * ``abx_exposure (int)``: The number of antibiotic courses taken in the first year of
+              life; an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
+            * ``year (int)``: The given year.
+            * ``sex (str)``: One of ``M`` or ``F``.
+            * ``age (int)``: The age of the person in years.
+            * ``prob (float)``: The probability of antibiotic exposure * probability of one or
+              more parents having asthma given that the person has asthma.
+            * ``odds_ratio (float)``: The odds combined odds ratio:
+              ``odds_ratio = odds_ratio_abx * odds_ratio_fam_hist``
+    """
+
+
+    birth_year = year - age
+    df_abx_exposure = p_antibiotic_exposure(max(birth_year, 2000), sex, model_abx)
+
+    # combine abx_exposure = 3, 4, 5+ into 3+
+    df_abx_exposure.loc[df_abx_exposure["abx_exposure"] == 3, "prob_abx"] = df_abx_exposure.loc[
+        df_abx_exposure["abx_exposure"] >= 3, "prob_abx"
+    ].sum()
+    df_abx_exposure = df_abx_exposure[df_abx_exposure["abx_exposure"] <= 3]
+
+    # select the given age if <= 5, otherwise select age == 5
+    df_fam_history_or_age = df_fam_history_or.loc[df_fam_history_or["age"] == min(age, 5)]
+    df_fam_history_or_age = df_fam_history_or_age[["fam_history", "odds_ratio"]]
+    df_fam_history_or_age.rename(columns={"odds_ratio": "odds_ratio_fam_hist"}, inplace=True)
+  
+    # select the given age if <= 8, otherwise select age == 8
+    # filter out abx_exposure > 3
+    df_abx_or_age = df_abx_or.loc[df_abx_or["age"] == min(age, 8)]
+    df_abx_or_age = df_abx_or_age[["abx_exposure", "odds_ratio"]]
+    df_abx_or_age.rename(columns={"odds_ratio": "odds_ratio_abx"}, inplace=True)
+    df_abx_or_age = df_abx_or_age.loc[df_abx_or_age["abx_exposure"] <= 3]
+       
+    df_risk_factors = pd.DataFrame(
+        list(itertools.product([0, 1], range(0, 4))),
+        columns=["fam_history", "abx_exposure"]
+    )
+    df_risk_factors["year"] = [year] * df_risk_factors.shape[0]
+    df_risk_factors["sex"] = [sex] * df_risk_factors.shape[0]
+    df_risk_factors["age"] = [age] * df_risk_factors.shape[0]
+
+    df_risk_factors = pd.merge(
+        df_risk_factors,
+        p_fam_distribution,
+        how="left",
+        on="fam_history"
+    )
+    df_risk_factors = pd.merge(
+        df_risk_factors,
+        df_abx_exposure,
+        how="left",
+        on="abx_exposure"
+    )
+    df_risk_factors = pd.merge(
+        df_risk_factors,
+        df_fam_history_or_age,
+        how="left",
+        on="fam_history"
+    )
+    df_risk_factors = pd.merge(
+        df_risk_factors,
+        df_abx_or_age,
+        how="left",
+        on="abx_exposure"
+    )
+    df_risk_factors["prob"] = df_risk_factors.apply(
+        lambda x: x["prob_fam"] * x["prob_abx"],
+        axis=1
+    )
+    df_risk_factors["odds_ratio"] = df_risk_factors.apply(
+        lambda x: x["odds_ratio_fam_hist"] * x["odds_ratio_abx"],
+        axis=1
+    )
+    df_risk_factors = df_risk_factors[
+        ["fam_history", "abx_exposure", "year", "sex", "age", "prob", "odds_ratio"]
+    ]
+    return df_risk_factors
+
 
 
