@@ -243,5 +243,46 @@ def OR_fam_calculator(
     else:
         return np.exp(params[0] + params[1] * (min(age, 5) - 3))
 
-    
+
+def OR_risk_factor_calculator(
+    fam_hist: int,
+    age: int,
+    dose: int,
+    family_history_params: list[float] | None = None,
+    abx_params: list[float] | None = None
+) -> float:
+    """Calculate the odds ratio for asthma prevalence based on family history and antibiotic exposure.
+
+    Args:
+        fam_hist: Whether or not there is a family history of asthma.
+            ``0`` = one or more parents has asthma,
+            ``1`` = neither parent has asthma.
+        age: The age of the individual in years.
+        dose: The number of antibiotic courses taken in the first year of life,
+            an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
+        family_history_params: The parameters for the family history odds ratio calculation.
+            If ``None``, the default parameters are used.
+        abx_params: The parameters for the antibiotic exposure odds ratio calculation.
+            If ``None``, the default parameters are used.
+
+    Returns:
+        The odds ratio for asthma prevalence based on family history and antibiotic exposure.
+    """
+    if family_history_params is None:
+        family_history_params = [
+            np.log(OR_ASTHMA_AGE_3),
+            (np.log(OR_ASTHMA_AGE_3) + np.log(OR_ASTHMA_AGE_5)) / 2 - np.log(OR_ASTHMA_AGE_3)
+        ]
+
+    if abx_params is None:
+        abx_params = [BETA_ABX_0, BETA_ABX_AGE, BETA_ABX_DOSE]
+
+    if age < MIN_ASTHMA_AGE:
+        return 1
+    else:
+        return np.exp(
+            np.log(OR_fam_calculator(age, fam_hist, family_history_params)) +
+            np.log(OR_abx_calculator(age, dose, abx_params))
+        )
+
 
