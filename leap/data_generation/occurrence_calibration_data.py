@@ -215,5 +215,33 @@ def OR_abx_calculator(
     else:
         return np.exp(np.sum(np.dot(params, [1, min(age, 7), min(dose, 3)])))
 
+
+def OR_fam_calculator(
+    age: int,
+    fam_hist: int,
+    params: list[float] | None
+) -> float:
+    """Calculate the odds ratio for asthma prevalence based on family history.
+
+    Args:
+        age: The age of the individual in years.
+        fam_hist: Whether or not there is a family history of asthma.
+            ``0`` = one or more parents has asthma,
+            ``1`` = neither parent has asthma.
+        params: The parameters for the odds ratio calculation. If ``None``, the default
+            parameters are used.
+    
+    Returns:
+        A float representing the odds ratio for asthma prevalence based on family
+        history and age.
+    """
+    if params is None:
+        params = [np.log(OR_ASTHMA_AGE_3), (np.log(OR_ASTHMA_AGE_5) + np.log(OR_ASTHMA_AGE_3)) / 2]
+
+    if age < MIN_ASTHMA_AGE or fam_hist == 0 or age > 7:
+        return 1.0
+    else:
+        return np.exp(params[0] + params[1] * (min(age, 5) - 3))
+
     
 
