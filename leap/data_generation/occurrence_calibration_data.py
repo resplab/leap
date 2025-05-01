@@ -148,5 +148,37 @@ def load_family_history_data() -> pd.DataFrame:
     return df_fam_history_or
 
 
+def load_abx_exposure_data() -> pd.DataFrame:
+    """Load the antibiotic exposure data.
+
+    Returns:
+        A dataframe containing the antibiotic exposure odds ratios.
+        It contains the following columns:
+
+            * ``age (int)``: The age of the individual. An integer in ``[3, 8]``.
+            * ``abx_dose (int)``: The number of antibiotic courses taken in the first year of life,
+              an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
+            * ``odds_ratio (float)``: The odds ratio for asthma prevalence based on antibiotic
+              exposure during the first year of life and age. The odds ratio is calculated based on
+              the CHILD study data.
+    """
+
+    df_abx_or = pd.read_csv(get_data_path("original_data/dose_response_log_aOR.csv"))
+    df_abx_or.columns = ["age"] + [i for i in range(1, 6)]
+    df_abx_or.insert(1, 0, [0] * df_abx_or.shape[0])
+
+    for abx_dose in range(0, 6):
+        df_abx_or[abx_dose] = df_abx_or[abx_dose].apply(
+            lambda x: np.exp(x)
+        )
+
+    df_abx_or = df_abx_or.loc[df_abx_or["age"] >= 3]
+    df_abx_or = pd.concat(
+        [df_abx_or, pd.DataFrame({"age": [8], 0: [1], 1: [1], 2: [1], 3: [1], 4: [1], 5: [1]})],
+        ignore_index=True
+    )
+
+    df_abx_or = df_abx_or.melt(id_vars=["age"], var_name="abx_dose", value_name="odds_ratio")
+    return df_abx_or
     
 
