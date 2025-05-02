@@ -75,3 +75,38 @@ def load_birth_data(
 
     return df
 
+
+def load_antibiotic_data() -> pd.DataFrame:
+    """Load the antibiotic dose data.
+
+    The antibiotic prescription data is from the BC Ministry of Health and contains the total
+    number of courses of antibiotics dispensed to infants, stratified by year and sex, ranging from
+    2000 to 2018.
+
+    The birth data is from StatCan census data and contains the number of births in BC,
+    stratified by year and sex.
+    
+    Returns:
+        A pandas dataframe with the following columns:
+        
+            * ``year (int)``: The calendar year.
+            * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+            * ``n_abx (int)``: The number total number of courses of antibiotics dispensed to
+              infants in BC for the given year and sex.
+            * ``n_birth (int)``: The number of births in BC for the given year and sex.
+
+    """
+
+    df_abx = pd.read_csv(get_data_path("original_data/private/bc_abx_dose_data.csv"))
+    df_birth = load_birth_data()
+
+    df_abx = pd.merge(
+        df_abx,
+        df_birth,
+        how="left",
+        on=["year", "sex"]
+    )
+
+    return df_abx
+
+    
