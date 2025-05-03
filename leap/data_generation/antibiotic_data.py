@@ -14,7 +14,7 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-STARTING_YEAR = 2000
+MIN_YEAR = 2000
 MAX_YEAR = 2019
 MAX_AGE = 65
 
@@ -165,5 +165,64 @@ def generate_antibiotic_model(
 
     return results
 
+
+def get_predicted_abx_data(
+    model: GLMResultsWrapper,
+    df: pd.DataFrame | None = None,
+    min_year: int = MIN_YEAR,
+    max_year: int = MAX_YEAR
+) -> pd.DataFrame:
+    """Get predicted data from a GLM model.
+
+    The GLM model must be fitted on the following columns:
+
+    * ``year (int)``: The calendar year.
+    * ``sex (int)``: One of ``0`` = female, ``1`` = male.
+    
+    Args:
+        model: The fitted GLM model for predicting the number of courses of antibiotics during
+            the first year of life, given year and sex.
+        df: (optional) If provided, the function will use this dataframe to predict the data. The
+            dataframe must contain the following columns:
+
+            * ``year (int)``: The calendar year.
+            * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+
+            If not provided, the function will generate a dataframe with all combinations of
+            year and sex in the range of ``min_year`` to ``max_year``.
+        min_year: The minimum year to predict.
+        max_year: The maximum year to predict.
+        
+    Returns:
+        A dataframe containing the predicted number of antibiotics prescribed per person during
+        infancy for a given birth year and sex.
+        Columns:
+        
+        * ``year (int)``: The calendar year.
+        * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+        * ``n_abx_μ (float)``: The predicted number of antibiotics prescribed per person during
+          infancy for the given birth year and sex.
+    """
+
+    if df is None:
+        df = pd.DataFrame(
+            data=list(itertools.product(
+                list(range(min_year, max_year + 1)), [1, 2]
+            )),
+            columns=["year", "sex"]
+        )
+    else:
+        df["sex"] = df.apply(
+            lambda x: 1 if x["sex"] == "F" else 2,
+            axis=1
+        )
+
+
+    df["n_abx_μ"] = np.exp(model.predict(df, which="linear"))
+    df["sex"] = df.apply(
+        lambda x: "F" if x["sex"] == 1 else "M",
+        axis=1
+    )
+    return df
 
     
