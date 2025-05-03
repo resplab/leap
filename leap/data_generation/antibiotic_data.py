@@ -2,7 +2,6 @@ import pathlib
 import pandas as pd
 import numpy as np
 import itertools
-import plotly.express as px
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from leap.utils import get_data_path
