@@ -5,9 +5,10 @@ from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 from scipy import optimize
 import itertools
 from leap.utils import get_data_path
+from leap.data_generation.antibiotic_data import get_predicted_abx_data
 from leap.logger import get_logger
 from typing import Tuple
-from scipy.stats import logistic
+from scipy.stats import logistic, nbinom
 from scipy.special import logit
 
 pd.options.mode.copy_on_write = True
@@ -184,6 +185,62 @@ def load_abx_exposure_data() -> pd.DataFrame:
 
     df_abx_or = df_abx_or.melt(id_vars=["age"], var_name="abx_dose", value_name="odds_ratio")
     return df_abx_or
+
+
+def p_antibiotic_exposure(
+    year: int,
+    sex: str,
+    model_abx: GLMResultsWrapper
+) -> pd.DataFrame:
+    """Compute the probability of number of courses of antibiotics during infancy.
+
+    Args:
+        year: The birth year of the person.
+        sex: The sex of the infant, one of ``"M"`` or ``"F"``.
+        model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
+    
+    Returns:
+        A dataframe with the probability of the number of courses of antibiotics,
+        ranging from 0 - 5+.
+        Columns:
+
+            * ``n_abx (int)``: The number of courses of antibiotics, an integer in ``[0, 5]``,
+              where ``5`` indicates 5 or more courses.
+            * ``prob (float)``: The probability that a person of the given sex and birth year
+              was given ``n_abx`` courses of antibiotics during the first year of their life.
+    """
+
+    if sex == "M":
+        year = min(2028 - 1, year)
+    else:
+        year = min(2025 - 1, year)
+
+    df = pd.DataFrame({
+        "year": [year], "sex": [sex], "n_abx": [1]
+    })
+
+    # Get the predicted average number of courses of antibiotics
+    df = get_predicted_abx_data(
+        model=model_abx,
+        df=df
+    )
+
+    # μ: average number of courses of antibiotics
+    # θ: dispersion parameter
+    μ = df["n_abx_μ"].iloc[0]
+    θ = 1 / model_abx.family.alpha
+    p = θ / (θ + μ)
+
+    # Calculate probability of 0, 1, 2, 3, 4, 5+ courses of antibiotics via negative binomial
+    prob = nbinom.pmf(list(range(0, 5)), n=θ, p=p)
+    prob = np.append(prob, 1 - prob.sum())
+    df = pd.DataFrame({
+        "n_abx": list(range(0, 6)),
+        "prob": prob
+    })
+    return df
+
+
 
 
 def OR_abx_calculator(
