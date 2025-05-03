@@ -6,7 +6,7 @@ import plotly.express as px
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from leap.utils import get_data_path
-from leap.data_generation.utils import get_province_id, get_sex_id
+from leap.data_generation.utils import get_province_id, get_sex_id, heaviside
 from leap.logger import get_logger
 from typing import Tuple
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
@@ -108,5 +108,63 @@ def load_antibiotic_data() -> pd.DataFrame:
     )
 
     return df_abx
+
+    
+
+def generate_antibiotic_model(
+    df_abx: pd.DataFrame,
+    formula: str = "n_abx ~ year + sex + heaviside(year, 2005) * year",
+    alpha: float = 1.0,
+    maxiter: int = 1000
+) -> GLMResultsWrapper:
+    """Generate a generalized linear model for antibiotic dose.
+
+    In this function, we fit a generalized linear model (GLM) to the antibiotic prescription data
+    using the negative binomial family. The model predicts the number of courses of antibiotics
+    dispensed to infants in BC, given the year and sex.
+
+    For more details, see :ref:`antibiotic_exposure_model`.
+    
+    Args:
+        df_abx: The antibiotic prescription data. Contains the following columns:
+
+            * ``year (int)``: The calendar year.
+            * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+            * ``n_abx (int)``: The number total number of courses of antibiotics dispensed to
+              infants in BC for the given year and sex.
+            * ``n_birth (int)``: The number of births in BC for the given year and sex.
+            
+        formula: The formula for the GLM model. See the `statsmodels documentation 
+            <https://www.statsmodels.org/stable/examples/notebooks/generated/glm_formula.html>`_
+            for more information.
+        alpha: The alpha parameter for the negative binomial model. This is the dispersion
+            parameter, which controls the variance of the model.
+        maxiter: The maximum number of iterations to perform while fitting the model.
+    
+    Returns:
+        The fitted ``GLM`` model.
+    """
+
+    df = df_abx.copy()
+
+    # Convert sex string to 1 or 2
+    df["sex"] = df.apply(
+        lambda x: 1 if x["sex"] == "F" else 2,
+        axis=1
+    )
+
+    # Fit the GLM model
+    model = smf.glm(
+        formula=formula,
+        data=df,
+        family=sm.families.NegativeBinomial(alpha=alpha),
+        offset=np.log(df["n_birth"])
+    )
+    results = model.fit(maxiter=maxiter)
+
+    print(results.summary())
+
+    return results
+
 
     
