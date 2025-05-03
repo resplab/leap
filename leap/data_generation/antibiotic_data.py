@@ -19,6 +19,41 @@ MAX_YEAR = 2019
 MAX_AGE = 65
 
 
+def estimate_alpha(
+    df: pd.DataFrame,
+    formula: str,
+    offset: np.ndarray | None = None,
+    maxiter: int = 5000
+) -> float:
+    r"""Estimate the alpha parameter for the negative binomial model.
+
+    The :math:`alpha` parameter is the dispersion parameter for the negative binomial model:
+
+    .. math::
+
+        \alpha := \dfrac{1}{\theta} = \dfrac{\sigma^2 - \mu}{\mu^2}
+    
+    Args:
+        df_abx: A Pandas dataframe with data to be fitted.
+        formula: The formula for the GLM model. See the `statsmodels documentation
+            <https://www.statsmodels.org/stable/examples/notebooks/generated/glm_formula.html>`_
+            for more information.
+        offset: The offset to use in the model, if desired.
+        maxiter: The maximum number of iterations to perform while fitting the model.
+
+    Returns:
+        The estimated alpha parameter for the negative binomial model.
+    """
+
+    model = smf.negativebinomial(
+        formula=formula, data=df, offset=offset
+    )
+
+    result = model.fit(maxiter=maxiter, method="nm")
+    alpha = result.params.loc["alpha"]
+    return alpha
+
+
 def load_birth_data(
     province: str = "BC", min_year: int = 2000, max_year: int = 2018
 ) -> pd.DataFrame:
