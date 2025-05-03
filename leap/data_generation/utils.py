@@ -1,5 +1,10 @@
 import pandas as pd
 import numpy as np
+from leap.logger import get_logger
+
+logger = get_logger(__name__)
+
+
 PROVINCE_MAP = {
     "Canada": "CA",
     "British Columbia": "BC",
@@ -88,3 +93,182 @@ def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float)
         return 1 if x >= threshold else 0
     else:
         return [1 if i >= threshold else 0 for i in x]
+
+
+def conv_2x2(
+    ori: float,
+    ni: float,
+    n1i: float,
+    n2i: float,
+    var_names: list = ["ai", "bi", "ci", "di"],
+) -> pd.DataFrame:
+    r"""Create a 2x2 contigency table.
+    
+    This function is based off the ``R`` function ``metafor::conv.2x2``.
+
+    We want to determine the contingency table:
+
+    .. raw:: html
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th></th>
+                <th>variable 2, outcome +</th>
+                <th>variable 2, outcome -</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>variable 1, outcome +</td>
+                <td><code class="notranslate">ai</code></td>
+                <td><code class="notranslate">bi</code></td>
+                <td><code class="notranslate">n1i</code></td>
+            </tr>
+            <tr>
+                <td>variable 1, outcome -</td>
+                <td><code class="notranslate">ci</code></td>
+                <td><code class="notranslate">di</code></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><code class="notranslate">n2i</code></td>
+                <td></td>
+                <td><code class="notranslate">ni</code></td>
+            </tr>
+            </tbody>
+        </table>
+
+    Given the odds ratio :math:`or_{i}`, the marginal counts :math:`n_{1i}` and :math:`n_{2i}`,
+    and the total sample size :math:`n_{i}`, we want to compute the probabilities
+    :math:`a_{i}`, :math:`b_{i}`, :math:`c_{i}`, and :math:`d_{i}`.
+
+    .. math::
+
+        n_{i} &= a_{i} + b_{i} + c_{i} + d_{i} \\
+        n_{1i} &= a_{i} + b_{i} \\
+        n_{2i} &= a_{i} + c_{i} \\
+        or_{i} &= \dfrac{a_{i} d_{i}}{b_{i} c_{i}}
+    
+    Args:
+        ori: The odds ratio.
+        ni: The total sample size.
+        n1i: The marginal count for the first variable.
+        n2i: The marginal count for the second variable.
+        var_names: The names of the variables. Must be of length 4.
+        
+    Returns:
+        A pandas DataFrame with the cell frequencies for the 2x2 table.
+
+    Examples:
+
+        Let's suppose we know that the probability of antibiotic use in infancy is 0.52,
+        and the probability of having an asthma diagnosis is 0.87, and suppose we have `100`
+        people. We also know that the odds ratio, i.e. the odds of getting asthma given
+        antibiotic exposure, is ``ori=0.4343``. Then the contingency table would be:
+
+        .. raw:: html
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>asthma</th>
+                    <th>no asthma</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <tr>antibiotics</tr>
+                    <td><code class="notranslate">ai</code></td>
+                    <td><code class="notranslate">bi</code></td>
+                    <td><code class="notranslate">n1i = 52</code></td>
+                </tr>
+                <tr>
+                    <td>no antibiotics</td>
+                    <td><code class="notranslate">ci</code></td>
+                    <td><code class="notranslate">di</code></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><code class="notranslate">n2i = 87</code></td>
+                    <td></td>
+                    <td><code class="notranslate">ni = 100</code></td>
+                </tr>
+                </tbody>
+            </table>
+
+
+        We want to compute ``ai``, ``bi``, ``ci``, and ``di``. We can do this using the
+        ``conv_2x2`` function:
+
+        >>> from leap.data_generation.utils import conv_2x2
+        >>> conv_2x2(ori=0.4343, ni=100, n1i=52, n2i=87)
+            values
+        ai      43
+        bi       9
+        ci      44
+        di       4
+
+        Here we have:
+
+        * ``ai`` = 43, the number of people who have asthma and were exposed to antibiotics.
+        * ``bi`` = 9, the number of people who have asthma and were not exposed to antibiotics.
+        * ``ci`` = 44, the number of people who do not have asthma and were exposed to antibiotics.
+        * ``di`` = 4, the number of people who do not have asthma and were not exposed to antibiotics.
+
+        We can divide them by ``ni`` to get the proportions:
+
+        * ``ai`` = 0.43, the probability of having asthma given antibiotic exposure.
+        * ``bi`` = 0.09, the probability of having asthma given no antibiotic exposure.
+        * ``ci`` = 0.44, the probability of not having asthma given antibiotic exposure.
+        * ``di`` = 0.04, the probability of not having asthma given no antibiotic exposure.
+    """
+
+    if len(var_names) != 4:
+        raise ValueError("Argument 'var.names' must be of length 4.")
+
+    ni = int(np.round(ni, 0))
+    n1i = int(np.round(n1i, 0))
+    n2i = int(np.round(n2i, 0))
+
+    if ni < 0 or n1i < 0 or n2i < 0:
+        raise ValueError("One or more sample sizes or marginal counts are negative.")
+
+    if n1i > ni or n2i > ni:
+        raise ValueError("One or more marginal counts are larger than the sample sizes.")
+
+   # compute marginal proportions for the two variables
+
+    p1i = n1i / ni
+    p2i = n2i / ni
+
+    x = ori * (p1i + p2i) + (1 - p1i) - p2i
+    y = np.sqrt(x**2 - 4 * p1i * p2i * ori * (ori - 1))
+
+    p11i = (x - y) / (2 * (ori - 1))
+
+    ai = int(np.round(ni * p11i, 0))
+    bi = n1i - ai
+    ci = n2i - ai
+    di = ni - ai - bi - ci
+
+    df = pd.DataFrame({
+        "values": [ai, bi, ci, di],
+    }, index=var_names)
+
+    # check for negative cell frequencies
+    df["has_neg"] = df["values"].apply(lambda x: x < 0)
+    has_neg = df["has_neg"].any()
+    if has_neg:
+        logger.warning("There are negative cell frequencies in the table.")
+        df["values"] = df["values"].apply(lambda x: np.nan if x < 0 else x)
+
+ 
+    df.drop(columns=["has_neg"], inplace=True)
+
+    return df
