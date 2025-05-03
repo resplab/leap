@@ -260,4 +260,34 @@ def get_predicted_abx_data(
     )
     return df
 
+
+def generate_antibiotic_data(
+    return_type: str = "csv"
+) -> GLMResultsWrapper | None:
+    """Fit a ``GLM`` for antibiotic prescriptions in the first year of life and generate data.
+
+    Args:
+        return_type: The type of data to return. If ``csv``, the function will save a CSV file
+            with the predicted data. If ``model``, the function will return the fitted GLM model.
     
+    Returns:
+        ``None`` if ``return_type`` is ``csv``, otherwise a fitted ``GLM`` model for predicting
+        the number of antibiotic prescriptions during the first year of life.
+
+    """
+    formula = "n_abx ~ year + sex + heaviside(year, 2005) * year"
+    df_abx = load_antibiotic_data()
+    alpha = estimate_alpha(df_abx, formula, offset=np.log(df["n_birth"]))
+    model_abx = generate_antibiotic_model(df_abx, formula, alpha)
+    if return_type == "csv":
+        df_abx_pred = get_predicted_abx_data(model_abx)
+        df_abx_pred.to_csv(
+            get_data_path("processed_data/antibiotic_predictions.csv"),
+            index=False
+        )
+    else:
+        return model_abx
+
+
+if __name__ == "__main__":
+    generate_antibiotic_data()
