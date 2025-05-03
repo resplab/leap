@@ -1,3 +1,5 @@
+import pandas as pd
+import numpy as np
 PROVINCE_MAP = {
     "Canada": "CA",
     "British Columbia": "BC",
@@ -69,3 +71,20 @@ def format_age_group(age_group: str, upper_age_group: str = "100 years and over"
         age = age.replace(" year", "")
         age = int(age)
     return age
+
+
+def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float) -> int | list[int]:
+    """Heaviside step function.
+    
+    Args:
+        x: The input value or array of values.
+        threshold: The threshold value.
+        
+    Returns:
+        1 if ``x >= threshold``, else 0. If ``x`` is a vector, this is computed for each entry.
+    """
+
+    if isinstance(x, float) or isinstance(x, int):
+        return 1 if x >= threshold else 0
+    else:
+        return [1 if i >= threshold else 0 for i in x]
