@@ -1,4 +1,3 @@
-import pathlib
 import pandas as pd
 import numpy as np
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
@@ -6,7 +5,7 @@ from scipy import optimize
 import itertools
 from leap.utils import get_data_path
 from leap.data_generation.utils import heaviside, conv_2x2
-from leap.data_generation.antibiotic_data import get_predicted_abx_data
+from leap.data_generation.antibiotic_data import get_predicted_abx_data, generate_antibiotic_data
 from leap.logger import get_logger
 from typing import Tuple
 from scipy.stats import logistic, nbinom
