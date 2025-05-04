@@ -488,7 +488,7 @@ def calibrator(
     df_reassessment: pd.DataFrame,
     inc_beta_params: list[float] | dict = INC_BETA_PARAMS,
     min_year: int = MIN_YEAR
-) -> dict:
+) -> pd.Series:
     """Compute the loss function given the effects of risk factors in the incidence equation, for
     each year, age, and sex.
 )
@@ -544,6 +544,10 @@ def calibrator(
     """
 
     logger.info(f"Calibrating for year={year}, age={age}, sex={sex}")
+    df = pd.Series(
+        [year, sex, age, np.nan, 0, 0],
+        index=["year", "sex", "age", "mean_diff_log_OR", "prev_correction", "inc_correction"]
+    )
 
     if type(inc_beta_params) != dict:
         inc_beta_params = {
@@ -585,11 +589,10 @@ def calibrator(
     )
 
     if year == 2000 or age == 3:
-        return {
-            "prev_correction": -np.dot(risk_set["prob"].iloc[1:], asthma_prev_risk_factor_params),
-            "inc_correction": None,
-            "mean_diff_log_OR": None
-        }
+        df["prev_correction"] = -np.dot(risk_set["prob"].iloc[1:], asthma_prev_risk_factor_params)
+        if year > 2000 and age == 3:
+            df["inc_correction"] = df["prev_correction"]
+        return df
 
     else:
         risk_set["inc"] = [df_incidence.loc[
@@ -700,46 +703,10 @@ def calibrator(
         Dx=1, # target diagnosis
     )
 
-    return {
-        "prev_correction": -np.dot(risk_set["prob"].iloc[1:], asthma_prev_risk_factor_params),
-        "inc_correction": asthma_inc_correction,
-        "mean_diff_log_OR": mean_diff_log_OR
-    }
-
-
-def calculate_correction(
-    year: int,
-    sex: str,
-    age: int,
-    model_abx: GLMResultsWrapper,
-    p_fam_distribution: pd.DataFrame,
-    df_fam_history_or: pd.DataFrame,
-    df_abx_or: pd.DataFrame,
-    df_incidence: pd.DataFrame,
-    df_prevalence: pd.DataFrame,
-    df_reassessment: pd.DataFrame,
-    inc_beta_params: list[float] | dict = [0.3766256, BETA_ABX_AGE]
-) -> pd.Series:
-
-    df = pd.Series(
-        [year, sex, age, np.nan, 0, 0],
-        index=["year", "sex", "age", "obj_value", "prev_correction", "inc_correction"]
-    )
-
-    results = calibrator(
-        year, sex, age, model_abx, p_fam_distribution, df_fam_history_or, df_abx_or,
-        df_incidence, df_prevalence, df_reassessment, inc_beta_params=inc_beta_params
-    )
-    df["prev_correction"] = results["prev_correction"]
-    if year > 2000:
-        if age == 3:
-            df["inc_correction"] = results["prev_correction"]
-        else:
-            df["obj_value"] = results["mean_diff_log_OR"]
-            df["inc_correction"] = results["inc_correction"]
-
+    df["prev_correction"] = -np.dot(risk_set["prob"].iloc[1:], asthma_prev_risk_factor_params)
+    df["inc_correction"] = asthma_inc_correction
+    df["mean_diff_log_OR"] = mean_diff_log_OR
     return df
-
 
 
 def generate_occurrence_calibration_data(
@@ -793,7 +760,7 @@ def generate_occurrence_calibration_data(
     )
     
     df_correction = df_correction.apply(
-        lambda x: calculate_correction(
+        lambda x: calibrator(
             year=x["year"],
             sex=x["sex"],
             age=x["age"],
