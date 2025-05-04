@@ -82,16 +82,16 @@ def load_occurrence_data(
     """
 
     df_asthma = pd.DataFrame(
-        list(itertools.product(range(3, 111), [0, 1], range(min_year, max_year + 1))),
+        list(itertools.product(range(3, 111), ["F", "M"], range(min_year, max_year + 1))),
         columns=["age", "sex", "year"]
     )
 
     df_asthma["incidence"] = df_asthma.apply(
-        lambda x: asthma_predictor(x["age"], x["sex"], x["year"], "inc"),
+        lambda x: asthma_predictor(x["age"], x["sex"], x["year"], "incidence"),
         axis=1
     )
     df_asthma["prevalence"] = df_asthma.apply(
-        lambda x: asthma_predictor(x["age"], x["sex"], x["year"], "prev"),
+        lambda x: asthma_predictor(x["age"], x["sex"], x["year"], "prevalence"),
         axis=1
     )
     df_asthma["incidence"] = df_asthma.apply(
