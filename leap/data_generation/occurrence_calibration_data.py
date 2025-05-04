@@ -707,6 +707,42 @@ def calibrator(
         "mean_diff_log_OR": mean_diff_log_OR
     }
 
+
+def calculate_correction(
+    year: int,
+    sex: str,
+    age: int,
+    model_abx: GLMResultsWrapper,
+    p_fam_distribution: pd.DataFrame,
+    df_fam_history_or: pd.DataFrame,
+    df_abx_or: pd.DataFrame,
+    df_incidence: pd.DataFrame,
+    df_prevalence: pd.DataFrame,
+    df_reassessment: pd.DataFrame,
+    inc_beta_params: list[float] | dict = [0.3766256, BETA_ABX_AGE]
+) -> pd.Series:
+
+    df = pd.Series(
+        [year, sex, age, np.nan, 0, 0],
+        index=["year", "sex", "age", "obj_value", "prev_correction", "inc_correction"]
+    )
+
+    results = calibrator(
+        year, sex, age, model_abx, p_fam_distribution, df_fam_history_or, df_abx_or,
+        df_incidence, df_prevalence, df_reassessment, inc_beta_params=inc_beta_params
+    )
+    df["prev_correction"] = results["prev_correction"]
+    if year > 2000:
+        if age == 3:
+            df["inc_correction"] = results["prev_correction"]
+        else:
+            df["obj_value"] = results["mean_diff_log_OR"]
+            df["inc_correction"] = results["inc_correction"]
+
+    return df
+
+
+
 def generate_occurrence_calibration_data(
     province: str = PROVINCE,
     min_year: int = MIN_YEAR,
