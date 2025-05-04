@@ -184,7 +184,7 @@ def load_abx_exposure_data() -> pd.DataFrame:
         ignore_index=True
     )
 
-    df_abx_or = df_abx_or.melt(id_vars=["age"], var_name="abx_dose", value_name="odds_ratio")
+    df_abx_or = df_abx_or.melt(id_vars=["age"], var_name="n_abx", value_name="odds_ratio")
     return df_abx_or
 
 
@@ -411,10 +411,12 @@ def risk_factor_generator(
     df_abx_exposure = p_antibiotic_exposure(max(birth_year, 2000), sex, model_abx)
 
     # combine abx_exposure = 3, 4, 5+ into 3+
-    df_abx_exposure.loc[df_abx_exposure["abx_exposure"] == 3, "prob_abx"] = df_abx_exposure.loc[
-        df_abx_exposure["abx_exposure"] >= 3, "prob_abx"
+    df_abx_exposure.loc[df_abx_exposure["n_abx"] == 3, "prob"] = df_abx_exposure.loc[
+        df_abx_exposure["n_abx"] >= 3, "prob"
     ].sum()
-    df_abx_exposure = df_abx_exposure[df_abx_exposure["abx_exposure"] <= 3]
+    df_abx_exposure = df_abx_exposure[df_abx_exposure["n_abx"] <= 3]
+    df_abx_exposure.rename(columns={"prob": "prob_abx"}, inplace=True)
+
 
     # select the given age if <= 5, otherwise select age == 5
     df_fam_history_or_age = df_fam_history_or.loc[df_fam_history_or["age"] == min(age, 5)]
@@ -424,13 +426,13 @@ def risk_factor_generator(
     # select the given age if <= 8, otherwise select age == 8
     # filter out abx_exposure > 3
     df_abx_or_age = df_abx_or.loc[df_abx_or["age"] == min(age, 8)]
-    df_abx_or_age = df_abx_or_age[["abx_exposure", "odds_ratio"]]
+    df_abx_or_age = df_abx_or_age[["n_abx", "odds_ratio"]]
     df_abx_or_age.rename(columns={"odds_ratio": "odds_ratio_abx"}, inplace=True)
-    df_abx_or_age = df_abx_or_age.loc[df_abx_or_age["abx_exposure"] <= 3]
+    df_abx_or_age = df_abx_or_age.loc[df_abx_or_age["n_abx"] <= 3]
        
     df_risk_factors = pd.DataFrame(
         list(itertools.product([0, 1], range(0, 4))),
-        columns=["fam_history", "abx_exposure"]
+        columns=["fam_history", "n_abx"]
     )
     df_risk_factors["year"] = [year] * df_risk_factors.shape[0]
     df_risk_factors["sex"] = [sex] * df_risk_factors.shape[0]
@@ -446,7 +448,7 @@ def risk_factor_generator(
         df_risk_factors,
         df_abx_exposure,
         how="left",
-        on="abx_exposure"
+        on="n_abx"
     )
     df_risk_factors = pd.merge(
         df_risk_factors,
@@ -458,7 +460,7 @@ def risk_factor_generator(
         df_risk_factors,
         df_abx_or_age,
         how="left",
-        on="abx_exposure"
+        on="n_abx"
     )
     df_risk_factors["prob"] = df_risk_factors.apply(
         lambda x: x["prob_fam"] * x["prob_abx"],
@@ -469,7 +471,7 @@ def risk_factor_generator(
         axis=1
     )
     df_risk_factors = df_risk_factors[
-        ["fam_history", "abx_exposure", "year", "sex", "age", "prob", "odds_ratio"]
+        ["fam_history", "n_abx", "year", "sex", "age", "prob", "odds_ratio"]
     ]
     return df_risk_factors
 
