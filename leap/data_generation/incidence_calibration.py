@@ -44,7 +44,7 @@ def compute_contingency_table(
         combination, ``i = 1`` is a special case; this is where there are no risk factors. We use
         this combination, referred to as the ``ref`` level, in the calculation of all the tables.
         
-        Each list entry contains a Pandas dataframe, with the following entries:
+        Each dictionary entry contains a Pandas dataframe, with the following entries:
 
             * ``di``: proportion of population labelled as no asthma with no risk factors
             * ``ci``: proportion of population labelled as asthma with no risk factors
