@@ -9,11 +9,13 @@ from scipy.special import logit
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
+
+
 def compute_contingency_table(
     risk_factor_prev: list[float],
     odds_ratio_target: list[float],
     asthma_prev_calibrated: list[float]
-) -> list[pd.DataFrame]:
+) -> Dict[str | int, pd.DataFrame]:
     r"""Compute the contingency table for the risk factors and asthma prevalence.
 
     This function computes the proportions of the population at different levels of family
@@ -31,7 +33,7 @@ def compute_contingency_table(
         asthma_prev_calibrated: A vector of the calibrated asthma prevalence.
 
     Returns:
-        A list of vectors representing the proportions of the population for different risk
+        A dictionary of dataframes representing the proportions of the population for different risk
         factor levels / combinations. For example, if we have the following risk factors:
 
         * family history: ``{0, 1}``
@@ -50,12 +52,12 @@ def compute_contingency_table(
             * ``ai``: proportion of population labelled as asthma with risk factors
     """
 
-    contingency_tables = []
+    contingency_tables = {}
 
     asthma_prev_ref = asthma_prev_calibrated[0]
     risk_factor_prev_ref = risk_factor_prev[0]
 
-    for i in range(len(odds_ratio_target)):
+    for i in range(1, len(odds_ratio_target)):
         risk_factor_prev_i = risk_factor_prev[i]
         asthma_prev = asthma_prev_calibrated[i]
 
@@ -80,7 +82,7 @@ def compute_contingency_table(
         # divide by sample size to get proportions
         table["values"] = table["values"].apply(lambda x: x / sample_size)
 
-        contingency_tables.append(table)
+        contingency_tables[i] = table
 
     return contingency_tables
 
