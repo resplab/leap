@@ -5,7 +5,6 @@ from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 from scipy import optimize
 import itertools
 from leap.utils import get_data_path
-from leap.data_generation.utils import heaviside
 from leap.data_generation.prevalence_calibration import prev_calibrator
 from leap.data_generation.incidence_calibration import inc_correction_calculator
 from leap.data_generation.antibiotic_data import get_predicted_abx_data, generate_antibiotic_data
@@ -494,7 +493,6 @@ def calibrator(
 ) -> pd.Series:
     """Compute the loss function given the effects of risk factors in the incidence equation, for
     each year, age, and sex.
-)
 
     Args:
         year: The integer year.
@@ -819,7 +817,6 @@ def inc_beta_solver(
         json.dump({"inc_beta_params": inc_beta_params}, f, indent=4)
 
 
-
 def generate_occurrence_calibration_data(
     province: str = PROVINCE,
     min_year: int = MIN_YEAR,
@@ -858,7 +855,7 @@ def generate_occurrence_calibration_data(
     df_fam_history_or = load_family_history_data()
     df_abx_or = load_abx_exposure_data()
 
-    model_abx = generate_antibiotic_data(return_type="model")
+    model_abx: GLMResultsWrapper = generate_antibiotic_data(return_type="model") # type: ignore
 
     if retrain_beta:
         inc_beta_solver(

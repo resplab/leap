@@ -1,4 +1,3 @@
-import pathlib
 import pandas as pd
 import numpy as np
 import itertools
@@ -7,7 +6,6 @@ import statsmodels.formula.api as smf
 from leap.utils import get_data_path
 from leap.data_generation.utils import get_province_id, get_sex_id, heaviside
 from leap.logger import get_logger
-from typing import Tuple
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 
 pd.options.mode.copy_on_write = True
