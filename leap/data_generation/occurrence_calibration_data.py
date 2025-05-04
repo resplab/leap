@@ -707,6 +707,92 @@ def calibrator(
         "mean_diff_log_OR": mean_diff_log_OR
     }
 
+def generate_occurrence_calibration_data(
+    province: str = PROVINCE,
+    min_year: int = MIN_YEAR,
+    max_year: int = MAX_YEAR,
+    baseline_year: int = BASELINE_YEAR,
+    stabilization_year: int = STABILIZATION_YEAR,
+    max_age: int = MAX_AGE
+):
+    """Generate the occurrence calibration data for the given province and year range.
+
+    Args:
+        province: The province to load data for.
+        min_year: The minimum year to load data for.
+        max_year: The maximum year to load data for.
+        baseline_year: The baseline year for the calibration.
+        stabilization_year: The stabilization year for the calibration.
+        max_age: The maximum age to consider for the calibration.
+    """
+
+    df_incidence, df_prevalence = load_occurrence_data(
+        province=province,
+        min_year=min_year,
+        max_year=max_year
+    )
+
+    df_reassessment = load_reassessment_data(province=province)
+
+    p_fam_distribution = pd.DataFrame({
+        "fam_history": [0, 1],
+        "prob_fam": [1 - PROB_FAM_HIST, PROB_FAM_HIST]
+    })
+
+    df_fam_history_or = load_family_history_data()
+    df_abx_or = load_abx_exposure_data()
+
+    model_abx = generate_antibiotic_data(return_type="model")
+
+    optimized_inc_beta = load_optimized_beta_params(
+        stabilization_year=stabilization_year, baseline_year=baseline_year, max_age=max_age
+    )
+
+    df_correction = pd.DataFrame(
+        list(itertools.product(
+            range(baseline_year - 1, stabilization_year + 1),
+            ["F", "M"],
+            range(3, max_age + 1)
+        )),
+        columns=["year", "sex", "age"]
+    )
+    
+    df_correction = df_correction.apply(
+        lambda x: calculate_correction(
+            year=x["year"],
+            sex=x["sex"],
+            age=x["age"],
+            model_abx=model_abx,
+            p_fam_distribution=p_fam_distribution,
+            df_fam_history_or=df_fam_history_or,
+            df_abx_or=df_abx_or,
+            df_incidence=df_incidence,
+            df_prevalence=df_prevalence,
+            df_reassessment=df_reassessment,
+            inc_beta_params=optimized_inc_beta
+        ), axis=1
+    ).reset_index(drop=True)
+
+    df_correction_prevalence = df_correction[["year", "sex", "age", "prev_correction"]].copy()
+    df_correction_prevalence.rename(columns={"prev_correction": "correction"}, inplace=True)
+    df_correction_prevalence["type"] = ["prevalence"] * df_correction_prevalence.shape[0] 
+    
+    df_correction_incidence = df_correction[["year", "sex", "age", "inc_correction"]].copy()
+    df_correction_incidence.rename(columns={"inc_correction": "correction"}, inplace=True)
+    df_correction_incidence["type"] = ["incidence"] * df_correction_incidence.shape[0]
+
+    df_correction = pd.concat(
+        [df_correction_prevalence, df_correction_incidence],
+        ignore_index=True
+    )
+
+    df_correction.to_csv(
+        get_data_path("processed_data/asthma_occurrence_correction.csv"),
+        index=False
+    )
+
+
+
 def compute_asthma_prev_risk_factors(
     asthma_prev_risk_factor_params: list[float],
     odds_ratio_target: list[float],
