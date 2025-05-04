@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 import numpy as np
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 from scipy import optimize
@@ -709,6 +710,114 @@ def calibrator(
     df["inc_correction"] = asthma_inc_correction
     df["mean_diff_log_OR"] = mean_diff_log_OR
     return df
+
+
+
+def compute_mean_diff_log_OR(
+    inc_beta_params: list[float],
+    df: pd.DataFrame,
+    model_abx: GLMResultsWrapper,
+    p_fam_distribution: pd.DataFrame,
+    df_fam_history_or: pd.DataFrame,
+    df_abx_or: pd.DataFrame,
+    df_incidence: pd.DataFrame,
+    df_prevalence: pd.DataFrame,
+    df_reassessment: pd.DataFrame,
+    min_year: int = MIN_YEAR
+) -> float:
+
+    """Compute the mean difference in log odds ratio for the given model and data.
+
+    Args:
+        model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
+        p_fam_distribution: A dataframe with the probability of family history of asthma, given
+            that the person has asthma.
+        df_fam_history_or: A dataframe with the odds ratio of family history of asthma, given
+            the age of the person.
+        df_abx_or: A dataframe with the odds ratio of antibiotic exposure, given
+            the age of the person.
+        df_incidence: A dataframe with the incidence of asthma.
+        df_prevalence: A dataframe with the prevalence of asthma.
+        df_reassessment: A dataframe with the reassessment of asthma.
+        inc_beta_params: The initial parameters for the incidence equation.
+        baseline_year: The baseline year for the calibration.
+        stabilization_year: The stabilization year for the calibration.
+        max_age: The maximum age to consider for the calibration.
+
+    Returns:
+        The mean difference in log odds ratio for the given model and data.
+    """
+
+    df["mean_log_diff_OR"] = df.apply(
+        lambda x: calibrator(
+            x["year"], x["sex"], x["age"], model_abx, p_fam_distribution,
+            df_fam_history_or, df_abx_or, df_incidence, df_prevalence,
+            df_reassessment, inc_beta_params, min_year
+        )["mean_diff_log_OR"],
+        axis=1
+    )
+    return df["mean_log_diff_OR"].mean()
+
+
+def inc_beta_solver(
+    model_abx: GLMResultsWrapper,
+    p_fam_distribution: pd.DataFrame,
+    df_fam_history_or: pd.DataFrame,
+    df_abx_or: pd.DataFrame,
+    df_incidence: pd.DataFrame,
+    df_prevalence: pd.DataFrame,
+    df_reassessment: pd.DataFrame,
+    baseline_year: int = BASELINE_YEAR,
+    stabilization_year: int = STABILIZATION_YEAR,
+    max_age: int = MAX_AGE,
+    min_year: int = MIN_YEAR,
+    inc_beta_params: list[float] | dict = INC_BETA_PARAMS
+) -> None:
+    """Optimize the incidence beta parameters for the given model and data.
+
+    Args:
+        model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
+        df_fam_history_or: A dataframe with the odds ratio of family history of asthma, given
+            the age of the person.
+        df_abx_or: A dataframe with the odds ratio of antibiotic exposure, given
+            the age of the person.
+        df_incidence: A dataframe with the incidence of asthma.
+        df_prevalence: A dataframe with the prevalence of asthma.
+        df_reassessment: A dataframe with the reassessment of asthma.
+        baseline_year: The baseline year for the calibration.
+        stabilization_year: The stabilization year for the calibration.
+        max_age: The maximum age to consider for the calibration.
+        inc_beta_params: The initial parameters for the incidence equation.
+    """
+
+    df = pd.DataFrame(
+        list(itertools.product(
+            range(baseline_year, stabilization_year + 2),
+            ["F", "M"],
+            range(4, max_age + 1)
+        )),
+        columns=["year", "sex", "age"]
+    )
+
+    res = optimize.minimize(
+        fun=compute_mean_diff_log_OR,
+        x0=inc_beta_params,
+        args=(
+            df, model_abx, p_fam_distribution, df_fam_history_or, df_abx_or, df_incidence,
+            df_prevalence, df_reassessment, min_year
+        ),
+        method="BFGS",
+        options={"maxiter": 1, "disp": True, "gtol": 1e-2}
+    )
+
+    inc_beta_params = {
+        "fam_history": res.x[0],
+        "abx": res.x[1]
+    }
+
+    with open(get_data_path("processed_data/occurrence_calibration_parameters.json"), "w") as f:
+        json.dump({"inc_beta_params": inc_beta_params}, f, indent=4)
+
 
 
 def generate_occurrence_calibration_data(
