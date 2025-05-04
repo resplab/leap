@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from leap.data_generation.utils import conv_2x2
-from leap.data_generation.prev_calibrator import prev_calibrator
+from leap.data_generation.prevalence_calibration import prev_calibrator
 from leap.logger import get_logger
 from typing import Tuple, Dict
 from scipy.stats import logistic
