@@ -486,7 +486,7 @@ def calibrator(
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
-    inc_beta_params: list[float] | dict = [0.3766256, BETA_ABX_AGE],
+    inc_beta_params: list[float] | dict = INC_BETA_PARAMS,
     min_year: int = MIN_YEAR
 ) -> dict:
     """Compute the loss function given the effects of risk factors in the incidence equation, for
