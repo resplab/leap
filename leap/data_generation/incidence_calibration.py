@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from leap.data_generation.utils import conv_2x2
+from leap.data_generation.prev_calibrator import prev_calibrator
 from leap.logger import get_logger
 from typing import Tuple, Dict
 from scipy.stats import logistic
@@ -189,6 +190,87 @@ def compute_odds_ratio_difference(
         total_diff_log_OR += diff
 
     return total_diff_log_OR
+
+
+
+def inc_correction_calculator(
+    asthma_inc_target: float,
+    asthma_prev_target_past: float,
+    odds_ratio_target_past: np.ndarray,
+    odds_ratio_target: np.ndarray,
+    risk_factor_prev_past: np.ndarray,
+    risk_set: pd.DataFrame,
+    ra_target: float = 1.0,
+    misDx: float = 0,
+    Dx: float = 1
+) -> Tuple[float, float]:
+    """Calculate the correction for asthma incidence based on risk factors.
+
+    Args:
+        asthma_inc_target: The target incidence of asthma.
+        asthma_prev_target_past: The target prevalence of asthma in the previous year.
+        odds_ratio_target_past: A vector of odds ratios for the risk factors in the previous year.
+        odds_ratio_target: A vector of odds ratios for the risk factors.
+        risk_factor_prev_past: A vector of the prevalence of the risk factors in the previous year.
+        risk_set: A data frame containing the risk factors and their corresponding odds ratios.
+        ra_target: A value between 0 and 1 indicating the target reassessment.
+        misDx: A numeric value representing the misdiagnosis rate.
+        Dx: A numeric value representing the diagnosis rate.
+
+    Returns:
+        A tuple containing two entries:
+        * ``mean_diff_log_OR``: mean difference between the target and calibrated log odds ratios.
+        * ``asthma_inc_correction``: the calibrated asthma incidence correction.
+    """
+
+    β_0 = logit(asthma_inc_target)
+    log_inc_OR = np.log(risk_set["odds_ratio"])
+    
+    # asthma prevalance ~ risk factor parameters for the previous year
+    asthma_prev_risk_factor_params_past = prev_calibrator(
+        asthma_prev_target=asthma_prev_target_past,
+        odds_ratio_target=odds_ratio_target_past,
+        risk_factor_prev=risk_factor_prev_past
+    )
+
+    # calibrated asthma prevalence for the previous year
+    asthma_prev_calibrated_past = logistic.cdf(
+        [logit(asthma_prev_target_past)] * odds_ratio_target_past.shape[0] +
+        np.log(odds_ratio_target_past) - 
+        [np.dot(risk_factor_prev_past[1:], asthma_prev_risk_factor_params_past)] * odds_ratio_target_past.shape[0]
+    )
+    # distribution of the risk factors for the population without asthma
+    risk_factor_prev_past_no_asthma = (1 - asthma_prev_calibrated_past) * risk_factor_prev_past
+    # normalize
+    risk_factor_prev_past_no_asthma = risk_factor_prev_past_no_asthma / np.sum(risk_factor_prev_past_no_asthma)
+    
+    # asthma prevalence ~ risk factor parameters for incidence
+    asthma_prev_risk_factor_params = prev_calibrator(
+        asthma_prev_target=asthma_inc_target,
+        odds_ratio_target=np.exp(log_inc_OR),
+        risk_factor_prev=risk_factor_prev_past_no_asthma
+    )
+
+    asthma_inc_correction = np.dot(
+        asthma_prev_risk_factor_params, risk_factor_prev_past_no_asthma[1:]
+    )
+
+    # calibrated asthma incidence
+    asthma_inc_calibrated = logistic.cdf(β_0 + log_inc_OR - asthma_inc_correction)
+
+    # for each odds ratio, we need to obtain the contingency table
+    contingency_tables = compute_contingency_table(
+        risk_factor_prev=list(risk_factor_prev_past),
+        odds_ratio_target=list(odds_ratio_target_past),
+        asthma_prev_calibrated=list(asthma_prev_calibrated_past)
+    )
+    
+    mean_diff_log_OR = compute_odds_ratio_difference(
+        asthma_inc_calibrated, odds_ratio_target, contingency_tables, ra_target, misDx, Dx
+    )
+
+    return mean_diff_log_OR, asthma_inc_correction
+
 
 
 

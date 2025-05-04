@@ -6,6 +6,7 @@ import itertools
 from leap.utils import get_data_path
 from leap.data_generation.utils import heaviside
 from leap.data_generation.prevalence_calibration import prev_calibrator
+from leap.data_generation.incidence_calibration import inc_correction_calculator
 from leap.data_generation.antibiotic_data import get_predicted_abx_data, generate_antibiotic_data
 from leap.logger import get_logger
 from typing import Tuple
@@ -692,11 +693,11 @@ def calibrator(
                 axis=1
             )
 
-    asthma_inc_correction, mean_diff_log_OR = inc_correction_calculator(
+    mean_diff_log_OR, asthma_inc_correction = inc_correction_calculator(
         asthma_inc_target=risk_set["inc"].iloc[0],
         asthma_prev_target_past=past_asthma_prev_target,
-        past_target_OR=past_risk_set["odds_ratio"],
-        target_OR=risk_set["odds_ratio"],
+        odds_ratio_target_past=past_risk_set["odds_ratio"],
+        odds_ratio_target=risk_set["odds_ratio"],
         risk_factor_prev_past=past_risk_set["prob"],
         risk_set=inc_risk_set,
         ra_target=ra_target,
