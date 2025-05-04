@@ -826,7 +826,8 @@ def generate_occurrence_calibration_data(
     max_year: int = MAX_YEAR,
     baseline_year: int = BASELINE_YEAR,
     stabilization_year: int = STABILIZATION_YEAR,
-    max_age: int = MAX_AGE
+    max_age: int = MAX_AGE,
+    retrain_beta: bool = False
 ):
     """Generate the occurrence calibration data for the given province and year range.
 
@@ -837,6 +838,8 @@ def generate_occurrence_calibration_data(
         baseline_year: The baseline year for the calibration.
         stabilization_year: The stabilization year for the calibration.
         max_age: The maximum age to consider for the calibration.
+        retrain_beta: If ``True``, re-run the fit for the ``inc_beta_params``. Otherwise, load
+            the saved parameters from a ``json`` file.
     """
 
     df_incidence, df_prevalence = load_occurrence_data(
@@ -857,9 +860,22 @@ def generate_occurrence_calibration_data(
 
     model_abx = generate_antibiotic_data(return_type="model")
 
-    optimized_inc_beta = load_optimized_beta_params(
-        stabilization_year=stabilization_year, baseline_year=baseline_year, max_age=max_age
-    )
+    if retrain_beta:
+        inc_beta_solver(
+            model_abx=model_abx,
+            p_fam_distribution=p_fam_distribution,
+            df_fam_history_or=df_fam_history_or,
+            df_abx_or=df_abx_or,
+            df_incidence=df_incidence,
+            df_prevalence=df_prevalence,
+            df_reassessment=df_reassessment,
+            baseline_year=baseline_year,
+            stabilization_year=stabilization_year,
+            max_age=max_age
+        )
+    
+    with open(get_data_path("processed_data/occurrence_calibration_parameters.json"), "r") as f:
+        optimized_inc_beta = json.load(f)["inc_beta_params"]
 
     df_correction = pd.DataFrame(
         list(itertools.product(
