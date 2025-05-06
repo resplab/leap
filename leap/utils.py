@@ -245,6 +245,31 @@ def convert_non_serializable(obj: np.ndarray | object) -> list | str:
     # Default for unsupported types
     return str(obj)
 
+def convert_time_unit_to_year_month(time_unit: int, starting_year: int) -> tuple[int, int]:
+    """
+    Converts a 1-indexed time unit (months since start) into the corresponding
+    calendar year and month, also 1-indexed.
+    
+    Args:
+        time_unit: the time index in months (1 = Jan of starting year, 2 = Feb, …)
+        starting_year: the initial year of the simulation
+        
+    Returns:
+        A (year, month) tuple, both 1-indexed.
+        
+    Examples:
+        >>> convert_time_unit_to_year_month(1, 2001)
+        (2001, 1)   # January 2001
+        >>> convert_time_unit_to_year_month(12, 2001)
+        (2001, 12)  # December 2001
+        >>> convert_time_unit_to_year_month(13, 2001)
+        (2002, 1)   # January 2002
+        >>> convert_time_unit_to_year_month(50, 2001)
+        (2005, 2)   # February 2005
+    """
+    year  = starting_year + (time_unit - 1) // 12
+    month = ((time_unit - 1) % 12) + 1
+    return year, month
 
 class Sex:
     """A class to handle different formats of the ``sex`` variable."""

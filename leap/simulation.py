@@ -21,7 +21,7 @@ from leap.pollution import PollutionTable, Pollution
 from leap.reassessment import Reassessment
 from leap.severity import ExacerbationSeverity
 from leap.utility import Utility
-from leap.utils import get_data_path
+from leap.utils import get_data_path, convert_time_unit_to_year_month
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -98,12 +98,12 @@ class Simulation:
     def __repr__(self):
         return (
             f"Simulation("
-            f"province='{self.province}', "
+            f"province={self.province}, "
             f"max_age={self.max_age}, "
             f"min_year={self.min_year}, "
             f"time_horizon={self.time_horizon}, "
-            f"population_growth_type='{self.population_growth_type}')"
-            f"num_births_initial={self.num_births_initial}, "
+            f"population_growth_type={self.population_growth_type}, "
+            f"num_births_initial={self.num_births_initial})"
         )
 
     @property
@@ -450,7 +450,7 @@ class Simulation:
         )
 
     def run(self, seed=None, until_all_die: bool = False):
-        """Run the simulation using a monthly cycle.
+        """Run the simulation using a monthly time_unit cycle.
 
         Args:
             seed: The random seed to use for the simulation.
@@ -464,51 +464,53 @@ class Simulation:
 
         # Initialize simulation parameters and outcome matrix
         self.max_time_horizon = np.iinfo(np.int32).max if until_all_die else self.time_horizon
-        self.years = np.arange(self.min_year, self.max_year + 1)
-        self.total_years = self.max_year - self.min_year + 1
+        # Time units is the total of years * 12 months
+        self.start_time_unit = 0
+        self.end_time_unit = (self.max_year - self.min_year + 1) * 12 - 1
+        self.tunits = np.arange(self.start_time_unit, self.end_time_unit + 1)
+
         self.outcome_matrix = OutcomeMatrix(
-            until_all_die, self.min_year, self.max_year, self.max_age
+            until_all_die, self.start_time_unit, self.end_time_unit, self.max_age
         )
 
-        # Loop over each year in the simulation
-        pbar_year = tqdm(self.years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")
-        for year in pbar_year:
-            pbar_year.set_description(f"Year {year}")
-            self._process_year(year)
+        # Loop over each time unit (tunit) in the simulation
+        pbar_tunit = tqdm(
+            self.tunits, desc="Time units", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}"
+        )
+        for tunit in pbar_tunit:
+            pbar_tunit.set_description(f"Time unit {tunit}")
+            self._process_time_unit(tunit)
 
         logger.info("\nSimulation finished. Check your simulation object for results.")
         return self.outcome_matrix
 
-    def _process_year(self, year):
-        """Process each year in the simulation."""
-        year_index = year - self.min_year
-        new_agents_df = self.get_new_agents(year=year)
+    def _process_time_unit(self, tunit):
+        """Process each time unit in the simulation."""
+        year, month = convert_time_unit_to_year_month(tunit, self.min_year)
+        new_agents_df = self.get_new_agents(year)
 
         logger.info(
-            f"Year {year}, year {year_index} of {self.total_years} years, "
+            f"Time unit {tunit} of {self.end_time_unit}."
+            f"Year = {year}, month = {month}"
             f"{new_agents_df.shape[0]} new agents born/immigrated."
         )
         logger.info(f"\n{new_agents_df}")
 
-        for month in range(1, 13):
-            self._process_month(year, year_index, month, new_agents_df)
-
-    def _process_month(self, year, year_index, month, new_agents_df):
-        """Process each month in the simulation."""
         pbar = tqdm(
             range(new_agents_df.shape[0]),
             desc="Agents",
             bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
         )
         for i in pbar:
-            self._process_agent(year, year_index, month, new_agents_df, i)
+            self._process_agent(tunit, new_agents_df, i)
 
-    def _process_agent(self, year, year_index, month, new_agents_df, i):
+    def _process_agent(self, tunit, new_agents_df, i):
         """Process each agent in the simulation."""
         self.control.assign_random_β0()
         self.exacerbation.assign_random_β0()
         self.exacerbation_severity.assign_random_p()
 
+        year, month = convert_time_unit_to_year_month(tunit, self.min_year)
         census_division = CensusDivision(census_table=self.census_table, province=self.province)
         pollution = (
             None
@@ -524,8 +526,8 @@ class Simulation:
         agent = Agent(
             sex=new_agents_df["sex"].iloc[i],
             age=new_agents_df["age"].iloc[i],
-            year=year,
-            year_index=year_index,
+            time_unit=tunit,
+            starting_year=self.min_year,
             family_history=self.family_history,
             antibiotic_exposure=self.antibiotic_exposure,
             province=self.province,
@@ -541,13 +543,13 @@ class Simulation:
             f"immigrant: {new_agents_df['immigrant'].iloc[i]}, "
             f"newborn: {not new_agents_df['immigrant'].iloc[i]}"
         )
-        logger.info(f"| -- Year: {agent.year_index + self.min_year - 1}, " f"age: {agent.age}")
+        logger.info(f"| -- Time Unit: {agent.time_unit}, " f"age: {agent.age}")
 
         if new_agents_df["immigrant"].iloc[i]:
             self.outcome_matrix.immigration.increment(
                 "n_immigrants",
                 {
-                    "year": agent.year,
+                    "time_unit": agent.time_unit,
                     "month": month,
                     "age": agent.age,
                     "sex": agent.sex,
@@ -556,12 +558,12 @@ class Simulation:
 
         self._process_agent_outcome_events(agent, month)
 
-    def _process_agent_outcome_events(self, agent, month):
+    def _process_agent_outcome_events(self, agent: Agent, month):
         """Process events for each agent to update outcome matrix."""
         self.outcome_matrix.antibiotic_exposure.increment(
             column="n_antibiotic_exposure",
             filter_columns={
-                "year": agent.year,
+                "time_unit": agent.time_unit,
                 "month": month,
                 "age": agent.age,
                 "sex": agent.sex,
@@ -572,7 +574,7 @@ class Simulation:
         self.outcome_matrix.family_history.increment(
             column="has_family_history",
             filter_columns={
-                "year": agent.year,
+                "time_unit": agent.time_unit,
                 "month": month,
                 "age": agent.age,
                 "sex": agent.sex,
@@ -585,7 +587,9 @@ class Simulation:
             logger.info(f"| ---- Agent age > 3, agent has asthma (prevalence)? {agent.has_asthma}")
 
         while (
-            agent.alive and agent.age <= self.max_age and agent.year_index <= self.max_time_horizon
+            agent.alive
+            and agent.age <= self.max_age
+            and agent.time_unit <= self.max_time_horizon * 12
         ):
             if not agent.has_asthma:
                 self.check_if_agent_gets_new_asthma_diagnosis(agent, self.outcome_matrix)
@@ -601,7 +605,7 @@ class Simulation:
                 self.outcome_matrix.asthma_prevalence.increment(
                     column="n_asthma",
                     filter_columns={
-                        "year": agent.year,
+                        "time_unit": agent.time_unit,
                         "month": month,
                         "age": agent.age,
                         "sex": agent.sex,
@@ -611,7 +615,7 @@ class Simulation:
             self.outcome_matrix.asthma_prevalence_contingency_table.increment(
                 column="n_asthma" if agent.has_asthma else "n_no_asthma",
                 filter_columns={
-                    "year": agent.year,
+                    "time_unit": agent.time_unit,
                     "month": month,
                     "age": agent.age,
                     "sex": agent.sex,
@@ -625,7 +629,7 @@ class Simulation:
             self.outcome_matrix.utility.increment(
                 column="utility",
                 filter_columns={
-                    "year": agent.year,
+                    "time_unit": agent.time_unit,
                     "month": month,
                     "age": agent.age,
                     "sex": agent.sex,
@@ -638,7 +642,7 @@ class Simulation:
             self.outcome_matrix.cost.increment(
                 column="cost",
                 filter_columns={
-                    "year": agent.year,
+                    "time_unit": agent.time_unit,
                     "month": month,
                     "age": agent.age,
                     "sex": agent.sex,
@@ -651,7 +655,7 @@ class Simulation:
                 self.outcome_matrix.death.increment(
                     column="n_deaths",
                     filter_columns={
-                        "year": agent.year,
+                        "time_unit": agent.time_unit,
                         "month": month,
                         "age": agent.age,
                         "sex": agent.sex,
@@ -663,7 +667,7 @@ class Simulation:
                 self.outcome_matrix.emigration.increment(
                     column="n_emigrants",
                     filter_columns={
-                        "year": agent.year,
+                        "time_unit": agent.time_unit,
                         "month": month,
                         "age": agent.age,
                         "sex": agent.sex,
@@ -674,7 +678,7 @@ class Simulation:
                 self.outcome_matrix.alive.increment(
                     column="n_alive",
                     filter_columns={
-                        "year": agent.year,
+                        "time_unit": agent.time_unit,
                         "month": month,
                         "age": agent.age,
                         "sex": agent.sex,
@@ -682,10 +686,9 @@ class Simulation:
                 )
 
                 agent.age += 1
-                agent.year += 1
-                agent.year_index += 1
+                agent.time_unit += 1
 
-                if agent.age <= self.max_age and agent.year_index <= self.max_time_horizon:
+                if agent.age <= self.max_age and agent.time_unit <= self.max_time_horizon * 12:
                     logger.info(
-                        f"| -- Year: {agent.year_index + self.min_year - 1}, age: {agent.age}"
+                        f"| -- Time Unit: {agent.time_unit}, age: {agent.age}"
                     )

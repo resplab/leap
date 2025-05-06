@@ -6,7 +6,7 @@ from leap.control import ControlLevels
 from leap.exacerbation import ExacerbationHistory
 from leap.pollution import Pollution
 from leap.severity import ExacerbationSeverityHistory
-from leap.utils import UUID4, Sex
+from leap.utils import UUID4, Sex, convert_time_unit_to_year_month
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from leap.family_history import FamilyHistory
@@ -18,18 +18,14 @@ class Agent:
     Attributes:
         year:
             The calendar year of the current iteration, e.g. 2027.
-        year_index:
-            An integer representing the year of the simulation. For example, if
-            the simulation starts in 2023, then the ``year_index`` for 2023 is 1, for 2024 is 2, etc.
     """
 
     def __init__(
         self,
         sex: str | int | bool | Sex,
         age: int,
-        year: int,
-        year_index: int,
-        month: int = 1,
+        time_unit: int,
+        starting_year: int,
         province: str = "CA",
         uuid: UUID4 | None = None,
         alive: bool = True,
@@ -54,9 +50,8 @@ class Agent:
         self.uuid = uuid
         self.sex = sex
         self.age = age
-        self.year = year
-        self.year_index = year_index
-        self.month = month
+        self.time_unit = time_unit
+        self.starting_year = starting_year
         self.alive = alive
         self.has_asthma = has_asthma
         self.asthma_age = asthma_age
@@ -65,6 +60,9 @@ class Agent:
         self.exacerbation_history = exacerbation_history
         self.exacerbation_severity_history = exacerbation_severity_history
         self.total_hosp = total_hosp
+        year, month = convert_time_unit_to_year_month(self.time_unit, self.starting_year)
+        self.year = year
+        self.month = month
         if num_antibiotic_use is None and antibiotic_exposure is not None:
             self.num_antibiotic_use = antibiotic_exposure.compute_num_antibiotic_use(
                 sex=int(self.sex),

@@ -69,63 +69,61 @@ class OutcomeTable:
 class OutcomeMatrix:
     """A class containing information about the outcomes of the model."""
     def __init__(
-        self, until_all_die: bool, min_year: int, max_year: int, max_age: int
+        self, until_all_die: bool, min_time_unit: int, max_time_unit: int, max_age: int
     ):
         """Initialize the ``OutcomeMatrix`` class.
         
         Args:
             until_all_die: A boolean indicating whether the simulation should run until all
                 people have died.
-            min_year: The minimum year of the simulation.
-            max_year: The maximum year of the simulation.
+            min_time_unit: The minimum time unit of the simulation.
+            max_time_unit: The maximum time unit of the simulation.
             max_age: The maximum age of the people in the simulation.
         """
 
         self.until_all_die = until_all_die
-        self.min_year = min_year
-        self.max_year = max_year
         self.max_age = max_age
 
         self.alive = self.create_table(
-            ["year", "month", "age", "sex", "n_alive"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "n_alive"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.antibiotic_exposure = self.create_table(
-            ["year", "month", "age", "sex", "n_antibiotic_exposure"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "n_antibiotic_exposure"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.asthma_incidence = self.create_table(
-            ["year", "month", "age", "sex", "n_new_diagnoses"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "n_new_diagnoses"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.asthma_prevalence = self.create_table(
-            ["year", "month", "age", "sex", "n_asthma"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "n_asthma"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.asthma_incidence_contingency_table = self.create_table(
-            ["year", "month", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
-            ["year", "month", "sex", "fam_history", "abx_exposure"],
-            range(min_year, max_year + 1),
+            ["time_unit", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
+            ["time_unit", "sex", "fam_history", "abx_exposure"],
+            range(min_time_unit, max_time_unit + 1),
             range(1, 13),
             range(0, 2),
             range(0, max_age + 2),
@@ -135,9 +133,9 @@ class OutcomeMatrix:
             [0]
         )
         self.asthma_prevalence_contingency_table = self.create_table(
-            ["year", "month", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
-            ["year", "month", "sex", "fam_history", "abx_exposure"],
-            range(min_year, max_year + 1),
+            ["time_unit", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
+            ["time_unit", "sex", "fam_history", "abx_exposure"],
+            range(min_time_unit, max_time_unit + 1),
             range(1, 13),
             range(0, 2),
             range(0, max_age + 2),
@@ -147,18 +145,18 @@ class OutcomeMatrix:
             [0]
         )
         self.asthma_status = self.create_table(
-            ["year", "month", "age", "sex", "status"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "status"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.control = self.create_table(
-            ["year", "month", "level", "age", "sex", "prob"],
-            ["year", "month", "level"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "level", "age", "sex", "prob"],
+            ["time_unit", "level"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(3),
             range(max_age + 1),
@@ -166,45 +164,45 @@ class OutcomeMatrix:
             [0.0]
         )
         self.cost = self.create_table(
-            ["year", "month", "age", "sex", "cost"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "cost"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0.0]
         )
         self.death = self.create_table(
-            ["year", "month", "age", "sex", "n_deaths"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "n_deaths"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.emigration = self.create_table(
-            ["year", "month", "age", "sex", "n_emigrants"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "n_emigrants"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.exacerbation = self.create_table(
-            ["year", "month", "age", "sex", "n_exacerbations"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "n_exacerbations"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.exacerbation_by_severity = self.create_table(
-            ["year", "month", "severity", "age", "sex", "p_exacerbations"],
-            ["year", "month", "severity"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "severity", "age", "sex", "p_exacerbations"],
+            ["time_unit", "severity"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(4),
             range(max_age + 1),
@@ -212,36 +210,36 @@ class OutcomeMatrix:
             [0.0]
         )
         self.exacerbation_hospital = self.create_table(
-            ["year", "month", "age", "sex", "n_hospitalizations"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "n_hospitalizations"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.family_history = self.create_table(
-            ["year", "month", "age", "sex", "has_family_history"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "has_family_history"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.immigration = self.create_table(
-            ["year", "month", "age", "sex", "n_immigrants"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "n_immigrants"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.utility = self.create_table(
-            ["year", "month", "age", "sex", "utility"],
-            ["year", "month"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["time_unit", "age", "sex", "utility"],
+            ["time_unit"],
+            range(min_time_unit, max_time_unit + 1 + (max_age if until_all_die else 0)),
             range(1, 13),
             range(max_age + 1),
             ["F", "M"],
