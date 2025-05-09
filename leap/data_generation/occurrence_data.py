@@ -5,7 +5,7 @@ import itertools
 import plotly.express as px
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-from leap.utils import get_data_path
+from leap.utils import get_data_path, poly
 from leap.logger import get_logger
 from typing import Tuple
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
@@ -17,76 +17,6 @@ logger = get_logger(__name__, 20)
 STARTING_YEAR = 2000
 MAX_YEAR = 2019
 MAX_AGE = 65
-
-def poly(
-    x: list[float] | np.ndarray,
-    degree: int = 1,
-    alpha: list[float] | np.ndarray | None = None,
-    norm2: list[float] | np.ndarray | None = None,
-    orthogonal: bool = False
-) -> np.ndarray | Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Generate a polynomial basis for a vector.
-
-    See `Orthogonal polynomial regression in Python
-    <https://davmre.github.io/blog/python/2013/12/15/orthogonal_poly/>`_ for more
-    information on this function.
-    
-    Args:
-        x: The vector to generate the polynomial basis for.
-        degree: The degree of the polynomial.
-        orthogonal: Whether to generate an orthogonal polynomial basis.
-        
-    Returns:
-        The polynomial basis, as a 2D Numpy array. If ``orthogonal`` is ``True``, the function
-        will return a tuple of three Numpy arrays: the orthogonal polynomial basis, the ``alpha``
-        values, and the ``norm2`` values.
-
-    Examples:
-
-        >>> poly([1, 2, 3], degree=2) # doctest: +NORMALIZE_WHITESPACE
-        array([[1, 1],
-               [2, 4],
-               [3, 9]])
-
-        >>> poly([1, 2, 3], degree=2, orthogonal=True) # doctest: +NORMALIZE_WHITESPACE
-        (array([[-7.07106781e-01,  4.08248290e-01],
-               [-5.55111512e-17, -8.16496581e-01],
-               [ 7.07106781e-01,  4.08248290e-01]]), array([2., 2.]), array([3.        , 2.        , 0.66666667]))
-    """
-    n = degree + 1
-    x = np.asarray(x).flatten()
-    if alpha is not None and norm2 is not None:
-        Z = np.empty((len(x), n))
-        Z[:,0] = 1
-        if degree > 0:
-            Z[:, 1] = x - alpha[0]
-        if degree > 1:
-            for i in np.arange(1, degree):
-                Z[:, i+1] = (x - alpha[i]) * Z[:, i] - (norm2[i] / norm2[i-1]) * Z[:, i-1]
-        Z /= np.sqrt(norm2)
-        return Z[:, 1:]
-    else:
-        if(degree >= len(np.unique(x))):
-            raise ValueError("'degree' must be less than number of unique points")
-        if orthogonal:
-            xbar = np.mean(x)
-            x = x - xbar
-            X = np.vander(x, n, increasing=True)
-            Q, R = np.linalg.qr(X)
-
-            Z = np.diag(np.diag(R))
-            raw = np.dot(Q, Z)
-
-            norm2 = np.sum(raw**2, axis=0)
-            alpha = (
-                np.sum((raw**2) * np.reshape(x, (-1, 1)), axis=0)/norm2 + 
-                xbar
-            )[:degree]
-            Z = raw / np.sqrt(norm2)
-            return Z[:, 1:], alpha, norm2
-        else:
-            X = np.vander(x, n, increasing=True)
-            return X[:, 1:]
 
 
 def parse_age_group(x: str, max_age: int = MAX_AGE) -> Tuple[int, int]:
