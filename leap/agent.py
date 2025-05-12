@@ -6,7 +6,7 @@ from leap.control import ControlLevels
 from leap.exacerbation import ExacerbationHistory
 from leap.pollution import Pollution
 from leap.severity import ExacerbationSeverityHistory
-from leap.utils import UUID4, Sex, convert_time_unit_to_year_month
+from leap.utils import UUID4, Sex, convert_time_to_year_month
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from leap.family_history import FamilyHistory
@@ -24,7 +24,7 @@ class Agent:
         self,
         sex: str | int | bool | Sex,
         age: int,
-        time_unit: int,
+        time: int,
         starting_year: int,
         province: str = "CA",
         uuid: UUID4 | None = None,
@@ -50,7 +50,7 @@ class Agent:
         self.uuid = uuid
         self.sex = sex
         self.age = age
-        self.time_unit = time_unit
+        self.time = time
         self.starting_year = starting_year
         self.alive = alive
         self.has_asthma = has_asthma
@@ -60,7 +60,7 @@ class Agent:
         self.exacerbation_history = exacerbation_history
         self.exacerbation_severity_history = exacerbation_severity_history
         self.total_hosp = total_hosp
-        year, month = convert_time_unit_to_year_month(self.time_unit, self.starting_year)
+        year, month = convert_time_to_year_month(self.time, self.starting_year)
         self.year = year
         self.month = month
         if num_antibiotic_use is None and antibiotic_exposure is not None:
