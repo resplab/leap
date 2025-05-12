@@ -10,13 +10,20 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 
-def compute_asthma_prev_risk_factors(
+def compute_asthma_prevalence_λ(
     asthma_prev_risk_factor_params: list[float],
     odds_ratio_target: list[float],
     risk_factor_prev: list[float],
     beta0: float
-) -> float:
-    """Compute the asthma prevalence based on the risk factors and the parameters provided.
+) -> np.ndarray:
+    r"""Compute the asthma prevalence based on the risk factors and the parameters provided.
+
+    .. math::
+
+        \beta_0 &= \sigma^{-1}(y) \\
+        \eta_{\lambda} &= \sigma(\beta_0 + \log(\omega_{\lambda}) - \alpha) \\
+        \alpha &= \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda} \\
+        \eta &= \sum_{\lambda=0}^{n} p(\lambda) \eta_{\lambda}
 
     Args:
         asthma_prev_risk_factor_params: A vector of parameters for the risk factors, with
@@ -32,13 +39,57 @@ def compute_asthma_prev_risk_factors(
     """
 
     n = len(odds_ratio_target)
-    # asthma_prev_x: asthma prevalence at risk factor level x
-    asthma_prev_x = logistic.cdf(
+
+    # prev_correction: correction term for prevalence
+    prev_correction = np.dot(risk_factor_prev[1:], asthma_prev_risk_factor_params)
+
+    # asthma_prev_λ: asthma prevalence at risk factor level λ
+    asthma_prev_λ = logistic.cdf(
         beta0 * np.ones(n) + 
         np.log(odds_ratio_target) - 
-        np.dot(risk_factor_prev[1:], asthma_prev_risk_factor_params) * np.ones(n)
+        prev_correction * np.ones(n)
     )
-    return(np.dot(asthma_prev_x, risk_factor_prev))
+
+    return asthma_prev_λ
+
+
+def compute_asthma_prevalence(
+    asthma_prev_risk_factor_params: list[float],
+    odds_ratio_target: list[float],
+    risk_factor_prev: list[float],
+    beta0: float
+) -> float:
+    r"""Compute the asthma prevalence based on the risk factors and the parameters provided.
+
+    .. math::
+
+        \beta_0 &= \sigma^{-1}(y) \\
+        \eta_{\lambda} &= \sigma(\beta_0 + \log(\omega_{\lambda}) - \alpha) \\
+        \alpha &= \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda} \\
+        \eta &= \sum_{\lambda=0}^{n} p(\lambda) \eta_{\lambda}
+
+    Args:
+        asthma_prev_risk_factor_params: A vector of parameters for the risk factors, with
+            shape ``(n - 1, 1)``.
+        odds_ratio_target: A vector of odds ratios between the risk factors and asthma, with
+            shape ``(n, 1)``.
+        risk_factor_prev: A vector of the prevalence of the risk factor levels, with shape
+            ``(n, 1)``.
+        beta0: The intercept of the logistic regression model.
+    
+    Returns:
+        The calibrated asthma prevalence.
+    """
+
+    # asthma_prev_λ: asthma prevalence at risk factor level λ
+    asthma_prev_λ = compute_asthma_prevalence_λ(
+        asthma_prev_risk_factor_params, odds_ratio_target, risk_factor_prev, beta0
+    )
+
+    # asthma_prev: predicted asthma prevalence
+    asthma_prev = np.dot(asthma_prev_λ, risk_factor_prev)
+    return(asthma_prev)
+
 
 
 def compute_asthma_prevalence_difference(
@@ -64,7 +115,7 @@ def compute_asthma_prevalence_difference(
         The absolute difference between the calibrated and target asthma prevalence.
     """
 
-    asthma_prev_calibrated = compute_asthma_prev_risk_factors(
+    asthma_prev_calibrated = compute_asthma_prevalence(
         asthma_prev_risk_factor_params, odds_ratio_target, risk_factor_prev, beta0
     )
     return np.abs(asthma_prev_calibrated - asthma_prev_target)
@@ -78,10 +129,37 @@ def prev_calibrator(
     beta0: float | None = None,
     verbose: bool = False
 ) -> list[float]:
-    """Calibrate asthma prevalence based on the target prevalence and odds ratios of risk factors.
+    r"""Calibrate asthma prevalence based on the target prevalence and odds ratios of risk factors.
+
+    We want to find the parameters :math:`\beta_{\lambda}` such that the difference between the
+    calibrated asthma prevalence and the target asthma prevalence is minimized. The calibrated
+    asthma prevalence is computed as follows:
+
+    .. math::
+
+        \beta_0 &= \sigma^{-1}(y) \\
+        \eta_{\lambda} &= \sigma(\beta_0 + \log(\omega_{\lambda}) - \alpha) \\
+        \alpha &= \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda} \\
+        \eta &= \sum_{\lambda=0}^{n} p(\lambda) \eta_{\lambda}
+
+    where:
+
+    * :math:`y` is the target asthma prevalence, ``asthma_prev_target``
+    * :math:`\omega_{\lambda}` is the odds ratio for risk factor level :math:`\lambda`,
+      ``odds_ratio_target[i]``
+    * :math:`p(\lambda)` is the prevalence of risk factor level :math:`\lambda`,
+      ``risk_factor_prev[i]``
+    * :math:`\beta_{\lambda}` is the parameter for risk factor level :math:`\lambda`,
+      ``asthma_prev_risk_factor_params[i]``
+    * :math:`\alpha` is the correction term for the asthma prevalence
+    * :math:`\eta_{\lambda}` is the predicted asthma prevalence at risk factor level :math:`\lambda`
+    * :math:`\eta` is the predicted / calibrated asthma prevalence
+
+    The function uses the ``BFGS`` optimization algorithm to minimize the absolute difference
+    between the calibrated asthma prevalence and the target asthma prevalence.
 
     Args:
-        asthma_prev_target: The target prevalence of asthma.
+        asthma_prev_target: The target prevalence of asthma from the BC Ministry of Health data.
         odds_ratio_target: A vector of odds ratios for the risk factors, with shape ``(n, 1)``.
         risk_factor_prev: A vector of the prevalence of the risk factors, with shape ``(n, 1)``.
         beta0: The intercept of the logistic regression model. If ``None``, it is set to
@@ -89,17 +167,19 @@ def prev_calibrator(
         verbose: A boolean indicating if the trace should be printed.
 
     Returns:
-        A vector of the calibrated asthma prevalence for each risk factor level.
+        A vector of the asthma prevalence beta parameters for each risk factor level, with shape
+        ``(n - 1, 1)``.
     """
 
     if beta0 is None:
         beta0 = logit(asthma_prev_target)
 
-    n_params = len(odds_ratio_target) - 1
+    # set initial beta parameters to 0
+    asthma_prev_risk_factor_params = np.zeros(len(odds_ratio_target) - 1)
 
     res = optimize.minimize(
         fun=compute_asthma_prevalence_difference,
-        x0=np.zeros(n_params),
+        x0=asthma_prev_risk_factor_params,
         args=(odds_ratio_target, risk_factor_prev, beta0, asthma_prev_target),
         method="BFGS",
         tol=1e-15,
@@ -107,7 +187,9 @@ def prev_calibrator(
         options={"maxiter": 10000, "disp": verbose}
     )
 
-    return res.x
+    # return optimized beta parameters
+    asthma_prev_risk_factor_params = res.x
+    return asthma_prev_risk_factor_params
 
 
 
