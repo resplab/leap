@@ -10,6 +10,31 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 
+def get_asthma_prevalence_correction(
+    asthma_prev_risk_factor_params: list[float],
+    risk_factor_prev: list[float]
+) -> float:
+    r"""Compute the correction term for asthma prevalence.
+
+    .. math::
+
+        \alpha = \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda}
+
+    Args:
+        asthma_prev_risk_factor_params: A vector of parameters for the risk factors, with
+            shape ``(n - 1, 1)``.
+        risk_factor_prev: A vector of the prevalence of the risk factor levels, with shape
+            ``(n, 1)``.
+    
+    Returns:
+        The correction term for asthma prevalence.
+    """
+
+    # prev_correction: correction term for prevalence
+    prev_correction = np.dot(risk_factor_prev[1:], asthma_prev_risk_factor_params)
+    return prev_correction
+
+
 def compute_asthma_prevalence_λ(
     asthma_prev_risk_factor_params: list[float],
     odds_ratio_target: list[float],
@@ -41,7 +66,9 @@ def compute_asthma_prevalence_λ(
     n = len(odds_ratio_target)
 
     # prev_correction: correction term for prevalence
-    prev_correction = np.dot(risk_factor_prev[1:], asthma_prev_risk_factor_params)
+    prev_correction = get_asthma_prevalence_correction(
+        asthma_prev_risk_factor_params, risk_factor_prev
+    )
 
     # asthma_prev_λ: asthma prevalence at risk factor level λ
     asthma_prev_λ = logistic.cdf(
