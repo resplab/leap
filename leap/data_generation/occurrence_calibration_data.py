@@ -10,7 +10,7 @@ from leap.data_generation.prevalence_calibration import prev_calibrator, \
 from leap.data_generation.incidence_calibration import inc_correction_calculator
 from leap.data_generation.antibiotic_data import get_predicted_abx_data, generate_antibiotic_data
 from leap.logger import get_logger
-from typing import Tuple
+from typing import Tuple, Dict
 from scipy.stats import logistic, nbinom
 from scipy.special import logit
 
@@ -489,7 +489,7 @@ def calibrator(
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
-    inc_beta_params: list[float] | dict = INC_BETA_PARAMS,
+    inc_beta_params: list[float] | Dict[str, float] = INC_BETA_PARAMS,
     min_year: int = MIN_YEAR
 ) -> pd.Series:
     """Compute the loss function given the effects of risk factors in the incidence equation, for
