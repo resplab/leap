@@ -570,17 +570,21 @@ def calibrator(
             odds_ratio=("odds_ratio", "mean")
         ).reset_index()
 
-    # target marginal asthma prevalence
+    # target asthma prevalence from BC Ministry of Health
     asthma_prev_target = df_prevalence.loc[
         (df_prevalence["age"] == age) &
         (df_prevalence["year"] == year) &
         (df_prevalence["sex"] == sex)
     ]["prevalence"].iloc[0]
 
+    # add target asthma prevalence to the risk set dataframe
+    risk_set["prev"] = [asthma_prev_target] * risk_set.shape[0]
+
+    # compute beta parameters for the prevalence correction
     asthma_prev_risk_factor_params = prev_calibrator(
         asthma_prev_target=asthma_prev_target,
-        odds_ratio_target=risk_set["odds_ratio"],
-        risk_factor_prev=risk_set["prob"]
+        odds_ratio_target=risk_set["odds_ratio"].to_list(),
+        risk_factor_prev=risk_set["prob"].to_list()
     )
 
     # compute calibrated asthma prevalence using optimized beta parameters
@@ -590,8 +594,6 @@ def calibrator(
         risk_factor_prev=risk_set["prob"].to_list(),
         beta0=logit(asthma_prev_target)
     )
-    # add target asthma prevalence to the risk set dataframe
-    risk_set["prev"] = [asthma_prev_target] * risk_set.shape[0]
 
     df["prev_correction"] = -1 * get_asthma_prevalence_correction(
         asthma_prev_risk_factor_params, risk_set["prob"].to_list()
