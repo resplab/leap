@@ -883,6 +883,11 @@ def generate_occurrence_calibration_data(
     with open(get_data_path("processed_data/occurrence_calibration_parameters.json"), "r") as f:
         optimized_inc_beta = json.load(f)["inc_beta_params"]
 
+    inc_beta_params = {
+        "fam_history":  [np.log(OR_ASTHMA_AGE_3), optimized_inc_beta["fam_history"]],
+        "abx": [BETA_ABX_0, optimized_inc_beta["abx"], BETA_ABX_DOSE]
+    }
+
     df_correction = pd.DataFrame(
         list(itertools.product(
             range(baseline_year - 1, stabilization_year + 1),
@@ -904,7 +909,7 @@ def generate_occurrence_calibration_data(
             df_incidence=df_incidence,
             df_prevalence=df_prevalence,
             df_reassessment=df_reassessment,
-            inc_beta_params=optimized_inc_beta
+            inc_beta_params=inc_beta_params
         ), axis=1
     ).reset_index(drop=True)
 
