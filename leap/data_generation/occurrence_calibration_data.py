@@ -640,14 +640,14 @@ def calibrator(
             )
         elif age == 8:
 
-            ttt_asthma_prev_risk_factor_params = prev_calibrator(
+            past_asthma_prev_risk_factor_params = prev_calibrator(
                 asthma_prev_target=past_asthma_prev_target,
                 odds_ratio_target=past_risk_set["odds_ratio"],
                 risk_factor_prev=past_risk_set["prob"]
             )
 
             past_risk_set["calibrated_prev"] = compute_asthma_prevalence_λ(
-                asthma_prev_risk_factor_params=ttt_asthma_prev_risk_factor_params,
+                asthma_prev_risk_factor_params=past_asthma_prev_risk_factor_params,
                 odds_ratio_target=past_risk_set["odds_ratio"].to_list(),
                 risk_factor_prev=past_risk_set["prob"].to_list(),
                 beta0=logit(past_asthma_prev_target)
