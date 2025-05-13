@@ -1,5 +1,17 @@
+=================
 Occurrence Model
-================
+=================
+
+Occurrence Model 1: Crude Occurrence
+=====================================
+
+In the first model, we will use data collected from the ``BC Ministry of Health`` on the
+incidence and prevalence of asthma in British Columbia. We will use this data to fit a 
+``Generalized Linear Model (GLM)`` to predict the incidence and prevalence of asthma
+given the age, sex, and year.
+
+Datasets
+*****************
 
 The BC Ministry of Health Administrative Dataset contains asthma incidence and prevalence data
 for the years ``2000-2019``, in 5-year age intervals. 
@@ -66,11 +78,18 @@ The data is formatted as follows:
     </table>
 
 
-Since our model projects into the future, we
-would like to be able to extend this data beyond ``2019``. Our model also makes predictions at
-1-year age intervals, not 5-year age intervals. To obtain these projections, we use a
-``Generalized Linear Model (GLM)``. A ``GLM`` is a type of regression analysis which is a
-generalized form of linear regression. See :doc:`model-glm` for more information on ``GLMs``.
+
+Model: Generalized Linear Model - Poisson
+****************************************************
+
+Since our model projects into the future, we would like to be able to extend this data beyond
+``2019``. Our model also makes predictions at 1-year age intervals, not 5-year age intervals.
+To obtain these projections, we use a ``Generalized Linear Model (GLM)``. A ``GLM`` is a type of
+regression analysis which is a generalized form of linear regression. See :doc:`model-glm` for more
+information on ``GLMs``.
+
+Probability Distribution
+---------------------------------------
 
 When fitting a ``GLM``, first you must choose a distribution for the ``response variable``. In our
 case, the response variable is the asthma prevalence or incidence. Incidence and prevalence are
@@ -81,6 +100,10 @@ discrete probability distribution. The ``Poisson distribution`` is a good choice
 .. math::
 
     P(Y = y) = p(y; \mu^{(i)}) = \dfrac{(\mu^{(i)})^{y} ~ e^{-\mu^{(i)}}}{y!}
+
+
+Link Function
+-----------------
 
 We also need to choose a ``link function``. Recall that the link function :math:`g(\mu^{(i)})`
 is used to relate the mean to the predicted value :math:`\eta^{(i)}`:
@@ -98,6 +121,10 @@ real numbers to positive numbers. The ``log link function`` is a good choice for
 .. math::
 
     g(\mu^{(i)}) = \log(\mu^{(i)}) = \eta^{(i)}
+
+
+Formula
+-----------------
 
 Now that we have our distribution and link function, we need to decide on a formula for
 :math:`\eta^{(i)}`. We are permitted to use linear combinations of functions of the features
