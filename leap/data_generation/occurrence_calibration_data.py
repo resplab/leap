@@ -605,13 +605,14 @@ def calibrator(
         return df
 
     else:
+        # target asthma incidence for current year and age from BC Ministry of Health data
         risk_set["inc"] = [df_incidence.loc[
             (df_incidence["age"] == age) &
             (df_incidence["year"] == year) &
             (df_incidence["sex"] == sex)
         ]["incidence"].iloc[0]] * risk_set.shape[0]
 
-        # target marginal asthma prevalence for the previous year and age
+        # target asthma prevalence for the previous year and age from BC Ministry of Health data
         past_asthma_prev_target = df_prevalence.loc[
             (df_prevalence["age"] == age - 1) &
             (df_prevalence["year"] == max(min_year, year - 1)) &
