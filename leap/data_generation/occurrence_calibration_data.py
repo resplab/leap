@@ -146,11 +146,11 @@ def load_family_history_data() -> pd.DataFrame:
         list(itertools.product(range(3, 6), [0, 1])),
         columns=["age", "fam_history"]
     )
-    df_fam_history_or["odds_ratio"] = [
-        1, OR_ASTHMA_AGE_3,
-        1, np.exp((np.log(OR_ASTHMA_AGE_3) + np.log(OR_ASTHMA_AGE_5)) / 2),
-        1, OR_ASTHMA_AGE_5
-    ]
+
+    df_fam_history_or["odds_ratio"] = df_fam_history_or.apply(
+        lambda x: OR_fam_calculator(x["age"], x["fam_history"]),
+        axis=1
+    )
 
     return df_fam_history_or
 
