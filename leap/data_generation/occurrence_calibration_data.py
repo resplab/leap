@@ -6,7 +6,7 @@ from scipy import optimize
 import itertools
 from leap.utils import get_data_path
 from leap.data_generation.prevalence_calibration import prev_calibrator, \
-    compute_asthma_prevalence_λ
+    compute_asthma_prevalence_λ, get_asthma_prevalence_correction
 from leap.data_generation.incidence_calibration import inc_correction_calculator
 from leap.data_generation.antibiotic_data import get_predicted_abx_data, generate_antibiotic_data
 from leap.logger import get_logger
