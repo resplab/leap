@@ -5,7 +5,8 @@ from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 from scipy import optimize
 import itertools
 from leap.utils import get_data_path
-from leap.data_generation.prevalence_calibration import prev_calibrator
+from leap.data_generation.prevalence_calibration import prev_calibrator, \
+    compute_asthma_prevalence_λ
 from leap.data_generation.incidence_calibration import inc_correction_calculator
 from leap.data_generation.antibiotic_data import get_predicted_abx_data, generate_antibiotic_data
 from leap.logger import get_logger
@@ -582,12 +583,17 @@ def calibrator(
         risk_factor_prev=risk_set["prob"]
     )
 
-    risk_set["prev"] = [asthma_prev_target] * risk_set.shape[0]
-    risk_set["calibrated_prev"] = logistic.cdf(
-        logit([asthma_prev_target] * risk_set.shape[0]) +
-        np.log(risk_set["odds_ratio"].to_numpy()) -
-        [np.dot(risk_set["prob"].iloc[1:].to_numpy(), asthma_prev_risk_factor_params)] * risk_set.shape[0]
+    # compute calibrated asthma prevalence using optimized beta parameters
+    risk_set["calibrated_prev"] = compute_asthma_prevalence_λ(
+        asthma_prev_risk_factor_params=asthma_prev_risk_factor_params,
+        odds_ratio_target=risk_set["odds_ratio"].to_list(),
+        risk_factor_prev=risk_set["prob"].to_list(),
+        beta0=logit(asthma_prev_target)
     )
+    # add target asthma prevalence to the risk set dataframe
+    risk_set["prev"] = [asthma_prev_target] * risk_set.shape[0]
+
+    
 
     if year == 2000 or age == 3:
         df["prev_correction"] = -np.dot(risk_set["prob"].iloc[1:], asthma_prev_risk_factor_params)
@@ -640,10 +646,11 @@ def calibrator(
                 risk_factor_prev=past_risk_set["prob"]
             )
 
-            past_risk_set["calibrated_prev"] = logistic.cdf(
-                [logit(past_asthma_prev_target)] * past_risk_set.shape[0] + 
-                np.log(past_risk_set["odds_ratio"]) -
-                [np.dot(past_risk_set["prob"].iloc[1:], ttt_asthma_prev_risk_factor_params)] * past_risk_set.shape[0]
+            past_risk_set["calibrated_prev"] = compute_asthma_prevalence_λ(
+                asthma_prev_risk_factor_params=ttt_asthma_prev_risk_factor_params,
+                odds_ratio_target=past_risk_set["odds_ratio"].to_list(),
+                risk_factor_prev=past_risk_set["prob"].to_list(),
+                beta0=logit(past_asthma_prev_target)
             )
             tmp_look = past_risk_set.copy()
             tmp_look["yes_asthma"] = tmp_look.apply(
