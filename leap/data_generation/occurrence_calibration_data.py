@@ -652,23 +652,22 @@ def calibrator(
                 risk_factor_prev=past_risk_set["prob"].to_list(),
                 beta0=logit(past_asthma_prev_target)
             )
-            tmp_look = past_risk_set.copy()
-            tmp_look["yes_asthma"] = tmp_look.apply(
+            past_risk_set["yes_asthma"] = past_risk_set.apply(
                 lambda x: x["calibrated_prev"] * x["prob"], axis=1
             )
-            tmp_look["no_asthma"] = tmp_look.apply(
+            past_risk_set["no_asthma"] = past_risk_set.apply(
                 lambda x: (1 - x["calibrated_prev"]) * x["prob"], axis=1
             )
-            past_tmp_OR = (
-                tmp_look.loc[tmp_look["fam_history"] == 0, "no_asthma"].sum() *
-                tmp_look.loc[tmp_look["fam_history"] == 1, "yes_asthma"].sum() /
-                (tmp_look.loc[tmp_look["fam_history"] == 0, "yes_asthma"].sum() *
-                tmp_look.loc[tmp_look["fam_history"] == 1, "no_asthma"].sum())
+            odds_ratio_past = (
+                past_risk_set.loc[past_risk_set["fam_history"] == 0, "no_asthma"].sum() *
+                past_risk_set.loc[past_risk_set["fam_history"] == 1, "yes_asthma"].sum() /
+                (past_risk_set.loc[past_risk_set["fam_history"] == 0, "yes_asthma"].sum() *
+                past_risk_set.loc[past_risk_set["fam_history"] == 1, "no_asthma"].sum())
             )
             past_risk_set = past_risk_set.groupby(["fam_history"]).agg(
                 prob=("prob", "sum")
             ).reset_index()
-            past_risk_set["odds_ratio"] = [1, past_tmp_OR]
+            past_risk_set["odds_ratio"] = [1, odds_ratio_past]
 
 
         inc_risk_set = risk_factor_generator(
