@@ -593,10 +593,11 @@ def calibrator(
     # add target asthma prevalence to the risk set dataframe
     risk_set["prev"] = [asthma_prev_target] * risk_set.shape[0]
 
-    
+    df["prev_correction"] = -1 * get_asthma_prevalence_correction(
+        asthma_prev_risk_factor_params, risk_set["prob"].to_list()
+    )
 
     if year == 2000 or age == 3:
-        df["prev_correction"] = -np.dot(risk_set["prob"].iloc[1:], asthma_prev_risk_factor_params)
         if year > 2000 and age == 3:
             df["inc_correction"] = df["prev_correction"]
         return df
@@ -710,7 +711,6 @@ def calibrator(
         Dx=1, # target diagnosis
     )
 
-    df["prev_correction"] = -np.dot(risk_set["prob"].iloc[1:], asthma_prev_risk_factor_params)
     df["inc_correction"] = asthma_inc_correction
     df["mean_diff_log_OR"] = mean_diff_log_OR
     return df
