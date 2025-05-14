@@ -347,8 +347,8 @@ def risk_factor_generator(
     sex: str,
     model_abx: GLMResultsWrapper,
     p_fam_distribution: pd.DataFrame,
-    df_fam_history_or: pd.DataFrame,
-    df_abx_or: pd.DataFrame
+    beta_params_fam_history: list[float] | None = None,
+    beta_params_abx: list[float] | None = None
 ) -> pd.DataFrame:
     """Compute the combined antibiotic exposure and family history odds ratio.
 
@@ -364,21 +364,10 @@ def risk_factor_generator(
               ``1`` = neither parent has asthma
             * ``prob_fam``: The probability of family history of asthma, given that the person
               has asthma.
-        df_fam_history_or: A dataframe with the odds ratio of family history of asthma, given
-            the age of the person. Columns:
-            * ``age (int)``: An integer in ``[3, 5]``.
-            * ``fam_history (int)``: Whether or not there is a family history of asthma.
-              ``0`` = one or more parents has asthma
-              ``1`` = neither parent has asthma
-            * ``odds_ratio (float)``: The odds ratio of family history of asthma, given that the
-              person has asthma. The odds ratio is calculated based on the CHILD study data.
-        df_abx_or: A dataframe with the odds ratio of antibiotic exposure, given
-            the age of the person. Columns:
-            * ``age (int)``: An integer in ``[3, 8]``.
-            * ``abx_exposure (int)``: The number of antibiotic courses taken in the first year of
-              life; an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
-            * ``odds_ratio (float)``: The odds ratio of antibiotic exposure, given that the person
-              has asthma.
+        beta_params_fam_history: A list of 2 beta parameters for the calculation of the odds
+            ratio of having asthma given family history.
+        beta_params_abx: A list of 3 beta parameters for the calculation of the odds
+            ratio of having asthma given antibiotic exposure during infancy.
 
     Returns:
         A dataframe with the combined probabilities and odds ratios for the antibiotic exposure
@@ -412,12 +401,14 @@ def risk_factor_generator(
 
 
     # select the given age if <= 5, otherwise select age == 5
+    df_fam_history_or = load_family_history_data(beta_params_fam_history)
     df_fam_history_or_age = df_fam_history_or.loc[df_fam_history_or["age"] == min(age, 5)]
     df_fam_history_or_age = df_fam_history_or_age[["fam_history", "odds_ratio"]]
     df_fam_history_or_age.rename(columns={"odds_ratio": "odds_ratio_fam_hist"}, inplace=True)
   
     # select the given age if <= 8, otherwise select age == 8
     # filter out abx_exposure > 3
+    df_abx_or = load_abx_exposure_data(beta_params_abx)
     df_abx_or_age = df_abx_or.loc[df_abx_or["age"] == min(age, 8)]
     df_abx_or_age = df_abx_or_age[["n_abx", "odds_ratio"]]
     df_abx_or_age.rename(columns={"odds_ratio": "odds_ratio_abx"}, inplace=True)
@@ -475,8 +466,6 @@ def calibrator(
     age: int,
     model_abx: GLMResultsWrapper,
     p_fam_distribution: pd.DataFrame,
-    df_fam_history_or: pd.DataFrame,
-    df_abx_or: pd.DataFrame,
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
@@ -497,19 +486,6 @@ def calibrator(
               ``1`` = one or more parents has asthma, ``0`` = no parents have asthma.
             * ``prob_fam (float)``: The probability that one or more parents has asthma, given
               that the person has asthma.
-        df_fam_history_or: A dataframe with the odds ratio of family history of asthma, given
-            the age of the person. Contains three columns:
-            * ``age (int)``: age in years, one of ``{3, 4, 5}``.
-            * ``fam_history (int)``: (0 or 1) Whether or not there is a family history of asthma.
-              ``1`` = one or more parents has asthma, ``0`` = no parents have asthma.
-            * ``odds_ratio (float)``: The odds ratio for having asthma given family history status.
-        df_abx_or: A dataframe with the odds ratio of antibiotic exposure, given
-            the age of the person. Contains three columns:
-            * ``age (int)``: age in years, one of ``{3, 4, 5}``.
-            * ``n_abx (int)``: The number of courses of antibiotics taken during the first year of
-              life, an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
-            * ``odds_ratio (float)``: The odds ratio for having asthma given ``n_abx`` courses
-              of antibiotics.
         df_incidence: A dataframe with the incidence of asthma, with the following columns:
             * ``year (int)``: the year
             * ``age (int)``: the age in years
@@ -549,9 +525,7 @@ def calibrator(
         }
 
 
-    risk_set = risk_factor_generator(
-        year, age, sex, model_abx, p_fam_distribution, df_fam_history_or, df_abx_or
-    )
+    risk_set = risk_factor_generator(year, age, sex, model_abx, p_fam_distribution)
 
     if age > 7:
         # group the all the antibiotic levels into one
@@ -615,9 +589,7 @@ def calibrator(
             sex=sex,
             age=age - 1,
             model_abx=model_abx,
-            p_fam_distribution=p_fam_distribution,
-            df_fam_history_or=df_fam_history_or,
-            df_abx_or=df_abx_or
+            p_fam_distribution=p_fam_distribution
         )
 
         ra_target = df_reassessment.loc[
@@ -665,9 +637,7 @@ def calibrator(
             past_risk_set["odds_ratio"] = [1, odds_ratio_past]
 
 
-        inc_risk_set = risk_factor_generator(
-            year, age, sex, model_abx, p_fam_distribution, df_fam_history_or, df_abx_or
-        )
+        inc_risk_set = risk_factor_generator(year, age, sex, model_abx, p_fam_distribution)
 
         if age > 7:
             # select only antibiotic level 0
@@ -714,8 +684,6 @@ def compute_mean_diff_log_OR(
     df: pd.DataFrame,
     model_abx: GLMResultsWrapper,
     p_fam_distribution: pd.DataFrame,
-    df_fam_history_or: pd.DataFrame,
-    df_abx_or: pd.DataFrame,
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
@@ -728,10 +696,6 @@ def compute_mean_diff_log_OR(
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
         p_fam_distribution: A dataframe with the probability of family history of asthma, given
             that the person has asthma.
-        df_fam_history_or: A dataframe with the odds ratio of family history of asthma, given
-            the age of the person.
-        df_abx_or: A dataframe with the odds ratio of antibiotic exposure, given
-            the age of the person.
         df_incidence: A dataframe with the incidence of asthma.
         df_prevalence: A dataframe with the prevalence of asthma.
         df_reassessment: A dataframe with the reassessment of asthma.
@@ -747,8 +711,7 @@ def compute_mean_diff_log_OR(
     df["mean_log_diff_OR"] = df.apply(
         lambda x: calibrator(
             x["year"], x["sex"], x["age"], model_abx, p_fam_distribution,
-            df_fam_history_or, df_abx_or, df_incidence, df_prevalence,
-            df_reassessment, inc_beta_params, min_year
+            df_incidence, df_prevalence, df_reassessment, inc_beta_params, min_year
         )["mean_diff_log_OR"],
         axis=1
     )
@@ -758,8 +721,6 @@ def compute_mean_diff_log_OR(
 def inc_beta_solver(
     model_abx: GLMResultsWrapper,
     p_fam_distribution: pd.DataFrame,
-    df_fam_history_or: pd.DataFrame,
-    df_abx_or: pd.DataFrame,
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
@@ -773,10 +734,6 @@ def inc_beta_solver(
 
     Args:
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
-        df_fam_history_or: A dataframe with the odds ratio of family history of asthma, given
-            the age of the person.
-        df_abx_or: A dataframe with the odds ratio of antibiotic exposure, given
-            the age of the person.
         df_incidence: A dataframe with the incidence of asthma.
         df_prevalence: A dataframe with the prevalence of asthma.
         df_reassessment: A dataframe with the reassessment of asthma.
@@ -799,8 +756,7 @@ def inc_beta_solver(
         fun=compute_mean_diff_log_OR,
         x0=inc_beta_params,
         args=(
-            df, model_abx, p_fam_distribution, df_fam_history_or, df_abx_or, df_incidence,
-            df_prevalence, df_reassessment, min_year
+            df, model_abx, p_fam_distribution, df_incidence, df_prevalence, df_reassessment, min_year
         ),
         method="BFGS",
         options={"maxiter": 1, "disp": True, "gtol": 1e-2}
@@ -850,17 +806,12 @@ def generate_occurrence_calibration_data(
         "prob_fam": [1 - PROB_FAM_HIST, PROB_FAM_HIST]
     })
 
-    df_fam_history_or = load_family_history_data()
-    df_abx_or = load_abx_exposure_data()
-
     model_abx: GLMResultsWrapper = generate_antibiotic_data(return_type="model") # type: ignore
 
     if retrain_beta:
         inc_beta_solver(
             model_abx=model_abx,
             p_fam_distribution=p_fam_distribution,
-            df_fam_history_or=df_fam_history_or,
-            df_abx_or=df_abx_or,
             df_incidence=df_incidence,
             df_prevalence=df_prevalence,
             df_reassessment=df_reassessment,
@@ -893,8 +844,6 @@ def generate_occurrence_calibration_data(
             age=x["age"],
             model_abx=model_abx,
             p_fam_distribution=p_fam_distribution,
-            df_fam_history_or=df_fam_history_or,
-            df_abx_or=df_abx_or,
             df_incidence=df_incidence,
             df_prevalence=df_prevalence,
             df_reassessment=df_reassessment,
