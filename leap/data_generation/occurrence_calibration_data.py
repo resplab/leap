@@ -172,22 +172,15 @@ def load_abx_exposure_data() -> pd.DataFrame:
               the CHILD study data.
     """
 
-    df_abx_or = pd.read_csv(get_data_path("original_data/dose_response_log_aOR.csv"))
-    df_abx_or.columns = ["age"] + [i for i in range(1, 6)]
-    df_abx_or.insert(1, 0, [0] * df_abx_or.shape[0])
-
-    for abx_dose in range(0, 6):
-        df_abx_or[abx_dose] = df_abx_or[abx_dose].apply(
-            lambda x: np.exp(x)
-        )
-
-    df_abx_or = df_abx_or.loc[df_abx_or["age"] >= 3]
-    df_abx_or = pd.concat(
-        [df_abx_or, pd.DataFrame({"age": [8], 0: [1], 1: [1], 2: [1], 3: [1], 4: [1], 5: [1]})],
-        ignore_index=True
+    df_abx_or = pd.DataFrame(
+        list(itertools.product(range(3, 9), range(0, 4))),
+        columns=["age", "n_abx"]
     )
 
-    df_abx_or = df_abx_or.melt(id_vars=["age"], var_name="n_abx", value_name="odds_ratio")
+    df_abx_or["odds_ratio"] = df_abx_or.apply(
+        lambda x: OR_abx_calculator(x["age"], x["n_abx"]),
+        axis=1
+    )
     return df_abx_or
 
 
