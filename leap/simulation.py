@@ -464,9 +464,10 @@ class Simulation:
 
         # Initialize simulation parameters and outcome matrix
         self.max_time_horizon = np.iinfo(np.int32).max if until_all_die else self.time_horizon
+        # Use 1-based indexing for start time (so January=1)
+        self.start_time = 1
         # Time is the total of years * 12 months
-        self.start_time = 0
-        self.end_time = (self.max_year - self.min_year + 1) * 12 - 1
+        self.end_time = (self.max_year - self.min_year + 1) * 12
         self.times = np.arange(self.start_time, self.end_time + 1)
 
         self.outcome_matrix = OutcomeMatrix(
