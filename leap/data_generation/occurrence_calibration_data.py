@@ -333,22 +333,13 @@ def OR_risk_factor_calculator(
     Returns:
         The odds ratio for asthma prevalence based on family history and antibiotic exposure.
     """
-    if family_history_params is None:
-        family_history_params = [
-            np.log(OR_ASTHMA_AGE_3),
-            (np.log(OR_ASTHMA_AGE_3) + np.log(OR_ASTHMA_AGE_5)) / 2 - np.log(OR_ASTHMA_AGE_3)
-        ]
-
-    if abx_params is None:
-        abx_params = [BETA_ABX_0, BETA_ABX_AGE, BETA_ABX_DOSE]
 
     if age < MIN_ASTHMA_AGE:
-        return 1
+        return 1.0
     else:
-        return np.exp(
-            np.log(OR_fam_calculator(age, fam_hist, family_history_params)) +
-            np.log(OR_abx_calculator(age, dose, abx_params))
-        )
+        odds_ratio_fam_history = OR_fam_calculator(age, fam_hist, family_history_params)
+        odds_ratio_abx = OR_abx_calculator(age, dose, abx_params)
+        return odds_ratio_fam_history * odds_ratio_abx
     
 
 def risk_factor_generator(
