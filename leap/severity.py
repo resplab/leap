@@ -187,7 +187,11 @@ class ExacerbationSeverity:
                 )
                 severity_levels_array = weight * (1 - severity_levels.very_severe)
 
-            return np.random.multinomial(num_current_year, severity_levels_array)
+            try:
+                dist = np.random.multinomial(num_current_year, severity_levels_array)
+            except ValueError:
+                raise ValueError(f"severity_levels_array was not normalized: {severity_levels_array}")
+            return dist
 
     def compute_hospitalization_prob(
         self, agent: Agent, control: Control, exacerbation: Exacerbation
