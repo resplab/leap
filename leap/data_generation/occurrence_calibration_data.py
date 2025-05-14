@@ -277,7 +277,7 @@ def OR_abx_calculator(
     if dose == 0:
         return 1.0
     else:
-        return np.exp(np.sum(np.dot(params, [1, min(age, 7), min(dose, 3)])))
+        return np.exp(np.dot(params, [1, min(age, 7), min(dose, 3)]))
 
 
 def OR_fam_calculator(
