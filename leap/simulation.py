@@ -365,7 +365,7 @@ class Simulation:
             outcome_matrix.control.increment(
                 column="prob",
                 filter_columns={
-                    "year": agent.year,
+                    "time": agent.time,
                     "level": level,
                     "sex": agent.sex,
                     "age": agent.age,
@@ -386,20 +386,20 @@ class Simulation:
             agent.total_hosp += agent.exacerbation_severity_history.current_year[3]
             outcome_matrix.exacerbation.increment(
                 column="n_exacerbations",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
+                filter_columns={"time": agent.time, "age": agent.age, "sex": str(agent.sex)},
                 amount=agent.exacerbation_history.num_current_year,
             )
 
             outcome_matrix.exacerbation_hospital.increment(
                 column="n_hospitalizations",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
+                filter_columns={"time": agent.time, "age": agent.age, "sex": str(agent.sex)},
                 amount=agent.exacerbation_severity_history.current_year[3],
             )
             for level in range(4):
                 outcome_matrix.exacerbation_by_severity.increment(
                     column="p_exacerbations",
                     filter_columns={
-                        "year": agent.year,
+                        "time": agent.time,
                         "age": agent.age,
                         "sex": str(agent.sex),
                         "severity": level,
@@ -426,7 +426,7 @@ class Simulation:
             agent.asthma_age = agent.age
             outcome_matrix.asthma_incidence.increment(
                 column="n_new_diagnoses",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+                filter_columns={"time": agent.time, "age": agent.age, "sex": agent.sex},
             )
             self.update_asthma_effects(agent, outcome_matrix)
 
@@ -435,13 +435,13 @@ class Simulation:
                 agent.asthma_status = True
                 outcome_matrix.asthma_status.increment(
                     column="status",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+                    filter_columns={"time": agent.time, "age": agent.age, "sex": agent.sex},
                 )
 
         outcome_matrix.asthma_incidence_contingency_table.increment(
             column="n_asthma" if agent.has_asthma else "n_no_asthma",
             filter_columns={
-                "year": agent.year,
+                "time": agent.time,
                 "age": agent.age,
                 "sex": agent.sex,
                 "fam_history": agent.has_family_history,
@@ -532,7 +532,6 @@ class Simulation:
             family_history=self.family_history,
             antibiotic_exposure=self.antibiotic_exposure,
             province=self.province,
-            month=month,
             ssp=self.SSP,
             census_division=census_division,
             pollution=pollution,
@@ -551,21 +550,19 @@ class Simulation:
                 "n_immigrants",
                 {
                     "time": agent.time,
-                    "month": month,
                     "age": agent.age,
                     "sex": agent.sex,
                 },
             )
 
-        self._process_agent_outcome_events(agent, month)
+        self._process_agent_outcome_events(agent, time)
 
-    def _process_agent_outcome_events(self, agent: Agent, month):
+    def _process_agent_outcome_events(self, agent: Agent, time : int):
         """Process events for each agent to update outcome matrix."""
         self.outcome_matrix.antibiotic_exposure.increment(
             column="n_antibiotic_exposure",
             filter_columns={
                 "time": agent.time,
-                "month": month,
                 "age": agent.age,
                 "sex": agent.sex,
             },
@@ -576,7 +573,6 @@ class Simulation:
             column="has_family_history",
             filter_columns={
                 "time": agent.time,
-                "month": month,
                 "age": agent.age,
                 "sex": agent.sex,
             },
@@ -607,7 +603,6 @@ class Simulation:
                     column="n_asthma",
                     filter_columns={
                         "time": agent.time,
-                        "month": month,
                         "age": agent.age,
                         "sex": agent.sex,
                     },
@@ -617,7 +612,6 @@ class Simulation:
                 column="n_asthma" if agent.has_asthma else "n_no_asthma",
                 filter_columns={
                     "time": agent.time,
-                    "month": month,
                     "age": agent.age,
                     "sex": agent.sex,
                     "fam_history": agent.has_family_history,
@@ -631,7 +625,6 @@ class Simulation:
                 column="utility",
                 filter_columns={
                     "time": agent.time,
-                    "month": month,
                     "age": agent.age,
                     "sex": agent.sex,
                 },
@@ -644,7 +637,6 @@ class Simulation:
                 column="cost",
                 filter_columns={
                     "time": agent.time,
-                    "month": month,
                     "age": agent.age,
                     "sex": agent.sex,
                 },
@@ -657,7 +649,6 @@ class Simulation:
                     column="n_deaths",
                     filter_columns={
                         "time": agent.time,
-                        "month": month,
                         "age": agent.age,
                         "sex": agent.sex,
                     },
@@ -669,7 +660,6 @@ class Simulation:
                     column="n_emigrants",
                     filter_columns={
                         "time": agent.time,
-                        "month": month,
                         "age": agent.age,
                         "sex": agent.sex,
                     },
@@ -680,7 +670,6 @@ class Simulation:
                     column="n_alive",
                     filter_columns={
                         "time": agent.time,
-                        "month": month,
                         "age": agent.age,
                         "sex": agent.sex,
                     },

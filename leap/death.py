@@ -120,7 +120,7 @@ class Death:
             # calibration
             odds_ratio = p / (1 - p) * np.exp(
                 self.parameters["β0"] +
-                self.parameters["β1"] * agent.year_index +
+                self.parameters["β1"] * agent.year +
                 self.parameters["β2"] * agent.age
             )
             p = max(min(odds_ratio / (1 + odds_ratio), 1), 0)
