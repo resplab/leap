@@ -129,8 +129,11 @@ def load_reassessment_data(
     return df_reassessment
 
 
-def load_family_history_data() -> pd.DataFrame:
+def load_family_history_data(params: list[float] | None = None) -> pd.DataFrame:
     """Load the family history data for the given province.
+
+    Args:
+        params: A list of two beta parameters for the odds ratio calculation.
 
     Returns:
         A dataframe containing the family history odds ratios.
@@ -150,15 +153,18 @@ def load_family_history_data() -> pd.DataFrame:
     )
 
     df_fam_history_or["odds_ratio"] = df_fam_history_or.apply(
-        lambda x: OR_fam_calculator(x["age"], x["fam_history"]),
+        lambda x: OR_fam_calculator(x["age"], x["fam_history"], params),
         axis=1
     )
 
     return df_fam_history_or
 
 
-def load_abx_exposure_data() -> pd.DataFrame:
+def load_abx_exposure_data(params: list[float] | None = None) -> pd.DataFrame:
     """Load the antibiotic exposure data.
+
+    Args:
+        params: A list of 3 beta parameters for the odds ratio calculation.
 
     Returns:
         A dataframe containing the antibiotic exposure odds ratios.
@@ -178,7 +184,7 @@ def load_abx_exposure_data() -> pd.DataFrame:
     )
 
     df_abx_or["odds_ratio"] = df_abx_or.apply(
-        lambda x: OR_abx_calculator(x["age"], x["n_abx"]),
+        lambda x: OR_abx_calculator(x["age"], x["n_abx"], params),
         axis=1
     )
     return df_abx_or
