@@ -346,7 +346,6 @@ def risk_factor_generator(
     age: int,
     sex: str,
     model_abx: GLMResultsWrapper,
-    p_fam_distribution: pd.DataFrame,
     beta_params_fam_history: list[float] | None = None,
     beta_params_abx: list[float] | None = None
 ) -> pd.DataFrame:
@@ -357,13 +356,6 @@ def risk_factor_generator(
         age: The age of the person in years.
         sex: One of ``M`` or ``F``.
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
-        p_fam_distribution: A dataframe with the probability of family history of asthma, given
-            that the person has asthma. Columns:
-            * ``fam_history (int)``: Whether or not there is a family history of asthma.
-              ``0`` = one or more parents has asthma
-              ``1`` = neither parent has asthma
-            * ``prob_fam``: The probability of family history of asthma, given that the person
-              has asthma.
         beta_params_fam_history: A list of 2 beta parameters for the calculation of the odds
             ratio of having asthma given family history.
         beta_params_abx: A list of 3 beta parameters for the calculation of the odds
@@ -413,6 +405,12 @@ def risk_factor_generator(
     df_abx_or_age = df_abx_or_age[["n_abx", "odds_ratio"]]
     df_abx_or_age.rename(columns={"odds_ratio": "odds_ratio_abx"}, inplace=True)
     df_abx_or_age = df_abx_or_age.loc[df_abx_or_age["n_abx"] <= 3]
+
+    # family history probabilities
+    p_fam_distribution = pd.DataFrame({
+        "fam_history": [0, 1],
+        "prob_fam": [1 - PROB_FAM_HIST, PROB_FAM_HIST]
+    })
        
     df_risk_factors = pd.DataFrame(
         list(itertools.product([0, 1], range(0, 4))),
@@ -465,7 +463,6 @@ def calibrator(
     sex: str,
     age: int,
     model_abx: GLMResultsWrapper,
-    p_fam_distribution: pd.DataFrame,
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
@@ -480,12 +477,6 @@ def calibrator(
         age: The age in years.
         sex: One of ``M`` = male, ``F`` = female.
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
-        p_fam_distribution: A dataframe with the probability of family history of asthma, given
-            that the person has asthma. Contains two columns:
-            * ``fam_history (int)``: (0 or 1) Whether or not there is a family history of asthma.
-              ``1`` = one or more parents has asthma, ``0`` = no parents have asthma.
-            * ``prob_fam (float)``: The probability that one or more parents has asthma, given
-              that the person has asthma.
         df_incidence: A dataframe with the incidence of asthma, with the following columns:
             * ``year (int)``: the year
             * ``age (int)``: the age in years
@@ -525,7 +516,7 @@ def calibrator(
         }
 
 
-    risk_set = risk_factor_generator(year, age, sex, model_abx, p_fam_distribution)
+    risk_set = risk_factor_generator(year, age, sex, model_abx)
 
     if age > 7:
         # group the all the antibiotic levels into one
@@ -588,8 +579,7 @@ def calibrator(
             year=max(min_year, year - 1),
             sex=sex,
             age=age - 1,
-            model_abx=model_abx,
-            p_fam_distribution=p_fam_distribution
+            model_abx=model_abx
         )
 
         ra_target = df_reassessment.loc[
@@ -637,7 +627,7 @@ def calibrator(
             past_risk_set["odds_ratio"] = [1, odds_ratio_past]
 
 
-        inc_risk_set = risk_factor_generator(year, age, sex, model_abx, p_fam_distribution)
+        inc_risk_set = risk_factor_generator(year, age, sex, model_abx)
 
         if age > 7:
             # select only antibiotic level 0
@@ -683,7 +673,6 @@ def compute_mean_diff_log_OR(
     inc_beta_params: list[float],
     df: pd.DataFrame,
     model_abx: GLMResultsWrapper,
-    p_fam_distribution: pd.DataFrame,
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
@@ -694,8 +683,6 @@ def compute_mean_diff_log_OR(
 
     Args:
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
-        p_fam_distribution: A dataframe with the probability of family history of asthma, given
-            that the person has asthma.
         df_incidence: A dataframe with the incidence of asthma.
         df_prevalence: A dataframe with the prevalence of asthma.
         df_reassessment: A dataframe with the reassessment of asthma.
@@ -710,8 +697,8 @@ def compute_mean_diff_log_OR(
 
     df["mean_log_diff_OR"] = df.apply(
         lambda x: calibrator(
-            x["year"], x["sex"], x["age"], model_abx, p_fam_distribution,
-            df_incidence, df_prevalence, df_reassessment, inc_beta_params, min_year
+            x["year"], x["sex"], x["age"], model_abx, df_incidence, df_prevalence,
+            df_reassessment, inc_beta_params, min_year
         )["mean_diff_log_OR"],
         axis=1
     )
@@ -720,7 +707,6 @@ def compute_mean_diff_log_OR(
 
 def inc_beta_solver(
     model_abx: GLMResultsWrapper,
-    p_fam_distribution: pd.DataFrame,
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
@@ -756,7 +742,7 @@ def inc_beta_solver(
         fun=compute_mean_diff_log_OR,
         x0=inc_beta_params,
         args=(
-            df, model_abx, p_fam_distribution, df_incidence, df_prevalence, df_reassessment, min_year
+            df, model_abx, df_incidence, df_prevalence, df_reassessment, min_year
         ),
         method="BFGS",
         options={"maxiter": 1, "disp": True, "gtol": 1e-2}
@@ -801,17 +787,11 @@ def generate_occurrence_calibration_data(
 
     df_reassessment = load_reassessment_data(province=province)
 
-    p_fam_distribution = pd.DataFrame({
-        "fam_history": [0, 1],
-        "prob_fam": [1 - PROB_FAM_HIST, PROB_FAM_HIST]
-    })
-
     model_abx: GLMResultsWrapper = generate_antibiotic_data(return_type="model") # type: ignore
 
     if retrain_beta:
         inc_beta_solver(
             model_abx=model_abx,
-            p_fam_distribution=p_fam_distribution,
             df_incidence=df_incidence,
             df_prevalence=df_prevalence,
             df_reassessment=df_reassessment,
@@ -843,7 +823,6 @@ def generate_occurrence_calibration_data(
             sex=x["sex"],
             age=x["age"],
             model_abx=model_abx,
-            p_fam_distribution=p_fam_distribution,
             df_incidence=df_incidence,
             df_prevalence=df_prevalence,
             df_reassessment=df_reassessment,
