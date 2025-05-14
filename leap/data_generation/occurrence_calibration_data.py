@@ -677,8 +677,6 @@ def calibrator(
         inc_risk_set = risk_factor_generator(
             year, age, sex, model_abx, p_fam_distribution, df_fam_history_or, df_abx_or
         )
-        # drop the odds_ratio column
-        inc_risk_set = inc_risk_set[["fam_history", "n_abx", "year", "sex", "age", "prob"]]
 
         if age > 7:
             # select only antibiotic level 0
