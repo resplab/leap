@@ -45,13 +45,14 @@ DF_OCC_PRED = pd.read_csv(get_data_path("processed_data/asthma_occurrence_predic
 
 
 def asthma_predictor(age: int, sex: str, year: int, occurrence_type: str) -> float:
-    """
-    Predicts the asthma prevalence or incidence based on the given parameters.
+    """Predicts the asthma prevalence or incidence based on the given parameters.
+
     Args:
-        age: Age of the individual.
-        sex: One of "M" or "F".
+        age: Age of the individual in years.
+        sex: One of ``"M"`` or ``"F"``.
         year: Year of the prediction.
-        occurrence_type: One of "prevalence" or "incidence".
+        occurrence_type: One of ``"prevalence"`` or ``"incidence"``.
+
     Returns:
         A float representing the predicted asthma prevalence or incidence.
     """
