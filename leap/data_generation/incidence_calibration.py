@@ -224,7 +224,6 @@ def inc_correction_calculator(
     """
 
     β_0 = logit(asthma_inc_target)
-    log_inc_OR = np.log(risk_set["odds_ratio"])
     
     # asthma prevalance ~ risk factor parameters for the previous year
     asthma_prev_risk_factor_params_past = prev_calibrator(
@@ -247,7 +246,7 @@ def inc_correction_calculator(
     # asthma prevalence ~ risk factor parameters for incidence
     asthma_prev_risk_factor_params = prev_calibrator(
         asthma_prev_target=asthma_inc_target,
-        odds_ratio_target=np.exp(log_inc_OR),
+        odds_ratio_target=risk_set["odds_ratio"].to_list(),
         risk_factor_prev=risk_factor_prev_past_no_asthma
     )
 
@@ -256,7 +255,8 @@ def inc_correction_calculator(
     )
 
     # calibrated asthma incidence
-    asthma_inc_calibrated = logistic.cdf(β_0 + log_inc_OR - asthma_inc_correction)
+    asthma_inc_calibrated = logistic.cdf(β_0 + np.log(risk_set["odds_ratio"]) - asthma_inc_correction)
+
 
     # for each odds ratio, we need to obtain the contingency table
     contingency_tables = compute_contingency_table(
