@@ -13,12 +13,12 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 
-def compute_contingency_table(
+def compute_contingency_tables(
     risk_factor_prev: list[float],
     odds_ratio_target: list[float],
     asthma_prev_calibrated: list[float]
 ) -> Dict[str | int, pd.DataFrame]:
-    r"""Compute the contingency table for the risk factors and asthma prevalence.
+    r"""Compute the contingency tables for the risk factors and asthma prevalence.
 
     This function computes the proportions of the population at different levels of family
     history and antibiotic exposure. The proportions are calculated based on the risk factors
@@ -269,7 +269,7 @@ def inc_correction_calculator(
     )
 
     # for each odds ratio, we need to obtain the contingency table
-    contingency_tables = compute_contingency_table(
+    contingency_tables = compute_contingency_tables(
         risk_factor_prev=list(risk_factor_prev_past),
         odds_ratio_target=list(odds_ratio_target_past),
         asthma_prev_calibrated=list(asthma_prev_calibrated_past)
