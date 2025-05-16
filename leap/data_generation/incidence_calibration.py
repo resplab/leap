@@ -91,9 +91,11 @@ def compute_contingency_tables(
 
 
 def compute_odds_ratio_difference(
+    risk_factor_prev_past: list[float] | np.ndarray,
+    odds_ratio_target_past: list[float] | np.ndarray,
+    asthma_prev_calibrated_past: list[float] | np.ndarray,
     asthma_inc_calibrated: list[float] | np.ndarray,
     odds_ratio_target: list[float] | np.ndarray,
-    contingency_tables_past: Dict[int | str, pd.DataFrame],
     ra_target: float = 1.0,
     misDx: float = 0,
     Dx: float = 1
@@ -130,6 +132,13 @@ def compute_odds_ratio_difference(
         The sum of the difference in log odds ratios between the target and calibrated asthma
         prevalence for each risk factor level.
     """
+
+    # for each odds ratio, we need to obtain the contingency table
+    contingency_tables_past = compute_contingency_tables(
+        risk_factor_prev=list(risk_factor_prev_past),
+        odds_ratio_target=list(odds_ratio_target_past),
+        asthma_prev_calibrated=list(asthma_prev_calibrated_past)
+    )
 
     asthma_inc_calibrated_ref = asthma_inc_calibrated[0]
     total_diff_log_OR = 0
@@ -267,21 +276,13 @@ def inc_correction_calculator(
         risk_factor_prev=list(risk_factor_prev_past_no_asthma),
         beta0=β_0
     )
-
-    # for each odds ratio, we need to obtain the contingency table
-    contingency_tables = compute_contingency_tables(
-        risk_factor_prev=list(risk_factor_prev_past),
-        odds_ratio_target=list(odds_ratio_target_past),
-        asthma_prev_calibrated=list(asthma_prev_calibrated_past)
-    )
     
     mean_diff_log_OR = compute_odds_ratio_difference(
-        asthma_inc_calibrated, odds_ratio_target, contingency_tables, ra_target, misDx, Dx
+        risk_factor_prev_past, odds_ratio_target_past, asthma_prev_calibrated_past,
+        asthma_inc_calibrated, odds_ratio_target, ra_target, misDx, Dx
     )
 
     return mean_diff_log_OR, asthma_inc_correction
-
-
 
 
 
