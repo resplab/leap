@@ -27,6 +27,7 @@ MAX_AGE = 63
 MAX_AGE = 9
 MAX_ASTHMA_AGE = 62
 MIN_ASTHMA_AGE = 3
+MAX_ABX_AGE = 7
 # odds ratio between asthma prevalence at age 3 and family history (CHILD Study)
 OR_ASTHMA_AGE_3 = 1.13
 # odds ratio between asthma prevalence at age 5 and family history (CHILD Study)
@@ -281,7 +282,7 @@ def OR_abx_calculator(
     if dose == 0:
         return 1.0
     else:
-        return np.exp(np.dot(params, [1, min(age, 7), min(dose, 3)]))
+        return np.exp(np.dot(params, [1, min(age, MAX_ABX_AGE), min(dose, 3)]))
 
 
 def OR_fam_calculator(
@@ -306,10 +307,10 @@ def OR_fam_calculator(
     if params is None:
         params = [BETA_FHX_0, BETA_FHX_AGE]
 
-    if age < MIN_ASTHMA_AGE or fam_hist == 0 or age > 7:
+    if age < MIN_ASTHMA_AGE or fam_hist == 0 or age > MAX_ABX_AGE:
         return 1.0
     else:
-        return np.exp(params[0] + params[1] * (min(age, 5) - 3))
+        return np.exp(params[0] + params[1] * (min(age, 5) - MIN_ASTHMA_AGE))
 
 
 def OR_risk_factor_calculator(
@@ -405,7 +406,7 @@ def risk_factor_generator(
     # select the given age if <= 8, otherwise select age == 8
     # filter out abx_exposure > 3
     df_abx_or = load_abx_exposure_data(beta_params_abx)
-    df_abx_or_age = df_abx_or.loc[df_abx_or["age"] == min(age, 8)]
+    df_abx_or_age = df_abx_or.loc[df_abx_or["age"] == min(age, MAX_ABX_AGE + 1)]
     df_abx_or_age = df_abx_or_age[["n_abx", "odds_ratio"]]
     df_abx_or_age.rename(columns={"odds_ratio": "odds_ratio_abx"}, inplace=True)
     df_abx_or_age = df_abx_or_age.loc[df_abx_or_age["n_abx"] <= 3]
@@ -522,7 +523,7 @@ def calibrator(
 
     risk_set = risk_factor_generator(year, age, sex, model_abx)
 
-    if age > 7:
+    if age > MAX_ABX_AGE:
         # group the all the antibiotic levels into one
         # only two risk levels: family history = {0, 1}
         risk_set = risk_set.groupby(["fam_history", "year", "sex", "age"]).agg(
@@ -559,8 +560,8 @@ def calibrator(
         asthma_prev_risk_factor_params, risk_set["prob"].to_list()
     )
 
-    if year == 2000 or age == 3:
-        if year > 2000 and age == 3:
+    if year == 2000 or age == MIN_ASTHMA_AGE:
+        if year > 2000 and age == MIN_ASTHMA_AGE:
             df["inc_correction"] = df["prev_correction"]
         return df
 
@@ -592,14 +593,14 @@ def calibrator(
             (df_reassessment["sex"] == sex)
         ]["ra"].iloc[0]
 
-        if age > 8:
+        if age > MAX_ABX_AGE + 1:
             # group the all the antibiotic levels into one
             # only two risk levels: family history = {0, 1}
             past_risk_set = past_risk_set.groupby(["fam_history"]).agg(
                 prob=("prob", "sum"),
                 odds_ratio=("odds_ratio", "mean")
             )
-        elif age == 8:
+        elif age == MAX_ABX_AGE + 1:
 
             past_asthma_prev_risk_factor_params = prev_calibrator(
                 asthma_prev_target=past_asthma_prev_target,
@@ -633,7 +634,7 @@ def calibrator(
 
         inc_risk_set = risk_factor_generator(year, age, sex, model_abx)
 
-        if age > 7:
+        if age > MAX_ABX_AGE:
             # select only antibiotic level 0
             inc_risk_set = inc_risk_set.loc[inc_risk_set["n_abx"] == 0]
 
@@ -649,7 +650,7 @@ def calibrator(
             axis=1
         )
         
-        if age <= 7:
+        if age <= MAX_ABX_AGE:
             inc_risk_set["prob"] = inc_risk_set.apply(
                 lambda x: x["prob"] / inc_risk_set["prob"].sum(),
                 axis=1
