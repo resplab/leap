@@ -751,7 +751,7 @@ def compute_mean_diff_log_OR(
     return df["mean_log_diff_OR"].mean()
 
 
-def inc_beta_solver(
+def beta_params_age_optimizer(
     model_abx: GLMResultsWrapper,
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
@@ -762,7 +762,7 @@ def inc_beta_solver(
     min_year: int = MIN_YEAR,
     β_risk_factors_age: list[float] = [β_RISK_FACTORS["fam_history"][1], β_RISK_FACTORS["abx"][1]]
 ) -> None:
-    """Optimize the incidence beta parameters for the given model and data.
+    """Optimize the risk factor beta parameters for the age terms.
 
     Args:
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
