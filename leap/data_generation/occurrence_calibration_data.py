@@ -389,14 +389,14 @@ def risk_factor_generator(
 
 
     birth_year = year - age
-    df_abx_exposure = p_antibiotic_exposure(max(birth_year, 2000), sex, model_abx)
+    df_abx_prob = p_antibiotic_exposure(max(birth_year, 2000), sex, model_abx)
 
     # combine abx_exposure = 3, 4, 5+ into 3+
-    df_abx_exposure.loc[df_abx_exposure["n_abx"] == 3, "prob"] = df_abx_exposure.loc[
-        df_abx_exposure["n_abx"] >= 3, "prob"
+    df_abx_prob.loc[df_abx_prob["n_abx"] == 3, "prob"] = df_abx_prob.loc[
+        df_abx_prob["n_abx"] >= 3, "prob"
     ].sum()
-    df_abx_exposure = df_abx_exposure[df_abx_exposure["n_abx"] <= 3]
-    df_abx_exposure.rename(columns={"prob": "prob_abx"}, inplace=True)
+    df_abx_prob = df_abx_prob[df_abx_prob["n_abx"] <= 3]
+    df_abx_prob.rename(columns={"prob": "prob_abx"}, inplace=True)
 
 
     # select the given age if <= 5, otherwise select age == 5
@@ -435,7 +435,7 @@ def risk_factor_generator(
     )
     df_risk_factors = pd.merge(
         df_risk_factors,
-        df_abx_exposure,
+        df_abx_prob,
         how="left",
         on="n_abx"
     )
