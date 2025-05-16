@@ -170,7 +170,7 @@ def load_family_history_data(β_fam_history: Dict[str, float] | None = None) -> 
     )
 
     df_fam_history_or["odds_ratio"] = df_fam_history_or.apply(
-        lambda x: OR_fam_calculator(x["age"], x["fam_history"], β_fam_history),
+        lambda x: calculate_odds_ratio_fam_history(x["age"], x["fam_history"], β_fam_history),
         axis=1
     )
 
@@ -268,7 +268,7 @@ def p_antibiotic_exposure(
 
 
 
-def OR_abx_calculator(
+def calculate_odds_ratio_abx(
     age: int,
     dose: int,
     β_abx: Dict[str, float] | None = None
@@ -306,7 +306,7 @@ def OR_abx_calculator(
         )
 
 
-def OR_fam_calculator(
+def calculate_odds_ratio_fam_history(
     age: int,
     fam_hist: int,
     β_fam_hist: Dict[str, float] | None = None
@@ -337,7 +337,7 @@ def OR_fam_calculator(
         )
 
 
-def OR_risk_factor_calculator(
+def calculate_odds_ratio_risk_factors(
     fam_hist: int,
     age: int,
     dose: int,
@@ -369,8 +369,10 @@ def OR_risk_factor_calculator(
     if age < MIN_ASTHMA_AGE:
         return 1.0
     else:
-        odds_ratio_fam_history = OR_fam_calculator(age, fam_hist, β_risk_factors.get("fam_history", None))
-        odds_ratio_abx = OR_abx_calculator(age, dose, β_risk_factors.get("abx", None))
+        odds_ratio_fam_history = calculate_odds_ratio_fam_history(
+            age, fam_hist, β_risk_factors.get("fam_history", None)
+        )
+        odds_ratio_abx = calculate_odds_ratio_abx(age, dose, β_risk_factors.get("abx", None))
         return odds_ratio_fam_history * odds_ratio_abx
     
 
@@ -671,7 +673,7 @@ def calibrator(
 
 
         inc_risk_set["odds_ratio"] = inc_risk_set.apply(
-            lambda x: OR_risk_factor_calculator(
+            lambda x: calculate_odds_ratio_risk_factors(
                 fam_hist=x["fam_history"],
                 age=x["age"],
                 dose=x["n_abx"],
