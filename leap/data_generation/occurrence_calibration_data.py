@@ -41,8 +41,18 @@ BETA_ABX_DOSE = 0.053
 # beta parameter for the age term in the odds ratio equation for antibiotic courses
 BETA_ABX_AGE = -0.225
 # beta parameter for the constant term in the odds ratio equation for antibiotic courses
-BETA_ABX_0 = 1.711 + 0.115
-INC_BETA_PARAMS = [BETA_FHX_AGE, BETA_ABX_AGE]
+# default beta parameters for the risk factors equations
+β_RISK_FACTORS = {
+    "fam_history": {
+        "β_fhx_0": BETA_FHX_0,
+        "β_fhx_age": BETA_FHX_AGE
+    },
+    "abx": {
+        "β_abx_0": BETA_ABX_0, 
+        "β_abx_age": BETA_ABX_AGE,
+        "β_abx_dose": BETA_ABX_DOSE
+    }
+}
 # the probability that one or more parents have asthma (CHILD Study)
 PROB_FAM_HIST = 0.2927242
 
@@ -134,11 +144,13 @@ def load_reassessment_data(
     return df_reassessment
 
 
-def load_family_history_data(params: list[float] | None = None) -> pd.DataFrame:
+def load_family_history_data(β_fam_history: Dict[str, float] | None = None) -> pd.DataFrame:
     """Load the family history data for the given province.
 
     Args:
-        params: A list of two beta parameters for the odds ratio calculation.
+        β_fam_history: A dictionary of two beta parameters for the odds ratio calculation:
+            * ``β_fhx_0``: The beta parameter for the constant term in the equation
+            * ``β_fhx_age``: The beta parameter for the age term in the equation.
 
     Returns:
         A dataframe containing the family history odds ratios.
@@ -158,18 +170,21 @@ def load_family_history_data(params: list[float] | None = None) -> pd.DataFrame:
     )
 
     df_fam_history_or["odds_ratio"] = df_fam_history_or.apply(
-        lambda x: OR_fam_calculator(x["age"], x["fam_history"], params),
+        lambda x: OR_fam_calculator(x["age"], x["fam_history"], β_fam_history),
         axis=1
     )
 
     return df_fam_history_or
 
 
-def load_abx_exposure_data(params: list[float] | None = None) -> pd.DataFrame:
+def load_abx_exposure_data(β_abx: Dict[str, float] | None = None) -> pd.DataFrame:
     """Load the antibiotic exposure data.
 
     Args:
-        params: A list of 3 beta parameters for the odds ratio calculation.
+        β_abx: A dictionary of 3 beta parameters for the odds ratio calculation:
+            * ``β_abx_0``: The beta parameter for the constant term in the equation
+            * ``β_abx_age``: The beta parameter for the age term in the equation
+            * ``β_abx_dose``: The beta parameter for the antibiotic dose term in the equation.
 
     Returns:
         A dataframe with the odds ratios of asthma prevalence given the number of courses of
@@ -190,7 +205,7 @@ def load_abx_exposure_data(params: list[float] | None = None) -> pd.DataFrame:
     )
 
     df_abx_or["odds_ratio"] = df_abx_or.apply(
-        lambda x: OR_abx_calculator(x["age"], x["n_abx"], params),
+        lambda x: OR_abx_calculator(x["age"], x["n_abx"], β_abx),
         axis=1
     )
     return df_abx_or
@@ -256,7 +271,7 @@ def p_antibiotic_exposure(
 def OR_abx_calculator(
     age: int,
     dose: int,
-    params: list[float] | None = None
+    β_abx: Dict[str, float] | None = None
 ) -> float:
     """Calculate the odds ratio for asthma prevalence based on antibiotic exposure.
 
@@ -264,7 +279,7 @@ def OR_abx_calculator(
         age: The age of the individual in years.
         dose: The number of antibiotic courses taken in the first year of life,
             an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
-        params: The parameters for the odds ratio calculation. If ``None``, the default
+        β_abx: The parameters for the odds ratio calculation. If ``None``, the default
             parameters are used. The default parameters are:
 
             * ``BETA_ABX_0``: The beta parameter for the constant term in the odds
@@ -278,19 +293,23 @@ def OR_abx_calculator(
         A float representing the odds ratio for asthma prevalence based on antibiotic
         exposure and age.
     """
-    if params is None:
-        params = [BETA_ABX_0, BETA_ABX_AGE, BETA_ABX_DOSE]
+    if β_abx is None:
+        β_abx = β_RISK_FACTORS["abx"]
 
     if dose == 0:
         return 1.0
     else:
-        return np.exp(np.dot(params, [1, min(age, MAX_ABX_AGE), min(dose, 3)]))
+        return np.exp(
+            β_abx["β_abx_0"] + 
+            β_abx["β_abx_age"] * min(age, MAX_ABX_AGE) + 
+            β_abx["β_abx_dose"] * min(dose, 3)
+        )
 
 
 def OR_fam_calculator(
     age: int,
     fam_hist: int,
-    params: list[float] | None = None
+    β_fam_hist: Dict[str, float] | None = None
 ) -> float:
     """Calculate the odds ratio for asthma prevalence based on family history.
 
@@ -299,28 +318,30 @@ def OR_fam_calculator(
         fam_hist: Whether or not there is a family history of asthma.
             ``0`` = one or more parents has asthma,
             ``1`` = neither parent has asthma.
-        params: The parameters for the odds ratio calculation. If ``None``, the default
-            parameters are used.
+        β_fam_hist: The beta parameters for the odds ratio calculation:
+            * ``β_fhx_0``: The beta parameter for the constant term in the odds ratio equation
+            * ``β_fhx_age``: The beta parameter for the age term in the odds ratio equation.
     
     Returns:
         A float representing the odds ratio for asthma prevalence based on family
         history and age.
     """
-    if params is None:
-        params = [BETA_FHX_0, BETA_FHX_AGE]
+    if β_fam_hist is None:
+        β_fam_hist = β_RISK_FACTORS["fam_history"]
 
     if age < MIN_ASTHMA_AGE or fam_hist == 0 or age > MAX_ABX_AGE:
         return 1.0
     else:
-        return np.exp(params[0] + params[1] * (min(age, 5) - MIN_ASTHMA_AGE))
+        return np.exp(
+            β_fam_hist["β_fhx_0"] + β_fam_hist["β_fhx_age"] * (min(age, 5) - MIN_ASTHMA_AGE)
+        )
 
 
 def OR_risk_factor_calculator(
     fam_hist: int,
     age: int,
     dose: int,
-    family_history_params: list[float] | None = None,
-    abx_params: list[float] | None = None
+    β_risk_factors: Dict[str, Dict[str, float]] | None = None
 ) -> float:
     """Calculate the odds ratio for asthma prevalence based on family history and antibiotic exposure.
 
@@ -331,20 +352,25 @@ def OR_risk_factor_calculator(
         age: The age of the individual in years.
         dose: The number of antibiotic courses taken in the first year of life,
             an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
-        family_history_params: The parameters for the family history odds ratio calculation.
-            If ``None``, the default parameters are used.
-        abx_params: The parameters for the antibiotic exposure odds ratio calculation.
-            If ``None``, the default parameters are used.
+        β_risk_factors: A dictionary of beta parameters for the risk factor equations.
+            Must contain the following keys:
+            * ``fam_history``: A dictionary with the beta parameters for the family history
+              odds ratio calculation. Must contain the keys ``β_fhx_0`` and ``β_fhx_age``.
+            * ``abx``: A dictionary with the beta parameters for the antibiotic exposure
+              odds ratio calculation. Must contain the keys ``β_abx_0``, ``β_abx_age``,
+              and ``β_abx_dose``.
 
     Returns:
         The odds ratio for asthma prevalence based on family history and antibiotic exposure.
     """
+    if β_risk_factors is None:
+        β_risk_factors = β_RISK_FACTORS
 
     if age < MIN_ASTHMA_AGE:
         return 1.0
     else:
-        odds_ratio_fam_history = OR_fam_calculator(age, fam_hist, family_history_params)
-        odds_ratio_abx = OR_abx_calculator(age, dose, abx_params)
+        odds_ratio_fam_history = OR_fam_calculator(age, fam_hist, β_risk_factors.get("fam_history", None))
+        odds_ratio_abx = OR_abx_calculator(age, dose, β_risk_factors.get("abx", None))
         return odds_ratio_fam_history * odds_ratio_abx
     
 
@@ -353,8 +379,8 @@ def risk_factor_generator(
     age: int,
     sex: str,
     model_abx: GLMResultsWrapper,
-    beta_params_fam_history: list[float] | None = None,
-    beta_params_abx: list[float] | None = None
+    β_fam_history: Dict[str, float] | None = None,
+    β_abx: Dict[str, float] | None = None
 ) -> pd.DataFrame:
     """Compute the combined antibiotic exposure and family history odds ratio.
 
@@ -363,10 +389,15 @@ def risk_factor_generator(
         age: The age of the person in years.
         sex: One of ``M`` or ``F``.
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
-        beta_params_fam_history: A list of 2 beta parameters for the calculation of the odds
-            ratio of having asthma given family history.
-        beta_params_abx: A list of 3 beta parameters for the calculation of the odds
-            ratio of having asthma given antibiotic exposure during infancy.
+        β_fam_history: A dictionary of 2 beta parameters for the calculation of the odds
+            ratio of having asthma given family history:
+            * ``β_fhx_0``: The beta parameter for the constant term in the equation.
+            * ``β_fhx_age``: The beta parameter for the age term in the equation.
+        β_abx: A dictionary of 3 beta parameters for the calculation of the odds
+            ratio of having asthma given antibiotic exposure during infancy:
+            * ``β_abx_0``: The beta parameter for the constant term in the equation.
+            * ``β_abx_age``: The beta parameter for the age term in the equation.
+            * ``β_abx_dose``: The beta parameter for the antibiotic dose term in the equation.
 
     Returns:
         A dataframe with the combined probabilities and odds ratios for the antibiotic exposure
@@ -400,14 +431,14 @@ def risk_factor_generator(
 
 
     # select the given age if <= 5, otherwise select age == 5
-    df_fam_history_or = load_family_history_data(beta_params_fam_history)
+    df_fam_history_or = load_family_history_data(β_fam_history)
     df_fam_history_or_age = df_fam_history_or.loc[df_fam_history_or["age"] == min(age, 5)]
     df_fam_history_or_age = df_fam_history_or_age[["fam_history", "odds_ratio"]]
     df_fam_history_or_age.rename(columns={"odds_ratio": "odds_ratio_fam_hist"}, inplace=True)
   
     # select the given age if <= 8, otherwise select age == 8
     # filter out abx_exposure > 3
-    df_abx_or = load_abx_exposure_data(beta_params_abx)
+    df_abx_or = load_abx_exposure_data(β_abx)
     df_abx_or_age = df_abx_or.loc[df_abx_or["age"] == min(age, MAX_ABX_AGE + 1)]
     df_abx_or_age = df_abx_or_age[["n_abx", "odds_ratio"]]
     df_abx_or_age.rename(columns={"odds_ratio": "odds_ratio_abx"}, inplace=True)
@@ -473,7 +504,7 @@ def calibrator(
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
-    inc_beta_params: list[float] | Dict[str, float] = INC_BETA_PARAMS,
+    β_risk_factors: Dict[str, Dict[str, float]] = β_RISK_FACTORS,
     min_year: int = MIN_YEAR
 ) -> pd.Series:
     """Compute the loss function given the effects of risk factors in the incidence equation, for
@@ -499,7 +530,12 @@ def calibrator(
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
             * ``ra (float)``: the reassessment of asthma
-        inc_beta_params: A list or dictionary of parameters for the incidence equation.
+        β_risk_factors: A dictionary of beta parameters for the risk factor equations:
+            * ``fam_history``: A dictionary with the beta parameters for the family history
+              odds ratio calculation. Must contain the keys ``β_fhx_0`` and ``β_fhx_age``.
+            * ``abx``: A dictionary with the beta parameters for the antibiotic exposure
+              odds ratio calculation. Must contain the keys ``β_abx_0``, ``β_abx_age``,
+              and ``β_abx_dose``.
         min_year: The minimum year to consider for the calibration.
 
     Returns:
@@ -515,13 +551,6 @@ def calibrator(
         [year, sex, age, np.nan, 0, 0],
         index=["year", "sex", "age", "mean_diff_log_OR", "prev_correction", "inc_correction"]
     )
-
-    if type(inc_beta_params) != dict:
-        inc_beta_params = {
-            "fam_history":  [BETA_FHX_0, inc_beta_params[0]],
-            "abx": [BETA_ABX_0, inc_beta_params[1], BETA_ABX_DOSE]
-        }
-
 
     risk_set = risk_factor_generator(year, age, sex, model_abx)
 
@@ -646,8 +675,7 @@ def calibrator(
                 fam_hist=x["fam_history"],
                 age=x["age"],
                 dose=x["n_abx"],
-                family_history_params=inc_beta_params["fam_history"],
-                abx_params=inc_beta_params["abx"]
+                β_risk_factors=β_risk_factors
             ),
             axis=1
         )
@@ -677,7 +705,7 @@ def calibrator(
 
 
 def compute_mean_diff_log_OR(
-    inc_beta_params: list[float],
+    β_risk_factors_age: list[float],
     df: pd.DataFrame,
     model_abx: GLMResultsWrapper,
     df_incidence: pd.DataFrame,
@@ -689,11 +717,11 @@ def compute_mean_diff_log_OR(
     """Compute the mean difference in log odds ratio for the given model and data.
 
     Args:
+        β_risk_factors_age: A list of two beta parameters, ``β_fhx_age`` and ``β_abx_age``.
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
         df_incidence: A dataframe with the incidence of asthma.
         df_prevalence: A dataframe with the prevalence of asthma.
         df_reassessment: A dataframe with the reassessment of asthma.
-        inc_beta_params: The initial parameters for the incidence equation.
         baseline_year: The baseline year for the calibration.
         stabilization_year: The stabilization year for the calibration.
         max_age: The maximum age to consider for the calibration.
@@ -701,11 +729,22 @@ def compute_mean_diff_log_OR(
     Returns:
         The mean difference in log odds ratio for the given model and data.
     """
+    β_risk_factors = {
+        "fam_history": {
+            "β_fhx_0": BETA_FHX_0,
+            "β_fhx_age": β_risk_factors_age[0]
+        },
+        "abx": {
+            "β_abx_0": BETA_ABX_0,
+            "β_abx_age": β_risk_factors_age[1],
+            "β_abx_dose": BETA_ABX_DOSE
+        }
+    }
 
     df["mean_log_diff_OR"] = df.apply(
         lambda x: calibrator(
             x["year"], x["sex"], x["age"], model_abx, df_incidence, df_prevalence,
-            df_reassessment, inc_beta_params, min_year
+            df_reassessment, β_risk_factors, min_year
         )["mean_diff_log_OR"],
         axis=1
     )
@@ -721,7 +760,7 @@ def inc_beta_solver(
     stabilization_year: int = STABILIZATION_YEAR,
     max_age: int = MAX_AGE,
     min_year: int = MIN_YEAR,
-    inc_beta_params: list[float] | dict = INC_BETA_PARAMS
+    β_risk_factors_age: list[float] = [β_RISK_FACTORS["fam_history"][1], β_RISK_FACTORS["abx"][1]]
 ) -> None:
     """Optimize the incidence beta parameters for the given model and data.
 
@@ -733,7 +772,8 @@ def inc_beta_solver(
         baseline_year: The baseline year for the calibration.
         stabilization_year: The stabilization year for the calibration.
         max_age: The maximum age to consider for the calibration.
-        inc_beta_params: The initial parameters for the incidence equation.
+        β_risk_factors_age: The initial beta parameters for the age terms in the
+            risk factors equations.
     """
 
     df = pd.DataFrame(
@@ -747,7 +787,7 @@ def inc_beta_solver(
 
     res = optimize.minimize(
         fun=compute_mean_diff_log_OR,
-        x0=inc_beta_params,
+        x0=β_risk_factors_age,
         args=(
             df, model_abx, df_incidence, df_prevalence, df_reassessment, min_year
         ),
@@ -755,13 +795,14 @@ def inc_beta_solver(
         options={"maxiter": 1, "disp": True, "gtol": 1e-2}
     )
 
-    inc_beta_params = {
-        "fam_history": res.x[0],
-        "abx": res.x[1]
-    }
-
     with open(get_data_path("processed_data/occurrence_calibration_parameters.json"), "w") as f:
-        json.dump({"inc_beta_params": inc_beta_params}, f, indent=4)
+        json.dump(
+            {
+                "β_fhx_age": res.x[0],
+                "β_abx_age": res.x[1],
+            },
+            f, indent=4
+        )
 
 
 def generate_occurrence_calibration_data(
@@ -782,7 +823,7 @@ def generate_occurrence_calibration_data(
         baseline_year: The baseline year for the calibration.
         stabilization_year: The stabilization year for the calibration.
         max_age: The maximum age to consider for the calibration.
-        retrain_beta: If ``True``, re-run the fit for the ``inc_beta_params``. Otherwise, load
+        retrain_beta: If ``True``, re-run the fit for the ``β_risk_factors``. Otherwise, load
             the saved parameters from a ``json`` file.
     """
 
@@ -808,11 +849,18 @@ def generate_occurrence_calibration_data(
         )
     
     with open(get_data_path("processed_data/occurrence_calibration_parameters.json"), "r") as f:
-        optimized_inc_beta = json.load(f)["inc_beta_params"]
+        params = json.load(f)
 
-    inc_beta_params = {
-        "fam_history":  [BETA_FHX_0, optimized_inc_beta["fam_history"]],
-        "abx": [BETA_ABX_0, optimized_inc_beta["abx"], BETA_ABX_DOSE]
+    β_risk_factors = {
+        "fam_history": {
+            "β_fhx_0": BETA_FHX_0,
+            "β_fhx_age": params["β_fhx_age"]
+        },
+        "abx": {
+            "β_abx_0": BETA_ABX_0,
+            "β_abx_age": params["β_abx_age"],
+            "β_abx_dose": BETA_ABX_DOSE
+        }
     }
 
     df_correction = pd.DataFrame(
@@ -833,7 +881,7 @@ def generate_occurrence_calibration_data(
             df_incidence=df_incidence,
             df_prevalence=df_prevalence,
             df_reassessment=df_reassessment,
-            inc_beta_params=inc_beta_params
+            β_risk_factors=β_risk_factors
         ), axis=1
     ).reset_index(drop=True)
 
