@@ -172,7 +172,8 @@ def load_abx_exposure_data(params: list[float] | None = None) -> pd.DataFrame:
         params: A list of 3 beta parameters for the odds ratio calculation.
 
     Returns:
-        A dataframe containing the antibiotic exposure odds ratios.
+        A dataframe with the odds ratios of asthma prevalence given the number of courses of
+        antibiotics taken during the first year of life.
         It contains the following columns:
 
             * ``age (int)``: The age of the individual. An integer in ``[3, 8]``.
@@ -206,6 +207,7 @@ def p_antibiotic_exposure(
         year: The birth year of the person.
         sex: The sex of the infant, one of ``"M"`` or ``"F"``.
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
+            This model was fitted using BC Ministry of Health data on antibiotic prescriptions.
     
     Returns:
         A dataframe with the probability of the number of courses of antibiotics,
@@ -635,7 +637,7 @@ def calibrator(
         inc_risk_set = risk_factor_generator(year, age, sex, model_abx)
 
         if age > MAX_ABX_AGE:
-            # select only antibiotic level 0
+            # select only antibiotic dose = 0
             inc_risk_set = inc_risk_set.loc[inc_risk_set["n_abx"] == 0]
 
 
