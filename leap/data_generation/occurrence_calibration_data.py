@@ -840,7 +840,7 @@ def generate_occurrence_calibration_data(
     model_abx: GLMResultsWrapper = generate_antibiotic_data(return_type="model") # type: ignore
 
     if retrain_beta:
-        inc_beta_solver(
+        beta_params_age_optimizer(
             model_abx=model_abx,
             df_incidence=df_incidence,
             df_prevalence=df_prevalence,
