@@ -31,13 +31,17 @@ MIN_ASTHMA_AGE = 3
 OR_ASTHMA_AGE_3 = 1.13
 # odds ratio between asthma prevalence at age 5 and family history (CHILD Study)
 OR_ASTHMA_AGE_5 = 2.4
+# beta parameter for the constant term in the odds ratio equation for family history
+BETA_FHX_0 = np.log(OR_ASTHMA_AGE_3)
+# beta parameter for the age term in the odds ratio equation for family history
+BETA_FHX_AGE = (np.log(OR_ASTHMA_AGE_5) - np.log(OR_ASTHMA_AGE_3)) / 2
 # beta parameter for the antibiotic dose term in the odds ratio equation for antibiotic courses
 BETA_ABX_DOSE = 0.053
 # beta parameter for the age term in the odds ratio equation for antibiotic courses
 BETA_ABX_AGE = -0.225
 # beta parameter for the constant term in the odds ratio equation for antibiotic courses
 BETA_ABX_0 = 1.711 + 0.115
-INC_BETA_PARAMS = [(np.log(OR_ASTHMA_AGE_5) - np.log(OR_ASTHMA_AGE_3)) / 2, BETA_ABX_AGE]
+INC_BETA_PARAMS = [BETA_FHX_AGE, BETA_ABX_AGE]
 # the probability that one or more parents have asthma (CHILD Study)
 PROB_FAM_HIST = 0.2927242
 
@@ -300,7 +304,7 @@ def OR_fam_calculator(
         history and age.
     """
     if params is None:
-        params = [np.log(OR_ASTHMA_AGE_3), (np.log(OR_ASTHMA_AGE_5) - np.log(OR_ASTHMA_AGE_3)) / 2]
+        params = [BETA_FHX_0, BETA_FHX_AGE]
 
     if age < MIN_ASTHMA_AGE or fam_hist == 0 or age > 7:
         return 1.0
@@ -511,7 +515,7 @@ def calibrator(
 
     if type(inc_beta_params) != dict:
         inc_beta_params = {
-            "fam_history":  [np.log(OR_ASTHMA_AGE_3), inc_beta_params[0]],
+            "fam_history":  [BETA_FHX_0, inc_beta_params[0]],
             "abx": [BETA_ABX_0, inc_beta_params[1], BETA_ABX_DOSE]
         }
 
@@ -804,7 +808,7 @@ def generate_occurrence_calibration_data(
         optimized_inc_beta = json.load(f)["inc_beta_params"]
 
     inc_beta_params = {
-        "fam_history":  [np.log(OR_ASTHMA_AGE_3), optimized_inc_beta["fam_history"]],
+        "fam_history":  [BETA_FHX_0, optimized_inc_beta["fam_history"]],
         "abx": [BETA_ABX_0, optimized_inc_beta["abx"], BETA_ABX_DOSE]
     }
 
