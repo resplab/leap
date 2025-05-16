@@ -635,8 +635,8 @@ def calibrator(
 
             past_asthma_prev_risk_factor_params = prev_calibrator(
                 asthma_prev_target=past_asthma_prev_target,
-                odds_ratio_target=past_risk_set["odds_ratio"],
-                risk_factor_prev=past_risk_set["prob"]
+                odds_ratio_target=past_risk_set["odds_ratio"].to_list(),
+                risk_factor_prev=past_risk_set["prob"].to_list()
             )
 
             past_risk_set["calibrated_prev"] = compute_asthma_prevalence_λ(
@@ -690,7 +690,7 @@ def calibrator(
         asthma_inc_target=risk_set["inc"].iloc[0],
         asthma_prev_target_past=past_asthma_prev_target,
         odds_ratio_target_past=past_risk_set["odds_ratio"],
-        odds_ratio_target=risk_set["odds_ratio"],
+        odds_ratio_target=risk_set["odds_ratio"].to_numpy(),
         risk_factor_prev_past=past_risk_set["prob"],
         risk_set=inc_risk_set,
         ra_target=ra_target,
@@ -884,6 +884,7 @@ def generate_occurrence_calibration_data(
             β_risk_factors=β_risk_factors
         ), axis=1
     ).reset_index(drop=True)
+    df_correction.sort_values(by=["sex", "age", "year"])
 
     df_correction_prevalence = df_correction[["year", "sex", "age", "prev_correction"]].copy()
     df_correction_prevalence.rename(columns={"prev_correction": "correction"}, inplace=True)
