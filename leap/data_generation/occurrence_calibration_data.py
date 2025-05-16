@@ -413,8 +413,8 @@ def risk_factor_generator(
     df_abx_or_age.rename(columns={"odds_ratio": "odds_ratio_abx"}, inplace=True)
     df_abx_or_age = df_abx_or_age.loc[df_abx_or_age["n_abx"] <= 3]
 
-    # family history probabilities
-    p_fam_distribution = pd.DataFrame({
+    # family history probabilities (from the CHILD study)
+    df_fam_history_prob = pd.DataFrame({
         "fam_history": [0, 1],
         "prob_fam": [1 - PROB_FAM_HIST, PROB_FAM_HIST]
     })
@@ -429,7 +429,7 @@ def risk_factor_generator(
 
     df_risk_factors = pd.merge(
         df_risk_factors,
-        p_fam_distribution,
+        df_fam_history_prob,
         how="left",
         on="fam_history"
     )
