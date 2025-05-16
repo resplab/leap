@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from leap.data_generation.utils import conv_2x2
 from leap.data_generation.prevalence_calibration import prev_calibrator, \
-    compute_asthma_prevalence_λ
+    compute_asthma_prevalence_λ, get_asthma_prevalence_correction
 from leap.logger import get_logger
 from typing import Tuple, Dict
 from scipy.stats import logistic
@@ -252,8 +252,8 @@ def inc_correction_calculator(
         risk_factor_prev=risk_factor_prev_past_no_asthma
     )
 
-    asthma_inc_correction = np.dot(
-        asthma_prev_risk_factor_params, risk_factor_prev_past_no_asthma[1:]
+    asthma_inc_correction = get_asthma_prevalence_correction(
+        asthma_prev_risk_factor_params, risk_factor_prev_past_no_asthma
     )
 
     # calibrated asthma incidence
