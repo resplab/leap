@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 from leap.data_generation.utils import conv_2x2
-from leap.data_generation.prevalence_calibration import prev_calibrator
+from leap.data_generation.prevalence_calibration import prev_calibrator, \
+    compute_asthma_prevalence_λ
 from leap.logger import get_logger
 from typing import Tuple, Dict
 from scipy.stats import logistic
@@ -233,10 +234,11 @@ def inc_correction_calculator(
     )
 
     # calibrated asthma prevalence for the previous year
-    asthma_prev_calibrated_past = logistic.cdf(
-        [logit(asthma_prev_target_past)] * odds_ratio_target_past.shape[0] +
-        np.log(odds_ratio_target_past) - 
-        [np.dot(risk_factor_prev_past[1:], asthma_prev_risk_factor_params_past)] * odds_ratio_target_past.shape[0]
+    asthma_prev_calibrated_past = compute_asthma_prevalence_λ(
+        asthma_prev_risk_factor_params=asthma_prev_risk_factor_params_past,
+        odds_ratio_target=list(odds_ratio_target_past),
+        risk_factor_prev=list(risk_factor_prev_past),
+        beta0=logit(asthma_prev_target_past)
     )
     # distribution of the risk factors for the population without asthma
     risk_factor_prev_past_no_asthma = (1 - asthma_prev_calibrated_past) * risk_factor_prev_past
@@ -255,8 +257,12 @@ def inc_correction_calculator(
     )
 
     # calibrated asthma incidence
-    asthma_inc_calibrated = logistic.cdf(β_0 + np.log(risk_set["odds_ratio"]) - asthma_inc_correction)
-
+    asthma_inc_calibrated = compute_asthma_prevalence_λ(
+        asthma_prev_risk_factor_params=asthma_prev_risk_factor_params,
+        odds_ratio_target=risk_set["odds_ratio"].to_list(),
+        risk_factor_prev=list(risk_factor_prev_past_no_asthma),
+        beta0=β_0
+    )
 
     # for each odds ratio, we need to obtain the contingency table
     contingency_tables = compute_contingency_table(
