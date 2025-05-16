@@ -224,9 +224,10 @@ def inc_correction_calculator(
         * ``asthma_inc_correction``: the calibrated asthma incidence correction.
     """
 
+    # target asthma incidence from the BC Ministry of Health data model
     β_0 = logit(asthma_inc_target)
     
-    # asthma prevalance ~ risk factor parameters for the previous year
+    # asthma prevalence ~ risk factor parameters for the previous year
     asthma_prev_risk_factor_params_past = prev_calibrator(
         asthma_prev_target=asthma_prev_target_past,
         odds_ratio_target=odds_ratio_target_past,
@@ -240,7 +241,9 @@ def inc_correction_calculator(
         risk_factor_prev=list(risk_factor_prev_past),
         beta0=logit(asthma_prev_target_past)
     )
-    # distribution of the risk factors for the population without asthma
+
+    # joint probability of risk factors and no asthma in the previous year
+    # P(λ, A = 0) = P(A = 0 | λ) * P(λ) = (1 - P(A = 1 | λ)) * P(λ)
     risk_factor_prev_past_no_asthma = (1 - asthma_prev_calibrated_past) * risk_factor_prev_past
     # normalize
     risk_factor_prev_past_no_asthma = risk_factor_prev_past_no_asthma / np.sum(risk_factor_prev_past_no_asthma)
@@ -252,11 +255,12 @@ def inc_correction_calculator(
         risk_factor_prev=risk_factor_prev_past_no_asthma
     )
 
+    # asthma incidence correction term for the current year
     asthma_inc_correction = get_asthma_prevalence_correction(
         asthma_prev_risk_factor_params, risk_factor_prev_past_no_asthma
     )
 
-    # calibrated asthma incidence
+    # calibrated asthma incidence for the current year
     asthma_inc_calibrated = compute_asthma_prevalence_λ(
         asthma_prev_risk_factor_params=asthma_prev_risk_factor_params,
         odds_ratio_target=risk_set["odds_ratio"].to_list(),
