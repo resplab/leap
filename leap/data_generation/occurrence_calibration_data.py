@@ -11,7 +11,7 @@ from leap.data_generation.incidence_calibration import inc_correction_calculator
 from leap.data_generation.antibiotic_data import get_predicted_abx_data, generate_antibiotic_data
 from leap.logger import get_logger
 from typing import Tuple, Dict
-from scipy.stats import logistic, nbinom
+from scipy.stats import nbinom
 from scipy.special import logit
 
 pd.options.mode.copy_on_write = True
