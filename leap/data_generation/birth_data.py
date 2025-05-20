@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from leap.utils import get_data_path
 from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group
@@ -7,7 +8,8 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 STARTING_YEAR = 1999
-
+GENERATE = False
+INTERPOLATE = True
 
 def get_projection_scenario_id(projection_scenario: str) -> str:
     """Convert the long form of the projection scenario to the 2-letter ID.
@@ -181,7 +183,6 @@ def load_projected_births_population_data(min_year: int) -> pd.DataFrame:
     df.sort_values(["province", "year", "projection_scenario"], inplace=True)
 
     return df
-
 
 
 def load_past_initial_population_data() -> pd.DataFrame:
@@ -408,6 +409,103 @@ def generate_initial_population_data():
     initial_population.to_csv(file_path, index=False)
 
 
+def interpolate_population_data(method: str = "linear"):
+    """
+    Interpolates the ``birth/initial_pop_distribution_prop`` by months between the years.
+    
+    Args:
+        method: The interpolation method to use (linear or lowess).
+    """
+    # Check for valid method
+    if method not in ["linear", "lowess"]:
+        raise ValueError(f"method was {method}. Must be one of ['linear', 'lowess']")
+    
+    # Load dataset
+    logger.info("Loading processed population data from CSV file...")
+    df = pd.read_csv(
+        get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
+    )
+    
+    # Sort values
+    df = df.sort_values(["age", "province", "projection_scenario", "year"])
+
+    # Define columns to interpolate
+    interp_cols = ["n_age", "n_birth", "prop", "prop_male"]
+
+    # Storage for interpolated output
+    all_rows = []
+
+    # Grouping
+    group_cols = ["age", "province", "projection_scenario"]
+    for group_key, group_df in df.groupby(group_cols):
+        logger.info(f"Interpolating for group {group_key}.")
+        group_df = group_df.sort_values("year")
+        
+        for i in range(len(group_df) - 1):
+            row_start = group_df.iloc[i]
+            row_end   = group_df.iloc[i + 1]
+            
+            for m in range(12):  # 12 points between years
+                fraction = m / 12
+                year_interp = row_start["year"] + fraction
+                
+                interpolated_row = {
+                    "year_float": year_interp,
+                    "age": row_start["age"],
+                    "province": row_start["province"],
+                    "projection_scenario": row_start["projection_scenario"],
+                }
+                for col in interp_cols:
+                    interpolated_row[col] = (
+                        row_start[col] + fraction * (row_end[col] - row_start[col])
+                    )
+                all_rows.append(interpolated_row)
+
+    # Add the final year point for each group
+    for group_key, group_df in df.groupby(group_cols):
+        final_row = group_df.loc[group_df["year"].idxmax()]
+        all_rows.append({
+            "year_float": final_row["year"],
+            "age": final_row["age"],
+            "province": final_row["province"],
+            "projection_scenario": final_row["projection_scenario"],
+            "n_age": final_row["n_age"],
+            "n_birth": final_row["n_birth"],
+            "prop": final_row["prop"],
+            "prop_male": final_row["prop_male"]
+        })
+
+    # Convert to DataFrame and sort
+    monthly_df = pd.DataFrame(all_rows)
+    monthly_df = monthly_df.sort_values(["age", "province", "projection_scenario", "year_float"])
+    
+    # Convert year_float to year-month string like "YYYY-MM"
+    monthly_df["year_month"] = monthly_df["year_float"].apply(
+        lambda x: f"{int(x)}-{int((x % 1) * 12 + 1):02d}"
+    )
+    
+    # Drop year_float
+    monthly_df = monthly_df.drop(columns="year_float")
+
+    # Optional: move year_month to the front
+    monthly_df = monthly_df[
+        ["year_month"] + [col for col in monthly_df.columns if col != "year_month"]
+    ]
+
+    # TODO
+    # Raw CSV is ~60Mb. Determine best way to compress or reduce.
+
+    # Save to CSV
+    # file_path = get_data_path("processed_data/birth/initial_pop_distribution_prop_monthly.csv")
+    # logger.info(f"Saving data to {file_path}")
+    # monthly_df.to_csv(file_path, index=False)
+   
+
 if __name__ == "__main__":
-    generate_initial_population_data()
-    generate_birth_estimate_data()
+    if GENERATE:
+        generate_initial_population_data()
+        generate_birth_estimate_data()
+    
+    if INTERPOLATE:
+        interpolate_population_data(method="linear")
+        
