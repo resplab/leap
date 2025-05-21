@@ -206,7 +206,7 @@ def load_abx_exposure_data(β_abx: Dict[str, float] | None = None) -> pd.DataFra
     )
 
     df_abx_or["odds_ratio"] = df_abx_or.apply(
-        lambda x: OR_abx_calculator(x["age"], x["n_abx"], β_abx),
+        lambda x: calculate_odds_ratio_abx(x["age"], x["n_abx"], β_abx),
         axis=1
     )
     return df_abx_or
