@@ -480,7 +480,7 @@ def interpolate_population_data(method: str = "linear"):
     
     # Convert year_float to year-month string like "YYYY-MM"
     monthly_df["year_month"] = monthly_df["year_float"].apply(
-        lambda x: f"{int(x)}-{int((x % 1) * 12 + 1):02d}"
+        lambda y: f"{int(y):04d}-{min(12, round((y - int(y)) * 12) + 1):02d}"
     )
     
     # Drop year_float
@@ -498,6 +498,7 @@ def interpolate_population_data(method: str = "linear"):
     )
     logger.info(f"Saving data to {file_path}")
     monthly_df.to_csv(file_path, index=False)
+
 
 def interpolate_birth_estimate_data(method: str = "linear"):
     """
