@@ -655,12 +655,6 @@ def calibrator(
             model_abx=model_abx
         )
 
-        ra_target = df_reassessment.loc[
-            (df_reassessment["age"] == age) &
-            (df_reassessment["year"] == year) &
-            (df_reassessment["sex"] == sex)
-        ]["ra"].iloc[0]
-
         if age - 1 > MAX_ABX_AGE:
             # group the all the antibiotic levels into one
             # only two risk levels: family history = {0, 1}
@@ -716,28 +710,34 @@ def calibrator(
                 axis=1
             )
 
-    asthma_inc_correction, asthma_inc_calibrated, asthma_prev_calibrated_past = \
-        inc_correction_calculator(
-        asthma_inc_target=risk_set["inc"].iloc[0],
-        asthma_prev_target_past=past_asthma_prev_target,
-        odds_ratio_target_past=past_risk_set["odds_ratio"],
-        risk_factor_prev_past=past_risk_set["prob"],
-        risk_set=inc_risk_set
-    )
+        asthma_inc_correction, asthma_inc_calibrated, asthma_prev_calibrated_past = \
+            inc_correction_calculator(
+            asthma_inc_target=risk_set["inc"].iloc[0],
+            asthma_prev_target_past=past_asthma_prev_target,
+            odds_ratio_target_past=past_risk_set["odds_ratio"],
+            risk_factor_prev_past=past_risk_set["prob"],
+            risk_set=inc_risk_set
+        )
 
-    mean_diff_log_OR = compute_odds_ratio_difference(
-        risk_factor_prev_past=past_risk_set["prob"],
-        odds_ratio_target_past=past_risk_set["odds_ratio"],
-        asthma_prev_calibrated_past=asthma_prev_calibrated_past,
-        asthma_inc_calibrated=asthma_inc_calibrated,
-        odds_ratio_target=risk_set["odds_ratio"].to_numpy(),
-        ra_target=ra_target,
-        misDx=0, # target misdiagnosis
-        Dx=1, # target diagnosis
-    )
+        ra_target = df_reassessment.loc[
+            (df_reassessment["age"] == age) &
+            (df_reassessment["year"] == year) &
+            (df_reassessment["sex"] == sex)
+        ]["ra"].iloc[0]
 
-    df["inc_correction"] = asthma_inc_correction
-    df["mean_diff_log_OR"] = mean_diff_log_OR
+        mean_diff_log_OR = compute_odds_ratio_difference(
+            risk_factor_prev_past=past_risk_set["prob"],
+            odds_ratio_target_past=past_risk_set["odds_ratio"],
+            asthma_prev_calibrated_past=asthma_prev_calibrated_past,
+            asthma_inc_calibrated=asthma_inc_calibrated,
+            odds_ratio_target=risk_set["odds_ratio"].to_numpy(),
+            ra_target=ra_target,
+            misDx=0, # target misdiagnosis
+            Dx=1, # target diagnosis
+        )
+
+        df["inc_correction"] = asthma_inc_correction
+        df["mean_diff_log_OR"] = mean_diff_log_OR
     return df
 
 
