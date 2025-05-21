@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from leap.data_generation.utils import conv_2x2
-from leap.data_generation.prevalence_calibration import prev_calibrator, \
+from leap.data_generation.prevalence_calibration import optimize_prevalence_β_parameters, \
     compute_asthma_prevalence_λ, get_asthma_prevalence_correction
 from leap.logger import get_logger
 from typing import Tuple, Dict
@@ -230,7 +230,7 @@ def inc_correction_calculator(
     β_0 = logit(asthma_inc_target)
     
     # asthma prevalence ~ risk factor parameters for the previous year
-    asthma_prev_risk_factor_params_past = prev_calibrator(
+    asthma_prev_risk_factor_params_past = optimize_prevalence_β_parameters(
         asthma_prev_target=asthma_prev_target_past,
         odds_ratio_target=odds_ratio_target_past,
         risk_factor_prev=risk_factor_prev_past
@@ -251,7 +251,7 @@ def inc_correction_calculator(
     risk_factor_prev_past_no_asthma = risk_factor_prev_past_no_asthma / np.sum(risk_factor_prev_past_no_asthma)
     
     # asthma prevalence ~ risk factor parameters for incidence
-    asthma_prev_risk_factor_params = prev_calibrator(
+    asthma_prev_risk_factor_params = optimize_prevalence_β_parameters(
         asthma_prev_target=asthma_inc_target,
         odds_ratio_target=risk_set["odds_ratio"].to_list(),
         risk_factor_prev=risk_factor_prev_past_no_asthma

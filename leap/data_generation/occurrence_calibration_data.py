@@ -5,7 +5,7 @@ from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 from scipy import optimize
 import itertools
 from leap.utils import get_data_path
-from leap.data_generation.prevalence_calibration import prev_calibrator, \
+from leap.data_generation.prevalence_calibration import optimize_prevalence_β_parameters, \
     compute_asthma_prevalence_λ, get_asthma_prevalence_correction
 from leap.data_generation.incidence_calibration import inc_correction_calculator, \
     compute_odds_ratio_difference
@@ -576,7 +576,7 @@ def calibrator(
     risk_set["prev"] = [asthma_prev_target] * risk_set.shape[0]
 
     # compute beta parameters for the prevalence correction
-    asthma_prev_risk_factor_params = prev_calibrator(
+    asthma_prev_risk_factor_params = optimize_prevalence_β_parameters(
         asthma_prev_target=asthma_prev_target,
         odds_ratio_target=risk_set["odds_ratio"].to_list(),
         risk_factor_prev=risk_set["prob"].to_list()
@@ -636,7 +636,7 @@ def calibrator(
             )
         elif age == MAX_ABX_AGE + 1:
 
-            past_asthma_prev_risk_factor_params = prev_calibrator(
+            past_asthma_prev_risk_factor_params = optimize_prevalence_β_parameters(
                 asthma_prev_target=past_asthma_prev_target,
                 odds_ratio_target=past_risk_set["odds_ratio"].to_list(),
                 risk_factor_prev=past_risk_set["prob"].to_list()

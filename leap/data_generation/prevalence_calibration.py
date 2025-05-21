@@ -149,7 +149,7 @@ def compute_asthma_prevalence_difference(
 
 
 
-def prev_calibrator(
+def optimize_prevalence_β_parameters(
     asthma_prev_target: float,
     odds_ratio_target: list[float],
     risk_factor_prev: list[float],
