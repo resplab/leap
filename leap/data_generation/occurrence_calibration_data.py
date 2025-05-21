@@ -627,14 +627,14 @@ def calibrator(
             (df_reassessment["sex"] == sex)
         ]["ra"].iloc[0]
 
-        if age > MAX_ABX_AGE + 1:
+        if age - 1 > MAX_ABX_AGE:
             # group the all the antibiotic levels into one
             # only two risk levels: family history = {0, 1}
             past_risk_set = past_risk_set.groupby(["fam_history"]).agg(
                 prob=("prob", "sum"),
                 odds_ratio=("odds_ratio", "mean")
             )
-        elif age == MAX_ABX_AGE + 1:
+        elif age - 1 == MAX_ABX_AGE:
 
             past_asthma_prev_risk_factor_params = optimize_prevalence_β_parameters(
                 asthma_prev_target=past_asthma_prev_target,
