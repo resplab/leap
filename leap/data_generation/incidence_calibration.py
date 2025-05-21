@@ -207,30 +207,23 @@ def inc_correction_calculator(
     asthma_inc_target: float,
     asthma_prev_target_past: float,
     odds_ratio_target_past: np.ndarray,
-    odds_ratio_target: np.ndarray,
     risk_factor_prev_past: np.ndarray,
-    risk_set: pd.DataFrame,
-    ra_target: float = 1.0,
-    misDx: float = 0,
-    Dx: float = 1
-) -> Tuple[float, float]:
+    risk_set: pd.DataFrame
+) -> Tuple[float, np.ndarray, np.ndarray]:
     """Calculate the correction for asthma incidence based on risk factors.
 
     Args:
         asthma_inc_target: The target incidence of asthma.
         asthma_prev_target_past: The target prevalence of asthma in the previous year.
         odds_ratio_target_past: A vector of odds ratios for the risk factors in the previous year.
-        odds_ratio_target: A vector of odds ratios for the risk factors.
         risk_factor_prev_past: A vector of the prevalence of the risk factors in the previous year.
         risk_set: A data frame containing the risk factors and their corresponding odds ratios.
-        ra_target: A value between 0 and 1 indicating the target reassessment.
-        misDx: A numeric value representing the misdiagnosis rate.
-        Dx: A numeric value representing the diagnosis rate.
 
     Returns:
-        A tuple containing two entries:
-        * ``mean_diff_log_OR``: mean difference between the target and calibrated log odds ratios.
+        A tuple containing three entries:
         * ``asthma_inc_correction``: the calibrated asthma incidence correction.
+        * ``asthma_inc_calibrated``: the calibrated asthma incidence.
+        * ``asthma_prev_calibrated_past``: the calibrated asthma prevalence for the previous year.
     """
 
     # target asthma incidence from the BC Ministry of Health data model
@@ -276,13 +269,9 @@ def inc_correction_calculator(
         risk_factor_prev=list(risk_factor_prev_past_no_asthma),
         beta0=β_0
     )
-    
-    mean_diff_log_OR = compute_odds_ratio_difference(
-        risk_factor_prev_past, odds_ratio_target_past, asthma_prev_calibrated_past,
-        asthma_inc_calibrated, odds_ratio_target, ra_target, misDx, Dx
-    )
 
-    return mean_diff_log_OR, asthma_inc_correction
+    return asthma_inc_correction, asthma_inc_calibrated, asthma_prev_calibrated_past
+
 
 
 

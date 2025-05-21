@@ -7,7 +7,8 @@ import itertools
 from leap.utils import get_data_path
 from leap.data_generation.prevalence_calibration import prev_calibrator, \
     compute_asthma_prevalence_λ, get_asthma_prevalence_correction
-from leap.data_generation.incidence_calibration import inc_correction_calculator
+from leap.data_generation.incidence_calibration import inc_correction_calculator, \
+    compute_odds_ratio_difference
 from leap.data_generation.antibiotic_data import get_predicted_abx_data, generate_antibiotic_data
 from leap.logger import get_logger
 from typing import Tuple, Dict
@@ -688,13 +689,21 @@ def calibrator(
                 axis=1
             )
 
-    mean_diff_log_OR, asthma_inc_correction = inc_correction_calculator(
+    asthma_inc_correction, asthma_inc_calibrated, asthma_prev_calibrated_past = \
+        inc_correction_calculator(
         asthma_inc_target=risk_set["inc"].iloc[0],
         asthma_prev_target_past=past_asthma_prev_target,
         odds_ratio_target_past=past_risk_set["odds_ratio"],
-        odds_ratio_target=risk_set["odds_ratio"].to_numpy(),
         risk_factor_prev_past=past_risk_set["prob"],
-        risk_set=inc_risk_set,
+        risk_set=inc_risk_set
+    )
+
+    mean_diff_log_OR = compute_odds_ratio_difference(
+        risk_factor_prev_past=past_risk_set["prob"],
+        odds_ratio_target_past=past_risk_set["odds_ratio"],
+        asthma_prev_calibrated_past=asthma_prev_calibrated_past,
+        asthma_inc_calibrated=asthma_inc_calibrated,
+        odds_ratio_target=risk_set["odds_ratio"].to_numpy(),
         ra_target=ra_target,
         misDx=0, # target misdiagnosis
         Dx=1, # target diagnosis
