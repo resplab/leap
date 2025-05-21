@@ -413,11 +413,11 @@ def interpolate_population_data(method: str = "linear"):
     Interpolates the ``birth/initial_pop_distribution_prop.csv`` by months between the years.
     
     Args:
-        method: The interpolation method to use (linear or lowess).
+        method: The interpolation method to use (linear or loess).
     """
     # Check for valid method
-    if method not in ["linear", "lowess"]:
-        raise ValueError(f"method was {method}. Must be one of ['linear', 'lowess']")
+    if method not in ["linear", "loess"]:
+        raise ValueError(f"method was {method}. Must be one of ['linear', 'loess']")
     
     # Load dataset
     logger.info("Loading processed population data from pop distribution CSV file...")
@@ -504,11 +504,11 @@ def interpolate_birth_estimate_data(method: str = "linear"):
     Interpolates the ``birth/birth_estimate.csv`` by months between the years.
     
     Args:
-        method: The interpolation method to use (linear or lowess).
+        method: The interpolation method to use (linear or loess).
     """
     # Check for valid method
-    if method not in ["linear", "lowess"]:
-        raise ValueError(f"method was {method}. Must be one of ['linear', 'lowess']")
+    if method not in ["linear", "loess"]:
+        raise ValueError(f"method was {method}. Must be one of ['linear', 'loess']")
     
     # Load dataset
     logger.info("Loading processed population data from birth estimate CSV file...")
