@@ -389,7 +389,7 @@ def interpolate_emigration_data(method: str = "linear"):
         create=True
     )
     logger.info(f"Saving data to {file_path}")
-    monthly_df.to_csv(file_path, index=False)
+    monthly_df.to_csv(file_path, float_format="%.8g", index=False)
 
 if __name__ == "__main__":
     if GENERATE:

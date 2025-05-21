@@ -497,7 +497,7 @@ def interpolate_population_data(method: str = "linear"):
         create=True
     )
     logger.info(f"Saving data to {file_path}")
-    monthly_df.to_csv(file_path, index=False)
+    monthly_df.to_csv(file_path, float_format="%.8g", index=False)
 
 
 def interpolate_birth_estimate_data(method: str = "linear"):
@@ -582,7 +582,7 @@ def interpolate_birth_estimate_data(method: str = "linear"):
     # Save to CSV
     file_path = get_data_path("processed_data/birth/birth_estimate_monthly.csv", create=True)
     logger.info(f"Saving data to {file_path}")
-    monthly_df.to_csv(file_path, index=False)
+    monthly_df.to_csv(file_path, float_format="%.8g", index=False)
    
 
 if __name__ == "__main__":
