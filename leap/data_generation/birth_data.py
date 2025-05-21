@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 from leap.utils import get_data_path
 from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group
@@ -411,7 +410,7 @@ def generate_initial_population_data():
 
 def interpolate_population_data(method: str = "linear"):
     """
-    Interpolates the ``birth/initial_pop_distribution_prop`` by months between the years.
+    Interpolates the ``birth/initial_pop_distribution_prop.csv`` by months between the years.
     
     Args:
         method: The interpolation method to use (linear or lowess).
@@ -421,7 +420,7 @@ def interpolate_population_data(method: str = "linear"):
         raise ValueError(f"method was {method}. Must be one of ['linear', 'lowess']")
     
     # Load dataset
-    logger.info("Loading processed population data from CSV file...")
+    logger.info("Loading processed population data from pop distribution CSV file...")
     df = pd.read_csv(
         get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
     )
@@ -438,7 +437,7 @@ def interpolate_population_data(method: str = "linear"):
     # Grouping
     group_cols = ["age", "province", "projection_scenario"]
     for group_key, group_df in df.groupby(group_cols):
-        logger.info(f"Interpolating for group {group_key}.")
+        logger.info(f"Interpolating population data for group {group_key}.")
         group_df = group_df.sort_values("year")
         
         for i in range(len(group_df) - 1):
@@ -492,13 +491,97 @@ def interpolate_population_data(method: str = "linear"):
         ["year_month"] + [col for col in monthly_df.columns if col != "year_month"]
     ]
 
-    # TODO
-    # Raw CSV is ~60Mb. Determine best way to compress or reduce.
+    # Save to CSV
+    file_path = get_data_path(
+        "processed_data/birth/initial_pop_distribution_prop_monthly.csv",
+        create=True
+    )
+    logger.info(f"Saving data to {file_path}")
+    monthly_df.to_csv(file_path, index=False)
+
+def interpolate_birth_estimate_data(method: str = "linear"):
+    """
+    Interpolates the ``birth/birth_estimate.csv`` by months between the years.
+    
+    Args:
+        method: The interpolation method to use (linear or lowess).
+    """
+    # Check for valid method
+    if method not in ["linear", "lowess"]:
+        raise ValueError(f"method was {method}. Must be one of ['linear', 'lowess']")
+    
+    # Load dataset
+    logger.info("Loading processed population data from birth estimate CSV file...")
+    df = pd.read_csv(
+        get_data_path("processed_data/birth/birth_estimate.csv")
+    )
+    
+    # Sort values
+    df = df.sort_values(["province", "projection_scenario", "year"])
+
+    # Define columns to interpolate
+    interp_cols = ["N", "prop_male"]
+
+    # Storage for interpolated output
+    all_rows = []
+
+    # Grouping
+    group_cols = ["province", "projection_scenario"]
+    for group_key, group_df in df.groupby(group_cols):
+        logger.info(f"Interpolating birth data for group {group_key}.")
+        group_df = group_df.sort_values("year")
+        
+        for i in range(len(group_df) - 1):
+            row_start = group_df.iloc[i]
+            row_end   = group_df.iloc[i + 1]
+            
+            for m in range(12):  # 12 points between years
+                fraction = m / 12
+                year_interp = row_start["year"] + fraction
+                
+                interpolated_row = {
+                    "year_float": year_interp,
+                    "province": row_start["province"],
+                    "projection_scenario": row_start["projection_scenario"],
+                }
+                for col in interp_cols:
+                    interpolated_row[col] = (
+                        row_start[col] + fraction * (row_end[col] - row_start[col])
+                    )
+                all_rows.append(interpolated_row)
+
+    # Add the final year point for each group
+    for group_key, group_df in df.groupby(group_cols):
+        final_row = group_df.loc[group_df["year"].idxmax()]
+        all_rows.append({
+            "year_float": final_row["year"],
+            "province": final_row["province"],
+            "projection_scenario": final_row["projection_scenario"],
+            "N": final_row["N"],
+            "prop_male": final_row["prop_male"]
+        })
+
+    # Convert to DataFrame and sort
+    monthly_df = pd.DataFrame(all_rows)
+    monthly_df = monthly_df.sort_values(["province", "projection_scenario", "year_float"])
+    
+    # Convert year_float to year-month string like "YYYY-MM"
+    monthly_df["year_month"] = monthly_df["year_float"].apply(
+        lambda y: f"{int(y):04d}-{min(12, round((y - int(y)) * 12) + 1):02d}"
+    )
+    
+    # Drop year_float
+    monthly_df = monthly_df.drop(columns="year_float")
+
+    # Optional: move year_month to the front
+    monthly_df = monthly_df[
+        ["year_month"] + [col for col in monthly_df.columns if col != "year_month"]
+    ]
 
     # Save to CSV
-    # file_path = get_data_path("processed_data/birth/initial_pop_distribution_prop_monthly.csv")
-    # logger.info(f"Saving data to {file_path}")
-    # monthly_df.to_csv(file_path, index=False)
+    file_path = get_data_path("processed_data/birth/birth_estimate_monthly.csv", create=True)
+    logger.info(f"Saving data to {file_path}")
+    monthly_df.to_csv(file_path, index=False)
    
 
 if __name__ == "__main__":
@@ -508,4 +591,5 @@ if __name__ == "__main__":
     
     if INTERPOLATE:
         interpolate_population_data(method="linear")
+        interpolate_birth_estimate_data(method="linear")
         
