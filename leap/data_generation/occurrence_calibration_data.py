@@ -504,7 +504,7 @@ def calibrate_asthma_prevalence(
     age: int,
     model_abx: GLMResultsWrapper,
     df_prevalence: pd.DataFrame
-) -> Dict[str, float]:
+) -> Dict[str, float | list[float]]:
 
     risk_set = risk_factor_generator(year, age, sex, model_abx)
 
@@ -548,7 +548,8 @@ def calibrate_asthma_prevalence(
     return {
         "α": prev_correction,
         "β": asthma_prev_risk_factor_params,
-        "ζ": risk_set["calibrated_prev"].to_list()
+        "ζ_λ": risk_set["calibrated_prev"].to_list(),
+        "ζ": np.dot(risk_set["prob"].to_numpy(), risk_set["calibrated_prev"].to_numpy())
     }
 
 
@@ -668,30 +669,23 @@ def calibrator(
                 odds_ratio=("odds_ratio", "mean")
             )
         elif age - 1 == MAX_ABX_AGE:
-
-            past_asthma_prev_risk_factor_params = optimize_prevalence_β_parameters(
-                asthma_prev_target=past_asthma_prev_target,
-                odds_ratio_target=past_risk_set["odds_ratio"].to_list(),
-                risk_factor_prev=past_risk_set["prob"].to_list()
+            prev_calibration_past = calibrate_asthma_prevalence(
+                year=max(min_year, year - 1),
+                sex=sex,
+                age=age - 1,
+                model_abx=model_abx,
+                df_prevalence=df_prevalence
             )
-
-            past_risk_set["calibrated_prev"] = compute_asthma_prevalence_λ(
-                asthma_prev_risk_factor_params=past_asthma_prev_risk_factor_params,
-                odds_ratio_target=past_risk_set["odds_ratio"].to_list(),
-                risk_factor_prev=past_risk_set["prob"].to_list(),
-                beta0=logit(past_asthma_prev_target)
-            )
-            past_risk_set["yes_asthma"] = past_risk_set.apply(
-                lambda x: x["calibrated_prev"] * x["prob"], axis=1
-            )
-            past_risk_set["no_asthma"] = past_risk_set.apply(
-                lambda x: (1 - x["calibrated_prev"]) * x["prob"], axis=1
+            past_risk_set["asthma_prev_cal_λ"] = prev_calibration_past["ζ_λ"]
+            past_risk_set["asthma_prev_cal"] = prev_calibration_past["ζ"]
+            past_risk_set["no_asthma_prev_cal"] = past_risk_set.apply(
+                lambda x: (1 - x["asthma_prev_cal_λ"]) * x["prob"], axis=1
             )
             odds_ratio_past = (
-                past_risk_set.loc[past_risk_set["fam_history"] == 0, "no_asthma"].sum() *
-                past_risk_set.loc[past_risk_set["fam_history"] == 1, "yes_asthma"].sum() /
-                (past_risk_set.loc[past_risk_set["fam_history"] == 0, "yes_asthma"].sum() *
-                past_risk_set.loc[past_risk_set["fam_history"] == 1, "no_asthma"].sum())
+                past_risk_set.loc[past_risk_set["fam_history"] == 0, "no_asthma_prev_cal"].sum() *
+                past_risk_set.loc[past_risk_set["fam_history"] == 1, "asthma_prev_cal"].sum() /
+                (past_risk_set.loc[past_risk_set["fam_history"] == 0, "asthma_prev_cal"].sum() *
+                past_risk_set.loc[past_risk_set["fam_history"] == 1, "no_asthma_prev_cal"].sum())
             )
             past_risk_set = past_risk_set.groupby(["fam_history"]).agg(
                 prob=("prob", "sum")
