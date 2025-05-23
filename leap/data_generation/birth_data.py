@@ -414,6 +414,16 @@ def interpolate_population_data(method: str = "linear"):
     """
     Interpolates the ``birth/initial_pop_distribution_prop.csv`` by months between the years.
     
+    The target values are:
+        - ``n_age``
+        - ``n_birth``
+        - ``prop``
+        - ``prop_male``
+    Each target value is grouped by:
+        - ``age``
+        - ``province``
+        - ``projection_scenario``
+    
     Args:
         method: The interpolation method to use (linear or loess).
     """
@@ -436,7 +446,7 @@ def interpolate_population_data(method: str = "linear"):
     # Grouping
     group_cols = ["age", "province", "projection_scenario"]
     for group_key, group_df in df.groupby(group_cols):
-        logger.info(f"Interpolating population data for group {group_key}.")
+        logger.info(f"Interpolating population data with {method} for group {group_key}.")
         group_df = group_df.sort_values("year")
         
         # Create monthly x-values for interpolation
@@ -469,7 +479,7 @@ def interpolate_population_data(method: str = "linear"):
                         )
                     all_rows.append(interpolated_row)
 
-            # Add the final year (same as before)
+            # Add the final year (constant values of last year)
             final_row = group_df.loc[group_df["year"].idxmax()]
             all_rows.append({
                 "year_float": final_row["year"],
@@ -478,7 +488,6 @@ def interpolate_population_data(method: str = "linear"):
                 "projection_scenario": final_row["projection_scenario"],
                 **{col: final_row[col] for col in interp_cols}
             })
-
         elif method == "loess":
             for col in interp_cols:
                 smoothed = lowess(
@@ -503,20 +512,6 @@ def interpolate_population_data(method: str = "linear"):
                         r[col] = val
             all_rows.extend(rows)
 
-    # Add the final year point for each group
-    for group_key, group_df in df.groupby(group_cols):
-        final_row = group_df.loc[group_df["year"].idxmax()]
-        all_rows.append({
-            "year_float": final_row["year"],
-            "age": final_row["age"],
-            "province": final_row["province"],
-            "projection_scenario": final_row["projection_scenario"],
-            "n_age": final_row["n_age"],
-            "n_birth": final_row["n_birth"],
-            "prop": final_row["prop"],
-            "prop_male": final_row["prop_male"]
-        })
-
     # Convert to DataFrame and sort
     monthly_df = pd.DataFrame(all_rows)
     monthly_df = monthly_df.sort_values(["province", "projection_scenario", "year_float", "age"])
@@ -529,7 +524,7 @@ def interpolate_population_data(method: str = "linear"):
     # Drop year_float
     monthly_df = monthly_df.drop(columns="year_float")
 
-    # Optional: move year_month to the front
+    # Move year_month to the front
     monthly_df = monthly_df[
         ["year_month"] + [col for col in monthly_df.columns if col != "year_month"]
     ]
@@ -539,13 +534,20 @@ def interpolate_population_data(method: str = "linear"):
         "processed_data/birth/initial_pop_distribution_prop_monthly.csv",
         create=True
     )
-    logger.info(f"Saving data to {file_path}")
+    logger.info(f"Saving {method}-interpolated data to {file_path}")
     monthly_df.to_csv(file_path, float_format="%.8g", index=False)
 
 
 def interpolate_birth_estimate_data(method: str = "linear"):
     """
     Interpolates the ``birth/birth_estimate.csv`` by months between the years.
+    
+    The target values are:
+        - ``N``
+        - ``prop_male``
+    Each target value is grouped by:
+        - ``province``
+        - ``projection_scenario``
     
     Args:
         method: The interpolation method to use (linear or loess).
@@ -559,11 +561,8 @@ def interpolate_birth_estimate_data(method: str = "linear"):
     df = pd.read_csv(
         get_data_path("processed_data/birth/birth_estimate.csv")
     )
-    
-    # Sort values
-    df = df.sort_values(["province", "projection_scenario", "year"])
 
-    # Define columns to interpolate
+    # Define target columns to interpolate
     interp_cols = ["N", "prop_male"]
 
     # Storage for interpolated output
@@ -571,39 +570,70 @@ def interpolate_birth_estimate_data(method: str = "linear"):
 
     # Grouping
     group_cols = ["province", "projection_scenario"]
+    
     for group_key, group_df in df.groupby(group_cols):
-        logger.info(f"Interpolating birth data for group {group_key}.")
+        logger.info(f"Interpolating birth data with {method} for group {group_key}.")
         group_df = group_df.sort_values("year")
         
-        for i in range(len(group_df) - 1):
-            row_start = group_df.iloc[i]
-            row_end   = group_df.iloc[i + 1]
-            
-            for m in range(12):  # 12 points between years
-                fraction = m / 12
-                year_interp = row_start["year"] + fraction
+        # Create monthly x-values for interpolation
+        year_min = group_df["year"].min()
+        year_max = group_df["year"].max()
+        monthly_x = np.linspace(year_min, year_max, int((year_max - year_min) * 12) + 1)
+        
+        if method == "linear":
+            for i in range(len(group_df) - 1):
+                row_start = group_df.iloc[i]
+                row_end = group_df.iloc[i + 1]
                 
-                interpolated_row = {
-                    "year_float": year_interp,
-                    "province": row_start["province"],
-                    "projection_scenario": row_start["projection_scenario"],
-                }
-                for col in interp_cols:
-                    interpolated_row[col] = (
-                        row_start[col] + fraction * (row_end[col] - row_start[col])
-                    )
-                all_rows.append(interpolated_row)
+                # cache constant values within row
+                row_province = row_start["province"]
+                row_scenario = row_start["projection_scenario"]
+                
+                for m in range(12):
+                    fraction = m / 12
+                    year_interp = row_start["year"] + fraction
 
-    # Add the final year point for each group
-    for group_key, group_df in df.groupby(group_cols):
-        final_row = group_df.loc[group_df["year"].idxmax()]
-        all_rows.append({
-            "year_float": final_row["year"],
-            "province": final_row["province"],
-            "projection_scenario": final_row["projection_scenario"],
-            "N": final_row["N"],
-            "prop_male": final_row["prop_male"]
-        })
+                    interpolated_row = {
+                        "year_float": year_interp,
+                        "province": row_province,
+                        "projection_scenario": row_scenario,
+                    }
+                    for col in interp_cols:
+                        interpolated_row[col] = (
+                            row_start[col] + fraction * (row_end[col] - row_start[col])
+                        )
+                    all_rows.append(interpolated_row)
+
+            # Add the final year (same as before)
+            final_row = group_df.loc[group_df["year"].idxmax()]
+            all_rows.append({
+                "year_float": final_row["year"],
+                "province": final_row["province"],
+                "projection_scenario": final_row["projection_scenario"],
+                **{col: final_row[col] for col in interp_cols}
+            })
+        elif method == "loess":
+            for col in interp_cols:
+                smoothed = lowess(
+                    endog=group_df[col],   # y value
+                    exog=group_df["year"], # x value
+                    frac=0.5,              # controls smoothing
+                    return_sorted=True
+                )
+                interp_values = np.interp(monthly_x, smoothed[:, 0], smoothed[:, 1])
+                
+                # Store into temp dict by column
+                if col == interp_cols[0]: # built row once for first column
+                    rows = [{
+                        "year_float": x,
+                        "province": group_key[0],
+                        "projection_scenario": group_key[1],
+                        col: val
+                    } for x, val in zip(monthly_x, interp_values)]
+                else: # reuse row for next columns
+                    for r, val in zip(rows, interp_values):
+                        r[col] = val
+            all_rows.extend(rows)
 
     # Convert to DataFrame and sort
     monthly_df = pd.DataFrame(all_rows)
@@ -617,7 +647,7 @@ def interpolate_birth_estimate_data(method: str = "linear"):
     # Drop year_float
     monthly_df = monthly_df.drop(columns="year_float")
 
-    # Optional: move year_month to the front
+    # Move year_month to the front
     monthly_df = monthly_df[
         ["year_month"] + [col for col in monthly_df.columns if col != "year_month"]
     ]
@@ -634,6 +664,6 @@ if __name__ == "__main__":
         generate_birth_estimate_data()
     
     if INTERPOLATE:
-        interpolate_population_data(method="loess")
-        # interpolate_birth_estimate_data(method="linear")
+        # interpolate_population_data(method="linear")
+        interpolate_birth_estimate_data(method="loess")
         
