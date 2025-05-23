@@ -302,6 +302,7 @@ def generate_migration_data():
     logger.info(f"Saving data to {file_path}")
     df_emigration.to_csv(file_path, index=False)
 
+
 def interpolate_emigration_data(method: str = "linear"):
     """
     Interpolates the ``migration/emigration_table.csv`` by months between the years.
@@ -391,9 +392,101 @@ def interpolate_emigration_data(method: str = "linear"):
     logger.info(f"Saving data to {file_path}")
     monthly_df.to_csv(file_path, float_format="%.8g", index=False)
 
+
+def interpolate_immigration_data(method: str = "linear"):
+    """
+    Interpolates the ``migration/immigration_table.csv`` by months between the years.
+    
+    Args:
+        method: The interpolation method to use (linear or loess).
+    """
+    # Check for valid method
+    if method not in ["linear", "loess"]:
+        raise ValueError(f"method was {method}. Must be one of ['linear', 'loess']")
+    
+    # Load dataset
+    logger.info("Loading processed population data from emigration CSV file...")
+    df = pd.read_csv(
+        get_data_path("processed_data/migration/immigration_table.csv")
+    )
+
+    # Define columns to interpolate
+    interp_cols = ["n_immigrants", "prop_immigrants_birth", "prop_immigrants_year"]
+
+    # Storage for interpolated output
+    all_rows = []
+
+    # Grouping
+    group_cols = ["age", "sex", "province", "projection_scenario"]
+    for group_key, group_df in df.groupby(group_cols):
+        logger.info(f"Interpolating immigration data for group {group_key}.")
+        group_df = group_df.sort_values("year")
+        
+        for i in range(len(group_df) - 1):
+            row_start = group_df.iloc[i]
+            row_end   = group_df.iloc[i + 1]
+            
+            for m in range(12):  # 12 points between years
+                fraction = m / 12
+                year_interp = row_start["year"] + fraction
+                
+                interpolated_row = {
+                    "year_float": year_interp,
+                    "sex": row_start["sex"],
+                    "age": row_start["age"],
+                    "province": row_start["province"],
+                    "projection_scenario": row_start["projection_scenario"],
+                }
+                for col in interp_cols:
+                    interpolated_row[col] = (
+                        row_start[col] + fraction * (row_end[col] - row_start[col])
+                    )
+                all_rows.append(interpolated_row)
+
+    # Add the final year point for each group
+    for group_key, group_df in df.groupby(group_cols):
+        final_row = group_df.loc[group_df["year"].idxmax()]
+        all_rows.append({
+            "year_float": final_row["year"],
+            "sex": final_row["sex"],
+            "age": final_row["age"],
+            "province": final_row["province"],
+            "projection_scenario": final_row["projection_scenario"],
+            "n_immigrants": final_row["n_immigrants"],
+            "prop_immigrants_birth": final_row["prop_immigrants_birth"],
+            "prop_immigrants_year": final_row["prop_immigrants_year"]
+        })
+
+    # Convert to DataFrame and sort
+    monthly_df = pd.DataFrame(all_rows)
+    monthly_df = monthly_df.sort_values(["province", "projection_scenario", "year_float", "age"])
+    
+    # Convert year_float to year-month string like "YYYY-MM"
+    monthly_df["year_month"] = monthly_df["year_float"].apply(
+        lambda y: f"{int(y):04d}-{min(12, round((y - int(y)) * 12) + 1):02d}"
+    )
+    
+    # Drop year_float
+    monthly_df = monthly_df.drop(columns="year_float")
+
+    # Move year_month to the front
+    monthly_df = monthly_df[
+        ["year_month"] + [col for col in monthly_df.columns if col != "year_month"]
+    ]
+
+    # Save to CSV
+    file_path = get_data_path(
+        "processed_data/migration/immigration_table_monthly.csv",
+        create=True
+    )
+    logger.info(f"Saving data to {file_path}")
+    monthly_df.to_csv(file_path, float_format="%.8g", index=False)
+
+
 if __name__ == "__main__":
     if GENERATE:
         generate_migration_data()
         
     if INTERPOLATE:
-        interpolate_emigration_data(method="linear")
+        # interpolate_emigration_data(method="linear")
+        interpolate_immigration_data(method="linear")
