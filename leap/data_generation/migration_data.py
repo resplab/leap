@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from statsmodels.nonparametric.smoothers_lowess import lowess
 from typing import Tuple
 from leap.utils import get_data_path
 from leap.logger import get_logger
@@ -307,6 +308,14 @@ def interpolate_emigration_data(method: str = "linear"):
     """
     Interpolates the ``migration/emigration_table.csv`` by months between the years.
     
+    The target values are:
+        - ``F``
+        - ``M``
+    Each target value is grouped by:
+        - ``age``
+        - ``province``
+        - ``proj_scenario``
+    
     Args:
         method: The interpolation method to use (linear or loess).
     """
@@ -319,9 +328,6 @@ def interpolate_emigration_data(method: str = "linear"):
     df = pd.read_csv(
         get_data_path("processed_data/migration/emigration_table.csv")
     )
-    
-    # Sort values
-    df = df.sort_values(["age", "province", "proj_scenario", "year"])
 
     # Define columns to interpolate
     interp_cols = ["F", "M"]
@@ -331,41 +337,74 @@ def interpolate_emigration_data(method: str = "linear"):
 
     # Grouping
     group_cols = ["age", "province", "proj_scenario"]
+    
     for group_key, group_df in df.groupby(group_cols):
-        logger.info(f"Interpolating emigration data for group {group_key}.")
+        logger.info(f"Interpolating emigration data using {method} for group {group_key}.")
         group_df = group_df.sort_values("year")
         
-        for i in range(len(group_df) - 1):
-            row_start = group_df.iloc[i]
-            row_end   = group_df.iloc[i + 1]
-            
-            for m in range(12):  # 12 points between years
-                fraction = m / 12
-                year_interp = row_start["year"] + fraction
+        # Create monthly x-values for interpolation
+        year_min = group_df["year"].min()
+        year_max = group_df["year"].max()
+        monthly_x = np.linspace(year_min, year_max, int((year_max - year_min) * 12) + 1)
+        
+        if method == "linear":
+            for i in range(len(group_df) - 1):
+                row_start = group_df.iloc[i]
+                row_end = group_df.iloc[i + 1]
                 
-                interpolated_row = {
-                    "year_float": year_interp,
-                    "age": row_start["age"],
-                    "province": row_start["province"],
-                    "proj_scenario": row_start["proj_scenario"],
-                }
-                for col in interp_cols:
-                    interpolated_row[col] = (
-                        row_start[col] + fraction * (row_end[col] - row_start[col])
-                    )
-                all_rows.append(interpolated_row)
+                # cache constant values within row
+                row_age = row_start["age"]
+                row_province = row_start["province"]
+                row_scenario = row_start["proj_scenario"]
+                
+                for m in range(12):
+                    fraction = m / 12
+                    year_interp = row_start["year"] + fraction
 
-    # Add the final year point for each group
-    for group_key, group_df in df.groupby(group_cols):
-        final_row = group_df.loc[group_df["year"].idxmax()]
-        all_rows.append({
-            "year_float": final_row["year"],
-            "age": final_row["age"],
-            "province": final_row["province"],
-            "proj_scenario": final_row["proj_scenario"],
-            "F": final_row["F"],
-            "M": final_row["M"],
-        })
+                    interpolated_row = {
+                        "year_float": year_interp,
+                        "age": row_age,
+                        "province": row_province,
+                        "proj_scenario": row_scenario,
+                    }
+                    for col in interp_cols:
+                        interpolated_row[col] = (
+                            row_start[col] + fraction * (row_end[col] - row_start[col])
+                        )
+                    all_rows.append(interpolated_row)
+
+            # Add the final year (same as before)
+            final_row = group_df.loc[group_df["year"].idxmax()]
+            all_rows.append({
+                "year_float": final_row["year"],
+                "age": final_row["age"],
+                "province": final_row["province"],
+                "proj_scenario": final_row["proj_scenario"],
+                **{col: final_row[col] for col in interp_cols}
+            })
+        elif method == "loess":
+            for col in interp_cols:
+                smoothed = lowess(
+                    endog=group_df[col],   # y value
+                    exog=group_df["year"], # x value
+                    frac=0.5,              # controls smoothing
+                    return_sorted=True
+                )
+                interp_values = np.interp(monthly_x, smoothed[:, 0], smoothed[:, 1])
+                
+                # Store into temp dict by column
+                if col == interp_cols[0]: # built row once for first column
+                    rows = [{
+                        "year_float": x,
+                        "age": group_key[0],
+                        "province": group_key[1],
+                        "proj_scenario": group_key[2],
+                        col: val
+                    } for x, val in zip(monthly_x, interp_values)]
+                else: # reuse row for next columns
+                    for r, val in zip(rows, interp_values):
+                        r[col] = val
+            all_rows.extend(rows)
 
     # Convert to DataFrame and sort
     monthly_df = pd.DataFrame(all_rows)
@@ -488,5 +527,5 @@ if __name__ == "__main__":
         generate_migration_data()
         
     if INTERPOLATE:
-        # interpolate_emigration_data(method="linear")
-        interpolate_immigration_data(method="linear")
+        interpolate_emigration_data(method="loess")
+        # interpolate_immigration_data(method="linear")
