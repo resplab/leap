@@ -903,7 +903,9 @@ def beta_params_age_optimizer(
     stabilization_year: int = STABILIZATION_YEAR,
     max_age: int = MAX_AGE,
     min_year: int = MIN_YEAR,
-    β_risk_factors_age: list[float] = [β_RISK_FACTORS["fam_history"][1], β_RISK_FACTORS["abx"][1]]
+    β_risk_factors_age: list[float] = [
+        β_RISK_FACTORS["fam_history"]["β_fhx_age"], β_RISK_FACTORS["abx"]["β_abx_age"]
+    ]
 ) -> None:
     """Optimize the risk factor beta parameters for the age terms.
 
