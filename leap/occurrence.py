@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Dict
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.agent import Agent
+    from leap.utils import Sex
 
 logger = get_logger(__name__)
 
@@ -146,7 +147,7 @@ class Occurrence:
         return p
 
     @abc.abstractmethod
-    def crude_occurrence(self, sex, age: int, year: int) -> float:
+    def crude_occurrence(self, sex: Sex, age: int, year: int) -> float:
         return
 
     def log_OR_family_history(self, age: int) -> float:
@@ -292,15 +293,20 @@ class Incidence(Occurrence):
         grouped_df = super().load_occurrence_correction_table(occurrence_type="inc")
         return grouped_df
 
-    def crude_occurrence(self, sex, age: int, year: int) -> float:
+    def crude_occurrence(
+        self,
+        sex: Sex,
+        age: int,
+        year: int
+    ) -> float:
         poly_age = self.poly_age_calculator(age)
         return np.exp(
             self.parameters["β0"] +
-            self.parameters["βsex"] * sex +
+            self.parameters["βsex"] * int(sex) +
             self.parameters["βyear"] * year +
-            self.parameters["βsexyear"] * sex * year +
+            self.parameters["βsexyear"] * int(sex) * year +
             np.dot(self.parameters["βage"], poly_age) +
-            np.dot(self.parameters["βsexage"], poly_age) * sex
+            np.dot(self.parameters["βsexage"], poly_age) * int(sex)
         )
 
 
@@ -426,19 +432,24 @@ class Prevalence(Occurrence):
         grouped_df = super().load_occurrence_correction_table(occurrence_type="prev")
         return grouped_df
 
-    def crude_occurrence(self, sex: bool, age: int, year: int) -> float:
+    def crude_occurrence(
+        self,
+        sex: Sex,
+        age: int,
+        year: int
+    ) -> float:
         poly_year = self.poly_year_calculator(year)
         poly_age = self.poly_age_calculator(age)
         poly_yearage = np.outer(poly_year, poly_age).flatten()
         return np.exp(
             self.parameters["β0"] +
-            self.parameters["βsex"] * sex +
+            self.parameters["βsex"] * int(sex) +
             np.dot(self.parameters["βyear"], poly_year) +
             np.dot(self.parameters["βage"], poly_age) +
-            np.dot(self.parameters["βsexyear"], poly_year) * sex +
-            np.dot(self.parameters["βsexage"], poly_age) * sex +
+            np.dot(self.parameters["βsexyear"], poly_year) * int(sex) +
+            np.dot(self.parameters["βsexage"], poly_age) * int(sex) +
             np.dot(self.parameters["βyearage"], poly_yearage) +
-            np.dot(self.parameters["βsexyearage"], poly_yearage) * sex
+            np.dot(self.parameters["βsexyearage"], poly_yearage) * int(sex)
         )
 
 
