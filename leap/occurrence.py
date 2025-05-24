@@ -61,12 +61,12 @@ class Occurrence:
         
         Each dataframe contains the following columns:
 
-        * ``year``: integer year.
-        * ``sex``: 0 = female, 1 = male.
-        * ``age``: integer age.
-        * ``correction``: float, TODO.
+        * ``year (int)``: integer year.
+        * ``sex (str)``: ``F`` = female, ``M`` = male.
+        * ``age (int)``: integer age.
+        * ``correction (float)``: The correction term for the occurrence equation.
 
-        See ``master_occurrence_correction.csv``.
+        See ``asthma_occurrence_correction.csv``.
         """
         return self._correction_table
     
@@ -107,10 +107,10 @@ class Occurrence:
         Returns:
             Dataframe grouped by year, age, and sex. Each dataframe contains the following columns:
 
-            * ``year``: integer year.
-            * ``sex``: ``"F"`` = female, ``"M"`` = male.
-            * ``age``: integer age.
-            * ``correction``: float, TODO.
+            * ``year (int)``: integer year.
+            * ``sex (str)``: ``"F"`` = female, ``"M"`` = male.
+            * ``age (int)``: integer age.
+            * ``correction (float)``: The correction term for the occurrence equation.
 
         """
         df = pd.read_csv(
@@ -122,15 +122,16 @@ class Occurrence:
         return grouped_df
 
     def equation(
-        self, sex: int, age: int, year: int, has_family_history: bool, dose: int
+        self, sex: Sex, age: int, year: int, has_family_history: bool, dose: int
     ) -> float:
         """Compute the asthma occurrence equation.
 
         Args:
-            sex: 0 = female, 1 = male.
+            sex: The sex of the agent.
             age: The age of the agent.
             year: The calendar year.
-            has_family_history: Whether the agent has a family history of asthma.
+            has_family_history: ``True`` if one or more parents of the agent has asthma,
+                otherwise ``False``.
             dose: The number of courses of antibiotics taken during the first year of life.
         """
         correction_year = min(year, self.max_year)
@@ -515,7 +516,7 @@ def agent_has_asthma(
         has_asthma = False
     elif age == 3:
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
-            sex=int(agent.sex), age=age, year=year, has_family_history=agent.has_family_history,
+            sex=agent.sex, age=age, year=year, has_family_history=agent.has_family_history,
             dose=agent.num_antibiotic_use
         ))) # type: ignore
     elif age > 3 and occurrence_type == "inc":
@@ -523,12 +524,12 @@ def agent_has_asthma(
             np.random.binomial(
                 n=1,
                 p=incidence.equation(
-                    int(agent.sex), age, year, agent.has_family_history, agent.num_antibiotic_use
+                    agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
                 )
             ) # type: ignore
         ) 
     elif age > 3 and occurrence_type == "prev":
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
-            int(agent.sex), age, year, agent.has_family_history, agent.num_antibiotic_use
+            agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
         ))) # type: ignore
     return has_asthma
