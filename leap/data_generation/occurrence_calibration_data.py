@@ -11,7 +11,7 @@ from leap.data_generation.incidence_calibration import inc_correction_calculator
     compute_odds_ratio_difference
 from leap.data_generation.antibiotic_data import get_predicted_abx_data, generate_antibiotic_data
 from leap.logger import get_logger
-from typing import Tuple, Dict
+from typing import Tuple, Dict, TypedDict, Literal
 from scipy.stats import nbinom
 from scipy.special import logit
 
@@ -553,6 +553,172 @@ def calibrate_asthma_prevalence(
     }
 
 
+CalibrationResults = TypedDict(
+    "CalibrationResults", 
+    {
+        "α": float,
+        "ζ_λ": list[float] | np.ndarray,
+        "ζ_prev_λ": list[float] | np.ndarray,
+        "risk_sets": Dict[Literal["inc", "past_prev"], pd.DataFrame]
+    }
+)
+
+
+def calibrate_asthma_incidence(
+    year: int,
+    sex: str,
+    age: int,
+    model_abx: GLMResultsWrapper,
+    df_incidence: pd.DataFrame,
+    df_prevalence: pd.DataFrame,
+    β_risk_factors: Dict[str, Dict[str, float]] = β_RISK_FACTORS,
+    min_year: int = MIN_YEAR
+) -> CalibrationResults:
+    """Calibrate the asthma incidence for the given year, age, and sex.
+
+    Args:
+        year: The integer year.
+        age: The age in years.
+        sex: One of ``M`` = male, ``F`` = female.
+        model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
+        df_incidence: A dataframe with the incidence of asthma, with the following columns:
+            * ``year (int)``: the year
+            * ``age (int)``: the age in years
+            * ``sex (str)``: ``M`` = male, ``F`` = female
+            * ``incidence (float)``: the incidence of asthma for the given year, age, and sex.
+        df_prevalence: A dataframe with the prevalence of asthma, with the following columns:
+            * ``year (int)``: the year
+            * ``age (int)``: the age in years
+            * ``sex (str)``: ``M`` = male, ``F`` = female
+            * ``prevalence (float)``: the prevalence of asthma for the given year, age, and sex.
+        β_risk_factors: A dictionary of beta parameters for the risk factor equations:
+            * ``fam_history``: A dictionary with the beta parameters for the family history
+              odds ratio calculation. Must contain the keys ``β_fhx_0`` and ``β_fhx_age``.
+            * ``abx``: A dictionary with the beta parameters for the antibiotic exposure
+              odds ratio calculation. Must contain the keys ``β_abx_0``, ``β_abx_age``,
+              and ``β_abx_dose``.
+        min_year: The minimum year to consider for the calibration.
+
+    Returns:
+        A dictionary with the following keys:
+
+            * ``α``: The incidence correction factor.
+            * ``ζ_λ``: A vector of the calibrated asthma incidence for each risk factor
+              combination ``λ`` for the current year.
+            * ``ζ_prev_λ``: A vector of the calibrated asthma prevalence for each risk factor
+              combination ``λ`` for the previous year.
+            * ``risk_sets``: A dictionary with two keys:
+                * ``inc``: A dataframe with the incidence risk factors and their probabilities.
+                * ``past_prev``: A dataframe with the risk factors and their probabilities and
+                  odds ratios for the previous year.
+    """
+
+    risk_set = risk_factor_generator(year, age, sex, model_abx)
+
+    if age > MAX_ABX_AGE:
+        # group the all the antibiotic levels into one
+        # only two risk levels: family history = {0, 1}
+        risk_set = risk_set.groupby(["fam_history", "year", "sex", "age"]).agg(
+            prob=("prob", "sum"),
+            odds_ratio=("odds_ratio", "mean")
+        ).reset_index()
+
+    # target asthma incidence for current year and age from BC Ministry of Health data
+    risk_set["inc"] = [df_incidence.loc[
+        (df_incidence["age"] == age) &
+        (df_incidence["year"] == year) &
+        (df_incidence["sex"] == sex)
+    ]["incidence"].iloc[0]] * risk_set.shape[0]
+
+    # target asthma prevalence for the previous year and age from BC Ministry of Health data
+    past_asthma_prev_target = df_prevalence.loc[
+        (df_prevalence["age"] == age - 1) &
+        (df_prevalence["year"] == max(min_year, year - 1)) &
+        (df_prevalence["sex"] == sex) 
+    ]["prevalence"].iloc[0]
+
+    past_risk_set = risk_factor_generator(
+        year=max(min_year, year - 1),
+        sex=sex,
+        age=age - 1,
+        model_abx=model_abx
+    )
+
+    if age - 1 > MAX_ABX_AGE:
+        # group the all the antibiotic levels into one
+        # only two risk levels: family history = {0, 1}
+        past_risk_set = past_risk_set.groupby(["fam_history"]).agg(
+            prob=("prob", "sum"),
+            odds_ratio=("odds_ratio", "mean")
+        )
+    elif age - 1 == MAX_ABX_AGE:
+        prev_calibration_past = calibrate_asthma_prevalence(
+            year=max(min_year, year - 1),
+            sex=sex,
+            age=age - 1,
+            model_abx=model_abx,
+            df_prevalence=df_prevalence
+        )
+        past_risk_set["asthma_prev_cal_λ"] = prev_calibration_past["ζ_λ"]
+        past_risk_set["asthma_prev_cal"] = prev_calibration_past["ζ"]
+        past_risk_set["no_asthma_prev_cal"] = past_risk_set.apply(
+            lambda x: (1 - x["asthma_prev_cal_λ"]) * x["prob"], axis=1
+        )
+        odds_ratio_past = (
+            past_risk_set.loc[past_risk_set["fam_history"] == 0, "no_asthma_prev_cal"].sum() *
+            past_risk_set.loc[past_risk_set["fam_history"] == 1, "asthma_prev_cal"].sum() /
+            (past_risk_set.loc[past_risk_set["fam_history"] == 0, "asthma_prev_cal"].sum() *
+            past_risk_set.loc[past_risk_set["fam_history"] == 1, "no_asthma_prev_cal"].sum())
+        )
+        past_risk_set = past_risk_set.groupby(["fam_history"]).agg(
+            prob=("prob", "sum")
+        ).reset_index()
+        past_risk_set["odds_ratio"] = [1, odds_ratio_past]
+
+
+    inc_risk_set = risk_factor_generator(year, age, sex, model_abx)
+
+    if age > MAX_ABX_AGE:
+        # select only antibiotic dose = 0
+        inc_risk_set = inc_risk_set.loc[inc_risk_set["n_abx"] == 0]
+
+
+    inc_risk_set["odds_ratio"] = inc_risk_set.apply(
+        lambda x: calculate_odds_ratio_risk_factors(
+            fam_hist=x["fam_history"],
+            age=x["age"],
+            dose=x["n_abx"],
+            β_risk_factors=β_risk_factors
+        ),
+        axis=1
+    )
+    
+    if age <= MAX_ABX_AGE:
+        inc_risk_set["prob"] = inc_risk_set.apply(
+            lambda x: x["prob"] / inc_risk_set["prob"].sum(),
+            axis=1
+        )
+
+    asthma_inc_correction, asthma_inc_calibrated, asthma_prev_calibrated_past = \
+        inc_correction_calculator(
+        asthma_inc_target=risk_set["inc"].iloc[0],
+        asthma_prev_target_past=past_asthma_prev_target,
+        odds_ratio_target_past=past_risk_set["odds_ratio"],
+        risk_factor_prev_past=past_risk_set["prob"],
+        risk_set=inc_risk_set
+    )
+
+    return {
+        "α": asthma_inc_correction,
+        "ζ_λ": asthma_inc_calibrated,
+        "ζ_prev_λ": asthma_prev_calibrated_past,
+        "risk_sets": {
+            "inc": inc_risk_set,
+            "past_prev": past_risk_set
+        }
+    }
+
+
 def calibrator(
     year: int,
     sex: str,
@@ -624,99 +790,16 @@ def calibrator(
         return df
 
     else:
-        risk_set = risk_factor_generator(year, age, sex, model_abx)
 
-        if age > MAX_ABX_AGE:
-            # group the all the antibiotic levels into one
-            # only two risk levels: family history = {0, 1}
-            risk_set = risk_set.groupby(["fam_history", "year", "sex", "age"]).agg(
-                prob=("prob", "sum"),
-                odds_ratio=("odds_ratio", "mean")
-            ).reset_index()
-
-        # target asthma incidence for current year and age from BC Ministry of Health data
-        risk_set["inc"] = [df_incidence.loc[
-            (df_incidence["age"] == age) &
-            (df_incidence["year"] == year) &
-            (df_incidence["sex"] == sex)
-        ]["incidence"].iloc[0]] * risk_set.shape[0]
-
-        # target asthma prevalence for the previous year and age from BC Ministry of Health data
-        past_asthma_prev_target = df_prevalence.loc[
-            (df_prevalence["age"] == age - 1) &
-            (df_prevalence["year"] == max(min_year, year - 1)) &
-            (df_prevalence["sex"] == sex) 
-        ]["prevalence"].iloc[0]
-
-        past_risk_set = risk_factor_generator(
-            year=max(min_year, year - 1),
-            sex=sex,
-            age=age - 1,
-            model_abx=model_abx
-        )
-
-        if age - 1 > MAX_ABX_AGE:
-            # group the all the antibiotic levels into one
-            # only two risk levels: family history = {0, 1}
-            past_risk_set = past_risk_set.groupby(["fam_history"]).agg(
-                prob=("prob", "sum"),
-                odds_ratio=("odds_ratio", "mean")
-            )
-        elif age - 1 == MAX_ABX_AGE:
-            prev_calibration_past = calibrate_asthma_prevalence(
-                year=max(min_year, year - 1),
-                sex=sex,
-                age=age - 1,
-                model_abx=model_abx,
-                df_prevalence=df_prevalence
-            )
-            past_risk_set["asthma_prev_cal_λ"] = prev_calibration_past["ζ_λ"]
-            past_risk_set["asthma_prev_cal"] = prev_calibration_past["ζ"]
-            past_risk_set["no_asthma_prev_cal"] = past_risk_set.apply(
-                lambda x: (1 - x["asthma_prev_cal_λ"]) * x["prob"], axis=1
-            )
-            odds_ratio_past = (
-                past_risk_set.loc[past_risk_set["fam_history"] == 0, "no_asthma_prev_cal"].sum() *
-                past_risk_set.loc[past_risk_set["fam_history"] == 1, "asthma_prev_cal"].sum() /
-                (past_risk_set.loc[past_risk_set["fam_history"] == 0, "asthma_prev_cal"].sum() *
-                past_risk_set.loc[past_risk_set["fam_history"] == 1, "no_asthma_prev_cal"].sum())
-            )
-            past_risk_set = past_risk_set.groupby(["fam_history"]).agg(
-                prob=("prob", "sum")
-            ).reset_index()
-            past_risk_set["odds_ratio"] = [1, odds_ratio_past]
-
-
-        inc_risk_set = risk_factor_generator(year, age, sex, model_abx)
-
-        if age > MAX_ABX_AGE:
-            # select only antibiotic dose = 0
-            inc_risk_set = inc_risk_set.loc[inc_risk_set["n_abx"] == 0]
-
-
-        inc_risk_set["odds_ratio"] = inc_risk_set.apply(
-            lambda x: calculate_odds_ratio_risk_factors(
-                fam_hist=x["fam_history"],
-                age=x["age"],
-                dose=x["n_abx"],
-                β_risk_factors=β_risk_factors
-            ),
-            axis=1
-        )
-        
-        if age <= MAX_ABX_AGE:
-            inc_risk_set["prob"] = inc_risk_set.apply(
-                lambda x: x["prob"] / inc_risk_set["prob"].sum(),
-                axis=1
-            )
-
-        asthma_inc_correction, asthma_inc_calibrated, asthma_prev_calibrated_past = \
-            inc_correction_calculator(
-            asthma_inc_target=risk_set["inc"].iloc[0],
-            asthma_prev_target_past=past_asthma_prev_target,
-            odds_ratio_target_past=past_risk_set["odds_ratio"],
-            risk_factor_prev_past=past_risk_set["prob"],
-            risk_set=inc_risk_set
+        inc_calibration = calibrate_asthma_incidence(
+            year,
+            sex,
+            age,
+            model_abx,
+            df_incidence,
+            df_prevalence,
+            β_risk_factors,
+            min_year
         )
 
         ra_target = df_reassessment.loc[
@@ -726,17 +809,17 @@ def calibrator(
         ]["ra"].iloc[0]
 
         mean_diff_log_OR = compute_odds_ratio_difference(
-            risk_factor_prev_past=past_risk_set["prob"],
-            odds_ratio_target_past=past_risk_set["odds_ratio"],
-            asthma_prev_calibrated_past=asthma_prev_calibrated_past,
-            asthma_inc_calibrated=asthma_inc_calibrated,
-            odds_ratio_target=risk_set["odds_ratio"].to_numpy(),
+            risk_factor_prev_past=inc_calibration["risk_sets"]["past_prev"]["prob"].to_numpy(),
+            odds_ratio_target_past=inc_calibration["risk_sets"]["past_prev"]["odds_ratio"].to_numpy(),
+            asthma_prev_calibrated_past=inc_calibration["ζ_prev_λ"],
+            asthma_inc_calibrated=inc_calibration["ζ_λ"],
+            odds_ratio_target=inc_calibration["risk_sets"]["inc"]["odds_ratio"].to_numpy(),
             ra_target=ra_target,
             misDx=0, # target misdiagnosis
             Dx=1, # target diagnosis
         )
 
-        df["inc_correction"] = asthma_inc_correction
+        df["inc_correction"] = inc_calibration["α"]
         df["mean_diff_log_OR"] = mean_diff_log_OR
     return df
 
