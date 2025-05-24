@@ -624,6 +624,17 @@ def calibrate_asthma_incidence(
                   odds ratios for the previous year.
     """
 
+    if year < BASELINE_YEAR or age == MIN_ASTHMA_AGE:
+        return {
+            "α": np.nan,
+            "ζ_λ": [],
+            "ζ_prev_λ": [],
+            "risk_sets": {
+                "inc": pd.DataFrame(),
+                "past_prev": pd.DataFrame()
+            }
+        }
+
     risk_set = risk_factor_generator(year, age, sex, model_abx)
 
     if age > MAX_ABX_AGE:
@@ -1003,19 +1014,37 @@ def generate_occurrence_calibration_data(
         )),
         columns=["year", "sex", "age"]
     )
-    
-    df_correction = df_correction.apply(
-        lambda x: calibrator(
+
+    df_correction["prev_correction"] = df_correction.apply(
+        lambda x: calibrate_asthma_prevalence(
+            year=x["year"],
+            sex=x["sex"],
+            age=x["age"],
+            model_abx=model_abx,
+            df_prevalence=df_prevalence,
+        )["α"], axis=1
+    ).reset_index(drop=True)
+
+    df_correction["inc_correction"] = df_correction.apply(
+        lambda x: calibrate_asthma_incidence(
             year=x["year"],
             sex=x["sex"],
             age=x["age"],
             model_abx=model_abx,
             df_incidence=df_incidence,
             df_prevalence=df_prevalence,
-            df_reassessment=df_reassessment,
-            β_risk_factors=β_risk_factors
-        ), axis=1
+            β_risk_factors=β_risk_factors,
+            min_year=min_year
+        )["α"], axis=1
     ).reset_index(drop=True)
+
+    df_correction["inc_correction"] = df_correction.apply(
+        lambda x: x["prev_correction"] 
+            if x["year"] >= BASELINE_YEAR and x["age"] == MIN_ASTHMA_AGE 
+            else x["inc_correction"],
+        axis=1
+    ).reset_index(drop=True)
+
     df_correction.sort_values(by=["sex", "age", "year"])
 
     df_correction_prevalence = df_correction[["year", "sex", "age", "prev_correction"]].copy()
