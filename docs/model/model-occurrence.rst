@@ -452,3 +452,77 @@ The beta coefficients were found to be:
 So, the only unknown term in our formula is the correction term :math:`\alpha`. To solve this,
 we separate the formulae for incidence and prevalence. We will begin with prevalence.
 
+Solving for the Correction Term: Prevalence
+--------------------------------------------
+
+.. math::
+
+  \zeta_{\text{prev}} &= \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda} \\
+  &= \sum_{\lambda=0}^{n} p(\lambda) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha) 
+
+
+We want to find a correction term :math:`\alpha` such that the predicted asthma prevalence
+:math:`\zeta` is as close as possible to the predicted asthma prevalence :math:`\eta`. To do this,
+we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the absolute
+difference between :math:`\zeta` and :math:`\eta`.
+
+
+Solving for the Correction Term: Incidence
+--------------------------------------------
+
+In our model, asthma incidence is defined as the number of new diagnoses between the previous year
+and the current year, divided by the total population. To calibrate the incidence, we first
+find the calibrated prevalence for the previous year:
+
+.. math::
+
+  \zeta_{\text{prev}}(t-1) &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \zeta_{\text{prev}, \lambda}(t-1) \\
+  &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
+
+Now, what we want to find is the joint probability of each risk factor combination,
+:math:`p(\lambda, A = 0 | t-1)`, for the population without asthma.
+
+.. math::
+
+  P(\lambda, A = 0) = P(A = 0 | \lambda) \cdot P(\lambda)
+
+Now, we must have:
+
+.. math::
+
+  P(A = 0 | \lambda) = 1 - P(A = 1 | \lambda) = 1 - \zeta_{\text{prev}, \lambda}(t-1)
+
+So, we can rewrite the joint probability as:
+
+.. math::
+
+  p(\lambda, A = 0 | t-1) = (1 - \zeta_{\text{prev}, \lambda}(t-1)) \cdot p(\lambda, t-1)
+
+
+Next, we find the calibrated asthma incidence for the current year:
+
+.. math::
+
+  \zeta_{\text{inc}}(t) &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 | t-1) \zeta_{\text{inc}, \lambda}(t) \\
+  &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 | t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
+
+
+where we recall that:
+
+* :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)}(t))` is determined by the output of the first model
+* :math:`\eta^{(i)}(t)`, defined above, is the predicted incidence from the first model
+* :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda, A = 0 | t-1) \cdot \beta_{\lambda}` is the
+  correction / calibration term for the incidence
+* :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda, A = 0 | t-1) \zeta_{\lambda}^{(i)}` is the
+  predicted asthma incidence for the model. We want this to be as close as possible to
+  :math:`\eta^{(i)}`
+* :math:`\zeta_{\lambda}^{(i)}` is the predicted asthma incidence from the model for the
+  risk factor combination indexed by :math:`\lambda`
+* :math:`p(\lambda, A = 0 | t-1)` is the joint probability of the risk factor combination
+  indexed by :math:`\lambda`, for a person who did not have asthma at time :math:`t-1`
+
+
+We again want to find a correction term :math:`\alpha` such that the predicted asthma incidence
+:math:`\zeta` is as close as possible to the asthma incidence from the first model, :math:`\eta`.
+To do this, we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the
+absolute difference between :math:`\zeta` and :math:`\eta`.
