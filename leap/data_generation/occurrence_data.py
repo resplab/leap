@@ -195,7 +195,7 @@ def generate_incidence_model(
 
 def generate_prevalence_model(
     df_asthma: pd.DataFrame, maxiter: int = 1000
-) -> GLMResultsWrapper:
+) -> Tuple[GLMResultsWrapper, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Generate a ``GLM`` model for asthma prevalence.
     
     Args:
@@ -211,7 +211,12 @@ def generate_prevalence_model(
         maxiter: The maximum number of iterations to perform while fitting the model.
     
     Returns:
-        The fitted ``GLM`` model.
+        A tuple containing:
+        1. The fitted ``GLM`` model.
+        2. The alpha parameters for the age polynomial.
+        3. The norm2 parameters for the age polynomial.
+        4. The alpha parameters for the year polynomial.
+        5. The norm2 parameters for the year polynomial.
     """
 
     _, alpha_age, norm2_age = poly(df_asthma["age"].to_list(), degree=5, orthogonal=True)
@@ -222,7 +227,7 @@ def generate_prevalence_model(
     results = generate_occurrence_model(
         df_asthma, formula=formula, occ_type="prevalence", maxiter=maxiter
     )
-    return results
+    return results, alpha_age, norm2_age, alpha_year, norm2_year
 
 def get_predicted_data(
     model: GLMResultsWrapper,
@@ -385,7 +390,7 @@ def generate_occurrence_data():
     """
     df_asthma = load_asthma_df()
     incidence_model = generate_incidence_model(df_asthma)
-    prevalence_model = generate_prevalence_model(df_asthma)
+    prevalence_model, alpha_age, norm2_age, alpha_year, norm2_year = generate_prevalence_model(df_asthma)
     df_incidence = get_predicted_data(
         incidence_model, "incidence", max_age=110, max_year=2065
     )
@@ -445,8 +450,20 @@ def generate_occurrence_data():
         config["prevalence"]["parameters"]
     )
 
+    config["prevalence"]["poly_parameters"] = {
+        "alpha_age": list(alpha_age),
+        "norm2_age": list(norm2_age),
+        "alpha_year": list(alpha_year),
+        "norm2_year": list(norm2_year)
+    }
+    config["incidence"]["poly_parameters"] = {
+        "alpha_age": list(alpha_age),
+        "norm2_age": list(norm2_age)
+    }
+
     with open(get_data_path("processed_data/config.json"), "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4, ensure_ascii=False)
+
 
 if __name__ == "__main__":
     generate_occurrence_data()
