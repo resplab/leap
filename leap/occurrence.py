@@ -105,13 +105,13 @@ class Occurrence:
             Dataframe grouped by year, age, and sex. Each dataframe contains the following columns:
 
             * ``year``: integer year.
-            * ``sex``: 0 = female, 1 = male.
+            * ``sex``: ``"F"`` = female, ``"M"`` = male.
             * ``age``: integer age.
             * ``correction``: float, TODO.
 
         """
         df = pd.read_csv(
-            get_data_path("processed_data/master_asthma_occurrence_correction.csv")
+            get_data_path("processed_data/asthma_occurrence_correction.csv")
         )
         df = df[df["type"] == occurrence_type]
         df.drop(columns=["type"], inplace=True)
@@ -128,7 +128,7 @@ class Occurrence:
             age: The age of the agent.
             year: The calendar year.
             has_family_history: Whether the agent has a family history of asthma.
-            dose: TODO.
+            dose: The number of courses of antibiotics taken during the first year of life.
         """
         correction_year = min(year, self.max_year)
         year = min(year, self.max_year)
