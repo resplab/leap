@@ -2,12 +2,13 @@ import pathlib
 import pandas as pd
 import numpy as np
 import itertools
+import json
 import plotly.express as px
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from leap.utils import get_data_path, poly
 from leap.logger import get_logger
-from typing import Tuple
+from typing import Tuple, Dict, Any
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 
 pd.options.mode.copy_on_write = True
@@ -340,6 +341,34 @@ def plot_occurrence(
     else:
         fig.write_image(str(file_path), width=width, height=height, scale=2)
 
+def add_beta_parameters(
+    model: GLMResultsWrapper, parameter_map: Dict[str, list[int]], config: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Add the beta parameters to the config dictionary.
+    
+    Args:
+        model: The fitted GLM model.
+        parameter_map: A dictionary mapping the parameter names to their indices in the model
+            parameters field, ``model.params``. The keys are the parameter names and the
+            values are lists of indices. For example, if ``βyear`` is the second parameter in the
+            list, then the mapping would be ``{"βyear": [1]}``, and it would be accessed by
+            ``model.params.iloc[1]``.
+        config: The config dictionary to add the parameters to.
+        
+    Returns:
+        The config dictionary with the beta parameters added.
+    """
+    beta_parameters = {}
+    for name, indices in parameter_map.items():
+        beta_parameters[name] = model.params.iloc[indices].to_list()
+        if len(beta_parameters[name]) == 1:
+            beta_parameters[name] = beta_parameters[name][0]
+
+    # add the beta parameters to the config dictionary
+    for key, value in beta_parameters.items():
+        config[key] = value
+    return config
+
 
 def generate_occurrence_data():
     """Generate the asthma incidence and prevalence data.
@@ -386,6 +415,38 @@ def generate_occurrence_data():
     )
     df.to_csv(get_data_path("processed_data/asthma_occurrence_predictions.csv"), index=False)
 
+
+    with open(get_data_path("processed_data/config.json"), "r") as f:
+        config = json.load(f)
+
+    config["incidence"]["parameters"] = add_beta_parameters(
+        incidence_model,
+        {
+            "β0": [0],
+            "βsex": [1],
+            "βyear": [2],
+            "βsexyear": [3],
+            "βage": list(range(4, 9)),
+            "βsexage": list(range(9, 14))
+        },
+        config["incidence"]["parameters"]
+    )
+    config["prevalence"]["parameters"] = add_beta_parameters(
+        prevalence_model, {
+            "β0": [0],
+            "βsex": [1],
+            "βyear": [2, 3],
+            "βsexyear": [4, 5],
+            "βage": list(range(6, 11)),
+            "βsexage": list(range(11, 16)),
+            "βyearage": list(range(16, 26)),
+            "βsexyearage": list(range(26, 36))
+        },
+        config["prevalence"]["parameters"]
+    )
+
+    with open(get_data_path("processed_data/config.json"), "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=4, ensure_ascii=False)
 
 if __name__ == "__main__":
     generate_occurrence_data()
