@@ -516,6 +516,27 @@ def calibrate_asthma_prevalence(
     model_abx: GLMResultsWrapper,
     df_prevalence: pd.DataFrame
 ) -> ResultsPrevalence:
+    """Calibrate the asthma prevalence for the given year, age, and sex.
+    
+    Args:
+        year: The integer year.
+        sex: One of ``M`` = male, ``F`` = female.
+        age: The age in years.
+        model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
+        df_prevalence: A dataframe with the prevalence of asthma, with the following columns:
+            * ``year (int)``: the year
+            * ``age (int)``: the age in years
+            * ``sex (str)``: ``M`` = male, ``F`` = female
+            * ``prevalence (float)``: the prevalence of asthma for the given year, age, and sex
+
+    Returns:
+        A dictionary with the following keys:
+            * ``α (float)``: The prevalence correction factor.
+            * ``β (list[float])``: A vector of the beta parameters for the risk factors.
+            * ``ζ_λ (list[float])``: A vector of the calibrated asthma prevalence for each risk
+              factor combination ``λ`` for the current year.
+            * ``ζ (float)``: The calibrated asthma prevalence for the current year.
+    """
 
     risk_set = risk_factor_generator(year, age, sex, model_abx)
 
@@ -756,9 +777,21 @@ def compute_mean_diff_log_OR(
     Args:
         β_risk_factors_age: A list of two beta parameters, ``β_fhx_age`` and ``β_abx_age``.
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
-        df_incidence: A dataframe with the incidence of asthma.
-        df_prevalence: A dataframe with the prevalence of asthma.
-        df_reassessment: A dataframe with the reassessment of asthma.
+        df_incidence: A dataframe with the incidence of asthma, with the following columns:
+            * ``year (int)``: the year
+            * ``age (int)``: the age in years
+            * ``sex (str)``: ``M`` = male, ``F`` = female
+            * ``incidence (float)``: the incidence of asthma for the given year, age, and sex.
+        df_prevalence: A dataframe with the prevalence of asthma, with the following columns:
+            * ``year (int)``: the year
+            * ``age (int)``: the age in years
+            * ``sex (str)``: ``M`` = male, ``F`` = female
+            * ``prevalence (float)``: the prevalence of asthma for the given year, age, and sex.
+        df_reassessment: A dataframe with the reassessment of asthma, with the following columns:
+            * ``year (int)``: the year
+            * ``age (int)``: the age in years
+            * ``sex (str)``: ``M`` = male, ``F`` = female
+            * ``ra (float)``: the reassessment of asthma
         baseline_year: The baseline year for the calibration.
         stabilization_year: The stabilization year for the calibration.
         max_age: The maximum age to consider for the calibration.
@@ -824,14 +857,26 @@ def beta_params_age_optimizer(
 
     Args:
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
-        df_incidence: A dataframe with the incidence of asthma.
-        df_prevalence: A dataframe with the prevalence of asthma.
-        df_reassessment: A dataframe with the reassessment of asthma.
+        df_incidence: A dataframe with the incidence of asthma, with the following columns:
+            * ``year (int)``: the year
+            * ``age (int)``: the age in years
+            * ``sex (str)``: ``M`` = male, ``F`` = female
+            * ``incidence (float)``: the incidence of asthma for the given year, age, and sex.
+        df_prevalence: A dataframe with the prevalence of asthma, with the following columns:
+            * ``year (int)``: the year
+            * ``age (int)``: the age in years
+            * ``sex (str)``: ``M`` = male, ``F`` = female
+            * ``prevalence (float)``: the prevalence of asthma for the given year, age, and sex.
+        df_reassessment: A dataframe with the reassessment of asthma, with the following columns:
+            * ``year (int)``: the year
+            * ``age (int)``: the age in years
+            * ``sex (str)``: ``M`` = male, ``F`` = female
+            * ``ra (float)``: the reassessment of asthma
         baseline_year: The baseline year for the calibration.
         stabilization_year: The stabilization year for the calibration.
         max_age: The maximum age to consider for the calibration.
-        β_risk_factors_age: The initial beta parameters for the age terms in the
-            risk factors equations.
+        β_risk_factors_age: A list of two beta parameters, ``β_fhx_age`` and ``β_abx_age``, to be
+            used as the initial values in the optimization.
     """
 
     df = pd.DataFrame(
