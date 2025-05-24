@@ -259,7 +259,7 @@ class Incidence(Occurrence):
             * ``correction``: float, TODO.
 
         """
-        grouped_df = super().load_occurrence_correction_table(occurrence_type="inc")
+        grouped_df = super().load_occurrence_correction_table(occurrence_type="incidence")
         return grouped_df
 
     def crude_occurrence(
@@ -403,7 +403,7 @@ class Prevalence(Occurrence):
         self._poly_parameters = poly_parameters
 
     def load_occurrence_correction_table(self) -> DataFrameGroupBy:
-        grouped_df = super().load_occurrence_correction_table(occurrence_type="prev")
+        grouped_df = super().load_occurrence_correction_table(occurrence_type="prevalence")
         return grouped_df
 
     def crude_occurrence(
