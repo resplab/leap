@@ -275,7 +275,7 @@ def generate_antibiotic_data(
     """
     formula = "n_abx ~ year + sex + heaviside(year, 2005) * year"
     df_abx = load_antibiotic_data()
-    alpha = estimate_alpha(df_abx, formula, offset=np.log(df["n_birth"]))
+    alpha = estimate_alpha(df_abx, formula, offset=np.log(df_abx["n_birth"]))
     model_abx = generate_antibiotic_model(df_abx, formula, alpha)
     if return_type == "csv":
         df_abx_pred = get_predicted_abx_data(model_abx)
