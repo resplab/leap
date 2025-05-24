@@ -884,13 +884,32 @@ def compute_mean_diff_log_OR(
         }
     }
 
-    df["mean_log_diff_OR"] = df.apply(
-        lambda x: calibrator(
+    inc_calibration_results = df.apply(
+        lambda x: calibrate_asthma_incidence(
             x["year"], x["sex"], x["age"], model_abx, df_incidence, df_prevalence,
-            df_reassessment, β_risk_factors, min_year
-        )["mean_diff_log_OR"],
+            β_risk_factors, min_year
+        ),
         axis=1
     )
+
+    df["mean_log_diff_OR"] = df.apply(
+        lambda x: compute_odds_ratio_difference(
+            risk_factor_prev_past=inc_calibration_results[x["index"]]["risk_sets"]["past_prev"]["prob"].to_numpy(),
+            odds_ratio_target_past=inc_calibration_results[x["index"]]["past_prev"]["odds_ratio"].to_numpy(),
+            asthma_prev_calibrated_past=inc_calibration_results[x["index"]]["ζ_prev_λ"],
+            asthma_inc_calibrated=inc_calibration_results[x["index"]]["ζ_λ"],
+            odds_ratio_target=inc_calibration_results[x["index"]]["risk_sets"]["inc"]["odds_ratio"].to_numpy(),
+            ra_target=df_reassessment.loc[
+                (df_reassessment["age"] == x["age"]) &
+                (df_reassessment["year"] == x["year"]) &
+                (df_reassessment["sex"] == x["sex"])
+            ]["ra"].iloc[0],
+            misDx=0, # target misdiagnosis
+            Dx=1, # target diagnosis
+        ),
+        axis=1
+    )
+
     return df["mean_log_diff_OR"].mean()
 
 
