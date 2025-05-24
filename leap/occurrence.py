@@ -3,7 +3,7 @@ import abc
 import pandas as pd
 import numpy as np
 from scipy.stats import logistic
-from leap.utils import get_data_path, logit
+from leap.utils import get_data_path, logit, poly
 from leap.logger import get_logger
 from typing import TYPE_CHECKING, Dict
 if TYPE_CHECKING:
@@ -163,37 +163,6 @@ class Occurrence:
                 self.parameters["βabx_exp"][2] * min(dose, 3)
             )
 
-    def poly_age_calculator(
-        self,
-        age: int,
-        alpha: list[float] = [32.07692, 32.42755, 32.76123, 32.80415, 32.54075],
-        nd: list[float] = [
-            1, 520, 179636.923076923, 47536813.3328764, 11589923664.2537,
-            2683688761696.54, 594554071731935
-        ]
-    ) -> np.ndarray:
-        fs = np.zeros(6)
-        fs[0] = 1 / np.sqrt(nd[1])
-        fs[1] = (age - alpha[0]) / np.sqrt(nd[2])
-
-        for i in range(1, 5):
-            fs[i + 1] = (
-                (age - alpha[i]) * np.sqrt(nd[i + 1]) * fs[i] -
-                nd[i + 1] / np.sqrt(nd[i]) * fs[i - 1]
-            ) / np.sqrt(nd[i + 2])
-        return fs[1:]
-
-    def poly_year_calculator(
-        self,
-        year: int,
-        alpha: list[float] = [2009.5, 2009.5],
-        nd: list[float] = [1.0, 520.0, 17290.0, 456456.0]
-    ) -> np.ndarray:
-        fs = np.zeros(3)
-        fs[0] = 1 / np.sqrt(nd[1])
-        fs[1] = (year - alpha[0]) / np.sqrt(nd[2])
-        fs[2] = ((year - alpha[1]) * np.sqrt(nd[2]) * fs[1] - nd[2] / np.sqrt(nd[1]) * fs[0]) / np.sqrt(nd[3])
-        return fs[1:]
 
 
 class Incidence(Occurrence):
@@ -299,7 +268,12 @@ class Incidence(Occurrence):
         age: int,
         year: int
     ) -> float:
-        poly_age = self.poly_age_calculator(age)
+        poly_age = poly(
+            age,
+            degree=5,
+            alpha=self.poly_parameters["alpha_age"],
+            norm2=self.poly_parameters["norm2_age"]
+        )
         return np.exp(
             self.parameters["β0"] +
             self.parameters["βsex"] * int(sex) +
@@ -438,8 +412,18 @@ class Prevalence(Occurrence):
         age: int,
         year: int
     ) -> float:
-        poly_year = self.poly_year_calculator(year)
-        poly_age = self.poly_age_calculator(age)
+        poly_year = poly(
+            year,
+            degree=2,
+            alpha=self.poly_parameters["alpha_year"],
+            norm2=self.poly_parameters["norm2_year"]
+        )
+        poly_age = poly(
+            age,
+            degree=5,
+            alpha=self.poly_parameters["alpha_age"],
+            norm2=self.poly_parameters["norm2_age"]
+        )
         poly_yearage = np.outer(poly_year, poly_age).flatten()
         return np.exp(
             self.parameters["β0"] +
