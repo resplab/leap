@@ -498,13 +498,24 @@ def risk_factor_generator(
     ]
     return df_risk_factors
 
+
+ResultsPrevalence = TypedDict(
+    "ResultsPrevalence", 
+    {
+        "α": float,
+        "β": list[float] | np.ndarray,
+        "ζ_λ": list[float] | np.ndarray,
+        "ζ": float
+    }
+)
+
 def calibrate_asthma_prevalence(
     year: int,
     sex: str,
     age: int,
     model_abx: GLMResultsWrapper,
     df_prevalence: pd.DataFrame
-) -> Dict[str, float | list[float]]:
+) -> ResultsPrevalence:
 
     risk_set = risk_factor_generator(year, age, sex, model_abx)
 
@@ -553,8 +564,8 @@ def calibrate_asthma_prevalence(
     }
 
 
-CalibrationResults = TypedDict(
-    "CalibrationResults", 
+ResultsIncidence = TypedDict(
+    "ResultsIncidence", 
     {
         "α": float,
         "ζ_λ": list[float] | np.ndarray,
@@ -573,7 +584,7 @@ def calibrate_asthma_incidence(
     df_prevalence: pd.DataFrame,
     β_risk_factors: Dict[str, Dict[str, float]] = β_RISK_FACTORS,
     min_year: int = MIN_YEAR
-) -> CalibrationResults:
+) -> ResultsIncidence:
     """Calibrate the asthma incidence for the given year, age, and sex.
 
     Args:
