@@ -164,14 +164,15 @@ def optimize_prevalence_β_parameters(
 
     .. math::
 
-        \beta_0 &= \sigma^{-1}(y) \\
-        \eta_{\lambda} &= \sigma(\beta_0 + \log(\omega_{\lambda}) - \alpha) \\
+        \beta_0 &= \sigma^{-1}(\eta) \\
+        \zeta_{\lambda} &= \sigma(\beta_0 + \log(\omega_{\lambda}) - \alpha) \\
         \alpha &= \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda} \\
-        \eta &= \sum_{\lambda=0}^{n} p(\lambda) \eta_{\lambda}
+        \zeta &= \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda}
 
     where:
 
-    * :math:`y` is the target asthma prevalence, ``asthma_prev_target``
+    * :math:`\eta` is the target asthma prevalence, ``asthma_prev_target``, from the model of
+      the BC Ministry of Health data.
     * :math:`\omega_{\lambda}` is the odds ratio for risk factor level :math:`\lambda`,
       ``odds_ratio_target[i]``
     * :math:`p(\lambda)` is the prevalence of risk factor level :math:`\lambda`,
@@ -179,14 +180,14 @@ def optimize_prevalence_β_parameters(
     * :math:`\beta_{\lambda}` is the parameter for risk factor level :math:`\lambda`,
       ``asthma_prev_risk_factor_params[i]``
     * :math:`\alpha` is the correction term for the asthma prevalence
-    * :math:`\eta_{\lambda}` is the predicted asthma prevalence at risk factor level :math:`\lambda`
-    * :math:`\eta` is the predicted / calibrated asthma prevalence
+    * :math:`\zeta_{\lambda}` is the predicted asthma prevalence at risk factor level :math:`\lambda`
+    * :math:`\zeta` is the predicted / calibrated asthma prevalence
 
     The function uses the ``BFGS`` optimization algorithm to minimize the absolute difference
     between the calibrated asthma prevalence and the target asthma prevalence.
 
     Args:
-        asthma_prev_target: The target prevalence of asthma from the BC Ministry of Health data.
+        asthma_prev_target: The target prevalence of asthma from the BC Ministry of Health model.
         odds_ratio_target: A vector of odds ratios for the risk factors, with shape ``(n, 1)``.
         risk_factor_prev: A vector of the prevalence of the risk factors, with shape ``(n, 1)``.
         beta0: The intercept of the logistic regression model. If ``None``, it is set to

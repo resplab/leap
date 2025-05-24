@@ -254,7 +254,7 @@ def inc_correction_calculator(
     asthma_prev_risk_factor_params = optimize_prevalence_β_parameters(
         asthma_prev_target=asthma_inc_target,
         odds_ratio_target=risk_set["odds_ratio"].to_list(),
-        risk_factor_prev=risk_factor_prev_past_no_asthma
+        risk_factor_prev=list(risk_factor_prev_past_no_asthma)
     )
 
     # asthma incidence correction term for the current year
