@@ -19,17 +19,15 @@ class Occurrence:
     def __init__(
         self,
         config: dict | None = None,
-        hyperparameters: dict | None = None,
         parameters: dict | None = None,
         max_age: int = 110,
         correction_table: DataFrameGroupBy | None = None
     ):
         if config is not None:
-            self.hyperparameters = config["hyperparameters"]
             self.parameters = config["parameters"]
             self.max_age = config["max_age"]
         elif hyperparameters is not None and parameters is not None:
-            self.hyperparameters = hyperparameters
+        elif parameters is not None:
             self.parameters = parameters
             self.max_age = max_age
         else:
@@ -45,25 +43,6 @@ class Occurrence:
         years = np.unique([key[0] for key in self.correction_table.groups.keys()])
         self.min_year = int(np.min(years)) + 1
         self.max_year = int(np.max(years))
-
-    @property
-    def hyperparameters(self) -> dict:
-        """A dictionary containing the hyperparameters used to compute ``β0`` from a normal
-        distribution:
-        
-        * ``β0_μ``: float, the mean of the normal distribution.
-        * ``β0_σ``: float, the standard deviation of the normal distribution.
-
-        """
-        return self._hyperparameters
-    
-    @hyperparameters.setter
-    def hyperparameters(self, hyperparameters: dict):
-        KEYS = ["β0_μ", "β0_σ"]
-        for key in KEYS:
-            if key not in hyperparameters.keys():
-                raise ValueError(f"Missing key {key} in hyperparameters.")
-        self._hyperparameters = hyperparameters
 
     @property
     def parameters(self) -> dict:
@@ -220,12 +199,11 @@ class Incidence(Occurrence):
     def __init__(
         self,
         config: dict | None = None,
-        hyperparameters: dict | None = None,
         parameters: dict | None = None,
         max_age: int = 110,
         correction_table: DataFrameGroupBy | None = None
     ):
-        super().__init__(config, hyperparameters, parameters, max_age, correction_table)
+        super().__init__(config, parameters, max_age, correction_table)
         self.parameters["βage"] = np.array(self.parameters["βage"])
         self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
         self.parameters["βfam_hist"] = np.array(self.parameters["βfam_hist"])
@@ -309,12 +287,11 @@ class Prevalence(Occurrence):
     def __init__(
         self,
         config: dict | None = None,
-        hyperparameters: dict | None = None,
         parameters: dict | None = None,
         max_age: int = 110,
         correction_table: DataFrameGroupBy | None = None
     ):
-        super().__init__(config, hyperparameters, parameters, max_age, correction_table)
+        super().__init__(config, parameters, max_age, correction_table)
         self.parameters["βage"] = np.array(self.parameters["βage"])
         self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
         self.parameters["βsexyear"] = np.array(self.parameters["βsexyear"])
