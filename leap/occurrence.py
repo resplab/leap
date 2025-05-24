@@ -5,7 +5,7 @@ import numpy as np
 from scipy.stats import logistic
 from leap.utils import get_data_path, logit
 from leap.logger import get_logger
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.agent import Agent
@@ -20,19 +20,21 @@ class Occurrence:
         self,
         config: dict | None = None,
         parameters: dict | None = None,
+        poly_parameters: Dict[str, list[float]] | None = None,
         max_age: int = 110,
         correction_table: DataFrameGroupBy | None = None
     ):
         if config is not None:
             self.parameters = config["parameters"]
             self.max_age = config["max_age"]
-        elif hyperparameters is not None and parameters is not None:
-        elif parameters is not None:
+            self.poly_parameters = config["poly_parameters"]
+        elif parameters is not None and poly_parameters is not None:
             self.parameters = parameters
             self.max_age = max_age
+            self.poly_parameters = poly_parameters
         else:
             raise ValueError(
-                "Either config dict or parameters and hyperparameters must be provided."
+                "Either config dict or parameters and poly_parameters must be provided."
             )
 
         if correction_table is None:
@@ -200,10 +202,11 @@ class Incidence(Occurrence):
         self,
         config: dict | None = None,
         parameters: dict | None = None,
+        poly_parameters: Dict[str, list[float]] | None = None,
         max_age: int = 110,
         correction_table: DataFrameGroupBy | None = None
     ):
-        super().__init__(config, parameters, max_age, correction_table)
+        super().__init__(config, parameters, poly_parameters, max_age, correction_table)
         self.parameters["βage"] = np.array(self.parameters["βage"])
         self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
         self.parameters["βfam_hist"] = np.array(self.parameters["βfam_hist"])
@@ -253,6 +256,26 @@ class Incidence(Occurrence):
                 raise ValueError(f"Missing key {key} in parameters.")
         self._parameters = parameters
 
+    @property
+    def poly_parameters(self) -> Dict[str, list[float]]:
+        r"""A dictionary containing the following keys:
+        
+            * ``alpha_age (list[float])``: The alpha vector from the normalization of the training
+              data in the ``poly`` function. Length = degree of age polynomial = 5.
+            * ``norm2_age (list[float])``: The :math:`\text{norm}^2` vector from the normalization
+              of the training data in the ``poly`` function.
+              Length = degree of age polynomial + 1 = 6.
+        """
+        return self._poly_parameters
+    
+    @poly_parameters.setter
+    def poly_parameters(self, poly_parameters: Dict[str, list[float]]):
+        KEYS = ["alpha_age", "norm2_age"]
+        for key in KEYS:
+            if key not in poly_parameters.keys():
+                raise ValueError(f"Missing key {key} in poly_parameters.")
+        self._poly_parameters = poly_parameters
+
     def load_occurrence_correction_table(self) -> DataFrameGroupBy:
         """Load the asthma incidence correction table.
 
@@ -288,10 +311,13 @@ class Prevalence(Occurrence):
         self,
         config: dict | None = None,
         parameters: dict | None = None,
+        poly_parameters: Dict[str, list[float]] | None = None,
         max_age: int = 110,
         correction_table: DataFrameGroupBy | None = None
     ):
-        super().__init__(config, parameters, max_age, correction_table)
+        super().__init__(
+            config, parameters, poly_parameters, max_age, correction_table
+        )
         self.parameters["βage"] = np.array(self.parameters["βage"])
         self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
         self.parameters["βsexyear"] = np.array(self.parameters["βsexyear"])
@@ -370,6 +396,31 @@ class Prevalence(Occurrence):
             if key not in parameters.keys():
                 raise ValueError(f"Missing key {key} in parameters.")
         self._parameters = parameters
+
+    @property
+    def poly_parameters(self) -> Dict[str, list[float]]:
+        r"""A dictionary containing the following keys:
+        
+            * ``alpha_age (list[float])``: The alpha vector from the normalization of the training
+              data in the ``poly`` function. Length = degree of age polynomial = 5.
+            * ``norm2_age (list[float])``: The :math:`\text{norm}^2` vector from the normalization
+              of the training data in the ``poly`` function.
+              Length = degree of age polynomial + 1 = 6.
+            * ``alpha_year (list[float])``: The alpha vector from the normalization of the training
+              data in the ``poly`` function. Length = degree of year polynomial = 2.
+            * ``norm2_year (list[float])``: The :math:`\text{norm}^2` vector from the normalization
+              of the training data in the ``poly`` function.
+              Length = degree of year polynomial + 1 = 3.
+        """
+        return self._poly_parameters
+    
+    @poly_parameters.setter
+    def poly_parameters(self, poly_parameters: Dict[str, list[float]]):
+        KEYS = ["alpha_age", "norm2_age", "alpha_year", "norm2_year"]
+        for key in KEYS:
+            if key not in poly_parameters.keys():
+                raise ValueError(f"Missing key {key} in poly_parameters.")
+        self._poly_parameters = poly_parameters
 
     def load_occurrence_correction_table(self) -> DataFrameGroupBy:
         grouped_df = super().load_occurrence_correction_table(occurrence_type="prev")
