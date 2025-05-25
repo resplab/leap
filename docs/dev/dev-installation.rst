@@ -38,7 +38,7 @@ Go to the `R for Windows <https://cran.r-project.org/bin/windows/base/>`_ page a
 latest version of R.
 
 
-1. Install ``pandoc``
+2. Install ``pandoc``
 *********************
 
 If you plan on working on the ``docs``, you will also need to install ``pandoc``, as this is used
