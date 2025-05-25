@@ -69,7 +69,36 @@ Windows
 
 See the `pandoc installation instructions for Windows <https://pandoc.org/installing.html#windows>`_.
 
-3. Install ``LEAP``
+3. Install ``git-lfs``
+***********************
+
+MacOS
+-----
+
+See the 
+`git-lfs installation instructions for MacOS 
+<https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage?platform=mac>`_.
+
+.. code:: bash
+
+  brew install git-lfs
+  git lfs install
+
+Linux (Ubuntu/Debian)
+---------------------
+
+See the `git-lfs installation instructions for Linux
+<https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage?platform=linux>`_.
+
+
+Windows
+-------
+
+See the `git-lfs installation instructions for Windows 
+<https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage?platform=windows>`_.
+
+
+4. Install ``LEAP``
 ***********************
 
 To install a development version of the ``LEAP`` package:
