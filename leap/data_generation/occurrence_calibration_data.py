@@ -212,7 +212,7 @@ def load_abx_exposure_data(β_abx: Dict[str, float] | None = None) -> pd.DataFra
     return df_abx_or
 
 
-def p_antibiotic_exposure(
+def compute_antibiotic_dose_prob(
     year: int,
     sex: str,
     model_abx: GLMResultsWrapper
@@ -423,7 +423,7 @@ def risk_factor_generator(
 
 
     birth_year = year - age
-    df_abx_prob = p_antibiotic_exposure(max(birth_year, 2000), sex, model_abx)
+    df_abx_prob = compute_antibiotic_dose_prob(max(birth_year, 2000), sex, model_abx)
 
     # combine abx_exposure = 3, 4, 5+ into 3+
     df_abx_prob.loc[df_abx_prob["n_abx"] == 3, "prob"] = df_abx_prob.loc[
