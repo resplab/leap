@@ -60,7 +60,7 @@ PROB_FAM_HIST = 0.2927242
 DF_OCC_PRED = pd.read_csv(get_data_path("processed_data/asthma_occurrence_predictions.csv"))
 
 
-def asthma_predictor(age: int, sex: str, year: int, occurrence_type: str) -> float:
+def get_asthma_occurrence_prediction(age: int, sex: str, year: int, occurrence_type: str) -> float:
     """Predicts the asthma prevalence or incidence based on the given parameters.
 
     Args:
@@ -106,11 +106,11 @@ def load_occurrence_data(
     )
 
     df_asthma["incidence"] = df_asthma.apply(
-        lambda x: asthma_predictor(x["age"], x["sex"], x["year"], "incidence"),
+        lambda x: get_asthma_occurrence_prediction(x["age"], x["sex"], x["year"], "incidence"),
         axis=1
     )
     df_asthma["prevalence"] = df_asthma.apply(
-        lambda x: asthma_predictor(x["age"], x["sex"], x["year"], "prevalence"),
+        lambda x: get_asthma_occurrence_prediction(x["age"], x["sex"], x["year"], "prevalence"),
         axis=1
     )
     df_asthma["incidence"] = df_asthma.apply(
