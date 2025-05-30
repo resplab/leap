@@ -831,8 +831,8 @@ def compute_mean_diff_log_OR(
                 (df_reassessment["year"] == x["year"]) &
                 (df_reassessment["sex"] == x["sex"])
             ]["ra"].iloc[0],
-            misDx=0, # target misdiagnosis
-            Dx=1, # target diagnosis
+            mis_dx=0, # target misdiagnosis
+            dx=1, # target diagnosis
         ),
         axis=1
     )
