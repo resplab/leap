@@ -37,23 +37,24 @@ def compute_contingency_tables(
         sample_size: The total population size to use for the calculations.
 
     Returns:
-        A dictionary of dataframes representing the proportions of the population for different risk
-        factor levels / combinations. For example, if we have the following risk factors:
+        A dictionary of ``ContingencyTable``s representing the proportions of the population for
+        different risk factor levels / combinations. For example, if we have the following
+        risk factors:
 
         * family history: ``{0, 1}``
         * antibiotic exposure: ``{0, 1, 2, 3}``
 
         then we have ``2 * 4 = 8`` combinations. Each combination is called a ``risk factor level``,
-        and is indexed by ``i`` (this corresponds to the index in the risk_set table). The first
-        combination, ``i = 1`` is a special case; this is where there are no risk factors. We use
-        this combination, referred to as the ``ref`` level, in the calculation of all the tables.
+        and is indexed by ``λ`` (this corresponds to the index in the risk_set table). The first
+        combination, ``λ = 0`` is a special case; this is where there are no risk factors.
         
-        Each dictionary entry contains a Pandas dataframe, with the following entries:
+        Each dictionary entry contains a ``ContingencyTable``, with the following entries:
 
-            * ``di``: proportion of population labelled as no asthma with no risk factors
-            * ``ci``: proportion of population labelled as asthma with no risk factors
-            * ``bi``: proportion of population labelled as no asthma with risk factors
-            * ``ai``: proportion of population labelled as asthma with risk factors
+        * ``a``: proportion of population labelled as asthma with risk factors ``λ``
+        * ``b``: proportion of population labelled as no asthma with risk factors ``λ``
+        * ``c``: proportion of population labelled as asthma with no risk factors 
+        * ``d``: proportion of population labelled as no asthma with no risk factors
+
     """
 
     contingency_tables = {}
@@ -102,22 +103,22 @@ def compute_odds_ratio(
     misDx: float = 0,
     Dx: float = 1
 ) -> float:
-    """Compute difference in odds ratios between the target and the calibrated asthma prevalence.
+    """Compute the odds ratio for risk factor combination ``λ``.
 
     Args:
-        risk_factor_prob_past: A vector of the probabilities of the risk factor levels in the past.
-        odds_ratio_target_past: A vector of odds ratios for the risk factors in the past.
-        asthma_prev_calibrated_past: A vector of the calibrated asthma prevalence for each risk factor
-            combination indexed by ``λ`` in the past.
-        asthma_inc_calibrated: A vector of the calibrated asthma incidence for each risk factor
-            combination indexed by ``λ`` in the current year.
+        contingency_table_past: A ``ContingencyTable`` object representing the proportions of the
+            population for different risk factor levels in the past.
+        asthma_incidence_0: The calibrated asthma incidence for the risk factor combination with no
+            risk factors (``λ = 0``) in the current year.
+        asthma_incidence_λ: The calibrated asthma incidence for the risk factor combination ``λ`` in
+            the current year.
         odds_ratio_target: A vector of odds ratios for the risk factors.
         ra_target: A value between 0 and 1 indicating the target reassessment.
         misDx: A numeric value representing the misdiagnosis rate.
         Dx: A numeric value representing the diagnosis rate.
 
     Returns:
-        The odds ratio for risk factor combination λ in the current year.
+        The odds ratio for risk factor combination ``λ`` in the current year.
     """
     
     # contingency table of the population with asthma from previous year t0
@@ -181,7 +182,7 @@ def compute_odds_ratio_difference(
     misDx: float = 0,
     Dx: float = 1
 ) -> float:
-    """Compute difference in odds ratios between the target and the calibrated asthma prevalence.
+    """Compute difference in odds ratios between the target and the calibrated asthma incidence.
 
     Args:
         risk_factor_prob_past: A vector of the probabilities of the risk factor levels in the past.
