@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from leap.data_generation.utils import conv_2x2
+from leap.data_generation.utils import conv_2x2, ContingencyTable
 from leap.data_generation.prevalence_calibration import optimize_prevalence_β_parameters, \
     compute_asthma_prevalence_λ, get_asthma_prevalence_correction
 from leap.logger import get_logger
@@ -17,7 +17,7 @@ def compute_contingency_tables(
     odds_ratio_target: list[float],
     asthma_prev_calibrated: list[float],
     sample_size: float = 1e10
-) -> Dict[str | int, pd.DataFrame]:
+) -> Dict[str | int, ContingencyTable]:
     r"""Compute the contingency tables for the risk factors and asthma prevalence.
 
     This function computes the proportions of the population at different levels of family
@@ -87,7 +87,7 @@ def compute_contingency_tables(
         )
 
         # divide by sample size to get proportions
-        table["values"] = table["values"].apply(lambda x: x / sample_size)
+        table = table.apply(lambda x: x / sample_size)
 
         contingency_tables[λ] = table
 

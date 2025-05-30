@@ -95,13 +95,45 @@ def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float)
         return [1 if i >= threshold else 0 for i in x]
 
 
+class ContingencyTable:
+    """A class representing a contingency table."""
+    def __init__(self, a: float, b: float, c: float, d: float):
+        """Initialize the contingency table with proportions.
+        Args:
+            a: Proportion of the population with variable 1 + and variable 2 +.
+            b: Proportion of the population with variable 1 + and variable 2 -.
+            c: Proportion of the population with variable 1 - and variable 2 +.
+            d: Proportion of the population with variable 1 - and variable 2 -.
+        """
+        self.a = a
+        self.b = b
+        self.c = c
+        self.d = d
+
+    def __repr__(self):
+        return f"ContingencyTable(values={self.a}, {self.b}, {self.c}, {self.d})"
+    
+    def to_list(self) -> list[float]:
+        """Convert the contingency table to a list of values."""
+        return [self.a, self.b, self.c, self.d]
+    
+    def apply(self, func) -> "ContingencyTable":
+        """Apply a function to each value in the contingency table."""
+        return ContingencyTable(
+            a=func(self.a),
+            b=func(self.b),
+            c=func(self.c),
+            d=func(self.d)
+        )
+    
+
 def conv_2x2(
     ori: float,
     ni: float,
     n1i: float,
     n2i: float,
     var_names: list = ["ai", "bi", "ci", "di"],
-) -> pd.DataFrame:
+) -> ContingencyTable:
     r"""Create a 2x2 contigency table.
     
     This function is based off the ``R`` function ``metafor::conv.2x2``.
@@ -271,4 +303,9 @@ def conv_2x2(
  
     df.drop(columns=["has_neg"], inplace=True)
 
-    return df
+    return ContingencyTable(
+        a=df.loc[var_names[0]].values[0],
+        b=df.loc[var_names[1]].values[0],
+        c=df.loc[var_names[2]].values[0],
+        d=df.loc[var_names[3]].values[0]
+    )
