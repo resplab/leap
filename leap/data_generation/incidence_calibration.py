@@ -5,7 +5,6 @@ from leap.data_generation.prevalence_calibration import optimize_prevalence_β_p
     compute_asthma_prevalence_λ, get_asthma_prevalence_correction
 from leap.logger import get_logger
 from typing import Tuple, Dict
-from scipy.stats import logistic
 from scipy.special import logit
 
 pd.options.mode.copy_on_write = True
