@@ -821,7 +821,7 @@ def compute_mean_diff_log_OR(
 
     df["mean_log_diff_OR"] = df.apply(
         lambda x: compute_odds_ratio_difference(
-            risk_factor_prev_past=inc_calibration_results[x["index"]]["risk_sets"]["past_prev"]["prob"].to_numpy(),
+            risk_factor_prob_past=inc_calibration_results[x["index"]]["risk_sets"]["past_prev"]["prob"].to_numpy(),
             odds_ratio_target_past=inc_calibration_results[x["index"]]["past_prev"]["odds_ratio"].to_numpy(),
             asthma_prev_calibrated_past=inc_calibration_results[x["index"]]["ζ_prev_λ"],
             asthma_inc_calibrated=inc_calibration_results[x["index"]]["ζ_λ"],
