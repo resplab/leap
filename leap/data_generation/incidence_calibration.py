@@ -13,9 +13,10 @@ logger = get_logger(__name__, 20)
 
 
 def compute_contingency_tables(
-    risk_factor_prev: list[float],
+    risk_factor_prob: list[float],
     odds_ratio_target: list[float],
-    asthma_prev_calibrated: list[float]
+    asthma_prev_calibrated: list[float],
+    sample_size: float = 1e10
 ) -> Dict[str | int, pd.DataFrame]:
     r"""Compute the contingency tables for the risk factors and asthma prevalence.
 
@@ -29,9 +30,11 @@ def compute_contingency_tables(
     https://doi.org/10.1037/0003-066x.62.3.254
 
     Args:
-        risk_factor_prev: A vector of the prevalence of the risk factor levels.
+        risk_factor_prob: A vector of the probabilities of the risk factor levels.
         odds_ratio_target: A vector of odds ratios for the risk factors.
-        asthma_prev_calibrated: A vector of the calibrated asthma prevalence.
+        asthma_prev_calibrated: A vector of the calibrated asthma prevalence for each risk factor
+            combination indexed by ``λ``.
+        sample_size: The total population size to use for the calculations.
 
     Returns:
         A dictionary of dataframes representing the proportions of the population for different risk
@@ -55,26 +58,29 @@ def compute_contingency_tables(
 
     contingency_tables = {}
 
-    asthma_prev_ref = asthma_prev_calibrated[0]
-    risk_factor_prev_ref = risk_factor_prev[0]
+    # calibrated asthma prevalence for population with no risk factors (λ = 0)
+    asthma_prev_0 = asthma_prev_calibrated[0]
 
-    for i in range(1, len(odds_ratio_target)):
-        risk_factor_prev_i = risk_factor_prev[i]
-        asthma_prev = asthma_prev_calibrated[i]
+    # proportion of the population with no risk factors (λ = 0)
+    risk_factor_prob_0 = risk_factor_prob[0]
 
-        # prevalence of risk factor combination i
-        risk_factor_prev_i = risk_factor_prev_i / (risk_factor_prev_i + risk_factor_prev_ref)
+    for λ in range(1, len(odds_ratio_target)):
+        risk_factor_prob_λ = risk_factor_prob[λ]
+        asthma_prev = asthma_prev_calibrated[λ]
 
-        sample_size = 1e10
-        # prevalence of risk factor combination i
-        n1i = sample_size * risk_factor_prev_i
-        # prevalence of asthma
+        # probability of risk factor combination λ assuming only two possibilities: λ and 0
+        risk_factor_prob_λ = risk_factor_prob_λ / (risk_factor_prob_λ + risk_factor_prob_0)
+
+        # population with risk factor combination λ
+        n1i = sample_size * risk_factor_prob_λ
+
+        # expected prevalence of asthma
         n2i = sample_size * np.dot(
-            [1 - risk_factor_prev_i, risk_factor_prev_i],
-            [asthma_prev_ref, asthma_prev]
+            [1 - risk_factor_prob_λ, risk_factor_prob_λ],
+            [asthma_prev_0, asthma_prev]
         )
         table = conv_2x2(
-            ori=odds_ratio_target[i],
+            ori=odds_ratio_target[λ],
             ni=sample_size,
             n1i=n1i,
             n2i=n2i
@@ -83,7 +89,7 @@ def compute_contingency_tables(
         # divide by sample size to get proportions
         table["values"] = table["values"].apply(lambda x: x / sample_size)
 
-        contingency_tables[i] = table
+        contingency_tables[λ] = table
 
     return contingency_tables
 
@@ -134,7 +140,7 @@ def compute_odds_ratio_difference(
 
     # for each odds ratio, we need to obtain the contingency table
     contingency_tables_past = compute_contingency_tables(
-        risk_factor_prev=list(risk_factor_prev_past),
+        risk_factor_prob=list(risk_factor_prev_past),
         odds_ratio_target=list(odds_ratio_target_past),
         asthma_prev_calibrated=list(asthma_prev_calibrated_past)
     )
