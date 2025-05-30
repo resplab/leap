@@ -94,6 +94,82 @@ def compute_contingency_tables(
     return contingency_tables
 
 
+def compute_odds_ratio(
+    contingency_table_past: ContingencyTable,
+    asthma_incidence_0: float,
+    asthma_incidence_λ: float,
+    ra_target: float = 1.0,
+    misDx: float = 0,
+    Dx: float = 1
+) -> float:
+    """Compute difference in odds ratios between the target and the calibrated asthma prevalence.
+
+    Args:
+        risk_factor_prob_past: A vector of the probabilities of the risk factor levels in the past.
+        odds_ratio_target_past: A vector of odds ratios for the risk factors in the past.
+        asthma_prev_calibrated_past: A vector of the calibrated asthma prevalence for each risk factor
+            combination indexed by ``λ`` in the past.
+        asthma_inc_calibrated: A vector of the calibrated asthma incidence for each risk factor
+            combination indexed by ``λ`` in the current year.
+        odds_ratio_target: A vector of odds ratios for the risk factors.
+        ra_target: A value between 0 and 1 indicating the target reassessment.
+        misDx: A numeric value representing the misdiagnosis rate.
+        Dx: A numeric value representing the diagnosis rate.
+
+    Returns:
+        The odds ratio for risk factor combination λ in the current year.
+    """
+    
+    # contingency table of the population with asthma from previous year t0
+    a0 = contingency_table_past.a # proportion of population labelled as asthma with risk factors level λ
+    b0 = contingency_table_past.b # proportion of population labelled as no asthma with risk factors level λ
+    c0 = contingency_table_past.c # proportion of population labelled as asthma with no risk factors
+    d0 = contingency_table_past.d # proportion of population labelled as no asthma with no risk factors
+    
+    # contingency table current year t1, asthma reassessment
+    # if ra=1, no reversibility
+    a1_ra = a0 * ra_target # proportion of population who keep asthma diagnosis at risk factors level λ
+    b1_ra = a0 * (1 - ra_target) # proportion of population who lose asthma diagnosis at risk factors level λ
+    c1_ra = c0 * ra_target # proportion of population who keep asthma diagnosis with no risk factors
+    d1_ra = c0 * (1 - ra_target) # proportion of population who lose asthma diagnosis with no risk factors
+
+    # contingency table current year t1, asthma diagnosis
+    # a1_dx: risk factors λ & asthma: got asthma and correctly Dx
+    # t0 = no asthma diagnosis, t1 = no asthma diagnosis * misDx = has asthma +
+    # t0 = no asthma diagnosis, t1 = asthma diagnosis * correct Dx = has asthma
+    a1_dx = b0 * ((1 - asthma_incidence_λ) * misDx + asthma_incidence_λ * Dx)
+    # b1_dx: risk factors λ & no asthma: did not get asthma and correctly Dx + got asthma but incorrectly Dx
+    # t0 = no asthma diagnosis, t1 = no asthma diagnosis * correct Dx = no asthma +
+    # t0 = no asthma diagnosis, t1 = asthma diagnosis * misDx = no asthma
+    b1_dx = b0 * ((1 - asthma_incidence_λ) * (1 - misDx) + asthma_incidence_λ * (1 - Dx))
+    # c1_dx: no risk factors & asthma: get asthma and correctly Dx + did not get asthma but misDx
+    # t0 = no asthma diagnosis, t1 = no asthma diagnosis * misdiagnosis = has asthma + 
+    # t0 = no asthma diagnosis, t1 = asthma diagnosis * correct Dx = has asthma
+    c1_dx = d0 * ((1 - asthma_incidence_0) *  misDx + asthma_incidence_0 * Dx)
+    # d1_dx: no risk factors & no asthma: 
+    # t0 = no asthma diagnosis, t1 = no asthma diagnosis * correct Dx = no asthma + 
+    # t0 = no asthma diagnosis, t1 = asthma diagnosis * misDx = no asthma
+    d1_dx = d0 * ((1 - asthma_incidence_0) * (1 - misDx) + asthma_incidence_0 * (1 - Dx))
+
+    # contingency table current year t1, asthma reassessment + diagnosis
+    # objective: asthma prev OR
+    # risk factors λ & asthma: proportion of population who either:
+    # (a1_ra) keep asthma diagnosis from t0 - t1 or (a1_dx) get new asthma diagnosis at t1
+    a1 = a1_ra + a1_dx
+    # risk factors λ & no asthma: proportion of population who either:
+    # (b1_ra) lose asthma diagnosis from t0 - t1 or (b1_dx) do not get new asthma diagnosis at t1
+    b1 = b1_ra + b1_dx
+    # no risk factors & asthma: proportion of population who either:
+    # (c1_ra) keep asthma diagnosis from t0 - t1 or (c1_dx) get new asthma diagnosis at t1
+    c1 = c1_ra + c1_dx
+    # no risk factors & no asthma: proportion of population who either: 
+    # (d1_ra) lose asthma diagnosis from t0 - t1 or (d1_dx) do not get new asthma diagnosis at t1
+    d1 = d1_ra + d1_dx
+
+    odds_ratio = (a1 * d1) / (b1 * c1)
+
+    return odds_ratio
+
 
 def compute_odds_ratio_difference(
     risk_factor_prob_past: list[float] | np.ndarray,
@@ -121,7 +197,7 @@ def compute_odds_ratio_difference(
 
     Returns:
         The sum of the difference in log odds ratios between the target and calibrated asthma
-        prevalence for each risk factor level.
+        incidence for each risk factor level.
     """
 
     # for each odds ratio, we need to obtain the contingency table
@@ -131,65 +207,23 @@ def compute_odds_ratio_difference(
         asthma_prev_calibrated=list(asthma_prev_calibrated_past)
     )
 
-    asthma_inc_calibrated_0 = asthma_inc_calibrated[0]
-    total_diff_log_OR = 0
-
-    for λ in range(1, len(odds_ratio_target)):
-        asthma_inc = asthma_inc_calibrated[λ]
-        
-        # contingency table of the population with asthma from previous year t0
-        a0 = contingency_tables_past[λ].loc["ai"].values[0] # proportion of population labelled as asthma with risk factors level λ
-        b0 = contingency_tables_past[λ].loc["bi"].values[0] # proportion of population labelled as no asthma with risk factors level λ
-        c0 = contingency_tables_past[λ].loc["ci"].values[0] # proportion of population labelled as asthma with no risk factors
-        d0 = contingency_tables_past[λ].loc["di"].values[0] # proportion of population labelled as no asthma with no risk factors
-        
-        # contingency table current year t1, asthma reassessment
-        # if ra=1, no reversibility
-        a1_ra = a0 * ra_target # proportion of population who keep asthma diagnosis at risk factors level λ
-        b1_ra = a0 * (1 - ra_target) # proportion of population who lose asthma diagnosis at risk factors level λ
-        c1_ra = c0 * ra_target # proportion of population who keep asthma diagnosis with no risk factors
-        d1_ra = c0 * (1 - ra_target) # proportion of population who lose asthma diagnosis with no risk factors
-    
-        # contingency table current year t1, asthma diagnosis
-        # a1_dx: risk factors λ & asthma: got asthma and correctly Dx
-        # t0 = no asthma diagnosis, t1 = no asthma diagnosis * misDx = has asthma +
-        # t0 = no asthma diagnosis, t1 = asthma diagnosis * correct Dx = has asthma
-        a1_dx = b0 * ((1 - asthma_inc) * misDx + asthma_inc * Dx)
-        # b1_dx: risk factors λ & no asthma: did not get asthma and correctly Dx + got asthma but incorrectly Dx
-        # t0 = no asthma diagnosis, t1 = no asthma diagnosis * correct Dx = no asthma +
-        # t0 = no asthma diagnosis, t1 = asthma diagnosis * misDx = no asthma
-        b1_dx = b0 * ((1 - asthma_inc) * (1 - misDx) + asthma_inc * (1 - Dx))
-        # c1_dx: no risk factors & asthma: get asthma and correctly Dx + did not get asthma but misDx
-        # t0 = no asthma diagnosis, t1 = no asthma diagnosis * misdiagnosis = has asthma + 
-        # t0 = no asthma diagnosis, t1 = asthma diagnosis * correct Dx = has asthma
-        c1_dx = d0 * ((1 - asthma_inc_calibrated_0) *  misDx + asthma_inc_calibrated_0 * Dx)
-        # d1_dx: no risk factors & no asthma: 
-        # t0 = no asthma diagnosis, t1 = no asthma diagnosis * correct Dx = no asthma + 
-        # t0 = no asthma diagnosis, t1 = asthma diagnosis * misDx = no asthma
-        d1_dx = d0 * ((1 - asthma_inc_calibrated_0) * (1 - misDx) + asthma_inc_calibrated_0 * (1 - Dx))
-
-        # contingency table current year t1, asthma reassessment + diagnosis
-        # objective: asthma prev OR
-        # risk factors λ & asthma: proportion of population who either:
-        # (a1_ra) keep asthma diagnosis from t0 - t1 or (a1_dx) get new asthma diagnosis at t1
-        a1 = a1_ra + a1_dx
-        # risk factors λ & no asthma: proportion of population who either:
-        # (b1_ra) lose asthma diagnosis from t0 - t1 or (b1_dx) do not get new asthma diagnosis at t1
-        b1 = b1_ra + b1_dx
-        # no risk factors & asthma: proportion of population who either:
-        # (c1_ra) keep asthma diagnosis from t0 - t1 or (c1_dx) get new asthma diagnosis at t1
-        c1 = c1_ra + c1_dx
-        # no risk factors & no asthma: proportion of population who either: 
-        # (d1_ra) lose asthma diagnosis from t0 - t1 or (d1_dx) do not get new asthma diagnosis at t1
-        d1 = d1_ra + d1_dx
-
-        odds_ratio = (a1 * d1) / (b1 * c1)
-        diff = np.abs(
-            np.log(odds_ratio_target[λ]) - (np.log(odds_ratio))
+    odds_ratios = [
+        compute_odds_ratio(
+            contingency_table_past=contingency_tables_past[λ],
+            asthma_incidence_0=asthma_inc_calibrated[0],
+            asthma_incidence_λ=asthma_inc_calibrated[λ],
+            ra_target=ra_target,
+            misDx=misDx,
+            Dx=Dx
         )
-        total_diff_log_OR += diff
+        for λ in range(1, len(odds_ratio_target))
+    ]
+    # compute the difference in log odds ratios
+    diff = np.abs(
+        np.log(odds_ratio_target[1:]) - np.log(odds_ratios)
+    )
 
-    return total_diff_log_OR
+    return np.sum(diff)
 
 
 
