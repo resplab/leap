@@ -330,7 +330,7 @@ def calculate_odds_ratio_fam_history(
     if β_fam_hist is None:
         β_fam_hist = β_RISK_FACTORS["fam_history"]
 
-    if age < MIN_ASTHMA_AGE or fam_hist == 0 or age > MAX_ABX_AGE:
+    if age < MIN_ASTHMA_AGE or fam_hist == 0:
         return 1.0
     else:
         return np.exp(
