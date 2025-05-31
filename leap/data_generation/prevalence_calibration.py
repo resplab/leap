@@ -20,6 +20,14 @@ def get_asthma_prevalence_correction(
 
         \alpha = \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda}
 
+    where:
+
+    * :math:`\alpha` is the correction term for the asthma prevalence
+    * :math:`p(\lambda)` is the prevalence of risk factor level :math:`\lambda`,
+      ``risk_factor_prev[λ]``
+    * :math:`\beta_{\lambda}` is the parameter for risk factor level :math:`\lambda`,
+      ``asthma_prev_risk_factor_params[λ]``
+
     Args:
         asthma_prev_risk_factor_params: A vector of parameters for the risk factors, with
             shape ``(n - 1, 1)``.
@@ -45,10 +53,15 @@ def compute_asthma_prevalence_λ(
 
     .. math::
 
-        \beta_0 &= \sigma^{-1}(y) \\
-        \eta_{\lambda} &= \sigma(\beta_0 + \log(\omega_{\lambda}) - \alpha) \\
-        \alpha &= \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda} \\
-        \eta &= \sum_{\lambda=0}^{n} p(\lambda) \eta_{\lambda}
+        \zeta_{\lambda} = \sigma(\beta_0 + \log(\omega_{\lambda}) - \alpha)
+
+    where:
+
+    * :math:`\beta_0 = \sigma^{-1}(\eta)`
+    * :math:`\omega_{\lambda}` is the odds ratio for risk factor level :math:`\lambda`,
+      ``odds_ratio_target[λ]``
+    * :math:`\alpha` is the correction term for the asthma prevalence, computed by
+      ``get_asthma_prevalence_correction``
 
     Args:
         asthma_prev_risk_factor_params: A vector of parameters for the risk factors, with
@@ -88,12 +101,37 @@ def compute_asthma_prevalence(
 ) -> float:
     r"""Compute the asthma prevalence based on the risk factors and the parameters provided.
 
+    We want to find the calibrated asthma prevalence :math:`\zeta`:
+
     .. math::
 
-        \beta_0 &= \sigma^{-1}(y) \\
-        \eta_{\lambda} &= \sigma(\beta_0 + \log(\omega_{\lambda}) - \alpha) \\
-        \alpha &= \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda} \\
-        \eta &= \sum_{\lambda=0}^{n} p(\lambda) \eta_{\lambda}
+        \zeta &= \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda} \\
+
+    where:
+
+    * :math:`p(\lambda)` is the probability of risk factor level :math:`\lambda`,
+      ``risk_factor_prev[λ]``
+    * :math:`\zeta_{\lambda}` is the predicted asthma prevalence at risk factor level
+      :math:`\lambda`, ``asthma_prev_λ``
+
+    We compute :math:`\zeta_{\lambda}` as follows:
+
+    .. math::
+
+        \zeta_{\lambda} &= \sigma(\beta_0 + \log(\omega_{\lambda}) - \alpha) \\
+        \beta_0 &= \sigma^{-1}(\eta) \\
+        \alpha &= \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda}
+
+    where:
+
+    * :math:`\eta` is the target asthma prevalence, ``asthma_prev_target``, from the model of
+      the BC Ministry of Health data.
+    * :math:`\omega_{\lambda}` is the odds ratio for risk factor level :math:`\lambda`,
+      ``odds_ratio_target[λ]``
+    * :math:`\beta_{\lambda}` is the parameter for risk factor level :math:`\lambda`,
+      ``asthma_prev_risk_factor_params[λ]``
+    * :math:`\alpha` is the correction term for the asthma prevalence, computed by
+      ``get_asthma_prevalence_correction``
 
     Args:
         asthma_prev_risk_factor_params: A vector of parameters for the risk factors, with
@@ -126,7 +164,20 @@ def compute_asthma_prevalence_difference(
     beta0: float,
     asthma_prev_target: float
 ) -> float:
-    """Compute the absolute difference between the calibrated and target asthma prevalence.
+    r"""Compute the absolute difference between the calibrated and target asthma prevalence.
+
+    We want to find:
+
+    .. math::
+
+        |\zeta - \eta|
+
+    where:
+
+    * :math:`\zeta` is the calibrated asthma prevalence, computed by
+      ``compute_asthma_prevalence``
+    * :math:`\eta` is the target asthma prevalence, ``asthma_prev_target``, from the model of
+      the BC Ministry of Health data.
 
     Args:
         asthma_prev_risk_factor_params: A vector of parameters for the risk factors, with

@@ -550,7 +550,64 @@ def calibrate_asthma_prevalence(
     model_abx: GLMResultsWrapper,
     df_prevalence: pd.DataFrame
 ) -> ResultsPrevalence:
-    """Calibrate the asthma prevalence for the given year, age, and sex.
+    r"""Calibrate the asthma prevalence for the given year, age, and sex.
+
+    Our goal is to find the correction term for the asthma prevalence, :math:`\alpha`, which is
+    given by:
+
+    .. math::
+
+        \alpha = \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda}
+
+    where:
+
+    * :math:`p(\lambda)` is the probability of risk factor level :math:`\lambda`,
+      ``risk_factor_prev[λ]``
+    * :math:`\beta_{\lambda}` is the parameter for risk factor level :math:`\lambda`,
+      ``asthma_prev_risk_factor_params[λ]``
+
+    To do so, we need to determine :math:`\beta_{\lambda}` for each risk factor level. In order to
+    find the :math:`\beta_{\lambda}` parameters, we minimize the following equation:
+
+    .. math::
+
+        \text{min}(\Delta) = \text{min}(| \zeta - \eta |)
+
+    where:
+
+    * :math:`\zeta` is the predicted / calibrated asthma prevalence
+    * :math:`\eta` is the target asthma prevalence, ``asthma_prev_target``, from the model of
+      the BC Ministry of Health data.
+
+    We have :math:`\eta` from the occurrence model, so we only need to find :math:`\zeta`. We can
+    write :math:`\zeta` in terms of :math:`zeta_{\lambda}`, the predicted asthma prevalence at
+    risk factor level :math:`\lambda`:
+
+    .. math::
+
+        \zeta = \sum_{\lambda=0}^{n} p(\lambda) \cdot \zeta_{\lambda}
+
+    We also already know :math:`p(\lambda)`, the probability of risk factor level :math:`\lambda`.
+    We can express :math:`\zeta_{\lambda}` finally as:
+
+    .. math::
+
+        \zeta_{\lambda} &= \sigma(\beta_0 + \log(\omega_{\lambda}) - \alpha) \\
+        \beta_0 &= \sigma^{-1}(\eta)
+
+    where:
+
+    * :math:`\omega_{\lambda}` is the odds ratio for risk factor level :math:`\lambda`,
+      ``odds_ratio_target[λ]``
+    * :math:`\alpha` is the correction term for the asthma prevalence
+
+    Putting everything together, the calibrated asthma prevalence is given by:
+
+    .. math::
+
+        \zeta = \sum_{\lambda=0}^{n} p(\lambda) \cdot \sigma\left(\sigma^{-1}(\eta) +
+            \log(\omega_{\lambda}) - \sum_{\gamma=1}^{n} p(\gamma) \cdot \beta_{\gamma}\right)
+
     
     Args:
         year: The integer year.
