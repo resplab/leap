@@ -25,7 +25,7 @@ def estimate_alpha(
 ) -> float:
     r"""Estimate the alpha parameter for the negative binomial model.
 
-    The :math:`alpha` parameter is the dispersion parameter for the negative binomial model:
+    The :math:`\alpha` parameter is the dispersion parameter for the negative binomial model:
 
     .. math::
 
@@ -68,10 +68,10 @@ def load_birth_data(
         A pandas dataframe with the number of births in a province, stratified by year and sex.
         Columns:
         
-            * ``year (int)``: The calendar year.
-            * ``province (str)``: The province name.
-            * ``sex (str)``: One of ``M`` = male, ``F`` = female
-            * ``n_birth (int)``: The number of births in the given year, province, and sex.
+        * ``year (int)``: The calendar year.
+        * ``province (str)``: The province name.
+        * ``sex (str)``: One of ``M`` = male, ``F`` = female
+        * ``n_birth (int)``: The number of births in the given year, province, and sex.
 
     """
     df = pd.read_csv(get_data_path("original_data/17100005.csv"))
@@ -119,13 +119,13 @@ def load_antibiotic_data() -> pd.DataFrame:
     stratified by year and sex.
     
     Returns:
-        A pandas dataframe with the following columns:
+        A Pandas dataframe. Columns:
         
-            * ``year (int)``: The calendar year.
-            * ``sex (str)``: One of ``M`` = male, ``F`` = female.
-            * ``n_abx (int)``: The number total number of courses of antibiotics dispensed to
-              infants in BC for the given year and sex.
-            * ``n_birth (int)``: The number of births in BC for the given year and sex.
+        * ``year (int)``: The calendar year.
+        * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+        * ``n_abx (int)``: The number total number of courses of antibiotics dispensed to
+            infants in BC for the given year and sex.
+        * ``n_birth (int)``: The number of births in BC for the given year and sex.
 
     """
 

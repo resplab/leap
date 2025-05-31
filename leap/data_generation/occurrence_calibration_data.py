@@ -97,8 +97,23 @@ def load_occurrence_data(
         max_year: The maximum year to load data for.
 
     Returns:
-        A tuple of two DataFrames: the first is the incidence data, and the second is the
-        prevalence data.
+        A tuple of two DataFrames.
+        Details:
+
+        1. Incidence dataframe with columns:
+
+           * ``year (int)``: The year of the prediction.
+           * ``age (int)``: The age of the individual in years, ranging from 3 to 110.
+           * ``sex (str)``: One of ``"M"`` or ``"F"``.
+           * ``incidence (float)``: The predicted asthma incidence for the given year, age,
+             and sex.
+        2. Prevalence dataframe with columns:
+
+           * ``year (int)``: The year of the prediction.
+           * ``age (int)``: The age of the individual in years, ranging from 3 to 110.
+           * ``sex (str)``: One of ``"M"`` or ``"F"``.
+           * ``prevalence (float)``: The predicted asthma prevalence for the given year, age,
+             and sex.
     """
 
     df_asthma = pd.DataFrame(
@@ -136,6 +151,12 @@ def load_reassessment_data(
 
     Returns:
         A DataFrame containing the reassessment data.
+        Columns:
+
+        * ``year (int)``: The year of the reassessment.
+        * ``age (int)``: The age of the individual in years, a value in ``[4, 110]``.
+        * ``sex (str)``: One of ``"M"`` or ``"F"``.
+        * ``ra (float)``: The reassessment rate for asthma, a value in ``[0, 1]``.
     """
 
     df_reassessment = pd.read_csv(get_data_path("processed_data/asthma_reassessment.csv"))
@@ -151,6 +172,7 @@ def load_family_history_data(β_fam_history: Dict[str, float] | None = None) -> 
 
     Args:
         β_fam_history: A dictionary of two beta parameters for the odds ratio calculation:
+
             * ``β_fhx_0``: The beta parameter for the constant term in the equation
             * ``β_fhx_age``: The beta parameter for the age term in the equation.
 
@@ -158,12 +180,14 @@ def load_family_history_data(β_fam_history: Dict[str, float] | None = None) -> 
         A dataframe containing the family history odds ratios.
         It contains the following columns:
 
-            * ``age (int)``: The age of the individual. Ranges from ``3`` to ``5``.
-            * ``fam_history (int)``: Whether or not there is a family history of asthma.
-              ``0`` = one or more parents has asthma, 
-              ``1`` = neither parent has asthma.
-            * ``odds_ratio (float)``: The odds ratio for asthma prevalence based on family
-                history and age. The odds ratio is calculated based on the CHILD study data.
+        * ``age (int)``: The age of the individual. Ranges from ``3`` to ``5``.
+        * ``fam_history (int)``: Whether or not there is a family history of asthma:
+
+          - ``0``: one or more parents has asthma, 
+          - ``1``: neither parent has asthma.
+
+        * ``odds_ratio (float)``: The odds ratio for asthma prevalence based on family
+          history and age. The odds ratio is calculated based on the ``CHILD`` study data.
     """
 
     df_fam_history_or = pd.DataFrame(
@@ -184,6 +208,7 @@ def load_abx_exposure_data(β_abx: Dict[str, float] | None = None) -> pd.DataFra
 
     Args:
         β_abx: A dictionary of 3 beta parameters for the odds ratio calculation:
+
             * ``β_abx_0``: The beta parameter for the constant term in the equation
             * ``β_abx_age``: The beta parameter for the age term in the equation
             * ``β_abx_dose``: The beta parameter for the antibiotic dose term in the equation.
@@ -193,12 +218,12 @@ def load_abx_exposure_data(β_abx: Dict[str, float] | None = None) -> pd.DataFra
         antibiotics taken during the first year of life.
         It contains the following columns:
 
-            * ``age (int)``: The age of the individual. An integer in ``[3, 8]``.
-            * ``abx_dose (int)``: The number of antibiotic courses taken in the first year of life,
-              an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
-            * ``odds_ratio (float)``: The odds ratio for asthma prevalence based on antibiotic
-              exposure during the first year of life and age. The odds ratio is calculated based on
-              the CHILD study data.
+        * ``age (int)``: The age of the individual. An integer in ``[3, 8]``.
+        * ``abx_dose (int)``: The number of antibiotic courses taken in the first year of life,
+          an integer in ``[0, 5]``, where 5 indicates 5 or more courses.
+        * ``odds_ratio (float)``: The odds ratio for asthma prevalence based on antibiotic
+          exposure during the first year of life and age. The odds ratio is calculated based on
+          the ``CHILD`` study data.
     """
 
     df_abx_or = pd.DataFrame(
@@ -228,13 +253,13 @@ def compute_antibiotic_dose_prob(
     
     Returns:
         A dataframe with the probability of the number of courses of antibiotics,
-        ranging from 0 - 5+.
+        ranging from ``0 - 5+``.
         Columns:
 
-            * ``n_abx (int)``: The number of courses of antibiotics, an integer in ``[0, 5]``,
-              where ``5`` indicates 5 or more courses.
-            * ``prob (float)``: The probability that a person of the given sex and birth year
-              was given ``n_abx`` courses of antibiotics during the first year of their life.
+        * ``n_abx (int)``: The number of courses of antibiotics, an integer in ``[0, 5]``,
+          where ``5`` indicates 5 or more courses.
+        * ``prob (float)``: The probability that a person of the given sex and birth year
+          was given ``n_abx`` courses of antibiotics during the first year of their life.
     """
 
     if sex == "M":
@@ -280,16 +305,13 @@ def calculate_odds_ratio_abx(
     Args:
         age: The age of the individual in years.
         dose: The number of antibiotic courses taken in the first year of life,
-            an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
+            an integer in ``[0, 5]``, where 5 indicates 5 or more courses.
         β_abx: The parameters for the odds ratio calculation. If ``None``, the default
-            parameters are used. The default parameters are:
+            parameters are used. Dictionary keys:
 
-            * ``BETA_ABX_0``: The beta parameter for the constant term in the odds
-                ratio equation for antibiotic courses.
-            * ``BETA_ABX_AGE``: The beta parameter for the age term in the odds
-                ratio equation for antibiotic courses.
-            * ``BETA_ABX_DOSE``: The beta parameter for the dose term in the odds
-                ratio equation for antibiotic courses.
+            * ``β_abx_0``: The beta parameter for the constant term in the equation
+            * ``β_abx_age``: The beta parameter for the age term in the equation
+            * ``β_abx_dose``: The beta parameter for the antibiotic dose term in the equation.
 
     Returns:
         A float representing the odds ratio for asthma prevalence based on antibiotic
@@ -317,10 +339,13 @@ def calculate_odds_ratio_fam_history(
 
     Args:
         age: The age of the individual in years.
-        fam_hist: Whether or not there is a family history of asthma.
-            ``0`` = one or more parents has asthma,
-            ``1`` = neither parent has asthma.
+        fam_hist: Whether or not there is a family history of asthma:
+
+            * ``0``: one or more parents has asthma
+            * ``1``: neither parent has asthma
+
         β_fam_hist: The beta parameters for the odds ratio calculation:
+
             * ``β_fhx_0``: The beta parameter for the constant term in the odds ratio equation
             * ``β_fhx_age``: The beta parameter for the age term in the odds ratio equation.
     
@@ -348,14 +373,17 @@ def calculate_odds_ratio_risk_factors(
     """Calculate the odds ratio for asthma prevalence based on family history and antibiotic exposure.
 
     Args:
-        fam_hist: Whether or not there is a family history of asthma.
-            ``0`` = one or more parents has asthma,
-            ``1`` = neither parent has asthma.
+        fam_hist: Whether or not there is a family history of asthma:
+
+            * ``0``: one or more parents has asthma
+            * ``1``: neither parent has asthma
+
         age: The age of the individual in years.
         dose: The number of antibiotic courses taken in the first year of life,
-            an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
+            an integer in ``[0, 5]``, where 5 indicates 5 or more courses.
         β_risk_factors: A dictionary of beta parameters for the risk factor equations.
             Must contain the following keys:
+
             * ``fam_history``: A dictionary with the beta parameters for the family history
               odds ratio calculation. Must contain the keys ``β_fhx_0`` and ``β_fhx_age``.
             * ``abx``: A dictionary with the beta parameters for the antibiotic exposure
@@ -391,14 +419,16 @@ def risk_factor_generator(
     Args:
         year: The current year.
         age: The age of the person in years.
-        sex: One of ``M`` or ``F``.
+        sex: One of ``"M"`` or ``"F"``.
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
         β_fam_history: A dictionary of 2 beta parameters for the calculation of the odds
             ratio of having asthma given family history:
+
             * ``β_fhx_0``: The beta parameter for the constant term in the equation.
             * ``β_fhx_age``: The beta parameter for the age term in the equation.
         β_abx: A dictionary of 3 beta parameters for the calculation of the odds
             ratio of having asthma given antibiotic exposure during infancy:
+
             * ``β_abx_0``: The beta parameter for the constant term in the equation.
             * ``β_abx_age``: The beta parameter for the age term in the equation.
             * ``β_abx_dose``: The beta parameter for the antibiotic dose term in the equation.
@@ -408,18 +438,22 @@ def risk_factor_generator(
         and family history risk factors.
         Columns:
 
-            * ``fam_history (int)``: Whether or not there is a family history of asthma.
-              ``0`` = one or more parents has asthma
-              ``1`` = neither parent has asthma
-            * ``abx_exposure (int)``: The number of antibiotic courses taken in the first year of
-              life; an integer in ``[0, 5]``, where ``5`` indicates 5 or more courses.
-            * ``year (int)``: The given year.
-            * ``sex (str)``: One of ``M`` or ``F``.
-            * ``age (int)``: The age of the person in years.
-            * ``prob (float)``: The probability of antibiotic exposure * probability of one or
-              more parents having asthma given that the person has asthma.
-            * ``odds_ratio (float)``: The odds combined odds ratio:
-              ``odds_ratio = odds_ratio_abx * odds_ratio_fam_hist``
+        * ``fam_history (int)``: Whether or not there is a family history of asthma.
+
+          - ``0``: one or more parents has asthma
+          - ``1``: neither parent has asthma
+        * ``abx_exposure (int)``: The number of antibiotic courses taken in the first year of
+          life; an integer in ``[0, 5]``, where 5 indicates 5 or more courses.
+        * ``year (int)``: The given year.
+        * ``sex (str)``: One of ``M`` or ``F``.
+        * ``age (int)``: The age of the person in years.
+        * ``prob (float)``: The probability of antibiotic exposure * probability of one or
+          more parents having asthma given that the person has asthma.
+        * ``odds_ratio (float)``: The odds combined odds ratio:
+
+          .. code:: python
+
+            odds_ratio = odds_ratio_abx * odds_ratio_fam_history
     """
 
 
@@ -524,18 +558,21 @@ def calibrate_asthma_prevalence(
         age: The age in years.
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
         df_prevalence: A dataframe with the prevalence of asthma, with the following columns:
+
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
             * ``prevalence (float)``: the prevalence of asthma for the given year, age, and sex
 
     Returns:
-        A dictionary with the following keys:
-            * ``α (float)``: The prevalence correction factor.
-            * ``β (list[float])``: A vector of the beta parameters for the risk factors.
-            * ``ζ_λ (list[float])``: A vector of the calibrated asthma prevalence for each risk
-              factor combination ``λ`` for the current year.
-            * ``ζ (float)``: The calibrated asthma prevalence for the current year.
+        A dictionary containing the calibrated asthma prevalence for the given year, age, and sex.
+        The dictionary has the following keys:
+
+        * ``α (float)``: The prevalence correction factor.
+        * ``β (list[float])``: A vector of the beta parameters for the risk factors.
+        * ``ζ_λ (list[float])``: A vector of the calibrated asthma prevalence for each risk
+          factor combination ``λ`` for the current year.
+        * ``ζ (float)``: The calibrated asthma prevalence for the current year.
     """
 
     risk_set = risk_factor_generator(year, age, sex, model_abx)
@@ -614,35 +651,43 @@ def calibrate_asthma_incidence(
         sex: One of ``M`` = male, ``F`` = female.
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
         df_incidence: A dataframe with the incidence of asthma, with the following columns:
+
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
             * ``incidence (float)``: the incidence of asthma for the given year, age, and sex.
+
         df_prevalence: A dataframe with the prevalence of asthma, with the following columns:
+
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
             * ``prevalence (float)``: the prevalence of asthma for the given year, age, and sex.
+
         β_risk_factors: A dictionary of beta parameters for the risk factor equations:
+            
             * ``fam_history``: A dictionary with the beta parameters for the family history
               odds ratio calculation. Must contain the keys ``β_fhx_0`` and ``β_fhx_age``.
             * ``abx``: A dictionary with the beta parameters for the antibiotic exposure
               odds ratio calculation. Must contain the keys ``β_abx_0``, ``β_abx_age``,
               and ``β_abx_dose``.
+
         min_year: The minimum year to consider for the calibration.
 
     Returns:
-        A dictionary with the following keys:
+        A dictionary containing the calibrated asthma incidence for the given year, age, and sex.
+        The dictionary has the following keys:
 
-            * ``α``: The incidence correction factor.
-            * ``ζ_λ``: A vector of the calibrated asthma incidence for each risk factor
-              combination ``λ`` for the current year.
-            * ``ζ_prev_λ``: A vector of the calibrated asthma prevalence for each risk factor
-              combination ``λ`` for the previous year.
-            * ``risk_sets``: A dictionary with two keys:
-                * ``inc``: A dataframe with the incidence risk factors and their probabilities.
-                * ``past_prev``: A dataframe with the risk factors and their probabilities and
-                  odds ratios for the previous year.
+        * ``α``: The incidence correction factor.
+        * ``ζ_λ``: A vector of the calibrated asthma incidence for each risk factor
+          combination ``λ`` for the current year.
+        * ``ζ_prev_λ``: A vector of the calibrated asthma prevalence for each risk factor
+          combination ``λ`` for the previous year.
+        * ``risk_sets``: A dictionary with two keys:
+
+          - ``inc``: A dataframe with the incidence risk factors and their probabilities.
+          - ``past_prev``: A dataframe with the risk factors and their probabilities and
+            odds ratios for the previous year.
     """
 
     if year < BASELINE_YEAR or age == MIN_ASTHMA_AGE:
@@ -776,25 +821,36 @@ def compute_mean_diff_log_OR(
 
     Args:
         β_risk_factors_age: A list of two beta parameters, ``β_fhx_age`` and ``β_abx_age``.
+        df: A dataframe with the following columns:
+
+            * ``year (int)``: the year
+            * ``age (int)``: the age in years
+            * ``sex (str)``: ``M`` = male, ``F`` = female
+            * ``index (int)``: the index of the row in the dataframe
+
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
         df_incidence: A dataframe with the incidence of asthma, with the following columns:
+
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
             * ``incidence (float)``: the incidence of asthma for the given year, age, and sex.
+
         df_prevalence: A dataframe with the prevalence of asthma, with the following columns:
+
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
             * ``prevalence (float)``: the prevalence of asthma for the given year, age, and sex.
+
         df_reassessment: A dataframe with the reassessment of asthma, with the following columns:
+
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
             * ``ra (float)``: the reassessment of asthma
-        baseline_year: The baseline year for the calibration.
-        stabilization_year: The stabilization year for the calibration.
-        max_age: The maximum age to consider for the calibration.
+
+        min_year: The minimum year to consider for the calibration.
 
     Returns:
         The mean difference in log odds ratio for the given model and data.
@@ -858,23 +914,30 @@ def beta_params_age_optimizer(
     Args:
         model_abx: The fitted ``Negative Binomial`` model for the number of courses of antibiotics.
         df_incidence: A dataframe with the incidence of asthma, with the following columns:
+
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
             * ``incidence (float)``: the incidence of asthma for the given year, age, and sex.
+
         df_prevalence: A dataframe with the prevalence of asthma, with the following columns:
+
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
             * ``prevalence (float)``: the prevalence of asthma for the given year, age, and sex.
+
         df_reassessment: A dataframe with the reassessment of asthma, with the following columns:
+
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
             * ``ra (float)``: the reassessment of asthma
+
         baseline_year: The baseline year for the calibration.
         stabilization_year: The stabilization year for the calibration.
         max_age: The maximum age to consider for the calibration.
+        min_year: The minimum year to consider for the calibration.
         β_risk_factors_age: A list of two beta parameters, ``β_fhx_age`` and ``β_abx_age``, to be
             used as the initial values in the optimization.
     """
