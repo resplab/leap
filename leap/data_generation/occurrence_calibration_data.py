@@ -1005,7 +1005,7 @@ def generate_occurrence_calibration_data(
         axis=1
     ).reset_index(drop=True)
 
-    df_correction.sort_values(by=["sex", "age", "year"])
+    df_correction.sort_values(by=["sex", "age", "year"], inplace=True)
 
     df_correction_prevalence = df_correction[["year", "sex", "age", "prev_correction"]].copy()
     df_correction_prevalence.rename(columns={"prev_correction": "correction"}, inplace=True)
