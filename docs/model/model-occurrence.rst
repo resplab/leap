@@ -401,8 +401,13 @@ where:
   for the risk factor combination indexed by :math:`\lambda`
 * :math:`p(\lambda)` is the probability of the risk factor combination indexed by :math:`\lambda`
 
-Let's break this formula down. The antibiotic terms were fit by Lee et al.
-:cite:`lee2024`, using a random effects meta-regression model:
+Let's break this formula down:
+
+Antibiotic Risk Factors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The antibiotic terms were fit by Lee et al. :cite:`lee2024`, using a random effects meta-regression
+model:
 
 .. math::
 
@@ -426,6 +431,9 @@ The beta coefficients were found to be:
 * :math:`\beta_{\text{abx_0}} = 1.82581`
 * :math:`\beta_{\text{abx_age}} = 0.2253`
 * :math:`\beta_{\text{abx_dose}} = 0.0531475`
+
+Family History Risk Factors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The family history terms were fit using the ``CHILD Study`` data, in the paper by Patrick et al.
 :cite:`patrick2020`, using logistic regression:
