@@ -8,6 +8,7 @@ and update if new data needs to be added.
 .. toctree::
   :maxdepth: 1
 
+  leap.data_generation.antibiotic_data
   leap.data_generation.birth_data
   leap.data_generation.control_data
   leap.data_generation.death_data
