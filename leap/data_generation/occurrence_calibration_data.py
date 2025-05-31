@@ -44,7 +44,7 @@ BETA_ABX_AGE = -0.225
 # beta parameter for the constant term in the odds ratio equation for antibiotic courses
 BETA_ABX_0 = 1.82581
 # default beta parameters for the risk factors equations
-β_RISK_FACTORS = {
+β_RISK_FACTORS: Dict[str, Dict[str, float]] = {
     "fam_history": {
         "β_fhx_0": BETA_FHX_0,
         "β_fhx_age": BETA_FHX_AGE
