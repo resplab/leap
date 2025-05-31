@@ -751,7 +751,7 @@ def calibrate_asthma_incidence(
     )
 
     return {
-        "α": asthma_inc_correction,
+        "α": -1 * asthma_inc_correction,
         "ζ_λ": asthma_inc_calibrated,
         "ζ_prev_λ": asthma_prev_calibrated_past,
         "risk_sets": {
