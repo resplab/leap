@@ -425,13 +425,12 @@ def risk_factor_generator(
     birth_year = year - age
     df_abx_prob = compute_antibiotic_dose_prob(max(birth_year, 2000), sex, model_abx)
 
-    # combine abx_exposure = 3, 4, 5+ into 3+
+    # combine n_abx = 3, 4, 5+ into 3+
     df_abx_prob.loc[df_abx_prob["n_abx"] == 3, "prob"] = df_abx_prob.loc[
         df_abx_prob["n_abx"] >= 3, "prob"
     ].sum()
     df_abx_prob = df_abx_prob[df_abx_prob["n_abx"] <= 3]
     df_abx_prob.rename(columns={"prob": "prob_abx"}, inplace=True)
-
 
     # select the given age if <= 5, otherwise select age == 5
     df_fam_history_or = load_family_history_data(β_fam_history)
@@ -440,7 +439,7 @@ def risk_factor_generator(
     df_fam_history_or_age.rename(columns={"odds_ratio": "odds_ratio_fam_hist"}, inplace=True)
   
     # select the given age if <= 8, otherwise select age == 8
-    # filter out abx_exposure > 3
+    # filter out n_abx > 3
     df_abx_or = load_abx_exposure_data(β_abx)
     df_abx_or_age = df_abx_or.loc[df_abx_or["age"] == min(age, MAX_ABX_AGE + 1)]
     df_abx_or_age = df_abx_or_age[["n_abx", "odds_ratio"]]
@@ -998,6 +997,7 @@ def generate_occurrence_calibration_data(
         )["α"], axis=1
     ).reset_index(drop=True)
 
+    # Set incidence = prevalence for age = 3
     df_correction["inc_correction"] = df_correction.apply(
         lambda x: x["prev_correction"] 
             if x["year"] >= BASELINE_YEAR and x["age"] == MIN_ASTHMA_AGE 
