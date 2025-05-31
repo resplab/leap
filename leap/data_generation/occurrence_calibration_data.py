@@ -42,6 +42,7 @@ BETA_ABX_DOSE = 0.053
 # beta parameter for the age term in the odds ratio equation for antibiotic courses
 BETA_ABX_AGE = -0.225
 # beta parameter for the constant term in the odds ratio equation for antibiotic courses
+BETA_ABX_0 = 1.82581
 # default beta parameters for the risk factors equations
 β_RISK_FACTORS = {
     "fam_history": {
