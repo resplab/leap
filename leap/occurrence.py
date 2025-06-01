@@ -139,7 +139,7 @@ class Occurrence:
         p0 = self.crude_occurrence(sex, age, year)
         p = logistic.cdf(
             logit(p0) +
-            has_family_history * self.log_OR_family_history(age) +
+            has_family_history * np.log(self.calculate_odds_ratio_fam_history(age)) +
             self.log_OR_abx_exposure(age, dose) +
             self.correction_table.get_group(
                 (correction_year, str(sex), min(age, 63))
@@ -151,10 +151,26 @@ class Occurrence:
     def crude_occurrence(self, sex: Sex, age: int, year: int) -> float:
         return
 
-    def log_OR_family_history(self, age: int) -> float:
-        β_fam_hist = self.parameters["β_fam_hist"]
-        return β_fam_hist["β_fhx_0"] + (min(5, age) - 3) * β_fam_hist["β_fhx_age"]
+    def calculate_odds_ratio_fam_history(self, age: int) -> float:
+        """Calculate the odds ratio for asthma prevalence based on family history.
 
+        ``β_fam_hist``: The beta parameters for the odds ratio calculation:
+
+        * ``β_fhx_0``: The beta parameter for the constant term in the odds ratio equation
+        * ``β_fhx_age``: The beta parameter for the age term in the odds ratio equation.
+
+        Args:
+            age: The age of the individual in years.
+
+        Returns:
+            A float representing the odds ratio for asthma prevalence based on family
+            history and age.
+        """
+        β_fam_hist = self.parameters["β_fam_hist"]
+        return np.exp(
+            β_fam_hist["β_fhx_0"] +
+            β_fam_hist["β_fhx_age"] * (min(5, age) - 3)
+        )
 
     def log_OR_abx_exposure(self, age: int, dose: int) -> float:
         if age > 7 or dose == 0:
@@ -361,7 +377,7 @@ class Prevalence(Occurrence):
                 βyearagesex9 * f5(age) * g1(year) * sex + βyearagesex10 * f5(age) * g2(year) * sex
 
             * ``β_fam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
-              age. See ``log_OR_family_history``.
+              age. See ``calculate_odds_ratio_fam_history``.
             * ``βabx_exp (list[float])``: An array of 3 parameters to be multiplied by functions of
                 age and antibiotic exposure. See ``log_OR_abx_exposure``.
         """
