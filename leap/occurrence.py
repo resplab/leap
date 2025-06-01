@@ -154,7 +154,7 @@ class Occurrence:
         p0 = self.crude_occurrence(sex, age, year)
         p = expit(
             logit(p0) +
-            has_family_history * np.log(self.calculate_odds_ratio_fam_history(age)) +
+            np.log(self.calculate_odds_ratio_fam_history(age, has_family_history)) +
             np.log(self.calculate_odds_ratio_abx(age, dose)) +
             self.correction_table.get_group(
                 (correction_year, str(sex), min(age, 63))
@@ -166,7 +166,7 @@ class Occurrence:
     def crude_occurrence(self, sex: Sex, age: int, year: int) -> float:
         return
 
-    def calculate_odds_ratio_fam_history(self, age: int) -> float:
+    def calculate_odds_ratio_fam_history(self, age: int, fam_hist: int) -> float:
         r"""Calculate the odds ratio for asthma prevalence based on family history.
 
         .. math::
@@ -184,11 +184,17 @@ class Occurrence:
 
         Args:
             age: The age of the individual in years.
+            fam_hist: The family history of asthma, an integer in ``[0, 1]``, where 1 indicates
+                at least one parent has asthma.
 
         Returns:
             The odds ratio for asthma prevalence based on family history and age.
         """
         β_fam_hist = self.parameters["β_fam_hist"]
+
+        if fam_hist == 0:
+            return 1.0
+
         return np.exp(
             β_fam_hist["β_fhx_0"] +
             β_fam_hist["β_fhx_age"] * (min(5, age) - MIN_ASTHMA_AGE)
