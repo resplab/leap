@@ -217,8 +217,15 @@ def test_simulation_generate_initial_asthma(
                 "β2005": 1,
                 "β2005_year": 1
             },
-            [100, 0],
-            [1.826, -0.2920745, 0.053],
+            {
+                "β_fhx_0": 100,
+                "β_fhx_age": 0
+            },
+            {
+                "β_abx_0": 1.826,
+                "β_abx_age": -0.2920745,
+                "β_abx_dose": 0.053
+            },
             {"p": 1.0},
             "F",
             4,
@@ -245,8 +252,15 @@ def test_simulation_generate_initial_asthma(
                 "β2005": 1,
                 "β2005_year": 1
             },
-            [-100, 0],
-            [0.0, 0.0, 0.0],
+            {
+                "β_fhx_0": -100,
+                "β_fhx_age": 0
+            },
+            {
+                "β_abx_0": 0.0,
+                "β_abx_age": 0.0,
+                "β_abx_dose": 0.0
+            },
             {"p": 1.0},
             "F",
             4,
