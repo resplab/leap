@@ -494,6 +494,8 @@ def agent_has_asthma(
     Args:
         agent: A person in the model.
         occurrence_type: One of ``"incidence"`` or ``"prevalence"``.
+        prevalence: Asthma prevalence object.
+        incidence: Asthma incidence object.
         age: The age of the agent.
         year: The calendar year.
     """
