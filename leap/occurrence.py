@@ -13,6 +13,9 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
+MIN_ASTHMA_AGE = 3
+MAX_ABX_AGE = 7
+
 
 class Occurrence:
     """A class containing information about asthma occurrence (incidence or prevalence)."""
@@ -169,7 +172,7 @@ class Occurrence:
         β_fam_hist = self.parameters["β_fam_hist"]
         return np.exp(
             β_fam_hist["β_fhx_0"] +
-            β_fam_hist["β_fhx_age"] * (min(5, age) - 3)
+            β_fam_hist["β_fhx_age"] * (min(5, age) - MIN_ASTHMA_AGE)
         )
 
     def calculate_odds_ratio_abx(self, age: int, dose: int) -> float:
@@ -186,13 +189,13 @@ class Occurrence:
         """
         β_abx = self.parameters["β_abx"]
 
-        if age > 7 or dose == 0:
+        if age > MAX_ABX_AGE or dose == 0:
             return 1.0
         else:
             return np.exp(
                 β_abx["β_abx_0"] +
-                β_abx["β_abx_age"] * min(age, 7) +
-                β_abx["β_abx_dose"] * min(dose, 3)
+                β_abx["β_abx_age"] * min(age, MAX_ABX_AGE) +
+                β_abx["β_abx_dose"] * min(dose, MIN_ASTHMA_AGE)
             )
 
 
@@ -483,11 +486,11 @@ def compute_asthma_age(
     min_year = incidence.min_year
     max_year = incidence.max_year
 
-    if current_age == 3:
-        return 3
+    if current_age == MIN_ASTHMA_AGE:
+        return MIN_ASTHMA_AGE
     else:
         find_asthma_age = True
-        asthma_age = 3
+        asthma_age = MIN_ASTHMA_AGE
         year = min(max(agent.year - current_age + asthma_age, min_year), max_year)
         while find_asthma_age and asthma_age < max_asthma_age:
             has_asthma = agent_has_asthma(
@@ -539,14 +542,14 @@ def agent_has_asthma(
         else:
             year = agent.year - 1
 
-    if age < 3:
+    if age < MIN_ASTHMA_AGE:
         has_asthma = False
-    elif age == 3:
+    elif age == MIN_ASTHMA_AGE:
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
             sex=agent.sex, age=age, year=year, has_family_history=agent.has_family_history,
             dose=agent.num_antibiotic_use
         ))) # type: ignore
-    elif age > 3 and occurrence_type == "incidence":
+    elif age > MIN_ASTHMA_AGE and occurrence_type == "incidence":
         has_asthma = bool(
             np.random.binomial(
                 n=1,
@@ -555,7 +558,7 @@ def agent_has_asthma(
                 )
             ) # type: ignore
         ) 
-    elif age > 3 and occurrence_type == "prevalence":
+    elif age > MIN_ASTHMA_AGE and occurrence_type == "prevalence":
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
             agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
         ))) # type: ignore
