@@ -9,6 +9,52 @@ from leap.occurrence import Incidence, Prevalence, agent_has_asthma
 from tests.utils import __test_dir__
 
 
+POLY_PARAMETERS_INCIDENCE = {
+    "alpha_age": [
+        32.76923076923077,
+        32.90289472637344,
+        33.11652518493872,
+        33.339224035842506,
+        33.13305341556257
+    ],
+    "norm2_age": [
+        519.9999999999999,
+        178492.30769230757,
+        49586442.54438886,
+        12799523974.241816,
+        3212003819462.7515,
+        712446143502445.5
+    ]
+}
+
+POLY_PARAMETERS_PREVALENCE = {
+    "alpha_age": [
+        32.76923076923077,
+        32.90289472637344,
+        33.11652518493872,
+        33.339224035842506,
+        33.13305341556257
+    ],
+    "norm2_age": [
+        519.9999999999999,
+        178492.30769230757,
+        49586442.54438886,
+        12799523974.241816,
+        3212003819462.7515,
+        712446143502445.5
+    ],
+    "alpha_year": [
+        2009.5,
+        2009.5
+    ],
+    "norm2_year": [
+        519.9999999999999,
+        17290.0,
+        456456.00000000006
+    ]
+}
+
+
 @pytest.fixture(scope="function")
 def config():
     with open(pathlib.Path(__test_dir__, "data/config.json"), "r") as file:
@@ -17,13 +63,9 @@ def config():
 
 
 @pytest.mark.parametrize(
-    "hyperparameters, parameters, max_age",
+    "parameters, poly_parameters, max_age",
     [
         (
-            {
-                "β0_μ": 0.0,
-                "β0_σ": 0.00000001
-            },
             {
                 "β0": 34.6,
                 "βsex": -9.5,
@@ -34,14 +76,19 @@ def config():
                 "βfam_hist": [0.12, 0.36],
                 "βabx_exp": [1.8, -0.29, 0.053]
             },
+            POLY_PARAMETERS_INCIDENCE,
             60
         ),
     ]
 )
-def test_incidence_constructor(hyperparameters, parameters, max_age):
-    incidence = Incidence(hyperparameters=hyperparameters, parameters=parameters, max_age=max_age)
-    assert incidence.hyperparameters["β0_μ"] == hyperparameters["β0_μ"]
-    assert incidence.hyperparameters["β0_σ"] == hyperparameters["β0_σ"]
+def test_incidence_constructor(parameters, poly_parameters, max_age):
+    incidence = Incidence(parameters=parameters, poly_parameters=poly_parameters, max_age=max_age)
+    np.testing.assert_array_equal(
+        incidence.poly_parameters["alpha_age"], poly_parameters["alpha_age"]
+    )
+    np.testing.assert_array_equal(
+        incidence.poly_parameters["norm2_age"], poly_parameters["norm2_age"]
+    )
     assert incidence.parameters["β0"] == parameters["β0"]
     assert incidence.parameters["βsex"] == parameters["βsex"]
     np.testing.assert_array_equal(incidence.parameters["βage"], parameters["βage"])
@@ -55,13 +102,9 @@ def test_incidence_constructor(hyperparameters, parameters, max_age):
 
 
 @pytest.mark.parametrize(
-    "hyperparameters, parameters, max_age",
+    "parameters, poly_parameters, max_age",
     [
         (
-            {
-                "β0_μ": 0.0,
-                "β0_σ": 0.00000001
-            },
             {
                 "β0": -2.28,
                 "βsex": -0.11,
@@ -74,14 +117,25 @@ def test_incidence_constructor(hyperparameters, parameters, max_age):
                 "βfam_hist": [0.122, 0.376],
                 "βabx_exp": [1.826, -0.225, 0.053]
             },
+            POLY_PARAMETERS_PREVALENCE,
             60
         ),
     ]
 )
-def test_prevalence_constructor(hyperparameters, parameters, max_age):
-    prevalence = Prevalence(hyperparameters=hyperparameters, parameters=parameters, max_age=max_age)
-    assert prevalence.hyperparameters["β0_μ"] == hyperparameters["β0_μ"]
-    assert prevalence.hyperparameters["β0_σ"] == hyperparameters["β0_σ"]
+def test_prevalence_constructor(parameters, poly_parameters, max_age):
+    prevalence = Prevalence(parameters=parameters, poly_parameters=poly_parameters, max_age=max_age)
+    np.testing.assert_array_equal(
+        prevalence.poly_parameters["alpha_age"], poly_parameters["alpha_age"]
+    )
+    np.testing.assert_array_equal(
+        prevalence.poly_parameters["norm2_age"], poly_parameters["norm2_age"]
+    )
+    np.testing.assert_array_equal(
+        prevalence.poly_parameters["alpha_year"], poly_parameters["alpha_year"]
+    )
+    np.testing.assert_array_equal(
+        prevalence.poly_parameters["norm2_year"], poly_parameters["norm2_year"]
+    )
     assert prevalence.parameters["β0"] == parameters["β0"]
     assert prevalence.parameters["βsex"] == parameters["βsex"]
     np.testing.assert_array_equal(prevalence.parameters["βage"], parameters["βage"])
@@ -97,15 +151,14 @@ def test_prevalence_constructor(hyperparameters, parameters, max_age):
 
 @pytest.mark.parametrize(
     (
-        "hyperparameters, incidence_parameters, prevalence_parameters, family_history_parameters,"
+        "poly_parameters_incidence, poly_parameters_prevalence, incidence_parameters,"
+        "prevalence_parameters, family_history_parameters,"
         "max_age, age, sex, starting_year, year, province, occurrence_type, has_asthma"
     ),
     [
         (
-            {
-                "β0_μ": 0.0,
-                "β0_σ": 0.00000001
-            },
+            POLY_PARAMETERS_INCIDENCE,
+            POLY_PARAMETERS_PREVALENCE,
             {
                 "β0": 34.6,
                 "βsex": -9.5,
@@ -137,14 +190,12 @@ def test_prevalence_constructor(hyperparameters, parameters, max_age):
             2024,
             2025,
             "CA",
-            "inc",
+            "incidence",
             True
         ),
         (
-            {
-                "β0_μ": 0.0,
-                "β0_σ": 0.00000001
-            },
+            POLY_PARAMETERS_INCIDENCE,
+            POLY_PARAMETERS_PREVALENCE,
             {
                 "β0": 34.6,
                 "βsex": -9.5,
@@ -176,14 +227,12 @@ def test_prevalence_constructor(hyperparameters, parameters, max_age):
             2024,
             2025,
             "CA",
-            "prev",
+            "prevalence",
             True
         ),
         (
-            {
-                "β0_μ": 0.0,
-                "β0_σ": 0.00000001
-            },
+            POLY_PARAMETERS_INCIDENCE,
+            POLY_PARAMETERS_PREVALENCE,
             {
                 "β0": 34.6,
                 "βsex": -9.5,
@@ -215,14 +264,15 @@ def test_prevalence_constructor(hyperparameters, parameters, max_age):
             2024,
             2025,
             "CA",
-            "prev",
+            "prevalence",
             False
-        ),
+        )
     ]
 )
 def test_agent_has_asthma(
-    config, hyperparameters, incidence_parameters, prevalence_parameters, family_history_parameters,
-    max_age, age, sex, starting_year, year, province, occurrence_type, has_asthma
+    config, poly_parameters_incidence, poly_parameters_prevalence, incidence_parameters,
+    prevalence_parameters, family_history_parameters, max_age, age, sex, starting_year, year,
+    province, occurrence_type, has_asthma
 ):
     """
     Setting the incidence parameter ``βfam_hist = [100, 0]`` and the family history parameter
@@ -232,10 +282,10 @@ def test_agent_has_asthma(
     """
     year_index = year - starting_year + 1
     incidence = Incidence(
-        hyperparameters=hyperparameters, parameters=incidence_parameters, max_age=max_age
+        parameters=incidence_parameters, poly_parameters=poly_parameters_incidence, max_age=max_age
     )
     prevalence = Prevalence(
-        hyperparameters=hyperparameters, parameters=prevalence_parameters, max_age=max_age
+       parameters=prevalence_parameters, poly_parameters=poly_parameters_prevalence, max_age=max_age
     )
     agent = Agent(
         sex=sex,
