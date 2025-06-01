@@ -77,7 +77,7 @@ def config():
                     "β_fhx_0": 0.12,
                     "β_fhx_age": 0.36
                 },
-                "βabx_exp": [1.8, -0.29, 0.053]
+                "β_abx": [1.8, -0.29, 0.053]
             },
             POLY_PARAMETERS_INCIDENCE,
             60
@@ -99,7 +99,7 @@ def test_incidence_constructor(parameters, poly_parameters, max_age):
     np.testing.assert_array_equal(incidence.parameters["βsexage"], parameters["βsexage"])
     assert incidence.parameters["βsexyear"] == parameters["βsexyear"]
     np.testing.assert_array_equal(incidence.parameters["β_fam_hist"], parameters["β_fam_hist"])
-    np.testing.assert_array_equal(incidence.parameters["βabx_exp"], parameters["βabx_exp"])
+    np.testing.assert_array_equal(incidence.parameters["β_abx"], parameters["β_abx"])
     assert incidence.max_age == max_age
 
 
@@ -121,7 +121,7 @@ def test_incidence_constructor(parameters, poly_parameters, max_age):
                     "β_fhx_0": 0.122,
                     "β_fhx_age": 0.376
                 },
-                "βabx_exp": [1.826, -0.225, 0.053]
+                "β_abx": [1.826, -0.225, 0.053]
             },
             POLY_PARAMETERS_PREVALENCE,
             60
@@ -151,7 +151,7 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
     np.testing.assert_array_equal(prevalence.parameters["βyearage"], parameters["βyearage"])
     np.testing.assert_array_equal(prevalence.parameters["βsexyearage"], parameters["βsexyearage"])
     np.testing.assert_array_equal(prevalence.parameters["β_fam_hist"], parameters["β_fam_hist"])
-    np.testing.assert_array_equal(prevalence.parameters["βabx_exp"], parameters["βabx_exp"])
+    np.testing.assert_array_equal(prevalence.parameters["β_abx"], parameters["β_abx"])
     assert prevalence.max_age == max_age
 
 
@@ -176,7 +176,11 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
                     "β_fhx_0": 100,
                     "β_fhx_age": 0
                 },
-                "βabx_exp": [1.8, -0.29, 0.053]
+                "β_abx": {
+                    "β_abx_0": 1.8,
+                    "β_abx_age": -0.29,
+                    "β_abx_dose": 0.053
+                }
             },
             {
                 "β0": -2.28,
@@ -191,7 +195,11 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
                     "β_fhx_0": 0.122,
                     "β_fhx_age": 0.376
                 },
-                "βabx_exp": [1.826, -0.225, 0.053]
+                "β_abx": {
+                    "β_abx_0": 1.826,
+                    "β_abx_age": -0.225,
+                    "β_abx_dose": 0.053
+                }
             },
             {
                 "p": 1.0
@@ -219,7 +227,11 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
                     "β_fhx_0": 100,
                     "β_fhx_age": 0
                 },
-                "βabx_exp": [1.8, -0.29, 0.053]
+                "β_abx": {
+                    "β_abx_0": 1.8,
+                    "β_abx_age": -0.29,
+                    "β_abx_dose": 0.053
+                }
             },
             {
                 "β0": -2.28,
@@ -234,7 +246,11 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
                     "β_fhx_0": 100,
                     "β_fhx_age": 0
                 },
-                "βabx_exp": [1.826, -0.225, 0.053]
+                "β_abx": {
+                    "β_abx_0": 1.826,
+                    "β_abx_age": -0.225,
+                    "β_abx_dose": 0.053
+                }
             },
             {
                 "p": 1.0
@@ -262,7 +278,11 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
                     "β_fhx_0": 100,
                     "β_fhx_age": 0
                 },
-                "βabx_exp": [1.8, -0.29, 0.053]
+                "β_abx": {
+                    "β_abx_0": 1.8,
+                    "β_abx_age": -0.29,
+                    "β_abx_dose": 0.053
+                }
             },
             {
                 "β0": -2.28,
@@ -277,7 +297,11 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
                     "β_fhx_0": 0.122,
                     "β_fhx_age": 0.376
                 },
-                "βabx_exp": [1.826, -0.225, 0.053]
+                "β_abx": {
+                    "β_abx_0": 1.826,
+                    "β_abx_age": -0.225,
+                    "β_abx_dose": 0.053
+                }
             },
             {
                 "p": 0.2927242
