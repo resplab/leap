@@ -151,14 +151,23 @@ class Occurrence:
         """
         correction_year = min(year, self.max_year)
         year = min(year, self.max_year)
-        p0 = self.crude_occurrence(sex, age, year)
+
+        # Calculate asthma incidence / prevalence based on Model 1
+        β_eta = self.crude_occurrence(sex, age, year)
+
+        # Calculate the odds ratio for asthma incidence / prevalence based on family history
+        odds_ratio_fhx = self.calculate_odds_ratio_fam_history(age, has_family_history)
+
+        # Calculate the odds ratio for asthma incidence / prevalence based on antibiotic doses
+        odds_ratio_abx = self.calculate_odds_ratio_abx(age, dose)
+
+        # Get the incidence or prevalence correction term
+        α = self.correction_table.get_group(
+            (correction_year, str(sex), min(age, 63))
+        )["correction"].values[0]
+
         p = expit(
-            logit(p0) +
-            np.log(self.calculate_odds_ratio_fam_history(age, has_family_history)) +
-            np.log(self.calculate_odds_ratio_abx(age, dose)) +
-            self.correction_table.get_group(
-                (correction_year, str(sex), min(age, 63))
-            )["correction"].values[0]
+            logit(β_eta) + np.log(odds_ratio_fhx) + np.log(odds_ratio_abx) + α
         )
         return p
 
