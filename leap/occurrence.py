@@ -152,7 +152,9 @@ class Occurrence:
         return
 
     def log_OR_family_history(self, age: int) -> float:
-        return self.parameters["βfam_hist"][0] + (min(5, age) - 3) * self.parameters["βfam_hist"][1]
+        β_fam_hist = self.parameters["β_fam_hist"]
+        return β_fam_hist["β_fhx_0"] + (min(5, age) - 3) * β_fam_hist["β_fhx_age"]
+
 
     def log_OR_abx_exposure(self, age: int, dose: int) -> float:
         if age > 7 or dose == 0:
@@ -180,7 +182,6 @@ class Incidence(Occurrence):
         super().__init__(config, parameters, poly_parameters, max_age, correction_table)
         self.parameters["βage"] = np.array(self.parameters["βage"])
         self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
-        self.parameters["βfam_hist"] = np.array(self.parameters["βfam_hist"])
         self.parameters["βabx_exp"] = np.array(self.parameters["βabx_exp"])
 
     @property
@@ -211,8 +212,8 @@ class Incidence(Occurrence):
               See ``poly_age_calculator``.
             * ``βsexyear (float)``: The parameter to be multiplied by sex and year,
               i.e. ``βsexyear * year * sex``.
-            * ``βfam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
-              age. See ``log_OR_family_history``.
+            * ``β_fam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
+              age. See ``calculate_odds_ratio_fam_history``.
             * ``βabx_exp (list[float])``: An array of 3 parameters to be multiplied by functions of
               age and antibiotic exposure. See ``log_OR_abx_exposure``.
 
@@ -221,7 +222,7 @@ class Incidence(Occurrence):
     
     @parameters.setter
     def parameters(self, parameters: dict):
-        KEYS = ["β0", "βsex", "βage", "βyear", "βsexage", "βsexyear", "βfam_hist", "βabx_exp"]
+        KEYS = ["β0", "βsex", "βage", "βyear", "βsexage", "βsexyear", "β_fam_hist", "βabx_exp"]
         for key in KEYS:
             if key not in parameters.keys():
                 raise ValueError(f"Missing key {key} in parameters.")
@@ -304,7 +305,6 @@ class Prevalence(Occurrence):
         self.parameters["βsexyear"] = np.array(self.parameters["βsexyear"])
         self.parameters["βyearage"] = np.array(self.parameters["βyearage"])
         self.parameters["βsexyearage"] = np.array(self.parameters["βsexyearage"])
-        self.parameters["βfam_hist"] = np.array(self.parameters["βfam_hist"])
         self.parameters["βabx_exp"] = np.array(self.parameters["βabx_exp"])
 
     @property
@@ -360,7 +360,7 @@ class Prevalence(Occurrence):
                 βyearagesex7 * f4(age) * g1(year) * sex + βyearagesex8 * f4(age) * g2(year) * sex +
                 βyearagesex9 * f5(age) * g1(year) * sex + βyearagesex10 * f5(age) * g2(year) * sex
 
-            * ``βfam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
+            * ``β_fam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
               age. See ``log_OR_family_history``.
             * ``βabx_exp (list[float])``: An array of 3 parameters to be multiplied by functions of
                 age and antibiotic exposure. See ``log_OR_abx_exposure``.
@@ -371,7 +371,7 @@ class Prevalence(Occurrence):
     def parameters(self, parameters: dict):
         KEYS = [
             "β0", "βsex", "βage", "βyear", "βsexage", "βsexyear", "βyearage",
-            "βsexyearage", "βfam_hist", "βabx_exp"
+            "βsexyearage", "β_fam_hist", "βabx_exp"
         ]
         for key in KEYS:
             if key not in parameters.keys():
