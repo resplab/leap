@@ -140,7 +140,7 @@ class Occurrence:
         p = logistic.cdf(
             logit(p0) +
             has_family_history * np.log(self.calculate_odds_ratio_fam_history(age)) +
-            self.log_OR_abx_exposure(age, dose) +
+            np.log(self.calculate_odds_ratio_abx(age, dose)) +
             self.correction_table.get_group(
                 (correction_year, str(sex), min(age, 63))
             )["correction"].values[0]
@@ -172,18 +172,28 @@ class Occurrence:
             β_fam_hist["β_fhx_age"] * (min(5, age) - 3)
         )
 
-    def log_OR_abx_exposure(self, age: int, dose: int) -> float:
+    def calculate_odds_ratio_abx(self, age: int, dose: int) -> float:
+        """Calculate the odds ratio for asthma prevalence based on antibiotic exposure.
+
+        Args:
+            age: The age of the individual in years.
+            dose: The number of antibiotic courses taken in the first year of life,
+                an integer in ``[0, 5]``, where 5 indicates 5 or more courses.
+
+        Returns:
+            A float representing the odds ratio for asthma prevalence based on antibiotic
+            exposure and age.
+        """
         β_abx = self.parameters["β_abx"]
 
         if age > 7 or dose == 0:
-            return 0
+            return 1.0
         else:
-            return (
+            return np.exp(
                 β_abx["β_abx_0"] +
                 β_abx["β_abx_age"] * min(age, 7) +
                 β_abx["β_abx_dose"] * min(dose, 3)
             )
-
 
 
 class Incidence(Occurrence):
@@ -232,7 +242,7 @@ class Incidence(Occurrence):
             * ``β_fam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
               age. See ``calculate_odds_ratio_fam_history``.
             * ``β_abx (list[float])``: An array of 3 parameters to be multiplied by functions of
-              age and antibiotic exposure. See ``log_OR_abx_exposure``.
+              age and antibiotic exposure. See ``calculate_odds_ratio_abx``.
 
         """
         return self._parameters
@@ -379,7 +389,7 @@ class Prevalence(Occurrence):
             * ``β_fam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
               age. See ``calculate_odds_ratio_fam_history``.
             * ``β_abx (list[float])``: An array of 3 parameters to be multiplied by functions of
-                age and antibiotic exposure. See ``log_OR_abx_exposure``.
+                age and antibiotic exposure. See ``calculate_odds_ratio_abx``.
         """
         return self._parameters
     
