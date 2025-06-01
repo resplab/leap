@@ -47,7 +47,7 @@ def compute_asthma_prevalence_λ(
     asthma_prev_risk_factor_params: list[float],
     odds_ratio_target: list[float],
     risk_factor_prob: list[float],
-    beta0: float
+    β_0: float
 ) -> np.ndarray:
     r"""Compute the asthma prevalence based on the risk factors and the parameters provided.
 
@@ -70,7 +70,7 @@ def compute_asthma_prevalence_λ(
             shape ``(n, 1)``.
         risk_factor_prob: A vector of the prevalence of the risk factor levels, with shape
             ``(n, 1)``.
-        beta0: The intercept of the logistic regression model.
+        β_0: The intercept of the logistic regression model.
     
     Returns:
         The calibrated asthma prevalence.
@@ -85,7 +85,7 @@ def compute_asthma_prevalence_λ(
 
     # asthma_prev_λ: asthma prevalence at risk factor level λ
     asthma_prev_λ = logistic.cdf(
-        beta0 * np.ones(n) + 
+        β_0 * np.ones(n) + 
         np.log(odds_ratio_target) - 
         prev_correction * np.ones(n)
     )
@@ -97,7 +97,7 @@ def compute_asthma_prevalence(
     asthma_prev_risk_factor_params: list[float],
     odds_ratio_target: list[float],
     risk_factor_prob: list[float],
-    beta0: float
+    β_0: float
 ) -> float:
     r"""Compute the asthma prevalence based on the risk factors and the parameters provided.
 
@@ -140,7 +140,7 @@ def compute_asthma_prevalence(
             shape ``(n, 1)``.
         risk_factor_prob: A vector of the prevalence of the risk factor levels, with shape
             ``(n, 1)``.
-        beta0: The intercept of the logistic regression model.
+        β_0: The intercept of the logistic regression model.
     
     Returns:
         The calibrated asthma prevalence.
@@ -148,7 +148,7 @@ def compute_asthma_prevalence(
 
     # asthma_prev_λ: asthma prevalence at risk factor level λ
     asthma_prev_λ = compute_asthma_prevalence_λ(
-        asthma_prev_risk_factor_params, odds_ratio_target, risk_factor_prob, beta0
+        asthma_prev_risk_factor_params, odds_ratio_target, risk_factor_prob, β_0
     )
 
     # asthma_prev: predicted asthma prevalence
@@ -161,7 +161,7 @@ def compute_asthma_prevalence_difference(
     asthma_prev_risk_factor_params: list[float],
     odds_ratio_target: list[float],
     risk_factor_prob: list[float],
-    beta0: float,
+    β_0: float,
     asthma_prev_target: float
 ) -> float:
     r"""Compute the absolute difference between the calibrated and target asthma prevalence.
@@ -186,7 +186,7 @@ def compute_asthma_prevalence_difference(
             shape ``(n, 1)``.
         risk_factor_prob: A vector of the prevalence of the risk factor levels, with shape
             ``(n, 1)``.
-        beta0: The intercept of the logistic regression model.
+        β_0: The intercept of the logistic regression model.
         asthma_prev_target: The target prevalence of asthma.
 
     Returns:
@@ -194,7 +194,7 @@ def compute_asthma_prevalence_difference(
     """
 
     asthma_prev_calibrated = compute_asthma_prevalence(
-        asthma_prev_risk_factor_params, odds_ratio_target, risk_factor_prob, beta0
+        asthma_prev_risk_factor_params, odds_ratio_target, risk_factor_prob, β_0
     )
     return np.abs(asthma_prev_calibrated - asthma_prev_target)
 
@@ -204,7 +204,7 @@ def optimize_prevalence_β_parameters(
     asthma_prev_target: float,
     odds_ratio_target: list[float],
     risk_factor_prob: list[float],
-    beta0: float | None = None,
+    β_0: float | None = None,
     verbose: bool = False
 ) -> list[float]:
     r"""Calibrate asthma prevalence based on the target prevalence and odds ratios of risk factors.
@@ -241,7 +241,7 @@ def optimize_prevalence_β_parameters(
         asthma_prev_target: The target prevalence of asthma from the BC Ministry of Health model.
         odds_ratio_target: A vector of odds ratios for the risk factors, with shape ``(n, 1)``.
         risk_factor_prob: A vector of the prevalence of the risk factors, with shape ``(n, 1)``.
-        beta0: The intercept of the logistic regression model. If ``None``, it is set to
+        β_0: The intercept of the logistic regression model. If ``None``, it is set to
             the ``logit`` of the target prevalence.
         verbose: A boolean indicating if the trace should be printed.
 
@@ -250,8 +250,8 @@ def optimize_prevalence_β_parameters(
         ``(n - 1, 1)``.
     """
 
-    if beta0 is None:
-        beta0 = logit(asthma_prev_target)
+    if β_0 is None:
+        β_0 = logit(asthma_prev_target)
 
     # set initial beta parameters to 0
     asthma_prev_risk_factor_params = np.zeros(len(odds_ratio_target) - 1)
@@ -259,7 +259,7 @@ def optimize_prevalence_β_parameters(
     res = optimize.minimize(
         fun=compute_asthma_prevalence_difference,
         x0=asthma_prev_risk_factor_params,
-        args=(odds_ratio_target, risk_factor_prob, beta0, asthma_prev_target),
+        args=(odds_ratio_target, risk_factor_prob, β_0, asthma_prev_target),
         method="BFGS",
         tol=1e-15,
         hess=True,

@@ -266,7 +266,7 @@ def inc_correction_calculator(
         asthma_prev_risk_factor_params=asthma_prev_risk_factor_params_past,
         odds_ratio_target=list(odds_ratio_target_past),
         risk_factor_prob=list(risk_factor_prob_past),
-        beta0=logit(asthma_prev_target_past)
+        β_0=logit(asthma_prev_target_past)
     )
 
     # joint probability of risk factors and no asthma in the previous year
@@ -292,7 +292,7 @@ def inc_correction_calculator(
         asthma_prev_risk_factor_params=asthma_prev_risk_factor_params,
         odds_ratio_target=risk_set["odds_ratio"].to_list(),
         risk_factor_prob=list(risk_factor_prob_past_no_asthma),
-        beta0=β_0
+        β_0=β_0
     )
 
     return asthma_inc_correction, asthma_inc_calibrated, asthma_prev_calibrated_past

@@ -664,7 +664,7 @@ def calibrate_asthma_prevalence(
         asthma_prev_risk_factor_params=asthma_prev_risk_factor_params,
         odds_ratio_target=risk_set["odds_ratio"].to_list(),
         risk_factor_prob=risk_set["prob"].to_list(),
-        beta0=logit(asthma_prev_target)
+        β_0=logit(asthma_prev_target)
     )
 
     prev_correction = -1 * get_asthma_prevalence_correction(
