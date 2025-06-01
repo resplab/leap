@@ -142,7 +142,7 @@ class Occurrence:
             has_family_history * self.log_OR_family_history(age) +
             self.log_OR_abx_exposure(age, dose) +
             self.correction_table.get_group(
-                (correction_year, sex, min(age, 63))
+                (correction_year, str(sex), min(age, 63))
             )["correction"].values[0]
         )
         return p
