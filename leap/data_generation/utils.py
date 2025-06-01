@@ -240,11 +240,7 @@ def conv_2x2(
 
         >>> from leap.data_generation.utils import conv_2x2
         >>> conv_2x2(ori=0.4343, ni=100, n1i=52, n2i=87)
-            values
-        ai      43
-        bi       9
-        ci      44
-        di       4
+        ContingencyTable(values=43, 9, 44, 4)
 
         Here we have:
 
