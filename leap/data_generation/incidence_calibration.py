@@ -18,16 +18,14 @@ def compute_contingency_tables(
     asthma_prev_calibrated: list[float],
     sample_size: float = 1e10
 ) -> Dict[str | int, ContingencyTable]:
-    r"""Compute the contingency tables for the risk factors and asthma prevalence.
+    """Compute the contingency tables for the risk factors and asthma prevalence.
 
     This function computes the proportions of the population at different levels of family
     history and antibiotic exposure. The proportions are calculated based on the risk factors
     and the calibrated asthma prevalence. The function uses the ``metafor`` package to convert
     odds ratios into proportions.
 
-    See: Bonett, D. G. (2007). Transforming odds ratios into correlations for
-    meta-analytic research. American Psychologist, 62(3), 254-255.
-    https://doi.org/10.1037/0003-066x.62.3.254
+    See :cite:`bonett2007` for more details.
 
     Args:
         risk_factor_prob: A vector of the probabilities of the risk factor levels.
@@ -37,7 +35,7 @@ def compute_contingency_tables(
         sample_size: The total population size to use for the calculations.
 
     Returns:
-        A dictionary of ``ContingencyTable``s representing the proportions of the population for
+        A dictionary of ``ContingencyTables`` representing the proportions of the population for
         different risk factor levels / combinations. For example, if we have the following
         risk factors:
 
@@ -112,7 +110,6 @@ def compute_odds_ratio(
             risk factors (``λ = 0``) in the current year.
         asthma_incidence_λ: The calibrated asthma incidence for the risk factor combination ``λ`` in
             the current year.
-        odds_ratio_target: A vector of odds ratios for the risk factors.
         ra_target: A value between 0 and 1 indicating the target reassessment.
         mis_dx: A numeric value representing the misdiagnosis rate.
         dx: A numeric value representing the diagnosis rate.

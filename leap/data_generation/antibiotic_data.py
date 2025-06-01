@@ -32,7 +32,7 @@ def estimate_alpha(
         \alpha := \dfrac{1}{\theta} = \dfrac{\sigma^2 - \mu}{\mu^2}
     
     Args:
-        df_abx: A Pandas dataframe with data to be fitted.
+        df: A Pandas dataframe with data to be fitted.
         formula: The formula for the GLM model. See the `statsmodels documentation
             <https://www.statsmodels.org/stable/examples/notebooks/generated/glm_formula.html>`_
             for more information.
