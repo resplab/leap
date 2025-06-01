@@ -23,7 +23,7 @@ def config():
 @pytest.mark.parametrize(
     (
         "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
-        "antibiotic_exposure_parameters, prevalence_parameters, incidence_parameter_βfam_hist,"
+        "antibiotic_exposure_parameters, prevalence_parameters, incidence_parameter_β_fam_hist,"
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
         "sex, age, year_index,"
         "expected_has_asthma, expected_asthma_age, expected_asthma_status, expected_control_levels"
@@ -55,8 +55,15 @@ def config():
                 "βsexyear": [0.0, 0.0],
                 "βyearage": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                 "βsexyearage": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                "βfam_hist": [-100, 0],
-                "βabx_exp": [0.0, 0.0, 0.0]
+                "β_fam_hist": {
+                    "β_fhx_0": -100,
+                    "β_fhx_age": 0
+                },
+                "β_abx": {
+                    "β_abx_0": 0.0,
+                    "β_abx_age": 0.0,
+                    "β_abx_dose": 0.0
+                }
             },
             [100, 0],
             {"p": 1.0},
@@ -96,8 +103,15 @@ def config():
                 "βsexyear": [0.0, 0.0],
                 "βyearage": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                 "βsexyearage": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                "βfam_hist": [100, 0],
-                "βabx_exp": [0.0, 0.0, 0.0]
+                "β_fam_hist": {
+                    "β_fhx_0": 100,
+                    "β_fhx_age": 0
+                },
+                "β_abx": {
+                    "β_abx_0": 0.0,
+                    "β_abx_age": 0.0,
+                    "β_abx_dose": 0.0
+                }
             },
             [100, 0],
             {"p": 1.0},
@@ -115,7 +129,7 @@ def config():
 )
 def test_simulation_generate_initial_asthma(
     config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
-    antibiotic_exposure_parameters, prevalence_parameters, incidence_parameter_βfam_hist,
+    antibiotic_exposure_parameters, prevalence_parameters, incidence_parameter_β_fam_hist,
     family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,
     sex, age, year_index, expected_has_asthma, expected_asthma_age, expected_asthma_status,
     expected_control_levels
@@ -130,7 +144,7 @@ def test_simulation_generate_initial_asthma(
     Setting the ``num_births_initial = 10`` and starting in 2024 with growth type "M3", each of the
     age groups has 10 agents, for a total of 10 x 5 = 50 agents.
 
-    Setting the incidence parameter ``βfam_hist = [100, 0]`` and the family history parameter
+    Setting the incidence parameter ``β_fam_hist = [100, 0]`` and the family history parameter
     ``p = 1.0`` ensures that the probability of an agent being diagnosed with asthma is 1. The
     maximum age is set to 4, and the minimum age required for an asthma diagnosis is 3. So all
     agents aged 4 should receive an asthma diagnosis.
@@ -154,7 +168,7 @@ def test_simulation_generate_initial_asthma(
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
     config["prevalence"]["parameters"] = prevalence_parameters
-    config["incidence"]["parameters"]["βfam_hist"] = incidence_parameter_βfam_hist
+    config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
     config["family_history"]["parameters"] = family_history_parameters
     config["exacerbation"]["hyperparameters"]["β0_μ"] = exacerbation_hyperparameter_β0_μ
     config["control"]["parameters"]["θ"] = control_parameter_θ
@@ -180,7 +194,7 @@ def test_simulation_generate_initial_asthma(
 @pytest.mark.parametrize(
     (
         "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
-        "antibiotic_exposure_parameters, incidence_parameter_βfam_hist,"
+        "antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,"
         "incidence_parameter_βabx_exp, family_history_parameters, sex, age, year_index,"
         "expected_agent_has_asthma, expected_asthma_age, expected_asthma_status,"
         "expected_asthma_incidence"
@@ -246,7 +260,7 @@ def test_simulation_generate_initial_asthma(
 )
 def test_check_if_agent_gets_new_asthma_diagnosis(
     config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
-    antibiotic_exposure_parameters, incidence_parameter_βfam_hist, incidence_parameter_βabx_exp,
+    antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, incidence_parameter_βabx_exp,
     family_history_parameters, sex, age, year_index, expected_agent_has_asthma, expected_asthma_age,
     expected_asthma_status, expected_asthma_incidence
 ):
@@ -261,13 +275,13 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
     age groups has 10 agents, for a total of 10 x 5 = 50 agents.
 
     Test 1:
-    Setting the incidence parameter ``βfam_hist = [100, 0]`` and the family history parameter
+    Setting the incidence parameter ``β_fam_hist = [100, 0]`` and the family history parameter
     ``p = 1.0`` ensures that the probability of an agent being diagnosed with asthma is 1. The
     maximum age is set to 4, and the minimum age required for an asthma diagnosis is 3. So all
     agents aged 4 should receive an asthma diagnosis.
 
     Test 2:
-    Setting the incidence parameter ``βfam_hist = [-100, 0]`` and the family history parameter
+    Setting the incidence parameter ``β_fam_hist = [-100, 0]`` and the family history parameter
     ``p = 1.0`` ensures that the probability of an agent being diagnosed with asthma is 0.
     """
 
@@ -280,7 +294,7 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
         "max_age": max_age
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
-    config["incidence"]["parameters"]["βfam_hist"] = incidence_parameter_βfam_hist
+    config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
     config["incidence"]["parameters"]["βabx_exp"] = incidence_parameter_βabx_exp
     config["family_history"]["parameters"] = family_history_parameters
 
@@ -319,7 +333,7 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
 @pytest.mark.parametrize(
     (
         "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
-        "antibiotic_exposure_parameters, incidence_parameter_βfam_hist,"
+        "antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,"
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
         "sex, age, has_asthma, asthma_age, asthma_status, expected_control_levels,"
         "expected_exacerbation_history, expected_outcome_matrix_control,"
@@ -376,7 +390,7 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
 )              
 def test_simulation_update_asthma_effects(
     config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
-    antibiotic_exposure_parameters, incidence_parameter_βfam_hist, family_history_parameters,
+    antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, family_history_parameters,
     control_parameter_θ, exacerbation_hyperparameter_β0_μ, sex, age, has_asthma, asthma_age,
     asthma_status, expected_control_levels, expected_exacerbation_history,
     expected_outcome_matrix_control, expected_outcome_matrix_exacerbation,
@@ -391,7 +405,7 @@ def test_simulation_update_asthma_effects(
     Setting the ``num_births_initial`` to 10 and starting in 2024 with growth type "M3", each of the
     age groups has 10 agents, for a total of 10 x 5 = 50 agents.
 
-    Setting the incidence parameter ``βfam_hist`` to [100, 0] and the family history parameter ``p``
+    Setting the incidence parameter ``β_fam_hist`` to [100, 0] and the family history parameter ``p``
     to 1.0 ensures that the probability of an agent being diagnosed with asthma is 1. The maximum
     age is set to 4, and the minimum age required for an asthma diagnosis is 3. So all agents aged 4
     should receive an asthma diagnosis.
@@ -414,7 +428,7 @@ def test_simulation_update_asthma_effects(
         "max_age": max_age
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
-    config["incidence"]["parameters"]["βfam_hist"] = incidence_parameter_βfam_hist
+    config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
     config["family_history"]["parameters"] = family_history_parameters
     config["control"]["parameters"]["θ"] = control_parameter_θ
     config["exacerbation"]["hyperparameters"]["β0_μ"] = exacerbation_hyperparameter_β0_μ
@@ -458,7 +472,7 @@ def test_simulation_update_asthma_effects(
 @pytest.mark.parametrize(
     (
         "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
-        "antibiotic_exposure_parameters, incidence_parameter_βfam_hist,"
+        "antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,"
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
         "sex, age, has_asthma, asthma_age, asthma_status, exacerbation_history, year_index,"
         "expected_control_levels, expected_exacerbation_history"
@@ -499,7 +513,7 @@ def test_simulation_update_asthma_effects(
 )
 def test_reassess_asthma_diagnosis(
     config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
-    antibiotic_exposure_parameters, incidence_parameter_βfam_hist, family_history_parameters,
+    antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, family_history_parameters,
     exacerbation_hyperparameter_β0_μ, control_parameter_θ, sex, age, has_asthma, asthma_age,
     asthma_status, exacerbation_history, year_index, expected_control_levels,
     expected_exacerbation_history
@@ -513,7 +527,7 @@ def test_reassess_asthma_diagnosis(
     Setting the ``num_births_initial`` to 10 and starting in 2024 with growth type "M3", each of the
     age groups has 10 agents, for a total of 10 x 5 = 50 agents.
 
-    Setting the incidence parameter ``βfam_hist=[100, 0]`` and the family history parameter ``p=1.0``
+    Setting the incidence parameter ``β_fam_hist=[100, 0]`` and the family history parameter ``p=1.0``
     ensures that the probability of an agent being diagnosed with asthma is 1. The maximum
     age is set to 4, and the minimum age required for an asthma diagnosis is 3. So all agents aged 4
     should receive an asthma diagnosis.
@@ -537,7 +551,7 @@ def test_reassess_asthma_diagnosis(
         "max_age": max_age
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
-    config["incidence"]["parameters"]["βfam_hist"] = incidence_parameter_βfam_hist
+    config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
     config["family_history"]["parameters"] = family_history_parameters
     config["control"]["parameters"]["θ"] = control_parameter_θ
     config["exacerbation"]["hyperparameters"]["β0_μ"] = exacerbation_hyperparameter_β0_μ
@@ -645,7 +659,7 @@ def test_simulation_get_new_agents(
 @pytest.mark.parametrize(
     (
         "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
-        "antibiotic_exposure_parameters, incidence_parameter_βfam_hist,"
+        "antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,"
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
         "death_parameters, prevalence_parameters, utility_parameters, cost_parameters,"
         "year_index, expected_asthma_incidence_total, expected_asthma_status_total,"
@@ -655,12 +669,12 @@ def test_simulation_get_new_agents(
     ),
     [
         (
-            2024,
+            2024, # min_year
             1,
             "CA",
             "M3",
             10,
-            4,
+            4, # max_age
             {
                 "β0": -100000,
                 "βyear": -0.01,
@@ -671,10 +685,14 @@ def test_simulation_get_new_agents(
                 "β2005": 1,
                 "β2005_year": 1
             },
-            [100, 0],
-            {"p": 1.0},
-            5.0,
-            [-1 * 10**5, -1 * 10**5],
+            # incidence_parameter_β_fam_hist
+            {
+                "β_fhx_0": 100,
+                "β_fhx_age": 0
+            },
+            {"p": 1.0}, # family_history_parameters
+            5.0, # exacerbation_hyperparameter_β0_μ
+            [-1 * 10**5, -1 * 10**5], # control_parameter_θ
             {
                 "β0": -1,
                 "β1": -1,
@@ -689,8 +707,15 @@ def test_simulation_get_new_agents(
                 "βsexyear": [0.0, 0.0],
                 "βyearage": [0.0] * 10,
                 "βsexyearage": [0.0] * 10,
-                "βfam_hist": [-100, 0],
-                "βabx_exp": [0.0, 0.0, 0.0]
+                "β_fam_hist": {
+                    "β_fhx_0": -100,
+                    "β_fhx_age": 0
+                },
+                "β_abx": {
+                    "β_abx_0": 0.0,
+                    "β_abx_age": 0.0,
+                    "β_abx_dose": 0.0
+                }
             },
             {
                 "βcontrol": [0.0, 0.0, 0.10],
@@ -757,7 +782,7 @@ def test_simulation_get_new_agents(
 )
 def test_run_simulation_one_year(
     config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
-    antibiotic_exposure_parameters, incidence_parameter_βfam_hist, family_history_parameters,
+    antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, family_history_parameters,
     exacerbation_hyperparameter_β0_μ, control_parameter_θ, death_parameters,
     prevalence_parameters, utility_parameters, cost_parameters, year_index,
     expected_asthma_incidence_total, expected_asthma_status_total, expected_asthma_cost,
@@ -796,7 +821,7 @@ def test_run_simulation_one_year(
     Setting ``time_horizon=1`` means that the agents are generated from the initial population
     table, and that no immigration happens.
 
-    Setting the incidence parameter ``βfam_hist=[100, 0]`` and the family history parameter
+    Setting the incidence parameter ``β_fam_hist=[100, 0]`` and the family history parameter
     ``p=1.0`` ensures that the probability of an agent being diagnosed with asthma is 1. The
     maximum age is set to 4, and the minimum age required for an asthma diagnosis is 3. So all
     agents aged 4 should receive an asthma diagnosis.
@@ -822,7 +847,7 @@ def test_run_simulation_one_year(
         "max_age": max_age
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
-    config["incidence"]["parameters"]["βfam_hist"] = incidence_parameter_βfam_hist
+    config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
     config["family_history"]["parameters"] = family_history_parameters
     config["exacerbation"]["hyperparameters"]["β0_μ"] = exacerbation_hyperparameter_β0_μ
     config["control"]["parameters"]["θ"] = control_parameter_θ
@@ -889,7 +914,7 @@ def test_run_simulation_one_year(
 @pytest.mark.parametrize(
     (
         "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
-        "antibiotic_exposure_parameters, incidence_parameter_βfam_hist,"
+        "antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,"
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
         "death_parameters, prevalence_parameters, cost_parameters,"
         "expected_alive, expected_antibiotic_exposure,"
@@ -915,7 +940,10 @@ def test_run_simulation_one_year(
                 "β2005": 1,
                 "β2005_year": 1
             },
-            [100, 0],
+            {
+                "β_fhx_0": 100,
+                "β_fhx_age": 0
+            },
             {"p": 1.0},
             5.0,
             [-1 * 10**5, -1 * 10**5],
@@ -933,8 +961,15 @@ def test_run_simulation_one_year(
                 "βsexyear": [0.0, 0.0],
                 "βyearage": [0.0] * 10,
                 "βsexyearage": [0.0] * 10,
-                "βfam_hist": [-100, 0],
-                "βabx_exp": [0.0, 0.0, 0.0]
+                "β_fam_hist": {
+                    "β_fhx_0": -100,
+                    "β_fhx_age": 0
+                },
+                "β_abx": {
+                    "β_abx_0": 0.0,
+                    "β_abx_age": 0.0,
+                    "β_abx_dose": 0.0
+                }
             },
             {
                 "control": [0.0, 0.0, 100.0],
@@ -995,14 +1030,14 @@ def test_run_simulation_one_year(
 )
 def test_run_simulation_two_years(
     config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
-    antibiotic_exposure_parameters, incidence_parameter_βfam_hist, family_history_parameters,
+    antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, family_history_parameters,
     exacerbation_hyperparameter_β0_μ, control_parameter_θ, death_parameters, prevalence_parameters,
     cost_parameters, expected_alive, expected_antibiotic_exposure, expected_asthma_cost,
     expected_death, expected_emigration, expected_exacerbation_total, expected_family_history,
     expected_immigration_total
 ):
     """
-    Setting the incidence parameter ``βfam_hist=[100, 0]`` and the family history parameter
+    Setting the incidence parameter ``β_fam_hist=[100, 0]`` and the family history parameter
     ``p=1.0`` ensures that the probability of an agent being diagnosed with asthma is 1. The
     maximum age is set to 4, and the minimum age required for an asthma diagnosis is 3. So all
     agents aged 4 should receive an asthma diagnosis.
@@ -1039,7 +1074,7 @@ def test_run_simulation_two_years(
     }
 
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
-    config["incidence"]["parameters"]["βfam_hist"] = incidence_parameter_βfam_hist
+    config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
     config["family_history"]["parameters"] = family_history_parameters
     config["exacerbation"]["hyperparameters"]["β0_μ"] = exacerbation_hyperparameter_β0_μ
     config["control"]["parameters"]["θ"] = control_parameter_θ
