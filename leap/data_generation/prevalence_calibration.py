@@ -12,7 +12,7 @@ logger = get_logger(__name__, 20)
 
 def get_asthma_prevalence_correction(
     asthma_prev_risk_factor_params: list[float],
-    risk_factor_prev: list[float]
+    risk_factor_prob: list[float]
 ) -> float:
     r"""Compute the correction term for asthma prevalence.
 
@@ -24,14 +24,14 @@ def get_asthma_prevalence_correction(
 
     * :math:`\alpha` is the correction term for the asthma prevalence
     * :math:`p(\lambda)` is the prevalence of risk factor level :math:`\lambda`,
-      ``risk_factor_prev[λ]``
+      ``risk_factor_prob[λ]``
     * :math:`\beta_{\lambda}` is the parameter for risk factor level :math:`\lambda`,
       ``asthma_prev_risk_factor_params[λ]``
 
     Args:
         asthma_prev_risk_factor_params: A vector of parameters for the risk factors, with
             shape ``(n - 1, 1)``.
-        risk_factor_prev: A vector of the prevalence of the risk factor levels, with shape
+        risk_factor_prob: A vector of the prevalence of the risk factor levels, with shape
             ``(n, 1)``.
     
     Returns:
@@ -39,14 +39,14 @@ def get_asthma_prevalence_correction(
     """
 
     # prev_correction: correction term for prevalence
-    prev_correction = np.dot(risk_factor_prev[1:], asthma_prev_risk_factor_params)
+    prev_correction = np.dot(risk_factor_prob[1:], asthma_prev_risk_factor_params)
     return prev_correction
 
 
 def compute_asthma_prevalence_λ(
     asthma_prev_risk_factor_params: list[float],
     odds_ratio_target: list[float],
-    risk_factor_prev: list[float],
+    risk_factor_prob: list[float],
     beta0: float
 ) -> np.ndarray:
     r"""Compute the asthma prevalence based on the risk factors and the parameters provided.
@@ -68,7 +68,7 @@ def compute_asthma_prevalence_λ(
             shape ``(n - 1, 1)``.
         odds_ratio_target: A vector of odds ratios between the risk factors and asthma, with
             shape ``(n, 1)``.
-        risk_factor_prev: A vector of the prevalence of the risk factor levels, with shape
+        risk_factor_prob: A vector of the prevalence of the risk factor levels, with shape
             ``(n, 1)``.
         beta0: The intercept of the logistic regression model.
     
@@ -80,7 +80,7 @@ def compute_asthma_prevalence_λ(
 
     # prev_correction: correction term for prevalence
     prev_correction = get_asthma_prevalence_correction(
-        asthma_prev_risk_factor_params, risk_factor_prev
+        asthma_prev_risk_factor_params, risk_factor_prob
     )
 
     # asthma_prev_λ: asthma prevalence at risk factor level λ
@@ -96,7 +96,7 @@ def compute_asthma_prevalence_λ(
 def compute_asthma_prevalence(
     asthma_prev_risk_factor_params: list[float],
     odds_ratio_target: list[float],
-    risk_factor_prev: list[float],
+    risk_factor_prob: list[float],
     beta0: float
 ) -> float:
     r"""Compute the asthma prevalence based on the risk factors and the parameters provided.
@@ -110,7 +110,7 @@ def compute_asthma_prevalence(
     where:
 
     * :math:`p(\lambda)` is the probability of risk factor level :math:`\lambda`,
-      ``risk_factor_prev[λ]``
+      ``risk_factor_prob[λ]``
     * :math:`\zeta_{\lambda}` is the predicted asthma prevalence at risk factor level
       :math:`\lambda`, ``asthma_prev_λ``
 
@@ -138,7 +138,7 @@ def compute_asthma_prevalence(
             shape ``(n - 1, 1)``.
         odds_ratio_target: A vector of odds ratios between the risk factors and asthma, with
             shape ``(n, 1)``.
-        risk_factor_prev: A vector of the prevalence of the risk factor levels, with shape
+        risk_factor_prob: A vector of the prevalence of the risk factor levels, with shape
             ``(n, 1)``.
         beta0: The intercept of the logistic regression model.
     
@@ -148,11 +148,11 @@ def compute_asthma_prevalence(
 
     # asthma_prev_λ: asthma prevalence at risk factor level λ
     asthma_prev_λ = compute_asthma_prevalence_λ(
-        asthma_prev_risk_factor_params, odds_ratio_target, risk_factor_prev, beta0
+        asthma_prev_risk_factor_params, odds_ratio_target, risk_factor_prob, beta0
     )
 
     # asthma_prev: predicted asthma prevalence
-    asthma_prev = np.dot(asthma_prev_λ, risk_factor_prev)
+    asthma_prev = np.dot(asthma_prev_λ, risk_factor_prob)
     return(asthma_prev)
 
 
@@ -160,7 +160,7 @@ def compute_asthma_prevalence(
 def compute_asthma_prevalence_difference(
     asthma_prev_risk_factor_params: list[float],
     odds_ratio_target: list[float],
-    risk_factor_prev: list[float],
+    risk_factor_prob: list[float],
     beta0: float,
     asthma_prev_target: float
 ) -> float:
@@ -184,7 +184,7 @@ def compute_asthma_prevalence_difference(
             shape ``(n - 1, 1)``.
         odds_ratio_target: A vector of odds ratios between the risk factors and asthma, with
             shape ``(n, 1)``.
-        risk_factor_prev: A vector of the prevalence of the risk factor levels, with shape
+        risk_factor_prob: A vector of the prevalence of the risk factor levels, with shape
             ``(n, 1)``.
         beta0: The intercept of the logistic regression model.
         asthma_prev_target: The target prevalence of asthma.
@@ -194,7 +194,7 @@ def compute_asthma_prevalence_difference(
     """
 
     asthma_prev_calibrated = compute_asthma_prevalence(
-        asthma_prev_risk_factor_params, odds_ratio_target, risk_factor_prev, beta0
+        asthma_prev_risk_factor_params, odds_ratio_target, risk_factor_prob, beta0
     )
     return np.abs(asthma_prev_calibrated - asthma_prev_target)
 
@@ -203,7 +203,7 @@ def compute_asthma_prevalence_difference(
 def optimize_prevalence_β_parameters(
     asthma_prev_target: float,
     odds_ratio_target: list[float],
-    risk_factor_prev: list[float],
+    risk_factor_prob: list[float],
     beta0: float | None = None,
     verbose: bool = False
 ) -> list[float]:
@@ -227,7 +227,7 @@ def optimize_prevalence_β_parameters(
     * :math:`\omega_{\lambda}` is the odds ratio for risk factor level :math:`\lambda`,
       ``odds_ratio_target[i]``
     * :math:`p(\lambda)` is the prevalence of risk factor level :math:`\lambda`,
-      ``risk_factor_prev[i]``
+      ``risk_factor_prob[i]``
     * :math:`\beta_{\lambda}` is the parameter for risk factor level :math:`\lambda`,
       ``asthma_prev_risk_factor_params[i]``
     * :math:`\alpha` is the correction term for the asthma prevalence
@@ -240,7 +240,7 @@ def optimize_prevalence_β_parameters(
     Args:
         asthma_prev_target: The target prevalence of asthma from the BC Ministry of Health model.
         odds_ratio_target: A vector of odds ratios for the risk factors, with shape ``(n, 1)``.
-        risk_factor_prev: A vector of the prevalence of the risk factors, with shape ``(n, 1)``.
+        risk_factor_prob: A vector of the prevalence of the risk factors, with shape ``(n, 1)``.
         beta0: The intercept of the logistic regression model. If ``None``, it is set to
             the ``logit`` of the target prevalence.
         verbose: A boolean indicating if the trace should be printed.
@@ -259,7 +259,7 @@ def optimize_prevalence_β_parameters(
     res = optimize.minimize(
         fun=compute_asthma_prevalence_difference,
         x0=asthma_prev_risk_factor_params,
-        args=(odds_ratio_target, risk_factor_prev, beta0, asthma_prev_target),
+        args=(odds_ratio_target, risk_factor_prob, beta0, asthma_prev_target),
         method="BFGS",
         tol=1e-15,
         hess=True,

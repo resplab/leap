@@ -232,7 +232,7 @@ def inc_correction_calculator(
     asthma_inc_target: float,
     asthma_prev_target_past: float,
     odds_ratio_target_past: np.ndarray,
-    risk_factor_prev_past: np.ndarray,
+    risk_factor_prob_past: np.ndarray,
     risk_set: pd.DataFrame
 ) -> Tuple[float, np.ndarray, np.ndarray]:
     """Calculate the correction for asthma incidence based on risk factors.
@@ -241,7 +241,7 @@ def inc_correction_calculator(
         asthma_inc_target: The target incidence of asthma.
         asthma_prev_target_past: The target prevalence of asthma in the previous year.
         odds_ratio_target_past: A vector of odds ratios for the risk factors in the previous year.
-        risk_factor_prev_past: A vector of the prevalence of the risk factors in the previous year.
+        risk_factor_prob_past: A vector of the prevalence of the risk factors in the previous year.
         risk_set: A data frame containing the risk factors and their corresponding odds ratios.
 
     Returns:
@@ -258,40 +258,40 @@ def inc_correction_calculator(
     asthma_prev_risk_factor_params_past = optimize_prevalence_β_parameters(
         asthma_prev_target=asthma_prev_target_past,
         odds_ratio_target=odds_ratio_target_past,
-        risk_factor_prev=risk_factor_prev_past
+        risk_factor_prob=risk_factor_prob_past
     )
 
     # calibrated asthma prevalence for the previous year
     asthma_prev_calibrated_past = compute_asthma_prevalence_λ(
         asthma_prev_risk_factor_params=asthma_prev_risk_factor_params_past,
         odds_ratio_target=list(odds_ratio_target_past),
-        risk_factor_prev=list(risk_factor_prev_past),
+        risk_factor_prob=list(risk_factor_prob_past),
         beta0=logit(asthma_prev_target_past)
     )
 
     # joint probability of risk factors and no asthma in the previous year
     # P(λ, A = 0) = P(A = 0 | λ) * P(λ) = (1 - P(A = 1 | λ)) * P(λ)
-    risk_factor_prev_past_no_asthma = (1 - asthma_prev_calibrated_past) * risk_factor_prev_past
+    risk_factor_prob_past_no_asthma = (1 - asthma_prev_calibrated_past) * risk_factor_prob_past
     # normalize
-    risk_factor_prev_past_no_asthma = risk_factor_prev_past_no_asthma / np.sum(risk_factor_prev_past_no_asthma)
+    risk_factor_prob_past_no_asthma = risk_factor_prob_past_no_asthma / np.sum(risk_factor_prob_past_no_asthma)
     
     # asthma prevalence ~ risk factor parameters for incidence
     asthma_prev_risk_factor_params = optimize_prevalence_β_parameters(
         asthma_prev_target=asthma_inc_target,
         odds_ratio_target=risk_set["odds_ratio"].to_list(),
-        risk_factor_prev=list(risk_factor_prev_past_no_asthma)
+        risk_factor_prob=list(risk_factor_prob_past_no_asthma)
     )
 
     # asthma incidence correction term for the current year
     asthma_inc_correction = get_asthma_prevalence_correction(
-        asthma_prev_risk_factor_params, risk_factor_prev_past_no_asthma
+        asthma_prev_risk_factor_params, risk_factor_prob_past_no_asthma
     )
 
     # calibrated asthma incidence for the current year
     asthma_inc_calibrated = compute_asthma_prevalence_λ(
         asthma_prev_risk_factor_params=asthma_prev_risk_factor_params,
         odds_ratio_target=risk_set["odds_ratio"].to_list(),
-        risk_factor_prev=list(risk_factor_prev_past_no_asthma),
+        risk_factor_prob=list(risk_factor_prob_past_no_asthma),
         beta0=β_0
     )
 

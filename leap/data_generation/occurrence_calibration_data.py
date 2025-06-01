@@ -562,7 +562,7 @@ def calibrate_asthma_prevalence(
     where:
 
     * :math:`p(\lambda)` is the probability of risk factor level :math:`\lambda`,
-      ``risk_factor_prev[λ]``
+      ``risk_factor_prob[λ]``
     * :math:`\beta_{\lambda}` is the parameter for risk factor level :math:`\lambda`,
       ``asthma_prev_risk_factor_params[λ]``
 
@@ -656,14 +656,14 @@ def calibrate_asthma_prevalence(
     asthma_prev_risk_factor_params = optimize_prevalence_β_parameters(
         asthma_prev_target=asthma_prev_target,
         odds_ratio_target=risk_set["odds_ratio"].to_list(),
-        risk_factor_prev=risk_set["prob"].to_list()
+        risk_factor_prob=risk_set["prob"].to_list()
     )
 
     # compute calibrated asthma prevalence using optimized beta parameters
     risk_set["calibrated_prev"] = compute_asthma_prevalence_λ(
         asthma_prev_risk_factor_params=asthma_prev_risk_factor_params,
         odds_ratio_target=risk_set["odds_ratio"].to_list(),
-        risk_factor_prev=risk_set["prob"].to_list(),
+        risk_factor_prob=risk_set["prob"].to_list(),
         beta0=logit(asthma_prev_target)
     )
 
@@ -849,7 +849,7 @@ def calibrate_asthma_incidence(
         asthma_inc_target=risk_set["inc"].iloc[0],
         asthma_prev_target_past=past_asthma_prev_target,
         odds_ratio_target_past=past_risk_set["odds_ratio"],
-        risk_factor_prev_past=past_risk_set["prob"],
+        risk_factor_prob_past=past_risk_set["prob"],
         risk_set=inc_risk_set
     )
 
