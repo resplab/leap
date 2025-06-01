@@ -57,10 +57,6 @@ def round_number(x: float, digits: int = 0, sigdigits: int | None = None) -> flo
         return round(x, digits)
 
 
-def logit(x: float | np.ndarray) -> float | np.ndarray:
-    return np.log(x / (1 - x))
-
-
 def compute_ordinal_regression(
     η: float,
     θ: float | list[float],
