@@ -108,7 +108,8 @@ class Occurrence:
         """Load the asthma incidence correction table.
 
         Returns:
-            Dataframe grouped by year, age, and sex. Each dataframe contains the following columns:
+            Dataframe grouped by year, age, and sex.
+            Each dataframe contains the following columns:
 
             * ``year (int)``: integer year.
             * ``sex (str)``: ``"F"`` = female, ``"M"`` = male.
@@ -127,7 +128,18 @@ class Occurrence:
     def equation(
         self, sex: Sex, age: int, year: int, has_family_history: bool, dose: int
     ) -> float:
-        """Compute the asthma occurrence equation.
+        r"""Compute the asthma incidence / prevalence for a given risk factor combination.
+
+        .. math::
+
+            \zeta_{\lambda} = \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
+
+        where:
+
+        * :math:`\beta_{\eta} = \sigma^{-1}(\eta(t))` is determined by the output of Model 1
+        * :math:`\omega_{\lambda}` is the odds ratio for asthma incidence / prevalence based on
+          family history and antibiotic doses
+        * :math:`\alpha` is the incidence / prevalence correction term
 
         Args:
             sex: The sex of the agent.
@@ -155,19 +167,26 @@ class Occurrence:
         return
 
     def calculate_odds_ratio_fam_history(self, age: int) -> float:
-        """Calculate the odds ratio for asthma prevalence based on family history.
+        r"""Calculate the odds ratio for asthma prevalence based on family history.
 
-        ``β_fam_hist``: The beta parameters for the odds ratio calculation:
+        .. math::
 
-        * ``β_fhx_0``: The beta parameter for the constant term in the odds ratio equation
-        * ``β_fhx_age``: The beta parameter for the age term in the odds ratio equation.
+            \log(\omega(f_{\lambda})) = 
+                \beta_{\text{fhx_0}} \cdot f + 
+                \beta_{\text{fhx_age}} \cdot (\text{min}(a, 5) - 3) \cdot f
+
+        where:
+
+        * :math:`\beta_{\text{fhx_xxx}}` is a constant coefficient
+        * :math:`a` is the age
+        * :math:`f` is the family history of asthma; 1 = at least one parent has asthma,
+          0 = neither parent has asthma
 
         Args:
             age: The age of the individual in years.
 
         Returns:
-            A float representing the odds ratio for asthma prevalence based on family
-            history and age.
+            The odds ratio for asthma prevalence based on family history and age.
         """
         β_fam_hist = self.parameters["β_fam_hist"]
         return np.exp(
@@ -176,7 +195,24 @@ class Occurrence:
         )
 
     def calculate_odds_ratio_abx(self, age: int, dose: int) -> float:
-        """Calculate the odds ratio for asthma prevalence based on antibiotic exposure.
+        r"""Calculate the odds ratio for asthma prevalence based on antibiotic exposure.
+
+        .. math::
+
+            \log(\omega(d_{\lambda})) =
+                \begin{cases}
+                \beta_{\text{abx_0}} + 
+                \beta_{\text{abx_age}} \cdot \text{min}(a, 7) +
+                \beta_{\text{abx_dose}} \cdot \text{min}(d, 3)
+                && d > 0 \text{ and } a \leq 7 \\ \\
+                0 && \text{otherwise}
+                \end{cases}
+
+        where:
+
+        * :math:`\beta_{\text{abx_xxx}}` is a constant coefficient
+        * :math:`a` is the age
+        * :math:`d` is the number of courses of antibiotics taken during the first year of life
 
         Args:
             age: The age of the individual in years.
@@ -184,8 +220,7 @@ class Occurrence:
                 an integer in ``[0, 5]``, where 5 indicates 5 or more courses.
 
         Returns:
-            A float representing the odds ratio for asthma prevalence based on antibiotic
-            exposure and age.
+            The odds ratio for asthma prevalence based on antibiotic exposure and age.
         """
         β_abx = self.parameters["β_abx"]
 
@@ -216,36 +251,41 @@ class Incidence(Occurrence):
 
     @property
     def parameters(self) -> dict:
-        """A dictionary containing the following keys:
+        r"""A dictionary containing the following keys:
         
-            * ``β0 (float)``: A constant parameter, randomly selected from a normal distribution
-              with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
-            * ``βsex (float)``: The parameter for the sex term, i.e. ``βsex * sex``.
-            * ``βage (list[float])``: An array of 5 parameters to be multiplied by functions of age,
+            * ``β0 (float)``: A constant parameter.
+            * ``βsex (float)``: The parameter for the sex term, i.e.
+              :math:`\beta_{\text{sex}} * \text{sex}`.
+            * ``βyear (float)``: The parameter for the year term, i.e.
+              :math:`\beta_{\text{year}} * \text{year}`.
+            * ``βsexyear (float)``: The parameter to be multiplied by sex and year, i.e.
+              :math:`\beta_{\text{sexyear}} * \text{year} * \text{sex}`.
+            * ``βage (list[float])``: An array of 5 parameters to be multiplied by powers of age,
               i.e.
 
-              .. code-block:: python
+              .. math::
 
-                βage1 * f1(age) + βage2 * f2(age) + βage3 * f3(age) +
-                βage4 * f4(age) + βage5 * f5(age)
-
-              See ``poly_age_calculator``.
-            * ``βyear (float)``: The parameter for the year term, i.e. ``βyear * year``.
+                \beta_{\text{age}1} * \text{age} + 
+                \beta_{\text{age}2} * \text{age}^2 + 
+                \beta_{\text{age}3} * \text{age}^3 +
+                \beta_{\text{age}4} * \text{age}^4 +
+                \beta_{\text{age}5} * \text{age}^5
+            
             * ``βsexage (list[float])``: An array of 5 parameters to be multiplied by the sex and
-              functions of age, i.e.
+              powers of age, i.e.
 
-              .. code-block:: python
+              .. math::
 
-                βsexage1 * f1(age) * sex + βsexage2 * f2(age) * sex + βsexage3 * f3(age) * sex +
-                βsexage4 * f4(age) * sex + βsexage5 * f5(age) * sex
+                \beta_{\text{sexage}1} * \text{sex} * \text{age} + 
+                \beta_{\text{sexage}2} * \text{sex} * \text{age}^2 + 
+                \beta_{\text{sexage}3} * \text{sex} * \text{age}^3 + \\
+                \beta_{\text{sexage}4} * \text{sex} * \text{age}^4 +
+                \beta_{\text{sexage}5} * \text{sex} * \text{age}^5
 
-              See ``poly_age_calculator``.
-            * ``βsexyear (float)``: The parameter to be multiplied by sex and year,
-              i.e. ``βsexyear * year * sex``.
-            * ``β_fam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
+            * ``β_fam_hist (dict)``: A dictionary of 2 parameters to be multiplied by functions of
               age. See ``calculate_odds_ratio_fam_history``.
-            * ``β_abx (list[float])``: An array of 3 parameters to be multiplied by functions of
-              age and antibiotic exposure. See ``calculate_odds_ratio_abx``.
+            * ``β_abx (dict)``: A dictionary of 3 parameters to be multiplied by functions of
+              age and antibiotic dose. See ``calculate_odds_ratio_abx``.
 
         """
         return self._parameters
@@ -285,10 +325,11 @@ class Incidence(Occurrence):
             A dataframe grouped by year, age, and sex.
             Each dataframe contains the following columns:
 
-            * ``year``: integer year.
-            * ``sex``: 0 = female, 1 = male.
-            * ``age``: integer age.
-            * ``correction``: float, TODO.
+            * ``year (int)``: integer year.
+            * ``sex (str)``: ``"F"`` = female, ``"M"`` = male.
+            * ``age (int)``: integer age.
+            * ``correction (float)``: The correction term for the asthma incidence / prevalence
+              equation.
 
         """
         grouped_df = super().load_occurrence_correction_table(occurrence_type="incidence")
@@ -300,6 +341,33 @@ class Incidence(Occurrence):
         age: int,
         year: int
     ) -> float:
+        r"""Calculate the crude asthma incidence.
+
+        .. math::
+
+            \eta^{(i)} = 
+                \sum_{m=0}^1 \beta_{01m} t^{(i)} \cdot (s^{(i)})^m +
+                \sum_{k=0}^{5} \sum_{m=0}^{1} \beta_{k0m} \cdot (a^{(i)})^k \cdot (s^{(i)})^m
+
+
+        where:
+
+        * :math:`\eta^{(i)}` is the crude asthma incidence
+        * :math:`\beta_{k\ell m}` is the coefficient for the feature
+          :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
+        * :math:`a^{(i)}` is the age
+        * :math:`t^{(i)}` is the year
+        * :math:`s^{(i)}` is the sex
+
+        Args:
+            sex: The sex of the agent.
+            age: The age of the agent.
+            year: The calendar year.
+
+        Returns:
+            A float representing the crude asthma incidence for the given year, age, and sex.
+        """
+
         poly_age = poly(
             age,
             degree=5,
@@ -338,61 +406,84 @@ class Prevalence(Occurrence):
 
     @property
     def parameters(self) -> dict:
-        """A dictionary containing the following keys:
+        r"""A dictionary containing the following keys:
 
-            * ``β0 (float)``: A constant parameter, randomly selected from a normal distribution
-              with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
-            * ``βsex (float)``: The parameter for the sex term, i.e. ``βsex * sex``.
-            * ``βage (list[float])``: An array of 5 parameters to be multiplied by functions of age,
+            * ``β0 (float)``: A constant parameter, determined by Model 1.
+            * ``βsex (float)``: The parameter for the sex term, i.e.
+              :math:`\beta_{\text{sex}} * \text{sex}`.
+            * ``βyear (list[float])``: An array of 2 parameters to be multiplied by powers of year,
+              i.e.
+              
+              .. math::
+              
+                \beta_{\text{year}1} * \text{year} + \beta_{\text{year}2} * \text{year}^2
+
+            * ``βsexyear (list[float])``: An array of 2 parameters to be multiplied by sex and
+              powers of year, i.e.
+
+              .. math::
+              
+                \beta_{\text{sexyear}1} * \text{sex} * \text{year} + 
+                \beta_{\text{sexyear}2} * \text{sex} * \text{year}^2
+
+            * ``βage (list[float])``: An array of 5 parameters to be multiplied by powers of age,
               i.e.
 
-              .. code-block:: python
+              .. math::
 
-                βage1 * f1(age) + βage2 * f2(age) + βage3 * f3(age) +
-                βage4 * f4(age) + βage5 * f5(age)
+                \beta_{\text{age}1} * \text{age} + 
+                \beta_{\text{age}2} * \text{age}^2 + 
+                \beta_{\text{age}3} * \text{age}^3 +
+                \beta_{\text{age}4} * \text{age}^4 +
+                \beta_{\text{age}5} * \text{age}^5
 
-              See ``poly_age_calculator``.
-
-            * ``βyear (list[float])``: An array of 2 parameters to be multiplied by functions of
-              year, i.e. ``βyear1 * g1(year) + βyear2 * g2(year)``. See ``poly_year_calculator``.
             * ``βsexage (list[float])``: An array of 5 parameters to be multiplied by the sex and
-              functions of age, i.e.
+              powers of age, i.e.
 
-              .. code-block:: python
+              .. math::
 
-                βsexage1 * f1(age) * sex + βsexage2 * f2(age) * sex + βsexage3 * f3(age) * sex +
-                βsexage4 * f4(age) * sex + βsexage5 * f5(age) * sex
+                \beta_{\text{sexage}1} * \text{sex} * \text{age} + 
+                \beta_{\text{sexage}2} * \text{sex} * \text{age}^2 + 
+                \beta_{\text{sexage}3} * \text{sex} * \text{age}^3 + \\
+                \beta_{\text{sexage}4} * \text{sex} * \text{age}^4 +
+                \beta_{\text{sexage}5} * \text{sex} * \text{age}^5
 
-              See ``poly_age_calculator``.
-            * ``βsexyear (list[float])``: An array of 2 parameters to be multiplied by sex and
-              functions of year, i.e. ``βyear1 * g1(year) + βyear2 * g2(year)``.
-            * ``βyearage (list[float])``: An array of 10 parameters to be multiplied by functions of
+            * ``βyearage (list[float])``: An array of 10 parameters to be multiplied by powers of
               age and year, i.e.
 
-              .. code-block:: python
+              .. math::
 
-                βyearage1 * f1(age) * g1(year) + βyearage2 * f1(age) * g2(year) +
-                βyearage3 * f2(age) * g1(year) + βyearage4 * f2(age) * g2(year) +
-                βyearage5 * f3(age) * g1(year) + βyearage6 * f3(age) * g2(year) +
-                βyearage7 * f4(age) * g1(year) + βyearage8 * f4(age) * g2(year) +
-                βyearage9 * f5(age) * g1(year) + βyearage10 * f5(age) * g2(year)
+                \beta_{\text{yearage}1} * \text{year} * \text{age} +
+                \beta_{\text{yearage}2} * \text{year}^2 * \text{age} + \\
+                \beta_{\text{yearage}3} * \text{year} * \text{age}^2 +
+                \beta_{\text{yearage}4} * \text{year}^2 * \text{age}^2 + \\
+                \beta_{\text{yearage}5} * \text{year} * \text{age}^3 +
+                \beta_{\text{yearage}6} * \text{year}^2 * \text{age}^3 + \\
+                \beta_{\text{yearage}7} * \text{year} * \text{age}^4 +
+                \beta_{\text{yearage}8} * \text{year}^2 * \text{age}^4 + \\
+                \beta_{\text{yearage}9} * \text{year} * \text{age}^5 +
+                \beta_{\text{yearage}10} * \text{year}^2 * \text{age}^5
 
-              See ``poly_age_calculator`` and ``poly_year_calculator``.
             * ``βsexyearage (list[float])``: An array of 10 parameters to be multiplied by sex and
-              functions of age and year, i.e.
+              powers of age and year, i.e.
 
-              .. code-block:: python
+              .. math::
 
-                βyearagesex1 * f1(age) * g1(year) * sex + βyearagesex2 * f1(age) * g2(year) * sex +
-                βyearagesex3 * f2(age) * g1(year) * sex + βyearagesex4 * f2(age) * g2(year) * sex +
-                βyearagesex5 * f3(age) * g1(year) * sex + βyearagesex6 * f3(age) * g2(year) * sex +
-                βyearagesex7 * f4(age) * g1(year) * sex + βyearagesex8 * f4(age) * g2(year) * sex +
-                βyearagesex9 * f5(age) * g1(year) * sex + βyearagesex10 * f5(age) * g2(year) * sex
+                \beta_{\text{sexyearage}1} * \text{sex} * \text{year} * \text{age} +
+                \beta_{\text{sexyearage}2} * \text{sex} * \text{year}^2 * \text{age} + \\
+                \beta_{\text{sexyearage}3} * \text{sex} * \text{year} * \text{age}^2 +
+                \beta_{\text{sexyearage}4} * \text{sex} * \text{year}^2 * \text{age}^2 + \\
+                \beta_{\text{sexyearage}5} * \text{sex} * \text{year} * \text{age}^3 +
+                \beta_{\text{sexyearage}6} * \text{sex} * \text{year}^2 * \text{age}^3 + \\
+                \beta_{\text{sexyearage}7} * \text{sex} * \text{year} * \text{age}^4 +
+                \beta_{\text{sexyearage}8} * \text{sex} * \text{year}^2 * \text{age}^4 + \\
+                \beta_{\text{sexyearage}9} * \text{sex} * \text{year} * \text{age}^5 +
+                \beta_{\text{sexyearage}10} * \text{sex} * \text{year}^2 * \text{age}^5
 
-            * ``β_fam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
+            * ``β_fam_hist (dict)``: A dictionary of 2 parameters to be multiplied by functions of
               age. See ``calculate_odds_ratio_fam_history``.
-            * ``β_abx (list[float])``: An array of 3 parameters to be multiplied by functions of
-                age and antibiotic exposure. See ``calculate_odds_ratio_abx``.
+            * ``β_abx (dict)``: A dictionary of 3 parameters to be multiplied by functions of
+              age and antibiotic dose. See ``calculate_odds_ratio_abx``.
         """
         return self._parameters
     
@@ -442,6 +533,32 @@ class Prevalence(Occurrence):
         age: int,
         year: int
     ) -> float:
+        r"""Calculate the crude asthma prevalence.
+
+        .. math::
+
+            \eta^{(i)} = \sum_{k=0}^{5} \sum_{\ell=0}^2 \sum_{m=0}^1 \beta_{k \ell m} 
+                \cdot (a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m
+
+        where:
+
+        * :math:`\beta_{k\ell m}` is the coefficient for the feature
+          :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
+        * :math:`a^{(i)}` is the age
+        * :math:`t^{(i)}` is the year
+        * :math:`s^{(i)}` is the sex
+
+        There are :math:`6 * 3 * 2 = 36` coefficients in the prevalence model.
+        
+        Args:
+            sex: The sex of the agent.
+            age: The age of the agent.
+            year: The calendar year.
+
+        Returns:
+            A float representing the crude asthma prevalence for the given year, age, and sex.
+        """
+
         poly_year = poly(
             year,
             degree=2,
