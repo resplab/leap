@@ -466,7 +466,7 @@ def compute_asthma_age(
         while find_asthma_age and asthma_age < max_asthma_age:
             has_asthma = agent_has_asthma(
                 agent=agent,
-                occurrence_type="inc",
+                occurrence_type="incidence",
                 incidence=incidence,
                 prevalence=prevalence,
                 age=asthma_age,
@@ -493,21 +493,20 @@ def agent_has_asthma(
 
     Args:
         agent: A person in the model.
-        incidence: Asthma incidence.
-        prevalence: Asthma prevalence.
+        occurrence_type: One of ``"incidence"`` or ``"prevalence"``.
         age: The age of the agent.
         year: The calendar year.
     """
-    if occurrence_type == "inc" and incidence is None:
+    if occurrence_type == "incidence" and incidence is None:
         raise ValueError("Incidence must be provided for incidence calculations.")
 
     if age is None:
-        if occurrence_type == "inc":
+        if occurrence_type == "incidence":
             age = min(agent.age, incidence.max_age)
         else:
             age = min(agent.age - 1, prevalence.max_age)
     if year is None:
-        if occurrence_type == "inc":
+        if occurrence_type == "incidence":
             year = agent.year
         else:
             year = agent.year - 1
@@ -519,7 +518,7 @@ def agent_has_asthma(
             sex=agent.sex, age=age, year=year, has_family_history=agent.has_family_history,
             dose=agent.num_antibiotic_use
         ))) # type: ignore
-    elif age > 3 and occurrence_type == "inc":
+    elif age > 3 and occurrence_type == "incidence":
         has_asthma = bool(
             np.random.binomial(
                 n=1,
@@ -528,7 +527,7 @@ def agent_has_asthma(
                 )
             ) # type: ignore
         ) 
-    elif age > 3 and occurrence_type == "prev":
+    elif age > 3 and occurrence_type == "prevalence":
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
             agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
         ))) # type: ignore
