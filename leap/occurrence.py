@@ -274,7 +274,7 @@ class Incidence(Occurrence):
             degree=5,
             alpha=self.poly_parameters["alpha_age"],
             norm2=self.poly_parameters["norm2_age"]
-        )
+        ).flatten()
         return np.exp(
             self.parameters["β0"] +
             self.parameters["βsex"] * int(sex) +
@@ -418,13 +418,13 @@ class Prevalence(Occurrence):
             degree=2,
             alpha=self.poly_parameters["alpha_year"],
             norm2=self.poly_parameters["norm2_year"]
-        )
+        ).flatten()
         poly_age = poly(
             age,
             degree=5,
             alpha=self.poly_parameters["alpha_age"],
             norm2=self.poly_parameters["norm2_age"]
-        )
+        ).flatten()
         poly_yearage = np.outer(poly_year, poly_age).flatten()
         return np.exp(
             self.parameters["β0"] +
