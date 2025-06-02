@@ -132,7 +132,7 @@ def get_reassessment_data(
         * ``province (str)``: the 2-letter province code, e.g. ``"CA"``.
         * ``age (int)``: age in years, range ``[4, max_age]``.
         * ``sex (str)``: one of ``"M"`` or ``"F"``.
-        * ``reassessment (float)``: the probability that someone diagnosed with asthma will
+        * ``prob (float)``: the probability that someone diagnosed with asthma will
           maintain their asthma diagnosis in the given year. Range: ``[0, 1]``.
     """
 
@@ -143,7 +143,7 @@ def get_reassessment_data(
         "province": [],
         "age": np.array([], dtype=int),
         "sex": [],
-        "reassessment": []
+        "prob": []
     })
 
     for year in range(starting_year + 1, max_year + 1):
@@ -166,7 +166,7 @@ def get_reassessment_data(
         df = pd.merge(
             df_year_0, df_year_1, on=["age_current", "sex"], suffixes=("_past", "_current"), how="outer"
         )
-        df["reassessment"] = df.apply(
+        df["prob"] = df.apply(
             lambda x: calculate_reassessment_probability(
                 x["prevalence_past"], x["prevalence_current"], x["incidence_current"]
             ),
@@ -197,7 +197,7 @@ def generate_reassessment_data():
         "province": [],
         "age": np.array([], dtype=int),
         "sex": [],
-        "reassessment": []
+        "prob": []
     })
 
     for province in PROVINCES:
