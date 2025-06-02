@@ -404,6 +404,12 @@ The data is formatted as follows:
 | `province` | `str` | two-letter province code, e.g. `BC`, `CA` |
 | `ra` | `float` | the asthma reassessment |
 
+### Processing the Data
+
+See the
+[Occurrence Model Documentation](https://resplab.github.io/leap/model/model-occurrence.html)
+for more details on the occurrence calibration formulae.
+
 ### Generating the Data
 
 To run the data generation for the incidence/prevalence calibration:
