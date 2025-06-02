@@ -110,7 +110,9 @@ def compute_odds_ratio(
             risk factors (``λ = 0``) in the current year.
         asthma_incidence_λ: The calibrated asthma incidence for the risk factor combination ``λ`` in
             the current year.
-        ra_target: A value between 0 and 1 indicating the target reassessment.
+        ra_target: The probability that an individual previously diagnosed with asthma will
+            maintain their asthma diagnosis after reassessment in the current year.
+            Range: ``[0, 1]``.
         mis_dx: A numeric value representing the misdiagnosis rate.
         dx: A numeric value representing the diagnosis rate.
 
@@ -189,7 +191,9 @@ def compute_odds_ratio_difference(
         asthma_inc_calibrated: A vector of the calibrated asthma incidence for each risk factor
             combination indexed by ``λ`` in the current year.
         odds_ratio_target: A vector of odds ratios for the risk factors.
-        ra_target: A value between 0 and 1 indicating the target reassessment.
+        ra_target: The probability that an individual previously diagnosed with asthma will
+            maintain their asthma diagnosis after reassessment in the current year.
+            Range: ``[0, 1]``.
         mis_dx: A numeric value representing the misdiagnosis rate.
         dx: A numeric value representing the diagnosis rate.
 
