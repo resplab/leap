@@ -607,3 +607,55 @@ To run the data generation for the asthma control data:
 cd LEAP
 python3 leap/data_generation/control_data.py
 ```
+
+## Reasessment Data
+
+### Datasets
+
+#### 1. Predictions from Occurrence Model 1
+
+For the calibration, we need the predicted asthma prevalence / incidence from `Occurrence Model 1`,
+$\eta$, which can be found at:
+
+`leap/leap/processed_data/asthma_occurrence_predictions.csv`
+
+The data is formatted as follows:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `year` | `int` | format `XXXX`, e.g `2000`, range `[1999, 2066]` |
+| `sex` | `str` | `"M"` or `"F"` |
+| `age` | `int` | range `[3, 110]` |
+| `incidence` | `float` | the incidence of asthma in BC for a given year, age group, and sex, per 100 people |
+| `prevalence` | `float` | the prevalence of asthma in BC for a given year, age group, and sex, per 100 people |
+
+### Processing the Data
+
+The probability of an individual diagnosed with asthma in a previous year maintaining their asthma
+diagnosis after reassessment in the current year is given by:
+
+```math
+
+P(A(y) = 1 | A(y_0) = 1) := 
+  \dfrac{\mathcal{P}(y) - \mathcal{I}(y) * (1 - \mathcal{P}(y_0))}{\mathcal{P}(y_0)}
+```
+
+### Generating the Data
+
+To run the data generation for the incidence/prevalence calibration:
+
+```sh
+cd LEAP
+python3 leap/data_generation/reassessment_data.py
+```
+
+This will update the file `leap/processed_data/asthma_reassessment.csv`. This file
+contains the probabilities for asthma prevalence after reassessment, and is formatted as follows:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `year` | `int` | format `XXXX`, e.g `2000`, range `[2000, 2026]` |
+| `sex` | `str` | `"M"` or `"F"` |
+| `age` | `int` | range `[3, 63]` |
+| `province` | `str` | two-letter province ID, e.g. `"BC"` or `"CA"` |
+| `prob` | `float` | the probability that someone diagnosed with asthma previously will maintain their asthma diagnosis when reassessed in the given year |
