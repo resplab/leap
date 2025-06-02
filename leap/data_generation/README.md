@@ -370,7 +370,22 @@ The `*.csv` file can be downloaded from here:
 and is saved as:
 `LEAP/leap/original_data/17100005.csv`
 
+#### 3. Predictions from Occurrence Model 1
 
+For the calibration, we need the predicted asthma prevalence / incidence from `Occurrence Model 1`,
+$\eta$, which can be found at:
+
+`leap/leap/processed_data/asthma_occurrence_predictions.csv`
+
+The data is formatted as follows:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `year` | `int` | format `XXXX`, e.g `2000`, range `[2000, 2019]` |
+| `sex` | `str` | `"M"` or `"F"` |
+| `age` | `int` | range `[3, 110]` |
+| `incidence` | `float` | the incidence of asthma in BC for a given year, age group, and sex, per 100 people |
+| `prevalence` | `float` | the prevalence of asthma in BC for a given year, age group, and sex, per 100 people |
 
 ## Asthma Control Coefficients
 
