@@ -62,7 +62,14 @@ PROB_FAM_HIST = 0.2927242
 DF_OCC_PRED = pd.read_csv(get_data_path("processed_data/asthma_occurrence_predictions.csv"))
 
 
-def get_asthma_occurrence_prediction(age: int, sex: str, year: int, occurrence_type: str) -> float:
+def get_asthma_occurrence_prediction(
+    age: int,
+    sex: str,
+    year: int,
+    occurrence_type: str,
+    max_asthma_age: int = MAX_ASTHMA_AGE,
+    stabilization_year: int = STABILIZATION_YEAR
+) -> float:
     """Predicts the asthma prevalence or incidence based on the given parameters.
 
     Args:
@@ -70,13 +77,15 @@ def get_asthma_occurrence_prediction(age: int, sex: str, year: int, occurrence_t
         sex: One of ``"M"`` or ``"F"``.
         year: Year of the prediction.
         occurrence_type: One of ``"prevalence"`` or ``"incidence"``.
+        max_asthma_age: The maximum age for asthma prediction (default is ``62``).
+        stabilization_year: The year when asthma stabilization occurs (default is ``2025``).
 
     Returns:
         A float representing the predicted asthma prevalence or incidence.
     """
 
-    age = min(age, MAX_ASTHMA_AGE)
-    year = min(year, STABILIZATION_YEAR)
+    age = min(age, max_asthma_age)
+    year = min(year, stabilization_year)
 
     return DF_OCC_PRED.loc[
         (DF_OCC_PRED["age"] == age) &
