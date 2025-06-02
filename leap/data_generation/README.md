@@ -430,6 +430,37 @@ contains the incidence / prevalence correction parameters and is formatted as fo
 | `correction` | `float` | the correction term for the asthma incidence / prevalence equation |
 | `type` | `str` | one of `"incidence"` or `"prevalence"` |
 
+If you want to rerun the optimization for the $\beta$ parameters, add the flag `--retrain-beta`:
+
+
+```sh
+cd LEAP
+python3 leap/data_generation/occurrence_calibration_data.py --retrain-beta
+```
+
+This will update the file `leap/processed_data/asthma_occurrence_correction.csv` as described
+above, and will also update `leap/processed_data/occurrence_calibration_parameters.json`:
+
+```json
+
+{
+    "β_fhx_age": 0.6445257,
+    "β_abx_age": -0.2968535
+}
+```
+
+<div class="note" style='padding:15px; background-color:#ffcaa2; color:#ff8020'>
+<span>
+<p style='text-align:left'>
+<b>Note:</b></p>
+<p>
+Rerunning the beta parameters optimization is slow - could take up to 24 hours.
+</p>
+</span>
+</div>
+</br>
+
+
 
 ## Asthma Control Coefficients
 
