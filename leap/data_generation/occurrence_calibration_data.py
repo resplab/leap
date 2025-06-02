@@ -1,6 +1,7 @@
 import pandas as pd
 import json
 import numpy as np
+import argparse
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 from scipy import optimize
 import itertools
@@ -1163,7 +1164,20 @@ def generate_occurrence_calibration_data(
         index=False
     )
 
-
     
 if __name__ == "__main__":
-    generate_occurrence_calibration_data()
+    parser = argparse.ArgumentParser()
+    args = parser.add_argument_group("ARGUMENTS")
+    args.add_argument(
+        "-r",
+        "--retrain-beta",
+        dest="retrain_beta",
+        required=False,
+        action="store_true",
+        help="""
+            If set, re-run the fit for the β_risk_factors. Otherwise, load the saved parameters
+            from a json file.
+        """
+    )
+    args = parser.parse_args()
+    generate_occurrence_calibration_data(retrain_beta=args.retrain_beta)
