@@ -300,7 +300,24 @@ def calculate_odds_ratio_abx(
     dose: int,
     β_abx: Dict[str, float] | None = None
 ) -> float:
-    """Calculate the odds ratio for asthma prevalence based on antibiotic exposure.
+    r"""Calculate the odds ratio for asthma prevalence based on antibiotic exposure.
+
+    .. math::
+
+    \log(\omega(d_{\lambda})) =
+        \begin{cases}
+        \beta_{\text{abx_0}} + 
+        \beta_{\text{abx_age}} \cdot \text{min}(a^{(i)}, 7) +
+        \beta_{\text{abx_dose}} \cdot \text{min}(d^{(i)}, 3)
+        && d^{(i)} > 0 \text{ and } a^{(i)} \leq 7 \\ \\
+        0 && \text{otherwise}
+        \end{cases}
+
+    where:
+
+    * :math:`\beta_{\text{abx_xxx}}` is a constant coefficient
+    * :math:`a^{(i)}` is the age
+    * :math:`d^{(i)}` is the number of courses of antibiotics taken during the first year of life
 
     Args:
         age: The age of the individual in years.
