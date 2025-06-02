@@ -92,3 +92,92 @@ def calculate_reassessment_probability(
 
     prob = (prevalence_current - incidence_current * (1 - prevalence_past)) / prevalence_past
     return max(0, min(prob, 1))
+
+
+def get_reassessment_data(
+    df_asthma: pd.DataFrame,
+    province: str = "CA",
+    starting_year: int = STARTING_YEAR,
+    end_year: int = 2065,
+    max_age: int = MAX_AGE
+) -> pd.DataFrame:
+    """Generates reassessment data for asthma prevalence and incidence.
+
+    Args:
+        df_asthma: A dataframe containing asthma prevalence and incidence predictions from
+            Occurrence Model 1. The dataframe should have the following columns:
+
+            * ``age (int)``: age in years, range ``[3, max_age]``.
+            * ``sex (str)``: one of ``"M"`` or ``"F"``.
+            * ``year (int)``: calendar year, range ``[starting_year, end_year]``.
+            * ``incidence (float)``: predicted asthma incidence for the given age, sex, and year.
+            * ``prevalence (float)``: predicted asthma prevalence for the given age, sex, and year.
+
+        province: The 2-letter province code, e.g. ``"CA"``.
+        starting_year: The starting year for the data.
+        end_year: The ending year for the data.
+        max_age: The maximum age for asthma prediction.
+
+    Returns:
+        A DataFrame containing the reassessment data.
+        Columns:
+
+        * ``year (int)``: calendar year, range ``[starting_year + 1, end_year]``.
+        * ``province (str)``: the 2-letter province code, e.g. ``"CA"``.
+        * ``age (int)``: age in years, range ``[4, max_age]``.
+        * ``sex (str)``: one of ``"M"`` or ``"F"``.
+        * ``reassessment (float)``: the probability that someone diagnosed with asthma will
+          maintain their asthma diagnosis in the given year. Range: ``[0, 1]``.
+    """
+
+    df_asthma_grouped = df_asthma.groupby(["year"])
+
+    df_reassessment = pd.DataFrame({
+        "year": np.array([], dtype=int),
+        "province": [],
+        "age": np.array([], dtype=int),
+        "sex": [],
+        "reassessment": []
+    })
+
+    for year in range(starting_year + 1, end_year + 1):
+
+        # Get the predicted prevalence for the previous year
+        df_year_0 = df_asthma_grouped.get_group((year - 1,))
+        df_year_0 = df_year_0.loc[df_year_0["age"] < max_age]
+        df_year_0["age_current"] = df_year_0.apply(
+             lambda x: x["age"] + 1,
+                axis=1
+        )
+        df_year_0.rename(columns={"age": "age_past", "year": "year_past"}, inplace=True)
+
+        # Get the predicted prevalence for the current year
+        df_year_1 = df_asthma_grouped.get_group((year,))
+        df_year_1 = df_year_1.loc[df_year_1["age"] > 3]
+        df_year_1.rename(columns={"age": "age_current", "year": "year_current"}, inplace=True)
+
+
+        df = pd.merge(
+            df_year_0, df_year_1, on=["age_current", "sex"], suffixes=("_past", "_current"), how="outer"
+        )
+        df["reassessment"] = df.apply(
+            lambda x: calculate_reassessment_probability(
+                x["prevalence_past"], x["prevalence_current"], x["incidence_current"]
+            ),
+            axis=1
+        )
+
+        df.drop(
+            columns=[
+                "prevalence_past", "prevalence_current", "incidence_current", "incidence_past",
+                "age_past", "year_past"
+            ],
+            inplace=True
+        )
+        df.rename(
+            columns={"year_current": "year", "age_current": "age"}, inplace=True
+        )
+        df["province"] = [province] * df.shape[0]
+        df_reassessment = pd.concat([df_reassessment, df], axis=0)
+    
+    return df_reassessment
