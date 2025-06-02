@@ -357,6 +357,21 @@ The data is formatted as follows:
 | `sex` | `str` | `"M"` or `"F"` |
 | `year` | `int` | format `XXXX`, e.g `2000`, range `[2000, 2018]` |
 
+#### 2. Past Birth Data
+
+To create the antibiotic dose regression model, we needed to use the past birth data from
+Statistics Canada (the same dataset used for the `birth_data.py` module):
+
+[Table 17-10-00005-01 from StatCan](https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=1710000501).
+
+The `*.csv` file can be downloaded from here:
+[17100005-eng.zip](https://www150.statcan.gc.ca/n1/tbl/csv/17100005-eng.zip)
+
+and is saved as:
+`LEAP/leap/original_data/17100005.csv`
+
+
+
 ## Asthma Control Coefficients
 
 The purpose of the ``control_data.py`` file is to perform ordinal regression with random effects
