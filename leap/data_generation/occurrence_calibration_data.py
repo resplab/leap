@@ -934,7 +934,8 @@ def compute_mean_diff_log_OR(
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
-            * ``ra (float)``: the reassessment of asthma
+            * ``prob (float)``: the probability that someone diagnosed with asthma previously
+              will maintain their asthma diagnosis in the given year.
 
         min_year: The minimum year to consider for the calibration.
 
@@ -1016,7 +1017,8 @@ def beta_params_age_optimizer(
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
-            * ``ra (float)``: the reassessment of asthma
+            * ``prob (float)``: the probability that someone diagnosed with asthma previously
+              will maintain their asthma diagnosis in the given year.
 
         baseline_year: The baseline year for the calibration.
         stabilization_year: The stabilization year for the calibration.
