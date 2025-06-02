@@ -45,7 +45,7 @@ def test_reassessment_constructor(starting_year, province):
 )
 def test_reassessment_agent_has_asthma(config, starting_year, province, sex, age, year, has_asthma):
     """
-    By the `master_asthma_reassessment.csv` table, the probability of still having asthma
+    By the ``asthma_reassessment.csv`` table, the probability of still having asthma
     is 1 for a male aged 53 in 2024 in BC.
     """
     reassessment = Reassessment(starting_year, province)
