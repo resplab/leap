@@ -220,3 +220,6 @@ def generate_reassessment_data():
     df_reassessment.reset_index(drop=True, inplace=True)
     df_reassessment.to_csv(get_data_path("processed_data/asthma_reassessment.csv"), index=False)
 
+
+if __name__ == "__main__":
+    generate_reassessment_data()
