@@ -73,3 +73,22 @@ def get_asthma_df(
     return df_asthma
 
 
+def calculate_reassessment_probability(
+    prevalence_past: float,
+    prevalence_current: float,
+    incidence_current: float
+) -> float:
+    """Calculates the reassessment probability based on asthma prevalence and incidence.
+
+    Args:
+        prevalence_past: The prevalence of asthma from the previous year.
+        prevalence_current: The prevalence of asthma in the current year.
+        incidence_current: The incidence of asthma in the current year.
+
+    Returns:
+        The probability that someone diagnosed with asthma will maintain their diagnosis in the
+        current year.
+    """
+
+    prob = (prevalence_current - incidence_current * (1 - prevalence_past)) / prevalence_past
+    return max(0, min(prob, 1))
