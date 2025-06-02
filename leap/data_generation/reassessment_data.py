@@ -14,6 +14,12 @@ STABILIZATION_YEAR = 2025
 MIN_ASTHMA_AGE = 3  # Minimum age for asthma diagnosis
 MAX_ASTHMA_AGE = 62
 MAX_AGE = 110
+PROVINCES = ["BC", "CA"]
+MAX_YEARS = {
+    "BC": 2043,
+    "CA": 2066
+}
+
 
 def get_asthma_df(
     starting_year: int = STARTING_YEAR,
@@ -181,3 +187,36 @@ def get_reassessment_data(
         df_reassessment = pd.concat([df_reassessment, df], axis=0)
     
     return df_reassessment
+
+
+def generate_reassessment_data():
+    """Generate reassessment data for asthma prevalence and incidence across different provinces."""
+
+    df_reassessment = pd.DataFrame({
+        "year": np.array([], dtype=int),
+        "province": [],
+        "age": np.array([], dtype=int),
+        "sex": [],
+        "reassessment": []
+    })
+
+    for province in PROVINCES:
+        df_asthma = get_asthma_df(
+            starting_year=STARTING_YEAR,
+            end_year=MAX_YEARS[province],
+            min_age=MIN_ASTHMA_AGE,
+            max_age=MAX_AGE,
+            max_asthma_age=MAX_ASTHMA_AGE,
+            stabilization_year=STABILIZATION_YEAR
+        )
+        df = get_reassessment_data(
+            df_asthma=df_asthma,
+            province=province,
+            end_year=MAX_YEARS[province],
+            max_age=MAX_AGE
+        )
+        df_reassessment = pd.concat([df_reassessment, df], axis=0)
+
+    df_reassessment.reset_index(drop=True, inplace=True)
+    df_reassessment.to_csv(get_data_path("processed_data/asthma_reassessment.csv"), index=False)
+
