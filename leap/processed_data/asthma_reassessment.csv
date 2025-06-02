@@ -1,4 +1,4 @@
-year,age,sex,province,reassessment
+year,age,sex,province,prob
 2000,4,F,BC,0.6242941617691482
 2000,4,M,BC,0.6995365117216272
 2000,5,F,BC,0.7953491040159585

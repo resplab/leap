@@ -166,7 +166,9 @@ def load_reassessment_data(
         * ``year (int)``: The year of the reassessment.
         * ``age (int)``: The age of the individual in years, a value in ``[4, 110]``.
         * ``sex (str)``: One of ``"M"`` or ``"F"``.
-        * ``ra (float)``: The reassessment rate for asthma, a value in ``[0, 1]``.
+        * ``province (str)``: The two-letter code for the province, e.g. ``"CA"``.
+        * ``prob (float)``: The probability that someone diagnosed with asthma previously
+          will maintain their asthma diagnosis in the given year; a value in ``[0, 1]``.
     """
 
     df_reassessment = pd.read_csv(get_data_path("processed_data/asthma_reassessment.csv"))
