@@ -404,6 +404,27 @@ The data is formatted as follows:
 | `province` | `str` | two-letter province code, e.g. `BC`, `CA` |
 | `ra` | `float` | the asthma reassessment |
 
+### Generating the Data
+
+To run the data generation for the incidence/prevalence calibration:
+
+```sh
+cd LEAP
+python3 leap/data_generation/occurrence_calibration_data.py
+```
+
+This will update the file `leap/processed_data/asthma_occurrence_correction.csv`. This file
+contains the incidence / prevalence correction parameters and is formatted as follows:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `year` | `int` | format `XXXX`, e.g `2000`, range `[2000, 2026]` |
+| `sex` | `str` | `"M"` or `"F"` |
+| `age` | `int` | range `[3, 63]` |
+| `correction` | `float` | the correction term for the asthma incidence / prevalence equation |
+| `type` | `str` | one of `"incidence"` or `"prevalence"` |
+
+
 ## Asthma Control Coefficients
 
 The purpose of the ``control_data.py`` file is to perform ordinal regression with random effects
