@@ -36,7 +36,7 @@ class Reassessment:
         * ``province``: a string indicating the province abbreviation, e.g. "BC".
           For all of Canada, set province to "CA".
 
-        See ``master_asthma_reassessment.csv``.
+        See ``asthma_reassessment.csv``.
         """
         return self._table
     
@@ -67,7 +67,7 @@ class Reassessment:
               For all of Canada, set province to "CA".
         """
         df = pd.read_csv(
-            get_data_path("processed_data/master_asthma_reassessment.csv")
+            get_data_path("processed_data/asthma_reassessment.csv")
         )
         check_year(starting_year, df)
         check_province(province)
