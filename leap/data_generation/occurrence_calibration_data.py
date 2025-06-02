@@ -305,14 +305,14 @@ def calculate_odds_ratio_abx(
 
     .. math::
 
-    \log(\omega(d_{\lambda})) =
-        \begin{cases}
-        \beta_{\text{abx_0}} + 
-        \beta_{\text{abx_age}} \cdot \text{min}(a^{(i)}, 7) +
-        \beta_{\text{abx_dose}} \cdot \text{min}(d^{(i)}, 3)
-        && d^{(i)} > 0 \text{ and } a^{(i)} \leq 7 \\ \\
-        0 && \text{otherwise}
-        \end{cases}
+        \log(\omega(d_{\lambda})) =
+            \begin{cases}
+            \beta_{\text{abx_0}} + 
+            \beta_{\text{abx_age}} \cdot \text{min}(a^{(i)}, 7) +
+            \beta_{\text{abx_dose}} \cdot \text{min}(d^{(i)}, 3)
+            && d^{(i)} > 0 \text{ and } a^{(i)} \leq 7 \\ \\
+            0 && \text{otherwise}
+            \end{cases}
 
     where:
 
