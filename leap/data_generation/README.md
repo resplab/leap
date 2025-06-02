@@ -332,6 +332,30 @@ This will also create 4 figures:
 3. `leap/data_generation/figures/asthma_prevalence_comparison.png`
 4. `leap/data_generation/figures/asthma_prevalence_predicted.png`
 
+## Asthma Incidence / Prevalence (Occurrence) Calibration
+
+### Datasets
+
+#### 1. Antibiotic Dose Data
+
+The antibiotic prescription data is from the BC Ministry of Health and contains the total
+number of courses of antibiotics dispensed to infants, stratified by year and sex, ranging from
+2000 to 2018. This is a **private** dataset, so you will need to follow some extra steps to
+obtain the data:
+
+1. Obtain access to the GitHub repository: [leap-data](https://github.com/resplab/leap-data)
+2. Download the data file:
+   [bc_abx_dose_data.csv](https://github.com/resplab/leap-data/blob/main/bc_abx_dose_data.csv)
+3. Save the file to: `leap/leap/original_data/private/bc_abx_dose_data.csv`
+
+The data is formatted as follows:
+
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `n_abx` | `int` | the total number of courses of antibiotics prescribed in BC for infants for the given year and sex |
+| `sex` | `str` | `"M"` or `"F"` |
+| `year` | `int` | format `XXXX`, e.g `2000`, range `[2000, 2018]` |
 
 ## Asthma Control Coefficients
 
