@@ -387,6 +387,23 @@ The data is formatted as follows:
 | `incidence` | `float` | the incidence of asthma in BC for a given year, age group, and sex, per 100 people |
 | `prevalence` | `float` | the prevalence of asthma in BC for a given year, age group, and sex, per 100 people |
 
+#### 4. Asthma Reassessment Data
+
+For the calibration, we need the predicted asthma prevalence / incidence from `Occurrence Model 1`,
+$\eta$, which can be found at:
+
+`leap/leap/processed_data/asthma_reassessment.csv`
+
+The data is formatted as follows:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `year` | `int` | format `XXXX`, e.g `2000`, range `[2000, 2065]` for Canada, `[2000, 2042]` for BC |
+| `sex` | `str` | `"M"` or `"F"` |
+| `age` | `int` | range `[4, 110]` |
+| `province` | `str` | two-letter province code, e.g. `BC`, `CA` |
+| `ra` | `float` | the asthma reassessment |
+
 ## Asthma Control Coefficients
 
 The purpose of the ``control_data.py`` file is to perform ordinal regression with random effects
