@@ -172,9 +172,19 @@ def interpolate_years_to_months(
             all_rows.extend(rows)
 
     # Convert to DataFrame and sort
-    STANDARD_ORDERING = ["province", "projection_scenario", "year_float", "age", "sex"]
     monthly_df = pd.DataFrame(all_rows)
-    monthly_df = monthly_df.sort_values([col for col in STANDARD_ORDERING if col in df.columns])
+    SCENARIO_ORDERING = ["past", "M1", "M2", "M3", "M4", "M5", "M6", "LG", "HG", "FA", "SA"]
+    # If 'scenario' is present, cast it to categorical with the specified order
+    if "projection_scenario" in monthly_df.columns:
+        monthly_df["projection_scenario"] = pd.Categorical(
+            monthly_df["projection_scenario"], categories=SCENARIO_ORDERING, ordered=True
+        )
+    
+    COLUMN_ORDERING = ["province", "projection_scenario", "year_float", "age", "sex"]
+    
+    monthly_df = monthly_df.sort_values(
+        [col for col in COLUMN_ORDERING if col in monthly_df.columns]
+    )
     
     # Convert year_float to year-month string like "YYYY-MM"
     monthly_df["year_month"] = monthly_df["year_float"].apply(
@@ -190,7 +200,8 @@ def interpolate_years_to_months(
     ]
 
     # Save to CSV
-    interp_file_name = f"{dataset}_{method}_interpolated.csv"
+    dataset_name = dataset.split(".")[0]
+    interp_file_name = f"{dataset_name}_{method}_interpolated.csv"
     file_path = get_data_path(interp_file_name, create=True)
     logger.info(f"Saving data to {file_path}")
     monthly_df.to_csv(file_path, float_format="%.8g", index=False)

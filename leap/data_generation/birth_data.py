@@ -2,7 +2,9 @@ import pandas as pd
 import numpy as np
 from statsmodels.nonparametric.smoothers_lowess import lowess
 from leap.utils import get_data_path
-from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group
+from leap.data_generation.utils import (get_province_id,
+                                        get_sex_id, format_age_group,
+                                        interpolate_years_to_months)
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
@@ -540,17 +542,7 @@ def interpolate_population_data(method: str = "linear"):
 
 def interpolate_birth_estimate_data(method: str = "linear"):
     """
-    Interpolates the ``birth/birth_estimate.csv`` by months between the years.
-    
-    The target values are:
-        - ``N``
-        - ``prop_male``
-    Each target value is grouped by:
-        - ``province``
-        - ``projection_scenario``
-    
-    Args:
-        method: The interpolation method to use (linear or loess).
+    Interpolates the ``birth/birth_estimate.csv`` by months between the years
     """
     # Check for valid method
     if method not in ["linear", "loess"]:
@@ -664,6 +656,17 @@ if __name__ == "__main__":
         generate_birth_estimate_data()
     
     if INTERPOLATE:
-        # interpolate_population_data(method="linear")
-        interpolate_birth_estimate_data(method="loess")
-        
+        # Interpolate initial population data
+        # interpolate_years_to_months(
+        #     dataset="processed_data/birth/initial_pop_distribution_prop.csv",
+        #     group_cols=["age", "province", "projection_scenario"],
+        #     interp_cols=["n_age", "n_birth", "prop", "prop_male"],
+        #     method="linear"
+        # )
+        # Interpolate birth estimate data
+        interpolate_years_to_months(
+            dataset="processed_data/birth/birth_estimate.csv",
+            group_cols=["province", "projection_scenario"],
+            interp_cols=["N", "prop_male"],
+            method="linear"
+        )
