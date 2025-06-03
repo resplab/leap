@@ -110,7 +110,8 @@ def interpolate_years_to_months(
         | 2006 | M   | 22    |
         +------+-----+-------+
         
-        >>> interpolate_years_to_months(
+
+        >>> interpolate_years_to_months( # doctest: +SKIP
         ...     dataset='input.csv',
         ...     group_cols=['sex'],
         ...     interp_cols=['value'],
