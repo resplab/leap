@@ -3,6 +3,7 @@ import numpy as np
 from statsmodels.nonparametric.smoothers_lowess import lowess
 from typing import Tuple
 from leap.utils import get_data_path
+from leap.data_generation.utils import interpolate_years_to_months
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
@@ -304,273 +305,22 @@ def generate_migration_data():
     df_emigration.to_csv(file_path, index=False)
 
 
-def interpolate_emigration_data(method: str = "linear"):
-    """
-    Interpolates the ``migration/emigration_table.csv`` by months between the years.
-    
-    The target values are:
-        - ``F``
-        - ``M``
-    Each target value is grouped by:
-        - ``age``
-        - ``province``
-        - ``proj_scenario``
-    
-    Args:
-        method: The interpolation method to use (linear or loess).
-    """
-    # Check for valid method
-    if method not in ["linear", "loess"]:
-        raise ValueError(f"method was {method}. Must be one of ['linear', 'loess']")
-    
-    # Load dataset
-    logger.info("Loading processed population data from emigration CSV file...")
-    df = pd.read_csv(
-        get_data_path("processed_data/migration/emigration_table.csv")
-    )
-
-    # Define columns to interpolate
-    interp_cols = ["F", "M"]
-
-    # Storage for interpolated output
-    all_rows = []
-
-    # Grouping
-    group_cols = ["age", "province", "proj_scenario"]
-    
-    for group_key, group_df in df.groupby(group_cols):
-        logger.info(f"Interpolating emigration data using {method} for group {group_key}.")
-        group_df = group_df.sort_values("year")
-        
-        # Create monthly x-values for interpolation
-        year_min = group_df["year"].min()
-        year_max = group_df["year"].max()
-        monthly_x = np.linspace(year_min, year_max, int((year_max - year_min) * 12) + 1)
-        
-        if method == "linear":
-            for i in range(len(group_df) - 1):
-                row_start = group_df.iloc[i]
-                row_end = group_df.iloc[i + 1]
-                
-                # cache constant values within row
-                row_age = row_start["age"]
-                row_province = row_start["province"]
-                row_scenario = row_start["proj_scenario"]
-                
-                for m in range(12):
-                    fraction = m / 12
-                    year_interp = row_start["year"] + fraction
-
-                    interpolated_row = {
-                        "year_float": year_interp,
-                        "age": row_age,
-                        "province": row_province,
-                        "proj_scenario": row_scenario,
-                    }
-                    for col in interp_cols:
-                        interpolated_row[col] = (
-                            row_start[col] + fraction * (row_end[col] - row_start[col])
-                        )
-                    all_rows.append(interpolated_row)
-
-            # Add the final year (same as before)
-            final_row = group_df.loc[group_df["year"].idxmax()]
-            all_rows.append({
-                "year_float": final_row["year"],
-                "age": final_row["age"],
-                "province": final_row["province"],
-                "proj_scenario": final_row["proj_scenario"],
-                **{col: final_row[col] for col in interp_cols}
-            })
-        elif method == "loess":
-            for col in interp_cols:
-                smoothed = lowess(
-                    endog=group_df[col],   # y value
-                    exog=group_df["year"], # x value
-                    frac=0.5,              # controls smoothing
-                    return_sorted=True
-                )
-                interp_values = np.interp(monthly_x, smoothed[:, 0], smoothed[:, 1])
-                
-                # Store into temp dict by column
-                if col == interp_cols[0]: # built row once for first column
-                    rows = [{
-                        "year_float": x,
-                        "age": group_key[0],
-                        "province": group_key[1],
-                        "proj_scenario": group_key[2],
-                        col: val
-                    } for x, val in zip(monthly_x, interp_values)]
-                else: # reuse row for next columns
-                    for r, val in zip(rows, interp_values):
-                        r[col] = val
-            all_rows.extend(rows)
-
-    # Convert to DataFrame and sort
-    monthly_df = pd.DataFrame(all_rows)
-    monthly_df = monthly_df.sort_values(["age", "province", "proj_scenario", "year_float"])
-    
-    # Convert year_float to year-month string like "YYYY-MM"
-    monthly_df["year_month"] = monthly_df["year_float"].apply(
-        lambda y: f"{int(y):04d}-{min(12, round((y - int(y)) * 12) + 1):02d}"
-    )
-    
-    # Drop year_float
-    monthly_df = monthly_df.drop(columns="year_float")
-
-    # Move year_month to the front
-    monthly_df = monthly_df[
-        ["year_month"] + [col for col in monthly_df.columns if col != "year_month"]
-    ]
-
-    # Save to CSV
-    file_path = get_data_path(
-        "processed_data/migration/emigration_table_monthly.csv",
-        create=True
-    )
-    logger.info(f"Saving data to {file_path}")
-    monthly_df.to_csv(file_path, float_format="%.8g", index=False)
-
-
-def interpolate_immigration_data(method: str = "linear"):
-    """
-    Interpolates the ``migration/immigration_table.csv`` by months between the years.
-    
-    The target values are:
-        - ``n_immigrants``
-        - ``prop_immigrants_birth``
-        - ``prop_immigrants_year``
-    Each target value is grouped by:
-        - ``age``
-        - ``sex``
-        - ``province``
-        - ``projection_scenario``
-    
-    Args:
-        method: The interpolation method to use (linear or loess).
-    """
-    # Check for valid method
-    if method not in ["linear", "loess"]:
-        raise ValueError(f"method was {method}. Must be one of ['linear', 'loess']")
-    
-    # Load dataset
-    logger.info("Loading processed population data from emigration CSV file...")
-    df = pd.read_csv(
-        get_data_path("processed_data/migration/immigration_table.csv")
-    )
-
-    # Define columns to interpolate
-    interp_cols = ["n_immigrants", "prop_immigrants_birth", "prop_immigrants_year"]
-
-    # Storage for interpolated output
-    all_rows = []
-
-    # Grouping
-    group_cols = ["age", "sex", "province", "projection_scenario"]
-    for group_key, group_df in df.groupby(group_cols):
-        logger.info(f"Interpolating immigration data with {method} for group {group_key}.")
-        group_df = group_df.sort_values("year")
-        
-        # Create monthly x-values for interpolation
-        year_min = group_df["year"].min()
-        year_max = group_df["year"].max()
-        monthly_x = np.linspace(year_min, year_max, int((year_max - year_min) * 12) + 1)
-        
-        if method == "linear":
-            for i in range(len(group_df) - 1):
-                row_start = group_df.iloc[i]
-                row_end = group_df.iloc[i + 1]
-                
-                row_age = row_start["age"]
-                row_sex = row_start["sex"]
-                row_province = row_start["province"]
-                row_scenario = row_start["projection_scenario"]
-                
-                for m in range(12):
-                    fraction = m / 12
-                    year_interp = row_start["year"] + fraction
-
-                    interpolated_row = {
-                        "year_float": year_interp,
-                        "age": row_age,
-                        "sex": row_sex,
-                        "province": row_province,
-                        "projection_scenario": row_scenario,
-                    }
-                    for col in interp_cols:
-                        interpolated_row[col] = (
-                            row_start[col] + fraction * (row_end[col] - row_start[col])
-                        )
-                    all_rows.append(interpolated_row)
-
-            # Add the final year (constant values of last year)
-            final_row = group_df.loc[group_df["year"].idxmax()]
-            all_rows.append({
-                "year_float": final_row["year"],
-                "age": final_row["age"],
-                "sex": final_row["sex"],
-                "province": final_row["province"],
-                "projection_scenario": final_row["projection_scenario"],
-                **{col: final_row[col] for col in interp_cols}
-            })
-        elif method == "loess":
-            for col in interp_cols:
-                smoothed = lowess(
-                    endog=group_df[col],   # y value
-                    exog=group_df["year"], # x value
-                    frac=0.5,              # controls smoothing
-                    return_sorted=True
-                )
-                interp_values = np.interp(monthly_x, smoothed[:, 0], smoothed[:, 1])
-                
-                # Store into temp dict by column
-                if col == interp_cols[0]:
-                    rows = [{
-                        "year_float": x,
-                        "age": group_key[0],
-                        "sex": group_key[1],
-                        "province": group_key[2],
-                        "projection_scenario": group_key[3],
-                        col: val
-                    } for x, val in zip(monthly_x, interp_values)]
-                else:
-                    for r, val in zip(rows, interp_values):
-                        r[col] = val
-            all_rows.extend(rows)
-
-
-    # Convert to DataFrame and sort
-    monthly_df = pd.DataFrame(all_rows)
-    monthly_df = monthly_df.sort_values(
-        ["province", "projection_scenario", "year_float", "age", "sex"]
-    )
-    
-    # Convert year_float to year-month string like "YYYY-MM"
-    monthly_df["year_month"] = monthly_df["year_float"].apply(
-        lambda y: f"{int(y):04d}-{min(12, round((y - int(y)) * 12) + 1):02d}"
-    )
-    
-    # Drop year_float
-    monthly_df = monthly_df.drop(columns="year_float")
-
-    # Move year_month to the front
-    monthly_df = monthly_df[
-        ["year_month"] + [col for col in monthly_df.columns if col != "year_month"]
-    ]
-
-    # Save to CSV
-    file_path = get_data_path(
-        "processed_data/migration/immigration_table_monthly.csv",
-        create=True
-    )
-    logger.info(f"Saving data to {file_path}")
-    monthly_df.to_csv(file_path, float_format="%.8g", index=False)
-
-
 if __name__ == "__main__":
     if GENERATE:
         generate_migration_data()
         
     if INTERPOLATE:
-        # interpolate_emigration_data(method="loess")
-        interpolate_immigration_data(method="loess")
+        # Interpolate emigration data
+        interpolate_years_to_months(
+            dataset="processed_data/migration/emigration_table.csv",
+            group_cols = ["age", "province", "proj_scenario"],
+            interp_cols = ["F", "M"],
+            method="linear"
+        )
+        # Interpolate immigration data
+        interpolate_years_to_months(
+            dataset="processed_data/migration/immigration_table.csv",
+            group_cols = ["age", "sex", "province", "projection_scenario"],
+            interp_cols = ["n_immigrants", "prop_immigrants_birth", "prop_immigrants_year"],
+            method="linear"
+        )
