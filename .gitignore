@@ -7,7 +7,5 @@ __pycache__/
 *scratch*
 .vscode/
 _build/
-output/
-leap_output
 build/
 leap/original_data/private/*
