@@ -96,13 +96,135 @@ def interpolate_years_to_months(
         method: Which interpolation method to use, ``linear`` or ``loess``
         
     Examples:
-    
+        ``input.csv``:
+        
+        +------+-----+-------+
+        | year | sex | value |
+        +======+=====+=======+
+        | 2005 | F   | 10    |
+        +------+-----+-------+
+        | 2005 | M   | 101   |
+        +------+-----+-------+
+        | 2006 | F   | 120   |
+        +------+-----+-------+
+        | 2006 | M   | 112   |
+        +------+-----+-------+
+        
+        >>> interpolate_years_to_months(
+        ...     dataset='input.csv',
+        ...     group_cols=['sex'],
+        ...     interp_cols=['value'],
+        ...     method='linear'
+        ... )
+        
+        ``input_linear_interpolated.csv``:
+        
+        +------------+-----+--------+
+        | year_month | sex | value  |
+        +============+=====+========+
+        | 2005-01    | F   | 10     |
+        +------------+-----+--------+
+        | 2005-01    | M   | 101    |
+        +------------+-----+--------+
+        | 2005-02    | F   | 20     |
+        +------------+-----+--------+
+        | 2005-02    | M   | 102    |
+        +------------+-----+--------+
+        | 2005-03    | F   | 30     |
+        +------------+-----+--------+
+        | 2005-03    | M   | 103    |
+        +------------+-----+--------+
+        | 2005-04    | F   | 40     |
+        +------------+-----+--------+
+        | 2005-04    | M   | 104    |
+        +------------+-----+--------+
+        | 2005-05    | F   | 50     |
+        +------------+-----+--------+
+        | 2005-05    | M   | 105    |
+        +------------+-----+--------+
+        | 2005-06    | F   | 60     |
+        +------------+-----+--------+
+        | 2005-06    | M   | 106    |
+        +------------+-----+--------+
+        | 2005-08    | F   | 70     |
+        +------------+-----+--------+
+        | 2005-08    | M   | 107    |
+        +------------+-----+--------+
+        | 2005-09    | F   | 80     |
+        +------------+-----+--------+
+        | 2005-09    | M   | 108    |
+        +------------+-----+--------+
+        | 2005-10    | F   | 90     |
+        +------------+-----+--------+
+        | 2005-10    | M   | 109    |
+        +------------+-----+--------+
+        | 2005-11    | F   | 100    |
+        +------------+-----+--------+
+        | 2005-11    | M   | 110    |
+        +------------+-----+--------+
+        | 2005-12    | F   | 110    |
+        +------------+-----+--------+
+        | 2005-12    | M   | 111    |
+        +------------+-----+--------+
+        | 2006-01    | F   | 120    |
+        +------------+-----+--------+
+        | 2006-01    | F   | 120    |
+        +------------+-----+--------+
+        | 2006-01    | M   | 112    |
+        +------------+-----+--------+
+        | 2006-01    | M   | 112    |
+        +------------+-----+--------+
+        | 2006-02    | F   | 120    |
+        +------------+-----+--------+
+        | 2006-02    | M   | 112    |
+        +------------+-----+--------+
+        | 2006-03    | F   | 120    |
+        +------------+-----+--------+
+        | 2006-03    | M   | 112    |
+        +------------+-----+--------+
+        | 2006-04    | F   | 120    |
+        +------------+-----+--------+
+        | 2006-04    | M   | 112    |
+        +------------+-----+--------+
+        | 2006-05    | F   | 120    |
+        +------------+-----+--------+
+        | 2006-05    | M   | 112    |
+        +------------+-----+--------+
+        | 2006-06    | F   | 120    |
+        +------------+-----+--------+
+        | 2006-06    | M   | 112    |
+        +------------+-----+--------+
+        | 2006-08    | F   | 120    |
+        +------------+-----+--------+
+        | 2006-08    | M   | 112    |
+        +------------+-----+--------+
+        | 2006-09    | F   | 120    |
+        +------------+-----+--------+
+        | 2006-09    | M   | 112    |
+        +------------+-----+--------+
+        | 2006-10    | F   | 120    |
+        +------------+-----+--------+
+        | 2006-10    | M   | 112    |
+        +------------+-----+--------+
+        | 2006-11    | F   | 120    |
+        +------------+-----+--------+
+        | 2006-11    | M   | 112    |
+        +------------+-----+--------+
+        | 2006-12    | F   | 120    |
+        +------------+-----+--------+
+        | 2006-12    | M   | 112    |
+        +------------+-----+--------+
+        | 2007-01    | F   | 120    |
+        +------------+-----+--------+
+        | 2007-01    | M   | 112    |
+        +------------+-----+--------+
+
+
+
     """
-    # Check for valid method
     if method not in ["linear", "loess"]:
         raise ValueError(f"method was {method}. Must be one of ['linear', 'loess']")
     
-    # Load dataset
     logger.info(f"Loading dataset from {dataset}")
     df = pd.read_csv(get_data_path(data_path=dataset))
 
@@ -127,7 +249,7 @@ def interpolate_years_to_months(
                 row_groups = {col : row_start[col] for col in group_cols}
                 
                 for m in range(12):
-                    fraction = m / 12
+                    fraction = m / 11
                     year_interp = row_start["year"] + fraction
 
                     # Use interpolated years, and other grouped columns
@@ -139,13 +261,15 @@ def interpolate_years_to_months(
                         )
                     all_rows.append(interpolated_row)
 
-            # Add the final year (same as before)
+            # Repeat the final year (all 12 months, constant values)
             final_row = group_df.loc[group_df["year"].idxmax()]
-            all_rows.append({
-                "year_float": final_row["year"],
-                **{col: final_row[col] for col in group_cols},
-                **{col: final_row[col] for col in interp_cols}
-            })
+            for m in range(12):
+                year_interp = final_row["year"] + m / 11
+                all_rows.append({
+                    "year_float": year_interp,
+                    **{col: final_row[col] for col in group_cols},
+                    **{col: final_row[col] for col in interp_cols}
+                })
 
         elif method == "loess":
             for icol in interp_cols:
@@ -180,21 +304,15 @@ def interpolate_years_to_months(
             monthly_df["projection_scenario"], categories=SCENARIO_ORDERING, ordered=True
         )
     
+    # Final dataframe cleanup 
     COLUMN_ORDERING = ["province", "projection_scenario", "year_float", "age", "sex"]
-    
     monthly_df = monthly_df.sort_values(
         [col for col in COLUMN_ORDERING if col in monthly_df.columns]
     )
-    
-    # Convert year_float to year-month string like "YYYY-MM"
     monthly_df["year_month"] = monthly_df["year_float"].apply(
         lambda y: f"{int(y):04d}-{min(12, round((y - int(y)) * 12) + 1):02d}"
     )
-    
-    # Drop year_float
     monthly_df = monthly_df.drop(columns="year_float")
-
-    # Move year_month to the front
     monthly_df = monthly_df[
         ["year_month"] + [col for col in monthly_df.columns if col != "year_month"]
     ]
