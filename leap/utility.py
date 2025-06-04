@@ -34,12 +34,12 @@ class Utility:
             EuroQol Group's quality of life metric called the EQ-5D.
             Each data frame contains the following columns:
 
-            * ``age``: integer age.
-            * ``sex``: sex of a person, 1 = male, 0 = female
-            * ``eq5d``: float, the quality of life.
-            * ``se``: float, standard error.
+            * ``age (int)``: integer age, range ``[0, 111]``.
+            * ``sex (str)``: sex of a person, either "M" or "F".
+            * ``eq5d (float)``: the quality of life.
+            * ``sd (float)``: standard deviation of the ``eq5d`` value.
 
-            See ``eq5d_canada.csv``.
+            See ``processed_data/eq5d_canada.csv``.
     """
     def __init__(
         self,
