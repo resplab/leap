@@ -259,3 +259,7 @@ def generate_eq5d_data():
     df_utility = pd.concat([df_utility_child, df_utility_adult], ignore_index=True)
     df_utility.to_csv(get_data_path("processed_data/eq5d_canada.csv"), index=False)
 
+
+if __name__ == "__main__":
+    generate_eq5d_data()
+
