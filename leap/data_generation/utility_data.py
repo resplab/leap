@@ -168,7 +168,7 @@ def load_eq5d_data(max_age: int = MAX_AGE) -> pd.DataFrame:
 
     # Create a DataFrame with all ages from 18 to 111
     df_utility = pd.DataFrame(
-        data=list(itertools.product(list(range(18, 110)), ["F", "M"], [0], [0])),
+        data=list(itertools.product(list(range(18, max_age + 1)), ["F", "M"], [0], [0])),
         columns=["age", "sex", "eq5d", "sd"]
     )
 
