@@ -208,3 +208,44 @@ def interpolate_eq5d(
 
     eq5d = 1 - (1 - eq5d_upper) / age_upper * age
     return eq5d
+    
+
+def interpolate_eq5d_data(df_utility: pd.DataFrame) -> pd.DataFrame:
+    """Interpolate EQ-5D data to fill in missing ages below 18.
+
+    The EQ-5D data was only available for ages 18 and above, so this function
+    generates EQ-5D values for ages 0 to 17 by interpolating from the values at age 18.
+    
+    Args:
+        df_utility: DataFrame containing EQ-5D data for ages 18 and above:
+
+            * ``age (int)``: Age of the individual.
+            * ``sex (str)``: One of ``"F"`` = female or ``"M"`` = male.
+            * ``eq5d (float)``: EQ-5D utility value.
+            * ``sd (float)``: Standard deviation of the EQ-5D utility value.
+
+    Returns:
+        A dataframe containing EQ-5D data for ages 0 to 17, interpolated from the values at age 18.
+        Columns:
+
+        * ``age (int)``: Age of the individual, now including ages 0 to 17.
+        * ``sex (str)``: One of ``"F"`` = female, ``"M"`` = male.
+        * ``eq5d (float)``: Interpolated EQ-5D utility value for ages 0 to 17.
+        * ``sd (float)``: Since the data was interpolated, the standard deviation is set to 0
+          for these ages.
+    """
+    df = pd.DataFrame(
+        data=list(itertools.product(list(range(0, 18)), ["F", "M"], [0], [0])),
+        columns=["age", "sex", "eq5d", "sd"]
+    )
+    df["eq5d"] = df.apply(
+        lambda x: interpolate_eq5d(
+            age=x["age"],
+            eq5d_upper=df_utility.loc[
+                (df_utility["sex"] == x["sex"]) & (df_utility["age"] == 18)
+            ]["eq5d"].values[0],
+            age_upper=18
+        ),
+        axis=1
+    )
+    return df
