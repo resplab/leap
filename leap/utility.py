@@ -75,7 +75,7 @@ class Utility:
         Args:
             agent: A person in the model.
         """
-        baseline = float(self.table.get_group((agent.age, int(agent.sex)))["eq5d"].iloc[0])
+        baseline = float(self.table.get_group((agent.age, str(agent.sex)))["eq5d"].iloc[0])
         if not agent.has_asthma:
             return baseline
         else:
