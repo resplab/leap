@@ -83,3 +83,22 @@ After processing the EQ5D data, our dataset is formatted as follows:
       </tr>
     </tbody>
     </table>
+
+
+Calculating Utility
+=========================
+
+The net utility is given by the formula:
+
+.. math::
+
+    u := u_{\text{baseline}} - A \cdot (d_{\text{exacerbation}} - d_{\text{control}})
+
+where:
+
+* :math:`u_{\text{baseline}}` is the baseline utility for a person of a given age and sex
+  (without asthma)
+* :math:`d_{\text{exacerbation}}` is the disutility due to asthma exacerbations
+* :math:`d_{\text{control}}` is the disutility due to asthma control levels
+* :math:`A` is a boolean indicating whether the person has asthma
+
