@@ -27,7 +27,7 @@ def config():
                 "βexac_sev_hist": [0.00615, 0.0169, 0.0192, 0.0215]
             },
             9,
-            0,
+            "F",
             0.9405
         ),
     ]
@@ -51,7 +51,7 @@ def test_utility_constructor(parameters, age, sex, eq5d):
                 "βexac_sev_hist": [0.00615, 0.0169, 0.0192, 0.0215]
             },
             9,
-            False,
+            "F",
             2024,
             0,
             "BC",
@@ -67,7 +67,7 @@ def test_utility_constructor(parameters, age, sex, eq5d):
                 "βexac_sev_hist": [0.0, 0.02, 0.0, 0.0]
             },
             9,
-            False,
+            "F",
             2024,
             0,
             "BC",
