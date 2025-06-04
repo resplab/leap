@@ -10,7 +10,7 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-MAX_AGE = 110
+MAX_AGE = 111
 
 
 def load_eq5d_data(max_age: int = MAX_AGE) -> pd.DataFrame:
@@ -166,7 +166,7 @@ def load_eq5d_data(max_age: int = MAX_AGE) -> pd.DataFrame:
 
     df.sort_values(by=["age_lower"], inplace=True)
 
-    # Create a DataFrame with all ages from 18 to 110
+    # Create a DataFrame with all ages from 18 to 111
     df_utility = pd.DataFrame(
         data=list(itertools.product(list(range(18, 110)), ["F", "M"], [0], [0])),
         columns=["age", "sex", "eq5d", "sd"]
@@ -252,7 +252,7 @@ def interpolate_eq5d_data(df_utility: pd.DataFrame) -> pd.DataFrame:
 
 
 def generate_eq5d_data():
-    """Generate EQ-5D data for ages 0 to 110."""
+    """Generate EQ-5D data for ages 0 to 111."""
 
     df_utility_adult = load_eq5d_data()
     df_utility_child = interpolate_eq5d_data(df_utility_adult)
