@@ -662,6 +662,8 @@ contains the probabilities for asthma prevalence after reassessment, and is form
 
 ## Utility Data
 
+### Datasets
+
 To calculate the disutility of having asthma, we first need to have the baseline utility
 based on age and sex. We obtained our data from the study
 [Canada population norms for the EQ-5D-5L](https://doi.org/10.1007/s10198-023-01570-1):
@@ -669,3 +671,13 @@ based on age and sex. We obtained our data from the study
 
 This is saved as an Excel file under:
 `leap/original_data/Table_3_Mean_(SD)_EQ-5D-5L_utilities_by_socio-demographic_characteristics.xlsx`.
+
+
+### Generating the Data
+
+To run the data generation for the utility data:
+
+```sh
+cd LEAP
+python3 leap/data_generation/utility_data.py
+```
