@@ -257,6 +257,7 @@ def generate_eq5d_data():
     df_utility_adult = load_eq5d_data()
     df_utility_child = interpolate_eq5d_data(df_utility_adult)
     df_utility = pd.concat([df_utility_child, df_utility_adult], ignore_index=True)
+    df_utility.sort_values(by=["sex", "age"], inplace=True)
     df_utility.to_csv(get_data_path("processed_data/eq5d_canada.csv"), index=False)
     logger.info("EQ-5D data generated and saved to 'processed_data/eq5d_canada.csv'.")
 
