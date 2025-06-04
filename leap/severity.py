@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 import numpy as np
 from scipy.special import gamma
 from leap.logger import get_logger
@@ -173,21 +174,22 @@ class ExacerbationSeverity:
             ... ) # doctest: +NORMALIZE_WHITESPACE
             array([10, 0, 0, 0])
         """
-        severity_levels = self.severity_levels
+        severity_levels = copy.deepcopy(self.severity_levels)
         severity_levels_array = severity_levels.as_array()
 
         if num_current_year == 0:
             return np.zeros(4)
         else:
             if prev_hosp:
-                weight = severity_levels_array / np.sum(severity_levels_array)
+                weights = severity_levels_array[0:3] / np.sum(severity_levels_array[0:3])
                 severity_levels.very_severe = severity_levels.very_severe * (
                     self.parameters["βprev_hosp_ped"] if age < 14
                     else self.parameters["βprev_hosp_adult"]
                 )
-                severity_levels_array = weight * (1 - severity_levels.very_severe)
+                severity_levels_array[0:3] = weights * (1 - severity_levels.very_severe)
+                severity_levels_array[3] = severity_levels.very_severe
 
-            return np.random.multinomial(num_current_year, severity_levels_array)
+        return np.random.multinomial(num_current_year, severity_levels_array)
 
     def compute_hospitalization_prob(
         self, agent: Agent, control: Control, exacerbation: Exacerbation
