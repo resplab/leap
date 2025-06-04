@@ -185,3 +185,26 @@ def load_eq5d_data(max_age: int = MAX_AGE) -> pd.DataFrame:
     )
 
     return df_utility
+
+
+def interpolate_eq5d(
+    age: int,
+    eq5d_upper: float,
+    age_upper: int = 18
+) -> float:
+    """Interpolate EQ-5D value for ages below 18 based on the EQ-5D value at 18.
+    
+    Args:
+        age: Age for which to interpolate the EQ-5D value. Must be in range ``[0, 18]``.
+        eq5d_upper: EQ-5D value at the upper age limit (default is ``18``).
+        age_upper: Upper age limit for interpolation (default is ``18``).
+        
+    Returns:
+        Interpolated EQ-5D value for the given age.
+    """
+
+    if age > age_upper:
+        raise ValueError(f"Age {age} must be less than or equal to {age_upper}.")
+
+    eq5d = 1 - (1 - eq5d_upper) / age_upper * age
+    return eq5d
