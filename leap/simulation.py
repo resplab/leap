@@ -645,7 +645,9 @@ class Simulation:
         outcome_matrix = OutcomeMatrix(until_all_die, min_year, max_year, max_age)
 
         # loop by year
-        for year in (pbar_year := tqdm(years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
+        for year in (pbar_year := tqdm(
+            years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}", position=0
+        )):
             pbar_year.set_description(f"Year {year}")
             year_index = year - min_year
 
@@ -658,19 +660,35 @@ class Simulation:
             logger.info(f"\n{new_agents_df}")
 
             # for each agent i born/immigrated in year
-            for i in (pbar := tqdm(range(new_agents_df.shape[0]), desc="Agents", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
-                outcome_matrix_agent = self.simulate_agent(
-                    year=year,
-                    year_index=year_index,
-                    min_year=min_year,
-                    max_year=max_year,
-                    max_time_horizon=max_time_horizon,
-                    max_age=max_age,
-                    month=month,
-                    new_agents_df=new_agents_df,
-                    until_all_die=until_all_die,
-                    i=i
+            with mp.Pool(n_cpu) as pool:
+                results = pool.starmap(
+                    func=self.simulate_agent,
+                    iterable=tqdm(
+                        [
+                            (
+                                year,
+                                year_index,
+                                min_year,
+                                max_year,
+                                max_time_horizon,
+                                max_age,
+                                month,
+                                new_agents_df,
+                                until_all_die,
+                                i
+                            )
+                            for i in range(new_agents_df.shape[0])
+                        ],
+                        desc=f"Agents Year {year}",
+                        bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
+                        total=new_agents_df.shape[0],
+                        position=1
+                    ),
+                    chunksize=new_agents_df.shape[0] // n_cpu
                 )
+
+            # combine the results from all agents
+            for outcome_matrix_agent in results:
                 outcome_matrix.combine(outcome_matrix_agent)
 
         self.outcome_matrix = outcome_matrix
