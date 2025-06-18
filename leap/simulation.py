@@ -4,6 +4,7 @@ import math
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import multiprocessing as mp
 from leap.agent import Agent
 from leap.antibiotic_exposure import AntibioticExposure
 from leap.birth import Birth
@@ -612,12 +613,14 @@ class Simulation:
 
         return outcome_matrix
 
-    def run(self, seed=None, until_all_die: bool = False):
+    def run(self, seed=None, until_all_die: bool = False, n_cpu: int | None = None):
         """Run the simulation.
 
         Args:
             seed: The random seed to use for the simulation.
             until_all_die: Whether to run the simulation until all agents die.
+            n_cpu: The number of CPUs to use for multiprocessing. If None, it will use all
+                available CPUs minus one.
 
         Returns:
             The outcome matrix.
@@ -625,6 +628,10 @@ class Simulation:
 
         if seed is not None:
             np.random.seed(seed)
+
+        if n_cpu is None:
+            n_cpu = mp.cpu_count() - 1
+            logger.message(f"Setting number of CPUs to use for multiprocessing to {n_cpu}")
 
         month = 1
         max_age = self.max_age
