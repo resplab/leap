@@ -116,6 +116,16 @@ def get_parser() -> argparse.ArgumentParser:
         help="Number of initial births for the simulation.",
     )
     args.add_argument(
+        "-nc",
+        "--n-cpu",
+        dest="n_cpu",
+        required=False,
+        type=int,
+        help="""The number of CPU cores to use for multiprocessing.
+            If not specified, defaults to the number of available cores.
+        """
+    )
+    args.add_argument(
         "-ip",
         "--ignore-pollution",
         dest="ignore_pollution",
@@ -332,7 +342,7 @@ def run_main():
         logger.message("Running simulation...")
 
         # This is the main function that runs the entire simulation
-        outcome_matrix = simulation.run()
+        outcome_matrix = simulation.run(n_cpu=args.n_cpu)
 
         logger.message(outcome_matrix)
         outcome_matrix.save(path=output_path)
