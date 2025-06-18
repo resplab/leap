@@ -443,6 +443,175 @@ class Simulation:
             }
         )
 
+    def simulate_agent(
+        self,
+        year: int,
+        year_index: int,
+        min_year: int,
+        max_year: int,
+        max_time_horizon: int,
+        max_age: int,
+        month: int,
+        new_agents_df: pd.DataFrame,
+        until_all_die: bool,
+        i: int
+    ):
+        outcome_matrix = OutcomeMatrix(until_all_die, min_year, max_year, max_age)
+        self.control.assign_random_β0()
+        self.exacerbation.assign_random_β0()
+        self.exacerbation_severity.assign_random_p()
+
+        census_division = CensusDivision(
+            census_table=self.census_table, province=self.province
+        )
+        if self.ignore_pollution_flag:
+            pollution = None
+        else:
+            pollution = Pollution(
+                pollution_table=self.pollution_table,
+                SSP=self.SSP,
+                year=year,
+                month=month,
+                cduid=census_division.cduid
+            )
+        agent = Agent(
+            sex=new_agents_df["sex"].iloc[i],
+            age=new_agents_df["age"].iloc[i],
+            year=year,
+            year_index=year_index,
+            family_history=self.family_history,
+            antibiotic_exposure=self.antibiotic_exposure,
+            province=self.province,
+            month=month,
+            ssp=self.SSP,
+            census_division=census_division,
+            pollution=pollution
+        )
+        # pbar.set_description(f"Agent {agent.uuid.short}")
+
+        logger.info(
+            f"Agent {agent.uuid.short} born/immigrated in year {year}, "
+            f"age {agent.age}, sex {int(agent.sex)}, "
+            f"immigrant: {new_agents_df['immigrant'].iloc[i]}, "
+            f"newborn: {not new_agents_df['immigrant'].iloc[i]}"
+        )
+        logger.info(
+            f"| -- Year: {agent.year_index + min_year - 1}, "
+            f"age: {agent.age}"
+        )
+
+        if new_agents_df["immigrant"].iloc[i]:
+            outcome_matrix.immigration.increment(
+                "n_immigrants", {"year": agent.year, "age": agent.age, "sex": agent.sex}
+            )
+
+        outcome_matrix.antibiotic_exposure.increment(
+            column="n_antibiotic_exposure",
+            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+            amount=agent.num_antibiotic_use
+        )
+
+        outcome_matrix.family_history.increment(
+            column="has_family_history",
+            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+            amount=agent.has_family_history
+        )
+
+        # if age > 4, we need to generate the initial distribution of asthma related events
+
+        if agent.age > 3:
+            self.generate_initial_asthma(agent)
+
+            logger.info(
+                f"| ---- Agent age > 3, agent has asthma (prevalence)? {agent.has_asthma}"
+            )
+
+        # go through event processes for each agent
+        while agent.alive and agent.age <= max_age and agent.year_index <= max_time_horizon:
+            if not agent.has_asthma:
+                self.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
+                logger.info(f"| ---- Agent has asthma (incidence)? {agent.has_asthma}")
+            else:
+                self.reassess_asthma_diagnosis(agent, outcome_matrix)
+                logger.info(
+                    "| ---- Agent was diagnosed with asthma, is this diagnosis correct? "
+                    f"{agent.has_asthma}"
+                )
+
+            # if no asthma, record it
+            if agent.has_asthma:
+                outcome_matrix.asthma_prevalence.increment(
+                    column="n_asthma",
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+                )
+
+            outcome_matrix.asthma_prevalence_contingency_table.increment(
+                column="n_asthma" if agent.has_asthma else "n_no_asthma",
+                filter_columns={
+                    "year": agent.year,
+                    "age": agent.age,
+                    "sex": agent.sex,
+                    "fam_history": agent.has_family_history,
+                    "abx_exposure": agent.num_antibiotic_use
+                }
+            )
+
+            # compute utility
+            utility = self.utility.compute_utility(agent)
+            logger.info(f"| ---- Utility of asthma: {utility}")
+            outcome_matrix.utility.increment(
+                column="utility",
+                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+                amount=utility
+            )
+
+            # compute cost
+            cost = self.cost.compute_cost(agent)
+            logger.info(f"| ---- Cost of asthma: {cost} CAD")
+
+            outcome_matrix.cost.increment(
+                column="cost",
+                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+                amount=cost
+            )
+
+            # death or emigration, assume death occurs first
+            if self.death.agent_dies(agent):
+                agent.alive = False
+                outcome_matrix.death.increment(
+                    column="n_deaths",
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                )
+                logger.info(f"| ---- Agent has died at age {agent.age}")
+            # emigration
+            elif self.emigration.compute_probability(
+                agent.year, agent.age, str(agent.sex)
+            ):
+                agent.alive = False
+                outcome_matrix.emigration.increment(
+                    column="n_emigrants",
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                )
+                logger.info(f"| ---- Agent has emigrated at age {agent.age}")
+            else:
+                # record alive
+                outcome_matrix.alive.increment(
+                    column="n_alive",
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                )
+
+                # update the patient stats
+                agent.age += 1
+                agent.year += 1
+                agent.year_index += 1
+
+                if agent.age <= max_age and agent.year_index <= max_time_horizon:
+                    logger.info(
+                        f"| -- Year: {agent.year_index + min_year - 1}, age: {agent.age}"
+                    )
+
+        return outcome_matrix
+
     def run(self, seed=None, until_all_die: bool = False):
         """Run the simulation.
 
@@ -483,158 +652,19 @@ class Simulation:
 
             # for each agent i born/immigrated in year
             for i in (pbar := tqdm(range(new_agents_df.shape[0]), desc="Agents", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
-                self.control.assign_random_β0()
-                self.exacerbation.assign_random_β0()
-                self.exacerbation_severity.assign_random_p()
-
-                census_division = CensusDivision(
-                    census_table=self.census_table, province=self.province
-                )
-                if self.ignore_pollution_flag:
-                    pollution = None
-                else:
-                    pollution = Pollution(
-                        pollution_table=self.pollution_table,
-                        SSP=self.SSP,
-                        year=year,
-                        month=month,
-                        cduid=census_division.cduid
-                    )
-                agent = Agent(
-                    sex=new_agents_df["sex"].iloc[i],
-                    age=new_agents_df["age"].iloc[i],
+                outcome_matrix_agent = self.simulate_agent(
                     year=year,
                     year_index=year_index,
-                    family_history=self.family_history,
-                    antibiotic_exposure=self.antibiotic_exposure,
-                    province=self.province,
+                    min_year=min_year,
+                    max_year=max_year,
+                    max_time_horizon=max_time_horizon,
+                    max_age=max_age,
                     month=month,
-                    ssp=self.SSP,
-                    census_division=census_division,
-                    pollution=pollution
+                    new_agents_df=new_agents_df,
+                    until_all_die=until_all_die,
+                    i=i
                 )
-                pbar.set_description(f"Agent {agent.uuid.short}")
-
-                logger.info(
-                    f"Agent {agent.uuid.short} born/immigrated in year {year}, "
-                    f"age {agent.age}, sex {int(agent.sex)}, "
-                    f"immigrant: {new_agents_df['immigrant'].iloc[i]}, "
-                    f"newborn: {not new_agents_df['immigrant'].iloc[i]}"
-                )
-                logger.info(
-                    f"| -- Year: {agent.year_index + min_year - 1}, "
-                    f"age: {agent.age}"
-                )
-
-                if new_agents_df["immigrant"].iloc[i]:
-                    outcome_matrix.immigration.increment(
-                        "n_immigrants", {"year": agent.year, "age": agent.age, "sex": agent.sex}
-                    )
-
-                outcome_matrix.antibiotic_exposure.increment(
-                    column="n_antibiotic_exposure",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                    amount=agent.num_antibiotic_use
-                )
-
-                outcome_matrix.family_history.increment(
-                    column="has_family_history",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                    amount=agent.has_family_history
-                )
-
-                # if age > 4, we need to generate the initial distribution of asthma related events
-
-                if agent.age > 3:
-                    self.generate_initial_asthma(agent)
-
-                    logger.info(
-                        f"| ---- Agent age > 3, agent has asthma (prevalence)? {agent.has_asthma}"
-                    )
-
-                # go through event processes for each agent
-                while agent.alive and agent.age <= max_age and agent.year_index <= max_time_horizon:
-                    if not agent.has_asthma:
-                        self.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
-                        logger.info(f"| ---- Agent has asthma (incidence)? {agent.has_asthma}")
-                    else:
-                        self.reassess_asthma_diagnosis(agent, outcome_matrix)
-                        logger.info(
-                            "| ---- Agent was diagnosed with asthma, is this diagnosis correct? "
-                            f"{agent.has_asthma}"
-                        )
-
-                    # if no asthma, record it
-                    if agent.has_asthma:
-                        outcome_matrix.asthma_prevalence.increment(
-                            column="n_asthma",
-                            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                        )
-
-                    outcome_matrix.asthma_prevalence_contingency_table.increment(
-                        column="n_asthma" if agent.has_asthma else "n_no_asthma",
-                        filter_columns={
-                            "year": agent.year,
-                            "age": agent.age,
-                            "sex": agent.sex,
-                            "fam_history": agent.has_family_history,
-                            "abx_exposure": agent.num_antibiotic_use
-                        }
-                    )
-
-                    # compute utility
-                    utility = self.utility.compute_utility(agent)
-                    logger.info(f"| ---- Utility of asthma: {utility}")
-                    outcome_matrix.utility.increment(
-                        column="utility",
-                        filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                        amount=utility
-                    )
-
-                    # compute cost
-                    cost = self.cost.compute_cost(agent)
-                    logger.info(f"| ---- Cost of asthma: {cost} CAD")
-
-                    outcome_matrix.cost.increment(
-                        column="cost",
-                        filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                        amount=cost
-                    )
-
-                    # death or emigration, assume death occurs first
-                    if self.death.agent_dies(agent):
-                        agent.alive = False
-                        outcome_matrix.death.increment(
-                            column="n_deaths",
-                            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
-                        )
-                        logger.info(f"| ---- Agent has died at age {agent.age}")
-                    # emigration
-                    elif self.emigration.compute_probability(
-                        agent.year, agent.age, str(agent.sex)
-                    ):
-                        agent.alive = False
-                        outcome_matrix.emigration.increment(
-                            column="n_emigrants",
-                            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
-                        )
-                        logger.info(f"| ---- Agent has emigrated at age {agent.age}")
-                    else:
-                        # record alive
-                        outcome_matrix.alive.increment(
-                            column="n_alive",
-                            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
-                        )
-
-                        # update the patient stats
-                        agent.age += 1
-                        agent.year += 1
-                        agent.year_index += 1
-
-                        if agent.age <= max_age and agent.year_index <= max_time_horizon:
-                            logger.info(
-                                f"| -- Year: {agent.year_index + min_year - 1}, age: {agent.age}"
-                            )
+                outcome_matrix.combine(outcome_matrix_agent)
 
         self.outcome_matrix = outcome_matrix
         logger.info("\nSimulation finished. Check your simulation object for results.")
