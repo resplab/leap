@@ -616,7 +616,13 @@ class Simulation:
 
         return outcome_matrix
 
-    def run(self, seed=None, until_all_die: bool = False, n_cpu: int | None = None):
+    def run(
+        self,
+        seed=None,
+        until_all_die: bool = False,
+        n_cpu: int | None = None,
+        min_agents_mp: int = MIN_AGENTS_MP
+    ):
         """Run the simulation.
 
         Args:
@@ -624,6 +630,9 @@ class Simulation:
             until_all_die: Whether to run the simulation until all agents die.
             n_cpu: The number of CPUs to use for multiprocessing. If None, it will use all
                 available CPUs minus one.
+            min_agents_mp: The minimum number of agents to use multiprocessing for. If the
+                number of new agents in a year is less than this value, the simulation will
+                run sequentially for that year.
 
         Returns:
             The outcome matrix.
@@ -663,36 +672,49 @@ class Simulation:
             logger.info(f"\n{new_agents_df}")
 
             # for each agent i born/immigrated in year
-            with mp.Pool(n_cpu) as pool:
-                results = pool.starmap(
-                    func=self.simulate_agent,
-                    iterable=tqdm(
-                        [
-                            (
-                                year,
-                                year_index,
-                                min_year,
-                                max_year,
-                                max_time_horizon,
-                                max_age,
-                                month,
-                                new_agents_df,
-                                until_all_die,
-                                i
-                            )
-                            for i in range(new_agents_df.shape[0])
-                        ],
-                        desc=f"Agents Year {year}",
-                        bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
-                        total=new_agents_df.shape[0],
-                        position=1
-                    ),
-                    chunksize=new_agents_df.shape[0] // n_cpu
-                )
+            if new_agents_df.shape[0] < min_agents_mp or n_cpu == 1:
+                for i in tqdm(
+                    range(new_agents_df.shape[0]),
+                    desc=f"Agents Year {year}",
+                    bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
+                    position=1
+                ):
+                    outcome_matrix_agent = self.simulate_agent(
+                        year, year_index, min_year, max_year, max_time_horizon,
+                        max_age, month, new_agents_df, until_all_die, i
+                    )
+                    outcome_matrix.combine(outcome_matrix_agent)
+            else:
+                with mp.Pool(n_cpu) as pool:
+                    results = pool.starmap(
+                        func=self.simulate_agent,
+                        iterable=tqdm(
+                            [
+                                (
+                                    year,
+                                    year_index,
+                                    min_year,
+                                    max_year,
+                                    max_time_horizon,
+                                    max_age,
+                                    month,
+                                    new_agents_df,
+                                    until_all_die,
+                                    i
+                                )
+                                for i in range(new_agents_df.shape[0])
+                            ],
+                            desc=f"Agents Year {year}",
+                            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
+                            total=new_agents_df.shape[0],
+                            position=1
+                        ),
+                        chunksize=new_agents_df.shape[0] // n_cpu
+                    )
 
-            # combine the results from all agents
-            for outcome_matrix_agent in results:
-                outcome_matrix.combine(outcome_matrix_agent)
+                # combine the results from all agents
+                for outcome_matrix_agent in results:
+                    outcome_matrix.combine(outcome_matrix_agent)
 
         self.outcome_matrix = outcome_matrix
         logger.info("\nSimulation finished. Check your simulation object for results.")
