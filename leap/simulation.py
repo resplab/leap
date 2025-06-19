@@ -28,6 +28,9 @@ from leap.logger import get_logger
 logger = get_logger(__name__)
 
 
+MIN_AGENTS_MP = 500
+
+
 class Simulation:
     """A class containing information about the simulation.
     """
