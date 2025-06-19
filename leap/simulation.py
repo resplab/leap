@@ -709,7 +709,7 @@ class Simulation:
                             total=new_agents_df.shape[0],
                             position=1
                         ),
-                        chunksize=new_agents_df.shape[0] // n_cpu
+                        chunksize=int(math.ceil(new_agents_df.shape[0] / (n_cpu * 8)))
                     )
 
                 # combine the results from all agents
