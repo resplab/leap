@@ -685,7 +685,7 @@ class Simulation:
                     )
                     outcome_matrix.combine(outcome_matrix_agent)
             else:
-                with mp.Pool(n_cpu) as pool:
+                with mp.get_context("spawn").Pool(n_cpu) as pool:
                     results = pool.starmap(
                         func=self.simulate_agent,
                         iterable=tqdm(
