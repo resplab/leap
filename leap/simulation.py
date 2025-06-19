@@ -658,7 +658,7 @@ class Simulation:
 
         # loop by year
         for year in (pbar_year := tqdm(
-            years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}", position=0
+            years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}"
         )):
             pbar_year.set_description(f"Year {year}")
             year_index = year - min_year
@@ -706,8 +706,7 @@ class Simulation:
                             ],
                             desc=f"Agents Year {year}",
                             bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
-                            total=new_agents_df.shape[0],
-                            position=1
+                            total=new_agents_df.shape[0]
                         ),
                         chunksize=int(math.ceil(new_agents_df.shape[0] / (n_cpu * 8)))
                     )
