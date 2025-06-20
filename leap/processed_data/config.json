@@ -5,7 +5,8 @@
         "province": "BC",
         "population_growth_type": "LG",
         "num_births_initial": 100,
-        "max_age": 111
+        "max_age": 111,
+        "until_all_die": false
     },
     "antibiotic_exposure": {
         "parameters": {

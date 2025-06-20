@@ -44,6 +44,7 @@ class Simulation:
         time_horizon: int | None = None,
         population_growth_type: str | None = None,
         num_births_initial: int | None = None,
+        until_all_die: bool | None = None,
         ignore_pollution_flag: bool = False
     ):
         if config is None:
@@ -77,6 +78,10 @@ class Simulation:
             self.num_births_initial = num_births_initial
         else:
             self.num_births_initial = config["simulation"]["num_births_initial"]
+        if until_all_die is not None:
+            self.until_all_die = until_all_die
+        else:
+            self.until_all_die = config["simulation"]["until_all_die"]
         self.agent = None
         self.birth = Birth(self.min_year, self.province, self.population_growth_type, self.max_age)
         self.emigration = Emigration(self.min_year, self.province, self.population_growth_type)
@@ -155,6 +160,18 @@ class Simulation:
         except AttributeError:
             pass
 
+
+    @property
+    def until_all_die(self) -> bool:
+        """Whether to run the simulation until all agents die."""
+        return self._until_all_die
+
+    @until_all_die.setter
+    def until_all_die(self, until_all_die: bool):
+        """Set whether to run the simulation until all agents die."""
+        if not isinstance(until_all_die, bool):
+            raise ValueError("until_all_die must be a boolean value.")
+        self._until_all_die = until_all_die
     @property
     def population_growth_type(self) -> str:
         """Population growth type to be used in the simulation.
@@ -455,9 +472,8 @@ class Simulation:
         year: int,
         year_index: int,
         max_time_horizon: int,
-        month: int,
-        until_all_die: bool
-    ):
+        month: int
+    ) -> OutcomeMatrix:
         """Simulate a new agent in the model.
 
         The agent in this function is a person who is either:
@@ -476,10 +492,11 @@ class Simulation:
                 simulation starts in 2010, then the year index for 2010 is 0, for 2011 is 1, etc.
             max_time_horizon: The maximum number of years the simulation will run for.
             month: The month of the year when the agent is born/immigrates.
-            until_all_die: Whether to run the simulation until all agents die.
 
         """
-        outcome_matrix = OutcomeMatrix(until_all_die, self.min_year, self.max_year, self.max_age)
+        outcome_matrix = OutcomeMatrix(
+            self.until_all_die, self.min_year, self.max_year, self.max_age
+        )
         self.control.assign_random_β0()
         self.exacerbation.assign_random_β0()
         self.exacerbation_severity.assign_random_p()
@@ -639,7 +656,7 @@ class Simulation:
     def run(
         self,
         seed=None,
-        until_all_die: bool = False,
+        until_all_die: bool | None = None,
         n_cpu: int | None = None,
         min_agents_mp: int = MIN_AGENTS_MP
     ):
@@ -665,13 +682,18 @@ class Simulation:
             n_cpu = mp.cpu_count() - 1
             logger.message(f"Setting number of CPUs to use for multiprocessing to {n_cpu}")
 
+        if until_all_die is not None:
+            self.until_all_die = until_all_die
+
         month = 1
 
-        max_time_horizon = np.iinfo(np.int32).max if until_all_die else self.time_horizon
+        max_time_horizon = np.iinfo(np.int32).max if self.until_all_die else self.time_horizon
         years = np.arange(self.min_year, self.max_year + 1)
         total_years = len(years)
 
-        outcome_matrix = OutcomeMatrix(until_all_die, self.min_year, self.max_year, self.max_age)
+        outcome_matrix = OutcomeMatrix(
+            self.until_all_die, self.min_year, self.max_year, self.max_age
+        )
 
         # loop by year
         for year in (pbar_year := tqdm(
@@ -704,8 +726,7 @@ class Simulation:
                         year=year,
                         year_index=year_index,
                         max_time_horizon=max_time_horizon,
-                        month=month,
-                        until_all_die=until_all_die
+                        month=month
                     )
                     outcome_matrix.combine(outcome_matrix_agent)
             else:
@@ -721,8 +742,7 @@ class Simulation:
                                     year,
                                     year_index,
                                     max_time_horizon,
-                                    month,
-                                    until_all_die
+                                    month
                                 )
                                 for i in range(new_agents_df.shape[0])
                             ],
