@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import functools
+import time
 import pathlib
 import math
 import os
@@ -13,6 +15,19 @@ logger = get_logger(__name__)
 
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
+
+
+def timer(func: Callable) -> Callable:
+    """Print the runtime of the decorated function"""
+    @functools.wraps(func)
+    def wrapper_timer(*args, **kwargs):
+        start_time = time.perf_counter()
+        value = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        run_time = end_time - start_time
+        logger.message(f"Finished {func.__name__}() in {run_time:.4f} seconds")
+        return value
+    return wrapper_timer
 
 
 class UUID4:
