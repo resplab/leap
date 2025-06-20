@@ -454,14 +454,11 @@ class Simulation:
         is_immigrant: bool,
         year: int,
         year_index: int,
-        min_year: int,
-        max_year: int,
         max_time_horizon: int,
-        max_age: int,
         month: int,
         until_all_die: bool
     ):
-        outcome_matrix = OutcomeMatrix(until_all_die, min_year, max_year, max_age)
+        outcome_matrix = OutcomeMatrix(until_all_die, self.min_year, self.max_year, self.max_age)
         self.control.assign_random_β0()
         self.exacerbation.assign_random_β0()
         self.exacerbation_severity.assign_random_p()
@@ -501,7 +498,7 @@ class Simulation:
             f"newborn: {not is_immigrant}"
         )
         logger.info(
-            f"| -- Year: {agent.year_index + min_year - 1}, "
+            f"| -- Year: {agent.year_index + self.min_year - 1}, "
             f"age: {agent.age}"
         )
 
@@ -532,7 +529,7 @@ class Simulation:
             )
 
         # go through event processes for each agent
-        while agent.alive and agent.age <= max_age and agent.year_index <= max_time_horizon:
+        while agent.alive and agent.age <= self.max_age and agent.year_index <= max_time_horizon:
             if not agent.has_asthma:
                 self.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
                 logger.info(f"| ---- Agent has asthma (incidence)? {agent.has_asthma}")
@@ -610,9 +607,9 @@ class Simulation:
                 agent.year += 1
                 agent.year_index += 1
 
-                if agent.age <= max_age and agent.year_index <= max_time_horizon:
+                if agent.age <= self.max_age and agent.year_index <= max_time_horizon:
                     logger.info(
-                        f"| -- Year: {agent.year_index + min_year - 1}, age: {agent.age}"
+                        f"| -- Year: {agent.year_index + self.min_year - 1}, age: {agent.age}"
                     )
 
         return outcome_matrix
@@ -647,22 +644,20 @@ class Simulation:
             logger.message(f"Setting number of CPUs to use for multiprocessing to {n_cpu}")
 
         month = 1
-        max_age = self.max_age
-        min_year = self.min_year
-        max_year = self.max_year
 
         max_time_horizon = np.iinfo(np.int32).max if until_all_die else self.time_horizon
-        years = np.arange(min_year, max_year + 1)
-        total_years = max_year - min_year + 1
+        years = np.arange(self.min_year, self.max_year + 1)
+        total_years = len(years)
 
-        outcome_matrix = OutcomeMatrix(until_all_die, min_year, max_year, max_age)
+        outcome_matrix = OutcomeMatrix(until_all_die, self.min_year, self.max_year, self.max_age)
 
         # loop by year
         for year in (pbar_year := tqdm(
             years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}"
         )):
             pbar_year.set_description(f"Year {year}")
-            year_index = year - min_year
+            year = int(year)
+            year_index = year - self.min_year
 
             new_agents_df = self.get_new_agents(
                 year=year
@@ -686,10 +681,7 @@ class Simulation:
                         is_immigrant=new_agents_df["immigrant"].iloc[i],
                         year=year,
                         year_index=year_index,
-                        min_year=min_year,
-                        max_year=max_year,
                         max_time_horizon=max_time_horizon,
-                        max_age=max_age,
                         month=month,
                         until_all_die=until_all_die
                     )
@@ -706,10 +698,7 @@ class Simulation:
                                     new_agents_df["immigrant"].iloc[i],
                                     year,
                                     year_index,
-                                    min_year,
-                                    max_year,
                                     max_time_horizon,
-                                    max_age,
                                     month,
                                     until_all_die
                                 )
