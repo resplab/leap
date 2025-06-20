@@ -458,6 +458,27 @@ class Simulation:
         month: int,
         until_all_die: bool
     ):
+        """Simulate a new agent in the model.
+
+        The agent in this function is a person who is either:
+
+        1. A new immigrant to Canada in the specified year.
+        2. A newborn baby born in the specified year.
+
+        This function simulates the agent's life from birth/immigration until death or emigration.
+        
+        Args:
+            sex: One of ``"M"`` or ``"F"``.
+            age: The age of the agent.
+            is_immigrant: Whether or not the agent (person) is an immigrant.
+            year: The current year of the simulation.
+            year_index: The index of the current year in the simulation. For example, if the
+                simulation starts in 2010, then the year index for 2010 is 0, for 2011 is 1, etc.
+            max_time_horizon: The maximum number of years the simulation will run for.
+            month: The month of the year when the agent is born/immigrates.
+            until_all_die: Whether to run the simulation until all agents die.
+
+        """
         outcome_matrix = OutcomeMatrix(until_all_die, self.min_year, self.max_year, self.max_age)
         self.control.assign_random_β0()
         self.exacerbation.assign_random_β0()
