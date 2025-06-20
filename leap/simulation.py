@@ -160,6 +160,15 @@ class Simulation:
         except AttributeError:
             pass
 
+    @property
+    def max_time_horizon(self) -> int:
+        """The maximum number of years the simulation will run for."""
+        return self._max_time_horizon
+
+    @max_time_horizon.setter
+    def max_time_horizon(self, max_time_horizon: int):
+        """Set the maximum number of years the simulation will run for."""
+        self._max_time_horizon = max_time_horizon
 
     @property
     def until_all_die(self) -> bool:
@@ -172,6 +181,11 @@ class Simulation:
         if not isinstance(until_all_die, bool):
             raise ValueError("until_all_die must be a boolean value.")
         self._until_all_die = until_all_die
+        if until_all_die:
+            self.max_time_horizon = np.iinfo(np.int32).max
+        else:
+            self.max_time_horizon = self.time_horizon
+
     @property
     def population_growth_type(self) -> str:
         """Population growth type to be used in the simulation.
@@ -471,7 +485,6 @@ class Simulation:
         is_immigrant: bool,
         year: int,
         year_index: int,
-        max_time_horizon: int,
         month: int
     ) -> OutcomeMatrix:
         """Simulate a new agent in the model.
@@ -490,7 +503,6 @@ class Simulation:
             year: The current year of the simulation.
             year_index: The index of the current year in the simulation. For example, if the
                 simulation starts in 2010, then the year index for 2010 is 0, for 2011 is 1, etc.
-            max_time_horizon: The maximum number of years the simulation will run for.
             month: The month of the year when the agent is born/immigrates.
 
         """
@@ -567,7 +579,7 @@ class Simulation:
             )
 
         # go through event processes for each agent
-        while agent.alive and agent.age <= self.max_age and agent.year_index <= max_time_horizon:
+        while agent.alive and agent.age <= self.max_age and agent.year_index <= self.max_time_horizon:
             if not agent.has_asthma:
                 self.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
                 logger.info(f"| ---- Agent has asthma (incidence)? {agent.has_asthma}")
@@ -645,7 +657,7 @@ class Simulation:
                 agent.year += 1
                 agent.year_index += 1
 
-                if agent.age <= self.max_age and agent.year_index <= max_time_horizon:
+                if agent.age <= self.max_age and agent.year_index <= self.max_time_horizon:
                     logger.info(
                         f"| -- Year: {agent.year_index + self.min_year - 1}, age: {agent.age}"
                     )
@@ -686,8 +698,6 @@ class Simulation:
             self.until_all_die = until_all_die
 
         month = 1
-
-        max_time_horizon = np.iinfo(np.int32).max if self.until_all_die else self.time_horizon
         years = np.arange(self.min_year, self.max_year + 1)
         total_years = len(years)
 
@@ -725,7 +735,6 @@ class Simulation:
                         is_immigrant=new_agents_df["immigrant"].iloc[i],
                         year=year,
                         year_index=year_index,
-                        max_time_horizon=max_time_horizon,
                         month=month
                     )
                     outcome_matrix.combine(outcome_matrix_agent)
@@ -741,7 +750,6 @@ class Simulation:
                                     new_agents_df["immigrant"].iloc[i],
                                     year,
                                     year_index,
-                                    max_time_horizon,
                                     month
                                 )
                                 for i in range(new_agents_df.shape[0])
