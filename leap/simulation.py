@@ -22,7 +22,7 @@ from leap.pollution import PollutionTable, Pollution
 from leap.reassessment import Reassessment
 from leap.severity import ExacerbationSeverity
 from leap.utility import Utility
-from leap.utils import get_data_path
+from leap.utils import get_data_path, timer
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -635,6 +635,7 @@ class Simulation:
 
         return outcome_matrix
 
+    @timer
     def run(
         self,
         seed=None,
