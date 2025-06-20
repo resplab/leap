@@ -126,6 +126,15 @@ def get_parser() -> argparse.ArgumentParser:
         """
     )
     args.add_argument(
+        "-mam",
+        "--min-agents-mp",
+        dest="min_agents_mp",
+        required=False,
+        type=int,
+        help="""Minimum number of agents for multiprocessing to be run.""",
+        default=500
+    )
+    args.add_argument(
         "-ip",
         "--ignore-pollution",
         dest="ignore_pollution",
@@ -342,7 +351,10 @@ def run_main():
         logger.message("Running simulation...")
 
         # This is the main function that runs the entire simulation
-        outcome_matrix = simulation.run(n_cpu=args.n_cpu)
+        outcome_matrix = simulation.run(
+            n_cpu=args.n_cpu,
+            min_agents_mp=args.min_agents_mp
+        )
 
         logger.message(outcome_matrix)
         outcome_matrix.save(path=output_path)
