@@ -449,6 +449,9 @@ class Simulation:
 
     def simulate_agent(
         self,
+        sex: str,
+        age: int,
+        is_immigrant: bool,
         year: int,
         year_index: int,
         min_year: int,
@@ -456,9 +459,7 @@ class Simulation:
         max_time_horizon: int,
         max_age: int,
         month: int,
-        new_agents_df: pd.DataFrame,
-        until_all_die: bool,
-        i: int
+        until_all_die: bool
     ):
         outcome_matrix = OutcomeMatrix(until_all_die, min_year, max_year, max_age)
         self.control.assign_random_β0()
@@ -479,8 +480,8 @@ class Simulation:
                 cduid=census_division.cduid
             )
         agent = Agent(
-            sex=new_agents_df["sex"].iloc[i],
-            age=new_agents_df["age"].iloc[i],
+            sex=sex,
+            age=age,
             year=year,
             year_index=year_index,
             family_history=self.family_history,
@@ -496,15 +497,15 @@ class Simulation:
         logger.info(
             f"Agent {agent.uuid.short} born/immigrated in year {year}, "
             f"age {agent.age}, sex {int(agent.sex)}, "
-            f"immigrant: {new_agents_df['immigrant'].iloc[i]}, "
-            f"newborn: {not new_agents_df['immigrant'].iloc[i]}"
+            f"immigrant: {is_immigrant}, "
+            f"newborn: {not is_immigrant}"
         )
         logger.info(
             f"| -- Year: {agent.year_index + min_year - 1}, "
             f"age: {agent.age}"
         )
 
-        if new_agents_df["immigrant"].iloc[i]:
+        if is_immigrant:
             outcome_matrix.immigration.increment(
                 "n_immigrants", {"year": agent.year, "age": agent.age, "sex": agent.sex}
             )
@@ -680,8 +681,17 @@ class Simulation:
                     position=1
                 ):
                     outcome_matrix_agent = self.simulate_agent(
-                        year, year_index, min_year, max_year, max_time_horizon,
-                        max_age, month, new_agents_df, until_all_die, i
+                        sex=new_agents_df["sex"].iloc[i],
+                        age=new_agents_df["age"].iloc[i],
+                        is_immigrant=new_agents_df["immigrant"].iloc[i],
+                        year=year,
+                        year_index=year_index,
+                        min_year=min_year,
+                        max_year=max_year,
+                        max_time_horizon=max_time_horizon,
+                        max_age=max_age,
+                        month=month,
+                        until_all_die=until_all_die
                     )
                     outcome_matrix.combine(outcome_matrix_agent)
             else:
@@ -691,6 +701,9 @@ class Simulation:
                         iterable=tqdm(
                             [
                                 (
+                                    new_agents_df["sex"].iloc[i],
+                                    new_agents_df["age"].iloc[i],
+                                    new_agents_df["immigrant"].iloc[i],
                                     year,
                                     year_index,
                                     min_year,
@@ -698,9 +711,7 @@ class Simulation:
                                     max_time_horizon,
                                     max_age,
                                     month,
-                                    new_agents_df,
-                                    until_all_die,
-                                    i
+                                    until_all_die
                                 )
                                 for i in range(new_agents_df.shape[0])
                             ],
