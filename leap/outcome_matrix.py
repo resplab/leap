@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import itertools
 import pathlib
 from leap.utils import check_file
@@ -523,3 +524,47 @@ class OutcomeMatrix:
             file_path = pathlib.Path(path.resolve(), f"outcome_matrix_{attribute.removeprefix('_')}.csv")
             self.__getattribute__(attribute).data.to_csv(file_path, index=False)
             logger.message(f"Saved {attribute.removeprefix('_')} to {file_path}.")
+
+
+def combine_outcome_tables(outcome_tables: list[OutcomeTable], column: str) -> OutcomeTable:
+    """Combine a list of outcome tables into a single outcome table.
+
+    Args:
+        outcome_tables: A list of ``OutcomeTable`` instances to combine.
+        column: The column to sum across the outcome tables.
+
+    Returns:
+        An ``OutcomeTable`` instance containing the combined data.
+    """
+    df_combined = outcome_tables[0].data.copy()
+    df_combined[column] = np.array([df.data[column] for df in outcome_tables[1:]]).sum(axis=0)
+    return OutcomeTable(df_combined, group_by=outcome_tables[0].group_by)
+
+
+def combine_outcome_matrices(outcome_matrices: list[OutcomeMatrix]) -> OutcomeMatrix:
+    """Combine a list of outcome matrices into a single outcome matrix.
+
+    Args:
+        outcome_matrices: A list of ``OutcomeMatrix`` instances to combine.
+
+    Returns:
+        An ``OutcomeMatrix`` instance containing the combined data.
+    """
+
+    combined_matrix = OutcomeMatrix(
+        until_all_die=outcome_matrices[0].until_all_die,
+        min_year=outcome_matrices[0].min_year,
+        max_year=outcome_matrices[0].max_year,
+        max_age=outcome_matrices[0].max_age
+    )
+    
+    for attribute in combined_matrix.__dict__.keys():
+        if isinstance(getattr(combined_matrix, attribute), OutcomeTable):
+            outcome_tables = [getattr(matrix, attribute) for matrix in outcome_matrices]
+            combined_table = combine_outcome_tables(
+                outcome_tables=outcome_tables,
+                column=combined_matrix.value_columns[attribute.removeprefix("_")][0]
+            )
+            setattr(combined_matrix, attribute, combined_table)
+    
+    return combined_matrix
