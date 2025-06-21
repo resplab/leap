@@ -6,15 +6,62 @@ import pathlib
 import math
 import os
 import uuid
+from tqdm import tqdm
 from scipy.stats import logistic
 import importlib.resources as pkg_resources
 from typing import Callable, Tuple
+import multiprocessing as mp
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
 
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
+
+def update_bar(
+    queue: mp.Queue,
+    chunk_indices: list[Tuple[int, int]],
+    desc: str,
+    position_offset: int
+):
+    """Update the progress bars from the queue.
+
+    We have a main job bar that shows the total progress, and a sub-bar for each process:
+
+    Job Bar: 96% [=================== ] | 240/250
+    Process 1: 100% [=================] | 63/63
+    Process 2: 95%  [================ ] | 60/63
+    Process 3: 100% [=================] | 63/63
+    Process 4: 89%  [==============   ] | 54/61
+    
+    Args:
+        queue: The multiprocessing queue which gets updated every time an element is processed.
+        chunk_indices: A list of tuples containing the start and end indices for each chunk.
+        desc: A description for the main job bar.
+        position_offset: The position offset for the main job bar in the tqdm display.
+    """
+    # Create the main job bar
+    job_bar = tqdm(
+        total=chunk_indices[-1][1],
+        position=position_offset,
+        desc=desc,
+        leave=True,
+        bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}"
+    )
+
+    # Create the process bars for the job
+    process_bars = [tqdm(
+        total=(chunk_indices[i][1] - chunk_indices[i][0]),
+        position=i + 1 + position_offset,
+        desc=f"Process {i}",
+        leave=False
+        ) for i in range(len(chunk_indices))
+    ]
+
+    while True:
+        process_id = queue.get()
+        process_bars[process_id].update()
+        job_bar.update()
 
 
 def timer(func: Callable) -> Callable:
