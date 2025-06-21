@@ -18,6 +18,26 @@ logger = get_logger(__name__)
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
 
+def get_chunk_indices(
+    n: int, chunk_size: int = 10
+) -> list[Tuple[int, int]]:
+    """Get the indices for chunks of size ``chunk_size`` from a total of ``n`` items.
+
+    Args:
+        n: The total number of items.
+        chunk_size: The size of each chunk.
+
+    Returns:
+        A list of tuples, where each tuple contains the start and end indices for each chunk.
+
+    Examples:
+
+        >>> get_chunk_indices(n=25, chunk_size=10)
+        [(0, 10), (10, 20), (20, 25)]
+    """
+    return [(i, min(i + chunk_size, n)) for i in range(0, n, chunk_size)]
+
+
 def update_bar(
     queue: mp.Queue,
     chunk_indices: list[Tuple[int, int]],
