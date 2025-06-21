@@ -22,7 +22,7 @@ from leap.pollution import PollutionTable, Pollution
 from leap.reassessment import Reassessment
 from leap.severity import ExacerbationSeverity
 from leap.utility import Utility
-from leap.utils import get_data_path, timer
+from leap.utils import get_data_path, timer, CustomManager, update_bar, get_chunk_indices
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -723,6 +723,7 @@ class Simulation:
         Returns:
             The outcome matrix.
         """
+        start_time = time.time()
 
         if seed is not None:
             np.random.seed(seed)
@@ -744,7 +745,8 @@ class Simulation:
 
         # loop by year
         for year in (pbar_year := tqdm(
-            years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}"
+            years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}", leave=True,
+            position=0
         )):
             pbar_year.set_description(f"Year {year}")
             year = int(year)
@@ -776,33 +778,60 @@ class Simulation:
                     )
                     outcome_matrix.combine(outcome_matrix_agent)
             else:
-                with mp.get_context("spawn").Pool(n_cpu) as pool:
-                    results = pool.starmap(
-                        func=self.simulate_agent,
-                        iterable=tqdm(
-                            [
-                                (
-                                    new_agents_df["sex"].iloc[i],
-                                    new_agents_df["age"].iloc[i],
-                                    new_agents_df["immigrant"].iloc[i],
-                                    year,
-                                    year_index,
-                                    month
-                                )
-                                for i in range(new_agents_df.shape[0])
-                            ],
-                            desc=f"Agents Year {year}",
-                            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
-                            total=new_agents_df.shape[0]
-                        ),
-                        chunksize=int(math.ceil(new_agents_df.shape[0] / (n_cpu * 8)))
+                queue_pbar = mp.Queue()
+                n_processes = n_cpu * 2
+                chunk_size = int(math.ceil(new_agents_df.shape[0] / (n_processes)))
+                chunk_indices = get_chunk_indices(
+                    new_agents_df.shape[0], chunk_size
+                )
+                n_processes = len(chunk_indices)
+
+                # daemon=True means the script doesn't wait for this process to end
+                process = mp.Process(
+                    target=update_bar,
+                    args=(queue_pbar, chunk_indices, f"Year {year}", year_index + 1),
+                    daemon=True
+                )
+                process.start()
+
+                processes = []
+                CustomManager.register('OutcomeMatrix', OutcomeMatrix)
+                with CustomManager() as manager:
+                    # create a shared OutcomeMatrix instance
+                    shared_outcome_matrix = manager.OutcomeMatrix(
+                        self.until_all_die, self.min_year, self.max_year, self.max_age
                     )
 
-                # combine the results from all agents
-                for outcome_matrix_agent in results:
-                    outcome_matrix.combine(outcome_matrix_agent)
+                    for process_id in range(n_processes):
+                        chunk_start = chunk_indices[process_id][0]
+                        chunk_end = chunk_indices[process_id][1]
+                        p = mp.Process(
+                            target=self.worker,
+                            args=(
+                                year,
+                                year_index,
+                                month,
+                                new_agents_df,
+                                shared_outcome_matrix,
+                                list(range(chunk_start, chunk_end)),
+                                process_id,
+                                queue_pbar
+                            )
+                        )
+                        processes.append(p)
+
+                    for p in processes:
+                        p.start()
+                    for p in processes:  
+                        p.join()
+
+                    outcome_matrix = shared_outcome_matrix._getvalue()
+                    process.terminate()
 
         self.outcome_matrix = outcome_matrix
         logger.info("\nSimulation finished. Check your simulation object for results.")
-
+        end_time = time.time()
+        logger.message(
+            f"Run time: {end_time - start_time:.2f} seconds"
+        )
         return outcome_matrix
