@@ -478,6 +478,43 @@ class Simulation:
             }
         )
 
+    def worker(
+        self,
+        year: int,
+        year_index: int,
+        month: int,
+        new_agents_df: pd.DataFrame,
+        shared_list: OutcomeMatrix,
+        indices: list[int],
+        process_id: int,
+        queue_pbar: mp.Queue | None = None
+    ):
+        """Worker function for multiprocessing.
+        
+        Args:
+            year: The current year of the simulation.
+            year_index: The index of the current year in the simulation. For example, if the
+                simulation starts in 2010, then the year index for 2010 is 0, for 2011 is 1, etc.
+            month: The month of the year when the agent is born/immigrates.
+            new_agents_df: A dataframe containing the new agents to simulate.
+            shared_list: A shared OutcomeMatrix instance to combine results.
+            indices: A list of indices of the new agents to simulate.
+            process_id: The ID for the process.
+            queue_pbar: A queue for updating the progress bar.
+        """
+        for index in indices:
+            outcome_matrix = self.simulate_agent(
+                sex=new_agents_df["sex"].iloc[index],
+                age=new_agents_df["age"].iloc[index],
+                is_immigrant=new_agents_df["immigrant"].iloc[index],
+                year=year,
+                year_index=year_index,
+                month=month
+            )
+            shared_list.combine(outcome_matrix)
+            if queue_pbar is not None:
+                queue_pbar.put_nowait(process_id)
+
     def simulate_agent(
         self,
         sex: str,
