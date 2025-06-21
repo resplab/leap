@@ -17,7 +17,7 @@ from leap.exacerbation import Exacerbation
 from leap.family_history import FamilyHistory
 from leap.immigration import Immigration
 from leap.occurrence import Incidence, Prevalence, agent_has_asthma, compute_asthma_age
-from leap.outcome_matrix import OutcomeMatrix
+from leap.outcome_matrix import OutcomeMatrix, combine_outcome_matrices
 from leap.pollution import PollutionTable, Pollution
 from leap.reassessment import Reassessment
 from leap.severity import ExacerbationSeverity
@@ -484,10 +484,10 @@ class Simulation:
         year_index: int,
         month: int,
         new_agents_df: pd.DataFrame,
-        shared_list: OutcomeMatrix,
         indices: list[int],
         process_id: int,
-        queue_pbar: mp.Queue | None = None
+        queue_pbar: mp.Queue | None = None,
+        queue_res: mp.Queue | None = None
     ):
         """Worker function for multiprocessing.
         
@@ -497,10 +497,10 @@ class Simulation:
                 simulation starts in 2010, then the year index for 2010 is 0, for 2011 is 1, etc.
             month: The month of the year when the agent is born/immigrates.
             new_agents_df: A dataframe containing the new agents to simulate.
-            shared_list: A shared OutcomeMatrix instance to combine results.
             indices: A list of indices of the new agents to simulate.
             process_id: The ID for the process.
             queue_pbar: A queue for updating the progress bar.
+            queue_res: A queue for returning the results.
         """
         for index in indices:
             outcome_matrix = self.simulate_agent(
@@ -511,9 +511,10 @@ class Simulation:
                 year_index=year_index,
                 month=month
             )
-            shared_list.combine(outcome_matrix)
             if queue_pbar is not None:
                 queue_pbar.put_nowait(process_id)
+            if queue_res is not None:
+                queue_res.put_nowait(outcome_matrix)
 
     def simulate_agent(
         self,
@@ -779,6 +780,7 @@ class Simulation:
                     outcome_matrix.combine(outcome_matrix_agent)
             else:
                 queue_pbar = mp.Queue()
+                queue_res = mp.Queue()
                 n_processes = n_cpu * 2
                 chunk_size = int(math.ceil(new_agents_df.shape[0] / (n_processes)))
                 chunk_indices = get_chunk_indices(
@@ -795,38 +797,38 @@ class Simulation:
                 process.start()
 
                 processes = []
-                CustomManager.register('OutcomeMatrix', OutcomeMatrix)
-                with CustomManager() as manager:
-                    # create a shared OutcomeMatrix instance
-                    shared_outcome_matrix = manager.OutcomeMatrix(
-                        self.until_all_die, self.min_year, self.max_year, self.max_age
-                    )
+                outcome_matrices = []
 
-                    for process_id in range(n_processes):
-                        chunk_start = chunk_indices[process_id][0]
-                        chunk_end = chunk_indices[process_id][1]
-                        p = mp.Process(
-                            target=self.worker,
-                            args=(
-                                year,
-                                year_index,
-                                month,
-                                new_agents_df,
-                                shared_outcome_matrix,
-                                list(range(chunk_start, chunk_end)),
-                                process_id,
-                                queue_pbar
-                            )
+                for process_id in range(n_processes):
+                    chunk_start = chunk_indices[process_id][0]
+                    chunk_end = chunk_indices[process_id][1]
+                    p = mp.Process(
+                        target=self.worker,
+                        args=(
+                            year,
+                            year_index,
+                            month,
+                            new_agents_df,
+                            list(range(chunk_start, chunk_end)),
+                            process_id,
+                            queue_pbar,
+                            queue_res
                         )
-                        processes.append(p)
+                    )
+                    processes.append(p)
 
-                    for p in processes:
-                        p.start()
-                    for p in processes:  
-                        p.join()
+                for p in processes:
+                    p.start()
+                for i in range(new_agents_df.shape[0]):
+                    res = queue_res.get() # will block
+                    outcome_matrices.append(res)
+                for p in processes:
+                    p.join()
 
-                    outcome_matrix = shared_outcome_matrix._getvalue()
-                    process.terminate()
+                process.terminate()
+            
+            logger.message("Combining OutcomeMatrix list...")
+            outcome_matrix = combine_outcome_matrices(outcome_matrices)
 
         self.outcome_matrix = outcome_matrix
         logger.info("\nSimulation finished. Check your simulation object for results.")
