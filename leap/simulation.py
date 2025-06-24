@@ -744,13 +744,17 @@ class Simulation:
         outcome_matrix = OutcomeMatrix(
             self.until_all_die, self.min_year, self.max_year, self.max_age
         )
-
         # loop by year
-        for year in (pbar_year := tqdm(
-            years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}", leave=True,
-            position=0
-        )):
-            pbar_year.set_description(f"Year {year}")
+        year_bar = tqdm(
+            years,
+            position=0,
+            desc=f"Years",
+            leave=True,
+            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
+            file=sys.stdout
+        )
+        for year in years:
+            # pbar_year.set_description(f"Year {year}")
             year = int(year)
             year_index = year - self.min_year
 
@@ -825,12 +829,12 @@ class Simulation:
                     outcome_matrices.append(res)
                 for p in processes:
                     p.join()
-
                 process.terminate()
-            
+
+            year_bar.update()
             logger.message("Combining OutcomeMatrix list...")
             outcome_matrix = combine_outcome_matrices(outcome_matrices)
-
+        year_bar.close()
         self.outcome_matrix = outcome_matrix
         logger.info("\nSimulation finished. Check your simulation object for results.")
         end_time = time.time()
