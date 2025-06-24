@@ -2,7 +2,6 @@ from __future__ import annotations
 import pathlib
 import json
 import math
-import time
 import numpy as np
 import sys
 import pandas as pd
@@ -728,7 +727,6 @@ class Simulation:
         Returns:
             The outcome matrix.
         """
-        start_time = time.time()
 
         if seed is not None:
             np.random.seed(seed)
@@ -864,8 +862,4 @@ class Simulation:
         sys.stdout.flush()
         self.outcome_matrix = outcome_matrix
         logger.info("\nSimulation finished. Check your simulation object for results.")
-        end_time = time.time()
-        logger.message(
-            f"Run time: {end_time - start_time:.2f} seconds"
-        )
         return outcome_matrix
