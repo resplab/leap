@@ -12,7 +12,6 @@ from scipy.stats import logistic
 import importlib.resources as pkg_resources
 from typing import Callable, Tuple
 import multiprocessing as mp
-from multiprocessing.managers import BaseManager
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -20,10 +19,6 @@ logger = get_logger(__name__)
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
 
-
-
-class CustomManager(BaseManager):
-    pass
 
 
 def get_chunk_indices(
