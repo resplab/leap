@@ -852,7 +852,7 @@ class Simulation:
                     pbar.close()
 
             year_bar.update()
-            logger.message("Combining OutcomeMatrix list...")
+            logger.message("Combining OutcomeMatrix list...", tqdm=True)
             outcome_matrix = combine_outcome_matrices(outcome_matrices)
         year_bar.close()
         sys.stdout.write('\033[F')    # Move cursor up one line
