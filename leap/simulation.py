@@ -787,7 +787,6 @@ class Simulation:
                     )
                     outcome_matrices.append(outcome_matrix_agent)
             else:
-                queue_pbar = mp.Queue()
                 queue_res = mp.Queue()
                 n_processes = n_cpu * 2
                 chunk_size = int(math.ceil(new_agents_df.shape[0] / (n_processes)))
@@ -795,8 +794,10 @@ class Simulation:
                     new_agents_df.shape[0], chunk_size
                 )
                 n_processes = len(chunk_indices)
-
                 processes = []
+
+                # Create progress bars
+                queue_pbar = mp.Queue()
                 job_bar = tqdm(
                     total=chunk_indices[-1][1],
                     position=1,
@@ -833,7 +834,7 @@ class Simulation:
 
                 # Update the progress bars from the queue
                 counter = 0
-                while counter <  new_agents_df.shape[0]:
+                while counter < new_agents_df.shape[0]:
                     try:
                         process_id = queue_pbar.get_nowait()
                         job_bar.update(1)
