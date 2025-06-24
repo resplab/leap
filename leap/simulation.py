@@ -832,6 +832,8 @@ class Simulation:
 
                 for p in processes:
                     p.start()
+
+                # Update the progress bars from the queue
                 counter = 0
                 while counter <  new_agents_df.shape[0]:
                     try:
@@ -847,6 +849,8 @@ class Simulation:
                     outcome_matrices.append(res)
                 for p in processes:
                     p.join()
+
+                # Make sure the progress bars close properly
                 job_bar.close()
                 for pbar in process_bars:
                     pbar.close()
