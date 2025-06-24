@@ -3,6 +3,7 @@ import pathlib
 import json
 import math
 import numpy as np
+import sys
 import pandas as pd
 from tqdm import tqdm
 import multiprocessing as mp
@@ -835,6 +836,9 @@ class Simulation:
             logger.message("Combining OutcomeMatrix list...")
             outcome_matrix = combine_outcome_matrices(outcome_matrices)
         year_bar.close()
+        sys.stdout.write('\033[F')    # Move cursor up one line
+        sys.stdout.write('\033[2K') 
+        sys.stdout.flush()
         self.outcome_matrix = outcome_matrix
         logger.info("\nSimulation finished. Check your simulation object for results.")
         end_time = time.time()
