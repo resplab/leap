@@ -769,6 +769,8 @@ class Simulation:
                         f"{new_agents_df.shape[0]} new agents born/immigrated.")
             logger.info(f"\n{new_agents_df}")
 
+            outcome_matrices = []
+
             # for each agent i born/immigrated in year
             if new_agents_df.shape[0] < min_agents_mp or n_cpu == 1:
                 for i in tqdm(
@@ -785,7 +787,7 @@ class Simulation:
                         year_index=year_index,
                         month=month
                     )
-                    outcome_matrix.combine(outcome_matrix_agent)
+                    outcome_matrices.append(outcome_matrix_agent)
             else:
                 queue_pbar = mp.Queue()
                 queue_res = mp.Queue()
