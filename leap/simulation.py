@@ -489,8 +489,7 @@ class Simulation:
         new_agents_df: pd.DataFrame,
         indices: list[int],
         process_id: int,
-        queue_pbar: mp.Queue | None = None,
-        queue_res: mp.Queue | None = None
+        queue: mp.Queue,
     ):
         """Worker function for multiprocessing.
         
@@ -502,8 +501,8 @@ class Simulation:
             new_agents_df: A dataframe containing the new agents to simulate.
             indices: A list of indices of the new agents to simulate.
             process_id: The ID for the process.
-            queue_pbar: A queue for updating the progress bar.
-            queue_res: A queue for returning the results.
+            queue: A queue for returning the results and updating the
+                progress bar.
         """
         for index in indices:
             outcome_matrix = self.simulate_agent(
@@ -514,10 +513,7 @@ class Simulation:
                 year_index=year_index,
                 month=month
             )
-            if queue_pbar is not None:
-                queue_pbar.put_nowait(process_id)
-            if queue_res is not None:
-                queue_res.put_nowait(outcome_matrix)
+            queue.put((process_id, outcome_matrix))
 
     def simulate_agent(
         self,
@@ -787,7 +783,7 @@ class Simulation:
                     )
                     outcome_matrices.append(outcome_matrix_agent)
             else:
-                queue_res = mp.Queue()
+                queue = mp.Queue()
                 n_processes = n_cpu * 2
                 chunk_size = int(math.ceil(new_agents_df.shape[0] / (n_processes)))
                 chunk_indices = get_chunk_indices(
@@ -797,7 +793,6 @@ class Simulation:
                 processes = []
 
                 # Create progress bars
-                queue_pbar = mp.Queue()
                 job_bar = tqdm(
                     total=chunk_indices[-1][1],
                     position=1,
@@ -823,8 +818,7 @@ class Simulation:
                             new_agents_df,
                             list(range(chunk_start, chunk_end)),
                             process_id,
-                            queue_pbar,
-                            queue_res
+                            queue
                         )
                     )
                     processes.append(p)
@@ -836,16 +830,14 @@ class Simulation:
                 counter = 0
                 while counter < new_agents_df.shape[0]:
                     try:
-                        process_id = queue_pbar.get_nowait()
+                        process_id, outcome_matrix_agent = queue.get_nowait()
                         job_bar.update(1)
                         process_bars[process_id].update(1)
+                        outcome_matrices.append(outcome_matrix_agent)
                         counter += 1
                     except:
                         pass
-                
-                for i in range(new_agents_df.shape[0]):
-                    res = queue_res.get() # will block
-                    outcome_matrices.append(res)
+
                 for p in processes:
                     p.join()
 
