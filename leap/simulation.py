@@ -794,15 +794,18 @@ class Simulation:
                 )
                 n_processes = len(chunk_indices)
 
-                # daemon=True means the script doesn't wait for this process to end
-                process = mp.Process(
-                    target=update_bar,
-                    args=(queue_pbar, chunk_indices, f"Year {year}", year_index + 1),
-                    daemon=True
-                )
-                process.start()
-
                 processes = []
+                job_bar = tqdm(
+                    total=chunk_indices[-1][1],
+                    position=1,
+                    desc=f"Year: {year}",
+                    leave=True,
+                    bar_format="{l_bar}{bar} | {n_fmt}/{total_fmt}",
+                    file=sys.stdout
+                )
+                process_bars = create_process_bars(
+                    chunk_indices, position_offset=2
+                )
                 outcome_matrices = []
 
                 for process_id in range(n_processes):
@@ -825,12 +828,24 @@ class Simulation:
 
                 for p in processes:
                     p.start()
+                counter = 0
+                while counter <  new_agents_df.shape[0]:
+                    try:
+                        process_id = queue_pbar.get_nowait()
+                        job_bar.update(1)
+                        process_bars[process_id].update(1)
+                        counter += 1
+                    except:
+                        pass
+                
                 for i in range(new_agents_df.shape[0]):
                     res = queue_res.get() # will block
                     outcome_matrices.append(res)
                 for p in processes:
                     p.join()
-                process.terminate()
+                job_bar.close()
+                for pbar in process_bars:
+                    pbar.close()
 
             year_bar.update()
             logger.message("Combining OutcomeMatrix list...")
