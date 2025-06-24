@@ -767,17 +767,17 @@ class Simulation:
             logger.info(f"\n{new_agents_df}")
 
             outcome_matrices = []
+            job_bar = tqdm(
+                total=new_agents_df.shape[0],
+                position=1,
+                desc=f"Year: {year}",
+                leave=True,
+                bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
+                file=sys.stdout
+            )
 
             # for each agent i born/immigrated in year
             if new_agents_df.shape[0] < min_agents_mp or n_cpu == 1:
-                job_bar = tqdm(
-                    total=new_agents_df.shape[0],
-                    position=1,
-                    desc=f"Year: {year}",
-                    leave=True,
-                    bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
-                    file=sys.stdout
-                )
                 for i in range(new_agents_df.shape[0]):
                     agent_id, outcome_matrix_agent = self.simulate_agent(
                         sex=new_agents_df["sex"].iloc[i],
@@ -801,18 +801,9 @@ class Simulation:
                 processes = []
 
                 # Create progress bars
-                job_bar = tqdm(
-                    total=chunk_indices[-1][1],
-                    position=1,
-                    desc=f"Year: {year}",
-                    leave=True,
-                    bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
-                    file=sys.stdout
-                )
                 process_bars = create_process_bars(
                     chunk_indices, position_offset=2
                 )
-                outcome_matrices = []
 
                 for process_id in range(n_processes):
                     chunk_start = chunk_indices[process_id][0]
@@ -834,7 +825,7 @@ class Simulation:
                 for p in processes:
                     p.start()
 
-                # Update the progress bars from the queue
+                # Update the progress bars and results from the queue
                 counter = 0
                 while counter < new_agents_df.shape[0]:
                     try:
