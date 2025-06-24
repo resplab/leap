@@ -2,6 +2,7 @@ from __future__ import annotations
 import pathlib
 import json
 import math
+import time
 import numpy as np
 import sys
 import pandas as pd
@@ -24,7 +25,7 @@ from leap.pollution import PollutionTable, Pollution
 from leap.reassessment import Reassessment
 from leap.severity import ExacerbationSeverity
 from leap.utility import Utility
-from leap.utils import get_data_path, timer, CustomManager, get_chunk_indices, create_process_bars
+from leap.utils import get_data_path, timer, get_chunk_indices, create_process_bars
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
