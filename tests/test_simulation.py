@@ -164,7 +164,8 @@ def test_simulation_generate_initial_asthma(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
     config["prevalence"]["parameters"] = prevalence_parameters
@@ -305,7 +306,8 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
     config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
@@ -439,7 +441,8 @@ def test_simulation_update_asthma_effects(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
     config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
@@ -562,7 +565,8 @@ def test_reassess_asthma_diagnosis(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
     config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
@@ -858,7 +862,8 @@ def test_run_simulation_one_year(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
     config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
@@ -1084,7 +1089,8 @@ def test_run_simulation_two_years(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
 
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
@@ -1195,7 +1201,8 @@ def test_run_simulation_full(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     simulation = Simulation(config)
     outcome_matrix = simulation.run(
