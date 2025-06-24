@@ -798,7 +798,7 @@ class Simulation:
                     position=1,
                     desc=f"Year: {year}",
                     leave=True,
-                    bar_format="{l_bar}{bar} | {n_fmt}/{total_fmt}",
+                    bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
                     file=sys.stdout
                 )
                 process_bars = create_process_bars(
