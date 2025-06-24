@@ -26,6 +26,9 @@ from leap.severity import ExacerbationSeverity
 from leap.utility import Utility
 from leap.utils import get_data_path, timer, get_chunk_indices, create_process_bars
 from leap.logger import get_logger
+from typing import Tuple, TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.utils import UUID4
 
 logger = get_logger(__name__)
 
@@ -505,7 +508,7 @@ class Simulation:
                 progress bar.
         """
         for index in indices:
-            outcome_matrix = self.simulate_agent(
+            agent_id, outcome_matrix = self.simulate_agent(
                 sex=new_agents_df["sex"].iloc[index],
                 age=new_agents_df["age"].iloc[index],
                 is_immigrant=new_agents_df["immigrant"].iloc[index],
@@ -513,7 +516,7 @@ class Simulation:
                 year_index=year_index,
                 month=month
             )
-            queue.put((process_id, outcome_matrix))
+            queue.put((agent_id.short, process_id, outcome_matrix))
 
     def simulate_agent(
         self,
@@ -523,7 +526,7 @@ class Simulation:
         year: int,
         year_index: int,
         month: int
-    ) -> OutcomeMatrix:
+    ) -> Tuple[UUID4, OutcomeMatrix]:
         """Simulate a new agent in the model.
 
         The agent in this function is a person who is either:
@@ -699,7 +702,7 @@ class Simulation:
                         f"| -- Year: {agent.year_index + self.min_year - 1}, age: {agent.age}"
                     )
 
-        return outcome_matrix
+        return agent.uuid, outcome_matrix
 
     @timer
     def run(
@@ -767,13 +770,16 @@ class Simulation:
 
             # for each agent i born/immigrated in year
             if new_agents_df.shape[0] < min_agents_mp or n_cpu == 1:
-                for i in tqdm(
-                    range(new_agents_df.shape[0]),
-                    desc=f"Agents Year {year}",
+                job_bar = tqdm(
+                    total=new_agents_df.shape[0],
+                    position=1,
+                    desc=f"Year: {year}",
+                    leave=True,
                     bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
-                    position=1
-                ):
-                    outcome_matrix_agent = self.simulate_agent(
+                    file=sys.stdout
+                )
+                for i in range(new_agents_df.shape[0]):
+                    agent_id, outcome_matrix_agent = self.simulate_agent(
                         sex=new_agents_df["sex"].iloc[i],
                         age=new_agents_df["age"].iloc[i],
                         is_immigrant=new_agents_df["immigrant"].iloc[i],
@@ -782,6 +788,8 @@ class Simulation:
                         month=month
                     )
                     outcome_matrices.append(outcome_matrix_agent)
+                    job_bar.update(1)
+                    job_bar.set_description(f"Year: {year} | Agent {agent_id.short}")
             else:
                 queue = mp.Queue()
                 n_processes = n_cpu * 2
@@ -830,9 +838,12 @@ class Simulation:
                 counter = 0
                 while counter < new_agents_df.shape[0]:
                     try:
-                        process_id, outcome_matrix_agent = queue.get_nowait()
+                        agent_id, process_id, outcome_matrix_agent = queue.get_nowait()
                         job_bar.update(1)
                         process_bars[process_id].update(1)
+                        process_bars[process_id].set_description(
+                            f"| -- Process {process_id}: Agent {agent_id}"
+                        )
                         outcome_matrices.append(outcome_matrix_agent)
                         counter += 1
                     except:
