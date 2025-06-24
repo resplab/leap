@@ -5,6 +5,7 @@ import time
 import pathlib
 import math
 import os
+import sys
 import uuid
 from tqdm import tqdm
 from scipy.stats import logistic
@@ -45,13 +46,11 @@ def get_chunk_indices(
     return [(i, min(i + chunk_size, n)) for i in range(0, n, chunk_size)]
 
 
-def update_bar(
-    queue: mp.Queue,
+def create_process_bars(
     chunk_indices: list[Tuple[int, int]],
-    desc: str,
-    position_offset: int
-):
-    """Update the progress bars from the queue.
+    position_offset: int = 0
+) -> list[tqdm]:
+    """Create a list of tqdm progress bars for each process.
 
     We have a main job bar that shows the total progress, and a sub-bar for each process:
 
@@ -61,34 +60,25 @@ def update_bar(
     Process 3: 100% [=================] | 63/63
     Process 4: 89%  [==============   ] | 54/61
     
-    Args:
-        queue: The multiprocessing queue which gets updated every time an element is processed.
-        chunk_indices: A list of tuples containing the start and end indices for each chunk.
-        desc: A description for the main job bar.
-        position_offset: The position offset for the main job bar in the tqdm display.
-    """
-    # Create the main job bar
-    job_bar = tqdm(
-        total=chunk_indices[-1][1],
-        position=position_offset,
-        desc=desc,
-        leave=True,
-        bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}"
-    )
 
-    # Create the process bars for the job
-    process_bars = [tqdm(
-        total=(chunk_indices[i][1] - chunk_indices[i][0]),
-        position=i + 1 + position_offset,
-        desc=f"Process {i}",
-        leave=False
+    Args:
+        chunk_indices: A list of tuples containing the start and end indices for each chunk.
+        position_offset: The position offset for the progress bars in the tqdm display.
+
+    Returns:
+        A list of tqdm progress bars, one for each chunk.
+    """
+    return [
+        tqdm(
+            total=(chunk_indices[i][1] - chunk_indices[i][0]),
+            position=i + position_offset,
+            desc=f"Process {i}",
+            leave=False,
+            file=sys.stdout
         ) for i in range(len(chunk_indices))
     ]
 
-    while True:
-        process_id = queue.get()
-        process_bars[process_id].update()
-        job_bar.update()
+
 
 
 def timer(func: Callable) -> Callable:
