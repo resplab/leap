@@ -660,7 +660,8 @@ def test_simulation_get_new_agents(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     simulation = Simulation(config)
     new_agents_df = simulation.get_new_agents(year=year)
