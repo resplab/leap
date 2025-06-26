@@ -407,7 +407,7 @@ class Simulation:
                 filter_columns={
                     "year": agent.year,
                     "level": level,
-                    "sex": agent.sex,
+                    "sex": str(agent.sex),
                     "age": agent.age
                 },
                 amount=agent.control_levels.as_array()[level]
@@ -463,7 +463,7 @@ class Simulation:
             agent.asthma_age = agent.age
             outcome_matrix.asthma_incidence.increment(
                 column="n_new_diagnoses",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
             )
             self.update_asthma_effects(agent, outcome_matrix)
 
@@ -472,13 +472,13 @@ class Simulation:
                 agent.asthma_status = True
                 outcome_matrix.asthma_status.increment(
                     column="status",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
                 )
 
         outcome_matrix.asthma_incidence_contingency_table.increment(
             column="n_asthma" if agent.has_asthma else "n_no_asthma",
             filter_columns={
-                "year": agent.year, "age": agent.age, "sex": agent.sex,
+                "year": agent.year, "age": agent.age, "sex": str(agent.sex),
                 "fam_history": agent.has_family_history,
                 "abx_exposure": agent.num_antibiotic_use,
             }
@@ -594,18 +594,18 @@ class Simulation:
 
         if is_immigrant:
             outcome_matrix.immigration.increment(
-                "n_immigrants", {"year": agent.year, "age": agent.age, "sex": agent.sex}
+                "n_immigrants", {"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
             )
 
         outcome_matrix.antibiotic_exposure.increment(
             column="n_antibiotic_exposure",
-            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+            filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
             amount=agent.num_antibiotic_use
         )
 
         outcome_matrix.family_history.increment(
             column="has_family_history",
-            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+            filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
             amount=agent.has_family_history
         )
 
@@ -634,7 +634,7 @@ class Simulation:
             if agent.has_asthma:
                 outcome_matrix.asthma_prevalence.increment(
                     column="n_asthma",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
                 )
 
             outcome_matrix.asthma_prevalence_contingency_table.increment(
@@ -642,7 +642,7 @@ class Simulation:
                 filter_columns={
                     "year": agent.year,
                     "age": agent.age,
-                    "sex": agent.sex,
+                    "sex": str(agent.sex),
                     "fam_history": agent.has_family_history,
                     "abx_exposure": agent.num_antibiotic_use
                 }
@@ -653,7 +653,7 @@ class Simulation:
             logger.info(f"| ---- Utility of asthma: {utility}")
             outcome_matrix.utility.increment(
                 column="utility",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
                 amount=utility
             )
 
@@ -663,7 +663,7 @@ class Simulation:
 
             outcome_matrix.cost.increment(
                 column="cost",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
+                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
                 amount=cost
             )
 
@@ -672,7 +672,7 @@ class Simulation:
                 agent.alive = False
                 outcome_matrix.death.increment(
                     column="n_deaths",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
                 )
                 logger.info(f"| ---- Agent has died at age {agent.age}")
             # emigration
@@ -682,14 +682,14 @@ class Simulation:
                 agent.alive = False
                 outcome_matrix.emigration.increment(
                     column="n_emigrants",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
                 )
                 logger.info(f"| ---- Agent has emigrated at age {agent.age}")
             else:
                 # record alive
                 outcome_matrix.alive.increment(
                     column="n_alive",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
                 )
 
                 # update the patient stats
