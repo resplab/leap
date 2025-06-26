@@ -67,7 +67,7 @@ def create_process_bars(
         tqdm(
             total=(chunk_indices[i][1] - chunk_indices[i][0]),
             position=i + position_offset,
-            desc=f"Process {i}",
+            desc=f"| -- Process {i}",
             leave=False,
             file=sys.stdout
         ) for i in range(len(chunk_indices))
