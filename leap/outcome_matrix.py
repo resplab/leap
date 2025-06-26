@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import itertools
 import pathlib
-from leap.utils import check_file
+from leap.utils import timer
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -26,6 +26,7 @@ class OutcomeTable:
     def __repr__(self):
         return self.data.__repr__()
 
+    @timer(log_level=20)
     def increment(self, column: str, filter_columns: dict | None = None, amount: float | int = 1):
         """Increment the value of a column in the table.
 
@@ -34,16 +35,19 @@ class OutcomeTable:
             amount: The amount to increment the column by.
             filter_columns: A dictionary of columns to filter by.
         """
-        df = self.data.copy(deep=True)
+
         if filter_columns is not None:
-            df_filtered = df.copy(deep=True)
-            for key, value in filter_columns.items():
-                df_filtered = df_filtered.loc[(df_filtered[key] == value)]
-            df_filtered[column] += amount
-            df.update(df_filtered)
+            f = "".join(
+                [
+                    f"({key} == '{value}') & " if isinstance(value, str) else
+                    f"({key} == {value}) & "
+                    for key, value in filter_columns.items()]
+            )[:-3]  # Remove the last '&'
+            df_filtered = self.data.query(f)
+            self.data.loc[df_filtered.index, column] += amount
         else:
-            df[column] += amount
-        self.data = df
+            self.data[column] += amount
+
         if self.group_by is not None:
             self.grouped_data = self.data.groupby(self.group_by)
 
