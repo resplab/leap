@@ -75,18 +75,22 @@ def create_process_bars(
 
 
 
-
-def timer(func: Callable) -> Callable:
-    """Print the runtime of the decorated function"""
-    @functools.wraps(func)
-    def wrapper_timer(*args, **kwargs):
-        start_time = time.perf_counter()
-        value = func(*args, **kwargs)
-        end_time = time.perf_counter()
-        run_time = end_time - start_time
-        logger.message(f"Finished {func.__name__}() in {run_time:.4f} seconds")
-        return value
-    return wrapper_timer
+def timer(log_level: int = 20) -> Callable:
+    def timer_decorator(func: Callable) -> Callable:
+        """Print the runtime of the decorated function"""
+        @functools.wraps(func)
+        def wrapper_timer(*args, **kwargs):
+            start_time = time.perf_counter()
+            value = func(*args, **kwargs)
+            end_time = time.perf_counter()
+            run_time = end_time - start_time
+            if log_level == 25:
+                logger.message(f"Finished {func.__name__}() in {run_time:.6f} seconds")
+            elif log_level == 20:
+                logger.info(f"Finished {func.__name__}() in {run_time:.6f} seconds")
+            return value
+        return wrapper_timer
+    return timer_decorator
 
 
 class UUID4:
