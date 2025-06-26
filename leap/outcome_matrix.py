@@ -159,7 +159,7 @@ class OutcomeMatrix:
 
         self.alive = self.create_table(
             ["year", "age", "sex", "n_alive"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -167,7 +167,7 @@ class OutcomeMatrix:
         )
         self.antibiotic_exposure = self.create_table(
             ["year", "age", "sex", "n_antibiotic_exposure"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -175,7 +175,7 @@ class OutcomeMatrix:
         )
         self.asthma_incidence = self.create_table(
             ["year", "age", "sex", "n_new_diagnoses"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -183,7 +183,7 @@ class OutcomeMatrix:
         )
         self.asthma_prevalence = self.create_table(
             ["year", "age", "sex", "n_asthma"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -230,7 +230,7 @@ class OutcomeMatrix:
         )
         self.cost = self.create_table(
             ["year", "age", "sex", "cost"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -238,7 +238,7 @@ class OutcomeMatrix:
         )
         self.death = self.create_table(
             ["year", "age", "sex", "n_deaths"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -246,7 +246,7 @@ class OutcomeMatrix:
         )
         self.emigration = self.create_table(
             ["year", "age", "sex", "n_emigrants"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -254,7 +254,7 @@ class OutcomeMatrix:
         )
         self.exacerbation = self.create_table(
             ["year", "age", "sex", "n_exacerbations"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -271,7 +271,7 @@ class OutcomeMatrix:
         )
         self.exacerbation_hospital = self.create_table(
             ["year", "age", "sex", "n_hospitalizations"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -279,7 +279,7 @@ class OutcomeMatrix:
         )
         self.family_history = self.create_table(
             ["year", "age", "sex", "has_family_history"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -287,7 +287,7 @@ class OutcomeMatrix:
         )
         self.immigration = self.create_table(
             ["year", "age", "sex", "n_immigrants"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -295,7 +295,7 @@ class OutcomeMatrix:
         )
         self.utility = self.create_table(
             ["year", "age", "sex", "utility"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -469,7 +469,7 @@ class OutcomeMatrix:
     def utility(self, utility: OutcomeTable):
         self._utility = utility
 
-    def create_table(self, columns: list[str], group_by: list[str], *args) -> OutcomeTable:
+    def create_table(self, columns: list[str], group_by: list[str] | None, *args) -> OutcomeTable:
         """Create an outcome table.
 
         Args:
