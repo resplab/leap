@@ -1,5 +1,5 @@
 =============================
-Command-Line Interface
+Running LEAP
 =============================
 
 The main function that you can run via command line:
@@ -17,3 +17,4 @@ For more information on the configuration file, see: :doc:`config`.
 
   cli-run-simulation
   config
+  validation
