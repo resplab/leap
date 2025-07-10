@@ -231,6 +231,9 @@ Test Workflow Files
           run: |
             pytest leap/ --doctest-modules
           continue-on-error: false
+        - name: Clean previous builds
+          run: |
+            rm -rf _build .tox
         - name: Test Sphinx build
           run: |
             sphinx-build docs _build -E -a
@@ -349,6 +352,9 @@ Test Workflow Files
           run: |
             pytest leap/ --doctest-modules
           continue-on-error: false
+        - name: Clean previous builds
+          run: |
+            rm -rf _build .tox
         - name: Test Sphinx build
           run: |
             sphinx-build docs _build -E -a
