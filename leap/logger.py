@@ -10,6 +10,7 @@ See:
 import logging
 import sys
 import re
+from tqdm import tqdm
 
 MIN_LEVEL = logging.DEBUG
 MESSAGE = 25
@@ -31,7 +32,12 @@ class LogFilter(logging.Filter):
 class Logger(logging.Logger):
     def message(self, msg, *args, **kwargs):
         if self.isEnabledFor(MESSAGE):
-            self._log(MESSAGE, msg, args, **kwargs)
+            if kwargs.pop("tqdm", False):
+                # If using tqdm, we don't want to log the message
+                # since it will interfere with the progress bar.
+                tqdm.write(msg, file=sys.stdout)
+            else:
+                self._log(MESSAGE, msg, args, **kwargs)
 
 
 class ColoredFormatter(logging.Formatter):
