@@ -768,11 +768,11 @@ where:
   at :math:`t=1` given that they had an asthma diagnosis at :math:`t=0`
 
 
-Current Contingency Table: Misdiagnosis
+Current Contingency Table: New Diagnosis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-According to our model, an asthma diagnosis is not static; a patient may be misdiagnosed with
-asthma. We would like to compute the updated contingency table:
+For the reassessment table, we considered only the patients who were diagnosed with asthma.
+We will now consider those who were not diagnosed with asthma:
 
 .. raw:: html
 
@@ -811,10 +811,10 @@ asthma. We would like to compute the updated contingency table:
 To calculate the updated contingency table, we have:
 
 .. math::
-    a_{1, \text{dx}} &= b_0 \cdot (1 - \zeta_{\text{inc}, \lambda}(t=1)) \cdot m + b_0 \cdot \zeta_{\text{inc}, \lambda}(t=1) * \delta \\
-    b_{1, \text{dx}} &= b_0 \cdot (1 - \zeta_{\text{inc}, \lambda}(t=1)) \cdot (1-m) + b_0 \cdot \zeta_{\text{inc}, \lambda}(t=1) * (1 - \delta) \\
-    c_{1, \text{dx}} &= d_0 \cdot (1 - \zeta_{\text{inc}, 0}(t=1)) \cdot m + d_0 \cdot \zeta_{\text{inc}, 0}(t=1) * \delta \\
-    d_{1, \text{dx}} &= d_0 \cdot (1 - \zeta_{\text{inc}, 0}(t=1)) \cdot (1-m) + d_0 \cdot \zeta_{\text{inc}, 0}(t=1) * (1 - \delta)
+    a_{1, \text{dx}} &= b_0 \cdot \zeta_{\text{inc}, \lambda}(t=1) \\
+    b_{1, \text{dx}} &= b_0 \cdot (1 - \zeta_{\text{inc}, \lambda}(t=1)) \\
+    c_{1, \text{dx}} &= d_0 \cdot \zeta_{\text{inc}, 0}(t=1) \\
+    d_{1, \text{dx}} &= d_0 \cdot (1 - \zeta_{\text{inc}, 0}(t=1))
 
 where:
 
@@ -833,7 +833,6 @@ where:
             <th></th>
             <th></th>
             <th>incidence</th>
-            <th>misdiagnosis</th>
             <th>net</th>
         </thead>
         <tbody>
@@ -842,7 +841,6 @@ where:
             <td><code class="notranslate">λ</code></td>
             <td>no asthma diagnosis</td>
             <td>new asthma diagnosis</td>
-            <td><code class="notranslate">False</code></td>
             <td>asthma</td>
         </tr>
         <tr>
@@ -850,7 +848,6 @@ where:
             <td><code class="notranslate">λ</code></td>
             <td>no asthma diagnosis</td>
             <td>no new asthma diagnosis</td>
-            <td><code class="notranslate">False</code></td>
             <td>no asthma</td>
         </tr>
         <tr>
@@ -858,7 +855,6 @@ where:
             <td>None</td>
             <td>no asthma diagnosis</td>
             <td>new asthma diagnosis</td>
-            <td><code class="notranslate">False</code></td>
             <td>asthma</td>
         </tr>
         <tr>
@@ -866,40 +862,23 @@ where:
             <td>None</td>
             <td>no asthma diagnosis</td>
             <td>no new asthma diagnosis</td>
-            <td><code class="notranslate">False</code></td>
             <td>no asthma</td>
         </tr>
         </tbody>
     </table>
 
 * :math:`a_{1, \text{dx}}` is the proportion of the population with risk factor combination :math:`\lambda`
-  who:
-
-  - didn't have an asthma diagnosis at :math:`t=0`, were not diagnosed with asthma at :math:`t=1`,
-    but were misdiangosed at :math:`t=1` :math:`\rightarrow` have asthma at :math:`t=1`
-  - didn't have an asthma diagnosis at :math:`t=0` and were diagnosed at :math:`t=1`
+  who didn't have an asthma diagnosis at :math:`t=0` and were diagnosed at :math:`t=1`
+  :math:`\rightarrow` have asthma at :math:`t=1`
 * :math:`b_{1, \text{dx}}` is the proportion of the population with risk factor combination :math:`\lambda`
-  who:
-
-  - didn't have an asthma diagnosis at :math:`t=0`, were not diagnosed with asthma at :math:`t=1`,
-    and were not misdiagnosed :math:`\rightarrow` don't have asthma at :math:`t=1`
-  - didn't have an asthma diagnosis at :math:`t=0`, were diagnosed with asthma at :math:`t=1`,
-    but were misdiagnosed :math:`\rightarrow` don't have asthma at :math:`t=1`
+  who didn't have an asthma diagnosis at :math:`t=0` and were not diagnosed with asthma at :math:`t=1`,
+  :math:`\rightarrow` don't have asthma at :math:`t=1`
 * :math:`c_{1, \text{dx}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
-  who:
-
-  - didn't have an asthma diagnosis at :math:`t=0`, were not diagnosed with asthma at :math:`t=1`,
-    but were misdiagnosed :math:`\rightarrow` have asthma at :math:`t=1`
-  - didn't have an asthma diagnosis at :math:`t=0` and were diagnosed at :math:`t=1`
+  who didn't have an asthma diagnosis at :math:`t=0` and were diagnosed at :math:`t=1`
+  :math:`\rightarrow` have asthma at :math:`t=1`
 * :math:`d_{1, \text{dx}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
-  who:
-
-  - didn't have an asthma diagnosis at :math:`t=0`, were not diagnosed with asthma at :math:`t=1`,
-    and were not misdiagnosed :math:`\rightarrow` don't have asthma at :math:`t=1`
-  - didn't have an asthma diagnosis at :math:`t=0`, were diagnosed with asthma at :math:`t=1`,
-    but were misdiagnosed :math:`\rightarrow` don't have asthma at :math:`t=1`
-* :math:`\rho` is the probability that a person would be reassessed as having an asthma diagnosis
-  at :math:`t=1` given that they had an asthma diagnosis at :math:`t=0`
+  who didn't have an asthma diagnosis at :math:`t=0` and were not diagnosed with asthma at
+  :math:`t=1`, :math:`\rightarrow` don't have asthma at :math:`t=1`
 
 
 Current Contingency Table
@@ -956,10 +935,11 @@ From these values, we can compute the odds ratio:
 
 
 Optimization
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 
 We want to minimize the difference between the predicted odds ratio :math:`\Omega` and the
 observed odds ratio :math:`\omega_{\lambda}`.
 
 .. math::
-    \sum_{i=1}^{N}\sum_{\lambda=1}^{n} \dfrac{\left| \log(\Omega^{(i)}) - \log(\omega_{\lambda}^{(i)}) \right|}{N}
+    \sum_{i=1}^{N}\sum_{\lambda=1}^{n} 
+      \dfrac{\left| \log(\Omega^{(i)}) - \log(\omega_{\lambda}^{(i)}) \right|}{N}
