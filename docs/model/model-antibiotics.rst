@@ -131,7 +131,7 @@ the distribution is written as:
 
 .. math::
 
-    P(Y = y; r, k) := \binom{k+r-1}{k}(1-p)^k p^r
+    P(Y = k; r, p) := \binom{k+r-1}{k}(1-p)^k p^r
 
 where:
 
