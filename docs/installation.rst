@@ -360,7 +360,7 @@ To create this directory, open a terminal and type:
 This directory will serve as the workspace where you install and manage the LEAP package.
 
 Step 3: Create a Virtual Environment
--------------------------------------
+****************************************
 
 When working with Python, it's best to create a virtual environment to keep your packages
 separate from the system Python. 
@@ -390,7 +390,7 @@ Windows PowerShell
 
 
 Step 4: (Optional) Setup Git Token
------------------------------------
+****************************************
 
 If you haven't used ``git`` on the command line before, you will need to set up a personal access
 token. This is so you can install the ``LEAP`` package from ``GitHub``. To do this:
@@ -416,8 +416,8 @@ token. This is so you can install the ``LEAP`` package from ``GitHub``. To do th
 
     # Replace YOUR_USERNAME and YOUR_PRIVATE_REPO with your GitHub username and a private repository name.
 
-*(Optional)* If you encounter issues, ensure that Git is installed on your system. You can download it from:
-`Git Downloads <https://git-scm.com/downloads>`_.
+*(Optional)* If you encounter issues, ensure that Git is installed on your system. You can download
+it from: `Git Downloads <https://git-scm.com/downloads>`_.
 
 Step 5: Install ``LEAP``
 -------------------------------
@@ -459,7 +459,7 @@ username and password. Paste the token in as your password:
 
 
 Step 6: Install Success!
--------------------------
+*************************
 
 To verify the installation was a success, type:
 
