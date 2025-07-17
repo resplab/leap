@@ -299,7 +299,7 @@ class Simulation:
             agent: A person in the model.
         """
         agent.has_asthma = agent_has_asthma(
-            agent=agent, occurrence_type="prev", prevalence=self.prevalence
+            agent=agent, occurrence_type="prevalence", prevalence=self.prevalence
         )
 
         if agent.has_asthma:
@@ -414,7 +414,7 @@ class Simulation:
             outcome_matrix: The outcome matrix.
         """
         agent.has_asthma = agent_has_asthma(
-            agent, occurrence_type="inc", incidence=self.incidence, prevalence=self.prevalence
+            agent, occurrence_type="incidence", incidence=self.incidence, prevalence=self.prevalence
         )
 
         if agent.has_asthma:
