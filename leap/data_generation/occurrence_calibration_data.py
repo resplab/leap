@@ -598,7 +598,7 @@ def calibrate_asthma_prevalence(
       the BC Ministry of Health data.
 
     We have :math:`\eta` from the occurrence model, so we only need to find :math:`\zeta`. We can
-    write :math:`\zeta` in terms of :math:`zeta_{\lambda}`, the predicted asthma prevalence at
+    write :math:`\zeta` in terms of :math:`\zeta_{\lambda}`, the predicted asthma prevalence at
     risk factor level :math:`\lambda`:
 
     .. math::
