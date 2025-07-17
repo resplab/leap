@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
+from statsmodels.nonparametric.smoothers_lowess import lowess
 from typing import Tuple
 from leap.utils import get_data_path
+from leap.data_generation.utils import interpolate_years_to_months
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
@@ -11,6 +13,8 @@ STARTING_YEAR = 2000
 STARTING_YEAR_PROJ = 2021
 MAX_YEAR = 2065
 PROVINCES = ["CA", "BC"]
+GENERATE = False
+INTERPOLATE = True
 
 
 def get_prev_year_population(
@@ -302,4 +306,21 @@ def generate_migration_data():
 
 
 if __name__ == "__main__":
-    generate_migration_data()
+    if GENERATE:
+        generate_migration_data()
+        
+    if INTERPOLATE:
+        # Interpolate emigration data
+        interpolate_years_to_months(
+            dataset="processed_data/migration/emigration_table.csv",
+            group_cols = ["age", "province", "proj_scenario"],
+            interp_cols = ["F", "M"],
+            method="linear"
+        )
+        # Interpolate immigration data
+        interpolate_years_to_months(
+            dataset="processed_data/migration/immigration_table.csv",
+            group_cols = ["age", "sex", "province", "projection_scenario"],
+            interp_cols = ["n_immigrants", "prop_immigrants_birth", "prop_immigrants_year"],
+            method="linear"
+        )

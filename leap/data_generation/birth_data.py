@@ -1,13 +1,18 @@
 import pandas as pd
+import numpy as np
+from statsmodels.nonparametric.smoothers_lowess import lowess
 from leap.utils import get_data_path
-from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group
+from leap.data_generation.utils import (get_province_id,
+                                        get_sex_id, format_age_group,
+                                        interpolate_years_to_months)
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
 STARTING_YEAR = 1999
-
+GENERATE = False
+INTERPOLATE = True
 
 def get_projection_scenario_id(projection_scenario: str) -> str:
     """Convert the long form of the projection scenario to the 2-letter ID.
@@ -181,7 +186,6 @@ def load_projected_births_population_data(min_year: int) -> pd.DataFrame:
     df.sort_values(["province", "year", "projection_scenario"], inplace=True)
 
     return df
-
 
 
 def load_past_initial_population_data() -> pd.DataFrame:
@@ -409,5 +413,22 @@ def generate_initial_population_data():
 
 
 if __name__ == "__main__":
-    generate_initial_population_data()
-    generate_birth_estimate_data()
+    if GENERATE:
+        generate_initial_population_data()
+        generate_birth_estimate_data()
+    
+    if INTERPOLATE:
+        # Interpolate initial population data
+        interpolate_years_to_months(
+            dataset="processed_data/birth/initial_pop_distribution_prop.csv",
+            group_cols=["age", "province", "projection_scenario"],
+            interp_cols=["n_age", "n_birth", "prop", "prop_male"],
+            method="linear"
+        )
+        # Interpolate birth estimate data
+        interpolate_years_to_months(
+            dataset="processed_data/birth/birth_estimate.csv",
+            group_cols=["province", "projection_scenario"],
+            interp_cols=["N", "prop_male"],
+            method="linear"
+        )
