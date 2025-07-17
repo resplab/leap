@@ -228,7 +228,7 @@ class OutcomeMatrix:
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
-            [0]
+            [0.0]
         )
 
     def __repr__(self):
