@@ -385,7 +385,7 @@ We can now define our formula for the calibration model:
 
 .. math::
 
-  \zeta_{\lambda}^{(i)} = \sigma(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) + \alpha)
+  \zeta_{\lambda}^{(i)} = \sigma\left(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) + \alpha\right)
 
 where:
 
