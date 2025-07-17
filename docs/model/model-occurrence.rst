@@ -539,6 +539,61 @@ absolute difference between :math:`\zeta` and :math:`\eta`.
 Optimizing the Beta Parameters
 --------------------------------------------
 
+Before we begin, let us first define what we mean by a ``contingency table``. A contingency
+table is a table that displays two categorical variables and their joint frequency distribution.
+For example, suppose we have two categorical variables: ``smoking`` and ``lung cancer``, with
+``n = 300`` patients in total:
+
+.. raw:: html
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th></th>
+            <th>lung cancer</th>
+            <th>no lung cancer</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>smoker</td>
+            <td><code class="notranslate">a0 = 100</code></td>
+            <td><code class="notranslate">b0 = 50</code></td>
+            <td><code class="notranslate">n1 = 150</code></td>
+        </tr>
+        <tr>
+            <td>non-smoker</td>
+            <td><code class="notranslate">c0 = 25</code></td>
+            <td><code class="notranslate">d0 = 125</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code class="notranslate">n2 = 125</code></td>
+            <td></td>
+            <td><code class="notranslate">n = 300</code></td>
+        </tr>
+        </tbody>
+    </table>
+
+The variables ``n1`` and ``n2`` are called the marginal totals:
+
+.. math::
+
+    n_1 &= a_0 + b_0 = \text{total number of patients with lung cancer} \\
+    n_2 &= c_0 + d_0 = \text{total number of patients who smoke}
+
+The variable ``n`` is the total number of patients:
+
+.. math::
+
+    n = a_0 + b_0 + c_0 + d_0 = \text{total number of patients}
+
+In our model, we want to compute the contingency table for the risk factor combinations
+:math:`\lambda` and the asthma diagnosis.
+
+
 Past Contingency Table
 ^^^^^^^^^^^^^^^^^^^^^^^
 
