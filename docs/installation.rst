@@ -10,7 +10,7 @@ Installation
 ==============
 
 Step 1: Install Python
------------------------
+***********************
 
 If you already have ``Python`` installed, you can skip this step. To check your ``Python`` version,
 open a terminal and type:
@@ -22,14 +22,14 @@ open a terminal and type:
 If the output is ``command not found: python3``, then you will need to install Python.
 LEAP requires Python 3.10 or higher.
 
-macOS
-~~~~~~
+MacOS
+------
 
 To install Python, download the installer from:
 `Mac Installer Python 3.10 <https://www.python.org/ftp/python/3.10.0/python-3.10.0post2-macos11.pkg>`_.
 
 Linux
-~~~~~~
+------
 
 To install Python, use your package manager. For example, on Ubuntu, type:
 
@@ -43,14 +43,14 @@ To install Python, use your package manager. For example, on Ubuntu, type:
     For other distributions, refer to your distribution's documentation.
 
 Windows
-~~~~~~~
+--------
 
 To install Python, download the installer from:
 `Windows Installer Python 3.10
 <https://www.python.org/downloads/release/python-31016/>`_.
 
 Confirming Installation
-~~~~~~
+------------------------
 
 Once the installation has finished, check to make sure that it's using the correct version:
 
@@ -61,9 +61,10 @@ Once the installation has finished, check to make sure that it's using the corre
     # Python 3.10.*
 
 Troubleshooting
-~~~~~~~~~~~~~~~
+----------------
 
-- If ``python3 --version`` does not return Python 3.10 or higher, ensure Python 3.10 is installed and that the ``python3`` command points to the correct version.
+- If ``python3 --version`` does not return Python 3.10 or higher, ensure Python 3.10 is installed
+  and that the ``python3`` command points to the correct version.
 - If ``pip`` is not installed, you can install it manually:
 
   .. code-block:: bash
@@ -71,7 +72,7 @@ Troubleshooting
       python3 -m ensurepip --upgrade
 
 Step 2: Choose Directory to Install LEAP
---------------------------------------
+****************************************
 
 Create a directory to install ``LEAP``. In this example, we'll use ``my_folder``.
 To create this directory, open a terminal and type:
@@ -84,14 +85,14 @@ To create this directory, open a terminal and type:
 This directory will serve as the workspace where you install and manage the LEAP package.
 
 Step 3: Create a Virtual Environment
--------------------------------------
+****************************************
 
 When working with Python, it's best to create a virtual environment to keep your packages
 separate from the system Python. You will want to use your same Python version so if you
 installed ``python3.10`` with the installer above, the command would be:
 
-macOS/Linux
-~~~~~~
+MacOS/Linux
+------------
 
 .. code-block:: bash
 
@@ -99,7 +100,7 @@ macOS/Linux
     source env/bin/activate
 
 Windows Command Prompt
-~~~~~~
+----------------------
 
 .. code-block:: cmd
 
@@ -107,7 +108,7 @@ Windows Command Prompt
     env\Scripts\activate
 
 Windows PowerShell
-~~~~~~
+-------------------
 
 .. code-block:: powershell
 
@@ -122,7 +123,7 @@ Windows PowerShell
     before running ``.\env\Scripts\Activate.ps1``
 
 Step 4: (Optional) Setup Git Token
------------------------------------
+****************************************
 
 If you haven't used ``git`` on the command line before, you will need to set up a personal access
 token. This is so you can install the ``LEAP`` package from ``GitHub``. To do this:
@@ -135,17 +136,17 @@ token. This is so you can install the ``LEAP`` package from ``GitHub``. To do th
 4. Tick all the boxes available, and click ``Generate token``.
 5. Copy this token to a secure file on your system. **You won't be shown it again.**
 
-macOS
-~~~~~~
+MacOS
+------
 
-6. In your terminal, type:
+1. In your terminal, type:
 
 .. code-block:: bash
 
     git config --global credential.helper osxkeychain
 
 Linux
-~~~~~~
+------
 
 6. In your terminal, either type:
 
@@ -153,7 +154,8 @@ Linux
 
     git config --global credential.helper cache
 
-Use this for temporary storage of credentials in memory (default 15 minutes). Add a note about setting a custom timeout with ``cache --timeout=3600`` for longer sessions.
+Use this for temporary storage of credentials in memory (default 15 minutes). Add a note about
+setting a custom timeout with ``cache --timeout=3600`` for longer sessions.
 
 .. code-block:: bash
 
@@ -167,7 +169,7 @@ Use this for persistent storage of credentials in plain text.
     Add a security warning that credentials are stored in ``~/.git-credentials`` 
 
 Windows
-~~~~~~
+--------
 
 6. In your terminal, type:
 
@@ -183,11 +185,11 @@ Windows
 
     # Replace YOUR_USERNAME and YOUR_PRIVATE_REPO with your GitHub username and a private repository name.
 
-*(Optional)* If you encounter issues, ensure that Git is installed on your system. You can download it from:
-`Git Downloads <https://git-scm.com/downloads>`_.
+*(Optional)* If you encounter issues, ensure that Git is installed on your system. You can download
+it from: `Git Downloads <https://git-scm.com/downloads>`_.
 
 Step 5: Install ``LEAP``
--------------------------
+*************************
 
 To install the ``LEAP`` package, type:
 
@@ -219,7 +221,7 @@ username and password. Paste the token in as your password:
     Password: YOUR_TOKEN # not your GitHub password
 
 Step 6: Install Success!
--------------------------
+*************************
 
 Now that you've successfully installed the ``LEAP`` package, you can start using it.
 To verify the installation was a success, type:
@@ -229,7 +231,7 @@ To verify the installation was a success, type:
     leap --help
 
 Expected Output
-~~~~~~
+-----------------
 
 After running ``leap --help``, you should see:
 
@@ -253,7 +255,7 @@ To get out of the virtual environment:
     deactivate
 
 Developers
--------------------------
+************
 
 If you want to develop this package, please see the installation instructions for
 developers: :doc:`Developer Installation <../dev/dev-installation>`.
