@@ -136,7 +136,7 @@ from year to year, it follows that asthma incidence should depend on the year. A
 also depends on age, so we should include age in our formula. Finally, there is a sex difference
 in asthma incidence, so we should include sex in our formula. 
 
-TODO: Why was this formula chosen?
+.. TODO: Why was this formula chosen?
 
 
 .. math::
