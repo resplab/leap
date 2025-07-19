@@ -578,8 +578,13 @@ To do this, we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to 
 absolute difference between :math:`\zeta` and :math:`\eta`.
 
 
-Optimizing the Beta Parameters for the Incidence Equation
------------------------------------------------------------
+Optimizing the Initial Beta Parameters for the Incidence Equation
+------------------------------------------------------------------
+
+For the incidence equation, we need to optimize two of the initial beta parameters:
+
+* :math:`\beta_{\text{fhx}_\text{age}}`
+* :math:`\beta_{\text{abx}_\text{age}}`
 
 Example
 ^^^^^^^^^
@@ -982,8 +987,8 @@ From these values, we can compute the odds ratio:
 Optimization
 ^^^^^^^^^^^^^^^^^
 
-We want to minimize the difference between the predicted odds ratio :math:`\Omega` and the
-observed odds ratio :math:`\omega_{\lambda}`.
+We want to find the beta parameters that minimize the difference between the predicted odds
+ratio :math:`\Omega` and the observed odds ratio :math:`\omega_{\lambda}`.
 
 .. math::
     \sum_{i=1}^{N}\sum_{\lambda=1}^{n} 
