@@ -1,6 +1,17 @@
-=================
-Occurrence Model
-=================
+========================
+Asthma Occurrence Model
+========================
+
+This document describes the asthma occurrence model, which is used to predict the incidence and
+prevalence of asthma in British Columbia. The model is divided into two parts:
+
+1. :ref:`occurrence-model-1`: A ``Generalized Linear Model (GLM)`` that predicts asthma incidence
+   and prevalence based on age, sex, and year.
+2. :ref:`occurrence-model-2`: A model that incorporates risk factors such as family history and
+   antibiotic use during infancy to predict asthma incidence and prevalence, along with the
+   results from the first model.
+
+.. _occurrence-model-1:
 
 Occurrence Model 1: Crude Occurrence
 =====================================
@@ -8,7 +19,9 @@ Occurrence Model 1: Crude Occurrence
 In the first model, we will use data collected from the ``BC Ministry of Health`` on the
 incidence and prevalence of asthma in British Columbia. We will use this data to fit a 
 ``Generalized Linear Model (GLM)`` to predict the incidence and prevalence of asthma
-given the age, sex, and year.
+based on the age, sex, and year. However, asthma occurrence doesn't just depend on someone's age or
+sex, but it also depends on risk factors such as family history and antibiotic use during
+infancy. We will address these in the second model: :ref:`occurrence-model-2`.
 
 Datasets
 *****************
@@ -89,7 +102,7 @@ regression analysis which is a generalized form of linear regression. See :doc:`
 information on ``GLMs``.
 
 Probability Distribution
----------------------------------------
+----------------------------
 
 When fitting a ``GLM``, first you must choose a distribution for the ``response variable``. In our
 case, the response variable is the asthma prevalence or incidence. Incidence and prevalence are
@@ -111,7 +124,7 @@ is used to relate the mean to the predicted value :math:`\eta^{(i)}`:
 .. math::
 
     g(\mu^{(i)}) &= \eta^{(i)} \\
-    \mu^{(i)} &= E(Y | X = x^{(i)})
+    \mu^{(i)} &= E(Y \mid X = x^{(i)})
 
 How do we choose a link function? Well, we are free to choose any link function we like, but there
 are some constraints. For example, in the Poisson distribution, the mean is always positive.
@@ -171,8 +184,15 @@ in asthma incidence and hence prevalence, so we should include sex in our formul
 There are :math:`6 * 3 * 2 = 36` coefficients in the prevalence model.
 
 
+.. _occurrence-model-2:
+
 Occurrence Model 2: Risk Factors
 =================================
+
+In the second model, we will use the predicted asthma incidence and prevalence from the first model,
+:math:`\eta`, as our target asthma prevalence / incidence in this model. We would now like to
+incorporate the risk factors of family history and antibiotic use on asthma incidence and
+prevalence.
 
 Datasets
 *****************
@@ -215,7 +235,7 @@ target asthma prevalence / incidence in this model. The data is formatted as fol
           <code class="notranslate">str</code>
         </td>
         <td>
-          <code class="notranslate">"F"</code> = Female,
+          <code class="notranslate">"F"</code> = Female <br>
           <code class="notranslate">"M"</code> = Male
         </td>
       </tr>
@@ -242,9 +262,9 @@ target asthma prevalence / incidence in this model. The data is formatted as fol
 
 
 Model: Risk Factors
-****************************************************
+******************************
 
-We wanted to incorporate the effects of family history and antibiotic use on asthma incidence and
+We want to incorporate the effects of family history and antibiotic use on asthma incidence and
 prevalence.
 
 .. raw:: html
@@ -264,7 +284,8 @@ prevalence.
           A value in <code class="notranslate">{0, 1}</code>
         </td>
         <td>
-          1 = at least one parent has asthma, 0 = neither parent has asthma
+          <code class="notranslate">1</code>: at least one parent has asthma<br>
+          <code class="notranslate">0</code>: neither parent has asthma
         </td>
       </tr>
       <tr>
@@ -361,7 +382,7 @@ We next define the odds ratio for a given risk factor as:
 
 .. math::
 
-  \omega(r=k) = \dfrac{P(A = 1 | r = k)}{P(A = 1 | r = 0)}
+  \omega(r=k) = \dfrac{P(A = 1 \mid r = k)}{P(A = 1 \mid r = 0)}
 
 where :math:`A` is the asthma incidence or prevalence and :math:`r` is the risk factor.
 To combine odds ratios, we have:
@@ -369,9 +390,9 @@ To combine odds ratios, we have:
 .. math::
 
   \omega_{\lambda} &= \omega(f = f_{\lambda}, d = d_{\lambda}) \\
-  &= \dfrac{P(A = 1 | f = f_{\lambda}, d = d_{\lambda})}{P(A = 1 | f = 0, d = 0)} \\
-  &= \dfrac{P(A = 1 | f = f_{\lambda})}{P(A = 1 | f = 0)} \cdot 
-    \dfrac{P(A = 1 | d = d_{\lambda})}{P(A = 1 | d = 0)} \\
+  &= \dfrac{P(A = 1 \mid f = f_{\lambda}, d = d_{\lambda})}{P(A = 1 \mid f = 0, d = 0)} \\
+  &= \dfrac{P(A = 1 \mid f = f_{\lambda})}{P(A = 1 \mid f = 0)} \cdot 
+    \dfrac{P(A = 1 \mid d = d_{\lambda})}{P(A = 1 \mid d = 0)} \\
   &= \omega(f = f_{\lambda}) \cdot \omega(d = d_{\lambda})
 
 Since these are multiplicative, the log of the odds ratios is additive:
@@ -389,22 +410,33 @@ We can now define our formula for the calibration model:
 
 where:
 
-* :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)})` is determined by the output of the first model
-* :math:`\eta^{(i)}`, defined above, is the predicted incidence or prevalence from the first model
-* :math:`\sigma(x)` is the logistic function
-* :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda}` is the
-  correction / calibration term for either the incidence or prevalence
-* :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda}^{(i)}` is predicted
-  asthma prevalence / incidence for the model. We want this to be as close as possible to
-  :math:`\eta^{(i)}`
-* :math:`\zeta_{\lambda}^{(i)}` is the predicted asthma incidence or prevalence from the model
-  for the risk factor combination indexed by :math:`\lambda`
-* :math:`p(\lambda)` is the probability of the risk factor combination indexed by :math:`\lambda`
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Variable
+     - Description
+   * - :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)})`
+     - determined by the output of the first model
+   * - :math:`\eta^{(i)}`
+     - the predicted incidence or prevalence from the first model
+   * - :math:`\sigma(x)`
+     - the logistic function
+   * - :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda}`
+     - the correction / calibration term for either the incidence or prevalence
+   * - :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda}^{(i)}`
+     - predicted asthma prevalence / incidence for the model. We want this to be as close as
+       possible to :math:`\eta^{(i)}`.
+   * - :math:`\zeta_{\lambda}^{(i)}`
+     - the predicted asthma incidence or prevalence from the model for the risk factor combination
+       indexed by :math:`\lambda`
+   * - :math:`p(\lambda)`
+     - the probability of the risk factor combination indexed by :math:`\lambda`
 
 Let's break this formula down:
 
 Antibiotic Risk Factors
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The antibiotic terms were fit by Lee et al. :cite:`lee2024`, using a random effects meta-regression
 model:
@@ -488,46 +520,56 @@ find the calibrated prevalence for the previous year:
   &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
 
 Now, what we want to find is the joint probability of each risk factor combination,
-:math:`p(\lambda, A = 0 | t-1)`, for the population without asthma.
+:math:`p(\lambda, A = 0 \mid t-1)`, for the population without asthma.
 
 .. math::
 
-  P(\lambda, A = 0) = P(A = 0 | \lambda) \cdot P(\lambda)
+  P(\lambda, A = 0) = P(A = 0 \mid \lambda) \cdot P(\lambda)
 
 Now, we must have:
 
 .. math::
 
-  P(A = 0 | \lambda) = 1 - P(A = 1 | \lambda) = 1 - \zeta_{\text{prev}, \lambda}(t-1)
+  P(A = 0 \mid \lambda) = 1 - P(A = 1 \mid \lambda) = 1 - \zeta_{\text{prev}, \lambda}(t-1)
 
 So, we can rewrite the joint probability as:
 
 .. math::
 
-  p(\lambda, A = 0 | t-1) = (1 - \zeta_{\text{prev}, \lambda}(t-1)) \cdot p(\lambda, t-1)
+  p(\lambda, A = 0 \mid t-1) = (1 - \zeta_{\text{prev}, \lambda}(t-1)) \cdot p(\lambda, t-1)
 
 
 Next, we find the calibrated asthma incidence for the current year:
 
 .. math::
 
-  \zeta_{\text{inc}}(t) &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 | t-1) \zeta_{\text{inc}, \lambda}(t) \\
-  &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 | t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
+  \zeta_{\text{inc}}(t) &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \zeta_{\text{inc}, \lambda}(t) \\
+  &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
 
 
 where we recall that:
 
-* :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)}(t))` is determined by the output of the first model
-* :math:`\eta^{(i)}(t)`, defined above, is the predicted incidence from the first model
-* :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda, A = 0 | t-1) \cdot \beta_{\lambda}` is the
-  correction / calibration term for the incidence
-* :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda, A = 0 | t-1) \zeta_{\lambda}^{(i)}` is the
-  predicted asthma incidence for the model. We want this to be as close as possible to
-  :math:`\eta^{(i)}`
-* :math:`\zeta_{\lambda}^{(i)}` is the predicted asthma incidence from the model for the
-  risk factor combination indexed by :math:`\lambda`
-* :math:`p(\lambda, A = 0 | t-1)` is the joint probability of the risk factor combination
-  indexed by :math:`\lambda`, for a person who did not have asthma at time :math:`t-1`
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Variable
+     - Description
+   * - :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)}(t))`
+     - determined by the output of the first model
+   * - :math:`\eta^{(i)}(t)`
+     - defined above; the predicted incidence from the first model
+   * - :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda, A = 0 \mid t-1) \cdot \beta_{\lambda}`
+     - the correction / calibration term for the incidence
+   * - :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \zeta_{\lambda}^{(i)}`
+     - predicted asthma incidence for the model. We want this to be as close as
+       possible to :math:`\eta^{(i)}`.
+   * - :math:`\zeta_{\lambda}^{(i)}`
+     - the predicted asthma incidence from the model for the risk factor combination
+       indexed by :math:`\lambda`
+   * - :math:`p(\lambda, A = 0 \mid t-1)`
+     - the joint probability of the risk factor combination indexed by :math:`\lambda`, for a
+       person who did not have asthma at time :math:`t-1`
 
 
 We again want to find a correction term :math:`\alpha` such that the predicted asthma incidence
@@ -536,8 +578,11 @@ To do this, we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to 
 absolute difference between :math:`\zeta` and :math:`\eta`.
 
 
-Optimizing the Beta Parameters
---------------------------------------------
+Optimizing the Beta Parameters for the Incidence Equation
+-----------------------------------------------------------
+
+Example
+^^^^^^^^^
 
 Before we begin, let us first define what we mean by a ``contingency table``. A contingency
 table is a table that displays two categorical variables and their joint frequency distribution.
@@ -638,7 +683,7 @@ consider one risk factor combination at a time. To do this, we compute the condi
 
 .. math::
 
-    p(\Lambda = \lambda ~|~ \Lambda \in \{0, \lambda\}) = 
+    p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) = 
       \dfrac{p(\Lambda = \lambda)}{p(\Lambda = \lambda) + p(\Lambda = 0)}
 
 To obtain :math:`n_1`, the number of people with risk factor combination :math:`\lambda` with or
@@ -646,14 +691,14 @@ without an asthma diagnosis, we multiply the conditional probability by the tota
 :math:`n`:
 
 .. math::
-    n_1 = p(\Lambda = \lambda | \Lambda \in \{0, \lambda\}) \cdot n
+    n_1 = p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) \cdot n
 
 To obtain :math:`n_2`, the number of people diagnosed with asthma with or without risk factor
 combination :math:`\lambda`:
 
 .. math::
-    n_2 = (1 - p(\Lambda = \lambda | \Lambda \in \{0, \lambda\})) \cdot \zeta_{\text{prev}, 0}(t=0) \cdot n +
-      p(\Lambda = \lambda | \Lambda \in \{0, \lambda\}) \cdot \zeta_{\text{prev}, \lambda}(t=0) \cdot n
+    n_2 = (1 - p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\})) \cdot \zeta_{\text{prev}, 0}(t=0) \cdot n +
+      p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) \cdot \zeta_{\text{prev}, \lambda}(t=0) \cdot n
 
 From this, we can calculate the values for the contingency table:
 
@@ -710,10 +755,10 @@ table:
 To calculate the updated contingency table, we have:
 
 .. math::
-    a_1 &= a_0 \cdot \rho \\
-    b_1 &= a_0 \cdot (1 - \rho) \\
-    c_1 &= c_0 \cdot \rho \\
-    d_1 &= c_0 \cdot (1 - \rho)
+    a_{1, \text{ra}} &= a_0 \cdot \rho \\
+    b_{1, \text{ra}} &= a_0 \cdot (1 - \rho) \\
+    c_{1, \text{ra}} &= c_0 \cdot \rho \\
+    d_{1, \text{ra}} &= c_0 \cdot (1 - \rho)
 
 where:
 
@@ -756,13 +801,13 @@ where:
         </tbody>
     </table>
 
-* :math:`a_1` is the proportion of the population with risk factor combination :math:`\lambda`
+* :math:`a_{1, \text{ra}}` is the proportion of the population with risk factor combination :math:`\lambda`
   who had an asthma diagnosis at :math:`t=0` and still have it at :math:`t=1`
-* :math:`b_1` is the proportion of the population with risk factor combination :math:`\lambda`
+* :math:`b_{1, \text{ra}}` is the proportion of the population with risk factor combination :math:`\lambda`
   who had an asthma diagnosis at :math:`t=0` but no longer have it at :math:`t=1`
-* :math:`c_1` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
+* :math:`c_{1, \text{ra}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
   who had an asthma diagnosis at :math:`t=0` and still have it at :math:`t=1`
-* :math:`d_1` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
+* :math:`d_{1, \text{ra}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
   who had an asthma diagnosis at :math:`t=0` but no longer have it at :math:`t=1`
 * :math:`\rho` is the probability that a person would be reassessed as having an asthma diagnosis
   at :math:`t=1` given that they had an asthma diagnosis at :math:`t=0`
