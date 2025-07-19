@@ -2,12 +2,13 @@ import pathlib
 import pandas as pd
 import numpy as np
 import itertools
+import json
 import plotly.express as px
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-from leap.utils import get_data_path
+from leap.utils import get_data_path, poly
 from leap.logger import get_logger
-from typing import Tuple
+from typing import Tuple, Dict, Any
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 
 pd.options.mode.copy_on_write = True
@@ -17,76 +18,6 @@ logger = get_logger(__name__, 20)
 STARTING_YEAR = 2000
 MAX_YEAR = 2019
 MAX_AGE = 65
-
-def poly(
-    x: list[float] | np.ndarray,
-    degree: int = 1,
-    alpha: list[float] | np.ndarray | None = None,
-    norm2: list[float] | np.ndarray | None = None,
-    orthogonal: bool = False
-) -> np.ndarray | Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Generate a polynomial basis for a vector.
-
-    See `Orthogonal polynomial regression in Python
-    <https://davmre.github.io/blog/python/2013/12/15/orthogonal_poly/>`_ for more
-    information on this function.
-    
-    Args:
-        x: The vector to generate the polynomial basis for.
-        degree: The degree of the polynomial.
-        orthogonal: Whether to generate an orthogonal polynomial basis.
-        
-    Returns:
-        The polynomial basis, as a 2D Numpy array. If ``orthogonal`` is ``True``, the function
-        will return a tuple of three Numpy arrays: the orthogonal polynomial basis, the ``alpha``
-        values, and the ``norm2`` values.
-
-    Examples:
-
-        >>> poly([1, 2, 3], degree=2) # doctest: +NORMALIZE_WHITESPACE
-        array([[1, 1],
-               [2, 4],
-               [3, 9]])
-
-        >>> poly([1, 2, 3], degree=2, orthogonal=True) # doctest: +NORMALIZE_WHITESPACE
-        (array([[-7.07106781e-01,  4.08248290e-01],
-               [-5.55111512e-17, -8.16496581e-01],
-               [ 7.07106781e-01,  4.08248290e-01]]), array([2., 2.]), array([3.        , 2.        , 0.66666667]))
-    """
-    n = degree + 1
-    x = np.asarray(x).flatten()
-    if alpha is not None and norm2 is not None:
-        Z = np.empty((len(x), n))
-        Z[:,0] = 1
-        if degree > 0:
-            Z[:, 1] = x - alpha[0]
-        if degree > 1:
-            for i in np.arange(1, degree):
-                Z[:, i+1] = (x - alpha[i]) * Z[:, i] - (norm2[i] / norm2[i-1]) * Z[:, i-1]
-        Z /= np.sqrt(norm2)
-        return Z[:, 1:]
-    else:
-        if(degree >= len(np.unique(x))):
-            raise ValueError("'degree' must be less than number of unique points")
-        if orthogonal:
-            xbar = np.mean(x)
-            x = x - xbar
-            X = np.vander(x, n, increasing=True)
-            Q, R = np.linalg.qr(X)
-
-            Z = np.diag(np.diag(R))
-            raw = np.dot(Q, Z)
-
-            norm2 = np.sum(raw**2, axis=0)
-            alpha = (
-                np.sum((raw**2) * np.reshape(x, (-1, 1)), axis=0)/norm2 + 
-                xbar
-            )[:degree]
-            Z = raw / np.sqrt(norm2)
-            return Z[:, 1:], alpha, norm2
-        else:
-            X = np.vander(x, n, increasing=True)
-            return X[:, 1:]
 
 
 def parse_age_group(x: str, max_age: int = MAX_AGE) -> Tuple[int, int]:
@@ -264,7 +195,7 @@ def generate_incidence_model(
 
 def generate_prevalence_model(
     df_asthma: pd.DataFrame, maxiter: int = 1000
-) -> GLMResultsWrapper:
+) -> Tuple[GLMResultsWrapper, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Generate a ``GLM`` model for asthma prevalence.
     
     Args:
@@ -280,7 +211,12 @@ def generate_prevalence_model(
         maxiter: The maximum number of iterations to perform while fitting the model.
     
     Returns:
-        The fitted ``GLM`` model.
+        A tuple containing:
+        1. The fitted ``GLM`` model.
+        2. The alpha parameters for the age polynomial.
+        3. The norm2 parameters for the age polynomial.
+        4. The alpha parameters for the year polynomial.
+        5. The norm2 parameters for the year polynomial.
     """
 
     _, alpha_age, norm2_age = poly(df_asthma["age"].to_list(), degree=5, orthogonal=True)
@@ -291,7 +227,7 @@ def generate_prevalence_model(
     results = generate_occurrence_model(
         df_asthma, formula=formula, occ_type="prevalence", maxiter=maxiter
     )
-    return results
+    return results, alpha_age, norm2_age, alpha_year, norm2_year
 
 def get_predicted_data(
     model: GLMResultsWrapper,
@@ -410,6 +346,34 @@ def plot_occurrence(
     else:
         fig.write_image(str(file_path), width=width, height=height, scale=2)
 
+def add_beta_parameters(
+    model: GLMResultsWrapper, parameter_map: Dict[str, list[int]], config: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Add the beta parameters to the config dictionary.
+    
+    Args:
+        model: The fitted GLM model.
+        parameter_map: A dictionary mapping the parameter names to their indices in the model
+            parameters field, ``model.params``. The keys are the parameter names and the
+            values are lists of indices. For example, if ``βyear`` is the second parameter in the
+            list, then the mapping would be ``{"βyear": [1]}``, and it would be accessed by
+            ``model.params.iloc[1]``.
+        config: The config dictionary to add the parameters to.
+        
+    Returns:
+        The config dictionary with the beta parameters added.
+    """
+    beta_parameters = {}
+    for name, indices in parameter_map.items():
+        beta_parameters[name] = model.params.iloc[indices].to_list()
+        if len(beta_parameters[name]) == 1:
+            beta_parameters[name] = beta_parameters[name][0]
+
+    # add the beta parameters to the config dictionary
+    for key, value in beta_parameters.items():
+        config[key] = value
+    return config
+
 
 def generate_occurrence_data():
     """Generate the asthma incidence and prevalence data.
@@ -426,7 +390,7 @@ def generate_occurrence_data():
     """
     df_asthma = load_asthma_df()
     incidence_model = generate_incidence_model(df_asthma)
-    prevalence_model = generate_prevalence_model(df_asthma)
+    prevalence_model, alpha_age, norm2_age, alpha_year, norm2_year = generate_prevalence_model(df_asthma)
     df_incidence = get_predicted_data(
         incidence_model, "incidence", max_age=110, max_year=2065
     )
@@ -455,6 +419,50 @@ def generate_occurrence_data():
         file_path=get_data_path("data_generation/figures/asthma_prevalence_predicted.png")
     )
     df.to_csv(get_data_path("processed_data/asthma_occurrence_predictions.csv"), index=False)
+
+
+    with open(get_data_path("processed_data/config.json"), "r") as f:
+        config = json.load(f)
+
+    config["incidence"]["parameters"] = add_beta_parameters(
+        incidence_model,
+        {
+            "β0": [0],
+            "βsex": [1],
+            "βyear": [2],
+            "βsexyear": [3],
+            "βage": list(range(4, 9)),
+            "βsexage": list(range(9, 14))
+        },
+        config["incidence"]["parameters"]
+    )
+    config["prevalence"]["parameters"] = add_beta_parameters(
+        prevalence_model, {
+            "β0": [0],
+            "βsex": [1],
+            "βyear": [2, 3],
+            "βsexyear": [4, 5],
+            "βage": list(range(6, 11)),
+            "βsexage": list(range(11, 16)),
+            "βyearage": list(range(16, 26)),
+            "βsexyearage": list(range(26, 36))
+        },
+        config["prevalence"]["parameters"]
+    )
+
+    config["prevalence"]["poly_parameters"] = {
+        "alpha_age": list(alpha_age),
+        "norm2_age": list(norm2_age),
+        "alpha_year": list(alpha_year),
+        "norm2_year": list(norm2_year)
+    }
+    config["incidence"]["poly_parameters"] = {
+        "alpha_age": list(alpha_age),
+        "norm2_age": list(norm2_age)
+    }
+
+    with open(get_data_path("processed_data/config.json"), "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":
