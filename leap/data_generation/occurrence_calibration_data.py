@@ -1178,4 +1178,7 @@ if __name__ == "__main__":
         """
     )
     args = parser.parse_args()
+    logger.message(
+        f"Calibrating the asthma occurrence model. Retrain beta parameters? {args.retrain_beta}"
+    )
     generate_occurrence_calibration_data(retrain_beta=args.retrain_beta)
