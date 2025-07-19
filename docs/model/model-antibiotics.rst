@@ -147,6 +147,9 @@ We can reparametrize this with :math:`\mu` and :math:`\theta` using the followin
     r &= \dfrac{\mu^2}{\sigma^2 - \mu} \\
     \sigma^2 &= \mu + \dfrac{\mu^2}{\theta}
 
+where :math:`\mu` is the mean, :math:`\sigma^2` is the variance, and :math:`\theta` is the
+overdispersion parameter. 
+
 Doing some algebra, we have:
 
 .. math::
