@@ -453,8 +453,8 @@ where:
 
 The beta coefficients were found to be:
 
-* :math:`\beta_{\text{hx_0}} = \log(1.13)`
-* :math:`\beta_{\text{hx_age}} = \dfrac{\log(2.4) - \log(1.13)}{2}`
+* :math:`\beta_{\text{hx_0}} = \log(1.13) = 0.122`
+* :math:`\beta_{\text{hx_age}} = \dfrac{\log(2.4) - \log(1.13)}{2} = 0.377`
 
 
 So, the only unknown term in our formula is the correction term :math:`\alpha`. To solve this,
