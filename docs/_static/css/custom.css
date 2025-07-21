@@ -48,12 +48,19 @@
     color: var(--md-code-kw-color);
 }
 
-/* Bootstrap Tables */
+/* Sphinx Tables */
 
 .md-typeset table.plot-table.data:not(.plain) td,
 .md-typeset table.plot-table.data:not(.plain) th {
     padding: 0px;
 }
+
+.md-typeset table.data:not(.plain) {
+    width: -webkit-fill-available;
+    display: table;
+}
+
+/* Bootstrap Tables */
 
 .table {
     width: 100%;

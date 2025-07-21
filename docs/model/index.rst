@@ -12,5 +12,6 @@ outcomes over a lifetime.
 
   model-simulation
   model-glm
+  model-antibiotics
   model-occurrence
   model-control
