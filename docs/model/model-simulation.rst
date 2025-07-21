@@ -196,6 +196,40 @@ Iterating Over Agents
 Once we have our list of agents for a given year, we then simulate the lifetime of each agent, from
 birth or immigration until either death or the maximum age is reached.
 
+To initialize an agent, we set the following initial attributes:
+
+
+.. list-table:: Agent Initialization
+   :widths: 25 25
+   :header-rows: 1
+
+   * - Attribute
+     - Description
+   * - age
+     - Either newborn, or the age at which the agent immigrated to the province.
+   * - sex
+     - Randomly assigned based on either sex proportions at birth or immigration data.
+   * - immigrant
+     - A boolean indicating whether the agent is an immigrant.
+   * - census division
+     - Each agent is randomly assigned to a census division based on the population distribution
+       in the province.
+   * - asthma control levels
+     - Initial asthma control levels are set to:
+
+       * probability of fully-controlled asthma: 0.33
+       * probability of partially-controlled asthma: 0.33
+       * probability of uncontrolled asthma: 0.33
+   * - has asthma?
+     - If the agent is less than 3 years old, they do not have asthma. Otherwise, they are assigned
+       an asthma status based on the asthma prevalence model.
+   * - exacerbation history
+     - Initial exacerbation history is set to:
+
+       * number of exacerbations previous year: 0
+       * number of exacerbations current year: 0
+
+
 Iterating Over Lifetime
 =========================
 
@@ -212,3 +246,4 @@ During a given year, the following events can occur:
 4. Agent gets diagnosed with asthma.
 5. Agent finds out that previous asthma diagnosis was incorrect.
 6. Agent emigrates to another province or country.
+
