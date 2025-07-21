@@ -332,6 +332,135 @@ This will also create 4 figures:
 3. `leap/data_generation/figures/asthma_prevalence_comparison.png`
 4. `leap/data_generation/figures/asthma_prevalence_predicted.png`
 
+## Asthma Incidence / Prevalence (Occurrence) Calibration
+
+### Datasets
+
+#### 1. Antibiotic Dose Data
+
+The antibiotic prescription data is from the BC Ministry of Health and contains the total
+number of courses of antibiotics dispensed to infants, stratified by year and sex, ranging from
+2000 to 2018. This is a **private** dataset, so you will need to follow some extra steps to
+obtain the data:
+
+1. Obtain access to the GitHub repository: [leap-data](https://github.com/resplab/leap-data)
+2. Download the data file:
+   [bc_abx_dose_data.csv](https://github.com/resplab/leap-data/blob/main/bc_abx_dose_data.csv)
+3. Save the file to: `leap/leap/original_data/private/bc_abx_dose_data.csv`
+
+The data is formatted as follows:
+
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `n_abx` | `int` | the total number of courses of antibiotics prescribed in BC for infants for the given year and sex |
+| `sex` | `str` | `"M"` or `"F"` |
+| `year` | `int` | format `XXXX`, e.g `2000`, range `[2000, 2018]` |
+
+#### 2. Past Birth Data
+
+To create the antibiotic dose regression model, we needed to use the past birth data from
+Statistics Canada (the same dataset used for the `birth_data.py` module):
+
+[Table 17-10-00005-01 from StatCan](https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=1710000501).
+
+The `*.csv` file can be downloaded from here:
+[17100005-eng.zip](https://www150.statcan.gc.ca/n1/tbl/csv/17100005-eng.zip)
+
+and is saved as:
+`LEAP/leap/original_data/17100005.csv`
+
+#### 3. Predictions from Occurrence Model 1
+
+For the calibration, we need the predicted asthma prevalence / incidence from `Occurrence Model 1`,
+$\eta$, which can be found at:
+
+`leap/leap/processed_data/asthma_occurrence_predictions.csv`
+
+The data is formatted as follows:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `year` | `int` | format `XXXX`, e.g `2000`, range `[2000, 2019]` |
+| `sex` | `str` | `"M"` or `"F"` |
+| `age` | `int` | range `[3, 110]` |
+| `incidence` | `float` | the incidence of asthma in BC for a given year, age group, and sex, per 100 people |
+| `prevalence` | `float` | the prevalence of asthma in BC for a given year, age group, and sex, per 100 people |
+
+#### 4. Asthma Reassessment Data
+
+For the calibration, we need the predicted asthma prevalence / incidence from `Occurrence Model 1`,
+$\eta$, which can be found at:
+
+`leap/leap/processed_data/asthma_reassessment.csv`
+
+The data is formatted as follows:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `year` | `int` | format `XXXX`, e.g `2000`, range `[2000, 2065]` for Canada, `[2000, 2042]` for BC |
+| `sex` | `str` | `"M"` or `"F"` |
+| `age` | `int` | range `[4, 110]` |
+| `province` | `str` | two-letter province code, e.g. `BC`, `CA` |
+| `ra` | `float` | the asthma reassessment |
+
+### Processing the Data
+
+See the
+[Occurrence Model Documentation](https://resplab.github.io/leap/model/model-occurrence.html)
+for more details on the occurrence calibration formulae.
+
+### Generating the Data
+
+To run the data generation for the incidence/prevalence calibration:
+
+```sh
+cd LEAP
+python3 leap/data_generation/occurrence_calibration_data.py
+```
+
+This will update the file `leap/processed_data/asthma_occurrence_correction.csv`. This file
+contains the incidence / prevalence correction parameters and is formatted as follows:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `year` | `int` | format `XXXX`, e.g `2000`, range `[2000, 2026]` |
+| `sex` | `str` | `"M"` or `"F"` |
+| `age` | `int` | range `[3, 63]` |
+| `correction` | `float` | the correction term for the asthma incidence / prevalence equation |
+| `type` | `str` | one of `"incidence"` or `"prevalence"` |
+
+If you want to rerun the optimization for the $\beta$ parameters, add the flag `--retrain-beta`:
+
+
+```sh
+cd LEAP
+python3 leap/data_generation/occurrence_calibration_data.py --retrain-beta
+```
+
+This will update the file `leap/processed_data/asthma_occurrence_correction.csv` as described
+above, and will also update `leap/processed_data/occurrence_calibration_parameters.json`:
+
+```json
+
+{
+    "β_fhx_age": 0.6445257,
+    "β_abx_age": -0.2968535
+}
+```
+
+<div class="note" style='padding:15px; background-color:#ffcaa2; color:#ff8020'>
+<span>
+<p style='text-align:left'>
+<b>Note:</b></p>
+<p>
+Rerunning the beta parameters optimization is slow - could take up to 24 hours.
+</p>
+</span>
+</div>
+</br>
+
+
 
 ## Asthma Control Coefficients
 

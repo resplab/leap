@@ -2,15 +2,19 @@ from __future__ import annotations
 import abc
 import pandas as pd
 import numpy as np
-from scipy.stats import logistic
-from leap.utils import get_data_path, logit
+from scipy.special import logit, expit
+from leap.utils import get_data_path, poly
 from leap.logger import get_logger
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.agent import Agent
+    from leap.utils import Sex
 
 logger = get_logger(__name__)
+
+MIN_ASTHMA_AGE = 3
+MAX_ABX_AGE = 7
 
 
 class Occurrence:
@@ -19,22 +23,22 @@ class Occurrence:
     def __init__(
         self,
         config: dict | None = None,
-        hyperparameters: dict | None = None,
         parameters: dict | None = None,
+        poly_parameters: Dict[str, list[float]] | None = None,
         max_age: int = 110,
         correction_table: DataFrameGroupBy | None = None
     ):
         if config is not None:
-            self.hyperparameters = config["hyperparameters"]
             self.parameters = config["parameters"]
             self.max_age = config["max_age"]
-        elif hyperparameters is not None and parameters is not None:
-            self.hyperparameters = hyperparameters
+            self.poly_parameters = config["poly_parameters"]
+        elif parameters is not None and poly_parameters is not None:
             self.parameters = parameters
             self.max_age = max_age
+            self.poly_parameters = poly_parameters
         else:
             raise ValueError(
-                "Either config dict or parameters and hyperparameters must be provided."
+                "Either config dict or parameters and poly_parameters must be provided."
             )
 
         if correction_table is None:
@@ -45,25 +49,6 @@ class Occurrence:
         years = np.unique([key[0] for key in self.correction_table.groups.keys()])
         self.min_year = int(np.min(years)) + 1
         self.max_year = int(np.max(years))
-
-    @property
-    def hyperparameters(self) -> dict:
-        """A dictionary containing the hyperparameters used to compute ``β0`` from a normal
-        distribution:
-        
-        * ``β0_μ``: float, the mean of the normal distribution.
-        * ``β0_σ``: float, the standard deviation of the normal distribution.
-
-        """
-        return self._hyperparameters
-    
-    @hyperparameters.setter
-    def hyperparameters(self, hyperparameters: dict):
-        KEYS = ["β0_μ", "β0_σ"]
-        for key in KEYS:
-            if key not in hyperparameters.keys():
-                raise ValueError(f"Missing key {key} in hyperparameters.")
-        self._hyperparameters = hyperparameters
 
     @property
     def parameters(self) -> dict:
@@ -79,12 +64,12 @@ class Occurrence:
         
         Each dataframe contains the following columns:
 
-        * ``year``: integer year.
-        * ``sex``: 0 = female, 1 = male.
-        * ``age``: integer age.
-        * ``correction``: float, TODO.
+        * ``year (int)``: integer year.
+        * ``sex (str)``: ``F`` = female, ``M`` = male.
+        * ``age (int)``: integer age.
+        * ``correction (float)``: The correction term for the occurrence equation.
 
-        See ``master_occurrence_correction.csv``.
+        See ``asthma_occurrence_correction.csv``.
         """
         return self._correction_table
     
@@ -123,16 +108,17 @@ class Occurrence:
         """Load the asthma incidence correction table.
 
         Returns:
-            Dataframe grouped by year, age, and sex. Each dataframe contains the following columns:
+            Dataframe grouped by year, age, and sex.
+            Each dataframe contains the following columns:
 
-            * ``year``: integer year.
-            * ``sex``: 0 = female, 1 = male.
-            * ``age``: integer age.
-            * ``correction``: float, TODO.
+            * ``year (int)``: integer year.
+            * ``sex (str)``: ``"F"`` = female, ``"M"`` = male.
+            * ``age (int)``: integer age.
+            * ``correction (float)``: The correction term for the occurrence equation.
 
         """
         df = pd.read_csv(
-            get_data_path("processed_data/master_asthma_occurrence_correction.csv")
+            get_data_path("processed_data/asthma_occurrence_correction.csv")
         )
         df = df[df["type"] == occurrence_type]
         df.drop(columns=["type"], inplace=True)
@@ -140,78 +126,127 @@ class Occurrence:
         return grouped_df
 
     def equation(
-        self, sex: int, age: int, year: int, has_family_history: bool, dose: int
+        self, sex: Sex, age: int, year: int, has_family_history: bool, dose: int
     ) -> float:
-        """Compute the asthma occurrence equation.
+        r"""Compute the asthma incidence / prevalence for a given risk factor combination.
+
+        .. math::
+
+            \zeta_{\lambda} = \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
+
+        where:
+
+        * :math:`\beta_{\eta} = \sigma^{-1}(\eta(t))` is determined by the output of Model 1
+        * :math:`\omega_{\lambda}` is the odds ratio for asthma incidence / prevalence based on
+          family history and antibiotic doses
+        * :math:`\alpha` is the incidence / prevalence correction term
 
         Args:
-            sex: 0 = female, 1 = male.
+            sex: The sex of the agent.
             age: The age of the agent.
             year: The calendar year.
-            has_family_history: Whether the agent has a family history of asthma.
-            dose: TODO.
+            has_family_history: ``True`` if one or more parents of the agent has asthma,
+                otherwise ``False``.
+            dose: The number of courses of antibiotics taken during the first year of life.
         """
         correction_year = min(year, self.max_year)
         year = min(year, self.max_year)
-        p0 = self.crude_occurrence(sex, age, year)
-        p = logistic.cdf(
-            logit(p0) +
-            has_family_history * self.log_OR_family_history(age) +
-            self.log_OR_abx_exposure(age, dose) +
-            self.correction_table.get_group(
-                (correction_year, sex, min(age, 63))
-            )["correction"].values[0]
+
+        # Calculate asthma incidence / prevalence based on Model 1
+        β_eta = self.crude_occurrence(sex, age, year)
+
+        # Calculate the odds ratio for asthma incidence / prevalence based on family history
+        odds_ratio_fhx = self.calculate_odds_ratio_fam_history(age, has_family_history)
+
+        # Calculate the odds ratio for asthma incidence / prevalence based on antibiotic doses
+        odds_ratio_abx = self.calculate_odds_ratio_abx(age, dose)
+
+        # Get the incidence or prevalence correction term
+        α = self.correction_table.get_group(
+            (correction_year, str(sex), min(age, 63))
+        )["correction"].values[0]
+
+        p = expit(
+            logit(β_eta) + np.log(odds_ratio_fhx) + np.log(odds_ratio_abx) + α
         )
         return p
 
     @abc.abstractmethod
-    def crude_occurrence(self, sex, age: int, year: int) -> float:
+    def crude_occurrence(self, sex: Sex, age: int, year: int) -> float:
         return
 
-    def log_OR_family_history(self, age: int) -> float:
-        return self.parameters["βfam_hist"][0] + (min(5, age) - 3) * self.parameters["βfam_hist"][1]
+    def calculate_odds_ratio_fam_history(self, age: int, fam_hist: int) -> float:
+        r"""Calculate the odds ratio for asthma prevalence based on family history.
 
-    def log_OR_abx_exposure(self, age: int, dose: int) -> float:
-        if age > 7 or dose == 0:
-            return 0
+        .. math::
+
+            \log(\omega(f_{\lambda})) = 
+                \beta_{\text{fhx_0}} \cdot f + 
+                \beta_{\text{fhx_age}} \cdot (\text{min}(a, 5) - 3) \cdot f
+
+        where:
+
+        * :math:`\beta_{\text{fhx_xxx}}` is a constant coefficient
+        * :math:`a` is the age
+        * :math:`f` is the family history of asthma; 1 = at least one parent has asthma,
+          0 = neither parent has asthma
+
+        Args:
+            age: The age of the individual in years.
+            fam_hist: The family history of asthma, an integer in ``[0, 1]``, where 1 indicates
+                at least one parent has asthma.
+
+        Returns:
+            The odds ratio for asthma prevalence based on family history and age.
+        """
+        β_fam_hist = self.parameters["β_fam_hist"]
+
+        if fam_hist == 0:
+            return 1.0
+
+        return np.exp(
+            β_fam_hist["β_fhx_0"] +
+            β_fam_hist["β_fhx_age"] * (min(5, age) - MIN_ASTHMA_AGE)
+        )
+
+    def calculate_odds_ratio_abx(self, age: int, dose: int) -> float:
+        r"""Calculate the odds ratio for asthma prevalence based on antibiotic exposure.
+
+        .. math::
+
+            \log(\omega(d_{\lambda})) =
+                \begin{cases}
+                \beta_{\text{abx_0}} + 
+                \beta_{\text{abx_age}} \cdot \text{min}(a, 7) +
+                \beta_{\text{abx_dose}} \cdot \text{min}(d, 3)
+                && d > 0 \text{ and } a \leq 7 \\ \\
+                0 && \text{otherwise}
+                \end{cases}
+
+        where:
+
+        * :math:`\beta_{\text{abx_xxx}}` is a constant coefficient
+        * :math:`a` is the age
+        * :math:`d` is the number of courses of antibiotics taken during the first year of life
+
+        Args:
+            age: The age of the individual in years.
+            dose: The number of antibiotic courses taken in the first year of life,
+                an integer in ``[0, 5]``, where 5 indicates 5 or more courses.
+
+        Returns:
+            The odds ratio for asthma prevalence based on antibiotic exposure and age.
+        """
+        β_abx = self.parameters["β_abx"]
+
+        if age > MAX_ABX_AGE or dose == 0:
+            return 1.0
         else:
-            return (
-                self.parameters["βabx_exp"][0] +
-                self.parameters["βabx_exp"][1] * min(age, 7) +
-                self.parameters["βabx_exp"][2] * min(dose, 3)
+            return np.exp(
+                β_abx["β_abx_0"] +
+                β_abx["β_abx_age"] * min(age, MAX_ABX_AGE) +
+                β_abx["β_abx_dose"] * min(dose, MIN_ASTHMA_AGE)
             )
-
-    def poly_age_calculator(
-        self,
-        age: int,
-        alpha: list[float] = [32.07692, 32.42755, 32.76123, 32.80415, 32.54075],
-        nd: list[float] = [
-            1, 520, 179636.923076923, 47536813.3328764, 11589923664.2537,
-            2683688761696.54, 594554071731935
-        ]
-    ) -> np.ndarray:
-        fs = np.zeros(6)
-        fs[0] = 1 / np.sqrt(nd[1])
-        fs[1] = (age - alpha[0]) / np.sqrt(nd[2])
-
-        for i in range(1, 5):
-            fs[i + 1] = (
-                (age - alpha[i]) * np.sqrt(nd[i + 1]) * fs[i] -
-                nd[i + 1] / np.sqrt(nd[i]) * fs[i - 1]
-            ) / np.sqrt(nd[i + 2])
-        return fs[1:]
-
-    def poly_year_calculator(
-        self,
-        year: int,
-        alpha: list[float] = [2009.5, 2009.5],
-        nd: list[float] = [1.0, 520.0, 17290.0, 456456.0]
-    ) -> np.ndarray:
-        fs = np.zeros(3)
-        fs[0] = 1 / np.sqrt(nd[1])
-        fs[1] = (year - alpha[0]) / np.sqrt(nd[2])
-        fs[2] = ((year - alpha[1]) * np.sqrt(nd[2]) * fs[1] - nd[2] / np.sqrt(nd[1]) * fs[0]) / np.sqrt(nd[3])
-        return fs[1:]
 
 
 class Incidence(Occurrence):
@@ -220,60 +255,83 @@ class Incidence(Occurrence):
     def __init__(
         self,
         config: dict | None = None,
-        hyperparameters: dict | None = None,
         parameters: dict | None = None,
+        poly_parameters: Dict[str, list[float]] | None = None,
         max_age: int = 110,
         correction_table: DataFrameGroupBy | None = None
     ):
-        super().__init__(config, hyperparameters, parameters, max_age, correction_table)
+        super().__init__(config, parameters, poly_parameters, max_age, correction_table)
         self.parameters["βage"] = np.array(self.parameters["βage"])
         self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
-        self.parameters["βfam_hist"] = np.array(self.parameters["βfam_hist"])
-        self.parameters["βabx_exp"] = np.array(self.parameters["βabx_exp"])
 
     @property
     def parameters(self) -> dict:
-        """A dictionary containing the following keys:
+        r"""A dictionary containing the following keys:
         
-            * ``β0 (float)``: A constant parameter, randomly selected from a normal distribution
-              with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
-            * ``βsex (float)``: The parameter for the sex term, i.e. ``βsex * sex``.
-            * ``βage (list[float])``: An array of 5 parameters to be multiplied by functions of age,
+            * ``β0 (float)``: A constant parameter.
+            * ``βsex (float)``: The parameter for the sex term, i.e.
+              :math:`\beta_{\text{sex}} * \text{sex}`.
+            * ``βyear (float)``: The parameter for the year term, i.e.
+              :math:`\beta_{\text{year}} * \text{year}`.
+            * ``βsexyear (float)``: The parameter to be multiplied by sex and year, i.e.
+              :math:`\beta_{\text{sexyear}} * \text{year} * \text{sex}`.
+            * ``βage (list[float])``: An array of 5 parameters to be multiplied by powers of age,
               i.e.
 
-              .. code-block:: python
+              .. math::
 
-                βage1 * f1(age) + βage2 * f2(age) + βage3 * f3(age) +
-                βage4 * f4(age) + βage5 * f5(age)
-
-              See ``poly_age_calculator``.
-            * ``βyear (float)``: The parameter for the year term, i.e. ``βyear * year``.
+                \beta_{\text{age}1} * \text{age} + 
+                \beta_{\text{age}2} * \text{age}^2 + 
+                \beta_{\text{age}3} * \text{age}^3 +
+                \beta_{\text{age}4} * \text{age}^4 +
+                \beta_{\text{age}5} * \text{age}^5
+            
             * ``βsexage (list[float])``: An array of 5 parameters to be multiplied by the sex and
-              functions of age, i.e.
+              powers of age, i.e.
 
-              .. code-block:: python
+              .. math::
 
-                βsexage1 * f1(age) * sex + βsexage2 * f2(age) * sex + βsexage3 * f3(age) * sex +
-                βsexage4 * f4(age) * sex + βsexage5 * f5(age) * sex
+                \beta_{\text{sexage}1} * \text{sex} * \text{age} + 
+                \beta_{\text{sexage}2} * \text{sex} * \text{age}^2 + 
+                \beta_{\text{sexage}3} * \text{sex} * \text{age}^3 + \\
+                \beta_{\text{sexage}4} * \text{sex} * \text{age}^4 +
+                \beta_{\text{sexage}5} * \text{sex} * \text{age}^5
 
-              See ``poly_age_calculator``.
-            * ``βsexyear (float)``: The parameter to be multiplied by sex and year,
-              i.e. ``βsexyear * year * sex``.
-            * ``βfam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
-              age. See ``log_OR_family_history``.
-            * ``βabx_exp (list[float])``: An array of 3 parameters to be multiplied by functions of
-              age and antibiotic exposure. See ``log_OR_abx_exposure``.
+            * ``β_fam_hist (dict)``: A dictionary of 2 parameters to be multiplied by functions of
+              age. See ``calculate_odds_ratio_fam_history``.
+            * ``β_abx (dict)``: A dictionary of 3 parameters to be multiplied by functions of
+              age and antibiotic dose. See ``calculate_odds_ratio_abx``.
 
         """
         return self._parameters
     
     @parameters.setter
     def parameters(self, parameters: dict):
-        KEYS = ["β0", "βsex", "βage", "βyear", "βsexage", "βsexyear", "βfam_hist", "βabx_exp"]
+        KEYS = ["β0", "βsex", "βage", "βyear", "βsexage", "βsexyear", "β_fam_hist", "β_abx"]
         for key in KEYS:
             if key not in parameters.keys():
                 raise ValueError(f"Missing key {key} in parameters.")
         self._parameters = parameters
+
+    @property
+    def poly_parameters(self) -> Dict[str, list[float]]:
+        r"""A dictionary containing the following keys:
+        
+            * ``alpha_age (list[float])``: The alpha vector from the normalization of the training
+              data in the ``poly`` function. Length = degree of age polynomial = 5.
+            * ``norm2_age (list[float])``: The :math:`\text{norm}^2` vector from the normalization
+              of the training data in the ``poly`` function.
+              Length = degree of age polynomial + 1 = 6.
+        """
+        return self._poly_parameters
+    
+    @poly_parameters.setter
+    def poly_parameters(self, poly_parameters: Dict[str, list[float]]):
+        KEYS = ["alpha_age", "norm2_age"]
+        for key in KEYS:
+            if key not in poly_parameters.keys():
+                raise ValueError(f"Missing key {key} in poly_parameters.")
+        self._poly_parameters = poly_parameters
 
     def load_occurrence_correction_table(self) -> DataFrameGroupBy:
         """Load the asthma incidence correction table.
@@ -282,24 +340,62 @@ class Incidence(Occurrence):
             A dataframe grouped by year, age, and sex.
             Each dataframe contains the following columns:
 
-            * ``year``: integer year.
-            * ``sex``: 0 = female, 1 = male.
-            * ``age``: integer age.
-            * ``correction``: float, TODO.
+            * ``year (int)``: integer year.
+            * ``sex (str)``: ``"F"`` = female, ``"M"`` = male.
+            * ``age (int)``: integer age.
+            * ``correction (float)``: The correction term for the asthma incidence / prevalence
+              equation.
 
         """
-        grouped_df = super().load_occurrence_correction_table(occurrence_type="inc")
+        grouped_df = super().load_occurrence_correction_table(occurrence_type="incidence")
         return grouped_df
 
-    def crude_occurrence(self, sex, age: int, year: int) -> float:
-        poly_age = self.poly_age_calculator(age)
+    def crude_occurrence(
+        self,
+        sex: Sex,
+        age: int,
+        year: int
+    ) -> float:
+        r"""Calculate the crude asthma incidence.
+
+        .. math::
+
+            \eta^{(i)} = 
+                \sum_{m=0}^1 \beta_{01m} t^{(i)} \cdot (s^{(i)})^m +
+                \sum_{k=0}^{5} \sum_{m=0}^{1} \beta_{k0m} \cdot (a^{(i)})^k \cdot (s^{(i)})^m
+
+
+        where:
+
+        * :math:`\eta^{(i)}` is the crude asthma incidence
+        * :math:`\beta_{k\ell m}` is the coefficient for the feature
+          :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
+        * :math:`a^{(i)}` is the age
+        * :math:`t^{(i)}` is the year
+        * :math:`s^{(i)}` is the sex
+
+        Args:
+            sex: The sex of the agent.
+            age: The age of the agent.
+            year: The calendar year.
+
+        Returns:
+            A float representing the crude asthma incidence for the given year, age, and sex.
+        """
+
+        poly_age = poly(
+            age,
+            degree=5,
+            alpha=self.poly_parameters["alpha_age"],
+            norm2=self.poly_parameters["norm2_age"]
+        ).flatten()
         return np.exp(
             self.parameters["β0"] +
-            self.parameters["βsex"] * sex +
+            self.parameters["βsex"] * int(sex) +
             self.parameters["βyear"] * year +
-            self.parameters["βsexyear"] * sex * year +
+            self.parameters["βsexyear"] * int(sex) * year +
             np.dot(self.parameters["βage"], poly_age) +
-            np.dot(self.parameters["βsexage"], poly_age) * sex
+            np.dot(self.parameters["βsexage"], poly_age) * int(sex)
         )
 
 
@@ -309,77 +405,100 @@ class Prevalence(Occurrence):
     def __init__(
         self,
         config: dict | None = None,
-        hyperparameters: dict | None = None,
         parameters: dict | None = None,
+        poly_parameters: Dict[str, list[float]] | None = None,
         max_age: int = 110,
         correction_table: DataFrameGroupBy | None = None
     ):
-        super().__init__(config, hyperparameters, parameters, max_age, correction_table)
+        super().__init__(
+            config, parameters, poly_parameters, max_age, correction_table
+        )
         self.parameters["βage"] = np.array(self.parameters["βage"])
         self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
         self.parameters["βsexyear"] = np.array(self.parameters["βsexyear"])
         self.parameters["βyearage"] = np.array(self.parameters["βyearage"])
         self.parameters["βsexyearage"] = np.array(self.parameters["βsexyearage"])
-        self.parameters["βfam_hist"] = np.array(self.parameters["βfam_hist"])
-        self.parameters["βabx_exp"] = np.array(self.parameters["βabx_exp"])
 
     @property
     def parameters(self) -> dict:
-        """A dictionary containing the following keys:
+        r"""A dictionary containing the following keys:
 
-            * ``β0 (float)``: A constant parameter, randomly selected from a normal distribution
-              with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
-            * ``βsex (float)``: The parameter for the sex term, i.e. ``βsex * sex``.
-            * ``βage (list[float])``: An array of 5 parameters to be multiplied by functions of age,
+            * ``β0 (float)``: A constant parameter, determined by Model 1.
+            * ``βsex (float)``: The parameter for the sex term, i.e.
+              :math:`\beta_{\text{sex}} * \text{sex}`.
+            * ``βyear (list[float])``: An array of 2 parameters to be multiplied by powers of year,
+              i.e.
+              
+              .. math::
+              
+                \beta_{\text{year}1} * \text{year} + \beta_{\text{year}2} * \text{year}^2
+
+            * ``βsexyear (list[float])``: An array of 2 parameters to be multiplied by sex and
+              powers of year, i.e.
+
+              .. math::
+              
+                \beta_{\text{sexyear}1} * \text{sex} * \text{year} + 
+                \beta_{\text{sexyear}2} * \text{sex} * \text{year}^2
+
+            * ``βage (list[float])``: An array of 5 parameters to be multiplied by powers of age,
               i.e.
 
-              .. code-block:: python
+              .. math::
 
-                βage1 * f1(age) + βage2 * f2(age) + βage3 * f3(age) +
-                βage4 * f4(age) + βage5 * f5(age)
+                \beta_{\text{age}1} * \text{age} + 
+                \beta_{\text{age}2} * \text{age}^2 + 
+                \beta_{\text{age}3} * \text{age}^3 +
+                \beta_{\text{age}4} * \text{age}^4 +
+                \beta_{\text{age}5} * \text{age}^5
 
-              See ``poly_age_calculator``.
-
-            * ``βyear (list[float])``: An array of 2 parameters to be multiplied by functions of
-              year, i.e. ``βyear1 * g1(year) + βyear2 * g2(year)``. See ``poly_year_calculator``.
             * ``βsexage (list[float])``: An array of 5 parameters to be multiplied by the sex and
-              functions of age, i.e.
+              powers of age, i.e.
 
-              .. code-block:: python
+              .. math::
 
-                βsexage1 * f1(age) * sex + βsexage2 * f2(age) * sex + βsexage3 * f3(age) * sex +
-                βsexage4 * f4(age) * sex + βsexage5 * f5(age) * sex
+                \beta_{\text{sexage}1} * \text{sex} * \text{age} + 
+                \beta_{\text{sexage}2} * \text{sex} * \text{age}^2 + 
+                \beta_{\text{sexage}3} * \text{sex} * \text{age}^3 + \\
+                \beta_{\text{sexage}4} * \text{sex} * \text{age}^4 +
+                \beta_{\text{sexage}5} * \text{sex} * \text{age}^5
 
-              See ``poly_age_calculator``.
-            * ``βsexyear (list[float])``: An array of 2 parameters to be multiplied by sex and
-              functions of year, i.e. ``βyear1 * g1(year) + βyear2 * g2(year)``.
-            * ``βyearage (list[float])``: An array of 10 parameters to be multiplied by functions of
+            * ``βyearage (list[float])``: An array of 10 parameters to be multiplied by powers of
               age and year, i.e.
 
-              .. code-block:: python
+              .. math::
 
-                βyearage1 * f1(age) * g1(year) + βyearage2 * f1(age) * g2(year) +
-                βyearage3 * f2(age) * g1(year) + βyearage4 * f2(age) * g2(year) +
-                βyearage5 * f3(age) * g1(year) + βyearage6 * f3(age) * g2(year) +
-                βyearage7 * f4(age) * g1(year) + βyearage8 * f4(age) * g2(year) +
-                βyearage9 * f5(age) * g1(year) + βyearage10 * f5(age) * g2(year)
+                \beta_{\text{yearage}1} * \text{year} * \text{age} +
+                \beta_{\text{yearage}2} * \text{year}^2 * \text{age} + \\
+                \beta_{\text{yearage}3} * \text{year} * \text{age}^2 +
+                \beta_{\text{yearage}4} * \text{year}^2 * \text{age}^2 + \\
+                \beta_{\text{yearage}5} * \text{year} * \text{age}^3 +
+                \beta_{\text{yearage}6} * \text{year}^2 * \text{age}^3 + \\
+                \beta_{\text{yearage}7} * \text{year} * \text{age}^4 +
+                \beta_{\text{yearage}8} * \text{year}^2 * \text{age}^4 + \\
+                \beta_{\text{yearage}9} * \text{year} * \text{age}^5 +
+                \beta_{\text{yearage}10} * \text{year}^2 * \text{age}^5
 
-              See ``poly_age_calculator`` and ``poly_year_calculator``.
             * ``βsexyearage (list[float])``: An array of 10 parameters to be multiplied by sex and
-              functions of age and year, i.e.
+              powers of age and year, i.e.
 
-              .. code-block:: python
+              .. math::
 
-                βyearagesex1 * f1(age) * g1(year) * sex + βyearagesex2 * f1(age) * g2(year) * sex +
-                βyearagesex3 * f2(age) * g1(year) * sex + βyearagesex4 * f2(age) * g2(year) * sex +
-                βyearagesex5 * f3(age) * g1(year) * sex + βyearagesex6 * f3(age) * g2(year) * sex +
-                βyearagesex7 * f4(age) * g1(year) * sex + βyearagesex8 * f4(age) * g2(year) * sex +
-                βyearagesex9 * f5(age) * g1(year) * sex + βyearagesex10 * f5(age) * g2(year) * sex
+                \beta_{\text{sexyearage}1} * \text{sex} * \text{year} * \text{age} +
+                \beta_{\text{sexyearage}2} * \text{sex} * \text{year}^2 * \text{age} + \\
+                \beta_{\text{sexyearage}3} * \text{sex} * \text{year} * \text{age}^2 +
+                \beta_{\text{sexyearage}4} * \text{sex} * \text{year}^2 * \text{age}^2 + \\
+                \beta_{\text{sexyearage}5} * \text{sex} * \text{year} * \text{age}^3 +
+                \beta_{\text{sexyearage}6} * \text{sex} * \text{year}^2 * \text{age}^3 + \\
+                \beta_{\text{sexyearage}7} * \text{sex} * \text{year} * \text{age}^4 +
+                \beta_{\text{sexyearage}8} * \text{sex} * \text{year}^2 * \text{age}^4 + \\
+                \beta_{\text{sexyearage}9} * \text{sex} * \text{year} * \text{age}^5 +
+                \beta_{\text{sexyearage}10} * \text{sex} * \text{year}^2 * \text{age}^5
 
-            * ``βfam_hist (list[float])``: An array of 2 parameters to be multiplied by functions of
-              age. See ``log_OR_family_history``.
-            * ``βabx_exp (list[float])``: An array of 3 parameters to be multiplied by functions of
-                age and antibiotic exposure. See ``log_OR_abx_exposure``.
+            * ``β_fam_hist (dict)``: A dictionary of 2 parameters to be multiplied by functions of
+              age. See ``calculate_odds_ratio_fam_history``.
+            * ``β_abx (dict)``: A dictionary of 3 parameters to be multiplied by functions of
+              age and antibiotic dose. See ``calculate_odds_ratio_abx``.
         """
         return self._parameters
     
@@ -387,30 +506,96 @@ class Prevalence(Occurrence):
     def parameters(self, parameters: dict):
         KEYS = [
             "β0", "βsex", "βage", "βyear", "βsexage", "βsexyear", "βyearage",
-            "βsexyearage", "βfam_hist", "βabx_exp"
+            "βsexyearage", "β_fam_hist", "β_abx"
         ]
         for key in KEYS:
             if key not in parameters.keys():
                 raise ValueError(f"Missing key {key} in parameters.")
         self._parameters = parameters
 
+    @property
+    def poly_parameters(self) -> Dict[str, list[float]]:
+        r"""A dictionary containing the following keys:
+        
+            * ``alpha_age (list[float])``: The alpha vector from the normalization of the training
+              data in the ``poly`` function. Length = degree of age polynomial = 5.
+            * ``norm2_age (list[float])``: The :math:`\text{norm}^2` vector from the normalization
+              of the training data in the ``poly`` function.
+              Length = degree of age polynomial + 1 = 6.
+            * ``alpha_year (list[float])``: The alpha vector from the normalization of the training
+              data in the ``poly`` function. Length = degree of year polynomial = 2.
+            * ``norm2_year (list[float])``: The :math:`\text{norm}^2` vector from the normalization
+              of the training data in the ``poly`` function.
+              Length = degree of year polynomial + 1 = 3.
+        """
+        return self._poly_parameters
+    
+    @poly_parameters.setter
+    def poly_parameters(self, poly_parameters: Dict[str, list[float]]):
+        KEYS = ["alpha_age", "norm2_age", "alpha_year", "norm2_year"]
+        for key in KEYS:
+            if key not in poly_parameters.keys():
+                raise ValueError(f"Missing key {key} in poly_parameters.")
+        self._poly_parameters = poly_parameters
+
     def load_occurrence_correction_table(self) -> DataFrameGroupBy:
-        grouped_df = super().load_occurrence_correction_table(occurrence_type="prev")
+        grouped_df = super().load_occurrence_correction_table(occurrence_type="prevalence")
         return grouped_df
 
-    def crude_occurrence(self, sex: bool, age: int, year: int) -> float:
-        poly_year = self.poly_year_calculator(year)
-        poly_age = self.poly_age_calculator(age)
+    def crude_occurrence(
+        self,
+        sex: Sex,
+        age: int,
+        year: int
+    ) -> float:
+        r"""Calculate the crude asthma prevalence.
+
+        .. math::
+
+            \eta^{(i)} = \sum_{k=0}^{5} \sum_{\ell=0}^2 \sum_{m=0}^1 \beta_{k \ell m} 
+                \cdot (a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m
+
+        where:
+
+        * :math:`\beta_{k\ell m}` is the coefficient for the feature
+          :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
+        * :math:`a^{(i)}` is the age
+        * :math:`t^{(i)}` is the year
+        * :math:`s^{(i)}` is the sex
+
+        There are :math:`6 * 3 * 2 = 36` coefficients in the prevalence model.
+        
+        Args:
+            sex: The sex of the agent.
+            age: The age of the agent.
+            year: The calendar year.
+
+        Returns:
+            A float representing the crude asthma prevalence for the given year, age, and sex.
+        """
+
+        poly_year = poly(
+            year,
+            degree=2,
+            alpha=self.poly_parameters["alpha_year"],
+            norm2=self.poly_parameters["norm2_year"]
+        ).flatten()
+        poly_age = poly(
+            age,
+            degree=5,
+            alpha=self.poly_parameters["alpha_age"],
+            norm2=self.poly_parameters["norm2_age"]
+        ).flatten()
         poly_yearage = np.outer(poly_year, poly_age).flatten()
         return np.exp(
             self.parameters["β0"] +
-            self.parameters["βsex"] * sex +
+            self.parameters["βsex"] * int(sex) +
             np.dot(self.parameters["βyear"], poly_year) +
             np.dot(self.parameters["βage"], poly_age) +
-            np.dot(self.parameters["βsexyear"], poly_year) * sex +
-            np.dot(self.parameters["βsexage"], poly_age) * sex +
+            np.dot(self.parameters["βsexyear"], poly_year) * int(sex) +
+            np.dot(self.parameters["βsexage"], poly_age) * int(sex) +
             np.dot(self.parameters["βyearage"], poly_yearage) +
-            np.dot(self.parameters["βsexyearage"], poly_yearage) * sex
+            np.dot(self.parameters["βsexyearage"], poly_yearage) * int(sex)
         )
 
 
@@ -433,16 +618,16 @@ def compute_asthma_age(
     min_year = incidence.min_year
     max_year = incidence.max_year
 
-    if current_age == 3:
-        return 3
+    if current_age == MIN_ASTHMA_AGE:
+        return MIN_ASTHMA_AGE
     else:
         find_asthma_age = True
-        asthma_age = 3
+        asthma_age = MIN_ASTHMA_AGE
         year = min(max(agent.year - current_age + asthma_age, min_year), max_year)
         while find_asthma_age and asthma_age < max_asthma_age:
             has_asthma = agent_has_asthma(
                 agent=agent,
-                occurrence_type="inc",
+                occurrence_type="incidence",
                 incidence=incidence,
                 prevalence=prevalence,
                 age=asthma_age,
@@ -469,43 +654,44 @@ def agent_has_asthma(
 
     Args:
         agent: A person in the model.
-        incidence: Asthma incidence.
-        prevalence: Asthma prevalence.
+        occurrence_type: One of ``"incidence"`` or ``"prevalence"``.
+        prevalence: Asthma prevalence object.
+        incidence: Asthma incidence object.
         age: The age of the agent.
         year: The calendar year.
     """
-    if occurrence_type == "inc" and incidence is None:
+    if occurrence_type == "incidence" and incidence is None:
         raise ValueError("Incidence must be provided for incidence calculations.")
 
     if age is None:
-        if occurrence_type == "inc":
+        if occurrence_type == "incidence":
             age = min(agent.age, incidence.max_age)
         else:
             age = min(agent.age - 1, prevalence.max_age)
     if year is None:
-        if occurrence_type == "inc":
+        if occurrence_type == "incidence":
             year = agent.year
         else:
             year = agent.year - 1
 
-    if age < 3:
+    if age < MIN_ASTHMA_AGE:
         has_asthma = False
-    elif age == 3:
+    elif age == MIN_ASTHMA_AGE:
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
-            sex=int(agent.sex), age=age, year=year, has_family_history=agent.has_family_history,
+            sex=agent.sex, age=age, year=year, has_family_history=agent.has_family_history,
             dose=agent.num_antibiotic_use
         ))) # type: ignore
-    elif age > 3 and occurrence_type == "inc":
+    elif age > MIN_ASTHMA_AGE and occurrence_type == "incidence":
         has_asthma = bool(
             np.random.binomial(
                 n=1,
                 p=incidence.equation(
-                    int(agent.sex), age, year, agent.has_family_history, agent.num_antibiotic_use
+                    agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
                 )
             ) # type: ignore
         ) 
-    elif age > 3 and occurrence_type == "prev":
+    elif age > MIN_ASTHMA_AGE and occurrence_type == "prevalence":
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
-            int(agent.sex), age, year, agent.has_family_history, agent.num_antibiotic_use
+            agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
         ))) # type: ignore
     return has_asthma
