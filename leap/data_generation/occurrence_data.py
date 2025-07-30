@@ -392,10 +392,10 @@ def generate_occurrence_data():
     incidence_model = generate_incidence_model(df_asthma)
     prevalence_model, alpha_age, norm2_age, alpha_year, norm2_year = generate_prevalence_model(df_asthma)
     df_incidence = get_predicted_data(
-        incidence_model, "incidence", max_age=110, max_year=2065
+        incidence_model, "incidence", max_age=110, min_year=1999, max_year=2066
     )
     df_prevalence = get_predicted_data(
-        prevalence_model, "prevalence", max_age=110, max_year=2065
+        prevalence_model, "prevalence", max_age=110, min_year=1999, max_year=2066
     )
     df = pd.merge(df_incidence, df_prevalence, on=["year", "sex", "age"], how="left")
     plot_occurrence(

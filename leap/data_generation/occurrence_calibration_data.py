@@ -62,7 +62,14 @@ PROB_FAM_HIST = 0.2927242
 DF_OCC_PRED = pd.read_csv(get_data_path("processed_data/asthma_occurrence_predictions.csv"))
 
 
-def get_asthma_occurrence_prediction(age: int, sex: str, year: int, occurrence_type: str) -> float:
+def get_asthma_occurrence_prediction(
+    age: int,
+    sex: str,
+    year: int,
+    occurrence_type: str,
+    max_asthma_age: int = MAX_ASTHMA_AGE,
+    stabilization_year: int = STABILIZATION_YEAR
+) -> float:
     """Predicts the asthma prevalence or incidence based on the given parameters.
 
     Args:
@@ -70,13 +77,15 @@ def get_asthma_occurrence_prediction(age: int, sex: str, year: int, occurrence_t
         sex: One of ``"M"`` or ``"F"``.
         year: Year of the prediction.
         occurrence_type: One of ``"prevalence"`` or ``"incidence"``.
+        max_asthma_age: The maximum age for asthma prediction (default is ``62``).
+        stabilization_year: The year when asthma stabilization occurs (default is ``2025``).
 
     Returns:
         A float representing the predicted asthma prevalence or incidence.
     """
 
-    age = min(age, MAX_ASTHMA_AGE)
-    year = min(year, STABILIZATION_YEAR)
+    age = min(age, max_asthma_age)
+    year = min(year, stabilization_year)
 
     return DF_OCC_PRED.loc[
         (DF_OCC_PRED["age"] == age) &
@@ -157,7 +166,9 @@ def load_reassessment_data(
         * ``year (int)``: The year of the reassessment.
         * ``age (int)``: The age of the individual in years, a value in ``[4, 110]``.
         * ``sex (str)``: One of ``"M"`` or ``"F"``.
-        * ``ra (float)``: The reassessment rate for asthma, a value in ``[0, 1]``.
+        * ``province (str)``: The two-letter code for the province, e.g. ``"CA"``.
+        * ``prob (float)``: The probability that someone diagnosed with asthma previously
+          will maintain their asthma diagnosis in the given year; a value in ``[0, 1]``.
     """
 
     df_reassessment = pd.read_csv(get_data_path("processed_data/asthma_reassessment.csv"))
@@ -923,7 +934,8 @@ def compute_mean_diff_log_OR(
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
-            * ``ra (float)``: the reassessment of asthma
+            * ``prob (float)``: the probability that someone diagnosed with asthma previously
+              will maintain their asthma diagnosis in the given year.
 
         min_year: The minimum year to consider for the calibration.
 
@@ -961,7 +973,9 @@ def compute_mean_diff_log_OR(
                 (df_reassessment["age"] == x["age"]) &
                 (df_reassessment["year"] == x["year"]) &
                 (df_reassessment["sex"] == x["sex"])
-            ]["ra"].iloc[0]
+            ]["prob"].iloc[0],
+            mis_dx=0, # target misdiagnosis
+            dx=1, # target diagnosis
         ),
         axis=1
     )
@@ -1005,7 +1019,8 @@ def beta_params_age_optimizer(
             * ``year (int)``: the year
             * ``age (int)``: the age in years
             * ``sex (str)``: ``M`` = male, ``F`` = female
-            * ``ra (float)``: the reassessment of asthma
+            * ``prob (float)``: the probability that someone diagnosed with asthma previously
+              will maintain their asthma diagnosis in the given year.
 
         baseline_year: The baseline year for the calibration.
         stabilization_year: The stabilization year for the calibration.

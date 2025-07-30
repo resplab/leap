@@ -29,14 +29,16 @@ class Reassessment:
         """Grouped dataframe (by year) giving the probability of an agent still having asthma after
         reassessment for a given age, province, and sex:
 
-        * ``year``: integer year.
-        * ``age``: integer age.
-        * ``M``: the probability that a male agent still has asthma.
-        * ``F``: the probability that a female agent still has asthma.
-        * ``province``: a string indicating the province abbreviation, e.g. "BC".
-          For all of Canada, set province to "CA".
+        * ``year (int)``: integer year.
+        * ``age (int)``: integer age.
+        * ``sex (str)``: one of ``"M"`` = male, ``"F"`` = female.
+        * ``prob (float)``: the probability that an agent previously diagnosed with asthma
+          maintains their asthma diagnosis after reassessment in the given year.
+          Value in ``[0, 1]``.
+        * ``province (str)``: a string indicating the province abbreviation, e.g. ``"BC"``.
+          For all of Canada, set province to ``"CA"``.
 
-        See ``master_asthma_reassessment.csv``.
+        See ``processed_data/asthma_reassessment.csv``.
         """
         return self._table
     
@@ -56,18 +58,19 @@ class Reassessment:
 
         Returns:
             A grouped data frame grouped by year.
-            
             Each data frame contains the following columns:
 
-            * ``year (int)``: calendar year.
-            * ``age (int)``: age of person in years.
-            * ``F (float)``: the probability that a female agent still has asthma.
-            * ``M (float)``: the probability that a male agent still has asthma.
-            * ``province (str)``: a string indicating the province abbreviation, e.g. "BC".
-              For all of Canada, set province to "CA".
+            * ``year (int)``: integer year.
+            * ``age (int)``: integer age.
+            * ``sex (str)``: one of ``"M"`` = male, ``"F"`` = female.
+            * ``prob (float)``: the probability that an agent previously diagnosed with asthma
+              maintains their asthma diagnosis after reassessment in the given year.
+              Value in ``[0, 1]``.
+            * ``province (str)``: a string indicating the province abbreviation, e.g. ``"BC"``.
+              For all of Canada, set province to ``"CA"``.
         """
         df = pd.read_csv(
-            get_data_path("processed_data/master_asthma_reassessment.csv")
+            get_data_path("processed_data/asthma_reassessment.csv")
         )
         check_year(starting_year, df)
         check_province(province)
@@ -120,6 +123,9 @@ class Reassessment:
             return agent.has_asthma
         else:
             df = self.table.get_group((min(agent.year, max_year),))
-            df = df[df["age"] == agent.age]
-            probability = df[str(agent.sex)].values[0]
+            df = df.loc[
+                (df["age"] == agent.age) &
+                (df["sex"] == str(agent.sex))
+            ]
+            probability = df["prob"].values[0]
             return bool(np.random.binomial(1, probability))

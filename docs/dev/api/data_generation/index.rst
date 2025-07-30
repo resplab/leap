@@ -18,6 +18,7 @@ and update if new data needs to be added.
   leap.data_generation.occurrence_data
   leap.data_generation.occurrence_calibration_data
   leap.data_generation.prevalence_calibration
+  leap.data_generation.reassessment_data
   leap.data_generation.utils
 
 
