@@ -6,3 +6,4 @@ sphinx-rtd-theme==2.0.0
 myst-parser==3.0.0
 sphinx-immaterial
 nbsphinx
+ipython
