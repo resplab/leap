@@ -95,6 +95,7 @@
 
 /* nbsphinx */
 
+div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
     width: 0ex;
     padding-top: 0px;
