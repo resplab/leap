@@ -35,7 +35,7 @@ extensions = [
     # "sphinx_immaterial.apidoc.python.apigen"
 ]
 
-
+nbsphinx_execute = "always"
 # object_description_options = []
 # object_description_options.append(("py:.*", dict(wrap_signatures_with_css=True)))
 
