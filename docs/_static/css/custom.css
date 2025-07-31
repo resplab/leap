@@ -92,3 +92,10 @@
     padding: .9375em 1.25em;
     vertical-align: top;
 }
+
+/* nbsphinx */
+
+div.nboutput.container div.prompt {
+    width: 0ex;
+    padding-top: 0px;
+}
