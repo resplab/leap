@@ -8,3 +8,4 @@ sphinx-immaterial
 nbsphinx
 ipython
 ipykernel
+scikit-learn
