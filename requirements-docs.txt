@@ -7,3 +7,4 @@ myst-parser==3.0.0
 sphinx-immaterial
 nbsphinx
 ipython
+ipykernel
