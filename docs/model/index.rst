@@ -3,8 +3,8 @@ Model
 ==============
 
 .. toctree::
+  :maxdepth: 2
   :hidden:
-  :maxdepth: 1
 
   model-glm
   model-antibiotics
