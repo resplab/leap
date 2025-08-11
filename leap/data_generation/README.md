@@ -262,7 +262,7 @@ BC Ministry of Health. This data had the following columns:
 | `prevalence_numerator` | `float` | TODO |
 | `pop` | `int` | the number of people for a given age group, gender, and year |
 
-TODO: prevalence / incidence calculation
+<!-- TODO: prevalence / incidence calculation -->
 
 This data was then processed and saved as `leap/original_data/private/asthma_inc_prev.csv`.
 
@@ -519,7 +519,7 @@ This is a private dataset, saved as ``df_EBA.csv``. To access the dataset, pleas
       <code class="notranslate">int</code>
       </td>
       <td>
-      1 = yes, 2 = no
+      1 = yes, 2 = no, 3 = unknown
       </td>
     </tr>
     <tr>
@@ -528,7 +528,7 @@ This is a private dataset, saved as ``df_EBA.csv``. To access the dataset, pleas
       <code class="notranslate">int</code>
       </td>
       <td>
-      1 = yes, 2 = no
+      1 = yes, 2 = no, 3 = unknown
       </td>
     </tr>
     <tr>
@@ -537,7 +537,8 @@ This is a private dataset, saved as ``df_EBA.csv``. To access the dataset, pleas
       <code class="notranslate">int</code>
       </td>
       <td>
-      1 = yes, 2 = no
+      Has the patient had to use an inhaler since the last visit? <br>
+      1 = yes, 2 = no, 3 = unknown
       </td>
     </tr>
     <tr>
@@ -546,7 +547,7 @@ This is a private dataset, saved as ``df_EBA.csv``. To access the dataset, pleas
       <code class="notranslate">int</code>
       </td>
       <td>
-      1 = yes, 2 = no
+      1 = yes, 2 = no, 3 = unknown
       </td>
     </tr>
     <tr>
@@ -555,7 +556,8 @@ This is a private dataset, saved as ``df_EBA.csv``. To access the dataset, pleas
       <code class="notranslate">int</code>
       </td>
       <td>
-      TODO
+      Has the patient had an asthma exacerbation since the last visit? <br>
+      1 = yes, 2 = no, 3 = unknown
       </td>
     </tr>
     <tr>
@@ -599,9 +601,12 @@ This is a private dataset, saved as ``df_EBA.csv``. To access the dataset, pleas
       <td>
       <code class="notranslate">int</code>
       </td>
-      <td>
-      1 = TODO, 2 = TODO, 3 = TODO
-      </td>
+        <td>
+        The time since diagnosis is broken into 3 categories: <br>
+        1 = 0 - 4.93 years <br>
+        2 = 5.00 - 19.95 years <br>
+        3 = 20.06 - 74.20 years
+        </td>
     </tr>
   </tbody>
 </table>
