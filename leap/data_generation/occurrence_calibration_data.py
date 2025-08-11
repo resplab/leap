@@ -609,7 +609,7 @@ def calibrate_asthma_prevalence(
       the BC Ministry of Health data.
 
     We have :math:`\eta` from the occurrence model, so we only need to find :math:`\zeta`. We can
-    write :math:`\zeta` in terms of :math:`zeta_{\lambda}`, the predicted asthma prevalence at
+    write :math:`\zeta` in terms of :math:`\zeta_{\lambda}`, the predicted asthma prevalence at
     risk factor level :math:`\lambda`:
 
     .. math::
@@ -1193,4 +1193,7 @@ if __name__ == "__main__":
         """
     )
     args = parser.parse_args()
+    logger.message(
+        f"Calibrating the asthma occurrence model. Retrain beta parameters? {args.retrain_beta}"
+    )
     generate_occurrence_calibration_data(retrain_beta=args.retrain_beta)

@@ -244,7 +244,7 @@ def conv_2x2(
                 </thead>
                 <tbody>
                 <tr>
-                    <tr>antibiotics</tr>
+                    <td>antibiotics</td>
                     <td><code class="notranslate">ai</code></td>
                     <td><code class="notranslate">bi</code></td>
                     <td><code class="notranslate">n1i = 52</code></td>

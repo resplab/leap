@@ -97,9 +97,7 @@ def compute_odds_ratio(
     contingency_table_past: ContingencyTable,
     asthma_incidence_0: float,
     asthma_incidence_λ: float,
-    ra_target: float = 1.0,
-    mis_dx: float = 0,
-    dx: float = 1
+    ra_target: float = 1.0
 ) -> float:
     """Compute the odds ratio for risk factor combination ``λ``.
 
@@ -134,22 +132,18 @@ def compute_odds_ratio(
     d1_ra = c0 * (1 - ra_target) # proportion of population who lose asthma diagnosis with no risk factors
 
     # contingency table current year t1, asthma diagnosis
-    # a1_dx: risk factors λ & asthma: got asthma and correctly dx
-    # t0 = no asthma diagnosis, t1 = no asthma diagnosis * mis_dx = has asthma +
-    # t0 = no asthma diagnosis, t1 = asthma diagnosis * correct dx = has asthma
-    a1_dx = b0 * ((1 - asthma_incidence_λ) * mis_dx + asthma_incidence_λ * dx)
-    # b1_dx: risk factors λ & no asthma: did not get asthma and correctly dx + got asthma but incorrectly dx
-    # t0 = no asthma diagnosis, t1 = no asthma diagnosis * correct dx = no asthma +
-    # t0 = no asthma diagnosis, t1 = asthma diagnosis * mis_dx = no asthma
-    b1_dx = b0 * ((1 - asthma_incidence_λ) * (1 - mis_dx) + asthma_incidence_λ * (1 - dx))
-    # c1_dx: no risk factors & asthma: get asthma and correctly dx + did not get asthma but mis_dx
-    # t0 = no asthma diagnosis, t1 = no asthma diagnosis * misdiagnosis = has asthma + 
-    # t0 = no asthma diagnosis, t1 = asthma diagnosis * correct dx = has asthma
-    c1_dx = d0 * ((1 - asthma_incidence_0) *  mis_dx + asthma_incidence_0 * dx)
-    # d1_dx: no risk factors & no asthma: 
-    # t0 = no asthma diagnosis, t1 = no asthma diagnosis * correct dx = no asthma + 
-    # t0 = no asthma diagnosis, t1 = asthma diagnosis * mis_dx = no asthma
-    d1_dx = d0 * ((1 - asthma_incidence_0) * (1 - mis_dx) + asthma_incidence_0 * (1 - dx))
+    # a1_dx: risk factors λ & asthma: got asthma new asthma diagnosis
+    # t0 = no asthma diagnosis, t1 = asthma diagnosis => has asthma
+    a1_dx = b0 * asthma_incidence_λ
+    # b1_dx: risk factors λ & no asthma: did not get asthma diagnosis
+    # t0 = no asthma diagnosis, t1 = no asthma diagnosis => no asthma
+    b1_dx = b0 * (1 - asthma_incidence_λ)
+    # c1_dx: no risk factors & asthma: got asthma new asthma diagnosis
+    # t0 = no asthma diagnosis, t1 = asthma diagnosis => has asthma
+    c1_dx = d0 * asthma_incidence_0
+    # d1_dx: no risk factors & no asthma: did not get asthma diagnosis
+    # t0 = no asthma diagnosis, t1 = no asthma diagnosis => no asthma
+    d1_dx = d0 * (1 - asthma_incidence_0)
 
     # contingency table current year t1, asthma reassessment + diagnosis
     # objective: asthma prev OR
@@ -177,9 +171,7 @@ def compute_odds_ratio_difference(
     asthma_prev_calibrated_past: list[float] | np.ndarray,
     asthma_inc_calibrated: list[float] | np.ndarray,
     odds_ratio_target: list[float] | np.ndarray,
-    ra_target: float = 1.0,
-    mis_dx: float = 0,
-    dx: float = 1
+    ra_target: float = 1.0
 ) -> float:
     """Compute difference in odds ratios between the target and the calibrated asthma incidence.
 
@@ -214,9 +206,7 @@ def compute_odds_ratio_difference(
             contingency_table_past=contingency_tables_past[λ],
             asthma_incidence_0=asthma_inc_calibrated[0],
             asthma_incidence_λ=asthma_inc_calibrated[λ],
-            ra_target=ra_target,
-            mis_dx=mis_dx,
-            dx=dx
+            ra_target=ra_target
         )
         for λ in range(1, len(odds_ratio_target))
     ]

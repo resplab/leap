@@ -681,3 +681,5 @@ To run the data generation for the utility data:
 cd LEAP
 python3 leap/data_generation/utility_data.py
 ```
+=======
+| `prob` | `float` | the probability that someone diagnosed with asthma previously will maintain their asthma diagnosis when reassessed in the given year |

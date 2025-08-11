@@ -131,7 +131,7 @@ the distribution is written as:
 
 .. math::
 
-    P(Y = y; r, k) := \binom{k+r-1}{k}(1-p)^k p^r
+    P(Y = k; r, p) := \binom{k+r-1}{k}(1-p)^k p^r
 
 where:
 
@@ -146,6 +146,9 @@ We can reparametrize this with :math:`\mu` and :math:`\theta` using the followin
     p &= \dfrac{\mu}{\sigma^2} \\
     r &= \dfrac{\mu^2}{\sigma^2 - \mu} \\
     \sigma^2 &= \mu + \dfrac{\mu^2}{\theta}
+
+where :math:`\mu` is the mean, :math:`\sigma^2` is the variance, and :math:`\theta` is the
+overdispersion parameter. 
 
 Doing some algebra, we have:
 

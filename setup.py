@@ -4,7 +4,7 @@ setup(
     name="leap",
     version="1.0",
     description="Lifetime Exposures and Asthma outcomes Projection (LEAP)",
-    author="Tae Yoon (Harry) Lee, Ainsleigh Hill",
+    author="Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert",
     author_email="ainsleighhill@gmail.com",
     packages=find_namespace_packages(include=["leap.*"]) + ["leap"],
     install_requires=[
