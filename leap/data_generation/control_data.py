@@ -17,14 +17,18 @@ def compute_control_score(
     """Compute the control score based on the control data.
 
     Args:
-        daytime_symptoms: Whether the person has daytime symptoms, 1 = True, 0 = False.
-        nocturnal_symptoms: Whether the person has nocturnal symptoms, 1 = True, 0 = False.
-        inhaler_use: Whether the person uses an inhaler for asthma, 1 = True, 0 = False.
-        limited_activities: Whether the person's activites are limited due to asthma,
-            1 = True, 0 = False.
+        daytime_symptoms: Whether the person has daytime symptoms:
+            ``1 = True``, ``0 = False``.
+        nocturnal_symptoms: Whether the person has nocturnal symptoms:
+            ``1 = True``, ``0 = False``.
+        inhaler_use: Whether the person uses an inhaler for asthma:
+            ``1 = True``, ``0 = False``.
+        limited_activities: Whether the person's activites are limited due to asthma:
+            ``1 = True``, ``0 = False``.
 
     Returns:
-        The control score, ranging from 0 to 4, with 0 being the best control and 4 being the worst.
+        The control score, ranging from ``0`` to ``4``, with ``0`` being the best control and ``4``
+        being the worst.
 
     """
     control_score = (
@@ -47,11 +51,11 @@ def compute_control_level(control_score: int) -> int:
             4 being the worst.
 
     Returns:
-        The control level, ranging from 1 to 3.
+        The control level, ranging from ``1`` to ``3``.
 
-        * 1 = fully-controlled
-        * 2 = partially-controlled
-        * 3 = uncontrolled
+        * ``1`` = fully-controlled
+        * ``2`` = partially-controlled
+        * ``3`` = uncontrolled
 
     """
 
@@ -89,19 +93,23 @@ def load_control_data() -> pd.DataFrame:
           ``1 = True``, ``0 = False``.
         * ``age_at_asthma_dx (float)``: The age at which the person was diagnosed with asthma.
         * ``time_since_dx (float)``: The time since asthma diagnosis in years.
-        * ``time_since_dx_cat``: TODO.
-        * ``control_score (int)``: The control score, ranging from 0 to 4, with 0 being the best
-          control and 4 being the worst.
+        * ``time_since_dx_cat``: The time since asthma diagnosis is broken into 3 categories:
+        
+          * ``1`` = 0 - 4.93 years
+          * ``2`` = 5.00 - 19.95 years
+          * ``3`` = 20.06 - 74.20 years
+
+        * ``control_score (int)``: The control score, ranging from ``0`` to ``4``, with ``0`` being
+            the best control and ``4`` being the worst.
         * ``control_score_missing (int)``: Whether any of the control scores are missing,
           ``1 = True``, ``0 = False``.
-        * ``control_level (int)``: The control level, ranging from 1 to 3, where:
+        * ``control_level (int)``: The control level, ranging from ``1`` to ``3``, where:
 
-          * 1 = fully-controlled
-          * 2 = partially-controlled
-          * 3 = uncontrolled
+          * ``1`` = fully-controlled
+          * ``2`` = partially-controlled
+          * ``3`` = uncontrolled
 
-        * ``exacerbations (int)``: TODO.
-        * ``exac (int)``: Whether the person has had an exacerbation, ``1 = True``, ``0 = False``.
+        * ``exacerbations (int)``: Whether the person has had an exacerbation, ``1 = True``, ``0 = False``.
 
 
     """
@@ -152,7 +160,7 @@ def load_control_data() -> pd.DataFrame:
 
     # Compute the control level
     df["control_level"] = df["control_score"].apply(compute_control_level)
-    df["exac"] = df.apply(
+    df["exacerbations"] = df.apply(
         lambda x: int(x["exacerbations"] == 1),
         axis=1
     )
@@ -188,19 +196,23 @@ def fit_ordinal_regression_model(df: pd.DataFrame) -> Tuple[dict, dict, dict]:
               ``1 = True``, ``0 = False``.
             * ``age_at_asthma_dx (float)``: The age at which the person was diagnosed with asthma.
             * ``time_since_dx (float)``: The time since asthma diagnosis in years.
-            * ``time_since_dx_cat``: TODO.
-            * ``control_score (int)``: The control score, ranging from 0 to 4, with 0 being the best
-              control and 4 being the worst.
+            * ``time_since_dx_cat``: The time since asthma diagnosis is broken into 3 categories:
+
+              * ``1`` = 0 - 4.93 years
+              * ``2`` = 5.00 - 19.95 years
+              * ``3`` = 20.06 - 74.20 years
+
+            * ``control_score (int)``: The control score, ranging from ``0`` to ``4``, with ``0``
+                being the best control and 4 being the worst.
             * ``control_score_missing (int)``: Whether any of the control scores are missing,
               ``1 = True``, ``0 = False``.
-            * ``control_level (int)``: The control level, ranging from 1 to 3, where:
+            * ``control_level (int)``: The control level, ranging from ``1`` to ``3``, where:
 
-              * 1 = fully-controlled
-              * 2 = partially-controlled
-              * 3 = uncontrolled
+              * ``1`` = fully-controlled
+              * ``2`` = partially-controlled
+              * ``3`` = uncontrolled
 
-            * ``exacerbations (int)``: TODO.
-            * ``exac (int)``: Whether the person has had an exacerbation,
+            * ``exacerbations (int)``: Whether the person has had an exacerbation,
               ``1 = True``, ``0 = False``.
 
     Returns:
