@@ -26,6 +26,9 @@ jobs:
       - name: Install LEAP requirements
         run: |
           pip install -r requirements.txt
+      - name: Install LEAP package in editable mode
+        run: |
+          pip install .
       - name: Sphinx build
         run: |
           sphinx-build docs _build -E -a
