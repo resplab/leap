@@ -343,6 +343,8 @@ Then we defined the asthma control level as follows:
     </tbody>
   </table>
 
+.. _control-model:
+
 Model
 =====
 
