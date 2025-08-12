@@ -163,8 +163,8 @@ class AntibioticExposure:
             year: The calendar year, e.g. 2024.
 
         Returns:
-            A probability.
-            TODO: This isn't exactly the probability of antibiotic exposure.
+            The ``p`` parameter for the Negative Binomial distribution, used to calculate
+            the number of courses of antibiotics used during the first year of life.
 
         Examples:
 
