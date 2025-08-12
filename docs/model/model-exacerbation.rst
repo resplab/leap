@@ -12,8 +12,6 @@ We use the Statistics Canada population data that was generated and saved as:
 `processed_data/birth/initial_pop_distribution_prop.csv 
 <https://github.com/resplab/leap/blob/main/leap/processed_data/birth/initial_pop_distribution_prop.csv>`_.
 
-year  age province    n_age  n_birth      prop  prop_male projection_scenario
-
 
 .. list-table::
    :widths: 25 25 50
