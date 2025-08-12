@@ -125,12 +125,14 @@ population change to get the net number of people who migrated:
 delta_n = n - n_prev * (1 - prob_death)
 ```
 
+<!--
 **TODO**: The next part of the calculation is incorrect. `delta_N` is the change in population due
 to migration. This model currently assumes that if `delta_N < 0`, 100% of migration is
 emigration, and if `delta_N > 0`, 100% of migration is immigration. This has
 led to the data being very inaccurate (for example, it appears as though people in their
 90s are emigrating a lot and people in their 20s are not). This will be remedied in a
 separate PR.
+-->
 
 
 To run the data generation for the migration data:
