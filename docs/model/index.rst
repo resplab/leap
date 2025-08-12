@@ -10,4 +10,5 @@ Model
   model-antibiotics
   model-occurrence
   model-control
+  model-exacerbation
   model-utility
