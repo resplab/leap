@@ -106,12 +106,17 @@ class Exacerbation:
 
     @property
     def calibration_table(self) -> DataFrameGroupBy:
-        """A dataframe grouped by year and sex, with the following columns:
+        r"""A dataframe grouped by year and sex, with the following columns:
 
-        * ``year``: integer year.
-        * ``sex``: 1 = male, 0 = female.
-        * ``age``: integer age.
-        * ``calibrator_multiplier``: float, TODO.
+        * ``year (int)``: calendar year.
+        * ``sex (str)``: ``F`` = female, ``M`` = male.
+        * ``age (int)``: integer age.
+        * ``calibrator_multiplier (float)``: A multiplier used to calibrate the exacerbation rate;
+          used to compute the :math:`\lambda` parameter for the Poisson distribution:
+        
+        .. math::
+
+            \lambda = \alpha \cdot e^{\beta_0} e^{\beta_{a} a} e^{\beta_{s} s} \prod_{i=1}^3 e^{\beta_i c_i} 
 
         See ``exacerbation_calibration.csv``.
         """
@@ -129,7 +134,7 @@ class Exacerbation:
         )
 
     def load_exacerbation_calibration(self, province: str) -> DataFrameGroupBy:
-        """Load the exacerbation calibration table.
+        r"""Load the exacerbation calibration table.
 
         Args:
             province: A string indicating the province abbreviation, e.g. ``"BC"``.
@@ -140,10 +145,15 @@ class Exacerbation:
 
             Each entry is a dataframe with the following columns:
 
-            * ``year``: integer year.
-            * ``sex``: 1 = male, 0 = female.
-            * ``age``: integer age.
-            * ``calibrator_multiplier``: float, TODO.
+            * ``year (int)``: calendar year.
+            * ``sex (str)``: ``F`` = female, ``M`` = male.
+            * ``age (int)``: integer age.
+            * ``calibrator_multiplier (float)``: A multiplier used to calibrate the exacerbation rate;
+              used to compute the :math:`\lambda` parameter for the Poisson distribution:
+        
+            .. math::
+
+                \lambda = \alpha \cdot e^{\beta_0} e^{\beta_{a} a} e^{\beta_{s} s} \prod_{i=1}^3 e^{\beta_i c_i} 
         """
 
         df = pd.read_csv(
@@ -176,7 +186,7 @@ class Exacerbation:
             initial: If this is the initial computation.
 
         Returns:
-            The number of asthma exacerbations.
+            The number of asthma exacerbations in the given year.
         """
 
         if agent is not None:
