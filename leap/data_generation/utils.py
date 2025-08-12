@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from leap.logger import get_logger
+from typing import Tuple
 
 logger = get_logger(__name__)
 
@@ -46,6 +47,35 @@ def get_sex_id(sex: str) -> str:
     """
     return sex[0:1]
 
+def parse_age_group(x: str, max_age: int) -> Tuple[int, int]:
+    """Parse an age group string into a tuple of integers.
+    
+    Args:
+        x: The age group string. Must be in the format "X-Y", "X+", "X-Y years", "<1 year".
+
+    Returns:
+        A tuple of integers representing the lower and upper age of the age group.
+
+    Examples:
+    
+        >>> parse_age_group("0-4", max_age=65)
+        (0, 4)
+        >>> parse_age_group("5-9 years", max_age=65)
+        (5, 9)
+        >>> parse_age_group("10+", max_age=65)
+        (10, 65)
+        >>> parse_age_group("<1 year", max_age=65)
+        (0, 1)
+    """
+    if x == "<1 year":
+        return 0, 1
+    elif "-" in x:
+        return int(x.split(" ")[0].split("-")[0]), int(x.split(" ")[0].split("-")[1])
+    elif "+" in x:
+        return int(x.split("+")[0]), max_age
+    else:
+        raise ValueError(f"Invalid age group: {x}")
+    
 
 def format_age_group(age_group: str, upper_age_group: str = "100 years and over") -> int:
     """Convert age group to integer.
