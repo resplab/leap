@@ -260,8 +260,8 @@ BC Ministry of Health. This data had the following columns:
 | `fiscal_year` | `str` | format "XXXX[A-z0-9]" |
 | `age_group_desc` | `str` | format "X-Y years" or "<1 year" |
 | `gender` | `str` | "M" or "F" |
-| `incidence_numerator` | `float` | TODO |
-| `prevalence_numerator` | `float` | TODO |
+| `incidence_numerator` | `float` | <!--TODO--> |
+| `prevalence_numerator` | `float` | <!--TODO--> |
 | `pop` | `int` | the number of people for a given age group, gender, and year |
 
 <!-- TODO: prevalence / incidence calculation -->
