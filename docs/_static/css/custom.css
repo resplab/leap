@@ -10,6 +10,7 @@
     --bs-link-color: #02377e;
     --bs-link-hover-color: #0c2046;
     --md-code-kw-color: #e74c3c;
+    --mystnb-source-margin-color: #02377e;
 }
 
 [data-md-color-primary=blue] {
@@ -91,6 +92,13 @@
     min-width: 1rem;
     padding: .9375em 1.25em;
     vertical-align: top;
+}
+
+/* myst_nb code cells */
+
+.cell_output {
+    padding-left: 0em;
+    overflow-x: scroll;
 }
 
 /* nbsphinx */
