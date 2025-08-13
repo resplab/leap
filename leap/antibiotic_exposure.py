@@ -66,9 +66,10 @@ class AntibioticExposure:
 
         Each entry is a dataframe with a single row with the following columns:
 
-        * ``year``: integer
+        * ``year (int)``: The calendar year, e.g. ``2024``.
         * ``sex``: 0 = female, 1 = male
-        * ``rate``: float, TODO.
+        * ``rate (float)``: The average number of courses of antibiotics prescribed during
+          infancy, per person.
         """
         return self._mid_trends
     
@@ -84,9 +85,10 @@ class AntibioticExposure:
 
             Each entry is a DataFrame with a single row with the following columns:
 
-            * ``year``: integer
+            * ``year (int)``: The calendar year, e.g. ``2024``.
             * ``sex``: 0 = female, 1 = male
-            * ``rate``: float, TODO.
+            * ``rate (float)``: The average number of courses of antibiotics prescribed during
+              infancy, per person.
         """
         df = pd.read_csv(get_data_path("processed_data/midtrends.csv"))
         grouped_df = df.groupby(["year", "sex"])
