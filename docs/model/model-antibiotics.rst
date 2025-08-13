@@ -267,3 +267,10 @@ where:
      - Heaviside step function constant
    * - :math:`\beta_{th}`
      - year and Heaviside step function constant
+
+
+Example
+*********
+
+.. include:: model-antibiotics.ipynb
+    :parser: myst_nb.docutils_
