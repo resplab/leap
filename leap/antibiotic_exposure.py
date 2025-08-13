@@ -185,7 +185,7 @@ class AntibioticExposure:
             >>> antibiotic_exposure.compute_probability(sex=1, year=2000)
             1.0
         """
-        μ = np.exp(
+        η = (
             self.parameters["β0"] +
             self.parameters["βsex"] * int(sex) +
             self.parameters["βyear"] * year +
@@ -193,5 +193,5 @@ class AntibioticExposure:
             self.parameters["β2005_year"] * (year > 2005) * year
         )
 
-        μ = max(μ, self.parameters["βfloor"] / 1000)
+        μ = max(np.exp(η), self.parameters["βfloor"] / 1000)
         return float(self.parameters["θ"] / (self.parameters["θ"] + μ))
