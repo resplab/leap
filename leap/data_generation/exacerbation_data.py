@@ -331,8 +331,8 @@ def exacerbation_calibrator(
           hospitalizations.
     """
 
-    df_prev_inc = pd.read_csv(get_data_path("processed_data/master_asthma_prev_inc.csv"))
-    df_prev = df_prev_inc[["year", "age", "sex", "prev"]]
+    df_prev_inc = pd.read_csv(get_data_path("processed_data/asthma_occurrence_predictions.csv"))
+    df_prev = df_prev_inc[["year", "age", "sex", "prevalence"]]
     df_prev["sex"] = df_prev.apply(
         lambda x: "F" if x["sex"]==0 else "M", axis=1
     )
@@ -367,7 +367,7 @@ def exacerbation_calibrator(
     # n: The number of people in a given year, age, and sex.
     df_target = pd.merge(df_target, df_prev, on=["year", "sex", "age"], how="left")
     df_target["n_asthma"] = df_target.apply(
-        lambda x: x["prev"] * x["n"], axis=1
+        lambda x: x["prevalence"] * x["n"], axis=1
     )
 
     # Calculate the mean number of exacerbations for a given age and sex
