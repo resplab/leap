@@ -32,9 +32,20 @@ extensions = [
     "sphinx_immaterial",
     "sphinxcontrib.bibtex",
     "nbsphinx",
+    "myst_nb",
     # "sphinx_immaterial.apidoc.python.apigen"
 ]
 
+myst_enable_extensions = [
+    "amsmath",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "html_image",
+]
+
+myst_dmath_double_inline = True
+myst_dmath_allow_space = True
 nbsphinx_execute = "always"
 # object_description_options = []
 # object_description_options.append(("py:.*", dict(wrap_signatures_with_css=True)))
