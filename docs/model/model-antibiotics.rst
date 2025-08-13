@@ -242,9 +242,28 @@ is ``2005``.
 
 where:
 
-* :math:`s^{(i)}` is the sex of the infant
-* :math:`t^{(i)}` is the year of birth of the infant
-* :math:`H(t^{(i)} - 2005)` is the ``Heaviside step function``, which is ``0`` for years before
-  ``2005`` and ``1`` for years after ``2005``
+.. list-table::
+   :widths: 25 50
+   :header-rows: 1
 
-
+   * - Variable
+     - Description
+   * - :math:`\eta^{(i)}`
+     - the predicted number of antibiotics per capita prescribed for an infant.
+   * - :math:`\beta_0`
+     - an intercept constant
+   * - :math:`s^{(i)}`
+     - sex
+   * - :math:`\beta_{s}`
+     - sex constant
+   * - :math:`t^{(i)}`
+     - year of birth of the infant
+   * - :math:`\beta_t`
+     - year constant
+   * - :math:`H(t^{(i)} - 2005)`
+     - Heaviside step function, which is ``0`` for years before ``2005`` and ``1`` for years
+       after ``2005``
+   * - :math:`\beta_h`
+     - Heaviside step function constant
+   * - :math:`\beta_{th}`
+     - year and Heaviside step function constant
