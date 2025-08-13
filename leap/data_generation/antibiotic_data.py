@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import json
 import itertools
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
@@ -283,6 +284,23 @@ def generate_antibiotic_data(
             get_data_path("processed_data/antibiotic_predictions.csv"),
             index=False
         )
+
+        # Update the config file with the beta coefficients and thresholds
+        config_path = get_data_path("processed_data/config.json")
+        with open(config_path) as f:
+            config = json.load(f)
+
+        config["antibiotic_exposure"]["parameters"]["β0"] = model_abx.params["Intercept"]
+        config["antibiotic_exposure"]["parameters"]["βyear"] = model_abx.params["year"]
+        config["antibiotic_exposure"]["parameters"]["βsex"] = model_abx.params["sex"]
+        config["antibiotic_exposure"]["parameters"]["β2005"] = model_abx.params["heaviside(year, 2005)"]
+        config["antibiotic_exposure"]["parameters"]["β2005_year"] = model_abx.params["heaviside(year, 2005):year"]
+        config["antibiotic_exposure"]["parameters"]["θ"] = 1 / alpha
+
+        with open(config_path, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=4, ensure_ascii=False)
+
+        logger.message("Antibiotic exposure coefficients generated and saved to config.json")
     else:
         return model_abx
 
