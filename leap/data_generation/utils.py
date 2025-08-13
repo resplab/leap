@@ -119,7 +119,7 @@ def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float)
         1 if ``x >= threshold``, else 0. If ``x`` is a vector, this is computed for each entry.
     """
 
-    if isinstance(x, float) or isinstance(x, int):
+    if isinstance(x, float) or isinstance(x, (int, np.integer)):
         return 1 if x >= threshold else 0
     else:
         return [1 if i >= threshold else 0 for i in x]
