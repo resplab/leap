@@ -7,6 +7,7 @@ Model
   :hidden:
 
   model-glm
+  model-birth
   model-antibiotics
   model-occurrence
   model-control
