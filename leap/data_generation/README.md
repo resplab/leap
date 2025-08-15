@@ -61,8 +61,16 @@ and is saved as:
 2. 2021 - 2068
 
 `StatCan` doesn't provide annual projections for death probabilities, but does provide a projection
-for specific years (which we call calibration years) for the ``M3`` projection scenario only.
-For Canada, this is 2068, and for BC, 2043.
+for specific years (which we call calibration years). We use the ``M3`` projection scenario only.
+
+We obtained this data from
+the [Statistics Canada Population Projections Technical Report](https://www150.statcan.gc.ca/n1/pub/91-620-x/91-620-x2025001-eng.htm),
+and saved it as three tables:
+
+- `LEAP/leap/original_data/mortality_projections_table_3-1.csv`: mortality projection scenarios
+- `LEAP/leap/original_data/mortality_projections_table_3-2.csv`: national projections
+- `LEAP/leap/original_data/mortality_projections_table_5-2.csv`: provincial projections
+
 The following equation can be used to obtain the probability of death in future years:
 
 ```math
