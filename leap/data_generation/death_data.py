@@ -189,6 +189,7 @@ def get_projected_life_table_single_year(
 def beta_year_optimizer(
     beta_year: float,
     life_table: pd.DataFrame,
+    df_calibration: pd.DataFrame,
     sex: str,
     province: str, 
     year_initial: int,
@@ -222,17 +223,20 @@ def beta_year_optimizer(
         The difference between the projected life expectancy of the calibration year
         and the desired life expectancy.
     """
-
+    desired_life_expectancies = df_calibration.loc[
+        (df_calibration["sex"] == sex) &
+        (df_calibration["province"] == province) &
+        (df_calibration["projection_scenario"] == "M3")
+    ]
+    year = desired_life_expectancies["year"].values[-1]
     projected_life_table = get_projected_life_table_single_year(
         beta_year, life_table, year_initial, year, sex, province
     )
     logger.info(projected_life_table)
 
     life_expectancy = calculate_life_expectancy(projected_life_table)
-    desired_life_expectancy = DESIRED_LIFE_EXPECTANCIES.loc[
-        (DESIRED_LIFE_EXPECTANCIES["sex"] == sex) &
-        (DESIRED_LIFE_EXPECTANCIES["province"] == province),
-        "life_expectancy"
+    desired_life_expectancy = desired_life_expectancies.loc[
+        desired_life_expectancies["year"] == year, "life_expectancy"
     ].values[0]
 
     return life_expectancy - desired_life_expectancy
@@ -426,7 +430,6 @@ def get_projected_death_data(
         "se": []
     })
     for province in past_life_table["province"].unique():
-        calibration_year = CALIBRATION_YEARS[province]
         life_table = past_life_table[past_life_table["province"] == province]
         starting_year = life_table["year"].max() + 1
         life_table = life_table[life_table["year"] == starting_year - 1]
@@ -437,10 +440,10 @@ def get_projected_death_data(
             b=b,
             args=(
                 life_table,
+                df_calibration,
                 "F",
                 province,
-                starting_year - 1,
-                calibration_year
+                starting_year - 1
             ),
             xtol=xtol
         )
@@ -451,10 +454,10 @@ def get_projected_death_data(
             b=b,
             args=(
                 life_table,
+                df_calibration,
                 "M",
                 province,
-                starting_year - 1,
-                calibration_year
+                starting_year - 1
             ),
             xtol=xtol
         )
