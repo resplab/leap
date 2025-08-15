@@ -1,0 +1,11 @@
+projection_scenario,Fertility,mortality_scenario,Immigration,Emigration
+LG,Low,HM,Low,High
+M1,Medium,MM,Medium,Medium
+M2,Medium,MM,Medium,Medium
+M3,Medium,MM,Medium,Medium
+M4,Medium,MM,Medium,Medium
+M5,Medium,MM,Medium,Medium
+M6,Medium,MM,Medium,Medium
+HG,High,LM,High,Low
+SA,High,HM,High,Medium
+FA,Low,LM,Low,Medium

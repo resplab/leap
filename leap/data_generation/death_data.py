@@ -12,29 +12,6 @@ logger = get_logger(__name__, 20)
 STARTING_YEAR = 1996
 FINAL_YEAR = 2068
 
-# The projected life expectencies as given by StatCan for the M3 projection scenario
-DESIRED_LIFE_EXPECTANCIES = pd.DataFrame({
-    "province": ["CA", "CA", "BC", "BC"],
-    "sex": ["M", "F", "M", "F"],
-    "life_expectancy": [87.0, 90.1, 84.6, 88.0]
-})
-
-CALIBRATION_YEARS = {
-    "CA": 2068,
-    "BC": 2043,
-    "AB": None,
-    "SK": None,
-    "MB": None,
-    "ON": None,
-    "QC": None,
-    "NL": None,
-    "NS": None,
-    "NB": None,
-    "PE": None,
-    "YT": None,
-    "NT": None,
-    "NU": None
-}
 
 
 def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
@@ -187,20 +164,22 @@ def get_projected_life_table_single_year(
 
 
 def beta_year_optimizer(
-    beta_year: float,
+    beta_year: np.ndarray,
     life_table: pd.DataFrame,
+    df_calibration: pd.DataFrame,
     sex: str,
     province: str, 
     year_initial: int,
-    year: int,
-) -> float:
+    projection_scenario: str
+) -> np.ndarray:
     """Calculate the difference between the projected life expectancy and desired life expectancy.
 
     This function is passed to the ``scipy.optimize.brentq`` function. We want to find ``beta_year``
     such that the projected life expectancy is as close as possible to the desired life expectancy.
     
     Args:
-        beta_year: The beta parameter for the given year.
+        beta_year: The beta parameter for the given year. The ``scipy.optimize.leastsq`` function
+            requires that this be a 1D array, but we only have a single parameter.
         life_table: A dataframe containing the projected probability of death
             for the calibration year, for a given sex and province. Columns:
 
@@ -211,31 +190,53 @@ def beta_year_optimizer(
               For all of Canada, set province to ``"CA"``.
             * ``prob_death``: the probability of death for a given age, province, sex, and year.
 
+        df_calibration: A dataframe containing the life expectancy projections for the calibration
+            years. Columns:
+
+            * ``year``: The calendar year. Range ``[1988, 2073]``.
+            * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+              For all of Canada, set province to ``"CA"``.
+            * ``sex``: One of ``F`` = female, ``M`` = male.
+            * ``projection_scenario``: The projection scenario, e.g. ``"M3"``.
+            * ``mortality_scenario``: The mortality scenario. One of:
+                - ``LM``: Low mortality
+                - ``MM``: Medium mortality
+                - ``HM``: High mortality
+            * ``life_expectancy``: The life expectancy in years for the given year, province,
+              sex, projection scenario, and mortality scenario.
+
         sex: one of ``M`` = male, ``F`` = female.
         province: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
             For all of Canada, set province to ``"CA"``.
         year_initial: The initial year with a known probability of death. This is the last year
             that the past data was collected.
-        year: The current year.
+        projection_scenario: The projection scenario, e.g. ``"M3"``.
     
     Returns:
         The difference between the projected life expectancy of the calibration year
-        and the desired life expectancy.
+        and the desired life expectancy, for each of the calibration years.
     """
+    beta_year = beta_year[0]
+    desired_life_expectancies = df_calibration.loc[
+        (df_calibration["sex"] == sex) &
+        (df_calibration["province"] == province) &
+        (df_calibration["projection_scenario"] == projection_scenario)
+    ]
 
-    projected_life_table = get_projected_life_table_single_year(
-        beta_year, life_table, year_initial, year, sex, province
-    )
-    logger.info(projected_life_table)
+    diff = []
+    for year in desired_life_expectancies["year"]:
+        projected_life_table = get_projected_life_table_single_year(
+            beta_year, life_table, year_initial, year, sex, province
+        )
+        logger.info(f"Calculating life expectancy for {year}, {sex}, {province}, beta_year={beta_year}")
 
-    life_expectancy = calculate_life_expectancy(projected_life_table)
-    desired_life_expectancy = DESIRED_LIFE_EXPECTANCIES.loc[
-        (DESIRED_LIFE_EXPECTANCIES["sex"] == sex) &
-        (DESIRED_LIFE_EXPECTANCIES["province"] == province),
-        "life_expectancy"
-    ].values[0]
-
-    return life_expectancy - desired_life_expectancy
+        life_expectancy = calculate_life_expectancy(projected_life_table)
+        desired_life_expectancy = desired_life_expectancies.loc[
+            desired_life_expectancies["year"] == year, "life_expectancy"
+        ].values[0]
+        diff.append(np.abs(life_expectancy - desired_life_expectancy))
+    
+    return np.array(diff)
 
 
 def load_past_death_data() -> pd.DataFrame:
@@ -306,11 +307,82 @@ def load_past_death_data() -> pd.DataFrame:
 
     return df
 
+def load_projected_death_data() -> pd.DataFrame:
+    """Load the projected death data from the ``StatCan`` CSV files.
 
-def load_projected_death_data(
+    ``Statistics Canada`` provides two tables with life expectancy projections:
+
+    - `Table 3.2 (Canada) <https://www150.statcan.gc.ca/n1/pub/91-620-x/91-620-x2025001-eng.html>`_
+    - `Table 5.2 (Provinces) <https://www150.statcan.gc.ca/n1/pub/91-620-x/91-620-x2025002-eng.html>`_
+
+    This data is only available for selected years.
+    
+    Returns:
+        A dataframe containing the life expectancy from selected calibration years from
+        ``Statistics Canada``:
+
+        * ``year (int)``: The calendar year. Range ``[1988, 2073]``.
+        * ``province (str)``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+          For all of Canada, set province to ``"CA"``.
+        * ``sex (str)``: One of ``F`` = female, ``M`` = male.
+        * ``projection_scenario (str)``: The projection scenario, e.g. ``"M3"``.
+        * ``mortality_scenario (str)``: The mortality scenario. One of:
+            - ``LM``: Low mortality
+            - ``MM``: Medium mortality
+            - ``HM``: High mortality
+        * ``life_expectancy (float)``: The life expectancy in years for the given year, province,
+          sex, projection scenario, and mortality scenario.
+    """
+
+    # Load the life expectancy projections for Canada from StatCan
+    df_can = pd.read_csv(get_data_path("original_data/mortality_projections_table_3-2.csv"))
+    df_can = df_can.melt(
+        id_vars=["year", "sex"],
+        value_vars=["LG", "M1", "M2", "M3", "M4", "M5", "M6", "HG", "SA", "FA"],
+        var_name="projection_scenario",
+        value_name="life_expectancy"
+    )
+    df_can["year"] = df_can["year"].apply(lambda x: int(x.split("/")[0]))
+    df_can["province"] = ["CA"] * df_can.shape[0]
+
+    # Load the life expectancy projections for the provinces / territories from StatCan
+    df_prov = pd.read_csv(get_data_path("original_data/mortality_projections_table_5-2.csv"))
+    df_prov = df_prov.melt(
+        id_vars=["province", "sex", "mortality_scenario"],
+        value_vars=[x for x in df_prov.columns if x.startswith("19") or x.startswith("20")],
+        var_name="year",
+        value_name="life_expectancy"
+    )
+    df_prov["year"] = df_prov["year"].apply(lambda x: int(x.split("/")[0]))
+
+    # Load the projection / mortality scenario mappings
+    df_scenarios = pd.read_csv(get_data_path("original_data/mortality_projections_table_3-1.csv"))
+    df_can = pd.merge(
+        df_can,
+        df_scenarios[["projection_scenario", "mortality_scenario"]],
+        on="projection_scenario",
+        how="left"
+    )
+    df_prov = pd.merge(
+        df_prov,
+        df_scenarios[["projection_scenario", "mortality_scenario"]],
+        on="mortality_scenario",
+        how="left"
+    )
+
+    # Combine the dataframes
+    df = pd.concat([df_can, df_prov], axis=0)
+
+    # Remove NA columns
+    df = df.dropna(subset=["life_expectancy"])
+    return df
+
+
+def get_projected_death_data(
     past_life_table: pd.DataFrame,
-    a: float = -0.03,
-    b: float = -0.01,
+    df_calibration: pd.DataFrame,
+    projection_scenario: str = "M3",
+    x0: float = -0.02,
     xtol: float = 0.00001
 ) -> pd.DataFrame:
     """Load the projected death data from ``StatCan`` CSV file.
@@ -327,8 +399,22 @@ def load_projected_death_data(
             * ``prob_death``: the probability of death.
             * ``se``: the standard error of the probability of death.
 
-        a: The lower bound for the beta parameter.
-        b: The upper bound for the beta parameter.
+        df_calibration: A dataframe containing the life expectancy projections for the calibration
+            years. Columns:
+
+            * ``year``: The calendar year. Range ``[1988, 2073]``.
+            * ``province``: A 2-letter string indicating the province abbreviation, e.g.
+              ``"BC"``. For all of Canada, set province to ``"CA"``.
+            * ``sex``: One of ``F`` = female, ``M`` = male.
+            * ``projection_scenario``: The projection scenario, e.g. ``"M3"``.
+            * ``mortality_scenario``: The mortality scenario. One of:
+                - ``LM``: Low mortality
+                - ``MM``: Medium mortality
+                - ``HM``: High mortality
+            * ``life_expectancy``: The life expectancy in years for the given year, province,
+              sex, projection scenario, and mortality scenario.
+
+        x0: The initial guess for the beta parameter.
         xtol: The tolerance for the beta parameter.
     
     Returns:
@@ -355,38 +441,37 @@ def load_projected_death_data(
         "se": []
     })
     for province in past_life_table["province"].unique():
-        calibration_year = CALIBRATION_YEARS[province]
         life_table = past_life_table[past_life_table["province"] == province]
         starting_year = life_table["year"].max() + 1
         life_table = life_table[life_table["year"] == starting_year - 1]
 
-        beta_year_female = optimize.brentq(
+        beta_year_female = optimize.leastsq(
             beta_year_optimizer,
-            a=a,
-            b=b,
+            x0=[x0],
             args=(
                 life_table,
+                df_calibration,
                 "F",
                 province,
                 starting_year - 1,
-                calibration_year
+                projection_scenario
             ),
-            xtol=xtol
-        )
+            xtol=xtol,
+        )[0][0]
 
-        beta_year_male = optimize.brentq(
+        beta_year_male = optimize.leastsq(
             beta_year_optimizer,
-            a=a,
-            b=b,
+            x0=[x0],
             args=(
                 life_table,
+                df_calibration,
                 "M",
                 province,
                 starting_year - 1,
-                calibration_year
+                projection_scenario
             ),
             xtol=xtol
-        )
+        )[0][0]
 
         projected_life_table_province = pd.DataFrame({
             "year": np.array([], dtype=int),
@@ -420,17 +505,21 @@ def load_projected_death_data(
 
 
 
-def generate_death_data():
+def generate_death_data(to_csv: bool = True) -> None | pd.DataFrame:
     """Generate the mortality data CSV."""
     past_life_table = load_past_death_data()
-    projected_life_table = load_projected_death_data(past_life_table)
+    df_calibration = load_projected_death_data()
+    projected_life_table = get_projected_death_data(past_life_table, df_calibration)
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
 
     # save the data
-    file_path = get_data_path("processed_data/life_table.csv")
-    logger.info(f"Saving data to {file_path}")
-    life_table.to_csv(file_path, index=False)
+    if to_csv:
+        file_path = get_data_path("processed_data/life_table.csv")
+        logger.info(f"Saving data to {file_path}")
+        life_table.to_csv(file_path, index=False)
+    else:
+        return life_table
 
 
 if __name__ == "__main__":
-    generate_death_data()
+    generate_death_data(to_csv=True)
