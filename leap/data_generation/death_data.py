@@ -192,8 +192,7 @@ def beta_year_optimizer(
     df_calibration: pd.DataFrame,
     sex: str,
     province: str, 
-    year_initial: int,
-    year: int,
+    year_initial: int
 ) -> float:
     """Calculate the difference between the projected life expectancy and desired life expectancy.
 
