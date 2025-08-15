@@ -476,7 +476,7 @@ def get_projected_death_data(
 
 
 
-def generate_death_data():
+def generate_death_data(to_csv: bool = True) -> None | pd.DataFrame:
     """Generate the mortality data CSV."""
     past_life_table = load_past_death_data()
     df_calibration = load_projected_death_data()
@@ -484,10 +484,13 @@ def generate_death_data():
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
 
     # save the data
-    file_path = get_data_path("processed_data/life_table.csv")
-    logger.info(f"Saving data to {file_path}")
-    life_table.to_csv(file_path, index=False)
+    if to_csv:
+        file_path = get_data_path("processed_data/life_table.csv")
+        logger.info(f"Saving data to {file_path}")
+        life_table.to_csv(file_path, index=False)
+    else:
+        return life_table
 
 
 if __name__ == "__main__":
-    generate_death_data()
+    generate_death_data(to_csv=True)
