@@ -164,7 +164,7 @@ def get_projected_life_table_single_year(
 
 
 def beta_year_optimizer(
-    beta_year: float,
+    beta_year: np.ndarray,
     life_table: pd.DataFrame,
     df_calibration: pd.DataFrame,
     sex: str,
@@ -178,7 +178,8 @@ def beta_year_optimizer(
     such that the projected life expectancy is as close as possible to the desired life expectancy.
     
     Args:
-        beta_year: The beta parameter for the given year.
+        beta_year: The beta parameter for the given year. The ``scipy.optimize.leastsq`` function
+            requires that this be a 1D array, but we only have a single parameter.
         life_table: A dataframe containing the projected probability of death
             for the calibration year, for a given sex and province. Columns:
 
