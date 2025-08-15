@@ -12,29 +12,6 @@ logger = get_logger(__name__, 20)
 STARTING_YEAR = 1996
 FINAL_YEAR = 2068
 
-# The projected life expectencies as given by StatCan for the M3 projection scenario
-DESIRED_LIFE_EXPECTANCIES = pd.DataFrame({
-    "province": ["CA", "CA", "BC", "BC"],
-    "sex": ["M", "F", "M", "F"],
-    "life_expectancy": [87.0, 90.1, 84.6, 88.0]
-})
-
-CALIBRATION_YEARS = {
-    "CA": 2068,
-    "BC": 2043,
-    "AB": None,
-    "SK": None,
-    "MB": None,
-    "ON": None,
-    "QC": None,
-    "NL": None,
-    "NS": None,
-    "NB": None,
-    "PE": None,
-    "YT": None,
-    "NT": None,
-    "NU": None
-}
 
 
 def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
