@@ -306,8 +306,7 @@ def load_past_death_data() -> pd.DataFrame:
 
     return df
 
-
-def load_projected_death_data(
+def get_projected_death_data(
     past_life_table: pd.DataFrame,
     a: float = -0.03,
     b: float = -0.01,
@@ -423,7 +422,7 @@ def load_projected_death_data(
 def generate_death_data():
     """Generate the mortality data CSV."""
     past_life_table = load_past_death_data()
-    projected_life_table = load_projected_death_data(past_life_table)
+    projected_life_table = get_projected_death_data(past_life_table)
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
 
     # save the data
