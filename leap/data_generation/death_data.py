@@ -306,6 +306,77 @@ def load_past_death_data() -> pd.DataFrame:
 
     return df
 
+def load_projected_death_data() -> pd.DataFrame:
+    """Load the projected death data from the ``StatCan`` CSV files.
+
+    ``Statistics Canada`` provides two tables with life expectancy projections:
+
+    - `Table 3.2 (Canada) <https://www150.statcan.gc.ca/n1/pub/91-620-x/91-620-x2025001-eng.html>`_
+    - `Table 5.2 (Provinces) <https://www150.statcan.gc.ca/n1/pub/91-620-x/91-620-x2025002-eng.html>`_
+
+    This data is only available for selected years.
+    
+    Returns:
+        A dataframe containing the life expectancy from selected calibration years from
+        ``Statistics Canada``:
+
+        * ``year (int)``: The calendar year. Range ``[1988, 2073]``.
+        * ``province (str)``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+          For all of Canada, set province to ``"CA"``.
+        * ``sex (str)``: One of ``F`` = female, ``M`` = male.
+        * ``projection_scenario (str)``: The projection scenario, e.g. ``"M3"``.
+        * ``mortality_scenario (str)``: The mortality scenario. One of:
+            - ``LM``: Low mortality
+            - ``MM``: Medium mortality
+            - ``HM``: High mortality
+        * ``life_expectancy (float)``: The life expectancy in years for the given year, province,
+          sex, projection scenario, and mortality scenario.
+    """
+
+    # Load the life expectancy projections for Canada from StatCan
+    df_can = pd.read_csv(get_data_path("original_data/mortality_projections_table_3-2.csv"))
+    df_can = df_can.melt(
+        id_vars=["year", "sex"],
+        value_vars=["LG", "M1", "M2", "M3", "M4", "M5", "M6", "HG", "SA", "FA"],
+        var_name="projection_scenario",
+        value_name="life_expectancy"
+    )
+    df_can["year"] = df_can["year"].apply(lambda x: int(x.split("/")[0]))
+    df_can["province"] = ["CA"] * df_can.shape[0]
+
+    # Load the life expectancy projections for the provinces / territories from StatCan
+    df_prov = pd.read_csv(get_data_path("original_data/mortality_projections_table_5-2.csv"))
+    df_prov = df_prov.melt(
+        id_vars=["province", "sex", "mortality_scenario"],
+        value_vars=[x for x in df_prov.columns if x.startswith("19") or x.startswith("20")],
+        var_name="year",
+        value_name="life_expectancy"
+    )
+    df_prov["year"] = df_prov["year"].apply(lambda x: int(x.split("/")[0]))
+
+    # Load the projection / mortality scenario mappings
+    df_scenarios = pd.read_csv(get_data_path("original_data/mortality_projections_table_3-1.csv"))
+    df_can = pd.merge(
+        df_can,
+        df_scenarios[["projection_scenario", "mortality_scenario"]],
+        on="projection_scenario",
+        how="left"
+    )
+    df_prov = pd.merge(
+        df_prov,
+        df_scenarios[["projection_scenario", "mortality_scenario"]],
+        on="mortality_scenario",
+        how="left"
+    )
+
+    # Combine the dataframes
+    df = pd.concat([df_can, df_prov], axis=0)
+
+    # Remove NA columns
+    df = df.dropna(subset=["life_expectancy"])
+    return df
+
+
 def get_projected_death_data(
     past_life_table: pd.DataFrame,
     a: float = -0.03,
