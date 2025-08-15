@@ -169,7 +169,8 @@ def beta_year_optimizer(
     df_calibration: pd.DataFrame,
     sex: str,
     province: str, 
-    year_initial: int
+    year_initial: int,
+    projection_scenario: str
 ) -> float:
     """Calculate the difference between the projected life expectancy and desired life expectancy.
 
@@ -202,7 +203,7 @@ def beta_year_optimizer(
     desired_life_expectancies = df_calibration.loc[
         (df_calibration["sex"] == sex) &
         (df_calibration["province"] == province) &
-        (df_calibration["projection_scenario"] == "M3")
+        (df_calibration["projection_scenario"] == projection_scenario)
     ]
     year = desired_life_expectancies["year"].values[-1]
     projected_life_table = get_projected_life_table_single_year(
@@ -360,6 +361,7 @@ def load_projected_death_data() -> pd.DataFrame:
 def get_projected_death_data(
     past_life_table: pd.DataFrame,
     df_calibration: pd.DataFrame,
+    projection_scenario: str = "M3",
     a: float = -0.03,
     b: float = -0.01,
     xtol: float = 0.00001
@@ -419,7 +421,8 @@ def get_projected_death_data(
                 df_calibration,
                 "F",
                 province,
-                starting_year - 1
+                starting_year - 1,
+                projection_scenario
             ),
             xtol=xtol
         )
@@ -433,7 +436,8 @@ def get_projected_death_data(
                 df_calibration,
                 "M",
                 province,
-                starting_year - 1
+                starting_year - 1,
+                projection_scenario
             ),
             xtol=xtol
         )
