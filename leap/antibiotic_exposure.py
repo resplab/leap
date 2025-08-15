@@ -66,9 +66,10 @@ class AntibioticExposure:
 
         Each entry is a dataframe with a single row with the following columns:
 
-        * ``year``: integer
+        * ``year (int)``: The calendar year, e.g. ``2024``.
         * ``sex``: 0 = female, 1 = male
-        * ``rate``: float, TODO.
+        * ``rate (float)``: The average number of courses of antibiotics prescribed during
+          infancy, per person.
         """
         return self._mid_trends
     
@@ -84,9 +85,10 @@ class AntibioticExposure:
 
             Each entry is a DataFrame with a single row with the following columns:
 
-            * ``year``: integer
+            * ``year (int)``: The calendar year, e.g. ``2024``.
             * ``sex``: 0 = female, 1 = male
-            * ``rate``: float, TODO.
+            * ``rate (float)``: The average number of courses of antibiotics prescribed during
+              infancy, per person.
         """
         df = pd.read_csv(get_data_path("processed_data/midtrends.csv"))
         grouped_df = df.groupby(["year", "sex"])
@@ -145,8 +147,8 @@ class AntibioticExposure:
             year: The calendar year, e.g. 2024.
 
         Returns:
-            A probability.
-            TODO: This isn't exactly the probability of antibiotic exposure.
+            The ``p`` parameter for the Negative Binomial distribution, used to calculate
+            the number of courses of antibiotics used during the first year of life.
 
         Examples:
 
@@ -167,7 +169,7 @@ class AntibioticExposure:
             >>> antibiotic_exposure.compute_probability(sex=1, year=2000)
             1.0
         """
-        μ = np.exp(
+        η = (
             self.parameters["β0"] +
             self.parameters["βsex"] * int(sex) +
             self.parameters["βyear"] * year +
@@ -175,5 +177,5 @@ class AntibioticExposure:
             self.parameters["β2005_year"] * (year > 2005) * year
         )
 
-        μ = max(μ, self.parameters["βfloor"] / 1000)
+        μ = max(np.exp(η), self.parameters["βfloor"] / 1000)
         return float(self.parameters["θ"] / (self.parameters["θ"] + μ))

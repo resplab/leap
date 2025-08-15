@@ -7,7 +7,10 @@ Model
   :hidden:
 
   model-glm
+  model-birth
+  model-death
   model-antibiotics
   model-occurrence
   model-control
+  model-exacerbation
   model-utility
