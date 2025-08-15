@@ -171,7 +171,7 @@ def beta_year_optimizer(
     province: str, 
     year_initial: int,
     projection_scenario: str
-) -> float:
+) -> np.ndarray:
     """Calculate the difference between the projected life expectancy and desired life expectancy.
 
     This function is passed to the ``scipy.optimize.brentq`` function. We want to find ``beta_year``
@@ -189,16 +189,31 @@ def beta_year_optimizer(
               For all of Canada, set province to ``"CA"``.
             * ``prob_death``: the probability of death for a given age, province, sex, and year.
 
+        df_calibration: A dataframe containing the life expectancy projections for the calibration
+            years. Columns:
+
+            * ``year``: The calendar year. Range ``[1988, 2073]``.
+            * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+              For all of Canada, set province to ``"CA"``.
+            * ``sex``: One of ``F`` = female, ``M`` = male.
+            * ``projection_scenario``: The projection scenario, e.g. ``"M3"``.
+            * ``mortality_scenario``: The mortality scenario. One of:
+                - ``LM``: Low mortality
+                - ``MM``: Medium mortality
+                - ``HM``: High mortality
+            * ``life_expectancy``: The life expectancy in years for the given year, province,
+              sex, projection scenario, and mortality scenario.
+
         sex: one of ``M`` = male, ``F`` = female.
         province: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
             For all of Canada, set province to ``"CA"``.
         year_initial: The initial year with a known probability of death. This is the last year
             that the past data was collected.
-        year: The current year.
+        projection_scenario: The projection scenario, e.g. ``"M3"``.
     
     Returns:
         The difference between the projected life expectancy of the calibration year
-        and the desired life expectancy.
+        and the desired life expectancy, for each of the calibration years.
     """
     beta_year = beta_year[0]
     desired_life_expectancies = df_calibration.loc[
@@ -383,8 +398,22 @@ def get_projected_death_data(
             * ``prob_death``: the probability of death.
             * ``se``: the standard error of the probability of death.
 
-        a: The lower bound for the beta parameter.
-        b: The upper bound for the beta parameter.
+        df_calibration: A dataframe containing the life expectancy projections for the calibration
+            years. Columns:
+
+            * ``year``: The calendar year. Range ``[1988, 2073]``.
+            * ``province``: A 2-letter string indicating the province abbreviation, e.g.
+              ``"BC"``. For all of Canada, set province to ``"CA"``.
+            * ``sex``: One of ``F`` = female, ``M`` = male.
+            * ``projection_scenario``: The projection scenario, e.g. ``"M3"``.
+            * ``mortality_scenario``: The mortality scenario. One of:
+                - ``LM``: Low mortality
+                - ``MM``: Medium mortality
+                - ``HM``: High mortality
+            * ``life_expectancy``: The life expectancy in years for the given year, province,
+              sex, projection scenario, and mortality scenario.
+
+        x0: The initial guess for the beta parameter.
         xtol: The tolerance for the beta parameter.
     
     Returns:
