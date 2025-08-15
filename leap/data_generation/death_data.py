@@ -366,8 +366,7 @@ def get_projected_death_data(
     past_life_table: pd.DataFrame,
     df_calibration: pd.DataFrame,
     projection_scenario: str = "M3",
-    a: float = -0.03,
-    b: float = -0.01,
+    x0: float = -0.02,
     xtol: float = 0.00001
 ) -> pd.DataFrame:
     """Load the projected death data from ``StatCan`` CSV file.
@@ -418,7 +417,7 @@ def get_projected_death_data(
 
         beta_year_female = optimize.leastsq(
             beta_year_optimizer,
-            x0=[a],
+            x0=[x0],
             args=(
                 life_table,
                 df_calibration,
@@ -432,7 +431,7 @@ def get_projected_death_data(
 
         beta_year_male = optimize.leastsq(
             beta_year_optimizer,
-            x0=[a],
+            x0=[x0],
             args=(
                 life_table,
                 df_calibration,
