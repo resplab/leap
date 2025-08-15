@@ -200,23 +200,27 @@ def beta_year_optimizer(
         The difference between the projected life expectancy of the calibration year
         and the desired life expectancy.
     """
+    beta_year = beta_year[0]
     desired_life_expectancies = df_calibration.loc[
         (df_calibration["sex"] == sex) &
         (df_calibration["province"] == province) &
         (df_calibration["projection_scenario"] == projection_scenario)
     ]
-    year = desired_life_expectancies["year"].values[-1]
-    projected_life_table = get_projected_life_table_single_year(
-        beta_year, life_table, year_initial, year, sex, province
-    )
-    logger.info(projected_life_table)
 
-    life_expectancy = calculate_life_expectancy(projected_life_table)
-    desired_life_expectancy = desired_life_expectancies.loc[
-        desired_life_expectancies["year"] == year, "life_expectancy"
-    ].values[0]
+    diff = []
+    for year in desired_life_expectancies["year"]:
+        projected_life_table = get_projected_life_table_single_year(
+            beta_year, life_table, year_initial, year, sex, province
+        )
+        logger.info(f"Calculating life expectancy for {year}, {sex}, {province}, beta_year={beta_year}")
 
-    return life_expectancy - desired_life_expectancy
+        life_expectancy = calculate_life_expectancy(projected_life_table)
+        desired_life_expectancy = desired_life_expectancies.loc[
+            desired_life_expectancies["year"] == year, "life_expectancy"
+        ].values[0]
+        diff.append(np.abs(life_expectancy - desired_life_expectancy))
+    
+    return np.array(diff)
 
 
 def load_past_death_data() -> pd.DataFrame:
@@ -412,10 +416,9 @@ def get_projected_death_data(
         starting_year = life_table["year"].max() + 1
         life_table = life_table[life_table["year"] == starting_year - 1]
 
-        beta_year_female = optimize.brentq(
+        beta_year_female = optimize.leastsq(
             beta_year_optimizer,
-            a=a,
-            b=b,
+            x0=[a],
             args=(
                 life_table,
                 df_calibration,
@@ -424,13 +427,12 @@ def get_projected_death_data(
                 starting_year - 1,
                 projection_scenario
             ),
-            xtol=xtol
-        )
+            xtol=xtol,
+        )[0][0]
 
-        beta_year_male = optimize.brentq(
+        beta_year_male = optimize.leastsq(
             beta_year_optimizer,
-            a=a,
-            b=b,
+            x0=[a],
             args=(
                 life_table,
                 df_calibration,
@@ -440,7 +442,7 @@ def get_projected_death_data(
                 projection_scenario
             ),
             xtol=xtol
-        )
+        )[0][0]
 
         projected_life_table_province = pd.DataFrame({
             "year": np.array([], dtype=int),
