@@ -479,7 +479,7 @@ def test_simulation_update_asthma_effects(
         expected_outcome_matrix_control
     )
     pd.testing.assert_frame_equal(
-        outcome_matrix.exacerbation.grouped_data.get_group((min_year)),
+        outcome_matrix.exacerbation.data.loc[outcome_matrix.exacerbation.data["year"] == min_year],
         expected_outcome_matrix_exacerbation,
         check_exact=False,
         rtol=0.15
