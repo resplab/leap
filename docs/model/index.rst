@@ -9,6 +9,7 @@ Model
   model-glm
   model-birth
   model-death
+  model-migration
   model-antibiotics
   model-occurrence
   model-control
