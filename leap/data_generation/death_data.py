@@ -98,7 +98,7 @@ def get_prob_death_projected(
 
         \sigma^{-1}(p(\text{sex}, \text{age}, \text{year})) =
             \sigma^{-1}(p(\text{sex}, \text{age}, \text{year}_0)) - 
-            e^{\beta(\text{sex})(\text{year} - \text{year}_0)}
+            \beta(\text{sex})(\text{year} - \text{year}_0)
 
     Args:
         prob_death: The probability of death for ``year_initial``, the last year that past data was
@@ -510,6 +510,7 @@ def generate_death_data(to_csv: bool = True) -> None | pd.DataFrame:
     past_life_table = load_past_death_data()
     df_calibration = load_projected_death_data()
     projected_life_table = get_projected_death_data(past_life_table, df_calibration)
+    # projected_life_table_2 = get_projected_death_data(past_life_table, df_calibration)
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
 
     # save the data
