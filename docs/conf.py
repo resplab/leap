@@ -138,3 +138,10 @@ autodoc_default_options = {
 }
 
 autodoc_typehints_format = "fully-qualified"
+
+latex_elements = {
+    "preamble": r"""
+    \usepackage{cancel}
+    \usepackage{xcolor}
+    """
+}
