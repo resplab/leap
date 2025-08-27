@@ -163,7 +163,7 @@ def get_projected_life_table_single_year(
     return df
 
 
-def beta_year_optimizer(
+def compute_life_expectancy_diff(
     beta_year: np.ndarray,
     life_table: pd.DataFrame,
     df_calibration: pd.DataFrame,
@@ -446,7 +446,7 @@ def get_projected_death_data(
         life_table = life_table[life_table["year"] == starting_year - 1]
 
         beta_year_female = optimize.leastsq(
-            beta_year_optimizer,
+            compute_life_expectancy_diff,
             x0=[x0],
             args=(
                 life_table,
@@ -460,7 +460,7 @@ def get_projected_death_data(
         )[0][0]
 
         beta_year_male = optimize.leastsq(
-            beta_year_optimizer,
+            compute_life_expectancy_diff,
             x0=[x0],
             args=(
                 life_table,
