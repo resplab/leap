@@ -31,8 +31,8 @@ def test_outcome_matrix_constructor(
     assert outcome_matrix.max_year == max_year
     assert outcome_matrix.max_age == max_age
 
-    alive_df = outcome_matrix.alive.grouped_data.get_group((min_year))
-    assert alive_df.shape == ((max_age + 1) * 2, 4)
+    alive_df = outcome_matrix.alive.data
+    assert alive_df.shape == ((max_age + 1) * 2 * time_horizon, 4)
     control_df = outcome_matrix.control.grouped_data.get_group((min_year, 1))
     assert control_df.shape == ((max_age + 1) * 2, 5)
     assert len(outcome_matrix.control.grouped_data.groups) == time_horizon * 3
