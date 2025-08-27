@@ -56,9 +56,17 @@
     padding: 0px;
 }
 
+.md-typeset table.data:not(.plain) th {
+    font-weight: 700;
+    min-width: 1rem;
+    padding: .9375em 1.25em;
+    vertical-align: top;
+}
+
 .md-typeset table.data:not(.plain) {
-    width: -webkit-fill-available;
-    display: table;
+    width: fit-content;
+    max-height: 500px;
+    display: block;
 }
 
 /* Bootstrap Tables */
@@ -85,13 +93,6 @@
 
 .table tbody+tbody {
     border-top: 2px solid #dee2e6;
-}
-
-.md-typeset table.data:not(.plain) th {
-    font-weight: 700;
-    min-width: 1rem;
-    padding: .9375em 1.25em;
-    vertical-align: top;
 }
 
 /* myst_nb code cells */
