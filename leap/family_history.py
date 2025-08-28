@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 from leap.logger import get_logger
 
@@ -45,3 +46,15 @@ class FamilyHistory:
 
         """
         return bool(np.random.binomial(1, self.parameters["p"]))
+
+    def __copy__(self):
+        return FamilyHistory(parameters=self.parameters)
+    
+    def __deepcopy__(self):
+        return FamilyHistory(parameters=copy.deepcopy(self.parameters))
+
+    def copy(self, deep: bool = True):
+        if deep:
+            return self.__deepcopy__()
+        else:
+            return self.__copy__()
