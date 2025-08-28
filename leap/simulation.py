@@ -778,6 +778,10 @@ class Simulation:
 
             # for each agent i born/immigrated in year
             if new_agents_df.shape[0] < min_agents_mp or n_cpu == 1:
+                logger.message(
+                    f"Number of new agents ({new_agents_df.shape[0]}) < min_agents_mp "
+                    f"({min_agents_mp}) or n_cpu = 1, running sequentially."
+                )
                 for i in range(new_agents_df.shape[0]):
                     agent_id, outcome_matrix_agent = self.simulate_agent(
                         sex=new_agents_df["sex"].iloc[i],
