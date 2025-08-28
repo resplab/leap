@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from leap.agent import Agent
 from leap.exacerbation import ExacerbationHistory
-from leap.simulation import Simulation
+from leap.simulation import Simulation, MIN_AGENTS_MP
 from leap.outcome_matrix import OutcomeMatrix
 from leap.logger import get_logger
 from tests.utils import __test_dir__
@@ -1047,8 +1047,12 @@ def test_run_simulation_one_year(
         )
     ]
 )
+@pytest.mark.parametrize(
+    "min_agents_mp",
+    [(0,), (MIN_AGENTS_MP,)]
+)
 def test_run_simulation_two_years(
-    config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
+    config, min_agents_mp, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
     antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, family_history_parameters,
     exacerbation_hyperparameter_β0_μ, control_parameter_θ, death_parameters, prevalence_parameters,
     cost_parameters, expected_alive, expected_antibiotic_exposure, expected_asthma_cost,
@@ -1105,7 +1109,8 @@ def test_run_simulation_two_years(
     simulation = Simulation(config)
     outcome_matrix = simulation.run(
         seed=1,
-        until_all_die=False
+        until_all_die=False,
+        min_agents_mp=min_agents_mp
     )
 
     for year, age in zip(range(min_year, min_year + time_horizon), range(max_age + 1)):
