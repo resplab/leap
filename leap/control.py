@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 import numpy as np
 from leap.utils import compute_ordinal_regression
 from typing import TYPE_CHECKING
@@ -72,7 +73,7 @@ class Control:
             for key in KEYS:
                 if key not in hyperparameters:
                     raise ValueError(f"Missing key {key} in hyperparameters.")
-        self._hyperparameters = hyperparameters
+        self._hyperparameters = copy.deepcopy(hyperparameters)
 
     @property
     def parameters(self) -> dict:
@@ -94,7 +95,7 @@ class Control:
         for key in KEYS:
             if key not in parameters:
                 raise ValueError(f"Missing key {key} in parameters.")
-        self._parameters = parameters
+        self._parameters = copy.deepcopy(parameters)
 
     def assign_random_β0(self):
         """Assign the parameter β0 a random value from a normal distribution."""

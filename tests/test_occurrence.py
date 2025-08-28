@@ -340,7 +340,7 @@ def test_agent_has_asthma(
         age=age,
         year=year,
         year_index=year_index,
-        family_history=FamilyHistory(parameters=family_history_parameters),
+        family_history=FamilyHistory(probability=family_history_parameters["p"]),
         antibiotic_exposure=AntibioticExposure(config=config["antibiotic_exposure"]),
         province=province,
         month=1,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import abc
+import copy
 import pandas as pd
 import numpy as np
 from scipy.special import logit, expit
@@ -56,7 +57,7 @@ class Occurrence:
     
     @parameters.setter
     def parameters(self, parameters: dict):
-        self._parameters = parameters
+        self._parameters = copy.deepcopy(parameters)
 
     @property
     def correction_table(self) -> DataFrameGroupBy:
@@ -311,7 +312,7 @@ class Incidence(Occurrence):
         for key in KEYS:
             if key not in parameters.keys():
                 raise ValueError(f"Missing key {key} in parameters.")
-        self._parameters = parameters
+        self._parameters = copy.deepcopy(parameters)
 
     @property
     def poly_parameters(self) -> Dict[str, list[float]]:
@@ -331,7 +332,7 @@ class Incidence(Occurrence):
         for key in KEYS:
             if key not in poly_parameters.keys():
                 raise ValueError(f"Missing key {key} in poly_parameters.")
-        self._poly_parameters = poly_parameters
+        self._poly_parameters = copy.deepcopy(poly_parameters)
 
     def load_occurrence_correction_table(self) -> DataFrameGroupBy:
         """Load the asthma incidence correction table.
@@ -511,7 +512,7 @@ class Prevalence(Occurrence):
         for key in KEYS:
             if key not in parameters.keys():
                 raise ValueError(f"Missing key {key} in parameters.")
-        self._parameters = parameters
+        self._parameters = copy.deepcopy(parameters)
 
     @property
     def poly_parameters(self) -> Dict[str, list[float]]:
@@ -536,7 +537,7 @@ class Prevalence(Occurrence):
         for key in KEYS:
             if key not in poly_parameters.keys():
                 raise ValueError(f"Missing key {key} in poly_parameters.")
-        self._poly_parameters = poly_parameters
+        self._poly_parameters = copy.deepcopy(poly_parameters)
 
     def load_occurrence_correction_table(self) -> DataFrameGroupBy:
         grouped_df = super().load_occurrence_correction_table(occurrence_type="prevalence")

@@ -59,7 +59,7 @@ class AntibioticExposure:
         for key in KEYS:
             if key not in parameters:
                 raise ValueError(f"Key {key} not found in parameters.")
-        self._parameters = parameters
+        self._parameters = copy.deepcopy(parameters)
 
     @property
     def mid_trends(self) -> DataFrameGroupBy:

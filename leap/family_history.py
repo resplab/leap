@@ -8,28 +8,26 @@ logger = get_logger(__name__)
 class FamilyHistory:
     """A class containing information about family history of asthma."""
 
-    def __init__(self, config: dict | None = None, parameters: dict | None = None):
+    def __init__(self, config: dict | None = None, probability: float | None = None):
         if config is not None:
-            self.parameters = config["parameters"]
-        elif parameters is not None:
-            self.parameters = parameters
+            self.probability = config["parameters"]["p"]
+        elif probability is not None:
+            self.probability = probability
         else:
-            raise ValueError("Either config dict or parameters must be provided.")
+            raise ValueError("Either config dict or probability must be provided.")
 
     @property
-    def parameters(self) -> dict:
-        """A dictionary containing the following keys:
-            * ``p``: float, the probability that an agent has a family history of asthma.
-        """
-        return self._parameters
+    def probability(self) -> float:
+        """The probability that an agent has a family history of asthma."""
+        return self._probability
 
-    @parameters.setter
-    def parameters(self, parameters: dict):
-        if parameters["p"] > 1 or parameters["p"] < 0:
+    @probability.setter
+    def probability(self, probability: float):
+        if probability > 1 or probability < 0:
             raise ValueError(
-                f"p must be a probability between 0 and 1, received {parameters['p']}."
+                f"p must be a probability between 0 and 1, received {probability}."
             )
-        self._parameters = parameters
+        self._probability = probability
 
     def has_family_history_of_asthma(self) -> bool:
         """Use Bernoulli distribution to determine whether an agent has a family history of asthma.
@@ -40,18 +38,18 @@ class FamilyHistory:
         Examples:
 
             >>> from leap.family_history import FamilyHistory
-            >>> family_history = FamilyHistory(parameters={"p": 1.0})
+            >>> family_history = FamilyHistory(probability=1.0)
             >>> family_history.has_family_history_of_asthma()
             True
 
         """
-        return bool(np.random.binomial(1, self.parameters["p"]))
+        return bool(np.random.binomial(1, self.probability))
 
     def __copy__(self):
-        return FamilyHistory(parameters=self.parameters)
+        return FamilyHistory(probability=self.probability)
     
     def __deepcopy__(self):
-        return FamilyHistory(parameters=copy.deepcopy(self.parameters))
+        return FamilyHistory(probability=copy.deepcopy(self.probability))
 
     def copy(self, deep: bool = True):
         if deep:

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 import pandas as pd
 import numpy as np
 from leap.utils import get_data_path, check_province
@@ -73,7 +74,7 @@ class Exacerbation:
         for key in KEYS:
             if key not in hyperparameters:
                 raise ValueError(f"Missing key {key} in hyperparameters.")
-        self._hyperparameters = hyperparameters
+        self._hyperparameters = copy.deepcopy(hyperparameters)
 
     @property
     def parameters(self) -> dict:
@@ -101,7 +102,7 @@ class Exacerbation:
         for key in KEYS:
             if key not in parameters:
                 raise ValueError(f"Missing key {key} in parameters.")
-        self._parameters = parameters
+        self._parameters = copy.deepycopy(parameters)
 
     @property
     def calibration_table(self) -> DataFrameGroupBy:
