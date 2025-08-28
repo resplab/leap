@@ -799,11 +799,15 @@ def test_simulation_get_new_agents(
         )
     ]
 )
+@pytest.mark.parametrize(
+    "min_agents_mp",
+    [(0,), (MIN_AGENTS_MP,)]
+)
 def test_run_simulation_one_year(
-    config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
-    antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, family_history_parameters,
-    exacerbation_hyperparameter_β0_μ, control_parameter_θ, death_parameters,
-    prevalence_parameters, utility_parameters, cost_parameters, year_index,
+    config, min_agents_mp, min_year, time_horizon, province, population_growth_type,
+    num_births_initial, max_age, antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,
+    family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,
+    death_parameters, prevalence_parameters, utility_parameters, cost_parameters, year_index,
     expected_asthma_incidence_total, expected_asthma_status_total, expected_asthma_cost,
     expected_death, expected_emigration, expected_exacerbation_total, expected_family_history,
     expected_immigration, expected_utility
@@ -879,7 +883,8 @@ def test_run_simulation_one_year(
     simulation = Simulation(config)
     outcome_matrix = simulation.run(
         seed=1,
-        until_all_die=False
+        until_all_die=False,
+        min_agents_mp=min_agents_mp
     )
     assert outcome_matrix.antibiotic_exposure.data.shape == (2 * 1 * (max_age + 1), 4)
     np.testing.assert_array_equal(
@@ -1196,8 +1201,13 @@ def test_run_simulation_two_years(
         )
     ]
 )
+@pytest.mark.parametrize(
+    "min_agents_mp",
+    [(0,), (MIN_AGENTS_MP,)]
+)
 def test_run_simulation_full(
-    config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age
+    config, min_agents_mp, min_year, time_horizon, province, population_growth_type,
+    num_births_initial, max_age
 ):
 
     config["simulation"] = {
@@ -1212,7 +1222,8 @@ def test_run_simulation_full(
     simulation = Simulation(config)
     outcome_matrix = simulation.run(
         seed=1,
-        until_all_die=False
+        until_all_die=False,
+        min_agents_mp=min_agents_mp
     )
 
     assert outcome_matrix.immigration.data.shape == (2 * time_horizon * (max_age + 1), 4)
