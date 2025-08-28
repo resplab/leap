@@ -541,7 +541,7 @@ def combine_outcome_tables(outcome_tables: list[OutcomeTable], column: str) -> O
         An ``OutcomeTable`` instance containing the combined data.
     """
     df_combined = outcome_tables[0].data.copy()
-    df_combined[column] = np.array([df.data[column] for df in outcome_tables[1:]]).sum(axis=0)
+    df_combined[column] = np.array([df.data[column] for df in outcome_tables]).sum(axis=0)
     return OutcomeTable(df_combined, group_by=outcome_tables[0].group_by)
 
 
