@@ -881,7 +881,6 @@ def test_run_simulation_one_year(
         seed=1,
         until_all_die=False
     )
-    logger.info(outcome_matrix.utility.data)
     assert outcome_matrix.antibiotic_exposure.data.shape == (2 * 1 * (max_age + 1), 4)
     np.testing.assert_array_equal(
         outcome_matrix.antibiotic_exposure.data["n_antibiotic_exposure"],
