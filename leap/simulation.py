@@ -744,6 +744,7 @@ class Simulation:
         outcome_matrix = OutcomeMatrix(
             self.until_all_die, self.min_year, self.max_year, self.max_age
         )
+        outcome_matrices = []
         # loop by year
         year_bar = tqdm(
             years,
@@ -766,7 +767,6 @@ class Simulation:
                         f"{new_agents_df.shape[0]} new agents born/immigrated.")
             logger.info(f"\n{new_agents_df}")
 
-            outcome_matrices = []
             job_bar = tqdm(
                 total=new_agents_df.shape[0],
                 position=1,
