@@ -619,7 +619,7 @@ class Simulation:
             )
 
         # go through event processes for each agent
-        while agent.alive and agent.age <= self.max_age and agent.year_index <= self.max_time_horizon:
+        while agent.alive and agent.age <= self.max_age and agent.year_index < self.max_time_horizon:
             if not agent.has_asthma:
                 self.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
                 logger.info(f"| ---- Agent has asthma (incidence)? {agent.has_asthma}")
@@ -697,7 +697,7 @@ class Simulation:
                 agent.year += 1
                 agent.year_index += 1
 
-                if agent.age <= self.max_age and agent.year_index <= self.max_time_horizon:
+                if agent.age <= self.max_age and agent.year_index < self.max_time_horizon:
                     logger.info(
                         f"| -- Year: {agent.year_index + self.min_year - 1}, age: {agent.age}"
                     )
