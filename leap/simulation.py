@@ -704,7 +704,7 @@ class Simulation:
 
         return agent.uuid, outcome_matrix
 
-    @timer
+    @timer()
     def run(
         self,
         seed=None,
