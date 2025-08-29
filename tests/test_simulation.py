@@ -1083,13 +1083,12 @@ def test_run_simulation_two_years(
     Setting the exacerbation hyperparameter ``β0_μ = 20.0`` ensures that every agent aged 4 has an
     asthma exacerbation.
 
-    Setting the ``time_horizon=2`` means that in the first year there should be 0 immigrants,
-    and in the second year there should be 1 immigrant.
-
     For the years 2024 and 2025, province "CA", growth type "M3", ages 0 - 4, the probability of
     emigration is 0. See ``processed_data/migration/emigration_table.csv``.
 
     Setting the ``prevalence`` parameters below ensures that the prevalence is 0.
+
+    Immigration: There should be 0 immigrants in 2024, and 1 immigrant aged 1-4 in the year 2025.
     """
 
     config["simulation"] = {
@@ -1118,12 +1117,28 @@ def test_run_simulation_two_years(
         min_agents_mp=min_agents_mp
     )
 
-    for year, age in zip(range(min_year, min_year + time_horizon), range(max_age + 1)):
+    for age in range(0, max_age + 1):
+        # Check that everyone in the first year is alive
         assert outcome_matrix.alive.get(
-            columns="n_alive", year=year, age=age
+            columns="n_alive", year=min_year, age=age
         ).sum() == expected_alive.loc[
-            (expected_alive["age"] == age) & (expected_alive["year"] == year)
+            (expected_alive["age"] == age) & (expected_alive["year"] == min_year)
         ]["n_alive"].sum()
+
+        # Check that the number alive in the second year is within 1 of the expected value
+        # (there is 1 immigrant in the second year, but the age is random)
+        assert np.abs(outcome_matrix.alive.get(
+            columns="n_alive", year=min_year + 1, age=age
+        ).sum() - expected_alive.loc[
+            (expected_alive["age"] == age) & (expected_alive["year"] == min_year + 1)
+        ]["n_alive"].sum()) <= 1
+
+    # Assert that the total number alive in the second year is correct
+    assert outcome_matrix.alive.get(
+        columns="n_alive", year=min_year + 1
+    ).sum() == expected_alive.loc[
+        expected_alive["year"] == min_year + 1
+    ]["n_alive"].sum()
 
     pd.testing.assert_frame_equal(
         outcome_matrix.antibiotic_exposure.data,
