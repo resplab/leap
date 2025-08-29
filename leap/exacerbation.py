@@ -102,7 +102,7 @@ class Exacerbation:
         for key in KEYS:
             if key not in parameters:
                 raise ValueError(f"Missing key {key} in parameters.")
-        self._parameters = copy.deepycopy(parameters)
+        self._parameters = copy.deepcopy(parameters)
 
     @property
     def calibration_table(self) -> DataFrameGroupBy:
