@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 import numpy as np
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
@@ -19,7 +20,7 @@ class AsthmaCost:
         exchange_rate_usd_cad: float | None = None
     ):
         if config is not None:
-            parameters = config["parameters"].copy()
+            parameters = copy.deepcopy(config["parameters"])
             self.exchange_rate_usd_cad = config["exchange_rate_usd_cad"]
             self.exac = np.array(parameters["exac"]) * self.exchange_rate_usd_cad
             self.control_probs = np.array(
