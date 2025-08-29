@@ -560,7 +560,7 @@ class Simulation:
             pollution = None
         else:
             pollution = Pollution(
-                pollution_table=self.pollution_table,
+                pollution_table=self.pollution_table.copy(),
                 SSP=self.SSP,
                 year=year,
                 month=month,
