@@ -554,7 +554,7 @@ class Simulation:
         self.exacerbation_severity.assign_random_p()
 
         census_division = CensusDivision(
-            census_table=self.census_table, province=self.province
+            census_table=self.census_table.copy(), province=self.province
         )
         if self.ignore_pollution_flag:
             pollution = None
