@@ -801,7 +801,7 @@ def test_simulation_get_new_agents(
 )
 @pytest.mark.parametrize(
     "min_agents_mp",
-    [(0,), (MIN_AGENTS_MP,)]
+    [0, MIN_AGENTS_MP]
 )
 def test_run_simulation_one_year(
     config, min_agents_mp, min_year, time_horizon, province, population_growth_type,
@@ -1054,7 +1054,7 @@ def test_run_simulation_one_year(
 )
 @pytest.mark.parametrize(
     "min_agents_mp",
-    [(0,), (MIN_AGENTS_MP,)]
+    [0, MIN_AGENTS_MP]
 )
 def test_run_simulation_two_years(
     config, min_agents_mp, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
@@ -1203,7 +1203,7 @@ def test_run_simulation_two_years(
 )
 @pytest.mark.parametrize(
     "min_agents_mp",
-    [(0,), (MIN_AGENTS_MP,)]
+    [0, MIN_AGENTS_MP]
 )
 def test_run_simulation_full(
     config, min_agents_mp, min_year, time_horizon, province, population_growth_type,
