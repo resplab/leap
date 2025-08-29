@@ -33,11 +33,11 @@ from leap.family_history import FamilyHistory
 )
 def test_family_history_constructor(parameters, is_valid):
     if is_valid:
-        family_history = FamilyHistory(parameters=parameters)
-        assert family_history.parameters["p"] == parameters["p"]
+        family_history = FamilyHistory(probability=parameters["p"])
+        assert family_history.probability == parameters["p"]
     else:
         with pytest.raises(ValueError) as error:
-            family_history = FamilyHistory(parameters=parameters)
+            family_history = FamilyHistory(probability=parameters["p"])
         assert str(error.value) == "p must be a probability between 0 and 1, received 5.6."
 
 
@@ -53,5 +53,5 @@ def test_family_history_constructor(parameters, is_valid):
     ]
 )
 def test_family_history_has_family_history_of_asthma(parameters, has_family_history):
-    family_history = FamilyHistory(parameters=parameters)
+    family_history = FamilyHistory(probability=parameters["p"])
     assert family_history.has_family_history_of_asthma() == has_family_history

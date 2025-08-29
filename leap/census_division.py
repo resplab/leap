@@ -72,6 +72,24 @@ class CensusTable:
             )
         self._year = year
 
+    def __copy__(self):
+        census_table = CensusTable(year=self.year, config=None)
+        census_table.data = self.data.copy()
+        census_table.grouped_data = census_table.data.groupby(["province"])
+        return census_table
+
+    def __deepcopy__(self, memo):
+        census_table = CensusTable(year=self.year, config=None)
+        census_table.data = self.data.copy(deep=True)
+        census_table.grouped_data = census_table.data.groupby(["province"])
+        return census_table
+
+    def copy(self, deep: bool = True):
+        if deep:
+            return self.__deepcopy__(memo={})
+        else:
+            return self.__copy__()
+
     def load_census_data(self) -> pd.DataFrame:
         """Load the census data."""
 

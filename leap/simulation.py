@@ -1,9 +1,12 @@
+from __future__ import annotations
 import pathlib
 import json
 import math
 import numpy as np
+import sys
 import pandas as pd
 from tqdm import tqdm
+import multiprocessing as mp
 from leap.agent import Agent
 from leap.antibiotic_exposure import AntibioticExposure
 from leap.birth import Birth
@@ -16,15 +19,22 @@ from leap.exacerbation import Exacerbation
 from leap.family_history import FamilyHistory
 from leap.immigration import Immigration
 from leap.occurrence import Incidence, Prevalence, agent_has_asthma, compute_asthma_age
-from leap.outcome_matrix import OutcomeMatrix
+from leap.outcome_matrix import OutcomeMatrix, combine_outcome_matrices
 from leap.pollution import PollutionTable, Pollution
 from leap.reassessment import Reassessment
 from leap.severity import ExacerbationSeverity
 from leap.utility import Utility
-from leap.utils import get_data_path
+from leap.utils import get_data_path, timer, get_chunk_indices, create_process_bars
 from leap.logger import get_logger
+from typing import Tuple, TYPE_CHECKING
+if TYPE_CHECKING:
+    from leap.utils import UUID4
 
 logger = get_logger(__name__)
+
+
+MIN_AGENTS_MP = 500
+mp.set_start_method("fork", force=True)
 
 
 class Simulation:
@@ -40,6 +50,7 @@ class Simulation:
         time_horizon: int | None = None,
         population_growth_type: str | None = None,
         num_births_initial: int | None = None,
+        until_all_die: bool | None = None,
         ignore_pollution_flag: bool = False
     ):
         if config is None:
@@ -73,6 +84,10 @@ class Simulation:
             self.num_births_initial = num_births_initial
         else:
             self.num_births_initial = config["simulation"]["num_births_initial"]
+        if until_all_die is not None:
+            self.until_all_die = until_all_die
+        else:
+            self.until_all_die = config["simulation"]["until_all_die"]
         self.agent = None
         self.birth = Birth(self.min_year, self.province, self.population_growth_type, self.max_age)
         self.emigration = Emigration(self.min_year, self.province, self.population_growth_type)
@@ -150,6 +165,32 @@ class Simulation:
             self.max_year = self.min_year + time_horizon - 1
         except AttributeError:
             pass
+
+    @property
+    def max_time_horizon(self) -> int:
+        """The maximum number of years the simulation will run for."""
+        return self._max_time_horizon
+
+    @max_time_horizon.setter
+    def max_time_horizon(self, max_time_horizon: int):
+        """Set the maximum number of years the simulation will run for."""
+        self._max_time_horizon = max_time_horizon
+
+    @property
+    def until_all_die(self) -> bool:
+        """Whether to run the simulation until all agents die."""
+        return self._until_all_die
+
+    @until_all_die.setter
+    def until_all_die(self, until_all_die: bool):
+        """Set whether to run the simulation until all agents die."""
+        if not isinstance(until_all_die, bool):
+            raise ValueError("until_all_die must be a boolean value.")
+        self._until_all_die = until_all_die
+        if until_all_die:
+            self.max_time_horizon = np.iinfo(np.int32).max
+        else:
+            self.max_time_horizon = self.time_horizon
 
     @property
     def population_growth_type(self) -> str:
@@ -366,7 +407,7 @@ class Simulation:
                 filter_columns={
                     "year": agent.year,
                     "level": level,
-                    "sex": agent.sex,
+                    "sex": str(agent.sex),
                     "age": agent.age
                 },
                 amount=agent.control_levels.as_array()[level]
@@ -422,7 +463,7 @@ class Simulation:
             agent.asthma_age = agent.age
             outcome_matrix.asthma_incidence.increment(
                 column="n_new_diagnoses",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
             )
             self.update_asthma_effects(agent, outcome_matrix)
 
@@ -431,24 +472,256 @@ class Simulation:
                 agent.asthma_status = True
                 outcome_matrix.asthma_status.increment(
                     column="status",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
                 )
 
         outcome_matrix.asthma_incidence_contingency_table.increment(
             column="n_asthma" if agent.has_asthma else "n_no_asthma",
             filter_columns={
-                "year": agent.year, "age": agent.age, "sex": agent.sex,
+                "year": agent.year, "age": agent.age, "sex": str(agent.sex),
                 "fam_history": agent.has_family_history,
                 "abx_exposure": agent.num_antibiotic_use,
             }
         )
 
-    def run(self, seed=None, until_all_die: bool = False):
+    def worker(
+        self,
+        year: int,
+        year_index: int,
+        month: int,
+        new_agents_df: pd.DataFrame,
+        indices: list[int],
+        process_id: int,
+        queue: mp.Queue,
+    ):
+        """Worker function for multiprocessing.
+        
+        Args:
+            year: The current year of the simulation.
+            year_index: The index of the current year in the simulation. For example, if the
+                simulation starts in 2010, then the year index for 2010 is 0, for 2011 is 1, etc.
+            month: The month of the year when the agent is born/immigrates.
+            new_agents_df: A dataframe containing the new agents to simulate.
+            indices: A list of indices of the new agents to simulate.
+            process_id: The ID for the process.
+            queue: A queue for returning the results and updating the
+                progress bar.
+        """
+        for index in indices:
+            agent_id, outcome_matrix = self.simulate_agent(
+                sex=new_agents_df["sex"].iloc[index],
+                age=new_agents_df["age"].iloc[index],
+                is_immigrant=new_agents_df["immigrant"].iloc[index],
+                year=year,
+                year_index=year_index,
+                month=month
+            )
+            queue.put((agent_id.short, process_id, outcome_matrix))
+
+    def simulate_agent(
+        self,
+        sex: str,
+        age: int,
+        is_immigrant: bool,
+        year: int,
+        year_index: int,
+        month: int
+    ) -> Tuple[UUID4, OutcomeMatrix]:
+        """Simulate a new agent in the model.
+
+        The agent in this function is a person who is either:
+
+        1. A new immigrant to Canada in the specified year.
+        2. A newborn baby born in the specified year.
+
+        This function simulates the agent's life from birth/immigration until death or emigration.
+        
+        Args:
+            sex: One of ``"M"`` or ``"F"``.
+            age: The age of the agent.
+            is_immigrant: Whether or not the agent (person) is an immigrant.
+            year: The current year of the simulation.
+            year_index: The index of the current year in the simulation. For example, if the
+                simulation starts in 2010, then the year index for 2010 is 0, for 2011 is 1, etc.
+            month: The month of the year when the agent is born/immigrates.
+
+        """
+        outcome_matrix = OutcomeMatrix(
+            self.until_all_die, self.min_year, self.max_year, self.max_age
+        )
+        self.control.assign_random_β0()
+        self.exacerbation.assign_random_β0()
+        self.exacerbation_severity.assign_random_p()
+
+        census_division = CensusDivision(
+            census_table=self.census_table.copy(), province=self.province
+        )
+        if self.ignore_pollution_flag:
+            pollution = None
+        else:
+            pollution = Pollution(
+                pollution_table=self.pollution_table.copy(),
+                SSP=self.SSP,
+                year=year,
+                month=month,
+                cduid=census_division.cduid
+            )
+        agent = Agent(
+            sex=sex,
+            age=age,
+            year=year,
+            year_index=year_index,
+            family_history=self.family_history.copy(),
+            antibiotic_exposure=self.antibiotic_exposure.copy(),
+            province=self.province,
+            month=month,
+            ssp=self.SSP,
+            census_division=census_division,
+            pollution=pollution
+        )
+        # pbar.set_description(f"Agent {agent.uuid.short}")
+
+        logger.info(
+            f"Agent {agent.uuid.short} born/immigrated in year {year}, "
+            f"age {agent.age}, sex {int(agent.sex)}, "
+            f"immigrant: {is_immigrant}, "
+            f"newborn: {not is_immigrant}"
+        )
+        logger.info(
+            f"| -- Year: {agent.year_index + self.min_year - 1}, "
+            f"age: {agent.age}"
+        )
+
+        if is_immigrant:
+            outcome_matrix.immigration.increment(
+                "n_immigrants", {"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
+            )
+
+        outcome_matrix.antibiotic_exposure.increment(
+            column="n_antibiotic_exposure",
+            filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
+            amount=agent.num_antibiotic_use
+        )
+
+        outcome_matrix.family_history.increment(
+            column="has_family_history",
+            filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
+            amount=agent.has_family_history
+        )
+
+        # if age > 4, we need to generate the initial distribution of asthma related events
+
+        if agent.age > 3:
+            self.generate_initial_asthma(agent)
+
+            logger.info(
+                f"| ---- Agent age > 3, agent has asthma (prevalence)? {agent.has_asthma}"
+            )
+
+        # go through event processes for each agent
+        while agent.alive and agent.age <= self.max_age and agent.year_index < self.max_time_horizon:
+            if not agent.has_asthma:
+                self.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
+                logger.info(f"| ---- Agent has asthma (incidence)? {agent.has_asthma}")
+            else:
+                self.reassess_asthma_diagnosis(agent, outcome_matrix)
+                logger.info(
+                    "| ---- Agent was diagnosed with asthma, is this diagnosis correct? "
+                    f"{agent.has_asthma}"
+                )
+
+            # if no asthma, record it
+            if agent.has_asthma:
+                outcome_matrix.asthma_prevalence.increment(
+                    column="n_asthma",
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
+                )
+
+            outcome_matrix.asthma_prevalence_contingency_table.increment(
+                column="n_asthma" if agent.has_asthma else "n_no_asthma",
+                filter_columns={
+                    "year": agent.year,
+                    "age": agent.age,
+                    "sex": str(agent.sex),
+                    "fam_history": agent.has_family_history,
+                    "abx_exposure": agent.num_antibiotic_use
+                }
+            )
+
+            # compute utility
+            utility = self.utility.compute_utility(agent)
+            logger.info(f"| ---- Utility of asthma: {utility}")
+            outcome_matrix.utility.increment(
+                column="utility",
+                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
+                amount=utility
+            )
+
+            # compute cost
+            cost = self.cost.compute_cost(agent)
+            logger.info(f"| ---- Cost of asthma: {cost} CAD")
+
+            outcome_matrix.cost.increment(
+                column="cost",
+                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
+                amount=cost
+            )
+
+            # death or emigration, assume death occurs first
+            if self.death.agent_dies(agent):
+                agent.alive = False
+                outcome_matrix.death.increment(
+                    column="n_deaths",
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
+                )
+                logger.info(f"| ---- Agent has died at age {agent.age}")
+            # emigration
+            elif self.emigration.compute_probability(
+                agent.year, agent.age, str(agent.sex)
+            ):
+                agent.alive = False
+                outcome_matrix.emigration.increment(
+                    column="n_emigrants",
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
+                )
+                logger.info(f"| ---- Agent has emigrated at age {agent.age}")
+            else:
+                # record alive
+                outcome_matrix.alive.increment(
+                    column="n_alive",
+                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
+                )
+
+                # update the patient stats
+                agent.age += 1
+                agent.year += 1
+                agent.year_index += 1
+
+                if agent.age <= self.max_age and agent.year_index < self.max_time_horizon:
+                    logger.info(
+                        f"| -- Year: {agent.year_index + self.min_year - 1}, age: {agent.age}"
+                    )
+
+        return agent.uuid, outcome_matrix
+
+    @timer()
+    def run(
+        self,
+        seed=None,
+        until_all_die: bool | None = None,
+        n_cpu: int | None = None,
+        min_agents_mp: int = MIN_AGENTS_MP
+    ):
         """Run the simulation.
 
         Args:
             seed: The random seed to use for the simulation.
             until_all_die: Whether to run the simulation until all agents die.
+            n_cpu: The number of CPUs to use for multiprocessing. If None, it will use all
+                available CPUs minus one.
+            min_agents_mp: The minimum number of agents to use multiprocessing for. If the
+                number of new agents in a year is less than this value, the simulation will
+                run sequentially for that year.
 
         Returns:
             The outcome matrix.
@@ -457,21 +730,34 @@ class Simulation:
         if seed is not None:
             np.random.seed(seed)
 
+        if n_cpu is None:
+            n_cpu = mp.cpu_count() - 1
+            logger.message(f"Setting number of CPUs to use for multiprocessing to {n_cpu}")
+
+        if until_all_die is not None:
+            self.until_all_die = until_all_die
+
         month = 1
-        max_age = self.max_age
-        min_year = self.min_year
-        max_year = self.max_year
+        years = np.arange(self.min_year, self.max_year + 1)
+        total_years = len(years)
 
-        max_time_horizon = np.iinfo(np.int32).max if until_all_die else self.time_horizon
-        years = np.arange(min_year, max_year + 1)
-        total_years = max_year - min_year + 1
-
-        outcome_matrix = OutcomeMatrix(until_all_die, min_year, max_year, max_age)
-
+        outcome_matrix = OutcomeMatrix(
+            self.until_all_die, self.min_year, self.max_year, self.max_age
+        )
+        outcome_matrices = []
         # loop by year
-        for year in (pbar_year := tqdm(years, desc="Years", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
-            pbar_year.set_description(f"Year {year}")
-            year_index = year - min_year
+        year_bar = tqdm(
+            years,
+            position=0,
+            desc=f"Years",
+            leave=True,
+            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
+            file=sys.stdout
+        )
+        for year in years:
+            # pbar_year.set_description(f"Year {year}")
+            year = int(year)
+            year_index = year - self.min_year
 
             new_agents_df = self.get_new_agents(
                 year=year
@@ -481,162 +767,98 @@ class Simulation:
                         f"{new_agents_df.shape[0]} new agents born/immigrated.")
             logger.info(f"\n{new_agents_df}")
 
+            job_bar = tqdm(
+                total=new_agents_df.shape[0],
+                position=1,
+                desc=f"Year: {year}",
+                leave=True,
+                bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
+                file=sys.stdout
+            )
+
             # for each agent i born/immigrated in year
-            for i in (pbar := tqdm(range(new_agents_df.shape[0]), desc="Agents", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}")):
-                self.control.assign_random_β0()
-                self.exacerbation.assign_random_β0()
-                self.exacerbation_severity.assign_random_p()
-
-                census_division = CensusDivision(
-                    census_table=self.census_table, province=self.province
+            if new_agents_df.shape[0] < min_agents_mp or n_cpu == 1:
+                logger.message(
+                    f"Number of new agents ({new_agents_df.shape[0]}) < min_agents_mp "
+                    f"({min_agents_mp}) or n_cpu = 1, running sequentially."
                 )
-                if self.ignore_pollution_flag:
-                    pollution = None
-                else:
-                    pollution = Pollution(
-                        pollution_table=self.pollution_table,
-                        SSP=self.SSP,
+                for i in range(new_agents_df.shape[0]):
+                    agent_id, outcome_matrix_agent = self.simulate_agent(
+                        sex=new_agents_df["sex"].iloc[i],
+                        age=new_agents_df["age"].iloc[i],
+                        is_immigrant=new_agents_df["immigrant"].iloc[i],
                         year=year,
-                        month=month,
-                        cduid=census_division.cduid
+                        year_index=year_index,
+                        month=month
                     )
-                agent = Agent(
-                    sex=new_agents_df["sex"].iloc[i],
-                    age=new_agents_df["age"].iloc[i],
-                    year=year,
-                    year_index=year_index,
-                    family_history=self.family_history,
-                    antibiotic_exposure=self.antibiotic_exposure,
-                    province=self.province,
-                    month=month,
-                    ssp=self.SSP,
-                    census_division=census_division,
-                    pollution=pollution
+                    outcome_matrices.append(outcome_matrix_agent)
+                    job_bar.update(1)
+                    job_bar.set_description(f"Year: {year} | Agent {agent_id.short}")
+            else:
+                queue = mp.Queue()
+                n_processes = n_cpu * 2
+                chunk_size = int(math.ceil(new_agents_df.shape[0] / (n_processes)))
+                chunk_indices = get_chunk_indices(
+                    new_agents_df.shape[0], chunk_size
                 )
-                pbar.set_description(f"Agent {agent.uuid.short}")
+                n_processes = len(chunk_indices)
+                processes = []
 
-                logger.info(
-                    f"Agent {agent.uuid.short} born/immigrated in year {year}, "
-                    f"age {agent.age}, sex {int(agent.sex)}, "
-                    f"immigrant: {new_agents_df['immigrant'].iloc[i]}, "
-                    f"newborn: {not new_agents_df['immigrant'].iloc[i]}"
-                )
-                logger.info(
-                    f"| -- Year: {agent.year_index + min_year - 1}, "
-                    f"age: {agent.age}"
+                # Create progress bars
+                process_bars = create_process_bars(
+                    chunk_indices, position_offset=2
                 )
 
-                if new_agents_df["immigrant"].iloc[i]:
-                    outcome_matrix.immigration.increment(
-                        "n_immigrants", {"year": agent.year, "age": agent.age, "sex": agent.sex}
-                    )
-
-                outcome_matrix.antibiotic_exposure.increment(
-                    column="n_antibiotic_exposure",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                    amount=agent.num_antibiotic_use
-                )
-
-                outcome_matrix.family_history.increment(
-                    column="has_family_history",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                    amount=agent.has_family_history
-                )
-
-                # if age > 4, we need to generate the initial distribution of asthma related events
-
-                if agent.age > 3:
-                    self.generate_initial_asthma(agent)
-
-                    logger.info(
-                        f"| ---- Agent age > 3, agent has asthma (prevalence)? {agent.has_asthma}"
-                    )
-
-                # go through event processes for each agent
-                while agent.alive and agent.age <= max_age and agent.year_index <= max_time_horizon:
-                    if not agent.has_asthma:
-                        self.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
-                        logger.info(f"| ---- Agent has asthma (incidence)? {agent.has_asthma}")
-                    else:
-                        self.reassess_asthma_diagnosis(agent, outcome_matrix)
-                        logger.info(
-                            "| ---- Agent was diagnosed with asthma, is this diagnosis correct? "
-                            f"{agent.has_asthma}"
+                for process_id in range(n_processes):
+                    chunk_start = chunk_indices[process_id][0]
+                    chunk_end = chunk_indices[process_id][1]
+                    p = mp.Process(
+                        target=self.worker,
+                        args=(
+                            year,
+                            year_index,
+                            month,
+                            new_agents_df,
+                            list(range(chunk_start, chunk_end)),
+                            process_id,
+                            queue
                         )
-
-                    # if no asthma, record it
-                    if agent.has_asthma:
-                        outcome_matrix.asthma_prevalence.increment(
-                            column="n_asthma",
-                            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                        )
-
-                    outcome_matrix.asthma_prevalence_contingency_table.increment(
-                        column="n_asthma" if agent.has_asthma else "n_no_asthma",
-                        filter_columns={
-                            "year": agent.year,
-                            "age": agent.age,
-                            "sex": agent.sex,
-                            "fam_history": agent.has_family_history,
-                            "abx_exposure": agent.num_antibiotic_use
-                        }
                     )
+                    processes.append(p)
 
-                    # compute utility
-                    utility = self.utility.compute_utility(agent)
-                    logger.info(f"| ---- Utility of asthma: {utility}")
-                    outcome_matrix.utility.increment(
-                        column="utility",
-                        filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                        amount=utility
-                    )
+                for p in processes:
+                    p.start()
 
-                    # compute cost
-                    cost = self.cost.compute_cost(agent)
-                    logger.info(f"| ---- Cost of asthma: {cost} CAD")
-
-                    outcome_matrix.cost.increment(
-                        column="cost",
-                        filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex},
-                        amount=cost
-                    )
-
-                    # death or emigration, assume death occurs first
-                    if self.death.agent_dies(agent):
-                        agent.alive = False
-                        outcome_matrix.death.increment(
-                            column="n_deaths",
-                            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
+                # Update the progress bars and results from the queue
+                counter = 0
+                while counter < new_agents_df.shape[0]:
+                    try:
+                        agent_id, process_id, outcome_matrix_agent = queue.get_nowait()
+                        job_bar.update(1)
+                        process_bars[process_id].update(1)
+                        process_bars[process_id].set_description(
+                            f"| -- Process {process_id}: Agent {agent_id}"
                         )
-                        logger.info(f"| ---- Agent has died at age {agent.age}")
-                    # emigration
-                    elif self.emigration.compute_probability(
-                        agent.year, agent.age, str(agent.sex)
-                    ):
-                        agent.alive = False
-                        outcome_matrix.emigration.increment(
-                            column="n_emigrants",
-                            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
-                        )
-                        logger.info(f"| ---- Agent has emigrated at age {agent.age}")
-                    else:
-                        # record alive
-                        outcome_matrix.alive.increment(
-                            column="n_alive",
-                            filter_columns={"year": agent.year, "age": agent.age, "sex": agent.sex}
-                        )
+                        outcome_matrices.append(outcome_matrix_agent)
+                        counter += 1
+                    except:
+                        pass
 
-                        # update the patient stats
-                        agent.age += 1
-                        agent.year += 1
-                        agent.year_index += 1
+                for p in processes:
+                    p.join()
 
-                        if agent.age <= max_age and agent.year_index <= max_time_horizon:
-                            logger.info(
-                                f"| -- Year: {agent.year_index + min_year - 1}, age: {agent.age}"
-                            )
+                # Make sure the progress bars close properly
+                job_bar.close()
+                for pbar in process_bars:
+                    pbar.close()
 
+            year_bar.update()
+            logger.message("Combining OutcomeMatrix list...", tqdm=True)
+            outcome_matrix = combine_outcome_matrices(outcome_matrices)
+        year_bar.close()
+        sys.stdout.write('\033[F')    # Move cursor up one line
+        sys.stdout.write('\033[2K') 
+        sys.stdout.flush()
         self.outcome_matrix = outcome_matrix
         logger.info("\nSimulation finished. Check your simulation object for results.")
-
         return outcome_matrix

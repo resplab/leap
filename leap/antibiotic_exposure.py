@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 import pandas as pd
 import numpy as np
 from leap.utils import get_data_path
@@ -58,7 +59,7 @@ class AntibioticExposure:
         for key in KEYS:
             if key not in parameters:
                 raise ValueError(f"Key {key} not found in parameters.")
-        self._parameters = parameters
+        self._parameters = copy.deepcopy(parameters)
 
     @property
     def mid_trends(self) -> DataFrameGroupBy:
@@ -75,6 +76,23 @@ class AntibioticExposure:
     @mid_trends.setter
     def mid_trends(self, mid_trends: DataFrameGroupBy):
         self._mid_trends = mid_trends
+
+    def __copy__(self):
+        return AntibioticExposure(
+            parameters=self.parameters, mid_trends=self.mid_trends
+        )
+
+    def __deepcopy__(self):
+        return AntibioticExposure(
+            parameters=copy.deepcopy(self.parameters),
+            mid_trends=copy.deepcopy(self.mid_trends)
+        )
+
+    def copy(self, deep: bool = True):
+        if deep:
+            return self.__deepcopy__()
+        else:
+            return self.__copy__()
 
     def load_abx_mid_trends(self):
         """Load the antibiotic mid trends table.

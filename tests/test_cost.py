@@ -35,9 +35,13 @@ def config():
     ]
 )
 def test_asthma_cost_constructor(parameters, exchange_rate_usd_cad, expected_parameters):
-    asthma_cost = AsthmaCost(parameters=parameters, exchange_rate_usd_cad=exchange_rate_usd_cad)
-    assert np.array_equal(asthma_cost.parameters["control"], expected_parameters["control"])
-    assert np.array_equal(asthma_cost.parameters["exac"], expected_parameters["exac"])
+    asthma_cost = AsthmaCost(
+        exac=parameters["exac"],
+        control_probs=parameters["control"],
+        exchange_rate_usd_cad=exchange_rate_usd_cad
+    )
+    assert np.array_equal(asthma_cost.control_probs, expected_parameters["control"])
+    assert np.array_equal(asthma_cost.exac, expected_parameters["exac"])
 
 
 @pytest.mark.parametrize(
@@ -97,7 +101,11 @@ def test_compute_cost(
         control_levels=control_levels,
         has_asthma=has_asthma
     )
-    asthma_cost = AsthmaCost(parameters=parameters, exchange_rate_usd_cad=exchange_rate_usd_cad)
+    asthma_cost = AsthmaCost(
+        control_probs=parameters["control"],
+        exac=parameters["exac"],
+        exchange_rate_usd_cad=exchange_rate_usd_cad
+    )
     cost = asthma_cost.compute_cost(agent)
     if ">" in expected_cost.keys():
         assert cost > expected_cost[">"]

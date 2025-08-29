@@ -1,6 +1,7 @@
 from __future__ import annotations
 import pathlib
 import os
+import copy
 import numpy as np
 import pandas as pd
 import pygrib
@@ -46,6 +47,20 @@ class PollutionTable:
     @data.setter
     def data(self, data: DataFrameGroupBy):
         self._data = data
+
+    def __copy__(self):
+        data = self.data.apply(lambda x: x).reset_index(drop=True)
+        return PollutionTable(data=data.copy().groupby("SSP"))
+
+    def __deepcopy__(self, memo):
+        data = self.data.apply(lambda x: x).reset_index(drop=True)
+        return PollutionTable(data=data.copy(deep=True).groupby("SSP"))
+
+    def copy(self, deep: bool = True) -> PollutionTable:
+        if deep:
+            return copy.deepcopy(self)
+        else:
+            return copy.copy(self)
 
     def load_pollution_data(
         self, pm25_data_path: pathlib.Path = get_data_path("processed_data/pollution")

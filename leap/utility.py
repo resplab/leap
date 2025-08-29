@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 import pandas as pd
 import numpy as np
 from leap.utils import get_data_path
@@ -61,6 +62,40 @@ class Utility:
 
         self.parameters["βexac_sev_hist"] = np.array(self.parameters["βexac_sev_hist"])
         self.parameters["βcontrol"] = np.array(self.parameters["βcontrol"])
+
+    @property
+    def parameters(self) -> dict:
+        """A dictionary containing the following keys:
+
+        * ``βcontrol``: A vector of 3 parameters to be multiplied by the control levels, i.e.
+
+          .. code-block:: python
+
+            βcontrol1 * fully_controlled +
+            βcontrol2 * partially_controlled +
+            βcontrol3 * uncontrolled
+
+        * ``βexac_sev_hist``: A vector of 4 parameters to be multiplied by the exacerbation
+          severity history, i.e.
+
+          .. code-block:: python
+          
+            βexac_sev_hist1 * mild + βexac_sev_hist2 * moderate +
+            βexac_sev_hist3 * severe + βexac_sev_hist4 * very_severe
+        """
+        return self._parameters
+    
+    @parameters.setter
+    def parameters(self, parameters: dict):
+        KEYS = ["βcontrol", "βexac_sev_hist"]
+        for key in KEYS:
+            if key not in parameters:
+                raise ValueError(f"The key '{key}' is missing in the parameters.")
+        if len(parameters["βcontrol"]) != 3:
+            raise ValueError("The length of the 'βcontrol' vector must be 3.")
+        if len(parameters["βexac_sev_hist"]) != 4:
+            raise ValueError("The length of the 'βexac_sev_hist' vector must be 4.")
+        self._parameters = copy.deepcopy(parameters)
 
     def load_eq5d(self) -> DataFrameGroupBy:
         df = pd.read_csv(get_data_path("processed_data/eq5d_canada.csv"))

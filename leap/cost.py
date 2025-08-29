@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 import numpy as np
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
@@ -14,42 +15,50 @@ class AsthmaCost:
     def __init__(
         self,
         config: dict | None = None,
-        parameters: dict | None = None,
+        exac: np.ndarray | list[float] | None = None,
+        control_probs: np.ndarray | list[float] | None = None,
         exchange_rate_usd_cad: float | None = None
     ):
         if config is not None:
-            self.parameters = config["parameters"]
-            exchange_rate_usd_cad = config["exchange_rate_usd_cad"]
-            self.parameters["exac"] = np.array(self.parameters["exac"]) * exchange_rate_usd_cad
-            self.parameters["control"] = np.array(
-                self.parameters["control"]
-            ) * exchange_rate_usd_cad
-        elif parameters is not None and exchange_rate_usd_cad is not None:
-            self.parameters = parameters
-            self.parameters["exac"] = np.array(self.parameters["exac"]) * exchange_rate_usd_cad
-            self.parameters["control"] = np.array(
-                self.parameters["control"]
-            ) * exchange_rate_usd_cad
+            parameters = copy.deepcopy(config["parameters"])
+            self.exchange_rate_usd_cad = config["exchange_rate_usd_cad"]
+            self.exac = np.array(parameters["exac"]) * self.exchange_rate_usd_cad
+            self.control_probs = np.array(
+                parameters["control"]
+            ) * self.exchange_rate_usd_cad
+        elif exac is not None and exchange_rate_usd_cad is not None and control_probs is not None:
+            self.exac = np.array(exac) * exchange_rate_usd_cad
+            self.control_probs = np.array(control_probs) * exchange_rate_usd_cad
         else:
             raise ValueError(
-                "Either config dict or parameters and exchange rate must be provided."
+                "Either config dict or control_probs, exac, and exchange rate must be provided."
             )
+    @property
+    def exchange_rate_usd_cad(self) -> float:
+        """The exchange rate from USD to CAD."""
+        return self._exchange_rate_usd_cad
+
+    @exchange_rate_usd_cad.setter
+    def exchange_rate_usd_cad(self, exchange_rate_usd_cad: float):
+        self._exchange_rate_usd_cad = exchange_rate_usd_cad
 
     @property
-    def parameters(self) -> dict:
-        """A dictionary containing the following keys:
-            * ``control``: A vector of 3 factors to multiply by the 3 control level probabilities.
-            * ``exac``: A vector of 4 factors to multiply by the 4 exacerbation severity levels.
-        """
-        return self._parameters
-    
-    @parameters.setter
-    def parameters(self, parameters: dict):
-        KEYS = ["control", "exac"]
-        for key in KEYS:
-            if key not in parameters:
-                raise ValueError(f"Parameter {key} is missing.")
-        self._parameters = parameters
+    def exac(self) -> np.ndarray:
+        """A vector of 4 factors to multiply by the 4 exacerbation severity levels."""
+        return self._exac
+
+    @exac.setter
+    def exac(self, exac: np.ndarray):
+        self._exac = exac
+
+    @property
+    def control_probs(self) -> np.ndarray:
+        """A vector of 3 factors to multiply by the 3 control level probabilities."""
+        return self._control_probs
+
+    @control_probs.setter
+    def control_probs(self, control_probs: np.ndarray):
+        self._control_probs = control_probs
 
     def compute_cost(self, agent: Agent) -> float:
         """Compute the cost in dollars for the current year due to asthma exacerbations and control.
@@ -80,11 +89,11 @@ class AsthmaCost:
             ...     has_asthma=True,
             ...     num_antibiotic_use=0
             ... )
-            >>> parameters = {
-            ...     "control": [2372, 2965, 3127],
-            ...     "exac": [130, 594, 2425, 9900]
-            ... }
-            >>> asthma_cost = AsthmaCost(parameters=parameters, exchange_rate_usd_cad=1.25)
+            >>> asthma_cost = AsthmaCost(
+            ...     control_probs=[2372, 2965, 3127],
+            ...     exac=[130, 594, 2425, 9900],
+            ...     exchange_rate_usd_cad=1.25
+            ... )
             >>> cost = asthma_cost.compute_cost(agent)
             >>> print(f"Total cost in 2027 for female aged 30: ${cost:.2f} CAD")
             Total cost in 2027 for female aged 30: $93922.62 CAD
@@ -99,7 +108,7 @@ class AsthmaCost:
             return (
                 np.dot(
                     agent.exacerbation_severity_history.current_year,
-                    self.parameters["exac"]
+                    self.exac
                 ) +
-                np.dot(control_levels.as_array(), self.parameters["control"])
+                np.dot(control_levels.as_array(), self.control_probs)
             )

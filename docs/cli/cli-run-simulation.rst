@@ -155,6 +155,26 @@ Simulation Arguments
           simulation as it runs. This is useful for debugging purposes.
         </td>
       </tr>
+      <tr>
+        <td><code class="notranslate">--n-cpu</code></td>
+        <td>all CPU minus one</td>
+        <td>By default, if multiprocessing is used, the simulation will use all available CPU cores
+          minus one. You can use this flag to specify the number of CPU cores to use. For example,
+          <code>--n-cpu 4</code> will use 4 CPU cores.
+        </td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">--min-agents-mp</code></td>
+        <td><code class="notranslate">500</code></td>
+        <td>The threshold number of agents to use multiprocessing. Multiprocessing has some
+          overhead, so it is not worth using it for small populations. By default, if the
+          population is less than <code>500</code>, then the simulation will run in a single
+          process. If the population is greater than or equal to <code>500</code>, then the
+          simulation will use multiprocessing. Set this to <code>0</code> to always use
+          multiprocessing, or set it to a very large number (e.g., <code>1e6</code>) to never
+          use multiprocessing.
+        </td>
+      </tr>
     </tbody>
   </table>
 

@@ -1,7 +1,8 @@
 import pandas as pd
+import numpy as np
 import itertools
 import pathlib
-from leap.utils import check_file
+from leap.utils import timer
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -25,6 +26,7 @@ class OutcomeTable:
     def __repr__(self):
         return self.data.__repr__()
 
+    @timer(log_level=20)
     def increment(self, column: str, filter_columns: dict | None = None, amount: float | int = 1):
         """Increment the value of a column in the table.
 
@@ -33,18 +35,68 @@ class OutcomeTable:
             amount: The amount to increment the column by.
             filter_columns: A dictionary of columns to filter by.
         """
-        df = self.data.copy(deep=True)
+
         if filter_columns is not None:
-            df_filtered = df.copy(deep=True)
-            for key, value in filter_columns.items():
-                df_filtered = df_filtered.loc[(df_filtered[key] == value)]
-            df_filtered[column] += amount
-            df.update(df_filtered)
+            f = "".join(
+                [
+                    f"({key} == '{value}') & " if isinstance(value, str) else
+                    f"({key} == {value}) & "
+                    for key, value in filter_columns.items()]
+            )[:-3]  # Remove the last '&'
+            df_filtered = self.data.query(f)
+            self.data.loc[df_filtered.index, column] += amount
         else:
-            df[column] += amount
-        self.data = df
+            self.data[column] += amount
+
         if self.group_by is not None:
             self.grouped_data = self.data.groupby(self.group_by)
+
+    def combine(self, outcome_table: "OutcomeTable", columns: list[str]):
+        """Combine two outcome tables via summation.
+        
+        This method combines the current outcome table with another ``OutcomeTable`` instance
+        by summing the values in the specified columns. The tables must have the same structure
+        and groupings.
+        
+        Args:
+            outcome_table: The outcome table to combine with this one.
+            columns: The columns to combine. These should be the columns that contain the values
+                to be summed. If the columns are not present in both tables, a ``ValueError`` will
+                be raised.
+        """
+        if self.group_by != outcome_table.group_by:
+            raise ValueError(
+                "Cannot combine outcome tables with different group_by columns."
+            )
+        if not isinstance(outcome_table, OutcomeTable):
+            raise TypeError("outcome_table must be an instance of OutcomeTable.")
+        if outcome_table.data.shape[0] != self.data.shape[0]:
+            raise ValueError(
+                "Cannot combine outcome tables with different number of rows."
+            )
+        if (
+            any(col not in self.data.columns for col in outcome_table.data.columns) or
+            any(col not in outcome_table.data.columns for col in self.data.columns)
+        ):
+            raise ValueError(
+                "Cannot combine outcome tables with different columns."
+            )
+        
+        df = self.data.copy(deep=True)
+        df = pd.merge(
+            df,
+            outcome_table.data,
+            on=[col for col in df.columns if col not in columns],
+            suffixes=("_x", "_y")
+        )
+        for column in columns:
+            df[column] = df.apply(
+                lambda x: x[f"{column}_x"] + x[f"{column}_y"],
+                axis=1
+            )
+            df.drop(columns=[f"{column}_x", f"{column}_y"], inplace=True)
+        self.data = df
+        self.grouped_data = self.data.groupby(self.group_by)
 
     def get(self, columns: str | list[str], **kwargs) -> float | int | pd.Series | pd.DataFrame:
         """Get the value of a column in the table.
@@ -85,10 +137,29 @@ class OutcomeMatrix:
         self.min_year = min_year
         self.max_year = max_year
         self.max_age = max_age
+        self.value_columns = {
+            "alive": ["n_alive"],
+            "antibiotic_exposure": ["n_antibiotic_exposure"],
+            "asthma_incidence": ["n_new_diagnoses"],
+            "asthma_prevalence": ["n_asthma"],
+            "asthma_incidence_contingency_table": ["n_asthma", "n_no_asthma"],
+            "asthma_prevalence_contingency_table": ["n_asthma", "n_no_asthma"],
+            "asthma_status": ["status"],
+            "control": ["prob"],
+            "cost": ["cost"],
+            "death": ["n_deaths"],
+            "emigration": ["n_emigrants"],
+            "exacerbation": ["n_exacerbations"],
+            "exacerbation_by_severity": ["p_exacerbations"],
+            "exacerbation_hospital": ["n_hospitalizations"],
+            "family_history": ["has_family_history"],
+            "immigration": ["n_immigrants"],
+            "utility": ["utility"]
+        }
 
         self.alive = self.create_table(
             ["year", "age", "sex", "n_alive"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -96,7 +167,7 @@ class OutcomeMatrix:
         )
         self.antibiotic_exposure = self.create_table(
             ["year", "age", "sex", "n_antibiotic_exposure"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -104,7 +175,7 @@ class OutcomeMatrix:
         )
         self.asthma_incidence = self.create_table(
             ["year", "age", "sex", "n_new_diagnoses"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -112,7 +183,7 @@ class OutcomeMatrix:
         )
         self.asthma_prevalence = self.create_table(
             ["year", "age", "sex", "n_asthma"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -159,7 +230,7 @@ class OutcomeMatrix:
         )
         self.cost = self.create_table(
             ["year", "age", "sex", "cost"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -167,7 +238,7 @@ class OutcomeMatrix:
         )
         self.death = self.create_table(
             ["year", "age", "sex", "n_deaths"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -175,7 +246,7 @@ class OutcomeMatrix:
         )
         self.emigration = self.create_table(
             ["year", "age", "sex", "n_emigrants"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -183,7 +254,7 @@ class OutcomeMatrix:
         )
         self.exacerbation = self.create_table(
             ["year", "age", "sex", "n_exacerbations"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -200,7 +271,7 @@ class OutcomeMatrix:
         )
         self.exacerbation_hospital = self.create_table(
             ["year", "age", "sex", "n_hospitalizations"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -208,7 +279,7 @@ class OutcomeMatrix:
         )
         self.family_history = self.create_table(
             ["year", "age", "sex", "has_family_history"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -216,7 +287,7 @@ class OutcomeMatrix:
         )
         self.immigration = self.create_table(
             ["year", "age", "sex", "n_immigrants"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -224,7 +295,7 @@ class OutcomeMatrix:
         )
         self.utility = self.create_table(
             ["year", "age", "sex", "utility"],
-            ["year"],
+            None,
             range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
             range(max_age + 1),
             ["F", "M"],
@@ -398,7 +469,7 @@ class OutcomeMatrix:
     def utility(self, utility: OutcomeTable):
         self._utility = utility
 
-    def create_table(self, columns: list[str], group_by: list[str], *args) -> OutcomeTable:
+    def create_table(self, columns: list[str], group_by: list[str] | None, *args) -> OutcomeTable:
         """Create an outcome table.
 
         Args:
@@ -418,7 +489,29 @@ class OutcomeMatrix:
         )
         table = OutcomeTable(df, group_by)
         return table
-    
+
+    def combine(self, outcome_matrix: "OutcomeMatrix"):
+        """Combine two outcome matrices via summation.
+
+        This method combines the outcome tables of the current instance with those of
+        another ``OutcomeMatrix`` instance by summing the values in the ``value_columns``
+        for each corresponding table. The tables must have the same structure and groupings.
+
+        Args:
+            outcome_matrix: The outcome matrix to combine with this one.
+        """
+        if not isinstance(outcome_matrix, OutcomeMatrix):
+            raise TypeError("outcome_matrix must be an instance of OutcomeMatrix.")
+        
+        attributes = [
+            key for key, value in self.__dict__.items() if isinstance(value, OutcomeTable)
+        ]
+        for attribute in attributes:
+            self.__getattribute__(attribute).combine(
+                outcome_table=outcome_matrix.__getattribute__(attribute),
+                columns=self.value_columns[attribute.removeprefix("_")]
+            )
+
     def save(self, path: pathlib.Path):
         """Save the outcome matrix to ``*.csv`` files.
 
@@ -435,3 +528,47 @@ class OutcomeMatrix:
             file_path = pathlib.Path(path.resolve(), f"outcome_matrix_{attribute.removeprefix('_')}.csv")
             self.__getattribute__(attribute).data.to_csv(file_path, index=False)
             logger.message(f"Saved {attribute.removeprefix('_')} to {file_path}.")
+
+
+def combine_outcome_tables(outcome_tables: list[OutcomeTable], column: str) -> OutcomeTable:
+    """Combine a list of outcome tables into a single outcome table.
+
+    Args:
+        outcome_tables: A list of ``OutcomeTable`` instances to combine.
+        column: The column to sum across the outcome tables.
+
+    Returns:
+        An ``OutcomeTable`` instance containing the combined data.
+    """
+    df_combined = outcome_tables[0].data.copy()
+    df_combined[column] = np.array([df.data[column] for df in outcome_tables]).sum(axis=0)
+    return OutcomeTable(df_combined, group_by=outcome_tables[0].group_by)
+
+
+def combine_outcome_matrices(outcome_matrices: list[OutcomeMatrix]) -> OutcomeMatrix:
+    """Combine a list of outcome matrices into a single outcome matrix.
+
+    Args:
+        outcome_matrices: A list of ``OutcomeMatrix`` instances to combine.
+
+    Returns:
+        An ``OutcomeMatrix`` instance containing the combined data.
+    """
+
+    combined_matrix = OutcomeMatrix(
+        until_all_die=outcome_matrices[0].until_all_die,
+        min_year=outcome_matrices[0].min_year,
+        max_year=outcome_matrices[0].max_year,
+        max_age=outcome_matrices[0].max_age
+    )
+    
+    for attribute in combined_matrix.__dict__.keys():
+        if isinstance(getattr(combined_matrix, attribute), OutcomeTable):
+            outcome_tables = [getattr(matrix, attribute) for matrix in outcome_matrices]
+            combined_table = combine_outcome_tables(
+                outcome_tables=outcome_tables,
+                column=combined_matrix.value_columns[attribute.removeprefix("_")][0]
+            )
+            setattr(combined_matrix, attribute, combined_table)
+    
+    return combined_matrix

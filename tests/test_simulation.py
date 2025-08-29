@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from leap.agent import Agent
 from leap.exacerbation import ExacerbationHistory
-from leap.simulation import Simulation
+from leap.simulation import Simulation, MIN_AGENTS_MP
 from leap.outcome_matrix import OutcomeMatrix
 from leap.logger import get_logger
 from tests.utils import __test_dir__
@@ -164,7 +164,8 @@ def test_simulation_generate_initial_asthma(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
     config["prevalence"]["parameters"] = prevalence_parameters
@@ -305,7 +306,8 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
     config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
@@ -439,7 +441,8 @@ def test_simulation_update_asthma_effects(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
     config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
@@ -476,7 +479,7 @@ def test_simulation_update_asthma_effects(
         expected_outcome_matrix_control
     )
     pd.testing.assert_frame_equal(
-        outcome_matrix.exacerbation.grouped_data.get_group((min_year)),
+        outcome_matrix.exacerbation.data.loc[outcome_matrix.exacerbation.data["year"] == min_year],
         expected_outcome_matrix_exacerbation,
         check_exact=False,
         rtol=0.15
@@ -562,7 +565,8 @@ def test_reassess_asthma_diagnosis(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
     config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
@@ -656,7 +660,8 @@ def test_simulation_get_new_agents(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     simulation = Simulation(config)
     new_agents_df = simulation.get_new_agents(year=year)
@@ -794,11 +799,15 @@ def test_simulation_get_new_agents(
         )
     ]
 )
+@pytest.mark.parametrize(
+    "min_agents_mp",
+    [0, MIN_AGENTS_MP]
+)
 def test_run_simulation_one_year(
-    config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
-    antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, family_history_parameters,
-    exacerbation_hyperparameter_β0_μ, control_parameter_θ, death_parameters,
-    prevalence_parameters, utility_parameters, cost_parameters, year_index,
+    config, min_agents_mp, min_year, time_horizon, province, population_growth_type,
+    num_births_initial, max_age, antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,
+    family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,
+    death_parameters, prevalence_parameters, utility_parameters, cost_parameters, year_index,
     expected_asthma_incidence_total, expected_asthma_status_total, expected_asthma_cost,
     expected_death, expected_emigration, expected_exacerbation_total, expected_family_history,
     expected_immigration, expected_utility
@@ -858,7 +867,8 @@ def test_run_simulation_one_year(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
     config["incidence"]["parameters"]["β_fam_hist"] = incidence_parameter_β_fam_hist
@@ -873,9 +883,9 @@ def test_run_simulation_one_year(
     simulation = Simulation(config)
     outcome_matrix = simulation.run(
         seed=1,
-        until_all_die=False
+        until_all_die=False,
+        min_agents_mp=min_agents_mp
     )
-    logger.info(outcome_matrix.utility.data)
     assert outcome_matrix.antibiotic_exposure.data.shape == (2 * 1 * (max_age + 1), 4)
     np.testing.assert_array_equal(
         outcome_matrix.antibiotic_exposure.data["n_antibiotic_exposure"],
@@ -1010,7 +1020,7 @@ def test_run_simulation_one_year(
                     "year": [2024] * 10 + [2025] * 10,
                     "age": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4] * 2,
                     "sex": ["F", "M"] * 10,
-                    "cost": [0.0] * 8 + [664, 996] + [0.0] * 8 + [724, 1096]
+                    "cost": [0.0] * 8 + [664, 996] + [0.0] * 8 + [830, 996]
                 }
             ),
             pd.DataFrame(
@@ -1042,8 +1052,12 @@ def test_run_simulation_one_year(
         )
     ]
 )
+@pytest.mark.parametrize(
+    "min_agents_mp",
+    [0, MIN_AGENTS_MP]
+)
 def test_run_simulation_two_years(
-    config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
+    config, min_agents_mp, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
     antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, family_history_parameters,
     exacerbation_hyperparameter_β0_μ, control_parameter_θ, death_parameters, prevalence_parameters,
     cost_parameters, expected_alive, expected_antibiotic_exposure, expected_asthma_cost,
@@ -1069,13 +1083,12 @@ def test_run_simulation_two_years(
     Setting the exacerbation hyperparameter ``β0_μ = 20.0`` ensures that every agent aged 4 has an
     asthma exacerbation.
 
-    Setting the ``time_horizon=2`` means that in the first year there should be 0 immigrants,
-    and in the second year there should be 1 immigrant.
-
     For the years 2024 and 2025, province "CA", growth type "M3", ages 0 - 4, the probability of
     emigration is 0. See ``processed_data/migration/emigration_table.csv``.
 
     Setting the ``prevalence`` parameters below ensures that the prevalence is 0.
+
+    Immigration: There should be 0 immigrants in 2024, and 1 immigrant aged 1-4 in the year 2025.
     """
 
     config["simulation"] = {
@@ -1084,7 +1097,8 @@ def test_run_simulation_two_years(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
 
     config["antibiotic_exposure"]["parameters"] = antibiotic_exposure_parameters
@@ -1099,15 +1113,32 @@ def test_run_simulation_two_years(
     simulation = Simulation(config)
     outcome_matrix = simulation.run(
         seed=1,
-        until_all_die=False
+        until_all_die=False,
+        min_agents_mp=min_agents_mp
     )
 
-    for year, age in zip(range(min_year, min_year + time_horizon), range(max_age + 1)):
+    for age in range(0, max_age + 1):
+        # Check that everyone in the first year is alive
         assert outcome_matrix.alive.get(
-            columns="n_alive", year=year, age=age
+            columns="n_alive", year=min_year, age=age
         ).sum() == expected_alive.loc[
-            (expected_alive["age"] == age) & (expected_alive["year"] == year)
+            (expected_alive["age"] == age) & (expected_alive["year"] == min_year)
         ]["n_alive"].sum()
+
+        # Check that the number alive in the second year is within 1 of the expected value
+        # (there is 1 immigrant in the second year, but the age is random)
+        assert np.abs(outcome_matrix.alive.get(
+            columns="n_alive", year=min_year + 1, age=age
+        ).sum() - expected_alive.loc[
+            (expected_alive["age"] == age) & (expected_alive["year"] == min_year + 1)
+        ]["n_alive"].sum()) <= 1
+
+    # Assert that the total number alive in the second year is correct
+    assert outcome_matrix.alive.get(
+        columns="n_alive", year=min_year + 1
+    ).sum() == expected_alive.loc[
+        expected_alive["year"] == min_year + 1
+    ]["n_alive"].sum()
 
     pd.testing.assert_frame_equal(
         outcome_matrix.antibiotic_exposure.data,
@@ -1155,18 +1186,18 @@ def test_run_simulation_two_years(
 
     assert outcome_matrix.exacerbation.data.shape == (2 * time_horizon * (max_age + 1), 4)
     assert outcome_matrix.exacerbation.data["n_exacerbations"].sum() > expected_exacerbation_total
-    # assert outcome_matrix.cost.get(
-    #     columns="cost", year=min_year + 1, age=max_age
-    # ).sum() <= expected_asthma_cost.loc[
-    #     (expected_asthma_cost["age"] == max_age) &
-    #     (expected_asthma_cost["year"] == min_year + 1)
-    # ]["cost"].sum()
-    # assert outcome_matrix.cost.get(
-    #     columns="cost", year=min_year + 1, age=max_age
-    # ).sum() >= expected_asthma_cost.loc[
-    #     (expected_asthma_cost["age"] == max_age) &
-    #     (expected_asthma_cost["year"] == min_year)
-    # ]["cost"].sum()
+    assert outcome_matrix.cost.get(
+        columns="cost", year=min_year + 1, age=max_age
+    ).sum() <= expected_asthma_cost.loc[
+        (expected_asthma_cost["age"] == max_age) &
+        (expected_asthma_cost["year"] == min_year + 1)
+    ]["cost"].sum()
+    assert outcome_matrix.cost.get(
+        columns="cost", year=min_year + 1, age=max_age
+    ).sum() >= expected_asthma_cost.loc[
+        (expected_asthma_cost["age"] == max_age) &
+        (expected_asthma_cost["year"] == min_year)
+    ]["cost"].sum()
 
 
 
@@ -1185,8 +1216,13 @@ def test_run_simulation_two_years(
         )
     ]
 )
+@pytest.mark.parametrize(
+    "min_agents_mp",
+    [0, MIN_AGENTS_MP]
+)
 def test_run_simulation_full(
-    config, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age
+    config, min_agents_mp, min_year, time_horizon, province, population_growth_type,
+    num_births_initial, max_age
 ):
 
     config["simulation"] = {
@@ -1195,12 +1231,14 @@ def test_run_simulation_full(
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
-        "max_age": max_age
+        "max_age": max_age,
+        "until_all_die": False
     }
     simulation = Simulation(config)
     outcome_matrix = simulation.run(
         seed=1,
-        until_all_die=False
+        until_all_die=False,
+        min_agents_mp=min_agents_mp
     )
 
     assert outcome_matrix.immigration.data.shape == (2 * time_horizon * (max_age + 1), 4)

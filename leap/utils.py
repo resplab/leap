@@ -1,18 +1,96 @@
 import numpy as np
 import pandas as pd
+import functools
+import time
 import pathlib
 import math
 import os
+import sys
 import uuid
+from tqdm import tqdm
 from scipy.stats import logistic
 import importlib.resources as pkg_resources
 from typing import Callable, Tuple
+import multiprocessing as mp
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
 
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
+
+
+
+def get_chunk_indices(
+    n: int, chunk_size: int = 10
+) -> list[Tuple[int, int]]:
+    """Get the indices for chunks of size ``chunk_size`` from a total of ``n`` items.
+
+    Args:
+        n: The total number of items.
+        chunk_size: The size of each chunk.
+
+    Returns:
+        A list of tuples, where each tuple contains the start and end indices for each chunk.
+
+    Examples:
+
+        >>> get_chunk_indices(n=25, chunk_size=10)
+        [(0, 10), (10, 20), (20, 25)]
+    """
+    return [(i, min(i + chunk_size, n)) for i in range(0, n, chunk_size)]
+
+
+def create_process_bars(
+    chunk_indices: list[Tuple[int, int]],
+    position_offset: int = 0
+) -> list[tqdm]:
+    """Create a list of tqdm progress bars for each process.
+
+    We have a main job bar that shows the total progress, and a sub-bar for each process:
+
+    Job Bar: 96% [=================== ] | 240/250
+    Process 1: 100% [=================] | 63/63
+    Process 2: 95%  [================ ] | 60/63
+    Process 3: 100% [=================] | 63/63
+    Process 4: 89%  [==============   ] | 54/61
+    
+
+    Args:
+        chunk_indices: A list of tuples containing the start and end indices for each chunk.
+        position_offset: The position offset for the progress bars in the tqdm display.
+
+    Returns:
+        A list of tqdm progress bars, one for each chunk.
+    """
+    return [
+        tqdm(
+            total=(chunk_indices[i][1] - chunk_indices[i][0]),
+            position=i + position_offset,
+            desc=f"| -- Process {i}",
+            leave=False,
+            file=sys.stdout
+        ) for i in range(len(chunk_indices))
+    ]
+
+
+
+def timer(log_level: int = 20) -> Callable:
+    def timer_decorator(func: Callable) -> Callable:
+        """Print the runtime of the decorated function"""
+        @functools.wraps(func)
+        def wrapper_timer(*args, **kwargs):
+            start_time = time.perf_counter()
+            value = func(*args, **kwargs)
+            end_time = time.perf_counter()
+            run_time = end_time - start_time
+            if log_level == 25:
+                logger.message(f"Finished {func.__name__}() in {run_time:.6f} seconds")
+            elif log_level == 20:
+                logger.info(f"Finished {func.__name__}() in {run_time:.6f} seconds")
+            return value
+        return wrapper_timer
+    return timer_decorator
 
 
 class UUID4:

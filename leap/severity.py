@@ -91,7 +91,7 @@ class ExacerbationSeverity:
                 raise ValueError(f"The key '{key}' is missing in the hyperparameters.")
         if len(hyperparameters["α"]) != 4:
             raise ValueError("The length of the 'α' vector must be 4.")
-        self._hyperparameters = hyperparameters
+        self._hyperparameters = copy.deepcopy(hyperparameters)
 
     @property
     def parameters(self) -> dict:
@@ -110,7 +110,7 @@ class ExacerbationSeverity:
         for key in KEYS:
             if key not in parameters:
                 raise ValueError(f"The key '{key}' is missing in the parameters.")
-        self._parameters = parameters
+        self._parameters = copy.deepcopy(parameters)
 
     @property
     def severity_levels(self) -> SeverityLevels:

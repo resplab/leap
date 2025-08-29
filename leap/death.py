@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 import pandas as pd
 import numpy as np
 from leap.utils import get_data_path, check_year, check_province
@@ -47,7 +48,7 @@ class Death:
         for key in KEYS:
             if key not in parameters:
                 raise ValueError(f"Parameter {key} is missing.")
-        self._parameters = parameters
+        self._parameters = copy.deepcopy(parameters)
 
     @property
     def life_table(self) -> DataFrameGroupBy:
