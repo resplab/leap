@@ -34,7 +34,7 @@ logger = get_logger(__name__)
 
 
 MIN_AGENTS_MP = 500
-mp.set_start_method("fork")
+mp.set_start_method("fork", force=True)
 
 
 class Simulation:
