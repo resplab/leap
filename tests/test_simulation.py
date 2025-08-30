@@ -680,7 +680,7 @@ def test_simulation_get_new_agents(
         "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
         "antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,"
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
-        "death_parameters, prevalence_parameters, utility_parameters, cost_parameters,"
+        "prevalence_parameters, utility_parameters, cost_parameters,"
         "year_index, expected_asthma_incidence_total, expected_asthma_status_total,"
         "expected_asthma_cost, expected_death, expected_emigration, expected_exacerbation_total,"
         "expected_family_history, expected_immigration, expected_utility"
@@ -712,11 +712,6 @@ def test_simulation_get_new_agents(
             {"p": 1.0}, # family_history_parameters
             5.0, # exacerbation_hyperparameter_β0_μ
             [-1 * 10**5, -1 * 10**5], # control_parameter_θ
-            {
-                "β0": -1,
-                "β1": -1,
-                "β2": -1
-            },
             {
                 "β0": -20,
                 "βsex": -20,
@@ -807,7 +802,7 @@ def test_run_simulation_one_year(
     config, min_agents_mp, min_year, time_horizon, province, population_growth_type,
     num_births_initial, max_age, antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,
     family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,
-    death_parameters, prevalence_parameters, utility_parameters, cost_parameters, year_index,
+    prevalence_parameters, utility_parameters, cost_parameters, year_index,
     expected_asthma_incidence_total, expected_asthma_status_total, expected_asthma_cost,
     expected_death, expected_emigration, expected_exacerbation_total, expected_family_history,
     expected_immigration, expected_utility
@@ -875,7 +870,6 @@ def test_run_simulation_one_year(
     config["family_history"]["parameters"] = family_history_parameters
     config["exacerbation"]["hyperparameters"]["β0_μ"] = exacerbation_hyperparameter_β0_μ
     config["control"]["parameters"]["θ"] = control_parameter_θ
-    config["death"]["parameters"] = death_parameters
     config["prevalence"]["parameters"] = prevalence_parameters
     config["utility"]["parameters"] = utility_parameters
     config["cost"]["parameters"] = cost_parameters
@@ -940,7 +934,7 @@ def test_run_simulation_one_year(
         "min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,"
         "antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,"
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
-        "death_parameters, prevalence_parameters, cost_parameters,"
+        "prevalence_parameters, cost_parameters,"
         "expected_alive, expected_antibiotic_exposure,"
         "expected_asthma_cost, expected_death, expected_emigration, expected_exacerbation_total,"
         "expected_family_history, expected_immigration_total"
@@ -971,11 +965,6 @@ def test_run_simulation_one_year(
             {"p": 1.0},
             5.0,
             [-1 * 10**5, -1 * 10**5],
-            {
-                "β0": -1,
-                "β1": -1,
-                "β2": -1
-            },
             {
                 "β0": -20,
                 "βsex": -20,
@@ -1059,7 +1048,7 @@ def test_run_simulation_one_year(
 def test_run_simulation_two_years(
     config, min_agents_mp, min_year, time_horizon, province, population_growth_type, num_births_initial, max_age,
     antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, family_history_parameters,
-    exacerbation_hyperparameter_β0_μ, control_parameter_θ, death_parameters, prevalence_parameters,
+    exacerbation_hyperparameter_β0_μ, control_parameter_θ, prevalence_parameters,
     cost_parameters, expected_alive, expected_antibiotic_exposure, expected_asthma_cost,
     expected_death, expected_emigration, expected_exacerbation_total, expected_family_history,
     expected_immigration_total
@@ -1106,7 +1095,6 @@ def test_run_simulation_two_years(
     config["family_history"]["parameters"] = family_history_parameters
     config["exacerbation"]["hyperparameters"]["β0_μ"] = exacerbation_hyperparameter_β0_μ
     config["control"]["parameters"]["θ"] = control_parameter_θ
-    config["death"]["parameters"] = death_parameters
     config["prevalence"]["parameters"] = prevalence_parameters
     config["cost"]["parameters"] = cost_parameters
 

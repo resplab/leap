@@ -45,11 +45,7 @@
         "exchange_rate_usd_cad": 1.66
     },
     "death": {
-        "parameters": {
-            "β0": 0,
-            "β1": 0,
-            "β2": 0
-        }
+        "parameters": {}
     },
     "exacerbation": {
         "hyperparameters": {
