@@ -16,35 +16,23 @@ def config():
 
 
 @pytest.mark.parametrize(
-    "parameters, province, starting_year",
+    "province, starting_year",
     [
         (
-            {
-                "β0": 0,
-                "β1": 0,
-                "β2": 0
-            },
             "BC",
             2024
         ),
     ]
 )
-def test_death_constructor(config, parameters, province, starting_year):
-    death = Death(config=config["death"], province=province, starting_year=starting_year)
-    assert death.parameters["β0"] == parameters["β0"]
-    assert death.parameters["β1"] == parameters["β1"]
-    assert death.parameters["β2"] == parameters["β2"]
+def test_death_constructor(config, province, starting_year):
+    death = Death(province=province, starting_year=starting_year)
+    assert death.life_table is not None
 
 
 @pytest.mark.parametrize(
-    "parameters, province, starting_year, year, year_index, sex, age, is_dead",
+    "province, starting_year, year, year_index, sex, age, is_dead",
     [
         (
-            {
-                "β0": 1,
-                "β1": 1,
-                "β2": 1
-            },
             "BC",
             2024,
             2024,
@@ -54,11 +42,6 @@ def test_death_constructor(config, parameters, province, starting_year):
             True
         ),
         (
-            {
-                "β0": 0,
-                "β1": 0,
-                "β2": 0
-            },
             "BC",
             2024,
             2025,
@@ -70,9 +53,9 @@ def test_death_constructor(config, parameters, province, starting_year):
     ]
 )
 def test_death_agent_dies(
-    config, parameters, province, starting_year, year, year_index, sex, age, is_dead
+    config, province, starting_year, year, year_index, sex, age, is_dead
 ):
-    death = Death(parameters=parameters, province=province, starting_year=starting_year)
+    death = Death(province=province, starting_year=starting_year)
     agent = Agent(
         sex=sex,
         age=age,

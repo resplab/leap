@@ -94,7 +94,7 @@ class Simulation:
         self.immigration = Immigration(
             self.min_year, self.province, self.population_growth_type, self.max_age
         )
-        self.death = Death(config["death"], self.province, self.min_year)
+        self.death = Death(self.province, self.min_year)
         self.incidence = Incidence(config["incidence"])
         self.prevalence = Prevalence(config["prevalence"])
         self.reassessment = Reassessment(self.min_year, self.province)
