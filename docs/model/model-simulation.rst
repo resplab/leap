@@ -372,7 +372,7 @@ where :math:`x_4` is the number of exacerbations at severity level 4.
 
 
 Iterating Over Lifetime
-=========================
+************************
 
 For each agent, we simulate their lifetime by iterating over each year of their life. We start with
 the year they were born or immigrated, and we continue until they reach the maximum age or
