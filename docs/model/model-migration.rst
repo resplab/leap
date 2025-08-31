@@ -1,3 +1,5 @@
+
+.. _migration-model:
 ===============================
 Immigration / Emigration Model
 ===============================

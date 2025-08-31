@@ -1,3 +1,5 @@
+.. _exacerbation-model:
+
 ===========================
 Asthma Exacerbations Model
 ===========================

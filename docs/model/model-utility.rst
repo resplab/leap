@@ -1,3 +1,5 @@
+.. _utility-model:
+
 =================
 Utility Model
 =================
