@@ -19,5 +19,6 @@ outcomes over a lifetime.
   model-occurrence
   model-control
   model-exacerbation
+  model-cost
   model-utility
   model-pollution
