@@ -48,8 +48,8 @@ Subsequent Years
 
 For all subsequent years, we create a list of agents who are either born in that year or who
 immigrated to the province in that year. The number of births in subsequent years is determined by
-the :ref:`birth_model`, which factors in the population growth type and the number of births
-in the previous year. The number of immigrants is determined by the :ref:`immigration_model`.
+the :ref:`birth-model`, which factors in the population growth type and the number of births
+in the previous year. The number of immigrants is determined by the :ref:`migration-model`.
 
 Example
 *************
