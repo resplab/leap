@@ -388,5 +388,223 @@ During a given year, the following events can occur:
 5. Agent finds out that previous asthma diagnosis was incorrect.
 6. Agent emigrates to another province or country.
 
+Let's begin the simulation.
 
+.. _step-1-lifetime-iteration:
+
+Step 1: Check if agent has asthma
+---------------------------------------------------
+
+If the agent has asthma, go to Step 7. If not continue to Step 2.
+
+Step 2: Check if agent gets a new asthma diagnosis
+---------------------------------------------------
+
+We use the asthma incidence model to determine if the agent gets a new asthma diagnosis
+in the current year of their lifetime. If they do not, skip to Step 4. If they do, we
+set the age of diagnosis to the current age of the agent and go to Step 3.
+
+Step 3: Compute the control levels
+---------------------------------------------------
+
+We next determine the asthma control levels for the agent using the :ref:`control-model`.
+The asthma control levels give the probability of the agent having fully-controlled,
+partially-controlled, or uncontrolled asthma:
+
+.. math::
+
+    k &= 0: \text{fully-controlled asthma} \\
+    k &= 1: \text{partially-controlled asthma} \\
+    k &= 2: \text{uncontrolled asthma}
+
+
+The probabilities of each control level are given by ordinal regression, where y = control level:
+
+.. math::
+
+    P(y \leq k) &= \sigma(\theta_k - \eta) \\
+    P(y = k) &= P(y \leq k) - P(y < k + 1) \\
+              &= \sigma(\theta_k - \eta) - \sigma(\theta_{k+1} - \eta)
+
+
+where:
+
+.. math::
+
+    \eta = \beta_0 + 
+        \text{age} \cdot \beta_{\text{age}} + 
+        \text{sex} \cdot \beta_{\text{sex}} +
+        \text{age} \cdot \text{sex} \cdot \beta_{\text{sexage}} + 
+        \text{age}^2 \cdot \text{sex} \cdot \beta_{\text{sexage}^2} + 
+        \text{age}^2 \cdot \beta_{\text{age}^2}
+
+
+Step 4: Compute the number of asthma exacerbations in the current year
+-----------------------------------------------------------------------
+
+To compute the number of asthma exacerbations in the current year, we use the
+:ref:`exacerbation-model`, which takes into account the agent's asthma control level, age, and sex,
+as well as the current year. The probability of having :math:`n` exacerbations is given by a
+Poisson distribution:
+
+.. math::
+
+    P(n = k) = \dfrac{\lambda^{k}e^{-\lambda}}{k!}
+
+We determine the expected number of exacerbations, :math:`\lambda`, using the following formula:
+
+.. math::
+
+    \lambda &= e^{\mu} \\
+    \mu &= \beta_0 +
+        \beta_{\text{age}} \cdot \text{age} +
+        \beta_{\text{sex}} \cdot \text{sex} \\
+        &+\beta_{uc} \cdot P(\text{uncontrolled}) +
+        \beta_{pc} \cdot P(\text{partially controlled}) +
+        \beta_{c} \cdot P(\text{fully controlled}) \\
+        &+\log(\alpha(\text{year}, \text{sex}, \text{age}))
+
+If the number of exacerbations is ``0``, skip to Step 8. Otherwise, go to Step 5.
+
+
+Step 5: Compute the severity of the asthma exacerbations in the current year
+-----------------------------------------------------------------------------
+
+There are four levels of severity for asthma exacerbations:
+
+.. math::
+
+    k &= 1: \text{mild} \\
+    k &= 2: \text{moderate} \\
+    k &= 3: \text{severe} \\
+    k &= 4: \text{very severe / hospitalization}
+
+If the agent has been previously hospitalized due to asthma:
+
+.. math::
+
+    P(k = 4 \mid t) &= \begin{cases}
+        P(k = 4 \mid t - 1) \cdot \beta_{\text{prevhospped}} & \text{if age} < 14 \\
+        P(k = 4 \mid t - 1) \cdot \beta_{\text{prevhospadult}} & \text{if age} \geq 14
+    \end{cases} \\
+    P(k = 1 \mid t) &= P(k = 1 \mid t - 1) \cdot (1 - P(k = 4 \mid t)) \\
+    P(k = 2 \mid t) &= P(k = 2 \mid t - 1) \cdot (1 - P(k = 4 \mid t)) \\
+    P(k = 3 \mid t) &= P(k = 3 \mid t - 1) \cdot (1 - P(k = 4 \mid t))
+
+
+Otherwise, we use the initial probabilities of each severity level. Then, to determine the
+number of exacerbations of each severity level, we use a multinomial distribution:
+
+.. math::
+
+    p(x_1, x_2, x_3, x_4; n, p) = 
+        \dfrac{n!}{x_1! x_2! x_3! x_4!} \prod_{i=1}^4 P(k = i)^{x_i}, \quad \text{where} \quad \sum_{i=1}^4 x_i = n
+
+
+Step 6: Update the number of hospitalizations
+-----------------------------------------------------------------------------
+
+We add the total previous hospitalizations to the current year's number of exacerbations at
+severity level 4:
+
+.. math::
+
+    \text{hospitalizations} = \text{previous hospitalizations} + x_4
+
+where :math:`x_4` is the number of exacerbations at severity level 4.
+Continue to Step 8.
+
+Step 7: Reassess asthma diagnosis
+---------------------------------------------------
+
+If the agents has been diagnosed with asthma, we want to check if they were misdiagnosed, or if
+they lose their diagnosis. For this we use a Bernoulli distribution:
+
+.. math::
+
+    p &:= \text{probability of a person with asthma keeping their diagnosis} \\
+    P(\text{agent keeps diagnosis}) &= p \\
+    P(\text{agent loses diagnosis}) &= q = 1 - p
+
+Step 8: Compute utility
+---------------------------
+
+Utility is a measure of the agent's quality of life, which can be affected by asthma control,
+exacerbations, and hospitalizations. We compute the utility for the agent in the current year
+using the :ref:`utility-model`:
+
+.. math::
+
+    u := u_{\text{baseline}} - A \cdot (d_{\text{exacerbation}} - d_{\text{control}})
+
+where:
+
+* :math:`u_{\text{baseline}}` is the baseline utility for a person of a given age and sex
+  (without asthma)
+* :math:`d_{\text{exacerbation}}` is the disutility due to asthma exacerbations
+* :math:`d_{\text{control}}` is the disutility due to asthma control levels
+* :math:`A` is a boolean indicating whether the person has asthma
+
+
+Step 9: Compute cost
+---------------------------
+
+Next, we compute the cost due to asthma for the agent in Canadian dollars using the
+:ref:`cost-model`:
+
+.. math::
+
+  \text{cost} = \sum_{S=1}^4 n_E(S) \cdot \text{cost}_E(S) + 
+    \sum_{L=1}^3 P(L) \cdot \text{cost}_C(L)
+
+
+where:
+
+* :math:`n_E(S)` is the number of exacerbations at severity level :math:`S`
+* :math:`\text{cost}_E(S)` is the cost of an exacerbation at severity level :math:`S`
+* :math:`P(L)` is the probability of being at asthma control level :math:`L`
+* :math:`\text{cost}_C(L)` is the cost of being at asthma control level :math:`L`
+
+Step 10: Check if agent dies
+-------------------------------
+
+We use the :ref:`mortality-model` to determine if the agent dies in the current year of their lifetime.
+If the agent dies, we finish simulating that agent and go on to the next agent. If the agent does
+not die, we increment their age by 1 and go back to :ref:`step-1-lifetime-iteration` to repeat the
+process for the next year of their life.
+
+To compute the probability of death, we use the following formula:
+
+.. math::
+
+  \sigma^{-1}(q_x(\text{sex}, \text{age})) = 
+      \sigma^{-1}(q_{x_0}(\text{sex}, \text{age})) -
+      \beta_{\text{sex}}(\text{year} - \text{year}_0)
+
+where:
+
+* :math:`q_x` is the probability of death between age :math:`x` and :math:`x + 1`
+* :math:`\sigma^{-1}` is the logit function
+* :math:`q_{x_0}` is the baseline probability of death between age :math:`x_0` and :math:`x_0 + 1`,
+  where :math:`x_0` is the age in the base year :math:`\text{year}_0`
+* :math:`\text{year}` is the current year in the simulation
+* :math:`\text{year}_0` is the starting year in the simulation
+
+Finally, we determine if the agent dies using a Bernoulli distribution:
+
+.. math::
+
+  \text{is_dead} \sim \text{Bernoulli}(q_x(\text{sex}, \text{age}))
+
+Step 11: Check if agent emigrates
+-----------------------------------
+
+We use the :ref:`migration-model` to determine if the agent emigrates to another province or country
+in the current year of their lifetime. If the agent emigrates, we finish simulating that agent and
+go on to the next agent. If the agent does not emigrate, we increment their age by 1 and go back to
+:ref:`step-1-lifetime-iteration` to repeat the process for the next year of their life.
+
+.. math::
+
+  \text{emigrates} \sim \text{Bernoulli}(p_{\text{emigrate}}(\text{sex}, \text{age}, \text{year}))
 
