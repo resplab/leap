@@ -1,5 +1,13 @@
+================
 ``config.json``
 ================
+
+The ``config.json`` file contains the parameters used in the simulation.
+
+.. warning::
+
+    Users should NOT edit this file, with the exception of the ``simulation`` section. All the
+    other parameters have been computed from fitting statistical models or from other papers.
 
 .. code-block:: json
 
