@@ -23,12 +23,9 @@ def config():
                 "β0_σ": 0.0000001
             },
             {
-                "βage": 0.0,
-                "βsex": 0.0,
                 "βcontrol_C": -1.671,
                 "βcontrol_PC": -0.9781,
                 "βcontrol_UC": -0.5727,
-                "β0_calibration": 0.0,
                 "min_year": 2001
             },
             "BC"
@@ -39,8 +36,6 @@ def test_exacerbation_constructor(config, hyperparameters, parameters, province)
     exacerbation = Exacerbation(config=config, province=province)
     assert exacerbation.hyperparameters["β0_μ"] == hyperparameters["β0_μ"]
     assert exacerbation.hyperparameters["β0_σ"] == hyperparameters["β0_σ"]
-    assert exacerbation.parameters["βage"] == parameters["βage"]
-    assert exacerbation.parameters["βsex"] == parameters["βsex"]
     assert round_number(
         exacerbation.parameters["βcontrol_C"], sigdigits=4
     ) == parameters["βcontrol_C"]
@@ -52,7 +47,6 @@ def test_exacerbation_constructor(config, hyperparameters, parameters, province)
     ) == parameters["βcontrol_UC"]
     assert exacerbation.parameters["β0"] < 50
     assert exacerbation.parameters["β0"] > -50
-    assert exacerbation.parameters["β0_calibration"] == parameters["β0_calibration"]
     assert exacerbation.parameters["min_year"] == parameters["min_year"]
     assert exacerbation.calibration_table.get_group(
         (parameters["min_year"] - 1, 0)

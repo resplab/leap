@@ -82,10 +82,6 @@ class Exacerbation:
 
         * ``β0``: float, a constant parameter, randomly selected from a normal distribution
           with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
-        * ``β0_calibration``: float, the parameter for the calibration term.
-        * ``βage``: float, the parameter for the age term.
-        * ``βsex``: float, the parameter for the sex term.
-        * ``βcontrol``: float, the parameter for the asthma control term.
         * ``βcontrol_C``: float, the parameter for the controlled asthma term.
         * ``βcontrol_PC``: float, the parameter for the partially-controlled asthma term.
         * ``βcontrol_UC``: float, the parameter for the uncontrolled asthma term.
@@ -97,7 +93,7 @@ class Exacerbation:
     @parameters.setter
     def parameters(self, parameters: dict):
         KEYS = [
-            "β0_calibration", "βage", "βsex", "βcontrol", "βcontrol_C", "βcontrol_PC", "βcontrol_UC"
+            "βcontrol_C", "βcontrol_PC", "βcontrol_UC"
         ]
         for key in KEYS:
             if key not in parameters:
@@ -116,7 +112,7 @@ class Exacerbation:
         
         .. math::
 
-            \lambda = \alpha \cdot e^{\beta_0} e^{\beta_{a} a} e^{\beta_{s} s} \prod_{i=1}^3 e^{\beta_i c_i} 
+            \lambda = \alpha \cdot e^{\beta_0} \prod_{i=1}^3 e^{\beta_i c_i} 
 
         See ``exacerbation_calibration.csv``.
         """
@@ -153,7 +149,7 @@ class Exacerbation:
         
             .. math::
 
-                \lambda = \alpha \cdot e^{\beta_0} e^{\beta_{a} a} e^{\beta_{s} s} \prod_{i=1}^3 e^{\beta_i c_i} 
+                \lambda = \alpha \cdot e^{\beta_0} \prod_{i=1}^3 e^{\beta_i c_i} 
         """
 
         df = pd.read_csv(
@@ -211,9 +207,6 @@ class Exacerbation:
 
         μ = (
             self.parameters["β0"] +
-            int(not initial) * self.parameters["β0_calibration"] +
-            age * self.parameters["βage"] +
-            int(sex) * self.parameters["βsex"] +
             control_levels.uncontrolled * self.parameters["βcontrol_UC"] +
             control_levels.partially_controlled * self.parameters["βcontrol_PC"] +
             control_levels.fully_controlled * self.parameters["βcontrol_C"] +

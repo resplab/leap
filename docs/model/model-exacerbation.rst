@@ -190,14 +190,6 @@ where:
      - the calibration multiplier that adjusts the model to match the hospitalization data
    * - :math:`\beta_0`
      - a constant randomly chosen from the normal distribution :math:`\mathcal{N}(0, 1)`
-   * - :math:`a`
-     - age
-   * - :math:`\beta_a`
-     - age constant
-   * - :math:`s`
-     - sex
-   * - :math:`\beta_{s}`
-     - sex constant
    * - :math:`c_i`
      - relative time spent in control level :math:`i`
    * - :math:`\beta_i`
@@ -212,7 +204,7 @@ We are interested in calculating :math:`\alpha`. If we rewrite the equation, the
 
 .. math::
 
-    \lambda = \alpha \cdot e^{\beta_0} e^{\beta_{a} a} e^{\beta_{s} s} \prod_{i=1}^3 e^{\beta_i c_i} 
+    \lambda = \alpha \cdot e^{\beta_0} \prod_{i=1}^3 e^{\beta_i c_i} 
 
 
 How do we obtain :math:`\alpha`? We again assume that the mean value has the same form as in a
