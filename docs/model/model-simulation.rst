@@ -535,14 +535,22 @@ using the :ref:`utility-model`:
 
 .. math::
 
-    u := u_{\text{baseline}} - A \cdot (d_{\text{exacerbation}} - d_{\text{control}})
+    u := u_{\text{baseline}} - A \cdot \left(
+      \sum_{S=1}^{4} d_E(S) \cdot n_E(S) + \sum_{L=1}^{3} d_C(L) \cdot C(L)
+    \right)
 
 where:
 
 * :math:`u_{\text{baseline}}` is the baseline utility for a person of a given age and sex
   (without asthma)
-* :math:`d_{\text{exacerbation}}` is the disutility due to asthma exacerbations
-* :math:`d_{\text{control}}` is the disutility due to asthma control levels
+* :math:`d_{E}(S)` is the disutility due to an asthma exacerbation of severity level :math:`S`
+* :math:`n_E(S)` is the number of asthma exacerbations of severity level :math:`S` in a year
+* :math:`S \in \{1, 2, 3, 4\}` is the asthma exacerbation severity level (1 = mild, 2 =
+  moderate, 3 = severe, 4 = very severe)
+* :math:`d_{C}` is the disutility due to having asthma at control level :math:`L`
+* :math:`C(L)` is the proportion of the year spent at asthma control level :math:`L`
+* :math:`L \in \{1, 2, 3\}` is the asthma control level (1 = well-controlled, 2 =
+  partially-controlled, 3 = uncontrolled)
 * :math:`A` is a boolean indicating whether the person has asthma
 
 
