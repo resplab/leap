@@ -1,3 +1,5 @@
+.. _control-model:
+
 =====================
 Asthma Control Model
 =====================
@@ -15,7 +17,9 @@ during the one-year follow-up. There were at least 500 cases for each asthma con
 More females were in the cohort as expected (adult asthma is more prevalent among females).
 Asthma control level changed during the follow-up for 79% of the patients.
 
-We followed the 2020 GINA guidelines to define asthma control level by using the sum of the
+We followed the 
+`2020 GINA guidelines <https://ginasthma.org/wp-content/uploads/2020/04/GINA-2020-full-report_-final-_wms.pdf>`_
+to define asthma control level by using the sum of the
 four indicator variables (0 if no and 1 if yes) in the last 3 months before each measurement:
 
 1. daily symptoms
@@ -66,7 +70,7 @@ patients who had no asthma diagnosis dates, for a final count of 613 patients.
         <code class="notranslate">int</code>
         </td>
         <td>
-        1 = yes, 2 = no
+        1 = yes, 2 = no, 3 = unknown
         </td>
       </tr>
       <tr>
@@ -75,7 +79,7 @@ patients who had no asthma diagnosis dates, for a final count of 613 patients.
         <code class="notranslate">int</code>
         </td>
         <td>
-        1 = yes, 2 = no
+        1 = yes, 2 = no, 3 = unknown
         </td>
       </tr>
       <tr>
@@ -84,7 +88,7 @@ patients who had no asthma diagnosis dates, for a final count of 613 patients.
         <code class="notranslate">int</code>
         </td>
         <td>
-        1 = yes, 2 = no
+        1 = yes, 2 = no, 3 = unknown
         </td>
       </tr>
       <tr>
@@ -93,7 +97,7 @@ patients who had no asthma diagnosis dates, for a final count of 613 patients.
         <code class="notranslate">int</code>
         </td>
         <td>
-        1 = yes, 2 = no
+        1 = yes, 2 = no, 3 = unknown
         </td>
       </tr>
       <tr>
@@ -102,7 +106,8 @@ patients who had no asthma diagnosis dates, for a final count of 613 patients.
         <code class="notranslate">int</code>
         </td>
         <td>
-        TODO
+        Has there been an asthma exacerbation in the last 3 months? <br>
+        1 = yes, 2 = no, 3 = unknown
         </td>
       </tr>
       <tr>
@@ -147,7 +152,9 @@ patients who had no asthma diagnosis dates, for a final count of 613 patients.
         <code class="notranslate">int</code>
         </td>
         <td>
-        1 = TODO, 2 = TODO, 3 = TODO
+        1 = 0 - 4.93 years <br>
+        2 = 5.00 - 19.95 years <br>
+        3 = 20.06 - 74.20 years
         </td>
       </tr>
     </tbody>
@@ -261,7 +268,8 @@ Then we defined the asthma control level as follows:
         <code class="notranslate">int</code>
         </td>
         <td>
-        TODO
+          <code class="notranslate">1 = True</code>, 
+          <code class="notranslate">0 = False</code>
         </td>
       </tr>
       <tr>
@@ -306,7 +314,9 @@ Then we defined the asthma control level as follows:
         <code class="notranslate">int</code>
         </td>
         <td>
-        1 = TODO, 2 = TODO, 3 = TODO
+        1 = 0 - 4.93 years <br>
+        2 = 5.00 - 19.95 years <br>
+        3 = 20.06 - 74.20 years
         </td>
       </tr>
       <tr>

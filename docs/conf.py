@@ -6,6 +6,9 @@
 
 import os
 import sys
+from pybtex.style.labels import BaseLabelStyle
+from pybtex.style.formatting.unsrt import Style as UnsrtStyle
+from pybtex.plugin import register_plugin
 sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
@@ -32,9 +35,20 @@ extensions = [
     "sphinx_immaterial",
     "sphinxcontrib.bibtex",
     "nbsphinx",
+    "myst_nb",
     # "sphinx_immaterial.apidoc.python.apigen"
 ]
 
+myst_enable_extensions = [
+    "amsmath",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "html_image",
+]
+
+myst_dmath_double_inline = True
+myst_dmath_allow_space = True
 nbsphinx_execute = "always"
 # object_description_options = []
 # object_description_options.append(("py:.*", dict(wrap_signatures_with_css=True)))
@@ -127,3 +141,35 @@ autodoc_default_options = {
 }
 
 autodoc_typehints_format = "fully-qualified"
+
+latex_elements = {
+    "preamble": r"""
+    \usepackage{cancel}
+    \usepackage{xcolor}
+    """
+}
+
+# Custom Citation Style for Pybtex
+
+class AuthorYearStyle(BaseLabelStyle):
+    """Custom style: [AuthorYear] style."""
+
+    def format_label(self, entry):
+        author = "Anon"
+        if entry.persons.get("author"):
+            person = entry.persons["author"][0]
+            if person.last_names:
+                author = person.last_names[0]
+        year = entry.fields.get("year", "n.d.")
+        return f"{author}, {year}"
+
+    def format_labels(self, sorted_entries):
+        # return a list of labels, same order as entries
+        return [self.format_label(entry) for entry in sorted_entries]
+
+class AuthorYear(UnsrtStyle):
+    default_label_style = "authoryearlabel"
+
+
+register_plugin("pybtex.style.labels", "authoryearlabel", AuthorYearStyle)
+register_plugin("pybtex.style.formatting", "authoryear", AuthorYear)

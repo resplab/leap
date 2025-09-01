@@ -1,3 +1,5 @@
+.. _occurrence-model:
+
 ========================
 Asthma Occurrence Model
 ========================
