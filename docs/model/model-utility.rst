@@ -86,6 +86,8 @@ After processing the EQ5D data, our dataset is formatted as follows:
     </tbody>
     </table>
 
+.. _utility-data-exacerbations:
+
 Disutility Due to Asthma Exacerbations
 *****************************************
 
@@ -195,6 +197,8 @@ utility:
      - 0.01096
      - 0.02192
 
+
+.. _utility-data-control:
 Disutility Due to Asthma Control Levels
 **********************************************
 
