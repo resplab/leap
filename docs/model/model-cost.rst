@@ -7,6 +7,11 @@ Asthma Cost Model
 Data
 ====
 
+.. _cost-data-exacerbations:
+
+Cost Due to Asthma Exacerbations
+**************************************
+
 The data used in the cost model comes from the study :cite:`yaghoubi`, in
 `Table I <https://www.sciencedirect.com/science/article/pii/S0091674919316343#tbl1>`_:
 
@@ -16,19 +21,12 @@ The data used in the cost model comes from the study :cite:`yaghoubi`, in
 
    * - Variable
      - Value
-   * - direct cost of asthma: well controlled
-     - $2372 USD
-   * - direct cost of asthma: not well controlled
-     - $2965 USD
-   * - direct cost of asthma: uncontrolled
-     - $3127 USD
-   * - direct cost of asthma: exacerbation severity mild
+   * - Direct costs of exacerbation by severity: mild
      - $130 USD
-   * - direct cost of asthma: exacerbation severity moderate
+   * - Direct costs of exacerbation by severity: moderate
      - $594 USD
-   * - direct cost of asthma: exacerbation severity (very) severe
+   * - Direct costs of exacerbation by severity: (very) severe
      - $9900 USD
-
 
 .. note::
 
@@ -43,6 +41,28 @@ The data used in the cost model comes from the study :cite:`yaghoubi`, in
             \text{log}(\text{cost}_E(\text{very severe}))
         }{2}\right) \\
         &= \$2425 \text{ USD}
+
+
+.. _cost-data-control:
+
+Cost Due to Asthma Control Levels
+**********************************
+
+The data used for the cost by asthma control level also comes from the study :cite:`yaghoubi`, in
+`Table I <https://www.sciencedirect.com/science/article/pii/S0091674919316343#tbl1>`_:
+
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Variable
+     - Value
+   * - Annual direct costs of well-controlled asthma
+     - $2372 USD
+   * - Annual direct costs of not-well-controlled asthma
+     - $2965 USD
+   * - Annual direct costs of uncontrolled asthma
+     - $3127 USD
 
 
 Model
