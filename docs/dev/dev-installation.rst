@@ -100,7 +100,7 @@ See the `git-lfs installation instructions for Windows
 <https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage?platform=windows>`_.
 
 
-1. Install ``LEAP``
+4. Install ``LEAP``
 ***********************
 
 To install a development version of the ``LEAP`` package:
