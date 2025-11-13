@@ -11,6 +11,14 @@ Prerequisites
 - Internet access to download dependencies.
 
 
+To get started, choose your operating system below:
+
+1. :ref:`MacOS Installation <macos-installation>`
+2. :ref:`Linux Installation <linux-installation>`
+3. :ref:`Windows Installation <windows-installation>`
+
+
+.. _macos-installation:
 MacOS
 ******
 
@@ -155,6 +163,7 @@ To get out of the virtual environment:
   deactivate
 
 
+... _linux-installation:
 Linux
 ******
 
@@ -312,6 +321,8 @@ To get out of the virtual environment:
 
   deactivate
 
+
+.. _windows-installation:
 Windows
 ********
 
