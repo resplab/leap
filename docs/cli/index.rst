@@ -31,23 +31,34 @@ virtual environment, go to the folder you installed the virtual environment in, 
 
 Then activate the virtual environment:
 
-**MacOS/Linux**:
+.. md-tab-set::
+  :class: custom-tab-set-style
+  :name: virtual-environment-activation
 
-.. code:: bash
+  .. md-tab-item:: MacOS
 
-  source env/bin/activate
+      .. code:: bash
 
-**Windows Command Prompt**:
+        source env/bin/activate
 
-.. code-block:: bash
+  .. md-tab-item:: Linux
 
-  env\Scripts\activate
+      .. code:: bash
 
-**Windows PowerShell**:
+        source env/bin/activate
 
-.. code-block:: bash
+  .. md-tab-item:: Windows Command Prompt
 
-  .\env\Scripts\Activate.ps1
+      .. code:: bash
+
+        env\Scripts\activate
+
+  .. md-tab-item:: Windows PowerShell
+
+      .. code:: bash
+
+        .\env\Scripts\Activate.ps1
+
 
 
 **2. Run the Simulation**:
