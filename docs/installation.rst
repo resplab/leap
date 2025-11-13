@@ -368,7 +368,7 @@ separate from the system Python.
 Windows Command Prompt
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: cmd
+.. code-block:: bash
 
   python -m venv env
   env\Scripts\activate
@@ -376,7 +376,7 @@ Windows Command Prompt
 Windows PowerShell
 ~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: powershell
+.. code-block:: bash
 
     python -m venv env
     .\env\Scripts\Activate.ps1
@@ -404,7 +404,7 @@ token. This is so you can install the ``LEAP`` package from ``GitHub``. To do th
 5. Copy this token to a secure file on your system. **You won't be shown it again.**
 6. In your terminal, type:
 
-.. code-block:: cmd
+.. code-block:: bash
 
     git config --global credential.helper manager
 
@@ -427,7 +427,7 @@ To install the ``LEAP`` package, type:
 Windows Command Prompt
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: cmd
+.. code-block:: bash
 
   python -m pip install git+https://github.com/resplab/leap.git
 
@@ -459,7 +459,7 @@ username and password. Paste the token in as your password:
 
 
 Step 6: Install Success!
-*************************
+-------------------------
 
 To verify the installation was a success, type:
 
@@ -481,13 +481,6 @@ After running ``leap --help``, you should see:
     ...
 
 Now that you've successfully installed the ``LEAP`` package, you can start using it.
-To verify the installation was a success, type:
-
-.. code-block:: bash
-
-  leap --help
-
-You should see various options appear of how to use the LEAP command.
 To get started running a simulation, see the :doc:`Command-Line Interface <cli/index>` documentation.
 
 To get out of the virtual environment:
