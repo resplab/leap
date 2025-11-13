@@ -445,7 +445,7 @@ Windows Command Prompt
 Windows PowerShell
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: powershell
+.. code-block:: bash
 
   python -m pip install git+https://github.com/resplab/leap.git
 
