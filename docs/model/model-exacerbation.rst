@@ -175,7 +175,7 @@ interested in can be approximated using the following formula:
 
 .. math::
 
-    \ln(\lambda) = \ln(\alpha) + \beta_0 + \beta_{a} a + \beta_{s} s + \sum_{i=1}^3 \beta_i c_i 
+    \ln(\lambda) = \ln(\alpha) + \beta_0 + \sum_{i=1}^3 \beta_i c_i 
 
 
 where:
@@ -195,6 +195,9 @@ where:
    * - :math:`\beta_i`
      - control level constant calculated from the :ref:`Control Model <control-model>`
 
+To calculate the :math:`\beta_i` values, we consider the discrete random variable :math:`S`, which
+is the severity of an asthma exacerbation, and the continuous random variable :math:`R`, which is
+the rate of exacerbations per year.
 
 Calibration
 ******************
@@ -212,22 +215,22 @@ Poisson regression, with the following formula:
 
 .. math::
 
-    \ln(\lambda_{C}) = \sum_{i=1}^3 \gamma_i c_i 
+    \ln(\lambda_{C}) = \sum_{i=1}^3 \beta_i c_i 
 
 
 * :math:`\lambda_C`: the average number of exacerbations in a given year
 * :math:`c_i`: relative time spent in control level :math:`i`
-* :math:`\gamma_i`: control level constant (different from :math:`\beta_i` above)
+* :math:`\beta_i`: control level constant
 
-Here, the :math:`\gamma_i` values were calculated from the
+Here, the :math:`\beta_i` values were calculated from the
 `Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
 and are given by:
 
 .. math::
 
-    \gamma_1 &:= 0.1880058 \quad \text{rate(exacerbation | fully controlled)} \\
-    \gamma_2 &:= 0.3760116 \quad \text{rate(exacerbation | partially controlled)} \\
-    \gamma_3 &:= 0.5640174 \quad \text{rate(exacerbation | uncontrolled)}
+    \beta_1 &:= \ln(0.1880058) \\
+    \beta_2 &:= \ln(0.3760116) \\
+    \beta_3 &:= \ln(0.5640174) 
 
 
 The number of exacerbations predicted by the model is then:
