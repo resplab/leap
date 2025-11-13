@@ -150,3 +150,180 @@ The ``config.json`` file contains the parameters used in the simulation.
             }
         }
     }
+
+
+.. list-table::
+    :header-rows: 1
+
+    * - Module
+      - Parameter
+      - Description
+      - Source
+      - Documentation
+    * - Antibiotic Exposure
+      - ``β0``
+      - Intercept for antibiotic exposure model
+      - Fitted using a GLM
+      - :ref:`antibiotic_exposure_model`
+    * - Antibiotic Exposure
+      - ``βyear``
+      - Effect of year on antibiotic exposure model
+      - Fitted using a GLM
+      - :ref:`antibiotic_exposure_model`
+    * - Antibiotic Exposure
+      - ``β2005``
+      - Effect of year 2005 on antibiotic exposure model
+      - Fitted using a GLM
+      - :ref:`antibiotic_exposure_model`
+    * - Antibiotic Exposure
+      - ``βsex``
+      - Effect of sex 
+      - Fitted using a GLM
+      - :ref:`antibiotic_exposure_model`
+    * - Antibiotic Exposure
+      - ``θ``
+      - Overdispersion parameter for antibiotic exposure model
+      - Fitted using a GLM
+      - :ref:`antibiotic_exposure_model`
+    * - Antibiotic Exposure
+      - ``β2005_year``
+      - Interaction effect of year and year 2005 on antibiotic exposure model
+      - Fitted using a GLM
+      - :ref:`antibiotic_exposure_model`
+    * - Antibiotic Exposure
+      - ``fixyear``
+      - Fixed year for antibiotic exposure model (if null, no fixed year)
+      - Fitted using a GLM
+      - :ref:`antibiotic_exposure_model`
+    * - Antibiotic Exposure
+      - ``βfloor``
+      - Floor for antibiotic exposure probability
+      - Fitted using a GLM
+      - :ref:`antibiotic_exposure_model`
+    * - Control
+      - ``β0_μ``
+      - Mean of the intercept for asthma control model
+      - Fitted using an ordinal regression model
+      - :ref:`control-params`
+    * - Control
+      - ``β0_σ``
+      - Standard deviation of the intercept for asthma control model
+      - Fitted using an ordinal regression model
+      - :ref:`control-model`
+    * - Control
+      - ``βage``
+      - :math:`\beta` coefficient for the :math:`\text{age}` term of the asthma control model
+      - Fitted using an ordinal regression model
+      - :ref:`control-model`
+    * - Control
+      - ``βage2``
+      - :math:`\beta` coefficient for the :math:`\text{age}^2` term of the asthma control model
+      - Fitted using an ordinal regression model
+      - :ref:`control-model`
+    * - Control
+      - ``βsexage``
+      - :math:`\beta` coefficient for the :math:`\text{sex}*\text{age}` term of the asthma control model
+      - Fitted using an ordinal regression model
+      - :ref:`control-model`
+    * - Control
+      - ``βsexage2``
+      - :math:`\beta` coefficient for the :math:`\text{sex}*\text{age}^2` term of the asthma control model
+      - Fitted using an ordinal regression model
+      - :ref:`control-model`
+    * - Control
+      - ``βsex``
+      - :math:`\beta` coefficient for the :math:`\text{sex}` term of the asthma control model
+      - Fitted using an ordinal regression model
+      - :ref:`control-model`
+    * - Control
+      - ``θ``
+      - Thresholds for the asthma control model
+      - Fitted using an ordinal regression model
+      - :ref:`control-model`
+    * - Cost
+      - ``control``
+      - Direct cost of asthma due to asthma control levels (1 = well-controlled, 2 = partially-controlled, 3 = uncontrolled)
+        in USD
+      - :cite:`yaghoubi`
+      - :ref:`cost-data-control`
+    * - Cost
+      - ``exac``
+      - Direct cost of asthma due to asthma exacerbation severity levels (1 = mild, 2 = moderate, 3 = severe, 4 = very severe)
+        in USD
+      - :cite:`yaghoubi`
+      - :ref:`cost-data-exacerbations`
+    * - Exacerbation
+      - ``β0_μ``
+      - Mean of the intercept for asthma exacerbation model
+      - Fitted using a Poisson regression model
+      - :ref:`exacerbation-model`
+    * - Exacerbation
+      - ``β0_σ``
+      - Standard deviation of the intercept for asthma exacerbation model
+      - Fitted using a Poisson regression model
+      - :ref:`exacerbation-model`
+    * - Exacerbation
+      - ``βcontrol_C``
+      - :math:`\beta` coefficient for the :math:`\text{asthma control level = well-controlled}` term of the asthma exacerbation model
+      - `Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
+      - :ref:`exacerbation-model`
+    * - Exacerbation
+      - ``βcontrol_PC``
+      - :math:`\beta` coefficient for the :math:`\text{asthma control level = partially-controlled}` term of the asthma exacerbation model
+      - `Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
+      - :ref:`exacerbation-model`
+    * - Exacerbation
+      - ``βcontrol_UC``
+      - :math:`\beta` coefficient for the :math:`\text{asthma control level = uncontrolled}` term of the asthma exacerbation model
+      - `Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
+      - :ref:`exacerbation-model`
+    * - Exacerbation
+      - ``initial_rate``
+      - Initial asthma exacerbation rate for newly incident asthma cases
+      - Fitted using a Poisson regression model
+      - :ref:`exacerbation-model`
+    * - Exacerbation Severity
+      - ``α``
+      - Dirichlet prior parameters for asthma exacerbation severity model
+      - Fitted using a Bayesian model
+      - :ref:`exacerbation_severity_model`
+    * - Exacerbation Severity
+      - ``k``
+      - Concentration parameter for asthma exacerbation severity model
+      - Fitted using a Bayesian model
+      - :ref:`exacerbation_severity_model`
+    * - Exacerbation Severity
+      - ``p``
+      - Probability of asthma exacerbation severity levels (1 = mild, 2 = moderate, 3 = severe, 4 = very severe)
+      - Fitted using a Bayesian model
+      - :ref:`exacerbation_severity_model`
+    * - Exacerbation Severity
+      - ``βprev_hosp_ped``
+      - Effect of previous pediatric hospitalization on asthma exacerbation severity
+      - Fitted using a Bayesian model
+      - :ref:`exacerbation_severity_model`
+    * - Exacerbation Severity
+      - ``βprev_hosp_adult``
+      - Effect of previous adult hospitalization on asthma exacerbation severity
+      - Fitted using a Bayesian model
+      - :ref:`exacerbation_severity_model`
+    * - Family History
+      - ``p``
+      - Probability of having a family history of asthma
+      - Fitted using the CHMS data
+      - :ref:`family-history-model`
+    * - Incidence
+      - ``β0_μ``
+      - Mean of the intercept for asthma incidence model
+      - Fitted using a logistic regression model
+      - :ref:`incidence-model`
+    * - Utility
+      - ``βcontrol``
+      - Disutility due to asthma control levels (1 = well-controlled, 2 = partially-controlled, 3 = uncontrolled)
+      - :cite:`yaghoubi`
+      - :ref:`utility-data-control`
+    * - Utility
+      - ``βexac_sev_hist``
+      - Disutility due to asthma exacerbation severity levels (1 = mild, 2 = moderate, 3 = severe, 4 = very severe)
+      - :cite:`einarson`
+      - :ref:`utility-data-exacerbations`
