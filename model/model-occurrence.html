@@ -1,0 +1,2130 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="model-antibiotics.html">
+      
+      
+        <link rel="next" href="model-control.html">
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>Asthma Occurrence Model - </title>
+      
+    
+    
+      
+        
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="../_static/sphinx_immaterial_theme.c15b9f3ac86171432.min.css" />
+        <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+        <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#occurrence-model-1-crude-occurrence" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="" class="md-header__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../_static/logo.png" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Asthma Occurrence Model
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="" class="md-nav__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../_static/logo.png" alt="logo">
+    </a>
+    
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/cli/index.rst (reference label)"><span>Running LEAP</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/index.rst (reference label)"><span>Model</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/model/index.rst (reference label)"><span>Model</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-simulation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-simulation.rst (reference label)"><span>Simulation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-glm.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-glm.ipynb (reference label)"><span>Generalized Linear Models</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-birth.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-birth.rst (reference label)"><span>Birth Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-death.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-death.rst (reference label)"><span>Mortality Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-migration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-migration.rst (reference label)"><span>Immigration / Emigration Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-antibiotics.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-antibiotics.rst (reference label)"><span>Antibiotic Exposure Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-occurrence.rst (reference label)"><span>Asthma Occurrence Model</span></span>
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-occurrence.rst (reference label)"><span>Asthma Occurrence Model</span></span>
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/model/model-occurrence.rst (reference label)"><span>Asthma Occurrence Model</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#occurrence-model-1-crude-occurrence" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#occurrence-model-1-crude-occurrence (reference label)"><span>Occurrence Model 1:<wbr> Crude Occurrence</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Occurrence Model 1: Crude Occurrence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#datasets" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#datasets (reference label)"><span>Datasets</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-generalized-linear-model-poisson" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#model-generalized-linear-model-poisson (reference label)"><span>Model:<wbr> Generalized Linear Model -<wbr> Poisson</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Model: Generalized Linear Model - Poisson">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probability-distribution" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#probability-distribution (reference label)"><span>Probability Distribution</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#link-function" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#link-function (reference label)"><span>Link Function</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#formula" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#formula (reference label)"><span>Formula</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#occurrence-model-2-risk-factors" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#occurrence-model-2-risk-factors (reference label)"><span>Occurrence Model 2:<wbr> Risk Factors</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Occurrence Model 2: Risk Factors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#id1" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#id1 (reference label)"><span>Datasets</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-risk-factors" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#model-risk-factors (reference label)"><span>Model:<wbr> Risk Factors</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Model: Risk Factors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#id2" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#id2 (reference label)"><span>Formula</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formula">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#antibiotic-risk-factors" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#antibiotic-risk-factors (reference label)"><span>Antibiotic Risk Factors</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#family-history-risk-factors" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#family-history-risk-factors (reference label)"><span>Family History Risk Factors</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solving-for-the-correction-term-prevalence" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#solving-for-the-correction-term-prevalence (reference label)"><span>Solving for the Correction Term:<wbr> Prevalence</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solving-for-the-correction-term-incidence" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#solving-for-the-correction-term-incidence (reference label)"><span>Solving for the Correction Term:<wbr> Incidence</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimizing-the-initial-beta-parameters-for-the-incidence-equation" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#optimizing-the-initial-beta-parameters-for-the-incidence-equation (reference label)"><span>Optimizing the Initial Beta Parameters for the Incidence Equation</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Optimizing the Initial Beta Parameters for the Incidence Equation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#example (reference label)"><span>Example</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#past-contingency-table" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#past-contingency-table (reference label)"><span>Past Contingency Table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-contingency-table-reassessment" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#current-contingency-table-reassessment (reference label)"><span>Current Contingency Table:<wbr> Reassessment</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-contingency-table-new-diagnosis" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#current-contingency-table-new-diagnosis (reference label)"><span>Current Contingency Table:<wbr> New Diagnosis</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-contingency-table" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#current-contingency-table (reference label)"><span>Current Contingency Table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimization" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#optimization (reference label)"><span>Optimization</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-control.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-control.rst (reference label)"><span>Asthma Control Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-exacerbation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-exacerbation.rst (reference label)"><span>Asthma Exacerbations Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-cost.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-cost.rst (reference label)"><span>Asthma Cost Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-utility.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-utility.rst (reference label)"><span>Utility Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-pollution.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-pollution.rst (reference label)"><span>Pollution Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/index.rst (reference label)"><span>Developers</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../references.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/references.rst (reference label)"><span>References</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/model/model-occurrence.rst (reference label)"><span>Asthma Occurrence Model</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#occurrence-model-1-crude-occurrence" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#occurrence-model-1-crude-occurrence (reference label)"><span>Occurrence Model 1:<wbr> Crude Occurrence</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Occurrence Model 1: Crude Occurrence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#datasets" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#datasets (reference label)"><span>Datasets</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-generalized-linear-model-poisson" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#model-generalized-linear-model-poisson (reference label)"><span>Model:<wbr> Generalized Linear Model -<wbr> Poisson</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Model: Generalized Linear Model - Poisson">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probability-distribution" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#probability-distribution (reference label)"><span>Probability Distribution</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#link-function" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#link-function (reference label)"><span>Link Function</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#formula" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#formula (reference label)"><span>Formula</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#occurrence-model-2-risk-factors" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#occurrence-model-2-risk-factors (reference label)"><span>Occurrence Model 2:<wbr> Risk Factors</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Occurrence Model 2: Risk Factors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#id1" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#id1 (reference label)"><span>Datasets</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-risk-factors" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#model-risk-factors (reference label)"><span>Model:<wbr> Risk Factors</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Model: Risk Factors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#id2" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#id2 (reference label)"><span>Formula</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formula">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#antibiotic-risk-factors" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#antibiotic-risk-factors (reference label)"><span>Antibiotic Risk Factors</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#family-history-risk-factors" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#family-history-risk-factors (reference label)"><span>Family History Risk Factors</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solving-for-the-correction-term-prevalence" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#solving-for-the-correction-term-prevalence (reference label)"><span>Solving for the Correction Term:<wbr> Prevalence</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solving-for-the-correction-term-incidence" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#solving-for-the-correction-term-incidence (reference label)"><span>Solving for the Correction Term:<wbr> Incidence</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimizing-the-initial-beta-parameters-for-the-incidence-equation" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#optimizing-the-initial-beta-parameters-for-the-incidence-equation (reference label)"><span>Optimizing the Initial Beta Parameters for the Incidence Equation</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Optimizing the Initial Beta Parameters for the Incidence Equation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#example (reference label)"><span>Example</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#past-contingency-table" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#past-contingency-table (reference label)"><span>Past Contingency Table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-contingency-table-reassessment" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#current-contingency-table-reassessment (reference label)"><span>Current Contingency Table:<wbr> Reassessment</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-contingency-table-new-diagnosis" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#current-contingency-table-new-diagnosis (reference label)"><span>Current Contingency Table:<wbr> New Diagnosis</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-contingency-table" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#current-contingency-table (reference label)"><span>Current Contingency Table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimization" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-occurrence.rst#optimization (reference label)"><span>Optimization</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                
+                
+                  
+
+
+  
+  
+
+<h1 id="asthma-occurrence-model"><span id="occurrence-model"></span>Asthma Occurrence Model<a class="headerlink" href="#asthma-occurrence-model" title="Permalink to this heading">¶</a></h1>
+<p>This document describes the asthma occurrence model, which is used to predict the incidence and
+prevalence of asthma in British Columbia. The model is divided into two parts:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#occurrence-model-1"><span class="std std-ref">Occurrence Model 1: Crude Occurrence</span></a>: A <code class="docutils literal notranslate"><span class="pre">Generalized</span> <span class="pre">Linear</span> <span class="pre">Model</span> <span class="pre">(GLM)</span></code> that predicts asthma incidence
+and prevalence based on age, sex, and year.</p></li>
+<li><p><a class="reference internal" href="#occurrence-model-2"><span class="std std-ref">Occurrence Model 2: Risk Factors</span></a>: A model that incorporates risk factors such as family history and
+antibiotic use during infancy to predict asthma incidence and prevalence, along with the
+results from the first model.</p></li>
+</ol>
+<h2 id="occurrence-model-1-crude-occurrence"><span id="occurrence-model-1"></span>Occurrence Model 1: Crude Occurrence<a class="headerlink" href="#occurrence-model-1-crude-occurrence" title="Permalink to this heading">¶</a></h2>
+<p>In the first model, we will use data collected from the <code class="docutils literal notranslate"><span class="pre">BC</span> <span class="pre">Ministry</span> <span class="pre">of</span> <span class="pre">Health</span></code> on the
+incidence and prevalence of asthma in British Columbia. We will use this data to fit a
+<code class="docutils literal notranslate"><span class="pre">Generalized</span> <span class="pre">Linear</span> <span class="pre">Model</span> <span class="pre">(GLM)</span></code> to predict the incidence and prevalence of asthma
+based on the age, sex, and year. However, asthma occurrence doesn’t just depend on someone’s age or
+sex, but it also depends on risk factors such as family history and antibiotic use during
+infancy. We will address these in the second model: <a class="reference internal" href="#occurrence-model-2"><span class="std std-ref">Occurrence Model 2: Risk Factors</span></a>.</p>
+<h3 id="datasets">Datasets<a class="headerlink" href="#datasets" title="Permalink to this heading">¶</a></h3>
+<p>The BC Ministry of Health Administrative Dataset contains asthma incidence and prevalence data
+for the years <code class="docutils literal notranslate"><span class="pre">2000-2019</span></code>, in 5-year age intervals.</p>
+<p>The data is formatted as follows:</p>
+<table class="table">
+  <thead>
+    <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="notranslate">year</code></td>
+      <td>
+        <code class="notranslate">int</code>
+      </td>
+      <td>
+        format <code>XXXX</code>, e.g <code>2000</code>, range <code>[2000, 2019]</code>
+      </td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">age</code></td>
+      <td>
+        <code class="notranslate">int</code>
+      </td>
+      <td>
+        The midpoint of the age group, e.g. 3 for the age group 1-5 years
+      </td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">sex</code></td>
+      <td>
+        <code class="notranslate">int</code>
+      </td>
+      <td>
+        1 = Female, 2 = Male
+      </td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">incidence</code></td>
+      <td>
+        <code class="notranslate">float</code>
+      </td>
+      <td>
+        The incidence of asthma in BC for a given year, age group, and sex, per 100 people
+      </td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">prevalence</code></td>
+      <td>
+        <code class="notranslate">float</code>
+      </td>
+      <td>
+        The prevalence of asthma in BC for a given year, age group, and sex, per 100 people
+      </td>
+    </tr>
+  </tbody>
+  </table><h3 id="model-generalized-linear-model-poisson">Model: Generalized Linear Model - Poisson<a class="headerlink" href="#model-generalized-linear-model-poisson" title="Permalink to this heading">¶</a></h3>
+<p>Since our model projects into the future, we would like to be able to extend this data beyond
+<code class="docutils literal notranslate"><span class="pre">2019</span></code>. Our model also makes predictions at 1-year age intervals, not 5-year age intervals.
+To obtain these projections, we use a <code class="docutils literal notranslate"><span class="pre">Generalized</span> <span class="pre">Linear</span> <span class="pre">Model</span> <span class="pre">(GLM)</span></code>. A <code class="docutils literal notranslate"><span class="pre">GLM</span></code> is a type of
+regression analysis which is a generalized form of linear regression. See <a class="reference internal" href="model-glm.html"><span class="doc">Generalized Linear Models</span></a> for more
+information on <code class="docutils literal notranslate"><span class="pre">GLMs</span></code>.</p>
+<h4 id="probability-distribution">Probability Distribution<a class="headerlink" href="#probability-distribution" title="Permalink to this heading">¶</a></h4>
+<p>When fitting a <code class="docutils literal notranslate"><span class="pre">GLM</span></code>, first you must choose a distribution for the <code class="docutils literal notranslate"><span class="pre">response</span> <span class="pre">variable</span></code>. In our
+case, the response variable is the asthma prevalence or incidence. Incidence and prevalence are
+counts of the number of people diagnosed with asthma and the number of people with asthma,
+respectively, in a given time interval (a year, in our case). Since these are counts, we need a
+discrete probability distribution. The <code class="docutils literal notranslate"><span class="pre">Poisson</span> <span class="pre">distribution</span></code> is a good choice for our data.</p>
+<div class="math notranslate nohighlight">
+\[P(Y = y) = p(y; \mu^{(i)}) = \dfrac{(\mu^{(i)})^{y} ~ e^{-\mu^{(i)}}}{y!}\]</div>
+<h4 id="link-function">Link Function<a class="headerlink" href="#link-function" title="Permalink to this heading">¶</a></h4>
+<p>We also need to choose a <code class="docutils literal notranslate"><span class="pre">link</span> <span class="pre">function</span></code>. Recall that the link function <span class="math notranslate nohighlight">\(g(\mu^{(i)})\)</span>
+is used to relate the mean to the predicted value <span class="math notranslate nohighlight">\(\eta^{(i)}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}g(\mu^{(i)}) &amp;= \eta^{(i)} \\
+\mu^{(i)} &amp;= E(Y \mid X = x^{(i)})\end{split}\]</div>
+<p>How do we choose a link function? Well, we are free to choose any link function we like, but there
+are some constraints. For example, in the Poisson distribution, the mean is always positive.
+However, <span class="math notranslate nohighlight">\(\eta^{(i)}\)</span> can be any real number. Therefore, we need a link function that maps
+real numbers to positive numbers. The <code class="docutils literal notranslate"><span class="pre">log</span> <span class="pre">link</span> <span class="pre">function</span></code> is a good choice for this:</p>
+<div class="math notranslate nohighlight">
+\[g(\mu^{(i)}) = \log(\mu^{(i)}) = \eta^{(i)}\]</div>
+<h4 id="formula">Formula<a class="headerlink" href="#formula" title="Permalink to this heading">¶</a></h4>
+<p>Now that we have our distribution and link function, we need to decide on a formula for
+<span class="math notranslate nohighlight">\(\eta^{(i)}\)</span>. We are permitted to use linear combinations of functions of the features
+in our dataset.</p>
+<p>Let’s start with <code class="docutils literal notranslate"><span class="pre">incidence</span></code>. We want a formula using <code class="docutils literal notranslate"><span class="pre">age</span></code>, <code class="docutils literal notranslate"><span class="pre">sex</span></code>, and <code class="docutils literal notranslate"><span class="pre">year</span></code>.
+Since asthma depends on factors such as pollution and antibiotic use, and these factors change
+from year to year, it follows that asthma incidence should depend on the year. Antibiotic use
+also depends on age, so we should include age in our formula. Finally, there is a sex difference
+in asthma incidence, so we should include sex in our formula.</p>
+<div class="math notranslate nohighlight">
+\[\eta^{(i)} =
+    \sum_{m=0}^1 \beta_{01m} t^{(i)} \cdot (s^{(i)})^m +
+    \sum_{k=0}^{5} \sum_{m=0}^{1} \beta_{k0m} \cdot (a^{(i)})^k \cdot (s^{(i)})^m\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\beta_{k\ell m}\)</span> is the coefficient for the feature <span class="math notranslate nohighlight">\((a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(a^{(i)}\)</span> is the age</p></li>
+<li><p><span class="math notranslate nohighlight">\(t^{(i)}\)</span> is the year</p></li>
+<li><p><span class="math notranslate nohighlight">\(s^{(i)}\)</span> is the sex</p></li>
+</ul>
+<p>There are <span class="math notranslate nohighlight">\(2 + 6 * 2 = 14\)</span> coefficients in the incidence model.</p>
+<p>Next we have the <code class="docutils literal notranslate"><span class="pre">prevalence</span></code>. We again want a formula using <code class="docutils literal notranslate"><span class="pre">age</span></code>, <code class="docutils literal notranslate"><span class="pre">sex</span></code>, and <code class="docutils literal notranslate"><span class="pre">year</span></code>.
+Since asthma prevalence depends on the number of people who have asthma, and this number changes
+from year to year, we should include year in our formula. Asthma prevalence also depends on age,
+so we should include age in our formula. Finally, there is a sex difference
+in asthma incidence and hence prevalence, so we should include sex in our formula.</p>
+<div class="math notranslate nohighlight">
+\[\eta^{(i)} = \sum_{k=0}^{5} \sum_{\ell=0}^2 \sum_{m=0}^1 \beta_{k \ell m}
+    \cdot (a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m\]</div>
+<p>There are <span class="math notranslate nohighlight">\(6 * 3 * 2 = 36\)</span> coefficients in the prevalence model.</p>
+<h2 id="occurrence-model-2-risk-factors"><span id="occurrence-model-2"></span>Occurrence Model 2: Risk Factors<a class="headerlink" href="#occurrence-model-2-risk-factors" title="Permalink to this heading">¶</a></h2>
+<p>In the second model, we will use the predicted asthma incidence and prevalence from the first model,
+<span class="math notranslate nohighlight">\(\eta\)</span>, as our target asthma prevalence / incidence in this model. We would now like to
+incorporate the risk factors of family history and antibiotic use on asthma incidence and
+prevalence.</p>
+<h3 id="id1">Datasets<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<p>We use the predicted asthma incidence and prevalence from the first model, <span class="math notranslate nohighlight">\(\eta\)</span>, as our
+target asthma prevalence / incidence in this model. The data is formatted as follows:</p>
+<table class="table">
+  <thead>
+    <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="notranslate">year</code></td>
+      <td>
+        <code class="notranslate">int</code>
+      </td>
+      <td>
+        format <code>XXXX</code>, e.g <code>2000</code>, range <code>[2000, 2019]</code>
+      </td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">age</code></td>
+      <td>
+        <code class="notranslate">int</code>
+      </td>
+      <td>
+        The age in years, a value in <code class="notranslate">[3, 100]</code>
+      </td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">sex</code></td>
+      <td>
+        <code class="notranslate">str</code>
+      </td>
+      <td>
+        <code class="notranslate">"F"</code> = Female <br>
+        <code class="notranslate">"M"</code> = Male
+      </td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">incidence</code></td>
+      <td>
+        <code class="notranslate">float</code>
+      </td>
+      <td>
+        The predicted incidence of asthma in BC for a given year, age, and sex, per 100 people
+      </td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">prevalence</code></td>
+      <td>
+        <code class="notranslate">float</code>
+      </td>
+      <td>
+        The predicted prevalence of asthma in BC for a given year, age, and sex, per 100 people
+      </td>
+    </tr>
+  </tbody>
+  </table><h3 id="model-risk-factors">Model: Risk Factors<a class="headerlink" href="#model-risk-factors" title="Permalink to this heading">¶</a></h3>
+<p>We want to incorporate the effects of family history and antibiotic use on asthma incidence and
+prevalence.</p>
+<table class="table">
+  <thead>
+    <tr>
+        <th>Risk Factor</th>
+        <th>Values</th>
+        <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Family History</td>
+      <td>
+        A value in <code class="notranslate">{0, 1}</code>
+      </td>
+      <td>
+        <code class="notranslate">1</code>: at least one parent has asthma<br>
+        <code class="notranslate">0</code>: neither parent has asthma
+      </td>
+    </tr>
+    <tr>
+      <td>Antibiotic Dose</td>
+      <td>
+        An integer in <code class="notranslate">[0, 3]</code>
+      </td>
+      <td>
+        This variable represents the number of courses of antibiotics taken during the first
+        year of life. The maximum value is 3, since the likelihood of taking more than 3 courses
+        of antibiotics in the first year of life is very low. The upper value of 3 indicates
+        3 or more courses of antibiotics taken during the first year of life.
+      </td>
+    </tr>
+  </tbody>
+  </table><h4 id="id2">Formula<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h4>
+<p>Before we begin, let us define some terms. We have two risk factors we are interested in:
+family history and antibiotic use. There are <span class="math notranslate nohighlight">\(2 * 4 = 8\)</span> possible combinations of these two
+risk factors:</p>
+<table class="table">
+  <thead>
+    <tr>
+        <th>&lambda;</th>
+        <th>Family History</th>
+        <th>Antibiotic Dose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="notranslate">0</code></td>
+      <td><code class="notranslate">0</code></td>
+      <td><code class="notranslate">0</code></td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">1</code></td>
+      <td><code class="notranslate">1</code></td>
+      <td><code class="notranslate">0</code></td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">2</code></td>
+      <td><code class="notranslate">0</code></td>
+      <td><code class="notranslate">1</code></td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">3</code></td>
+      <td><code class="notranslate">1</code></td>
+      <td><code class="notranslate">1</code></td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">4</code></td>
+      <td><code class="notranslate">0</code></td>
+      <td><code class="notranslate">2</code></td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">5</code></td>
+      <td><code class="notranslate">1</code></td>
+      <td><code class="notranslate">2</code></td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">6</code></td>
+      <td><code class="notranslate">0</code></td>
+      <td><code class="notranslate">3</code></td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">7</code></td>
+      <td><code class="notranslate">1</code></td>
+      <td><code class="notranslate">3</code></td>
+    </tr>
+  </tbody>
+  </table><p>We can represent each combination as a vector of the form:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{bmatrix}
+  f_{\lambda} \\
+  d_{\lambda}
+\end{bmatrix}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(f_{\lambda}\)</span> is the family history and <span class="math notranslate nohighlight">\(d_{\lambda}\)</span> is the antibiotic dose.</p>
+<p>We next define the odds ratio for a given risk factor as:</p>
+<div class="math notranslate nohighlight">
+\[\omega(r=k) = \dfrac{P(A = 1 \mid r = k)}{P(A = 1 \mid r = 0)}\]</div>
+<p>where <span class="math notranslate nohighlight">\(A\)</span> is the asthma incidence or prevalence and <span class="math notranslate nohighlight">\(r\)</span> is the risk factor.
+To combine odds ratios, we have:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\omega_{\lambda} &amp;= \omega(f = f_{\lambda}, d = d_{\lambda}) \\
+&amp;= \dfrac{P(A = 1 \mid f = f_{\lambda}, d = d_{\lambda})}{P(A = 1 \mid f = 0, d = 0)} \\
+&amp;= \dfrac{P(A = 1 \mid f = f_{\lambda})}{P(A = 1 \mid f = 0)} \cdot
+  \dfrac{P(A = 1 \mid d = d_{\lambda})}{P(A = 1 \mid d = 0)} \\
+&amp;= \omega(f = f_{\lambda}) \cdot \omega(d = d_{\lambda})\end{split}\]</div>
+<p>Since these are multiplicative, the log of the odds ratios is additive:</p>
+<div class="math notranslate nohighlight">
+\[\log(\omega_{\lambda}) = \log(\omega(f = f_{\lambda})) +
+  \log(\omega(d = d_{\lambda}))\]</div>
+<p>We can now define our formula for the calibration model:</p>
+<div class="math notranslate nohighlight">
+\[\zeta_{\lambda}^{(i)} = \sigma\left(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) + \alpha\right)\]</div>
+<p>where:</p>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\beta_{\eta} = \sigma^{-1}(\eta^{(i)})\)</span></p></td>
+<td><p>determined by the output of the first model</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\eta^{(i)}\)</span></p></td>
+<td><p>the predicted incidence or prevalence from the first model</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\sigma(x)\)</span></p></td>
+<td><p>the logistic function</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\alpha = \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda}\)</span></p></td>
+<td><p>the correction / calibration term for either the incidence or prevalence</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda}^{(i)}\)</span></p></td>
+<td><p>predicted asthma prevalence / incidence for the model. We want this to be as close as
+possible to <span class="math notranslate nohighlight">\(\eta^{(i)}\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\zeta_{\lambda}^{(i)}\)</span></p></td>
+<td><p>the predicted asthma incidence or prevalence from the model for the risk factor combination
+indexed by <span class="math notranslate nohighlight">\(\lambda\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(p(\lambda)\)</span></p></td>
+<td><p>the probability of the risk factor combination indexed by <span class="math notranslate nohighlight">\(\lambda\)</span></p></td>
+</tr>
+</tbody>
+</table>
+<p>Let’s break this formula down:</p>
+<h5 id="antibiotic-risk-factors">Antibiotic Risk Factors<a class="headerlink" href="#antibiotic-risk-factors" title="Permalink to this heading">¶</a></h5>
+<p>The antibiotic terms were fit by Lee et al. <span id="id3">[<a class="reference internal" href="../references.html#id5" title="Tae Yoon Lee, John Petkau, Ariana Saatchi, Fawziah Marra, Stuart E. Turvey, Hannah Lishman, David M. Patrick, Jacquelyn J. Cragg, Kate M. Johnson, and Mohsen Sadatsafavi. Impact analysis of infant antibiotic exposure on the burden of asthma: a simulation modeling study. Frontiers in Allergy, 2024. URL: https://www.frontiersin.org/journals/allergy/articles/10.3389/falgy.2024.1491985, doi:10.3389/falgy.2024.1491985.">Lee, 2024</a>]</span>, using a random effects meta-regression
+model:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\log(\omega(d_{\lambda})) =
+  \begin{cases}
+    \beta_{\text{abx_0}} +
+    \beta_{\text{abx_age}} \cdot \text{min}(a^{(i)}, 7) +
+    \beta_{\text{abx_dose}} \cdot \text{min}(d^{(i)}, 3)
+    &amp;&amp; d^{(i)} &gt; 0 \text{ and } a^{(i)} \leq 7 \\ \\
+    0 &amp;&amp; \text{otherwise}
+  \end{cases}\end{split}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\beta_{\text{abx_xxx}}\)</span> is a constant coefficient</p></li>
+<li><p><span class="math notranslate nohighlight">\(a^{(i)}\)</span> is the age</p></li>
+<li><p><span class="math notranslate nohighlight">\(d^{(i)}\)</span> is the number of courses of antibiotics taken during the first year of life</p></li>
+</ul>
+<p>The beta coefficients were found to be:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\beta_{\text{abx_0}} = 1.82581\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\beta_{\text{abx_age}} = 0.2253\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\beta_{\text{abx_dose}} = 0.0531475\)</span></p></li>
+</ul>
+<h5 id="family-history-risk-factors">Family History Risk Factors<a class="headerlink" href="#family-history-risk-factors" title="Permalink to this heading">¶</a></h5>
+<p>The family history terms were fit using the <code class="docutils literal notranslate"><span class="pre">CHILD</span> <span class="pre">Study</span></code> data, in the paper by Patrick et al.
+<span id="id4">[<a class="reference internal" href="../references.html#id4" title="David M Patrick, Hind Sbihi, Darlene L Y Dai, Abdullah Al Mamun, Drona Rasali, Caren Rose, Fawziah Marra, Rozlyn C T Boutin, Charisse Petersen, Leah T Stiemsma, Geoffrey L Winsor, Fiona S L Brinkman, Anita L Kozyrskyj, Meghan B Azad, Allan B Becker, Piush J Mandhane, Theo J Moraes, Malcolm R Sears, Padmaja Subbarao, B Brett Finlay, and Stuart E Turvey. Decreasing antibiotic use, the gut microbiota, and asthma incidence in children: evidence from population-based and prospective cohort studies. The Lancet Respiratory Medicine, 8(11):1094–1105, 11 2020. URL: https://doi.org/10.1016/S2213-2600(20)30052-7, doi:10.1016/S2213-2600(20)30052-7.">Patrick, 2020</a>]</span>, using logistic regression:</p>
+<div class="math notranslate nohighlight">
+\[\log(\omega(f_{\lambda})) =
+  \beta_{\text{hx_0}} \cdot f^{(i)} +
+  \beta_{\text{hx_age}} \cdot (\text{min}(a^{(i)}, 5) - 3) \cdot f^{(i)}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\beta_{\text{hx_xxx}}\)</span> is a constant coefficient</p></li>
+<li><p><span class="math notranslate nohighlight">\(a^{(i)}\)</span> is the age</p></li>
+<li><p><span class="math notranslate nohighlight">\(f^{(i)}\)</span> is the family history of asthma; 1 = at least one parent has asthma,
+0 = neither parent has asthma</p></li>
+</ul>
+<p>The beta coefficients were found to be:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\beta_{\text{hx_0}} = \log(1.13) = 0.122\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\beta_{\text{hx_age}} = \dfrac{\log(2.4) - \log(1.13)}{2} = 0.377\)</span></p></li>
+</ul>
+<p>So, the only unknown term in our formula is the correction term <span class="math notranslate nohighlight">\(\alpha\)</span>. To solve this,
+we separate the formulae for incidence and prevalence. We will begin with prevalence.</p>
+<h4 id="solving-for-the-correction-term-prevalence">Solving for the Correction Term: Prevalence<a class="headerlink" href="#solving-for-the-correction-term-prevalence" title="Permalink to this heading">¶</a></h4>
+<div class="math notranslate nohighlight">
+\[\begin{split}\zeta_{\text{prev}} &amp;= \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda} \\
+&amp;= \sum_{\lambda=0}^{n} p(\lambda) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)\end{split}\]</div>
+<p>We want to find a correction term <span class="math notranslate nohighlight">\(\alpha\)</span> such that the predicted asthma prevalence
+<span class="math notranslate nohighlight">\(\zeta\)</span> is as close as possible to the predicted asthma prevalence <span class="math notranslate nohighlight">\(\eta\)</span>. To do this,
+we use the <code class="docutils literal notranslate"><span class="pre">Broyden-Fletcher-Goldfarb-Shanno</span> <span class="pre">(BFGS)</span></code> algorithm to minimize the absolute
+difference between <span class="math notranslate nohighlight">\(\zeta\)</span> and <span class="math notranslate nohighlight">\(\eta\)</span>.</p>
+<h4 id="solving-for-the-correction-term-incidence">Solving for the Correction Term: Incidence<a class="headerlink" href="#solving-for-the-correction-term-incidence" title="Permalink to this heading">¶</a></h4>
+<p>In our model, asthma incidence is defined as the number of new diagnoses between the previous year
+and the current year, divided by the total population. To calibrate the incidence, we first
+find the calibrated prevalence for the previous year:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\zeta_{\text{prev}}(t-1) &amp;= \sum_{\lambda=0}^{n} p(\lambda, t-1) \zeta_{\text{prev}, \lambda}(t-1) \\
+&amp;= \sum_{\lambda=0}^{n} p(\lambda, t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)\end{split}\]</div>
+<p>Now, what we want to find is the joint probability of each risk factor combination,
+<span class="math notranslate nohighlight">\(p(\lambda, A = 0 \mid t-1)\)</span>, for the population without asthma.</p>
+<div class="math notranslate nohighlight">
+\[P(\lambda, A = 0) = P(A = 0 \mid \lambda) \cdot P(\lambda)\]</div>
+<p>Now, we must have:</p>
+<div class="math notranslate nohighlight">
+\[P(A = 0 \mid \lambda) = 1 - P(A = 1 \mid \lambda) = 1 - \zeta_{\text{prev}, \lambda}(t-1)\]</div>
+<p>So, we can rewrite the joint probability as:</p>
+<div class="math notranslate nohighlight">
+\[p(\lambda, A = 0 \mid t-1) = (1 - \zeta_{\text{prev}, \lambda}(t-1)) \cdot p(\lambda, t-1)\]</div>
+<p>Next, we find the calibrated asthma incidence for the current year:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\zeta_{\text{inc}}(t) &amp;= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \zeta_{\text{inc}, \lambda}(t) \\
+&amp;= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)\end{split}\]</div>
+<p>where we recall that:</p>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\beta_{\eta} = \sigma^{-1}(\eta^{(i)}(t))\)</span></p></td>
+<td><p>determined by the output of the first model</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\eta^{(i)}(t)\)</span></p></td>
+<td><p>defined above; the predicted incidence from the first model</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\alpha = \sum_{\lambda=1}^{n} p(\lambda, A = 0 \mid t-1) \cdot \beta_{\lambda}\)</span></p></td>
+<td><p>the correction / calibration term for the incidence</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \zeta_{\lambda}^{(i)}\)</span></p></td>
+<td><p>predicted asthma incidence for the model. We want this to be as close as
+possible to <span class="math notranslate nohighlight">\(\eta^{(i)}\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\zeta_{\lambda}^{(i)}\)</span></p></td>
+<td><p>the predicted asthma incidence from the model for the risk factor combination
+indexed by <span class="math notranslate nohighlight">\(\lambda\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(p(\lambda, A = 0 \mid t-1)\)</span></p></td>
+<td><p>the joint probability of the risk factor combination indexed by <span class="math notranslate nohighlight">\(\lambda\)</span>, for a
+person who did not have asthma at time <span class="math notranslate nohighlight">\(t-1\)</span></p></td>
+</tr>
+</tbody>
+</table>
+<p>We again want to find a correction term <span class="math notranslate nohighlight">\(\alpha\)</span> such that the predicted asthma incidence
+<span class="math notranslate nohighlight">\(\zeta\)</span> is as close as possible to the asthma incidence from the first model, <span class="math notranslate nohighlight">\(\eta\)</span>.
+To do this, we use the <code class="docutils literal notranslate"><span class="pre">Broyden-Fletcher-Goldfarb-Shanno</span> <span class="pre">(BFGS)</span></code> algorithm to minimize the
+absolute difference between <span class="math notranslate nohighlight">\(\zeta\)</span> and <span class="math notranslate nohighlight">\(\eta\)</span>.</p>
+<h4 id="optimizing-the-initial-beta-parameters-for-the-incidence-equation">Optimizing the Initial Beta Parameters for the Incidence Equation<a class="headerlink" href="#optimizing-the-initial-beta-parameters-for-the-incidence-equation" title="Permalink to this heading">¶</a></h4>
+<p>For the incidence equation, we need to optimize two of the initial beta parameters:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\beta_{\text{fhx}_\text{age}}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\beta_{\text{abx}_\text{age}}\)</span></p></li>
+</ul>
+<h5 id="example">Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h5>
+<p>Before we begin, let us first define what we mean by a <code class="docutils literal notranslate"><span class="pre">contingency</span> <span class="pre">table</span></code>. A contingency
+table is a table that displays two categorical variables and their joint frequency distribution.
+For example, suppose we have two categorical variables: <code class="docutils literal notranslate"><span class="pre">smoking</span></code> and <code class="docutils literal notranslate"><span class="pre">lung</span> <span class="pre">cancer</span></code>, with
+<code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">300</span></code> patients in total:</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>lung cancer</th>
+        <th>no lung cancer</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>smoker</td>
+        <td><code class="notranslate">a0 = 100</code></td>
+        <td><code class="notranslate">b0 = 50</code></td>
+        <td><code class="notranslate">n1 = 150</code></td>
+    </tr>
+    <tr>
+        <td>non-smoker</td>
+        <td><code class="notranslate">c0 = 25</code></td>
+        <td><code class="notranslate">d0 = 125</code></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td><code class="notranslate">n2 = 125</code></td>
+        <td></td>
+        <td><code class="notranslate">n = 300</code></td>
+    </tr>
+    </tbody>
+</table><p>The variables <code class="docutils literal notranslate"><span class="pre">n1</span></code> and <code class="docutils literal notranslate"><span class="pre">n2</span></code> are called the marginal totals:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}n_1 &amp;= a_0 + b_0 = \text{total number of patients with lung cancer} \\
+n_2 &amp;= c_0 + d_0 = \text{total number of patients who smoke}\end{split}\]</div>
+<p>The variable <code class="docutils literal notranslate"><span class="pre">n</span></code> is the total number of patients:</p>
+<div class="math notranslate nohighlight">
+\[n = a_0 + b_0 + c_0 + d_0 = \text{total number of patients}\]</div>
+<p>In our model, we want to compute the contingency table for the risk factor combinations
+<span class="math notranslate nohighlight">\(\lambda\)</span> and the asthma diagnosis.</p>
+<h5 id="past-contingency-table">Past Contingency Table<a class="headerlink" href="#past-contingency-table" title="Permalink to this heading">¶</a></h5>
+<table class="table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>variable 2, outcome +</th>
+        <th>variable 2, outcome -</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>variable 1, outcome +</td>
+        <td><code class="notranslate">a0</code></td>
+        <td><code class="notranslate">b0</code></td>
+        <td><code class="notranslate">n1</code></td>
+    </tr>
+    <tr>
+        <td>variable 1, outcome -</td>
+        <td><code class="notranslate">c0</code></td>
+        <td><code class="notranslate">d0</code></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td><code class="notranslate">n2</code></td>
+        <td></td>
+        <td><code class="notranslate">n</code></td>
+    </tr>
+    </tbody>
+</table><p>We want to calculate <span class="math notranslate nohighlight">\(a_0\)</span>, <span class="math notranslate nohighlight">\(b_0\)</span>, <span class="math notranslate nohighlight">\(c_0\)</span>, and <span class="math notranslate nohighlight">\(d_0\)</span> using <span class="math notranslate nohighlight">\(n_1\)</span>,
+<span class="math notranslate nohighlight">\(n_2\)</span>, <span class="math notranslate nohighlight">\(n\)</span>, and <span class="math notranslate nohighlight">\(\omega_{\lambda}\)</span>. Now, we have the probabilities of each of the
+risk factor combinations, <span class="math notranslate nohighlight">\(p(\lambda)\)</span>, but for the contingency table, we only want to
+consider one risk factor combination at a time. To do this, we compute the conditional probability:</p>
+<div class="math notranslate nohighlight">
+\[p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) =
+  \dfrac{p(\Lambda = \lambda)}{p(\Lambda = \lambda) + p(\Lambda = 0)}\]</div>
+<p>To obtain <span class="math notranslate nohighlight">\(n_1\)</span>, the number of people with risk factor combination <span class="math notranslate nohighlight">\(\lambda\)</span> with or
+without an asthma diagnosis, we multiply the conditional probability by the total population
+<span class="math notranslate nohighlight">\(n\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[n_1 = p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) \cdot n\]</div>
+<p>To obtain <span class="math notranslate nohighlight">\(n_2\)</span>, the number of people diagnosed with asthma with or without risk factor
+combination <span class="math notranslate nohighlight">\(\lambda\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[n_2 = (1 - p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\})) \cdot \zeta_{\text{prev}, 0}(t=0) \cdot n +
+  p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) \cdot \zeta_{\text{prev}, \lambda}(t=0) \cdot n\]</div>
+<p>From this, we can calculate the values for the contingency table:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}b_0 &amp;= n_1 - a_0 \\
+c_0 &amp;= n_2 - a_0 \\
+d_0 &amp;= n - n_1 - n_2 - a_0\end{split}\]</div>
+<p>To obtain <span class="math notranslate nohighlight">\(a_0\)</span>, we follow the methods described in the paper <span id="id5">[<a class="reference internal" href="../references.html#id6" title="Di Pietrantonj C. Four-fold table cell frequencies imputation in meta analysis. Statistics in Medicine, 25:2299-2322, 7 2006. doi:10.1002/sim.2287.">C., 2006</a>]</span>.
+See <a class="reference internal" href="../dev/api/data_generation/leap.data_generation.utils.html"><span class="doc">conv_2x2</span></a> for the Python
+implementation of this method.</p>
+<h5 id="current-contingency-table-reassessment">Current Contingency Table: Reassessment<a class="headerlink" href="#current-contingency-table-reassessment" title="Permalink to this heading">¶</a></h5>
+<p>According to our model, an asthma diagnosis is not static; a patient may be diagnosed with asthma
+and then later be reassessed as not having asthma. We would like to compute the updated contingency
+table:</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>asthma, outcome +</th>
+        <th>asthma, outcome -</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>risk factor <code class="notranslate">λ</code>, outcome +</td>
+        <td><code class="notranslate">a1_ra</code></td>
+        <td><code class="notranslate">b1_ra</code></td>
+        <td><code class="notranslate">n1</code></td>
+    </tr>
+    <tr>
+        <td>risk factor <code class="notranslate">λ</code>, outcome -</td>
+        <td><code class="notranslate">c1_ra</code></td>
+        <td><code class="notranslate">d1_ra</code></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td><code class="notranslate">n2</code></td>
+        <td></td>
+        <td><code class="notranslate">n</code></td>
+    </tr>
+    </tbody>
+</table><p>To calculate the updated contingency table, we have:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}a_{1, \text{ra}} &amp;= a_0 \cdot \rho \\
+b_{1, \text{ra}} &amp;= a_0 \cdot (1 - \rho) \\
+c_{1, \text{ra}} &amp;= c_0 \cdot \rho \\
+d_{1, \text{ra}} &amp;= c_0 \cdot (1 - \rho)\end{split}\]</div>
+<p>where:</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Risk Factors</th>
+        <th>t=0</th>
+        <th>t=1</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td><code class="notranslate">a1_ra</code></td>
+        <td><code class="notranslate">λ</code></td>
+        <td>has asthma diagnosis</td>
+        <td>reassessed: has asthma diagnosis</td>
+    </tr>
+    <tr>
+        <td><code class="notranslate">b1_ra</code></td>
+        <td><code class="notranslate">λ</code></td>
+        <td>has asthma diagnosis</td>
+        <td>reassessed: no asthma diagnosis</td>
+    </tr>
+    <tr>
+        <td><code class="notranslate">c1_ra</code></td>
+        <td>None</td>
+        <td>has asthma diagnosis</td>
+        <td>reassessed: has asthma diagnosis</td>
+    </tr>
+    <tr>
+        <td><code class="notranslate">d1_ra</code></td>
+        <td>None</td>
+        <td>has asthma diagnosis</td>
+        <td>reassessed: no asthma diagnosis</td>
+    </tr>
+    </tbody>
+</table><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(a_{1, \text{ra}}\)</span> is the proportion of the population with risk factor combination <span class="math notranslate nohighlight">\(\lambda\)</span>
+who had an asthma diagnosis at <span class="math notranslate nohighlight">\(t=0\)</span> and still have it at <span class="math notranslate nohighlight">\(t=1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(b_{1, \text{ra}}\)</span> is the proportion of the population with risk factor combination <span class="math notranslate nohighlight">\(\lambda\)</span>
+who had an asthma diagnosis at <span class="math notranslate nohighlight">\(t=0\)</span> but no longer have it at <span class="math notranslate nohighlight">\(t=1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(c_{1, \text{ra}}\)</span> is the proportion of the population with no risk factors (<span class="math notranslate nohighlight">\(\lambda = 0\)</span>)
+who had an asthma diagnosis at <span class="math notranslate nohighlight">\(t=0\)</span> and still have it at <span class="math notranslate nohighlight">\(t=1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(d_{1, \text{ra}}\)</span> is the proportion of the population with no risk factors (<span class="math notranslate nohighlight">\(\lambda = 0\)</span>)
+who had an asthma diagnosis at <span class="math notranslate nohighlight">\(t=0\)</span> but no longer have it at <span class="math notranslate nohighlight">\(t=1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\rho\)</span> is the probability that a person would be reassessed as having an asthma diagnosis
+at <span class="math notranslate nohighlight">\(t=1\)</span> given that they had an asthma diagnosis at <span class="math notranslate nohighlight">\(t=0\)</span></p></li>
+</ul>
+<h5 id="current-contingency-table-new-diagnosis">Current Contingency Table: New Diagnosis<a class="headerlink" href="#current-contingency-table-new-diagnosis" title="Permalink to this heading">¶</a></h5>
+<p>For the reassessment table, we considered only the patients who were diagnosed with asthma.
+We will now consider those who were not diagnosed with asthma:</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>asthma, outcome +</th>
+        <th>asthma, outcome -</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>risk factor <code class="notranslate">λ</code>, outcome +</td>
+        <td><code class="notranslate">a1_dx</code></td>
+        <td><code class="notranslate">b1_dx</code></td>
+        <td><code class="notranslate">n1</code></td>
+    </tr>
+    <tr>
+        <td>risk factor <code class="notranslate">λ</code>, outcome -</td>
+        <td><code class="notranslate">c1_dx</code></td>
+        <td><code class="notranslate">d1_dx</code></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td><code class="notranslate">n2</code></td>
+        <td></td>
+        <td><code class="notranslate">n</code></td>
+    </tr>
+    </tbody>
+</table><p>To calculate the updated contingency table, we have:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}a_{1, \text{dx}} &amp;= b_0 \cdot \zeta_{\text{inc}, \lambda}(t=1) \\
+b_{1, \text{dx}} &amp;= b_0 \cdot (1 - \zeta_{\text{inc}, \lambda}(t=1)) \\
+c_{1, \text{dx}} &amp;= d_0 \cdot \zeta_{\text{inc}, 0}(t=1) \\
+d_{1, \text{dx}} &amp;= d_0 \cdot (1 - \zeta_{\text{inc}, 0}(t=1))\end{split}\]</div>
+<p>where:</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Risk Factors</th>
+        <th>t=0</th>
+        <th colspan="3">t=1</th>
+    </tr>
+    <tr>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>incidence</th>
+        <th>net</th>
+    </thead>
+    <tbody>
+    <tr>
+        <td><code class="notranslate">a1_dx</code></td>
+        <td><code class="notranslate">λ</code></td>
+        <td>no asthma diagnosis</td>
+        <td>new asthma diagnosis</td>
+        <td>asthma</td>
+    </tr>
+    <tr>
+        <td><code class="notranslate">b1_dx</code></td>
+        <td><code class="notranslate">λ</code></td>
+        <td>no asthma diagnosis</td>
+        <td>no new asthma diagnosis</td>
+        <td>no asthma</td>
+    </tr>
+    <tr>
+        <td><code class="notranslate">c1_dx</code></td>
+        <td>None</td>
+        <td>no asthma diagnosis</td>
+        <td>new asthma diagnosis</td>
+        <td>asthma</td>
+    </tr>
+    <tr>
+        <td><code class="notranslate">d1_dx</code></td>
+        <td>None</td>
+        <td>no asthma diagnosis</td>
+        <td>no new asthma diagnosis</td>
+        <td>no asthma</td>
+    </tr>
+    </tbody>
+</table><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(a_{1, \text{dx}}\)</span> is the proportion of the population with risk factor combination <span class="math notranslate nohighlight">\(\lambda\)</span>
+who didn’t have an asthma diagnosis at <span class="math notranslate nohighlight">\(t=0\)</span> and were diagnosed at <span class="math notranslate nohighlight">\(t=1\)</span>
+<span class="math notranslate nohighlight">\(\rightarrow\)</span> have asthma at <span class="math notranslate nohighlight">\(t=1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(b_{1, \text{dx}}\)</span> is the proportion of the population with risk factor combination <span class="math notranslate nohighlight">\(\lambda\)</span>
+who didn’t have an asthma diagnosis at <span class="math notranslate nohighlight">\(t=0\)</span> and were not diagnosed with asthma at <span class="math notranslate nohighlight">\(t=1\)</span>,
+<span class="math notranslate nohighlight">\(\rightarrow\)</span> don’t have asthma at <span class="math notranslate nohighlight">\(t=1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(c_{1, \text{dx}}\)</span> is the proportion of the population with no risk factors (<span class="math notranslate nohighlight">\(\lambda = 0\)</span>)
+who didn’t have an asthma diagnosis at <span class="math notranslate nohighlight">\(t=0\)</span> and were diagnosed at <span class="math notranslate nohighlight">\(t=1\)</span>
+<span class="math notranslate nohighlight">\(\rightarrow\)</span> have asthma at <span class="math notranslate nohighlight">\(t=1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(d_{1, \text{dx}}\)</span> is the proportion of the population with no risk factors (<span class="math notranslate nohighlight">\(\lambda = 0\)</span>)
+who didn’t have an asthma diagnosis at <span class="math notranslate nohighlight">\(t=0\)</span> and were not diagnosed with asthma at
+<span class="math notranslate nohighlight">\(t=1\)</span>, <span class="math notranslate nohighlight">\(\rightarrow\)</span> don’t have asthma at <span class="math notranslate nohighlight">\(t=1\)</span></p></li>
+</ul>
+<h5 id="current-contingency-table">Current Contingency Table<a class="headerlink" href="#current-contingency-table" title="Permalink to this heading">¶</a></h5>
+<p>Finally, we can compute the contingency table for the current year, <span class="math notranslate nohighlight">\(t=1\)</span>:</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>asthma, outcome +</th>
+        <th>asthma, outcome -</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>risk factor <code class="notranslate">λ</code>, outcome +</td>
+        <td><code class="notranslate">a1</code></td>
+        <td><code class="notranslate">b1</code></td>
+        <td><code class="notranslate">n1</code></td>
+    </tr>
+    <tr>
+        <td>risk factor <code class="notranslate">λ</code>, outcome -</td>
+        <td><code class="notranslate">c1</code></td>
+        <td><code class="notranslate">d1</code></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td><code class="notranslate">n2</code></td>
+        <td></td>
+        <td><code class="notranslate">n</code></td>
+    </tr>
+    </tbody>
+</table><p>where:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}a_1 &amp;= a_{1, \text{ra}} + a_{1, \text{dx}} \\
+b_1 &amp;= b_{1, \text{ra}} + b_{1, \text{dx}} \\
+c_1 &amp;= c_{1, \text{ra}} + c_{1, \text{dx}} \\
+d_1 &amp;= d_{1, \text{ra}} + d_{1, \text{dx}}\end{split}\]</div>
+<p>From these values, we can compute the odds ratio:</p>
+<div class="math notranslate nohighlight">
+\[\Omega = \dfrac{a_1 \cdot d_1}{b_1 \cdot c_1}\]</div>
+<h5 id="optimization">Optimization<a class="headerlink" href="#optimization" title="Permalink to this heading">¶</a></h5>
+<p>We want to find the beta parameters that minimize the difference between the predicted odds
+ratio <span class="math notranslate nohighlight">\(\Omega\)</span> and the observed odds ratio <span class="math notranslate nohighlight">\(\omega_{\lambda}\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\sum_{i=1}^{N}\sum_{\lambda=1}^{n}
+  \dfrac{\left| \log(\Omega^{(i)}) - \log(\omega_{\lambda}^{(i)}) \right|}{N}\]</div>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        &#169; Copyright 2024, Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert.
+        
+    </div>
+  
+    Created using
+    <a href="https://www.sphinx-doc.org/" target="_blank" rel="noopener">Sphinx</a>
+    7.0.0.
+     and
+    <a href="https://github.com/jbms/sphinx-immaterial/" target="_blank" rel="noopener">Sphinx-Immaterial</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/resplab/leap/" target="_blank" rel="noopener" title="Source on github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.expand", "navigation.sections", "navigation.top", "search.share", "toc.follow", "toc.sticky", "content.tabs.link", "announce.dismiss", "content.code.annotate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+        <script src="../_static/sphinx_immaterial_theme.32136f45f91ae6956.min.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script id="MathJax-script" src="../_static/mathjax/tex-mml-chtml.js"></script>
+    
+  </body>
+</html>

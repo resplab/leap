@@ -1,0 +1,3432 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="leap.occurrence.html">
+      
+      
+        <link rel="next" href="leap.pollution.html">
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>leap.outcome_matrix module - </title>
+      
+    
+    
+      
+        
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_immaterial_theme.c15b9f3ac86171432.min.css" />
+        <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+        <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#leap.outcome_matrix.OutcomeTable" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../index.html" title="" class="md-header__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../../../_static/logo.png" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              leap.outcome_matrix module
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../index.html" title="" class="md-nav__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../../../_static/logo.png" alt="logo">
+    </a>
+    
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/cli/index.rst (reference label)"><span>Running LEAP</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../model/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/index.rst (reference label)"><span>Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/index.rst (reference label)"><span>Developers</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/dev/index.rst (reference label)"><span>Developers</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev-installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/dev-installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev-testing.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/dev-testing.rst (reference label)"><span>Testing</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev-docs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/dev-docs.rst (reference label)"><span>Sphinx Documentation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev-releases.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/dev-releases.rst (reference label)"><span>Releases</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/index.rst (reference label)"><span>API</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/dev/api/index.rst (reference label)"><span>API</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data_generation/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/index.rst (reference label)"><span>Data Generation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/index.rst (reference label)"><span>LEAP</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_5_2" id="__nav_4_5_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/dev/api/leap/index.rst (reference label)"><span>LEAP</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.agent.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.agent.rst (reference label)"><span>leap.<wbr>agent module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.antibiotic_exposure.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.antibiotic_exposure.rst (reference label)"><span>leap.<wbr>antibiotic_<wbr>exposure module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.birth.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.birth.rst (reference label)"><span>leap.<wbr>birth module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.census_division.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.census_division.rst (reference label)"><span>leap.<wbr>census_<wbr>division module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.control.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.control.rst (reference label)"><span>leap.<wbr>control module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.cost.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.cost.rst (reference label)"><span>leap.<wbr>cost module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.death.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.death.rst (reference label)"><span>leap.<wbr>death module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.emigration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.emigration.rst (reference label)"><span>leap.<wbr>emigration module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.exacerbation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.exacerbation.rst (reference label)"><span>leap.<wbr>exacerbation module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.family_history.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.family_history.rst (reference label)"><span>leap.<wbr>family_<wbr>history module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.immigration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.immigration.rst (reference label)"><span>leap.<wbr>immigration module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.logger.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.logger.rst (reference label)"><span>leap.<wbr>logger module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.main.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.main.rst (reference label)"><span>leap.<wbr>main module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.occurrence.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.occurrence.rst (reference label)"><span>leap.<wbr>occurrence module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.outcome_matrix.rst (reference label)"><span>leap.<wbr>outcome_<wbr>matrix module</span></span>
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.outcome_matrix.rst (reference label)"><span>leap.<wbr>outcome_<wbr>matrix module</span></span>
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/dev/api/leap/leap.outcome_matrix.rst (reference label)"><span>leap.<wbr>outcome_<wbr>matrix module</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable" class="md-nav__link">
+    
+      <span aria-label="Python class" class="objinfo-icon objinfo-icon__data" title="Python class">C</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable (Python class) — The data for the table."><span>leap.<wbr>outcome_<wbr>matrix.<wbr>Outcome<wbr>Table</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.outcome_matrix.OutcomeTable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.__init__" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.__init__ (Python method) — Create an outcome table."><span>__<wbr>init__<wbr></span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="__init__">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.__init__-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.__init__.data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>data</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.__init__.group_by" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>group_<wbr>by</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.increment" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.increment (Python method) — Increment the value of a column in the table."><span>increment</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="increment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.increment-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.increment.column" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.increment.column (Python parameter) — The column to increment."><span>column</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.increment.filter_columns" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.increment.filter_columns (Python parameter) — A dictionary of columns to filter by."><span>filter_<wbr>columns</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.increment.amount" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.increment.amount (Python parameter) — The amount to increment the column by."><span>amount</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.combine" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.combine (Python method) — Combine two outcome tables via summation."><span>combine</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="combine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.combine-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.combine.outcome_table" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.combine.outcome_table (Python parameter) — The outcome table to combine with this one."><span>outcome_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.combine.columns" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.combine.columns (Python parameter) — The columns to combine."><span>columns</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.get" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.get (Python method) — Get the value of a column in the table."><span>get</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="get">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.get-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.get.columns" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.get.columns (Python parameter) — The column(s) to get the value from."><span>columns</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.get.kwargs" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.get.kwargs (Python parameter) — A dictionary of columns to filter by."><span>kwargs</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.get-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix" class="md-nav__link">
+    
+      <span aria-label="Python class" class="objinfo-icon objinfo-icon__data" title="Python class">C</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix (Python class) — A boolean indicating whether the simulation should run until all people have died."><span>leap.<wbr>outcome_<wbr>matrix.<wbr>Outcome<wbr>Matrix</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.outcome_matrix.OutcomeMatrix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.__init__" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.__init__ (Python method) — Initialize the OutcomeMatrix class."><span>__<wbr>init__<wbr></span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="__init__">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.__init__-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.__init__.until_all_die" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>until_<wbr>all_<wbr>die</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.__init__.min_year" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>min_<wbr>year</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.__init__.max_year" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>max_<wbr>year</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.__init__.max_age" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>max_<wbr>age</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.alive" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.alive (Python property) — A table containing the number of people alive in each year, age, and sex."><span>alive</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.antibiotic_exposure" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.antibiotic_exposure (Python property) — A table containing the number of rounds of antibiotics for each year, age, and sex."><span>antibiotic_<wbr>exposure</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.asthma_incidence" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.asthma_incidence (Python property) — A table containing the number of new asthma diagnoses for each year, age, and sex."><span>asthma_<wbr>incidence</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.asthma_prevalence" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.asthma_prevalence (Python property) — A table containing the number of people with asthma for each year, age, and sex."><span>asthma_<wbr>prevalence</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.asthma_incidence_contingency_table" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.asthma_incidence_contingency_table (Python property) — A contingency table with the following columns:"><span>asthma_<wbr>incidence_<wbr>contingency_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.asthma_prevalence_contingency_table" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.asthma_prevalence_contingency_table (Python property) — A contingency table with the following columns:"><span>asthma_<wbr>prevalence_<wbr>contingency_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.asthma_status" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.asthma_status (Python property) — A table containing the status of asthma."><span>asthma_<wbr>status</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.control" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.control (Python property) — A table containing the level of asthma control for each year, age, and sex."><span>control</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.cost" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.cost (Python property) — A table containing the cost of asthma for each year, age, and sex."><span>cost</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.death" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.death (Python property) — A table containing the number of people who died in a given year, age, and sex."><span>death</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.emigration" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.emigration (Python property) — A table containing the number of people who emigrated to Canada for each year, age, and sex."><span>emigration</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.exacerbation" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.exacerbation (Python property) — A table containing the number of asthma exacerbations for each year, age, and sex."><span>exacerbation</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.exacerbation_by_severity" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.exacerbation_by_severity (Python property) — A table containing the number of asthma exacerbations by severity."><span>exacerbation_<wbr>by_<wbr>severity</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.exacerbation_hospital" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.exacerbation_hospital (Python property) — A table containing the number of asthma exacerbations leading to hospitalization."><span>exacerbation_<wbr>hospital</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.family_history" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.family_history (Python property) — A table containing the number of people with a family history of asthma."><span>family_<wbr>history</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.immigration" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.immigration (Python property) — A table containing the number of people who immigrated to Canada for each year, age, and sex."><span>immigration</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.utility" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.utility (Python property) — A table containing the utility due to asthma for each year, age, and sex."><span>utility</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.create_table" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.create_table (Python method) — Create an outcome table."><span>create_<wbr>table</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="create_table">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.create_table-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.create_table.columns" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.create_table.columns (Python parameter) — The list of column names for the table."><span>columns</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.create_table.group_by" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.create_table.group_by (Python parameter) — The list of column names to group by."><span>group_<wbr>by</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.create_table.args" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.create_table.args (Python parameter) — A list of lists, where each list corresponds to a column in the table. Each list is used to create a Cartesian product of the columns, so it should contain the set of possible values for that column."><span>args</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.create_table-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.combine" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.combine (Python method) — Combine two outcome matrices via summation."><span>combine</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="combine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.combine-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.combine.outcome_matrix" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.combine.outcome_matrix (Python parameter) — The outcome matrix to combine with this one."><span>outcome_<wbr>matrix</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.save" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.save (Python method) — Save the outcome matrix to *.csv files."><span>save</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="save">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.save-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.save.path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.save.path (Python parameter) — The full path to the folder where the data will be saved."><span>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_tables" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.combine_outcome_tables (Python function) — Combine a list of outcome tables into a single outcome table."><span>leap.<wbr>outcome_<wbr>matrix.<wbr>combine_<wbr>outcome_<wbr>tables</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.outcome_matrix.combine_outcome_tables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_tables-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_tables.outcome_tables" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.combine_outcome_tables.outcome_tables (Python parameter) — A list of OutcomeTable instances to combine."><span>outcome_<wbr>tables</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_tables.column" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.combine_outcome_tables.column (Python parameter) — The column to sum across the outcome tables."><span>column</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_tables-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_matrices" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.combine_outcome_matrices (Python function) — Combine a list of outcome matrices into a single outcome matrix."><span>leap.<wbr>outcome_<wbr>matrix.<wbr>combine_<wbr>outcome_<wbr>matrices</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.outcome_matrix.combine_outcome_matrices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_matrices-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_matrices.outcome_matrices" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.combine_outcome_matrices.outcome_matrices (Python parameter) — A list of OutcomeMatrix instances to combine."><span>outcome_<wbr>matrices</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_matrices-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.pollution.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.pollution.rst (reference label)"><span>leap.<wbr>pollution module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.reassessment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.reassessment.rst (reference label)"><span>leap.<wbr>reassessment module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.severity.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.severity.rst (reference label)"><span>leap.<wbr>severity module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.simulation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.simulation.rst (reference label)"><span>leap.<wbr>simulation module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.utility.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.utility.rst (reference label)"><span>leap.<wbr>utility module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.utils.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.utils.rst (reference label)"><span>leap.<wbr>utils module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../references.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/references.rst (reference label)"><span>References</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/dev/api/leap/leap.outcome_matrix.rst (reference label)"><span>leap.<wbr>outcome_<wbr>matrix module</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable" class="md-nav__link">
+    
+      <span aria-label="Python class" class="objinfo-icon objinfo-icon__data" title="Python class">C</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable (Python class) — The data for the table."><span>leap.<wbr>outcome_<wbr>matrix.<wbr>Outcome<wbr>Table</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.outcome_matrix.OutcomeTable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.__init__" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.__init__ (Python method) — Create an outcome table."><span>__<wbr>init__<wbr></span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="__init__">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.__init__-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.__init__.data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>data</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.__init__.group_by" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>group_<wbr>by</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.increment" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.increment (Python method) — Increment the value of a column in the table."><span>increment</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="increment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.increment-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.increment.column" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.increment.column (Python parameter) — The column to increment."><span>column</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.increment.filter_columns" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.increment.filter_columns (Python parameter) — A dictionary of columns to filter by."><span>filter_<wbr>columns</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.increment.amount" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.increment.amount (Python parameter) — The amount to increment the column by."><span>amount</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.combine" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.combine (Python method) — Combine two outcome tables via summation."><span>combine</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="combine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.combine-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.combine.outcome_table" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.combine.outcome_table (Python parameter) — The outcome table to combine with this one."><span>outcome_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.combine.columns" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.combine.columns (Python parameter) — The columns to combine."><span>columns</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.get" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.get (Python method) — Get the value of a column in the table."><span>get</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="get">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.get-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.get.columns" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.get.columns (Python parameter) — The column(s) to get the value from."><span>columns</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.get.kwargs" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeTable.get.kwargs (Python parameter) — A dictionary of columns to filter by."><span>kwargs</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeTable.get-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix" class="md-nav__link">
+    
+      <span aria-label="Python class" class="objinfo-icon objinfo-icon__data" title="Python class">C</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix (Python class) — A boolean indicating whether the simulation should run until all people have died."><span>leap.<wbr>outcome_<wbr>matrix.<wbr>Outcome<wbr>Matrix</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.outcome_matrix.OutcomeMatrix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.__init__" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.__init__ (Python method) — Initialize the OutcomeMatrix class."><span>__<wbr>init__<wbr></span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="__init__">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.__init__-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.__init__.until_all_die" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>until_<wbr>all_<wbr>die</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.__init__.min_year" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>min_<wbr>year</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.__init__.max_year" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>max_<wbr>year</span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.__init__.max_age" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>max_<wbr>age</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.alive" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.alive (Python property) — A table containing the number of people alive in each year, age, and sex."><span>alive</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.antibiotic_exposure" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.antibiotic_exposure (Python property) — A table containing the number of rounds of antibiotics for each year, age, and sex."><span>antibiotic_<wbr>exposure</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.asthma_incidence" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.asthma_incidence (Python property) — A table containing the number of new asthma diagnoses for each year, age, and sex."><span>asthma_<wbr>incidence</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.asthma_prevalence" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.asthma_prevalence (Python property) — A table containing the number of people with asthma for each year, age, and sex."><span>asthma_<wbr>prevalence</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.asthma_incidence_contingency_table" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.asthma_incidence_contingency_table (Python property) — A contingency table with the following columns:"><span>asthma_<wbr>incidence_<wbr>contingency_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.asthma_prevalence_contingency_table" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.asthma_prevalence_contingency_table (Python property) — A contingency table with the following columns:"><span>asthma_<wbr>prevalence_<wbr>contingency_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.asthma_status" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.asthma_status (Python property) — A table containing the status of asthma."><span>asthma_<wbr>status</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.control" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.control (Python property) — A table containing the level of asthma control for each year, age, and sex."><span>control</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.cost" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.cost (Python property) — A table containing the cost of asthma for each year, age, and sex."><span>cost</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.death" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.death (Python property) — A table containing the number of people who died in a given year, age, and sex."><span>death</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.emigration" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.emigration (Python property) — A table containing the number of people who emigrated to Canada for each year, age, and sex."><span>emigration</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.exacerbation" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.exacerbation (Python property) — A table containing the number of asthma exacerbations for each year, age, and sex."><span>exacerbation</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.exacerbation_by_severity" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.exacerbation_by_severity (Python property) — A table containing the number of asthma exacerbations by severity."><span>exacerbation_<wbr>by_<wbr>severity</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.exacerbation_hospital" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.exacerbation_hospital (Python property) — A table containing the number of asthma exacerbations leading to hospitalization."><span>exacerbation_<wbr>hospital</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.family_history" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.family_history (Python property) — A table containing the number of people with a family history of asthma."><span>family_<wbr>history</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.immigration" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.immigration (Python property) — A table containing the number of people who immigrated to Canada for each year, age, and sex."><span>immigration</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.utility" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.utility (Python property) — A table containing the utility due to asthma for each year, age, and sex."><span>utility</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.create_table" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.create_table (Python method) — Create an outcome table."><span>create_<wbr>table</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="create_table">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.create_table-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.create_table.columns" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.create_table.columns (Python parameter) — The list of column names for the table."><span>columns</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.create_table.group_by" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.create_table.group_by (Python parameter) — The list of column names to group by."><span>group_<wbr>by</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.create_table.args" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.create_table.args (Python parameter) — A list of lists, where each list corresponds to a column in the table. Each list is used to create a Cartesian product of the columns, so it should contain the set of possible values for that column."><span>args</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.create_table-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.combine" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.combine (Python method) — Combine two outcome matrices via summation."><span>combine</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="combine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.combine-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.combine.outcome_matrix" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.combine.outcome_matrix (Python parameter) — The outcome matrix to combine with this one."><span>outcome_<wbr>matrix</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.save" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.save (Python method) — Save the outcome matrix to *.csv files."><span>save</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="save">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.save-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.OutcomeMatrix.save.path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.OutcomeMatrix.save.path (Python parameter) — The full path to the folder where the data will be saved."><span>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_tables" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.combine_outcome_tables (Python function) — Combine a list of outcome tables into a single outcome table."><span>leap.<wbr>outcome_<wbr>matrix.<wbr>combine_<wbr>outcome_<wbr>tables</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.outcome_matrix.combine_outcome_tables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_tables-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_tables.outcome_tables" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.combine_outcome_tables.outcome_tables (Python parameter) — A list of OutcomeTable instances to combine."><span>outcome_<wbr>tables</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_tables.column" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.combine_outcome_tables.column (Python parameter) — The column to sum across the outcome tables."><span>column</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_tables-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_matrices" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.combine_outcome_matrices (Python function) — Combine a list of outcome matrices into a single outcome matrix."><span>leap.<wbr>outcome_<wbr>matrix.<wbr>combine_<wbr>outcome_<wbr>matrices</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.outcome_matrix.combine_outcome_matrices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_matrices-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_matrices.outcome_matrices" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.outcome_matrix.combine_outcome_matrices.outcome_matrices (Python parameter) — A list of OutcomeMatrix instances to combine."><span>outcome_<wbr>matrices</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.outcome_matrix.combine_outcome_matrices-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                
+                
+                  
+
+
+  
+  
+
+<h1 id="module-leap.outcome_matrix"><span id="leap-outcome-matrix-module"></span>leap.outcome_matrix module<a class="headerlink" href="#module-leap.outcome_matrix" title="Permalink to this heading">¶</a></h1>
+<dl class="py class objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.outcome_matrix.OutcomeTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">leap.outcome_matrix.</span></span><span class="sig-name descname"><span class="pre">OutcomeTable</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable.__init__.data (Python parameter) — The data for the table."><span class="n"><span class="pre">data</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable.__init__.group_by (Python parameter) — The columns to group the data by."><span class="n"><span class="pre">group_by</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/outcome_matrix.html#OutcomeTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.outcome_matrix.OutcomeTable.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable.__init__.data (Python parameter) — The data for the table."><span class="n"><span class="pre">data</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable.__init__.group_by (Python parameter) — The columns to group the data by."><span class="n"><span class="pre">group_by</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/outcome_matrix.html#OutcomeTable.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an outcome table.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.outcome_matrix.OutcomeTable.__init__-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.__init__-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.outcome_matrix.OutcomeTable.__init__.data"><span class="n sig-name">data</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pandas.core.frame.DataFrame</span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.__init__.data" title="Permalink to this definition">¶</a></dt><dd><p>The data for the table.</p>
+</dd>
+<dt id="leap.outcome_matrix.OutcomeTable.__init__.group_by"><span class="n sig-name">group_by</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">list<span class="p">[</span>str<span class="p">]</span><span class="w">   </span><span class="p">|</span><span class="w">   </span>None</span></span><span class="w">   </span><span class="o">=</span><span class="w">   </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.__init__.group_by" title="Permalink to this definition">¶</a></dt><dd><p>The columns to group the data by.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.outcome_matrix.OutcomeTable.increment">
+<span class="sig-name descname"><span class="pre">increment</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeTable.increment.column" title="leap.outcome_matrix.OutcomeTable.increment.column (Python parameter) — The column to increment."><span class="n"><span class="pre">column</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeTable.increment.filter_columns" title="leap.outcome_matrix.OutcomeTable.increment.filter_columns (Python parameter) — A dictionary of columns to filter by."><span class="n"><span class="pre">filter_columns</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeTable.increment.amount" title="leap.outcome_matrix.OutcomeTable.increment.amount (Python parameter) — The amount to increment the column by."><span class="n"><span class="pre">amount</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="mi">1</span></code></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/outcome_matrix.html#OutcomeTable.increment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.increment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increment the value of a column in the table.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.outcome_matrix.OutcomeTable.increment-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.increment-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.outcome_matrix.OutcomeTable.increment.column"><span class="n sig-name">column</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">str</span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.increment.column" title="Permalink to this definition">¶</a></dt><dd><p>The column to increment.</p>
+</dd>
+<dt id="leap.outcome_matrix.OutcomeTable.increment.filter_columns"><span class="n sig-name">filter_columns</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">dict<span class="w">   </span><span class="p">|</span><span class="w">   </span>None</span></span><span class="w">   </span><span class="o">=</span><span class="w">   </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.increment.filter_columns" title="Permalink to this definition">¶</a></dt><dd><p>A dictionary of columns to filter by.</p>
+</dd>
+<dt id="leap.outcome_matrix.OutcomeTable.increment.amount"><span class="n sig-name">amount</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">float<span class="w">   </span><span class="p">|</span><span class="w">   </span>int</span></span><span class="w">   </span><span class="o">=</span><span class="w">   </span><code class="code python default_value docutils literal highlight highlight-python"><span class="mi">1</span></code><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.increment.amount" title="Permalink to this definition">¶</a></dt><dd><p>The amount to increment the column by.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.outcome_matrix.OutcomeTable.combine">
+<span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeTable.combine.outcome_table" title="leap.outcome_matrix.OutcomeTable.combine.outcome_table (Python parameter) — The outcome table to combine with this one."><span class="n"><span class="pre">outcome_table</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeTable.combine.columns" title="leap.outcome_matrix.OutcomeTable.combine.columns (Python parameter) — The columns to combine."><span class="n"><span class="pre">columns</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/outcome_matrix.html#OutcomeTable.combine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.combine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine two outcome tables via summation.</p>
+<p>This method combines the current outcome table with another <code class="docutils literal notranslate"><span class="pre">OutcomeTable</span></code> instance
+by summing the values in the specified columns. The tables must have the same structure
+and groupings.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.outcome_matrix.OutcomeTable.combine-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.combine-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.outcome_matrix.OutcomeTable.combine.outcome_table"><span class="n sig-name">outcome_table</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object">leap.outcome_matrix.OutcomeTable</a></span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.combine.outcome_table" title="Permalink to this definition">¶</a></dt><dd><p>The outcome table to combine with this one.</p>
+</dd>
+<dt id="leap.outcome_matrix.OutcomeTable.combine.columns"><span class="n sig-name">columns</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">list<span class="p">[</span>str<span class="p">]</span></span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.combine.columns" title="Permalink to this definition">¶</a></dt><dd><p>The columns to combine. These should be the columns that contain the values
+to be summed. If the columns are not present in both tables, a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> will
+be raised.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.outcome_matrix.OutcomeTable.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeTable.get.columns" title="leap.outcome_matrix.OutcomeTable.get.columns (Python parameter) — The column(s) to get the value from."><span class="n"><span class="pre">columns</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><span class="o"><span class="pre">**</span></span><a class="n reference internal" href="#leap.outcome_matrix.OutcomeTable.get.kwargs" title="leap.outcome_matrix.OutcomeTable.get.kwargs (Python parameter) — A dictionary of columns to filter by."><span class="n"><span class="pre">kwargs</span></span></a></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.core.series.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.core.frame.DataFrame</span></span></span></span><a class="reference internal" href="../../../_modules/leap/outcome_matrix.html#OutcomeTable.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the value of a column in the table.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.outcome_matrix.OutcomeTable.get-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.get-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.outcome_matrix.OutcomeTable.get.columns"><span class="n sig-name">columns</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">str<span class="w">   </span><span class="p">|</span><span class="w">   </span>list<span class="p">[</span>str<span class="p">]</span></span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.get.columns" title="Permalink to this definition">¶</a></dt><dd><p>The column(s) to get the value from.</p>
+</dd>
+<dt id="leap.outcome_matrix.OutcomeTable.get.kwargs"><span class="o">**</span><span class="n sig-name">kwargs</span><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.get.kwargs" title="Permalink to this definition">¶</a></dt><dd><p>A dictionary of columns to filter by.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="leap.outcome_matrix.OutcomeTable.get-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.OutcomeTable.get-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>The value of the column.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.outcome_matrix.OutcomeMatrix">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">leap.outcome_matrix.</span></span><span class="sig-name descname"><span class="pre">OutcomeMatrix</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix.__init__.until_all_die (Python parameter) — A boolean indicating whether the simulation should run until all people have died."><span class="n"><span class="pre">until_all_die</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix.__init__.min_year (Python parameter) — The minimum year of the simulation."><span class="n"><span class="pre">min_year</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix.__init__.max_year (Python parameter) — The maximum year of the simulation."><span class="n"><span class="pre">max_year</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix.__init__.max_age (Python parameter) — The maximum age of the people in the simulation."><span class="n"><span class="pre">max_age</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/outcome_matrix.html#OutcomeMatrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class containing information about the outcomes of the model.</p>
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.outcome_matrix.OutcomeMatrix.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix.__init__.until_all_die (Python parameter) — A boolean indicating whether the simulation should run until all people have died."><span class="n"><span class="pre">until_all_die</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix.__init__.min_year (Python parameter) — The minimum year of the simulation."><span class="n"><span class="pre">min_year</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix.__init__.max_year (Python parameter) — The maximum year of the simulation."><span class="n"><span class="pre">max_year</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix.__init__.max_age (Python parameter) — The maximum age of the people in the simulation."><span class="n"><span class="pre">max_age</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/outcome_matrix.html#OutcomeMatrix.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the <code class="docutils literal notranslate"><span class="pre">OutcomeMatrix</span></code> class.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.outcome_matrix.OutcomeMatrix.__init__-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.__init__-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.outcome_matrix.OutcomeMatrix.__init__.until_all_die"><span class="n sig-name">until_all_die</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">bool</span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.__init__.until_all_die" title="Permalink to this definition">¶</a></dt><dd><p>A boolean indicating whether the simulation should run until all
+people have died.</p>
+</dd>
+<dt id="leap.outcome_matrix.OutcomeMatrix.__init__.min_year"><span class="n sig-name">min_year</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">int</span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.__init__.min_year" title="Permalink to this definition">¶</a></dt><dd><p>The minimum year of the simulation.</p>
+</dd>
+<dt id="leap.outcome_matrix.OutcomeMatrix.__init__.max_year"><span class="n sig-name">max_year</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">int</span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.__init__.max_year" title="Permalink to this definition">¶</a></dt><dd><p>The maximum year of the simulation.</p>
+</dd>
+<dt id="leap.outcome_matrix.OutcomeMatrix.__init__.max_age"><span class="n sig-name">max_age</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">int</span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.__init__.max_age" title="Permalink to this definition">¶</a></dt><dd><p>The maximum age of the people in the simulation.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.alive">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alive</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.alive" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the number of people alive in each year, age, and sex.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.antibiotic_exposure">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">antibiotic_exposure</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.antibiotic_exposure" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the number of rounds of antibiotics for each year, age, and sex.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.asthma_incidence">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">asthma_incidence</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.asthma_incidence" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the number of new asthma diagnoses for each year, age, and sex.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.asthma_prevalence">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">asthma_prevalence</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.asthma_prevalence" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the number of people with asthma for each year, age, and sex.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.outcome_matrix.OutcomeMatrix.asthma_incidence_contingency_table">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">asthma_incidence_contingency_table</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.asthma_incidence_contingency_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>A contingency table with the following columns:</p>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>year</p></th>
+<th class="head"><p>age</p></th>
+<th class="head"><p>sex</p></th>
+<th class="head"><p>has_family_history</p></th>
+<th class="head"><p>abx_exposure</p></th>
+<th class="head"><p>n_asthma</p></th>
+<th class="head"><p>n_no_asthma</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>calendar year</p></td>
+<td><p>age in years</p></td>
+<td><p>one of <code class="docutils literal notranslate"><span class="pre">F</span></code> or <code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p>whether the person has a family history of asthma</p></td>
+<td><p>number of courses of antibiotics in infancy</p></td>
+<td><p>number of people diagnosed with asthma in the given year, for the given
+age, sex, family history, and antibiotic exposure</p></td>
+<td><p>number of people not diagnosed with asthma in the given year, for the given
+age, sex, family history, and antibiotic exposure</p></td>
+</tr>
+<tr class="row-odd"><td><p>2024</p></td>
+<td><p>15</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">F</span></code></p></td>
+<td><p>0</p></td>
+<td><p>2</p></td>
+<td><p>10</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.outcome_matrix.OutcomeMatrix.asthma_prevalence_contingency_table">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">asthma_prevalence_contingency_table</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.asthma_prevalence_contingency_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>A contingency table with the following columns:</p>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>year</p></th>
+<th class="head"><p>age</p></th>
+<th class="head"><p>sex</p></th>
+<th class="head"><p>has_family_history</p></th>
+<th class="head"><p>abx_exposure</p></th>
+<th class="head"><p>n_asthma</p></th>
+<th class="head"><p>n_no_asthma</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>calendar year</p></td>
+<td><p>age in years</p></td>
+<td><p>one of <code class="docutils literal notranslate"><span class="pre">F</span></code> or <code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p>whether the person has a family history of asthma</p></td>
+<td><p>number of courses of antibiotics in infancy</p></td>
+<td><p>number of people with asthma for the given year, age, sex, family history,
+and antibiotic exposure</p></td>
+<td><p>number of people without asthma for the given year, age, sex, family history,
+and antibiotic exposure</p></td>
+</tr>
+<tr class="row-odd"><td><p>2024</p></td>
+<td><p>15</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">F</span></code></p></td>
+<td><p>0</p></td>
+<td><p>2</p></td>
+<td><p>100</p></td>
+<td><p>46</p></td>
+</tr>
+<tr class="row-even"><td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.asthma_status">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">asthma_status</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.asthma_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the status of asthma.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.control">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">control</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.control" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the level of asthma control for each year, age, and sex.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.cost">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cost</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.cost" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the cost of asthma for each year, age, and sex.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.death">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">death</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.death" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the number of people who died in a given year, age, and sex.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.emigration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">emigration</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.emigration" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the number of people who emigrated to Canada for each year, age,
+and sex.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.exacerbation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">exacerbation</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.exacerbation" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the number of asthma exacerbations for each year, age, and sex.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.exacerbation_by_severity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">exacerbation_by_severity</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.exacerbation_by_severity" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the number of asthma exacerbations by severity.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.exacerbation_hospital">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">exacerbation_hospital</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.exacerbation_hospital" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the number of asthma exacerbations leading to hospitalization.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.family_history">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">family_history</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.family_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the number of people with a family history of asthma.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.immigration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">immigration</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.immigration" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the number of people who immigrated to Canada for each year, age,
+and sex.</p>
+</dd></dl>
+
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.utility">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">utility</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.utility" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing the utility due to asthma for each year, age, and sex.</p>
+</dd></dl>
+
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.outcome_matrix.OutcomeMatrix.create_table">
+<span class="sig-name descname"><span class="pre">create_table</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix.create_table.columns" title="leap.outcome_matrix.OutcomeMatrix.create_table.columns (Python parameter) — The list of column names for the table."><span class="n"><span class="pre">columns</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix.create_table.group_by" title="leap.outcome_matrix.OutcomeMatrix.create_table.group_by (Python parameter) — The list of column names to group by."><span class="n"><span class="pre">group_by</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><span class="o"><span class="pre">*</span></span><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix.create_table.args" title="leap.outcome_matrix.OutcomeMatrix.create_table.args (Python parameter) — A list of lists, where each list corresponds to a column in the table. Each list is used to create a Cartesian product of the columns, so it should contain the set of possible values for that column."><span class="n"><span class="pre">args</span></span></a></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span></span></span><a class="reference internal" href="../../../_modules/leap/outcome_matrix.html#OutcomeMatrix.create_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.create_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an outcome table.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.outcome_matrix.OutcomeMatrix.create_table-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.create_table-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.outcome_matrix.OutcomeMatrix.create_table.columns"><span class="n sig-name">columns</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">list<span class="p">[</span>str<span class="p">]</span></span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.create_table.columns" title="Permalink to this definition">¶</a></dt><dd><p>The list of column names for the table.</p>
+</dd>
+<dt id="leap.outcome_matrix.OutcomeMatrix.create_table.group_by"><span class="n sig-name">group_by</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">list<span class="p">[</span>str<span class="p">]</span><span class="w">   </span><span class="p">|</span><span class="w">   </span>None</span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.create_table.group_by" title="Permalink to this definition">¶</a></dt><dd><p>The list of column names to group by. Set to <code class="docutils literal notranslate"><span class="pre">None</span></code> if no grouping
+is needed.</p>
+</dd>
+<dt id="leap.outcome_matrix.OutcomeMatrix.create_table.args"><span class="o">*</span><span class="n sig-name">args</span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.create_table.args" title="Permalink to this definition">¶</a></dt><dd><p>A list of lists, where each list corresponds to a column in the table.
+Each list is used to create a Cartesian product of the columns,
+so it should contain the set of possible values for that column.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="leap.outcome_matrix.OutcomeMatrix.create_table-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.create_table-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>An <code class="docutils literal notranslate"><span class="pre">OutcomeTable</span></code> object containing the data for the table.</p>
+</dd>
+</dl>
+<p class="example rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">leap.outcome_matrix</span><span class="w"> </span><span class="kn">import</span> <span class="n">OutcomeMatrix</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">outcome_matrix</span> <span class="o">=</span> <span class="n">OutcomeMatrix</span><span class="p">(</span><span class="n">until_all_die</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">min_year</span><span class="o">=</span><span class="mi">2024</span><span class="p">,</span> <span class="n">max_year</span><span class="o">=</span><span class="mi">2030</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">outcome_matrix</span><span class="o">.</span><span class="n">create_table</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="s2">&quot;sex&quot;</span><span class="p">,</span> <span class="s2">&quot;n_alive&quot;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="kc">None</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="nb">range</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">2026</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;M&quot;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> 
+<span class="go">year  age sex  n_alive</span>
+<span class="go">0  2024    1   F        0</span>
+<span class="go">1  2024    1   M        0</span>
+<span class="go">2  2024    2   F        0</span>
+<span class="go">3  2024    2   M        0</span>
+<span class="go">4  2025    1   F        0</span>
+<span class="go">5  2025    1   M        0</span>
+<span class="go">6  2025    2   F        0</span>
+<span class="go">7  2025    2   M        0</span>
+</code></pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.combine">
+<span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix.combine.outcome_matrix" title="leap.outcome_matrix.OutcomeMatrix.combine.outcome_matrix (Python parameter) — The outcome matrix to combine with this one."><span class="n"><span class="pre">outcome_matrix</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeMatrix</span></a></span></span></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/outcome_matrix.html#OutcomeMatrix.combine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.combine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine two outcome matrices via summation.</p>
+<p>This method combines the outcome tables of the current instance with those of
+another <code class="docutils literal notranslate"><span class="pre">OutcomeMatrix</span></code> instance by summing the values in the <code class="docutils literal notranslate"><span class="pre">value_columns</span></code>
+for each corresponding table. The tables must have the same structure and groupings.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.outcome_matrix.OutcomeMatrix.combine-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.combine-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.outcome_matrix.OutcomeMatrix.combine.outcome_matrix"><span class="n sig-name">outcome_matrix</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix (Python class) — Bases: object">leap.outcome_matrix.OutcomeMatrix</a></span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.combine.outcome_matrix" title="Permalink to this definition">¶</a></dt><dd><p>The outcome matrix to combine with this one.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight py" id="leap.outcome_matrix.OutcomeMatrix.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.OutcomeMatrix.save.path" title="leap.outcome_matrix.OutcomeMatrix.save.path (Python parameter) — The full path to the folder where the data will be saved."><span class="n"><span class="pre">path</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pathlib.Path</span></span></span></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/outcome_matrix.html#OutcomeMatrix.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the outcome matrix to <code class="docutils literal notranslate"><span class="pre">*.csv</span></code> files.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.outcome_matrix.OutcomeMatrix.save-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.save-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.outcome_matrix.OutcomeMatrix.save.path"><span class="n sig-name">path</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pathlib.Path</span></span><a class="headerlink" href="#leap.outcome_matrix.OutcomeMatrix.save.path" title="Permalink to this definition">¶</a></dt><dd><p>The full path to the folder where the data will be saved.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.outcome_matrix.combine_outcome_tables">
+<span class="sig-prename descclassname"><span class="pre">leap.outcome_matrix.</span></span><span class="sig-name descname"><span class="pre">combine_outcome_tables</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.combine_outcome_tables.outcome_tables" title="leap.outcome_matrix.combine_outcome_tables.outcome_tables (Python parameter) — A list of OutcomeTable instances to combine."><span class="n"><span class="pre">outcome_tables</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a><span class="p"><span class="pre">]</span></span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.combine_outcome_tables.column" title="leap.outcome_matrix.combine_outcome_tables.column (Python parameter) — The column to sum across the outcome tables."><span class="n"><span class="pre">column</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span></span></span></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeTable</span></a></span></span></span><a class="reference internal" href="../../../_modules/leap/outcome_matrix.html#combine_outcome_tables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.outcome_matrix.combine_outcome_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine a list of outcome tables into a single outcome table.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.outcome_matrix.combine_outcome_tables-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.combine_outcome_tables-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.outcome_matrix.combine_outcome_tables.outcome_tables"><span class="n sig-name">outcome_tables</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">list<span class="p">[</span><a class="reference internal" href="#leap.outcome_matrix.OutcomeTable" title="leap.outcome_matrix.OutcomeTable (Python class) — Bases: object">leap.outcome_matrix.OutcomeTable</a><span class="p">]</span></span></span><a class="headerlink" href="#leap.outcome_matrix.combine_outcome_tables.outcome_tables" title="Permalink to this definition">¶</a></dt><dd><p>A list of <code class="docutils literal notranslate"><span class="pre">OutcomeTable</span></code> instances to combine.</p>
+</dd>
+<dt id="leap.outcome_matrix.combine_outcome_tables.column"><span class="n sig-name">column</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">str</span></span><a class="headerlink" href="#leap.outcome_matrix.combine_outcome_tables.column" title="Permalink to this definition">¶</a></dt><dd><p>The column to sum across the outcome tables.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="leap.outcome_matrix.combine_outcome_tables-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.combine_outcome_tables-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>An <code class="docutils literal notranslate"><span class="pre">OutcomeTable</span></code> instance containing the combined data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.outcome_matrix.combine_outcome_matrices">
+<span class="sig-prename descclassname"><span class="pre">leap.outcome_matrix.</span></span><span class="sig-name descname"><span class="pre">combine_outcome_matrices</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.outcome_matrix.combine_outcome_matrices.outcome_matrices" title="leap.outcome_matrix.combine_outcome_matrices.outcome_matrices (Python parameter) — A list of OutcomeMatrix instances to combine."><span class="n"><span class="pre">outcome_matrices</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeMatrix</span></a><span class="p"><span class="pre">]</span></span></span></span></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><a class="reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix (Python class) — Bases: object"><span class="pre">leap.outcome_matrix.OutcomeMatrix</span></a></span></span></span><a class="reference internal" href="../../../_modules/leap/outcome_matrix.html#combine_outcome_matrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.outcome_matrix.combine_outcome_matrices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine a list of outcome matrices into a single outcome matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.outcome_matrix.combine_outcome_matrices-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.combine_outcome_matrices-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.outcome_matrix.combine_outcome_matrices.outcome_matrices"><span class="n sig-name">outcome_matrices</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">list<span class="p">[</span><a class="reference internal" href="#leap.outcome_matrix.OutcomeMatrix" title="leap.outcome_matrix.OutcomeMatrix (Python class) — Bases: object">leap.outcome_matrix.OutcomeMatrix</a><span class="p">]</span></span></span><a class="headerlink" href="#leap.outcome_matrix.combine_outcome_matrices.outcome_matrices" title="Permalink to this definition">¶</a></dt><dd><p>A list of <code class="docutils literal notranslate"><span class="pre">OutcomeMatrix</span></code> instances to combine.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="leap.outcome_matrix.combine_outcome_matrices-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.outcome_matrix.combine_outcome_matrices-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>An <code class="docutils literal notranslate"><span class="pre">OutcomeMatrix</span></code> instance containing the combined data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        &#169; Copyright 2024, Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert.
+        
+    </div>
+  
+    Created using
+    <a href="https://www.sphinx-doc.org/" target="_blank" rel="noopener">Sphinx</a>
+    7.0.0.
+     and
+    <a href="https://github.com/jbms/sphinx-immaterial/" target="_blank" rel="noopener">Sphinx-Immaterial</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/resplab/leap/" target="_blank" rel="noopener" title="Source on github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.sections", "navigation.top", "search.share", "toc.follow", "toc.sticky", "content.tabs.link", "announce.dismiss", "content.code.annotate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+        <script src="../../../_static/sphinx_immaterial_theme.32136f45f91ae6956.min.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+  </body>
+</html>

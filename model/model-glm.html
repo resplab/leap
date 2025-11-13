@@ -1,0 +1,1427 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="model-simulation.html">
+      
+      
+        <link rel="next" href="model-birth.html">
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>Generalized Linear Models - </title>
+      
+    
+    
+      
+        
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="../_static/sphinx_immaterial_theme.c15b9f3ac86171432.min.css" />
+        <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+        <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#background-ordinary-linear-regression" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="" class="md-header__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../_static/logo.png" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Generalized Linear Models
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="" class="md-nav__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../_static/logo.png" alt="logo">
+    </a>
+    
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/cli/index.rst (reference label)"><span>Running LEAP</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/index.rst (reference label)"><span>Model</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/model/index.rst (reference label)"><span>Model</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-simulation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-simulation.rst (reference label)"><span>Simulation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-glm.ipynb (reference label)"><span>Generalized Linear Models</span></span>
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-glm.ipynb (reference label)"><span>Generalized Linear Models</span></span>
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/model/model-glm.ipynb (reference label)"><span>Generalized Linear Models</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#background-ordinary-linear-regression" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#background-ordinary-linear-regression (reference label)"><span>Background:<wbr> Ordinary Linear Regression</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#glm-linear-predictor" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#glm-linear-predictor (reference label)"><span>GLM:<wbr> Linear Predictor</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GLM: Linear Predictor">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#examples (reference label)"><span>Examples</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invalid-examples" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#invalid-examples (reference label)"><span>Invalid Examples</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#glm-exponential-distribution" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#glm-exponential-distribution (reference label)"><span>GLM:<wbr> Exponential Distribution</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#glm-link-function" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#glm-link-function (reference label)"><span>GLM:<wbr> Link Function</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-1-identity-link-function-ordinary-linear-regression" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#example-1-identity-link-function-ordinary-linear-regression (reference label)"><span>Example 1:<wbr> Identity Link Function, Ordinary Linear Regression</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-birth.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-birth.rst (reference label)"><span>Birth Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-death.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-death.rst (reference label)"><span>Mortality Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-migration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-migration.rst (reference label)"><span>Immigration / Emigration Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-antibiotics.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-antibiotics.rst (reference label)"><span>Antibiotic Exposure Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-occurrence.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-occurrence.rst (reference label)"><span>Asthma Occurrence Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-control.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-control.rst (reference label)"><span>Asthma Control Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-exacerbation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-exacerbation.rst (reference label)"><span>Asthma Exacerbations Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-cost.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-cost.rst (reference label)"><span>Asthma Cost Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-utility.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-utility.rst (reference label)"><span>Utility Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-pollution.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-pollution.rst (reference label)"><span>Pollution Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/index.rst (reference label)"><span>Developers</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../references.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/references.rst (reference label)"><span>References</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/model/model-glm.ipynb (reference label)"><span>Generalized Linear Models</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#background-ordinary-linear-regression" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#background-ordinary-linear-regression (reference label)"><span>Background:<wbr> Ordinary Linear Regression</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#glm-linear-predictor" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#glm-linear-predictor (reference label)"><span>GLM:<wbr> Linear Predictor</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GLM: Linear Predictor">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#examples (reference label)"><span>Examples</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invalid-examples" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#invalid-examples (reference label)"><span>Invalid Examples</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#glm-exponential-distribution" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#glm-exponential-distribution (reference label)"><span>GLM:<wbr> Exponential Distribution</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#glm-link-function" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#glm-link-function (reference label)"><span>GLM:<wbr> Link Function</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-1-identity-link-function-ordinary-linear-regression" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-glm.ipynb#example-1-identity-link-function-ordinary-linear-regression (reference label)"><span>Example 1:<wbr> Identity Link Function, Ordinary Linear Regression</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                
+                
+                  
+
+
+  
+  
+
+<h1 id="generalized-linear-models">Generalized Linear Models<a class="headerlink" href="#generalized-linear-models" title="Permalink to this heading">¶</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.io</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pio</span>
+<span class="n">pio</span><span class="o">.</span><span class="n">renderers</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;sphinx_gallery&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.express</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">px</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn</span><span class="w"> </span><span class="kn">import</span> <span class="n">datasets</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">statsmodels.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">statsmodels.formula.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">smf</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="background-ordinary-linear-regression">Background: Ordinary Linear Regression<a class="headerlink" href="#background-ordinary-linear-regression" title="Permalink to this heading">¶</a></h2>
+<p>A generalized linear model is a generalization of ordinary linear regression. In ordinary linear
+regression, we assume that the <code class="docutils literal notranslate"><span class="pre">response</span> <span class="pre">variable</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, can be described by the equation:</p>
+<div class="math notranslate nohighlight">
+\[
+    y^{(i)} = \beta_0 + \beta_1 x_1^{(i)} + \beta_2 x_2^{(i)} + \ldots + \beta_n x_n^{(i)}
+\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(i\)</span> is the index of the sample</p></li>
+<li><p><span class="math notranslate nohighlight">\(n\)</span> is the number of features</p></li>
+<li><p><span class="math notranslate nohighlight">\(\beta_0, \beta_1, \ldots, \beta_n\)</span> are the coefficients of the model</p></li>
+<li><p><span class="math notranslate nohighlight">\(x_1^{(i)}, x_2^{(i)}, \ldots, x_n^{(i)}\)</span> are the features of the <span class="math notranslate nohighlight">\(i\)</span>-th sample</p></li>
+<li><p><span class="math notranslate nohighlight">\(y^{(i)}\)</span> is the response variable for the <span class="math notranslate nohighlight">\(i\)</span>-th sample</p></li>
+</ul>
+<p>For example, let’s suppose we look at the <code class="docutils literal notranslate"><span class="pre">diabetes</span></code> dataset:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="c1"># Load diabetes dataset</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">load_diabetes</span><span class="p">()</span>
+<span class="n">x_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span>
+<span class="n">y_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;disease_progression&quot;</span><span class="p">])</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="s2">&quot;sex&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>The diabetes dataset has been transformed into numbers that are somewhat meaningless; for example:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sex is one of: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;sex&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Age is one of:</span><span class="se">\n</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>Sex is one of: [-0.04464164  0.05068012]
+Age is one of:
+[-0.10722563 -0.10359309 -0.09996055 -0.09632802 -0.09269548 -0.08906294
+ -0.0854304  -0.08179786 -0.07816532 -0.07453279 -0.07090025 -0.06726771
+ -0.06363517 -0.06000263 -0.05637009 -0.05273755 -0.04910502 -0.04547248
+ -0.04183994 -0.0382074  -0.03457486 -0.03094232 -0.02730979 -0.02367725
+ -0.02004471 -0.01641217 -0.01277963 -0.00914709 -0.00551455 -0.00188202
+  0.00175052  0.00538306  0.0090156   0.01264814  0.01628068  0.01991321
+  0.02354575  0.02717829  0.03081083  0.03444337  0.03807591  0.04170844
+  0.04534098  0.04897352  0.05260606  0.0562386   0.05987114  0.06350368
+  0.06713621  0.07076875  0.07440129  0.07803383  0.08166637  0.08529891
+  0.08893144  0.09256398  0.09619652  0.11072668]
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Before using this dataset, we would like <code class="docutils literal notranslate"><span class="pre">sex</span></code> and <code class="docutils literal notranslate"><span class="pre">age</span></code> to having meaningful values. To do so,
+we transform the data using information from <code class="docutils literal notranslate"><span class="pre">Table</span> <span class="pre">1</span></code> in the original study:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://hastie.su.domains/Papers/LARS/LeastAngle_2002.pdf">Least Angle Regression</a></p></li>
+<li><p><a class="reference external" href="https://www4.stat.ncsu.edu/~boos/var.select/diabetes.tab.txt">Diabetes Original Data</a></p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="c1"># Original ages</span>
+<span class="n">ages_orig</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+
+<span class="c1"># Correct ages</span>
+<span class="n">MIN_AGE</span> <span class="o">=</span> <span class="mi">19</span>
+<span class="n">MAX_AGE</span> <span class="o">=</span> <span class="n">MIN_AGE</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ages_orig</span><span class="p">)</span>
+<span class="n">ages</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">MIN_AGE</span><span class="p">,</span> <span class="n">MAX_AGE</span><span class="p">))</span>
+
+<span class="c1"># Transform the ages in the dataset</span>
+<span class="n">age_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">age_orig</span><span class="p">:</span> <span class="n">age</span> <span class="k">for</span> <span class="n">age_orig</span><span class="p">,</span> <span class="n">age</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ages_orig</span><span class="p">,</span> <span class="n">ages</span><span class="p">)}</span>
+<span class="n">data</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">age_map</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="c1"># Original sexes</span>
+<span class="n">sexes_orig</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sex&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+
+<span class="c1"># Correct sexes</span>
+<span class="n">sexes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+<span class="c1"># Transform the sexes in the dataset</span>
+<span class="n">sex_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">sex_orig</span><span class="p">:</span> <span class="n">sex</span> <span class="k">for</span> <span class="n">sex_orig</span><span class="p">,</span> <span class="n">sex</span><span class="p">,</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sexes_orig</span><span class="p">,</span> <span class="n">sexes</span><span class="p">)}</span>
+<span class="n">data</span><span class="p">[</span><span class="s2">&quot;sex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">sex_map</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;sex&quot;</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>sex</th>
+      <th>bmi</th>
+      <th>bp</th>
+      <th>s1</th>
+      <th>s2</th>
+      <th>s3</th>
+      <th>s4</th>
+      <th>s5</th>
+      <th>s6</th>
+      <th>disease_progression</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>26</th>
+      <td>19</td>
+      <td>1</td>
+      <td>-0.077342</td>
+      <td>-0.026328</td>
+      <td>-0.089630</td>
+      <td>-0.096198</td>
+      <td>0.026550</td>
+      <td>-0.076395</td>
+      <td>-0.042571</td>
+      <td>-0.005220</td>
+      <td>137.0</td>
+    </tr>
+    <tr>
+      <th>344</th>
+      <td>19</td>
+      <td>1</td>
+      <td>-0.011595</td>
+      <td>-0.040099</td>
+      <td>0.049341</td>
+      <td>0.064447</td>
+      <td>-0.013948</td>
+      <td>0.034309</td>
+      <td>0.007027</td>
+      <td>-0.030072</td>
+      <td>200.0</td>
+    </tr>
+    <tr>
+      <th>374</th>
+      <td>19</td>
+      <td>1</td>
+      <td>-0.034229</td>
+      <td>-0.067642</td>
+      <td>-0.063487</td>
+      <td>-0.070520</td>
+      <td>0.008142</td>
+      <td>-0.039493</td>
+      <td>-0.000612</td>
+      <td>-0.079778</td>
+      <td>140.0</td>
+    </tr>
+    <tr>
+      <th>79</th>
+      <td>20</td>
+      <td>1</td>
+      <td>-0.037463</td>
+      <td>-0.026328</td>
+      <td>0.002559</td>
+      <td>0.019980</td>
+      <td>0.011824</td>
+      <td>-0.002592</td>
+      <td>-0.068332</td>
+      <td>-0.025930</td>
+      <td>113.0</td>
+    </tr>
+    <tr>
+      <th>226</th>
+      <td>20</td>
+      <td>2</td>
+      <td>-0.046085</td>
+      <td>-0.026328</td>
+      <td>-0.024960</td>
+      <td>-0.024800</td>
+      <td>0.030232</td>
+      <td>-0.039493</td>
+      <td>-0.039809</td>
+      <td>-0.054925</td>
+      <td>77.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Here we have <code class="docutils literal notranslate"><span class="pre">10</span></code> features:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>[&#39;age&#39;, &#39;sex&#39;, &#39;bmi&#39;, &#39;bp&#39;, &#39;s1&#39;, &#39;s2&#39;, &#39;s3&#39;, &#39;s4&#39;, &#39;s5&#39;, &#39;s6&#39;]
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>and a response variable <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">disease_progression</span></code>, indicating the disease progression one year after baseline.</p>
+<p>Our equation for linear regression would be:</p>
+<div class="math notranslate nohighlight">
+\[
+y^{(i)} = \beta_0 + \beta_1 x_1^{(i)} + \ldots + \beta_{10} x_{10}^{(i)}
+\]</div>
+<p>For the first data point (sample), this would be:</p>
+<div class="math notranslate nohighlight">
+\[
+137.0 = \beta_0 + \beta_1 * 19 + \beta_2 * 1 + \beta_3 * -0.077342 + \ldots \beta_{10} * -0.005220
+\]</div>
+<p>In ordinary linear regression, we would try to optimize a cost function, typically the least
+squares cost function, to find values of <span class="math notranslate nohighlight">\(\beta\)</span> which optimize the correct prediction of the
+<span class="math notranslate nohighlight">\(y\)</span>-values.</p>
+<h2 id="glm-linear-predictor">GLM: Linear Predictor<a class="headerlink" href="#glm-linear-predictor" title="Permalink to this heading">¶</a></h2>
+<p>For a generalized linear model (GLM), we assume that the relationship between different terms is linear,
+but the terms themselves aren’t necessarily linear.</p>
+<h3 id="examples">Examples<a class="headerlink" href="#examples" title="Permalink to this heading">¶</a></h3>
+<p>For example, we may want to do a polynomial fit (I’m dropping the <span class="math notranslate nohighlight">\((i)\)</span> superscript here for readability):</p>
+<div class="math notranslate nohighlight">
+\[
+\eta = \beta_0 + \beta_{11} x_1+ \beta_{12} x_1^2 + \beta_{21} x_2 + \beta_{22} x_2^2 + \beta_{31} x_3
+    + \beta_{32} x_3^2 + \beta_{41} x_4 + \beta_{42} x_4^2
+\]</div>
+<p>or, perhaps some of the variables may interact:</p>
+<div class="math notranslate nohighlight">
+\[
+\eta = \beta_0 + \beta_{12} x_1 x_2 + \beta_{3} x_3 + \beta_{4} x_4
+\]</div>
+<p>or, maybe there’s an exponential function:</p>
+<div class="math notranslate nohighlight">
+\[
+\eta = \beta_0 + \beta_1 e^{x_1} + \beta_{2} x_2 + \beta_{3} x_3 + \beta_{4} x_4
+\]</div>
+<h3 id="invalid-examples">Invalid Examples<a class="headerlink" href="#invalid-examples" title="Permalink to this heading">¶</a></h3>
+<p>An example of what is <strong>not</strong> a valid function for a GLM:</p>
+<div class="math notranslate nohighlight">
+\[
+\eta = \beta_0 + \beta_1 x_1^{\beta_5} + \beta_{2} x_2 + \beta_{3} x_3 + \beta_{4} x_4
+\]</div>
+<h2 id="glm-exponential-distribution">GLM: Exponential Distribution<a class="headerlink" href="#glm-exponential-distribution" title="Permalink to this heading">¶</a></h2>
+<p>The second component of a GLM is called the <code class="docutils literal notranslate"><span class="pre">random</span> <span class="pre">component</span></code>. We assume that the observed data <span class="math notranslate nohighlight">\(Y\)</span>
+comes from an exponential family of distributions, such as:
+<code class="docutils literal notranslate"><span class="pre">Gaussian</span></code>, <code class="docutils literal notranslate"><span class="pre">Poisson</span></code>, <code class="docutils literal notranslate"><span class="pre">binomial</span></code>, <code class="docutils literal notranslate"><span class="pre">gamma</span></code>, etc.</p>
+<div class="math notranslate nohighlight">
+\[
+p(y^{(i)}; \theta^{(i)}) = a(\theta^{(i)})b(y^{(i)})e^{y^{(i)}Q(\theta^{(i)})}
+\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(p\)</span> is the probability density function</p></li>
+<li><p><span class="math notranslate nohighlight">\(y^{(i)}\)</span> is the observed target value, e.g. the <code class="docutils literal notranslate"><span class="pre">disease_progression</span></code> in the <code class="docutils literal notranslate"><span class="pre">diabetes</span></code> example</p></li>
+<li><p><span class="math notranslate nohighlight">\(\theta^{(i)}\)</span> is a function of the explanatory variables <span class="math notranslate nohighlight">\(x_n^{(i)}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(Q(\theta)\)</span> is the natural parameter</p></li>
+</ul>
+<h2 id="glm-link-function">GLM: Link Function<a class="headerlink" href="#glm-link-function" title="Permalink to this heading">¶</a></h2>
+<p>The third component of a GLM is called the <code class="docutils literal notranslate"><span class="pre">link</span> <span class="pre">function</span></code>:</p>
+<div class="math notranslate nohighlight">
+\[
+g(\mu^{(i)}) = \eta^{(i)}
+\]</div>
+<p>We differentiate here between <span class="math notranslate nohighlight">\(\eta^{(i)}\)</span>, the predicted value of the <span class="math notranslate nohighlight">\(i^{th}\)</span> sample, and
+<span class="math notranslate nohighlight">\(y^{(i)} \in Y\)</span>, the observed value of the <span class="math notranslate nohighlight">\(i^{th}\)</span> sample. We can think of <span class="math notranslate nohighlight">\(\mu^{(i)}\)</span> as the
+expectation value (mean) of an exponential distribution:</p>
+<div class="math notranslate nohighlight">
+\[
+\mu^{(i)} = E(Y | X = x^{(i)})
+\]</div>
+<p><strong>Our goal is to estimate</strong> <span class="math notranslate nohighlight">\(\mu\)</span><strong>, not</strong> <span class="math notranslate nohighlight">\(\eta\)</span>.</p>
+<p>The link function that transforms the mean <span class="math notranslate nohighlight">\(\mu\)</span> to the natural parameter <span class="math notranslate nohighlight">\(Q(\theta)\)</span> is called the
+<em>canonical link function</em>.</p>
+<h2 id="example-1-identity-link-function-ordinary-linear-regression">Example 1: Identity Link Function, Ordinary Linear Regression<a class="headerlink" href="#example-1-identity-link-function-ordinary-linear-regression" title="Permalink to this heading">¶</a></h2>
+<p>Let’s start with the example of ordinary linear regression. In that case, the predicted output is
+simply the expectation value; in other words:</p>
+<div class="math notranslate nohighlight">
+\[
+g(\mu^{(i)}) = \mu^{(i)} = E(Y | X = x^{(i)}) = \eta^{(i)}
+\]</div>
+<p>So, the <strong>link function</strong> <span class="math notranslate nohighlight">\(g(\mu)\)</span> is simply the <strong>identity function</strong>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">random</span> <span class="pre">component</span></code>, the exponential function, is given by the <code class="docutils literal notranslate"><span class="pre">Gaussian</span> <span class="pre">distribution</span></code>, where <span class="math notranslate nohighlight">\(\theta = \mu\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[
+p(y^{(i)}; \mu^{(i)}) = \dfrac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(y^{(i)}-\mu^{(i)})^2}{2\sigma^2}}
+\]</div>
+<p>Applying this to the <code class="docutils literal notranslate"><span class="pre">diabetes</span></code> example, we first define a formula (see <a class="reference external" href="https://www.statsmodels.org/stable/example_formulas.html%5D">Fitting models using R-style formulas</a> for details on how to write formulas in Python):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">formula</span> <span class="o">=</span> <span class="s2">&quot;disease_progression ~ age + bmi + sex&quot;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="n">smf</span><span class="o">.</span><span class="n">glm</span><span class="p">(</span><span class="n">formula</span><span class="o">=</span><span class="n">formula</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="n">sm</span><span class="o">.</span><span class="n">families</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">())</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">summary</span><span class="p">())</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>                  Generalized Linear Model Regression Results                  
+===============================================================================
+Dep. Variable:     disease_progression   No. Observations:                  442
+Model:                             GLM   Df Residuals:                      438
+Model Family:                 Gaussian   Df Model:                            3
+Link Function:                Identity   Scale:                          3885.1
+Method:                           IRLS   Log-Likelihood:                -2451.7
+Date:                 Thu, 13 Nov 2025   Deviance:                   1.7017e+06
+Time:                         21:19:24   Pearson chi2:                 1.70e+06
+No. Iterations:                      3   Pseudo R-squ. (CS):             0.4146
+Covariance Type:             nonrobust                                         
+==============================================================================
+                 coef    std err          z      P&gt;|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept    132.8957     13.567      9.795      0.000     106.304     159.487
+age            0.4998      0.234      2.136      0.033       0.041       0.958
+bmi          927.0815     63.541     14.590      0.000     802.543    1051.620
+sex           -3.4098      6.043     -0.564      0.573     -15.253       8.433
+==============================================================================
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Now that we have trained our GLM, which is technically just a linear regression, let’s
+see how well it predicts on our data:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">disease_progression_pred</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">disease_progression_pred</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>26      67.280918
+344    128.233317
+374    107.249704
+79     104.751886
+226     93.348294
+          ...    
+211    200.689430
+311    204.186929
+321    215.178345
+204    170.301126
+402    133.329999
+Length: 442, dtype: float64
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;disease_progression_pred&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">disease_progression_pred</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;bmi&quot;</span><span class="p">),</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;bmi&quot;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">&quot;disease_progression&quot;</span><span class="p">,</span>
+    <span class="n">facet_col</span><span class="o">=</span><span class="s2">&quot;sex&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+<span class="p">)</span>
+<span class="n">px_data</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;bmi&quot;</span><span class="p">),</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;bmi&quot;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">&quot;disease_progression_pred&quot;</span><span class="p">,</span>
+    <span class="n">facet_col</span><span class="o">=</span><span class="s2">&quot;sex&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">data</span>
+<span class="n">px_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;line&#39;</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="s1">&#39;dash&#39;</span><span class="p">:</span> <span class="s1">&#39;solid&#39;</span><span class="p">}</span>
+<span class="n">px_data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;line&#39;</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="s1">&#39;dash&#39;</span><span class="p">:</span> <span class="s1">&#39;solid&#39;</span><span class="p">}</span>
+<span class="n">px_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;legendgroup&#39;</span><span class="p">]</span><span class="o">=</span> <span class="s2">&quot;predicted&quot;</span>
+<span class="n">px_data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;legendgroup&#39;</span><span class="p">]</span><span class="o">=</span> <span class="s2">&quot;predicted&quot;</span>
+<span class="n">px_data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;showlegend&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">px_data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;predicted&quot;</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_traces</span><span class="p">(</span>
+    <span class="n">px_data</span>
+<span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legendgroup</span> <span class="o">=</span> <span class="s2">&quot;observed&quot;</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legendgroup</span> <span class="o">=</span> <span class="s2">&quot;observed&quot;</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;observed&quot;</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">showlegend</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s1">&#39;Disease Progression&#39;</span><span class="p">}</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;BMI&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Diabetes Disease Progression Linear Regression&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG"></script><script type="text/javascript">if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.2.0.min.js" integrity="sha256-iZ2u/oU2wf/vDbl/ChcX93WgbBRSBvUO6N413hDz7xM=" crossorigin="anonymous"></script>                <div id="85645b3f-77e7-45ee-9b30-192d532df761" class="plotly-graph-div" style="height:525px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("85645b3f-77e7-45ee-9b30-192d532df761")) {                    Plotly.newPlot(                        "85645b3f-77e7-45ee-9b30-192d532df761",                        [{"hovertemplate":"sex=2\u003cbr\u003ebmi=%{x}\u003cbr\u003edisease_progression=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"observed","line":{"color":"#636efa","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"","orientation":"v","showlegend":false,"x":{"dtype":"f8","bdata":"h1SFI0gct793iulzpdW2v+lvb0ftWbS\u002fyds36KfMs7+qRwCJYj+zv3vpLHp6a7K\u002f1Z1lm4Tfr7+Wdfbc+cSuv1hNhx5vqq2\u002fGiUYYOSPrL8aJRhg5I+svxolGGDkj6y\u002f3PyooVl1q78bhFtmuSWovxuEW2a5Jai\u002f+e8jB3SYp7\u002f57yMHdJinv9xb7KcuC6e\u002fu8e0SOl9pr98n0WKXmOlv3yfRYpeY6W\u002fWwsOKxnWpL9bCw4rGdakvz531svTSKS\u002fPnfWy9NIpL8+d9bL00ikvxzjnmyOu6O\u002f\u002f05nDUkuo7\u002feui+uA6Giv7wm+E6+E6K\u002fvCb4Tr4Tor+gksDveIahv37+iJAz+aC\u002ffv6IkDP5oL9+\u002foiQM\u002fmgv2JqUTHua6C\u002fYmpRMe5roL9\u002frDOkUb2fv3+sM6RRvZ+\u002ff6wzpFG9n79\u002frDOkUb2fv3+sM6RRvZ+\u002ff6wzpFG9n79\u002frDOkUb2fvzqExOXGop6\u002fOoTE5cainr86hMTlxqKevzqExOXGop6\u002fOoTE5cainr8CXFUnPIidv74z5mixbZy\u002fQeMH7Js4mr9B4wfsmziav0HjB+ybOJq\u002fQeMH7Js4mr9B4wfsmziav\u002f+6mC0RHpm\u002f\u002f7qYLREemb\u002f\u002fupgtER6Zv\u002f+6mC0RHpm\u002f\u002f7qYLREemb\u002f\u002fupgtER6Zv8aSKW+GA5i\u002fxpIpb4YDmL+Barqw++iWv4FqurD76Ja\u002fgWq6sPvolr9JQkvycM6VvwUa3DPms5S\u002fBRrcM+azlL8FGtwz5rOUv8HxbHVbmZO\u002fiMn9ttB+kr+Iyf220H6Sv4jJ\u002fbbQfpK\u002fiMn9ttB+kr9FoY74RWSRvwx5Hzq7SZC\u002fDHkfOrtJkL8MeR86u0mQv5ChYPdgXo6\u002fkKFg92Bejr8JUYJ6SymMv5cApP019Im\u002flwCk\u002fTX0ib8QsMWAIL+HvxCwxYAgv4e\u002fnl\u002fnAwuKhb+eX+cDC4qFvxcPCYf1VIO\u002fFw8Jh\u002fVUg78XDwmH9VSDvxcPCYf1VIO\u002fj74qCuAfgb+PvioK4B+Bv4++KgrgH4G\u002fj74qCuAfgb873JgaldV9vzvcmBqV1X2\u002fKzvcIGpreb8rO9wgamt5vys73CBqa3m\u002fSJofJz8Bdb9Imh8nPwF1v0iaHyc\u002fAXW\u002fOfliLRSXcL9UsExn0llov1SwTGfSWWi\u002fHd2m5\u002fgKX78d3abn+Apfvx3dpuf4Cl+\u002fHd2m5\u002fgKX7+9sWgBmsRKv7Sq+Jh7GTE\u002f6q4wzQrvVT\u002fqrjDNCu9VP+quMM0K71U\u002f6q4wzQrvVT+UmRFa28tjP5SZEVrby2M\u002flJkRWtvLYz9a24pNMaBsP7wOgqBDunI\u002fvA6CoEO6cj+frz6abiR3P5+vPppuJHc\u002fn68+mm4kdz+vUPuTmY57P69Q+5OZjns\u002fUEm6w3cxgj\u002fXmZhAjWaEP9eZmECNZoQ\u002f15mYQI1mhD9J6na9opuGP9E6VTq40Ig\u002f0TpVOrjQiD\u002fK2xE04zqNP8rbETTjOo0\u002fytsRNOM6jT\u002fK2xE04zqNP8rbETTjOo0\u002fUizwsPhvjz9hPucWh9KQP2E+5xaH0pA\u002fpmZW1RHtkT+mZlbVEe2RP+mOxZOcB5M\u002fIrc0UicilD8itzRSJyKUP2bfoxCyPJU\u002fnwcTzzxXlj\u002fiL4KNx3GXP1+AYArdppk\u002fo6jPyGfBmj8g+a1FffacPyD5rUV99pw\u002fnEmMwpIrnz+cSYzCkiufP5xJjMKSK58\u002fDE21H1SwoD9QdSTe3sqhP20JXD0kWKI\u002fzMUCW\u002fT\u002foz8L7nEZfxqlPy2CqXjEp6U\u002fa6oYN0\u002fCpj+NPlCWlE+nP40+UJaUT6c\u002fqdKH9dncpz8Jjy4TqoSpP2pL1TB6LKs\u002fhd8MkL+5qz+oc0TvBEesP8oHfE5K1Kw\u002fCDDrDNXurT8lxCJsGnyuPyXEImwafK4\u002fJcQibBp8rj9GWFrLXwmvP0ZYWstfCa8\u002fRlhay18Jrz9o7JEqpZavP2jskSqllq8\u002faOyRKqWWrz9RioD0l1iwP5Sy77Iic7E\u002foHyLYsW5sT\u002fCEMPBCkeyP8IQw8EKR7I\u002fwhDDwQpHsj\u002fT2l5xrY2yP+9ultDyGrM\u002fEQPOLziosz8izWnf2u6zP08rPe7CwrQ\u002fwLF\u002fuzWxtj\u002fAsX+7NbG2Pw+kiiljErg\u002fKzjCiKifuD9OzPnn7Sy5P66IoAW+1Lo\u002fDUVHI458vD+48\u002fiui4W\u002fP+1DGIdoCcA\u002f\u002fg20NgtQwD9FG\u002fFM543BPzvX3+7A1MU\u002f"},"xaxis":"x","y":{"dtype":"f8","bdata":"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"},"yaxis":"y","type":"scatter"},{"hovertemplate":"sex=1\u003cbr\u003ebmi=%{x}\u003cbr\u003edisease_progression=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"observed","line":{"color":"#636efa","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"observed","orientation":"v","showlegend":true,"x":{"dtype":"f8","bdata":"OGJ6tRq7tb8nmN4FeHS1vwgEp6Yy57S\u002fCASnpjLntL\u002f6OQv3j6C0v8nbN+inzLO\u002fuRGcOAWGs7+afWTZv\u002fiyv4mzyCkdsrK\u002fibPIKR2ysr9qH5HK1ySyv1tV9Ro13rG\u002fW1X1GjXesb9bVfUaNd6xv0uLWWuSl7G\u002fOcG9u+9Qsb8s9yEMTQqxvyz3IQxNCrG\u002fLPchDE0Ksb8aLYZcqsOwvxothlyqw7C\u002fGi2GXKrDsL8aLYZcqsOwvwxj6qwHfbC\u002fDGPqrAd9sL8MY+qsB32wv\u002fuYTv1kNrC\u002f+5hO\u002fWQ2sL\u002fVnWWbhN+vv9WdZZuE36+\u002fuAkuPD9Sr7+4CS48P1Kvv5Z19tz5xK6\u002feeG+fbQ3rr954b59tDeuv1hNhx5vqq2\u002fWE2HHm+qrb9YTYceb6qtv1hNhx5vqq2\u002fNblPvykdrb81uU+\u002fKR2tvxolGGDkj6y\u002f95DgAJ8CrL\u002f3kOAAnwKsv\u002feQ4ACfAqy\u002fuWhxQhToqr+X1Dnjzlqqv3pAAoSJzam\u002fekAChInNqb9ZrMokRECpvzwYk8X+sqi\u002fPBiTxf6yqL8bhFtmuSWov\u002fnvIwd0mKe\u002f+e8jB3SYp7\u002f57yMHdJinv\u002fnvIwd0mKe\u002f+e8jB3SYp7\u002fcW+ynLgunv9xb7KcuC6e\u002fnjN96aPwpb98n0WKXmOlv3yfRYpeY6W\u002fWwsOKxnWpL9bCw4rGdakv1sLDisZ1qS\u002fPnfWy9NIpL8c455sjrujvxzjnmyOu6O\u002fHOOebI67o78c455sjrujv\u002f9OZw1JLqO\u002f\u002f05nDUkuo7\u002feui+uA6Giv966L64DoaK\u002f3rovrgOhor\u002feui+uA6Giv7wm+E6+E6K\u002fvCb4Tr4Tor+gksDveIahv6CSwO94hqG\u002ffv6IkDP5oL9+\u002foiQM\u002fmgv37+iJAz+aC\u002fYmpRMe5roL9ialEx7mugv3+sM6RRvZ+\u002fAlxVJzyInb+GC3eqJlObv0HjB+ybOJq\u002fQeMH7Js4mr\u002f\u002fupgtER6Zv\u002f+6mC0RHpm\u002fxpIpb4YDmL\u002fGkilvhgOYv8aSKW+GA5i\u002fxpIpb4YDmL+Barqw++iWv0lCS\u002fJwzpW\u002fSUJL8nDOlb8FGtwz5rOUvwUa3DPms5S\u002fBRrcM+azlL\u002fB8Wx1W5mTv4jJ\u002fbbQfpK\u002fRaGO+EVkkb8MeR86u0mQvwx5Hzq7SZC\u002fCVGCekspjL+XAKT9NfSJv5cApP019Im\u002fELDFgCC\u002fh78QsMWAIL+HvxCwxYAgv4e\u002fnl\u002fnAwuKhb+eX+cDC4qFv55f5wMLioW\u002fFw8Jh\u002fVUg7+PvioK4B+Bv4++KgrgH4G\u002fj74qCuAfgb873JgaldV9vzvcmBqV1X2\u002fO9yYGpXVfb8rO9wgamt5vys73CBqa3m\u002fSJofJz8Bdb85+WItFJdwvzn5Yi0Ul3C\u002fOfliLRSXcL85+WItFJdwv1SwTGfSWWi\u002fvbFoAZrESr+9sWgBmsRKv+quMM0K71U\u002f6q4wzQrvVT9a24pNMaBsP7wOgqBDunI\u002fvA6CoEO6cj+8DoKgQ7pyP7wOgqBDunI\u002fn68+mm4kdz+frz6abiR3P69Q+5OZjns\u002fr1D7k5mOez+vUPuTmY57P1BJusN3MYI\u002f15mYQI1mhD9J6na9opuGP9E6VTq40Ig\u002fytsRNOM6jT9SLPCw+G+PP1Is8LD4b48\u002fYT7nFofSkD+mZlbVEe2RP6ZmVtUR7ZE\u002f6Y7Fk5wHkz\u002fpjsWTnAeTP+mOxZOcB5M\u002fIrc0UicilD9m36MQsjyVP2bfoxCyPJU\u002f4i+Cjcdxlz8nWPFLUoyYPydY8UtSjJg\u002fX4BgCt2mmT+jqM\u002fIZ8GaP6Ooz8hnwZo\u002f29A+h\u002fLbmz8g+a1FffacP5xJjMKSK58\u002fnEmMwpIrnz\u002fvuH3ADiOgPy7h7H6ZPaE\u002fLuHsfpk9oT8u4ex+mT2hP1B1JN7eyqE\u002fbQlcPSRYoj+OnZOcaeWiP46dk5xp5aI\u002fqzHL+65yoz\u002fMxQJb9P+jP8zFAlv0\u002f6M\u002fzMUCW\u002fT\u002foz\u002fvWTq6OY2kP+9ZOro5jaQ\u002f71k6ujmNpD8L7nEZfxqlPy2CqXjEp6U\u002fSRbh1wk1pj9JFuHXCTWmP2uqGDdPwqY\u002fjT5QlpRPpz+NPlCWlE+nP6nSh\u002fXZ3Kc\u002fy2a\u002fVB9qqD\u002fLZr9UH2qoPwmPLhOqhKk\u002fCY8uE6qEqT9Ht53RNJ+qP0e3ndE0n6o\u002fhd8MkL+5qz+F3wyQv7mrP4XfDJC\u002fuas\u002fqHNE7wRHrD\u002fKB3xOStSsP8oHfE5K1Kw\u002fCDDrDNXurT8lxCJsGnyuPyXEImwafK4\u002fRlhay18Jrz9GWFrLXwmvP2jskSqllq8\u002fYVQcpDqfsD9hVBykOp+wP4ToUwOALLE\u002flLLvsiJzsT+gfItixbmxP7BGJxJoALI\u002fwhDDwQpHsj\u002fCEMPBCkeyP+Ok+iBQ1LI\u002fPmGhPiB8tD+NU6ysTd21P41TrKxN3bU\u002fwLF\u002fuzWxtj\u002f+2e55wMu3P\u002f7Z7nnAy7c\u002f\u002ftnuecDLtz89Al44S+a4P66IoAW+1Lo\u002f\u002fnqrc+s1vD88oxoydlC9PwTzgY5cc8A\u002f8smi2OSWxD8="},"xaxis":"x2","y":{"dtype":"f8","bdata":"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"},"yaxis":"y2","type":"scatter"},{"hovertemplate":"sex=2\u003cbr\u003ebmi=%{x}\u003cbr\u003edisease_progression_pred=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"predicted","line":{"color":"orange","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"","orientation":"v","showlegend":false,"x":{"dtype":"f8","bdata":"h1SFI0gct793iulzpdW2v+lvb0ftWbS\u002fyds36KfMs7+qRwCJYj+zv3vpLHp6a7K\u002f1Z1lm4Tfr7+Wdfbc+cSuv1hNhx5vqq2\u002fGiUYYOSPrL8aJRhg5I+svxolGGDkj6y\u002f3PyooVl1q78bhFtmuSWovxuEW2a5Jai\u002f+e8jB3SYp7\u002f57yMHdJinv9xb7KcuC6e\u002fu8e0SOl9pr98n0WKXmOlv3yfRYpeY6W\u002fWwsOKxnWpL9bCw4rGdakvz531svTSKS\u002fPnfWy9NIpL8+d9bL00ikvxzjnmyOu6O\u002f\u002f05nDUkuo7\u002feui+uA6Giv7wm+E6+E6K\u002fvCb4Tr4Tor+gksDveIahv37+iJAz+aC\u002ffv6IkDP5oL9+\u002foiQM\u002fmgv2JqUTHua6C\u002fYmpRMe5roL9\u002frDOkUb2fv3+sM6RRvZ+\u002ff6wzpFG9n79\u002frDOkUb2fv3+sM6RRvZ+\u002ff6wzpFG9n79\u002frDOkUb2fvzqExOXGop6\u002fOoTE5cainr86hMTlxqKevzqExOXGop6\u002fOoTE5cainr8CXFUnPIidv74z5mixbZy\u002fQeMH7Js4mr9B4wfsmziav0HjB+ybOJq\u002fQeMH7Js4mr9B4wfsmziav\u002f+6mC0RHpm\u002f\u002f7qYLREemb\u002f\u002fupgtER6Zv\u002f+6mC0RHpm\u002f\u002f7qYLREemb\u002f\u002fupgtER6Zv8aSKW+GA5i\u002fxpIpb4YDmL+Barqw++iWv4FqurD76Ja\u002fgWq6sPvolr9JQkvycM6VvwUa3DPms5S\u002fBRrcM+azlL8FGtwz5rOUv8HxbHVbmZO\u002fiMn9ttB+kr+Iyf220H6Sv4jJ\u002fbbQfpK\u002fiMn9ttB+kr9FoY74RWSRvwx5Hzq7SZC\u002fDHkfOrtJkL8MeR86u0mQv5ChYPdgXo6\u002fkKFg92Bejr8JUYJ6SymMv5cApP019Im\u002flwCk\u002fTX0ib8QsMWAIL+HvxCwxYAgv4e\u002fnl\u002fnAwuKhb+eX+cDC4qFvxcPCYf1VIO\u002fFw8Jh\u002fVUg78XDwmH9VSDvxcPCYf1VIO\u002fj74qCuAfgb+PvioK4B+Bv4++KgrgH4G\u002fj74qCuAfgb873JgaldV9vzvcmBqV1X2\u002fKzvcIGpreb8rO9wgamt5vys73CBqa3m\u002fSJofJz8Bdb9Imh8nPwF1v0iaHyc\u002fAXW\u002fOfliLRSXcL9UsExn0llov1SwTGfSWWi\u002fHd2m5\u002fgKX78d3abn+Apfvx3dpuf4Cl+\u002fHd2m5\u002fgKX7+9sWgBmsRKv7Sq+Jh7GTE\u002f6q4wzQrvVT\u002fqrjDNCu9VP+quMM0K71U\u002f6q4wzQrvVT+UmRFa28tjP5SZEVrby2M\u002flJkRWtvLYz9a24pNMaBsP7wOgqBDunI\u002fvA6CoEO6cj+frz6abiR3P5+vPppuJHc\u002fn68+mm4kdz+vUPuTmY57P69Q+5OZjns\u002fUEm6w3cxgj\u002fXmZhAjWaEP9eZmECNZoQ\u002f15mYQI1mhD9J6na9opuGP9E6VTq40Ig\u002f0TpVOrjQiD\u002fK2xE04zqNP8rbETTjOo0\u002fytsRNOM6jT\u002fK2xE04zqNP8rbETTjOo0\u002fUizwsPhvjz9hPucWh9KQP2E+5xaH0pA\u002fpmZW1RHtkT+mZlbVEe2RP+mOxZOcB5M\u002fIrc0UicilD8itzRSJyKUP2bfoxCyPJU\u002fnwcTzzxXlj\u002fiL4KNx3GXP1+AYArdppk\u002fo6jPyGfBmj8g+a1FffacPyD5rUV99pw\u002fnEmMwpIrnz+cSYzCkiufP5xJjMKSK58\u002fDE21H1SwoD9QdSTe3sqhP20JXD0kWKI\u002fzMUCW\u002fT\u002foz8L7nEZfxqlPy2CqXjEp6U\u002fa6oYN0\u002fCpj+NPlCWlE+nP40+UJaUT6c\u002fqdKH9dncpz8Jjy4TqoSpP2pL1TB6LKs\u002fhd8MkL+5qz+oc0TvBEesP8oHfE5K1Kw\u002fCDDrDNXurT8lxCJsGnyuPyXEImwafK4\u002fJcQibBp8rj9GWFrLXwmvP0ZYWstfCa8\u002fRlhay18Jrz9o7JEqpZavP2jskSqllq8\u002faOyRKqWWrz9RioD0l1iwP5Sy77Iic7E\u002foHyLYsW5sT\u002fCEMPBCkeyP8IQw8EKR7I\u002fwhDDwQpHsj\u002fT2l5xrY2yP+9ultDyGrM\u002fEQPOLziosz8izWnf2u6zP08rPe7CwrQ\u002fwLF\u002fuzWxtj\u002fAsX+7NbG2Pw+kiiljErg\u002fKzjCiKifuD9OzPnn7Sy5P66IoAW+1Lo\u002fDUVHI458vD+48\u002fiui4W\u002fP+1DGIdoCcA\u002f\u002fg20NgtQwD9FG\u002fFM543BPzvX3+7A1MU\u002f"},"xaxis":"x","y":{"dtype":"f8","bdata":"Tl0\u002fnp3wSkDKMeawZPBMQGaofw2691BAiY1RUqgXUUAHO1wjjLdRQDR0na4pV1VA6RmOpuVWVUA6Y3yxzrZVQBIAXFCLNlhAwOrmpYa2V0Acsx8yfDZYQJKGyt+LdldAy52qh3e2V0CRFVniN5ZYQO3dkW4tFllAMfqsdEpWV0Aob4E59HVbQNysf3DntVtAMknhXMjVXEBuOSXD0LVbQDojQYCcNV5AKCnrdv01WUD362ry5VVaQIxFk0miNV1AvoITzrkVXEAwfVq9rLVcQLV92G+IFV5A9MCPt4i1XUC9VziTXHVfQHRumohsVV5A6Gjhd1\u002f1XkA+3qYiXbVeQNRp2VmPqmBAJFkl3mfVXUAMJxd7arVdQOrvzbk7lV9AdvWGykj1XkD+eoI+kipgQOdIdNuUCmBAelTbZYp1W0AgxhdTjlpgQF5wBYZTFV5ALDOFATw1X0As354EjWpgQCYHrmEn1V9APDm8xCT1X0A8ObzEJPVfQELrg0FeNV1A+uSW7od6YEAgtDqALxVfQHopACst1V5AVkcMq2\u002fqYEA\u002fRpnjJXVeQITcwwwe1V5AYmCTXG76YECQxK8iaTphQOC22WtymmBAr+1s8SBVXkAOG\u002fYxbdpgQJi7Xo4jNV5AX8qnDGRKYUDERheWAdVfQNQlshcHNV9A8QmI9z2VXECgDV9UZOpgQENFJshuamBAGULNHSR1XUAofSwVZ5pgQLosHclLumFAGc65E17aYED3giT\u002fYapgQPTsOK9X+mBA+2\u002fUEExaYUBmKvgMXYpgQC3P8CLp1F5At\u002ftFddmUX0A9cBPqOQpiQLrGWfk9qmFA3+pSzFZ6YEAkgX31TtpgQOaUim8uOmJAleXYlDfKYUBj69B+MtphQAONrKIyqmFA7zMC\u002flEqYED4tp1fRopgQI38eWM1WmFAuqMOmEKKYEDFvJVJQZpgQL9NRjsaSmJAy2bN7BhaYkBmXnFtQWpgQPnK6bITmmJAG1n3NSK6YUCOUz4lFVpiQD6kjEoe6mFAvLda6w+aYkCv4UuoI3phQOaFi2EAKmNANni1qgmKYkDmyAPQEhpiQLWLg0v7OWNA1hmRzglaYkAeiR+2HlphQL\u002fngmsMOmJAXbD60O9pY0D+Udb07zljQHBMHeTi2WNAZHYOofa5YkBZXYfv96liQLUlwHvtKWNAEe74B+OpY0C0aDjq\u002fxliQCPNk4noCWNAuVXo++nJYkDYxxlSyVlkQMRub63o2WJAdL+90vFpYkB8Qlk05sliQNgKksDbSWNA4yMZctpZY0AkJFhLyAlkQOvpLELhqWJA39ClkOKZYkC1FsFtvxlkQM8hM4\u002fZ2WJAzEjP0Lw5ZEBT3zjTokllQBpilVup+WRAQ3M+QKx5ZEBXD2FTn+lkQOQUGmSsSWRA2PuSsq05ZECEtvWHrBlkQDmxe1CNaWVA3ehCxJfpZECI5h0IqbljQJEmQfuKKWVATJAW0pLJZEBAd48glLlkQAf666iaaWRAKIj5K6mJY0A4S7iAf1llQH7h4ql3uWVA8R6iB31JZUCsiHfehOlkQJHAfSt9GWVA0sC8BGvJZUDe2UO2adllQP6O7XpbWWZAtGLXAVlJZkCamt1OUXlmQOb2G0hQKWZAb2bpCFPZZUCLhad9OqlmQLzCJwJSiWVA4vpsKDhpZkDLyF7FOklmQO0T9Nk2eWZA5uccOiIZZ0BLdmmWHulmQDvH9pQVKWdA+mD06xlpZkASp06i5JhoQCv1ODIRSWZA8bJ9T8hoaUBy4icd6ahnQPwOfW\u002fZaGhA+HiRH8+4aEBmY92b3IhnQHD6xFCe+GlAzN7ZCcMIaEB5mTzfwehnQKKOCZeV2GlAj0mrRYJoakAu64ZpgjhqQNIiTt2MuGlAa0GOn5goaUA4biLLdphqQFF5lOyQWGlAUXmU7JBYaUDM9nY9eFhqQPpakwNzmGpABnQatXGoakClWG5HhGhpQC5GnAtKeGtAk2rUt1D4akAlXT3aRwhrQLJi9upUaGpAr4mSLDjIa0A4+V\u002ftOnhrQFMYHmIiSGxAKqGxrRG4bEBPCCPvPHhqQG\u002fRGAf8B21AlA2vDconbkBmqZJHz+dtQGKt4ye3J25A9HiwCMvXbEDMAURUukdtQM6vzNd5R29AjOZxIacjcEBRQrtbgfNwQBQvLJR983BAnp75VICjcEBERZnKaPNwQLEgbyz\u002fMnNA"},"yaxis":"y","type":"scatter"},{"hovertemplate":"sex=1\u003cbr\u003ebmi=%{x}\u003cbr\u003edisease_progression_pred=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"predicted","line":{"color":"orange","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"predicted","orientation":"v","showlegend":true,"x":{"dtype":"f8","bdata":"OGJ6tRq7tb8nmN4FeHS1vwgEp6Yy57S\u002fCASnpjLntL\u002f6OQv3j6C0v8nbN+inzLO\u002fuRGcOAWGs7+afWTZv\u002fiyv4mzyCkdsrK\u002fibPIKR2ysr9qH5HK1ySyv1tV9Ro13rG\u002fW1X1GjXesb9bVfUaNd6xv0uLWWuSl7G\u002fOcG9u+9Qsb8s9yEMTQqxvyz3IQxNCrG\u002fLPchDE0Ksb8aLYZcqsOwvxothlyqw7C\u002fGi2GXKrDsL8aLYZcqsOwvwxj6qwHfbC\u002fDGPqrAd9sL8MY+qsB32wv\u002fuYTv1kNrC\u002f+5hO\u002fWQ2sL\u002fVnWWbhN+vv9WdZZuE36+\u002fuAkuPD9Sr7+4CS48P1Kvv5Z19tz5xK6\u002feeG+fbQ3rr954b59tDeuv1hNhx5vqq2\u002fWE2HHm+qrb9YTYceb6qtv1hNhx5vqq2\u002fNblPvykdrb81uU+\u002fKR2tvxolGGDkj6y\u002f95DgAJ8CrL\u002f3kOAAnwKsv\u002feQ4ACfAqy\u002fuWhxQhToqr+X1Dnjzlqqv3pAAoSJzam\u002fekAChInNqb9ZrMokRECpvzwYk8X+sqi\u002fPBiTxf6yqL8bhFtmuSWov\u002fnvIwd0mKe\u002f+e8jB3SYp7\u002f57yMHdJinv\u002fnvIwd0mKe\u002f+e8jB3SYp7\u002fcW+ynLgunv9xb7KcuC6e\u002fnjN96aPwpb98n0WKXmOlv3yfRYpeY6W\u002fWwsOKxnWpL9bCw4rGdakv1sLDisZ1qS\u002fPnfWy9NIpL8c455sjrujvxzjnmyOu6O\u002fHOOebI67o78c455sjrujv\u002f9OZw1JLqO\u002f\u002f05nDUkuo7\u002feui+uA6Giv966L64DoaK\u002f3rovrgOhor\u002feui+uA6Giv7wm+E6+E6K\u002fvCb4Tr4Tor+gksDveIahv6CSwO94hqG\u002ffv6IkDP5oL9+\u002foiQM\u002fmgv37+iJAz+aC\u002fYmpRMe5roL9ialEx7mugv3+sM6RRvZ+\u002fAlxVJzyInb+GC3eqJlObv0HjB+ybOJq\u002fQeMH7Js4mr\u002f\u002fupgtER6Zv\u002f+6mC0RHpm\u002fxpIpb4YDmL\u002fGkilvhgOYv8aSKW+GA5i\u002fxpIpb4YDmL+Barqw++iWv0lCS\u002fJwzpW\u002fSUJL8nDOlb8FGtwz5rOUvwUa3DPms5S\u002fBRrcM+azlL\u002fB8Wx1W5mTv4jJ\u002fbbQfpK\u002fRaGO+EVkkb8MeR86u0mQvwx5Hzq7SZC\u002fCVGCekspjL+XAKT9NfSJv5cApP019Im\u002fELDFgCC\u002fh78QsMWAIL+HvxCwxYAgv4e\u002fnl\u002fnAwuKhb+eX+cDC4qFv55f5wMLioW\u002fFw8Jh\u002fVUg7+PvioK4B+Bv4++KgrgH4G\u002fj74qCuAfgb873JgaldV9vzvcmBqV1X2\u002fO9yYGpXVfb8rO9wgamt5vys73CBqa3m\u002fSJofJz8Bdb85+WItFJdwvzn5Yi0Ul3C\u002fOfliLRSXcL85+WItFJdwv1SwTGfSWWi\u002fvbFoAZrESr+9sWgBmsRKv+quMM0K71U\u002f6q4wzQrvVT9a24pNMaBsP7wOgqBDunI\u002fvA6CoEO6cj+8DoKgQ7pyP7wOgqBDunI\u002fn68+mm4kdz+frz6abiR3P69Q+5OZjns\u002fr1D7k5mOez+vUPuTmY57P1BJusN3MYI\u002f15mYQI1mhD9J6na9opuGP9E6VTq40Ig\u002fytsRNOM6jT9SLPCw+G+PP1Is8LD4b48\u002fYT7nFofSkD+mZlbVEe2RP6ZmVtUR7ZE\u002f6Y7Fk5wHkz\u002fpjsWTnAeTP+mOxZOcB5M\u002fIrc0UicilD9m36MQsjyVP2bfoxCyPJU\u002f4i+Cjcdxlz8nWPFLUoyYPydY8UtSjJg\u002fX4BgCt2mmT+jqM\u002fIZ8GaP6Ooz8hnwZo\u002f29A+h\u002fLbmz8g+a1FffacP5xJjMKSK58\u002fnEmMwpIrnz\u002fvuH3ADiOgPy7h7H6ZPaE\u002fLuHsfpk9oT8u4ex+mT2hP1B1JN7eyqE\u002fbQlcPSRYoj+OnZOcaeWiP46dk5xp5aI\u002fqzHL+65yoz\u002fMxQJb9P+jP8zFAlv0\u002f6M\u002fzMUCW\u002fT\u002foz\u002fvWTq6OY2kP+9ZOro5jaQ\u002f71k6ujmNpD8L7nEZfxqlPy2CqXjEp6U\u002fSRbh1wk1pj9JFuHXCTWmP2uqGDdPwqY\u002fjT5QlpRPpz+NPlCWlE+nP6nSh\u002fXZ3Kc\u002fy2a\u002fVB9qqD\u002fLZr9UH2qoPwmPLhOqhKk\u002fCY8uE6qEqT9Ht53RNJ+qP0e3ndE0n6o\u002fhd8MkL+5qz+F3wyQv7mrP4XfDJC\u002fuas\u002fqHNE7wRHrD\u002fKB3xOStSsP8oHfE5K1Kw\u002fCDDrDNXurT8lxCJsGnyuPyXEImwafK4\u002fRlhay18Jrz9GWFrLXwmvP2jskSqllq8\u002fYVQcpDqfsD9hVBykOp+wP4ToUwOALLE\u002flLLvsiJzsT+gfItixbmxP7BGJxJoALI\u002fwhDDwQpHsj\u002fCEMPBCkeyP+Ok+iBQ1LI\u002fPmGhPiB8tD+NU6ysTd21P41TrKxN3bU\u002fwLF\u002fuzWxtj\u002f+2e55wMu3P\u002f7Z7nnAy7c\u002f\u002ftnuecDLtz89Al44S+a4P66IoAW+1Lo\u002f\u002fnqrc+s1vD88oxoydlC9PwTzgY5cc8A\u002f8smi2OSWxD8="},"xaxis":"x2","y":{"dtype":"f8","bdata":"PyoYWBUSUkAfmNjdfmRPQI\u002f59j8jUlBA1I8haRuyUEAnLINV\u002fNFRQAIot4\u002f60VBA+\u002fvf7+VxUUBfnnifr1FTQFlyof+a8VNAiq8hhLLRUkDreFZ1XxFWQP1X8fZkcVVAh4RGSVUxVkAxbtU5mfFSQKzjJ7EecVhAhLfDRIJRU0ClFqWsS5FVQAHf3ThBEVZAoj1B7i7xVkDNTurSMXFWQBLlFPwp0VZAWlSj4z7RVUBurU2IH1FXQAq5PVwVcVdA3y2FVDfRVUAfEugA9vBYQDLxgoL7UFhAHpjY3RrRVkBF0B0EAbFXQDF3c18gMVZA3ClGW72QWkD+v+O3LTFVQDpR04L0kFdAviq18+yQV0DvZzV4BHFWQI1zJUz6kFZAs0wW157wWkDMV4j4uLBZQHCPT2zDMFlAzN141d2QV0DJBBUXwfBYQGfpaKnTsFdA7OnmW68QWUB5759svHBYQMFeLlTRcFdAaZfxLJOwWUB7nSjwe3BaQMxgJh5A8FxA\u002fJ2molfQW0Dk8Ygcf5BZQMK6P1tQcFtAgP148HSwWUC8jmi7OxBcQHOlyrBL8FpAitfYE0kQW0Ax6ANGcDBZQBQELmY50FtAcMxm8i5QXEDFaMjeD3BdQCQKZSkikFxAWkjhEvEvXkCkFsSVR7BZQA+G30nkb15ADDNsaOyvXUBCIrRpPdBZQJ7q7PUyUFpASnYjsOxPXUDogROE4m9dQNQoad8B8FtAnjkh3rDPX0DOdqFiyK9eQMz8kT\u002ftj1xAF0WE5R4wWkB9YSy4wy9eQPBbc6e2z15ArMVIfr5vXkD55p7iDLBaQGPcqnPOT11AqHLVnMavXUBApWGyny9fQBvMcCf7z1pAbo9uVb9PXUDkYhkDz49cQDp5ihKLz19AmaZZObs3YEBiijP3jU9fQBjIMS6Bj19A11MlMbEnYEBRFIDwqhdgQFmXG1Kfd2BAwXjbj5MHYUAonRM8modgQD\u002fPIZ+Xp2BAvCVorptHYEBQmXsTdo9dQPH33shjb15AJAco7I\u002fXYEDc2hFzjcdgQD8m5mB3p2FAVlj0w3THYUCPGBCqgAdhQNSuOtN4Z2FAmzGXW38XYUDdMdY0bcdhQNBbx\u002fGAp2BAEjjGrxnPX0C9FmmgbTdhQI+yTNpy92BAWyJZdGNXYUCF8InqU+dhQMFGkSBq12BA7+0lVXcHYECQTIkKZedgQChrycxwV2BAouirHVhXYUDoftZGULdhQC\u002fuZC5lt2BAT6MO81Y3YUDWOXj1PEdiQFVNRpYu92JAVU1Gli73YkAXOrfOKvdiQC5sxTEoF2NAAAipay3XYkAUpMt+IEdjQBSky34gR2NAPnL89BDXY0BXwOaEPYdhQClcyr5CR2FA3hPYGBGnY0A9tXRjI8diQCPterAb92JAhKJjTvsmZEAemgfPIzdiQLyl96IZV2JArbMMM\u002f6mY0ACUG4f38ZkQEcpEbfpFmRARykRt+kWZEDIFUMW+GZjQGxNCooC52JAfuksnfVWY0BCkyVn32ZkQBGZHVHadmRA4zQBi982ZEDUQhYbxIZlQF31W0rZJmRA0DIbqN62Y0AGGtPPzVZkQN1f7qyq1mVAzfPzGbQGZUD6mohOwTZkQLMr+masNmVAgDHyUKdGZUAIyFtTjVZmQHKCf0+ehmVABDJwA4OmZkCGHqJikfZlQNmmt\u002fukBmVAPPKL6Y7mZUAA3\u002fwhi+ZlQL4hNrevJmRAqAN0p38WZkBJpU\u002fLf+ZlQI47evR3RmZAmJd5FIlGZUBBeXgra4ZmQDZg8XlsdmZAgnm3BFk2Z0Ccx6GUheZkQCrhpvhfVmZAzhhubGrWZUA8pGVNNiZoQCs4a7o\u002fVmdABhRy5yaGaED90070RBZnQMoA4x8jhmhA7WdUYU5GZkC2u4TODxZpQGYM0\u002fMYpmhATh09\u002fy12Z0DUs6YBFIZoQGSSw9A9hmZAtEF1qzT2ZkBQMYlS+4VpQIFuCdcSZmhA1fYecCZ2Z0B0mPqTJkZnQMGxwB4TBmhAm9A\u002fugwmaEDA9DiNJfZmQMh31O4ZVmdAfXJat\u002fqlaEAWkZp5BhZoQNh9C7ICFmhAvrUR\u002f\u002fpFaECQUfU4AAZoQNrUz3PiFWlAH2v6nNp1aUCshP8AteVqQAsmnEvHBWpAiL9ayd2VaEApHr5+y3VpQPu5objQNWlAJojSLsHFaUC6N8PipeVqQNNCNQTApWlAqcvIT68VakCC6kfrqDVqQCYiD1+ztWlAI4wjD6kFakDnNRzZkhVrQHCl6ZmVxWpAXKMDt5RFakChOS7gjKVqQO6VbNmLVWpAPK8yZHgVa0D7wj\u002feV3VsQD+c4nVixWtAXlGMOlRFbEAorUyBd5VqQLbGUeVRBWxARlP3NzsFbECfH4GkGMVsQMqqOaz2ZG5AGErwEwgFbUArPdfo2nRuQCL9s\u002fX4BG1A9JiXL\u002f7EbED9cvdS0iRuQJSp1EiT5G9A4Aih9zoycEDk9VAJJeJwQLStmWMQsnBAbmOFzrGBckA="},"yaxis":"y2","type":"scatter"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"xaxis":{"anchor":"y","domain":[0.0,0.49],"title":{"text":"BMI"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"Disease Progression"}},"xaxis2":{"anchor":"y2","domain":[0.51,1.0],"matches":"x","title":{"text":"BMI"}},"yaxis2":{"anchor":"x2","domain":[0.0,1.0],"matches":"y","showticklabels":false},"annotations":[{"font":{},"showarrow":false,"text":"sex=2","x":0.245,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{},"showarrow":false,"text":"sex=1","x":0.755,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"}],"legend":{"tracegroupgap":0},"margin":{"t":60},"title":{"text":"Diabetes Disease Progression Linear Regression"}},                        {"responsive": true}                    )                };            </script>        </div></div></div>
+</div>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        &#169; Copyright 2024, Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert.
+        
+    </div>
+  
+    Created using
+    <a href="https://www.sphinx-doc.org/" target="_blank" rel="noopener">Sphinx</a>
+    7.0.0.
+     and
+    <a href="https://github.com/jbms/sphinx-immaterial/" target="_blank" rel="noopener">Sphinx-Immaterial</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/resplab/leap/" target="_blank" rel="noopener" title="Source on github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.expand", "navigation.sections", "navigation.top", "search.share", "toc.follow", "toc.sticky", "content.tabs.link", "announce.dismiss", "content.code.annotate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+        <script src="../_static/sphinx_immaterial_theme.32136f45f91ae6956.min.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script id="MathJax-script" src="../_static/mathjax/tex-mml-chtml.js"></script>
+    
+  </body>
+</html>

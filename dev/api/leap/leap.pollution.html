@@ -1,0 +1,2933 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="leap.outcome_matrix.html">
+      
+      
+        <link rel="next" href="leap.reassessment.html">
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>leap.pollution module - </title>
+      
+    
+    
+      
+        
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_immaterial_theme.c15b9f3ac86171432.min.css" />
+        <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+        <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#leap.pollution.PollutionTable" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../index.html" title="" class="md-header__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../../../_static/logo.png" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              leap.pollution module
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../index.html" title="" class="md-nav__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../../../_static/logo.png" alt="logo">
+    </a>
+    
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/cli/index.rst (reference label)"><span>Running LEAP</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../model/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/index.rst (reference label)"><span>Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/index.rst (reference label)"><span>Developers</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/dev/index.rst (reference label)"><span>Developers</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev-installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/dev-installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev-testing.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/dev-testing.rst (reference label)"><span>Testing</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev-docs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/dev-docs.rst (reference label)"><span>Sphinx Documentation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev-releases.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/dev-releases.rst (reference label)"><span>Releases</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/index.rst (reference label)"><span>API</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/dev/api/index.rst (reference label)"><span>API</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data_generation/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/index.rst (reference label)"><span>Data Generation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/index.rst (reference label)"><span>LEAP</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_5_2" id="__nav_4_5_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/dev/api/leap/index.rst (reference label)"><span>LEAP</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.agent.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.agent.rst (reference label)"><span>leap.<wbr>agent module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.antibiotic_exposure.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.antibiotic_exposure.rst (reference label)"><span>leap.<wbr>antibiotic_<wbr>exposure module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.birth.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.birth.rst (reference label)"><span>leap.<wbr>birth module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.census_division.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.census_division.rst (reference label)"><span>leap.<wbr>census_<wbr>division module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.control.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.control.rst (reference label)"><span>leap.<wbr>control module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.cost.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.cost.rst (reference label)"><span>leap.<wbr>cost module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.death.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.death.rst (reference label)"><span>leap.<wbr>death module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.emigration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.emigration.rst (reference label)"><span>leap.<wbr>emigration module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.exacerbation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.exacerbation.rst (reference label)"><span>leap.<wbr>exacerbation module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.family_history.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.family_history.rst (reference label)"><span>leap.<wbr>family_<wbr>history module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.immigration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.immigration.rst (reference label)"><span>leap.<wbr>immigration module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.logger.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.logger.rst (reference label)"><span>leap.<wbr>logger module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.main.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.main.rst (reference label)"><span>leap.<wbr>main module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.occurrence.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.occurrence.rst (reference label)"><span>leap.<wbr>occurrence module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.outcome_matrix.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.outcome_matrix.rst (reference label)"><span>leap.<wbr>outcome_<wbr>matrix module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.pollution.rst (reference label)"><span>leap.<wbr>pollution module</span></span>
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.pollution.rst (reference label)"><span>leap.<wbr>pollution module</span></span>
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/dev/api/leap/leap.pollution.rst (reference label)"><span>leap.<wbr>pollution module</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable" class="md-nav__link">
+    
+      <span aria-label="Python class" class="objinfo-icon objinfo-icon__data" title="Python class">C</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.PollutionTable (Python class) — Bases: object"><span>leap.<wbr>pollution.<wbr>Pollution<wbr>Table</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.PollutionTable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable.data" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.PollutionTable.data (Python property) — A data frame grouped by the SSP scenario, with the following columns:"><span>data</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable.copy" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.PollutionTable.copy (Python method)"><span>copy</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable.load_pollution_data" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.PollutionTable.load_pollution_data (Python method) — Load the data from the PM2.5 SSP *.csv files."><span>load_<wbr>pollution_<wbr>data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="load_pollution_data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable.load_pollution_data-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable.load_pollution_data.pm25_data_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.PollutionTable.load_pollution_data.pm25_data_path (Python parameter) — Full directory path for the PM2.5 *.csv files."><span>pm25_<wbr>data_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable.load_pollution_data-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution" class="md-nav__link">
+    
+      <span aria-label="Python class" class="objinfo-icon objinfo-icon__data" title="Python class">C</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution (Python class) — Bases: object"><span>leap.<wbr>pollution.<wbr>Pollution</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.Pollution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.cduid" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution.cduid (Python attribute) — the census division identifier."><span>cduid</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.year" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution.year (Python attribute) — the year for the pollution data projection."><span>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.month" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution.month (Python attribute) — the month for the pollution data projection."><span>month</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.wildfire_pm25_scaled" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution.wildfire_pm25_scaled (Python attribute) — wildfire_pm25 * factor."><span>wildfire_<wbr>pm25_<wbr>scaled</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="wildfire_pm25_scaled">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.wildfire_pm25_scaled-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.total_pm25" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution.total_pm25 (Python attribute) — the total average PM2.5 levels for a given month: wildfire_pm25_scaled + background_pm25."><span>total_<wbr>pm25</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="total_pm25">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.total_pm25-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.SSP" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution.SSP (Python attribute) — The Shared Socioeconomic Pathway (SSP) scenario from the IPCC, one of:"><span>SSP</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.GribData" class="md-nav__link">
+    
+      <span aria-label="Python class" class="objinfo-icon objinfo-icon__data" title="Python class">C</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData (Python class) — Bases: object"><span>leap.<wbr>pollution.<wbr>Grib<wbr>Data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.GribData">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.year" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.year (Python attribute) — year the data was collected."><span>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.month" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.month (Python attribute) — month the data was collected."><span>month</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.day" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.day (Python attribute) — day the data was collected."><span>day</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.projection" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.projection (Python attribute) — which map projection was used. See gridType on the GRIB keys page."><span>projection</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.longitudes" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.longitudes (Python attribute) — a list of longitude values."><span>longitudes</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.latitudes" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.latitudes (Python attribute) — a list of latitude values."><span>latitudes</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.values" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.values (Python attribute) — a list of the values of interest at a specified longitude and latitude. For example, it could be the PM2.5 concentration."><span>values</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.load_file" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.load_file (Python method) — Load a *.grib2 file and amalgamate the data by taking the mean."><span>load_<wbr>file</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="load_file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.load_file-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.load_file.file_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.load_file.file_path (Python parameter) — Full file name of *.csv file to load the data from."><span>file_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.save" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.save (Python method) — Save the GribData object to a *.csv file."><span>save</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="save">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.save-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.save.file_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.save.file_path (Python parameter) — Full file name of *.csv file to save the data to."><span>file_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.add_record_to_df (Python function) — Add a new column to the grib data frame."><span>leap.<wbr>pollution.<wbr>add_<wbr>record_<wbr>to_<wbr>df</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.add_record_to_df">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df.df" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.add_record_to_df.df (Python parameter) — A data frame with the following columns:"><span>df</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df.longitudes" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.add_record_to_df.longitudes (Python parameter) — An array of longitude values."><span>longitudes</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df.latitudes" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.add_record_to_df.latitudes (Python parameter) — An array of latitude values."><span>latitudes</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df.values" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.add_record_to_df.values (Python parameter) — An array of the values of interest at a specified longitude and latitude. For example, it could be the PM2.5 concentration."><span>values</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df.index" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.add_record_to_df.index (Python parameter) — The index of the iteration loop."><span>index</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.get_data_average" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.get_data_average (Python function) — Find the mean of all the value_* columns, and return a GribData object."><span>leap.<wbr>pollution.<wbr>get_<wbr>data_<wbr>average</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.get_data_average">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.get_data_average-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.get_data_average.df" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.get_data_average.df (Python parameter) — A data frame with the following columns:"><span>df</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.invert_longitude" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.invert_longitude (Python function) — Convert between + degrees East of the Prime Meridian and - degrees West of the Prime Meridian."><span>leap.<wbr>pollution.<wbr>invert_<wbr>longitude</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.invert_longitude">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.invert_longitude-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.invert_longitude.longitude" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.invert_longitude.longitude (Python parameter) — a number in [0, 360) giving the degrees east or west of the Prime Meridian."><span>longitude</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.invert_longitude-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.load_grib_files" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.load_grib_files (Python function) — Load multiple *.grib2 files and amalgamate the data by taking the mean."><span>leap.<wbr>pollution.<wbr>load_<wbr>grib_<wbr>files</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.load_grib_files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.load_grib_files-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.load_grib_files.folder" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.load_grib_files.folder (Python parameter) — The folder containing the .grib2 files to open."><span>folder</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.load_grib_files.recursive" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.load_grib_files.recursive (Python parameter) — If True, iterate through all subdirectories and compute an aggregate average."><span>recursive</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.reassessment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.reassessment.rst (reference label)"><span>leap.<wbr>reassessment module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.severity.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.severity.rst (reference label)"><span>leap.<wbr>severity module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.simulation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.simulation.rst (reference label)"><span>leap.<wbr>simulation module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.utility.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.utility.rst (reference label)"><span>leap.<wbr>utility module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.utils.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/leap.utils.rst (reference label)"><span>leap.<wbr>utils module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../references.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/references.rst (reference label)"><span>References</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/dev/api/leap/leap.pollution.rst (reference label)"><span>leap.<wbr>pollution module</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable" class="md-nav__link">
+    
+      <span aria-label="Python class" class="objinfo-icon objinfo-icon__data" title="Python class">C</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.PollutionTable (Python class) — Bases: object"><span>leap.<wbr>pollution.<wbr>Pollution<wbr>Table</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.PollutionTable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable.data" class="md-nav__link">
+    
+      <span aria-label="Python property" class="objinfo-icon objinfo-icon__alias" title="Python property">P</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.PollutionTable.data (Python property) — A data frame grouped by the SSP scenario, with the following columns:"><span>data</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable.copy" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.PollutionTable.copy (Python method)"><span>copy</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable.load_pollution_data" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.PollutionTable.load_pollution_data (Python method) — Load the data from the PM2.5 SSP *.csv files."><span>load_<wbr>pollution_<wbr>data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="load_pollution_data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable.load_pollution_data-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable.load_pollution_data.pm25_data_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.PollutionTable.load_pollution_data.pm25_data_path (Python parameter) — Full directory path for the PM2.5 *.csv files."><span>pm25_<wbr>data_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.PollutionTable.load_pollution_data-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution" class="md-nav__link">
+    
+      <span aria-label="Python class" class="objinfo-icon objinfo-icon__data" title="Python class">C</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution (Python class) — Bases: object"><span>leap.<wbr>pollution.<wbr>Pollution</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.Pollution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.cduid" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution.cduid (Python attribute) — the census division identifier."><span>cduid</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.year" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution.year (Python attribute) — the year for the pollution data projection."><span>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.month" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution.month (Python attribute) — the month for the pollution data projection."><span>month</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.wildfire_pm25_scaled" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution.wildfire_pm25_scaled (Python attribute) — wildfire_pm25 * factor."><span>wildfire_<wbr>pm25_<wbr>scaled</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="wildfire_pm25_scaled">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.wildfire_pm25_scaled-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.total_pm25" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution.total_pm25 (Python attribute) — the total average PM2.5 levels for a given month: wildfire_pm25_scaled + background_pm25."><span>total_<wbr>pm25</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="total_pm25">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.total_pm25-type" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Type</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.Pollution.SSP" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.Pollution.SSP (Python attribute) — The Shared Socioeconomic Pathway (SSP) scenario from the IPCC, one of:"><span>SSP</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.GribData" class="md-nav__link">
+    
+      <span aria-label="Python class" class="objinfo-icon objinfo-icon__data" title="Python class">C</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData (Python class) — Bases: object"><span>leap.<wbr>pollution.<wbr>Grib<wbr>Data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.GribData">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.year" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.year (Python attribute) — year the data was collected."><span>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.month" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.month (Python attribute) — month the data was collected."><span>month</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.day" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.day (Python attribute) — day the data was collected."><span>day</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.projection" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.projection (Python attribute) — which map projection was used. See gridType on the GRIB keys page."><span>projection</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.longitudes" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.longitudes (Python attribute) — a list of longitude values."><span>longitudes</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.latitudes" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.latitudes (Python attribute) — a list of latitude values."><span>latitudes</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.values" class="md-nav__link">
+    
+      <span aria-label="Python attribute" class="objinfo-icon objinfo-icon__alias" title="Python attribute">A</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.values (Python attribute) — a list of the values of interest at a specified longitude and latitude. For example, it could be the PM2.5 concentration."><span>values</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.load_file" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.load_file (Python method) — Load a *.grib2 file and amalgamate the data by taking the mean."><span>load_<wbr>file</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="load_file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.load_file-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.load_file.file_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.load_file.file_path (Python parameter) — Full file name of *.csv file to load the data from."><span>file_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.save" class="md-nav__link">
+    
+      <span aria-label="Python method" class="objinfo-icon objinfo-icon__procedure" title="Python method">M</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.save (Python method) — Save the GribData object to a *.csv file."><span>save</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="save">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.save-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.GribData.save.file_path" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.GribData.save.file_path (Python parameter) — Full file name of *.csv file to save the data to."><span>file_<wbr>path</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.add_record_to_df (Python function) — Add a new column to the grib data frame."><span>leap.<wbr>pollution.<wbr>add_<wbr>record_<wbr>to_<wbr>df</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.add_record_to_df">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df.df" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.add_record_to_df.df (Python parameter) — A data frame with the following columns:"><span>df</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df.longitudes" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.add_record_to_df.longitudes (Python parameter) — An array of longitude values."><span>longitudes</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df.latitudes" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.add_record_to_df.latitudes (Python parameter) — An array of latitude values."><span>latitudes</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df.values" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.add_record_to_df.values (Python parameter) — An array of the values of interest at a specified longitude and latitude. For example, it could be the PM2.5 concentration."><span>values</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df.index" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.add_record_to_df.index (Python parameter) — The index of the iteration loop."><span>index</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.add_record_to_df-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.get_data_average" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.get_data_average (Python function) — Find the mean of all the value_* columns, and return a GribData object."><span>leap.<wbr>pollution.<wbr>get_<wbr>data_<wbr>average</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.get_data_average">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.get_data_average-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.get_data_average.df" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.get_data_average.df (Python parameter) — A data frame with the following columns:"><span>df</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.invert_longitude" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.invert_longitude (Python function) — Convert between + degrees East of the Prime Meridian and - degrees West of the Prime Meridian."><span>leap.<wbr>pollution.<wbr>invert_<wbr>longitude</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.invert_longitude">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.invert_longitude-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.invert_longitude.longitude" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.invert_longitude.longitude (Python parameter) — a number in [0, 360) giving the degrees east or west of the Prime Meridian."><span>longitude</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.invert_longitude-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leap.pollution.load_grib_files" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.load_grib_files (Python function) — Load multiple *.grib2 files and amalgamate the data by taking the mean."><span>leap.<wbr>pollution.<wbr>load_<wbr>grib_<wbr>files</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.pollution.load_grib_files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.load_grib_files-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.load_grib_files.folder" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.load_grib_files.folder (Python parameter) — The folder containing the .grib2 files to open."><span>folder</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.pollution.load_grib_files.recursive" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.pollution.load_grib_files.recursive (Python parameter) — If True, iterate through all subdirectories and compute an aggregate average."><span>recursive</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                
+                
+                  
+
+
+  
+  
+
+<h1 id="module-leap.pollution"><span id="leap-pollution-module"></span>leap.pollution module<a class="headerlink" href="#module-leap.pollution" title="Permalink to this heading">¶</a></h1>
+<dl class="py class objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.pollution.PollutionTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">leap.pollution.</span></span><span class="sig-name descname"><span class="pre">PollutionTable</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.PollutionTable" title="leap.pollution.PollutionTable.__init__.data (Python parameter)"><span class="n"><span class="pre">data</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">DataFrameGroupBy</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/pollution.html#PollutionTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.pollution.PollutionTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class containing information about PM 2.5 pollution in Canada.</p>
+<dl class="py property objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.PollutionTable.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><span class="p"> <span class="pre">:</span> </span><span class="desctype"><span class="pre">DataFrameGroupBy</span></span><a class="headerlink" href="#leap.pollution.PollutionTable.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>A data frame grouped by the SSP scenario, with the following columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CDUID</span></code>: the census division identifier.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">year</span></code>: the year for the pollution data projection.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">month</span></code>: the month for the pollution data projection.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">date</span></code>: the data for the pollution data projection, first of the month.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">background_pm25</span></code>: the average background PM2.5 levels for a given month.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wildfire_pm25</span></code>: the average PM2.5 levels due to wildfires for a given month.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">factor</span></code>: the future climate scaling factor, based on the SSP scenario.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wildfire_pm25_scaled</span></code>: <code class="docutils literal notranslate"><span class="pre">wildfire_pm25</span></code> * <code class="docutils literal notranslate"><span class="pre">factor</span></code>.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">total_pm25</span></code>: the total average PM2.5 levels for a given month:</dt><dd><p><code class="docutils literal notranslate"><span class="pre">wildfire_pm25_scaled</span> <span class="pre">+</span> <span class="pre">background_pm25</span></code></p>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SSP</span></code>: The Shared Socioeconomic Pathway (SSP) scenario from the IPCC, one of:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">SSP1_2.6</span></code>: Sustainability - Taking the Green Road, low GHG emissions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SSP2_4.5</span></code>: Middle of the Road, medium GHG emissions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SSP3_7.0</span></code>: Regional Rivalry - A Rocky Road, high GHG emissions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SSP5_8.5</span></code>: Fossil-Driven Development, very high GHG emissions</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.PollutionTable.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.PollutionTable.copy" title="leap.pollution.PollutionTable.copy.deep (Python parameter)"><span class="n"><span class="pre">deep</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">True</span></code></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><a class="reference internal" href="#leap.pollution.PollutionTable" title="leap.pollution.PollutionTable (Python class) — Bases: object"><span class="pre">leap.pollution.PollutionTable</span></a></span></span></span><a class="reference internal" href="../../../_modules/leap/pollution.html#PollutionTable.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.pollution.PollutionTable.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.pollution.PollutionTable.load_pollution_data">
+<span class="sig-name descname"><span class="pre">load_pollution_data</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.PollutionTable.load_pollution_data.pm25_data_path" title="leap.pollution.PollutionTable.load_pollution_data.pm25_data_path (Python parameter) — Full directory path for the PM2.5 *.csv files."><span class="n"><span class="pre">pm25_data_path</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pathlib.Path</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="n">PosixPath</span><span class="p">(</span><span class="s1">&#39;/home/runner/work/leap/leap/leap/processed_data/pollution&#39;</span><span class="p">)</span></code></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">DataFrameGroupBy</span></span></span></span><a class="reference internal" href="../../../_modules/leap/pollution.html#PollutionTable.load_pollution_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.pollution.PollutionTable.load_pollution_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the data from the PM2.5 SSP <code class="docutils literal notranslate"><span class="pre">*.csv</span></code> files.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.pollution.PollutionTable.load_pollution_data-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.pollution.PollutionTable.load_pollution_data-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.pollution.PollutionTable.load_pollution_data.pm25_data_path"><span class="n sig-name">pm25_data_path</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pathlib.Path</span></span><span class="w">   </span><span class="o">=</span><span class="w">   </span><code class="code python default_value docutils literal highlight highlight-python"><span class="n">PosixPath</span><span class="p">(</span><span class="s1">&#39;/home/runner/work/leap/leap/leap/processed_data/pollution&#39;</span><span class="p">)</span></code><a class="headerlink" href="#leap.pollution.PollutionTable.load_pollution_data.pm25_data_path" title="Permalink to this definition">¶</a></dt><dd><p>Full directory path for the PM2.5 <code class="docutils literal notranslate"><span class="pre">*.csv</span></code> files.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="leap.pollution.PollutionTable.load_pollution_data-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.pollution.PollutionTable.load_pollution_data-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>A data frame grouped by the SSP scenario.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.pollution.Pollution">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">leap.pollution.</span></span><span class="sig-name descname"><span class="pre">Pollution</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.Pollution" title="leap.pollution.Pollution.__init__.cduid (Python parameter)"><span class="n"><span class="pre">cduid</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.Pollution" title="leap.pollution.Pollution.__init__.year (Python parameter)"><span class="n"><span class="pre">year</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.Pollution" title="leap.pollution.Pollution.__init__.month (Python parameter)"><span class="n"><span class="pre">month</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.Pollution" title="leap.pollution.Pollution.__init__.SSP (Python parameter)"><span class="n"><span class="pre">SSP</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.Pollution" title="leap.pollution.Pollution.__init__.pollution_table (Python parameter)"><span class="n"><span class="pre">pollution_table</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><a class="reference internal" href="#leap.pollution.PollutionTable" title="leap.pollution.PollutionTable (Python class) — Bases: object"><span class="pre">leap.pollution.PollutionTable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/pollution.html#Pollution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.pollution.Pollution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Contains information about PM2.5 pollution for a census division, date, and SSP scenario.</p>
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.Pollution.cduid">
+<span class="sig-name descname"><span class="pre">cduid</span></span><a class="headerlink" href="#leap.pollution.Pollution.cduid" title="Permalink to this definition">¶</a></dt>
+<dd><p>the census division identifier.</p>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.Pollution.year">
+<span class="sig-name descname"><span class="pre">year</span></span><a class="headerlink" href="#leap.pollution.Pollution.year" title="Permalink to this definition">¶</a></dt>
+<dd><p>the year for the pollution data projection.</p>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.Pollution.month">
+<span class="sig-name descname"><span class="pre">month</span></span><a class="headerlink" href="#leap.pollution.Pollution.month" title="Permalink to this definition">¶</a></dt>
+<dd><p>the month for the pollution data projection.</p>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.Pollution.wildfire_pm25_scaled">
+<span class="sig-name descname"><span class="pre">wildfire_pm25_scaled</span></span><a class="headerlink" href="#leap.pollution.Pollution.wildfire_pm25_scaled" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">wildfire_pm25</span></code> * <code class="docutils literal notranslate"><span class="pre">factor</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.pollution.Pollution.wildfire_pm25_scaled-type">Type<span class="colon">:</span><a class="headerlink" href="#leap.pollution.Pollution.wildfire_pm25_scaled-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.Pollution.total_pm25">
+<span class="sig-name descname"><span class="pre">total_pm25</span></span><a class="headerlink" href="#leap.pollution.Pollution.total_pm25" title="Permalink to this definition">¶</a></dt>
+<dd><p>the total average PM2.5 levels for a given month:
+<code class="docutils literal notranslate"><span class="pre">wildfire_pm25_scaled</span></code> + <code class="docutils literal notranslate"><span class="pre">background_pm25</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.pollution.Pollution.total_pm25-type">Type<span class="colon">:</span><a class="headerlink" href="#leap.pollution.Pollution.total_pm25-type" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.Pollution.SSP">
+<span class="sig-name descname"><span class="pre">SSP</span></span><a class="headerlink" href="#leap.pollution.Pollution.SSP" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Shared Socioeconomic Pathway (SSP) scenario from the IPCC, one of:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SSP1_2.6</span></code>: Sustainability - Taking the Green Road, low GHG emissions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SSP2_4.5</span></code>: Middle of the Road, medium GHG emissions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SSP3_7.0</span></code>: Regional Rivalry - A Rocky Road, high GHG emissions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SSP5_8.5</span></code>: Fossil-Driven Development, very high GHG emissions</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.pollution.GribData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">leap.pollution.</span></span><span class="sig-name descname"><span class="pre">GribData</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.GribData" title="leap.pollution.GribData.__init__.file_path (Python parameter)"><span class="n"><span class="pre">file_path</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pathlib.Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.GribData" title="leap.pollution.GribData.__init__.year (Python parameter)"><span class="n"><span class="pre">year</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.GribData" title="leap.pollution.GribData.__init__.month (Python parameter)"><span class="n"><span class="pre">month</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.GribData" title="leap.pollution.GribData.__init__.day (Python parameter)"><span class="n"><span class="pre">day</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.GribData" title="leap.pollution.GribData.__init__.projection (Python parameter)"><span class="n"><span class="pre">projection</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.GribData" title="leap.pollution.GribData.__init__.longitudes (Python parameter)"><span class="n"><span class="pre">longitudes</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">numpy.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.GribData" title="leap.pollution.GribData.__init__.latitudes (Python parameter)"><span class="n"><span class="pre">latitudes</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">numpy.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.GribData" title="leap.pollution.GribData.__init__.values (Python parameter)"><span class="n"><span class="pre">values</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">numpy.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">None</span></code></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/pollution.html#GribData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.pollution.GribData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class containing GRIB data on air pollution.</p>
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.GribData.year">
+<span class="sig-name descname"><span class="pre">year</span></span><a class="headerlink" href="#leap.pollution.GribData.year" title="Permalink to this definition">¶</a></dt>
+<dd><p>year the data was collected.</p>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.GribData.month">
+<span class="sig-name descname"><span class="pre">month</span></span><a class="headerlink" href="#leap.pollution.GribData.month" title="Permalink to this definition">¶</a></dt>
+<dd><p>month the data was collected.</p>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.GribData.day">
+<span class="sig-name descname"><span class="pre">day</span></span><a class="headerlink" href="#leap.pollution.GribData.day" title="Permalink to this definition">¶</a></dt>
+<dd><p>day the data was collected.</p>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.GribData.projection">
+<span class="sig-name descname"><span class="pre">projection</span></span><a class="headerlink" href="#leap.pollution.GribData.projection" title="Permalink to this definition">¶</a></dt>
+<dd><p>which map projection was used. See <cite>gridType</cite> on the
+<a class="reference external" href="https://confluence.ecmwf.int/display/ECC/GRIB+Keys">GRIB keys</a> page.</p>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.GribData.longitudes">
+<span class="sig-name descname"><span class="pre">longitudes</span></span><a class="headerlink" href="#leap.pollution.GribData.longitudes" title="Permalink to this definition">¶</a></dt>
+<dd><p>a list of longitude values.</p>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.GribData.latitudes">
+<span class="sig-name descname"><span class="pre">latitudes</span></span><a class="headerlink" href="#leap.pollution.GribData.latitudes" title="Permalink to this definition">¶</a></dt>
+<dd><p>a list of latitude values.</p>
+</dd></dl>
+
+<dl class="py attribute objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.GribData.values">
+<span class="sig-name descname"><span class="pre">values</span></span><a class="headerlink" href="#leap.pollution.GribData.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>a list of the values of interest at a specified longitude and latitude.
+For example, it could be the PM2.5 concentration.</p>
+</dd></dl>
+
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.GribData.load_file">
+<span class="sig-name descname"><span class="pre">load_file</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.GribData.load_file.file_path" title="leap.pollution.GribData.load_file.file_path (Python parameter) — Full file name of *.csv file to load the data from."><span class="n"><span class="pre">file_path</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pathlib.Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></span></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/pollution.html#GribData.load_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.pollution.GribData.load_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a <code class="docutils literal notranslate"><span class="pre">*.grib2</span></code> file and amalgamate the data by taking the mean.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.pollution.GribData.load_file-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.pollution.GribData.load_file-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.pollution.GribData.load_file.file_path"><span class="n sig-name">file_path</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pathlib.Path<span class="w">   </span><span class="p">|</span><span class="w">   </span>str</span></span><a class="headerlink" href="#leap.pollution.GribData.load_file.file_path" title="Permalink to this definition">¶</a></dt><dd><p>Full file name of <code class="docutils literal notranslate"><span class="pre">*.csv</span></code> file to load the data from.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.GribData.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.GribData.save.file_path" title="leap.pollution.GribData.save.file_path (Python parameter) — Full file name of *.csv file to save the data to."><span class="n"><span class="pre">file_path</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pathlib.Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></span></em></span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/leap/pollution.html#GribData.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.pollution.GribData.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the GribData object to a <code class="docutils literal notranslate"><span class="pre">*.csv</span></code> file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.pollution.GribData.save-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.pollution.GribData.save-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.pollution.GribData.save.file_path"><span class="n sig-name">file_path</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pathlib.Path<span class="w">   </span><span class="p">|</span><span class="w">   </span>str</span></span><a class="headerlink" href="#leap.pollution.GribData.save.file_path" title="Permalink to this definition">¶</a></dt><dd><p>Full file name of <code class="docutils literal notranslate"><span class="pre">*.csv</span></code> file to save the data to.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.pollution.add_record_to_df">
+<span class="sig-prename descclassname"><span class="pre">leap.pollution.</span></span><span class="sig-name descname"><span class="pre">add_record_to_df</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.add_record_to_df.df" title="leap.pollution.add_record_to_df.df (Python parameter) — A data frame with the following columns:"><span class="n"><span class="pre">df</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.add_record_to_df.longitudes" title="leap.pollution.add_record_to_df.longitudes (Python parameter) — An array of longitude values."><span class="n"><span class="pre">longitudes</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">numpy.ndarray</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.add_record_to_df.latitudes" title="leap.pollution.add_record_to_df.latitudes (Python parameter) — An array of latitude values."><span class="n"><span class="pre">latitudes</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">numpy.ndarray</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.add_record_to_df.values" title="leap.pollution.add_record_to_df.values (Python parameter) — An array of the values of interest at a specified longitude and latitude. For example, it could be the PM2.5 concentration."><span class="n"><span class="pre">values</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">numpy.ndarray</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.add_record_to_df.index" title="leap.pollution.add_record_to_df.index (Python parameter) — The index of the iteration loop."><span class="n"><span class="pre">index</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></span><a class="reference internal" href="../../../_modules/leap/pollution.html#add_record_to_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.pollution.add_record_to_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new column to the grib data frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.pollution.add_record_to_df-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.pollution.add_record_to_df-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.pollution.add_record_to_df.df"><span class="n sig-name">df</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pandas.core.frame.DataFrame</span></span><a class="headerlink" href="#leap.pollution.add_record_to_df.df" title="Permalink to this definition">¶</a></dt><dd><p><p>A data frame with the following columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">longitudes</span></code>: a list of longitude values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">latitudes</span></code>: a list of latitude values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">value_{index}</span></code>: a list of the values of interest at a specified longitude and
+latitude. For example, it could be the PM2.5 concentration. Each value column
+corresponds to either a record in the original grib file, or a file in a folder.</p></li>
+</ul>
+</p>
+</dd>
+<dt id="leap.pollution.add_record_to_df.longitudes"><span class="n sig-name">longitudes</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">numpy.ndarray</span></span><a class="headerlink" href="#leap.pollution.add_record_to_df.longitudes" title="Permalink to this definition">¶</a></dt><dd><p>An array of longitude values.</p>
+</dd>
+<dt id="leap.pollution.add_record_to_df.latitudes"><span class="n sig-name">latitudes</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">numpy.ndarray</span></span><a class="headerlink" href="#leap.pollution.add_record_to_df.latitudes" title="Permalink to this definition">¶</a></dt><dd><p>An array of latitude values.</p>
+</dd>
+<dt id="leap.pollution.add_record_to_df.values"><span class="n sig-name">values</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">numpy.ndarray</span></span><a class="headerlink" href="#leap.pollution.add_record_to_df.values" title="Permalink to this definition">¶</a></dt><dd><p>An array of the values of interest at a specified longitude and latitude.
+For example, it could be the PM2.5 concentration.</p>
+</dd>
+<dt id="leap.pollution.add_record_to_df.index"><span class="n sig-name">index</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">int</span></span><a class="headerlink" href="#leap.pollution.add_record_to_df.index" title="Permalink to this definition">¶</a></dt><dd><p>The index of the iteration loop.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="leap.pollution.add_record_to_df-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.pollution.add_record_to_df-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>A dataframe with a new column added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.pollution.get_data_average">
+<span class="sig-prename descclassname"><span class="pre">leap.pollution.</span></span><span class="sig-name descname"><span class="pre">get_data_average</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.get_data_average.df" title="leap.pollution.get_data_average.df (Python parameter) — A data frame with the following columns:"><span class="n"><span class="pre">df</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></span><a class="reference internal" href="../../../_modules/leap/pollution.html#get_data_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.pollution.get_data_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the mean of all the <code class="docutils literal notranslate"><span class="pre">value_*</span></code> columns, and return a <code class="docutils literal notranslate"><span class="pre">GribData</span></code> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.pollution.get_data_average-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.pollution.get_data_average-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.pollution.get_data_average.df"><span class="n sig-name">df</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pandas.core.frame.DataFrame</span></span><a class="headerlink" href="#leap.pollution.get_data_average.df" title="Permalink to this definition">¶</a></dt><dd><p><p>A data frame with the following columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">longitudes</span></code>: a list of longitude values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">latitudes</span></code>: a list of latitude values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">value_{index}</span></code>: a list of the values of interest at a specified longitude and
+latitude. For example, it could be the PM2.5 concentration. Each value column
+corresponds to either a record in the original grib file, or a file in a folder.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight py" id="leap.pollution.invert_longitude">
+<span class="sig-prename descclassname"><span class="pre">leap.pollution.</span></span><span class="sig-name descname"><span class="pre">invert_longitude</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.invert_longitude.longitude" title="leap.pollution.invert_longitude.longitude (Python parameter) — a number in [0, 360) giving the degrees east or west of the Prime Meridian."><span class="n"><span class="pre">longitude</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">float</span></span></span></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">float</span></span></span></span><a class="reference internal" href="../../../_modules/leap/pollution.html#invert_longitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.pollution.invert_longitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert between + degrees East of the Prime Meridian and - degrees West of the Prime Meridian.</p>
+<p>Longitude values can be given as either + degrees East of the Prime Meridian, or as
+- degrees West of the Prime Meridian.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.pollution.invert_longitude-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.pollution.invert_longitude-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.pollution.invert_longitude.longitude"><span class="n sig-name">longitude</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">float</span></span><a class="headerlink" href="#leap.pollution.invert_longitude.longitude" title="Permalink to this definition">¶</a></dt><dd><p>a number in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">360)</span></code> giving the degrees east or west of the Prime Meridian.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="leap.pollution.invert_longitude-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.pollution.invert_longitude-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>The converted longitude.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.pollution.load_grib_files">
+<span class="sig-prename descclassname"><span class="pre">leap.pollution.</span></span><span class="sig-name descname"><span class="pre">load_grib_files</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.load_grib_files.folder" title="leap.pollution.load_grib_files.folder (Python parameter) — The folder containing the .grib2 files to open."><span class="n"><span class="pre">folder</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.pollution.load_grib_files.recursive" title="leap.pollution.load_grib_files.recursive (Python parameter) — If True, iterate through all subdirectories and compute an aggregate average."><span class="n"><span class="pre">recursive</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">False</span></code></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><a class="reference internal" href="#leap.pollution.GribData" title="leap.pollution.GribData (Python class) — Bases: object"><span class="pre">leap.pollution.GribData</span></a></span></span></span><a class="reference internal" href="../../../_modules/leap/pollution.html#load_grib_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.pollution.load_grib_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load multiple <code class="docutils literal notranslate"><span class="pre">*.grib2</span></code> files and amalgamate the data by taking the mean.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.pollution.load_grib_files-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.pollution.load_grib_files-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.pollution.load_grib_files.folder"><span class="n sig-name">folder</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">str</span></span><a class="headerlink" href="#leap.pollution.load_grib_files.folder" title="Permalink to this definition">¶</a></dt><dd><p>The folder containing the <code class="docutils literal notranslate"><span class="pre">.grib2</span></code> files to open.</p>
+</dd>
+<dt id="leap.pollution.load_grib_files.recursive"><span class="n sig-name">recursive</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">bool</span></span><span class="w">   </span><span class="o">=</span><span class="w">   </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">False</span></code><a class="headerlink" href="#leap.pollution.load_grib_files.recursive" title="Permalink to this definition">¶</a></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, iterate through all subdirectories and compute an
+aggregate average. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, only read <code class="docutils literal notranslate"><span class="pre">.grib2</span></code> files in the given directory.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        &#169; Copyright 2024, Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert.
+        
+    </div>
+  
+    Created using
+    <a href="https://www.sphinx-doc.org/" target="_blank" rel="noopener">Sphinx</a>
+    7.0.0.
+     and
+    <a href="https://github.com/jbms/sphinx-immaterial/" target="_blank" rel="noopener">Sphinx-Immaterial</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/resplab/leap/" target="_blank" rel="noopener" title="Source on github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.sections", "navigation.top", "search.share", "toc.follow", "toc.sticky", "content.tabs.link", "announce.dismiss", "content.code.annotate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+        <script src="../../../_static/sphinx_immaterial_theme.32136f45f91ae6956.min.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+  </body>
+</html>

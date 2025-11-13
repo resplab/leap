@@ -1,0 +1,1066 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="index.html">
+      
+      
+        <link rel="next" href="cli/index.html">
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>Installation - </title>
+      
+    
+    
+      
+        
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="_static/sphinx_immaterial_theme.c15b9f3ac86171432.min.css" />
+        <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+        <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#prerequisites" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="" class="md-header__button md-logo" aria-label="" data-md-component="logo">
+      <img src="_static/logo.png" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Installation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="" class="md-nav__button md-logo" aria-label="" data-md-component="logo">
+      <img src="_static/logo.png" alt="logo">
+    </a>
+    
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    <span title="/installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/installation.rst (reference label)"><span>Installation</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#prerequisites (reference label)"><span>Prerequisites</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-python" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#step-1-install-python (reference label)"><span>Step 1:<wbr> Install Python</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-choose-install-folder" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#step-2-choose-install-folder (reference label)"><span>Step 2:<wbr> Choose Install Folder</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-create-a-virtual-environment" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#step-3-create-a-virtual-environment (reference label)"><span>Step 3:<wbr> Create a Virtual Environment</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-optional-setup-git-token" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#step-4-optional-setup-git-token (reference label)"><span>Step 4:<wbr> <wbr>(Optional) Setup Git Token</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-install-leap" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#step-5-install-leap (reference label)"><span>Step 5:<wbr> Install LEAP</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-install-success" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#step-6-install-success (reference label)"><span>Step 6:<wbr> Install Success!</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#developers" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#developers (reference label)"><span>Developers</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#troubleshooting (reference label)"><span>Troubleshooting</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cli/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/cli/index.rst (reference label)"><span>Running LEAP</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/index.rst (reference label)"><span>Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dev/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/index.rst (reference label)"><span>Developers</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="references.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/references.rst (reference label)"><span>References</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/installation.rst (reference label)"><span>Installation</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#prerequisites (reference label)"><span>Prerequisites</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-python" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#step-1-install-python (reference label)"><span>Step 1:<wbr> Install Python</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-choose-install-folder" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#step-2-choose-install-folder (reference label)"><span>Step 2:<wbr> Choose Install Folder</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-create-a-virtual-environment" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#step-3-create-a-virtual-environment (reference label)"><span>Step 3:<wbr> Create a Virtual Environment</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-optional-setup-git-token" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#step-4-optional-setup-git-token (reference label)"><span>Step 4:<wbr> <wbr>(Optional) Setup Git Token</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-install-leap" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#step-5-install-leap (reference label)"><span>Step 5:<wbr> Install LEAP</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-install-success" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#step-6-install-success (reference label)"><span>Step 6:<wbr> Install Success!</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#developers" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#developers (reference label)"><span>Developers</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/installation.rst#troubleshooting (reference label)"><span>Troubleshooting</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                
+                
+                  
+
+
+  
+  
+
+<h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Administrator or <code class="docutils literal notranslate"><span class="pre">sudo</span></code> privileges (Linux/macOS).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GitHub</span></code> account created.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">git</span></code> installed on your system.</p></li>
+<li><p>Ensure <code class="docutils literal notranslate"><span class="pre">pip</span></code> is installed.</p></li>
+<li><p>Internet access to download dependencies.</p></li>
+</ul>
+<h3 id="step-1-install-python">Step 1: Install Python<a class="headerlink" href="#step-1-install-python" title="Permalink to this heading">¶</a></h3>
+<p>If you already have <code class="docutils literal notranslate"><span class="pre">Python</span></code> installed, you can skip this step. To check your <code class="docutils literal notranslate"><span class="pre">Python</span></code> version,
+open a terminal and type:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python3<span class="w"> </span>--version
+</code></pre></div>
+</div>
+<p>If the output is <code class="docutils literal notranslate"><span class="pre">command</span> <span class="pre">not</span> <span class="pre">found:</span> <span class="pre">python3</span></code>, or the version is lower than <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">3.9</span></code>,
+then you will need to install Python.</p>
+<div class="tabbed-set tabbed-alternate custom-tab-set-style" data-tabs="1:4" id="installation-python">
+<input checked type="radio" id="__tabbed_1_1" name="__tabbed_1"><input type="radio" id="__tabbed_1_2" name="__tabbed_1"><input type="radio" id="__tabbed_1_3" name="__tabbed_1"><input type="radio" id="__tabbed_1_4" name="__tabbed_1"><div class="tabbed-labels docutils">
+<label class="tabbed-label" for="__tabbed_1_1">
+MacOS</label><label class="tabbed-label" for="__tabbed_1_2">
+Linux</label><label class="tabbed-label" for="__tabbed_1_3">
+Windows Command Prompt</label><label class="tabbed-label" for="__tabbed_1_4">
+Windows PowerShell</label></div>
+<div class="tabbed-content docutils">
+<div class="tabbed-block docutils">
+<p>To install Python, download the installer from:
+<a class="reference external" href="https://www.python.org/ftp/python/3.10.0/python-3.10.0post2-macos11.pkg">Mac Installer Python 3.10</a>.</p>
+<p>Once the install has finished, check to make sure that it’s using the correct version:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python3<span class="w"> </span>--version
+<span class="w">  </span><span class="c1"># Expected output:</span>
+<span class="w">  </span><span class="c1"># Python 3.10.*</span>
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<p>To install Python, use your package manager. For example, on Ubuntu, type:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>python3.10
+</code></pre></div>
+</div>
+<p>Once the install has finished, check to make sure that it’s using the correct version:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python3<span class="w"> </span>--version
+<span class="c1"># Expected output:</span>
+<span class="c1"># Python 3.10.*</span>
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<p>To install Python, download the installer from:
+<a class="reference external" href="https://www.python.org/downloads/release/python-31016/">Windows Installer Python 3.10</a>.</p>
+<div class="note admonition">
+<p class="admonition-title">Note</p>
+<p>For other distributions, refer to your distribution’s documentation.</p>
+</div>
+<p>Once the installation has finished, check to make sure that it’s using the correct version:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python3<span class="w"> </span>--version
+<span class="c1"># Expected output:</span>
+<span class="c1"># Python 3.10.*</span>
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<p>To install Python, download the installer from:
+<a class="reference external" href="https://www.python.org/downloads/release/python-31016/">Windows Installer Python 3.10</a>.</p>
+<div class="note admonition">
+<p class="admonition-title">Note</p>
+<p>For other distributions, refer to your distribution’s documentation.</p>
+</div>
+<p>Once the installation has finished, check to make sure that it’s using the correct version:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python3<span class="w"> </span>--version
+<span class="c1"># Expected output:</span>
+<span class="c1"># Python 3.10.*</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div><h3 id="step-2-choose-install-folder">Step 2: Choose Install Folder<a class="headerlink" href="#step-2-choose-install-folder" title="Permalink to this heading">¶</a></h3>
+<p>Create a directory to install <code class="docutils literal notranslate"><span class="pre">LEAP</span></code>. In this example, we’ll use <code class="docutils literal notranslate"><span class="pre">my_folder</span></code>.
+To create this directory, open a terminal and type:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>my_folder
+<span class="nb">cd</span><span class="w"> </span>my_folder
+</code></pre></div>
+</div>
+<p>This directory will serve as the workspace where you install and manage the LEAP package.</p>
+<h3 id="step-3-create-a-virtual-environment">Step 3: Create a Virtual Environment<a class="headerlink" href="#step-3-create-a-virtual-environment" title="Permalink to this heading">¶</a></h3>
+<p>When working with Python, it’s best to create a virtual environment to keep your packages
+separate from the system Python.</p>
+<div class="tabbed-set tabbed-alternate custom-tab-set-style" data-tabs="2:4" id="installation-env">
+<input checked type="radio" id="__tabbed_2_1" name="__tabbed_2"><input type="radio" id="__tabbed_2_2" name="__tabbed_2"><input type="radio" id="__tabbed_2_3" name="__tabbed_2"><input type="radio" id="__tabbed_2_4" name="__tabbed_2"><div class="tabbed-labels docutils">
+<label class="tabbed-label" for="__tabbed_2_1">
+MacOS</label><label class="tabbed-label" for="__tabbed_2_2">
+Linux</label><label class="tabbed-label" for="__tabbed_2_3">
+Windows Command Prompt</label><label class="tabbed-label" for="__tabbed_2_4">
+Windows PowerShell</label></div>
+<div class="tabbed-content docutils">
+<div class="tabbed-block docutils">
+<p>You will want to use your same Python version so if you
+installed <code class="docutils literal notranslate"><span class="pre">python3.10</span></code> with the installer above, the command would be:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python3.x<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>env
+<span class="nb">source</span><span class="w"> </span>env/bin/activate
+</code></pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">python3.x</span></code> is your Python version. For example, if you installed Python with the installer
+above, you installed <code class="docutils literal notranslate"><span class="pre">python3.10</span></code>, so the command would be:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python3.10<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>env
+<span class="nb">source</span><span class="w"> </span>env/bin/activate
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<p>You will want to use your same Python version so if you
+installed <code class="docutils literal notranslate"><span class="pre">python3.10</span></code> with the installer above, the command would be:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python3.x<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>env
+<span class="nb">source</span><span class="w"> </span>env/bin/activate
+</code></pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">python3.x</span></code> is your Python version. For example, if you installed Python with the installer
+above, you installed <code class="docutils literal notranslate"><span class="pre">python3.10</span></code>, so the command would be:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python3.10<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>env
+<span class="nb">source</span><span class="w"> </span>env/bin/activate
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>env
+env<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>env
+.<span class="se">\e</span>nv<span class="se">\S</span>cripts<span class="se">\A</span>ctivate.ps1
+</code></pre></div>
+</div>
+<div class="warning admonition">
+<p class="admonition-title">Warning</p>
+<p>For PowerShell, you may need to allow scripts temporarily:</p>
+<p>If you get an error, run <code class="docutils literal notranslate"><span class="pre">Set-ExecutionPolicy</span> <span class="pre">Unrestricted</span> <span class="pre">-Scope</span> <span class="pre">Process</span></code>
+before running <code class="docutils literal notranslate"><span class="pre">.\env\Scripts\Activate.ps1</span></code></p>
+</div>
+</div>
+</div>
+</div><h3 id="step-4-optional-setup-git-token">Step 4: (Optional) Setup Git Token<a class="headerlink" href="#step-4-optional-setup-git-token" title="Permalink to this heading">¶</a></h3>
+<div class="tabbed-set tabbed-alternate custom-tab-set-style" data-tabs="3:4" id="installation-git-token">
+<input checked type="radio" id="__tabbed_3_1" name="__tabbed_3"><input type="radio" id="__tabbed_3_2" name="__tabbed_3"><input type="radio" id="__tabbed_3_3" name="__tabbed_3"><input type="radio" id="__tabbed_3_4" name="__tabbed_3"><div class="tabbed-labels docutils">
+<label class="tabbed-label" for="__tabbed_3_1">
+MacOS</label><label class="tabbed-label" for="__tabbed_3_2">
+Linux</label><label class="tabbed-label" for="__tabbed_3_3">
+Windows Command Prompt</label><label class="tabbed-label" for="__tabbed_3_4">
+Windows PowerShell</label></div>
+<div class="tabbed-content docutils">
+<div class="tabbed-block docutils">
+<p>If you haven’t used <code class="docutils literal notranslate"><span class="pre">git</span></code> on the command line before, you will need to set up a personal access
+token. This is so you can install the <code class="docutils literal notranslate"><span class="pre">LEAP</span></code> package from <code class="docutils literal notranslate"><span class="pre">GitHub</span></code>. To do this:</p>
+<ol class="arabic simple">
+<li><p>Go to <a class="reference external" href="https://github.com/settings/tokens">GitHub Settings: Tokens</a> to create a personal
+access token.</p></li>
+<li><p>Click on <code class="docutils literal notranslate"><span class="pre">Tokens:</span> <span class="pre">classic</span></code> and then <code class="docutils literal notranslate"><span class="pre">Generate</span> <span class="pre">new</span> <span class="pre">token</span> <span class="pre">(classic)</span></code>.</p></li>
+<li><p>Set the expiration to <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">expiration</span></code> so you don’t have to do this again. If you want more
+security, set an earlier date.</p></li>
+<li><p>Tick all the boxes available, and click <code class="docutils literal notranslate"><span class="pre">Generate</span> <span class="pre">token</span></code>.</p></li>
+<li><p>Copy this token to a secure file on your system. <strong>You won’t be shown it again.</strong></p></li>
+<li><p>In your terminal, type:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>credential.helper<span class="w"> </span>osxkeychain
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<p>If you haven’t used <code class="docutils literal notranslate"><span class="pre">git</span></code> on the command line before, you will need to set up a personal access
+token. This is so you can install the <code class="docutils literal notranslate"><span class="pre">LEAP</span></code> package from <code class="docutils literal notranslate"><span class="pre">GitHub</span></code>. To do this:</p>
+<ol class="arabic simple">
+<li><p>Go to <a class="reference external" href="https://github.com/settings/tokens">GitHub Settings: Tokens</a> to create a personal
+access token.</p></li>
+<li><p>Click on <code class="docutils literal notranslate"><span class="pre">Tokens:</span> <span class="pre">classic</span></code> and then <code class="docutils literal notranslate"><span class="pre">Generate</span> <span class="pre">new</span> <span class="pre">token</span> <span class="pre">(classic)</span></code>.</p></li>
+<li><p>Set the expiration to <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">expiration</span></code> so you don’t have to do this again. If you want more
+security, set an earlier date.</p></li>
+<li><p>Tick all the boxes available, and click <code class="docutils literal notranslate"><span class="pre">Generate</span> <span class="pre">token</span></code>.</p></li>
+<li><p>Copy this token to a secure file on your system. <strong>You won’t be shown it again.</strong></p></li>
+<li><p>In your terminal, either type:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>credential.helper<span class="w"> </span>cache
+</code></pre></div>
+</div>
+<p>Use this for temporary storage of credentials in memory (default 15 minutes). Add a note about
+setting a custom timeout with <code class="docutils literal notranslate"><span class="pre">cache</span> <span class="pre">--timeout=3600</span></code> for longer sessions.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>credential.helper<span class="w"> </span>store
+</code></pre></div>
+</div>
+<p>Use this for persistent storage of credentials in plain text.</p>
+<div class="warning admonition">
+<p class="admonition-title">Warning</p>
+<p>This command should only be used on trusted machines.
+Add a security warning that credentials are stored in <code class="docutils literal notranslate"><span class="pre">~/.git-credentials</span></code></p>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<p>If you haven’t used <code class="docutils literal notranslate"><span class="pre">git</span></code> on the command line before, you will need to set up a personal access
+token. This is so you can install the <code class="docutils literal notranslate"><span class="pre">LEAP</span></code> package from <code class="docutils literal notranslate"><span class="pre">GitHub</span></code>. To do this:</p>
+<ol class="arabic simple">
+<li><p>Go to <a class="reference external" href="https://github.com/settings/tokens">GitHub Settings: Tokens</a> to create a personal
+access token.</p></li>
+<li><p>Click on <code class="docutils literal notranslate"><span class="pre">Tokens:</span> <span class="pre">classic</span></code> and then <code class="docutils literal notranslate"><span class="pre">Generate</span> <span class="pre">new</span> <span class="pre">token</span> <span class="pre">(classic)</span></code>.</p></li>
+<li><p>Set the expiration to <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">expiration</span></code> so you don’t have to do this again. If you want more
+security, set an earlier date.</p></li>
+<li><p>Tick all the boxes available, and click <code class="docutils literal notranslate"><span class="pre">Generate</span> <span class="pre">token</span></code>.</p></li>
+<li><p>Copy this token to a secure file on your system. <strong>You won’t be shown it again.</strong></p></li>
+<li><p>In your terminal, type:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>credential.helper<span class="w"> </span>manager
+</code></pre></div>
+</div>
+<ol class="arabic simple" start="7">
+<li><p>Test your setup by cloning a private repository or running a Git command like:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>git<span class="w"> </span>ls-remote<span class="w"> </span>https://github.com/YOUR_USERNAME/YOUR_PRIVATE_REPO.git
+
+<span class="c1"># Replace YOUR_USERNAME and YOUR_PRIVATE_REPO with your GitHub username and a private repository name.</span>
+</code></pre></div>
+</div>
+<p><em>(Optional)</em> If you encounter issues, ensure that Git is installed on your system. You can download
+it from: <a class="reference external" href="https://git-scm.com/downloads">Git Downloads</a>.</p>
+</div>
+<div class="tabbed-block docutils">
+<p>If you haven’t used <code class="docutils literal notranslate"><span class="pre">git</span></code> on the command line before, you will need to set up a personal access
+token. This is so you can install the <code class="docutils literal notranslate"><span class="pre">LEAP</span></code> package from <code class="docutils literal notranslate"><span class="pre">GitHub</span></code>. To do this:</p>
+<ol class="arabic simple">
+<li><p>Go to <a class="reference external" href="https://github.com/settings/tokens">GitHub Settings: Tokens</a> to create a personal
+access token.</p></li>
+<li><p>Click on <code class="docutils literal notranslate"><span class="pre">Tokens:</span> <span class="pre">classic</span></code> and then <code class="docutils literal notranslate"><span class="pre">Generate</span> <span class="pre">new</span> <span class="pre">token</span> <span class="pre">(classic)</span></code>.</p></li>
+<li><p>Set the expiration to <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">expiration</span></code> so you don’t have to do this again. If you want more
+security, set an earlier date.</p></li>
+<li><p>Tick all the boxes available, and click <code class="docutils literal notranslate"><span class="pre">Generate</span> <span class="pre">token</span></code>.</p></li>
+<li><p>Copy this token to a secure file on your system. <strong>You won’t be shown it again.</strong></p></li>
+<li><p>In your terminal, type:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>credential.helper<span class="w"> </span>manager
+</code></pre></div>
+</div>
+<ol class="arabic simple" start="7">
+<li><p>Test your setup by cloning a private repository or running a Git command like:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>git<span class="w"> </span>ls-remote<span class="w"> </span>https://github.com/YOUR_USERNAME/YOUR_PRIVATE_REPO.git
+
+<span class="c1"># Replace YOUR_USERNAME and YOUR_PRIVATE_REPO with your GitHub username and a private repository name.</span>
+</code></pre></div>
+</div>
+<p><em>(Optional)</em> If you encounter issues, ensure that Git is installed on your system. You can download
+it from: <a class="reference external" href="https://git-scm.com/downloads">Git Downloads</a>.</p>
+</div>
+</div>
+</div><h3 id="step-5-install-leap">Step 5: Install <code class="docutils literal notranslate"><span class="pre">LEAP</span></code><a class="headerlink" href="#step-5-install-leap" title="Permalink to this heading">¶</a></h3>
+<p>To install the <code class="docutils literal notranslate"><span class="pre">LEAP</span></code> package, type:</p>
+<div class="tabbed-set tabbed-alternate custom-tab-set-style" data-tabs="4:4" id="installation-leap">
+<input checked type="radio" id="__tabbed_4_1" name="__tabbed_4"><input type="radio" id="__tabbed_4_2" name="__tabbed_4"><input type="radio" id="__tabbed_4_3" name="__tabbed_4"><input type="radio" id="__tabbed_4_4" name="__tabbed_4"><div class="tabbed-labels docutils">
+<label class="tabbed-label" for="__tabbed_4_1">
+MacOS</label><label class="tabbed-label" for="__tabbed_4_2">
+Linux</label><label class="tabbed-label" for="__tabbed_4_3">
+Windows Command Prompt</label><label class="tabbed-label" for="__tabbed_4_4">
+Windows PowerShell</label></div>
+<div class="tabbed-content docutils">
+<div class="tabbed-block docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>pip3<span class="w"> </span>install<span class="w"> </span>git+https://github.com/resplab/leap.git
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>pip3<span class="w"> </span>install<span class="w"> </span>git+https://github.com/resplab/leap.git
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/resplab/leap.git
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/resplab/leap.git
+</code></pre></div>
+</div>
+</div>
+</div>
+</div><p>To install a specific release, append <code class="docutils literal notranslate"><span class="pre">&#64;vx.y.z</span></code> at the end:</p>
+<div class="tabbed-set tabbed-alternate custom-tab-set-style" data-tabs="5:4" id="installation-leap-version">
+<input checked type="radio" id="__tabbed_5_1" name="__tabbed_5"><input type="radio" id="__tabbed_5_2" name="__tabbed_5"><input type="radio" id="__tabbed_5_3" name="__tabbed_5"><input type="radio" id="__tabbed_5_4" name="__tabbed_5"><div class="tabbed-labels docutils">
+<label class="tabbed-label" for="__tabbed_5_1">
+MacOS</label><label class="tabbed-label" for="__tabbed_5_2">
+Linux</label><label class="tabbed-label" for="__tabbed_5_3">
+Windows Command Prompt</label><label class="tabbed-label" for="__tabbed_5_4">
+Windows PowerShell</label></div>
+<div class="tabbed-content docutils">
+<div class="tabbed-block docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>pip3<span class="w"> </span>install<span class="w"> </span>git+https://github.com/resplab/leap.git@vx.y.z
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>pip3<span class="w"> </span>install<span class="w"> </span>git+https://github.com/resplab/leap.git@vx.y.z
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/resplab/leap.git@vx.y.z
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/resplab/leap.git@vx.y.z
+</code></pre></div>
+</div>
+</div>
+</div>
+</div><p>where <code class="docutils literal notranslate"><span class="pre">vx.y.z</span></code> is the release version you would like to install. To see all the releases, go to:
+<a class="reference external" href="https://github.com/resplab/leap/releases">LEAP Releases</a>.</p>
+<p><em>(Optional)</em> If you set up your <code class="docutils literal notranslate"><span class="pre">git</span></code> token in the last step, you will now be asked for you
+username and password. Paste the token in as your password:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>Username<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s1">&#39;https://github.com&#39;</span>:<span class="w"> </span>YOUR_GIT_USERNAME<span class="w"> </span><span class="c1"># not your email address</span>
+Password:<span class="w"> </span>YOUR_TOKEN<span class="w"> </span><span class="c1"># not your GitHub password</span>
+</code></pre></div>
+</div>
+<h3 id="step-6-install-success">Step 6: Install Success!<a class="headerlink" href="#step-6-install-success" title="Permalink to this heading">¶</a></h3>
+<p>To verify the installation was a success, type:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>leap<span class="w"> </span>--help
+</code></pre></div>
+</div>
+<p>After running <code class="docutils literal notranslate"><span class="pre">leap</span> <span class="pre">--help</span></code>, you should see:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>usage:<span class="w"> </span>leap<span class="w"> </span><span class="o">[</span>-r<span class="o">]</span><span class="w"> </span><span class="o">[</span>-c<span class="w"> </span>CONFIG<span class="o">]</span><span class="w"> </span><span class="o">[</span>-p<span class="w"> </span>PROVINCE<span class="o">]</span><span class="w"> </span><span class="o">[</span>-ma<span class="w"> </span>MAX_AGE<span class="o">]</span><span class="w"> </span><span class="o">[</span>-my<span class="w"> </span>MIN_YEAR<span class="o">]</span><span class="w"> </span><span class="o">[</span>-th<span class="w"> </span>TIME_HORIZON<span class="o">]</span>
+<span class="w">            </span><span class="o">[</span>-gt<span class="w"> </span>POPULATION_GROWTH_TYPE<span class="o">]</span><span class="w"> </span><span class="o">[</span>-nb<span class="w"> </span>NUM_BIRTHS_INITIAL<span class="o">]</span><span class="w"> </span><span class="o">[</span>-ip<span class="o">]</span><span class="w"> </span><span class="o">[</span>-o<span class="w"> </span>PATH_OUTPUT<span class="o">]</span><span class="w"> </span><span class="o">[</span>-f<span class="o">]</span>
+<span class="w">            </span><span class="o">[</span>-v<span class="o">]</span><span class="w"> </span><span class="o">[</span>-h<span class="o">]</span>
+
+options:
+<span class="w">    </span>-r,<span class="w"> </span>--run-simulation<span class="w">  </span>Run<span class="w"> </span>the<span class="w"> </span>simulation.
+
+ARGUMENTS:
+<span class="w">    </span>...
+</code></pre></div>
+</div>
+<p>Now that you’ve successfully installed the <code class="docutils literal notranslate"><span class="pre">LEAP</span></code> package, you can start using it. To get
+started, see the <a class="reference internal" href="cli/index.html"><span class="doc">Command-Line Interface</span></a> documentation.</p>
+<p>To get out of the virtual environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>deactivate
+</code></pre></div>
+</div>
+<h2 id="developers">Developers<a class="headerlink" href="#developers" title="Permalink to this heading">¶</a></h2>
+<p>If you want to develop this package, please see the installation instructions for
+developers: <a class="reference internal" href="dev/dev-installation.html"><span class="doc">Developer Installation</span></a>.</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">--version</span></code> does not return Python 3.10 or higher, ensure Python 3.10 is installed
+and that the <code class="docutils literal notranslate"><span class="pre">python3</span></code> command points to the correct version.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">pip</span></code> is not installed, you can install it manually:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>ensurepip<span class="w"> </span>--upgrade
+</code></pre></div>
+</div>
+</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        &#169; Copyright 2024, Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert.
+        
+    </div>
+  
+    Created using
+    <a href="https://www.sphinx-doc.org/" target="_blank" rel="noopener">Sphinx</a>
+    7.0.0.
+     and
+    <a href="https://github.com/jbms/sphinx-immaterial/" target="_blank" rel="noopener">Sphinx-Immaterial</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/resplab/leap/" target="_blank" rel="noopener" title="Source on github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.expand", "navigation.sections", "navigation.top", "search.share", "toc.follow", "toc.sticky", "content.tabs.link", "announce.dismiss", "content.code.annotate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+        <script src="_static/sphinx_immaterial_theme.32136f45f91ae6956.min.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+  </body>
+</html>

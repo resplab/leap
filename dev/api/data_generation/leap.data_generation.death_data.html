@@ -1,0 +1,2587 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="leap.data_generation.control_data.html">
+      
+      
+        <link rel="next" href="leap.data_generation.exacerbation_data.html">
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>Death Data - </title>
+      
+    
+    
+      
+        
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_immaterial_theme.c15b9f3ac86171432.min.css" />
+        <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+        <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#module-leap.data_generation.death_data" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../index.html" title="" class="md-header__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../../../_static/logo.png" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Death Data
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../index.html" title="" class="md-nav__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../../../_static/logo.png" alt="logo">
+    </a>
+    
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/cli/index.rst (reference label)"><span>Running LEAP</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../model/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/index.rst (reference label)"><span>Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/index.rst (reference label)"><span>Developers</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/dev/index.rst (reference label)"><span>Developers</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev-installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/dev-installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev-testing.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/dev-testing.rst (reference label)"><span>Testing</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev-docs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/dev-docs.rst (reference label)"><span>Sphinx Documentation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev-releases.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/dev-releases.rst (reference label)"><span>Releases</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/index.rst (reference label)"><span>API</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/dev/api/index.rst (reference label)"><span>API</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_1" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/index.rst (reference label)"><span>Data Generation</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_5_1" id="__nav_4_5_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/dev/api/data_generation/index.rst (reference label)"><span>Data Generation</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.data_generation.antibiotic_data.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.antibiotic_data.rst (reference label)"><span>Antibiotic Data</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.data_generation.birth_data.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.birth_data.rst (reference label)"><span>Birth Data</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.data_generation.control_data.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.control_data.rst (reference label)"><span>Control Data</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.death_data.rst (reference label)"><span>Death Data</span></span>
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.death_data.rst (reference label)"><span>Death Data</span></span>
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/dev/api/data_generation/leap.data_generation.death_data.rst (reference label)"><span>Death Data</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#module-leap.data_generation.death_data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data (Python module)"><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data module</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.calculate_life_expectancy" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.calculate_life_expectancy (Python function) — Determine the life expectancy for a person born in a given year."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>calculate_<wbr>life_<wbr>expectancy</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.calculate_life_expectancy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.calculate_life_expectancy-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.calculate_life_expectancy.life_table" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.calculate_life_expectancy.life_table (Python parameter) — A dataframe containing the probability of death for a single year, province and sex, for each age."><span>life_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.calculate_life_expectancy-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_prob_death_projected (Python function) — Given the (known) prob death for a past year, calculate the prob death in a future year."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>get_<wbr>prob_<wbr>death_<wbr>projected</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.get_prob_death_projected">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected.prob_death" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_prob_death_projected.prob_death (Python parameter) — The probability of death for year_initial, the last year that past data was collected, for a given age, sex, province, and projection scenario."><span>prob_<wbr>death</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected.year_initial" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_prob_death_projected.year_initial (Python parameter) — The initial year with a known probability of death."><span>year_<wbr>initial</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected.year" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_prob_death_projected.year (Python parameter) — The current year."><span>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected.beta_year" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_prob_death_projected.beta_year (Python parameter) — The beta parameter for the given sex, province, and projection scenario."><span>beta_<wbr>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year (Python function) — Get the life table for a single year."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>get_<wbr>projected_<wbr>life_<wbr>table_<wbr>single_<wbr>year</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.get_projected_life_table_single_year">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year.beta_year" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year.beta_year (Python parameter) — The beta parameter for the given year."><span>beta_<wbr>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year.life_table" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year.life_table (Python parameter) — A dataframe containing the projected probability of death for the starting year, for a given sex and province."><span>life_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year.year_initial" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year.year_initial (Python parameter) — The initial year with a known probability of death."><span>year_<wbr>initial</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year.year" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year.year (Python parameter) — The current year."><span>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year.sex" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year.sex (Python parameter) — One of M = male, F = female."><span>sex</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year.province" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year.province (Python parameter) — a string indicating the province abbreviation, e.g."><span>province</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff (Python function) — Calculate the difference between the projected life expectancy and desired life expectancy."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>compute_<wbr>life_<wbr>expectancy_<wbr>diff</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.compute_life_expectancy_diff">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.beta_year" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.beta_year (Python parameter) — The beta parameter for the given year."><span>beta_<wbr>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.life_table" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.life_table (Python parameter) — A dataframe containing the projected probability of death for the calibration year, for a given sex and province."><span>life_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.df_calibration" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.df_calibration (Python parameter) — A dataframe containing the life expectancy projections for the calibration years."><span>df_<wbr>calibration</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.sex" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.sex (Python parameter) — one of M = male, F = female."><span>sex</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.province" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.province (Python parameter) — A 2-letter string indicating the province abbreviation, e.g."><span>province</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.year_initial" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.year_initial (Python parameter) — The initial year with a known probability of death."><span>year_<wbr>initial</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.projection_scenario" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.projection_scenario (Python parameter) — The projection scenario, e.g."><span>projection_<wbr>scenario</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.load_past_death_data" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.load_past_death_data (Python function) — Load the past death data from the StatCan CSV file."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>load_<wbr>past_<wbr>death_<wbr>data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.load_past_death_data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.load_past_death_data-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.load_projected_death_data" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.load_projected_death_data (Python function) — Load the projected death data from the StatCan CSV files."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>load_<wbr>projected_<wbr>death_<wbr>data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.load_projected_death_data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.load_projected_death_data-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_death_data (Python function) — Load the projected death data from StatCan CSV file."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>get_<wbr>projected_<wbr>death_<wbr>data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.get_projected_death_data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data.past_life_table" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_death_data.past_life_table (Python parameter) — A dataframe containing the probability of death and the standard error for each year, province, age, and sex."><span>past_<wbr>life_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data.df_calibration" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_death_data.df_calibration (Python parameter) — A dataframe containing the life expectancy projections for the calibration years."><span>df_<wbr>calibration</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data.x0" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_death_data.x0 (Python parameter) — The initial guess for the beta parameter."><span>x0</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data.xtol" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_death_data.xtol (Python parameter) — The tolerance for the beta parameter."><span>xtol</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.generate_death_data" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.generate_death_data (Python function) — Generate the mortality data CSV."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>generate_<wbr>death_<wbr>data</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.data_generation.exacerbation_data.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.exacerbation_data.rst (reference label)"><span>Exacerbation Calibration Data</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.data_generation.incidence_calibration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.incidence_calibration.rst (reference label)"><span>Incidence Calibration</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.data_generation.migration_data.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.migration_data.rst (reference label)"><span>Migration Data</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.data_generation.occurrence_data.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.occurrence_data.rst (reference label)"><span>Occurrence Data</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.data_generation.occurrence_calibration_data.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.occurrence_calibration_data.rst (reference label)"><span>Occurrence Calibration Data</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.data_generation.prevalence_calibration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.prevalence_calibration.rst (reference label)"><span>Prevalence Calibration</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.data_generation.reassessment_data.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.reassessment_data.rst (reference label)"><span>Reassessment Data</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.data_generation.utility_data.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.utility_data.rst (reference label)"><span>Utility Data</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leap.data_generation.utils.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/data_generation/leap.data_generation.utils.rst (reference label)"><span>leap.<wbr>data_<wbr>generation.<wbr>utils module</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../leap/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/api/leap/index.rst (reference label)"><span>LEAP</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../references.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/references.rst (reference label)"><span>References</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/dev/api/data_generation/leap.data_generation.death_data.rst (reference label)"><span>Death Data</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#module-leap.data_generation.death_data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data (Python module)"><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data module</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.calculate_life_expectancy" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.calculate_life_expectancy (Python function) — Determine the life expectancy for a person born in a given year."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>calculate_<wbr>life_<wbr>expectancy</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.calculate_life_expectancy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.calculate_life_expectancy-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.calculate_life_expectancy.life_table" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.calculate_life_expectancy.life_table (Python parameter) — A dataframe containing the probability of death for a single year, province and sex, for each age."><span>life_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.calculate_life_expectancy-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_prob_death_projected (Python function) — Given the (known) prob death for a past year, calculate the prob death in a future year."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>get_<wbr>prob_<wbr>death_<wbr>projected</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.get_prob_death_projected">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected.prob_death" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_prob_death_projected.prob_death (Python parameter) — The probability of death for year_initial, the last year that past data was collected, for a given age, sex, province, and projection scenario."><span>prob_<wbr>death</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected.year_initial" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_prob_death_projected.year_initial (Python parameter) — The initial year with a known probability of death."><span>year_<wbr>initial</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected.year" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_prob_death_projected.year (Python parameter) — The current year."><span>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected.beta_year" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_prob_death_projected.beta_year (Python parameter) — The beta parameter for the given sex, province, and projection scenario."><span>beta_<wbr>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_prob_death_projected-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year (Python function) — Get the life table for a single year."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>get_<wbr>projected_<wbr>life_<wbr>table_<wbr>single_<wbr>year</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.get_projected_life_table_single_year">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year.beta_year" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year.beta_year (Python parameter) — The beta parameter for the given year."><span>beta_<wbr>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year.life_table" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year.life_table (Python parameter) — A dataframe containing the projected probability of death for the starting year, for a given sex and province."><span>life_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year.year_initial" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year.year_initial (Python parameter) — The initial year with a known probability of death."><span>year_<wbr>initial</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year.year" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year.year (Python parameter) — The current year."><span>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year.sex" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year.sex (Python parameter) — One of M = male, F = female."><span>sex</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year.province" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_life_table_single_year.province (Python parameter) — a string indicating the province abbreviation, e.g."><span>province</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_life_table_single_year-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff (Python function) — Calculate the difference between the projected life expectancy and desired life expectancy."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>compute_<wbr>life_<wbr>expectancy_<wbr>diff</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.compute_life_expectancy_diff">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.beta_year" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.beta_year (Python parameter) — The beta parameter for the given year."><span>beta_<wbr>year</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.life_table" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.life_table (Python parameter) — A dataframe containing the projected probability of death for the calibration year, for a given sex and province."><span>life_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.df_calibration" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.df_calibration (Python parameter) — A dataframe containing the life expectancy projections for the calibration years."><span>df_<wbr>calibration</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.sex" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.sex (Python parameter) — one of M = male, F = female."><span>sex</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.province" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.province (Python parameter) — A 2-letter string indicating the province abbreviation, e.g."><span>province</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.year_initial" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.year_initial (Python parameter) — The initial year with a known probability of death."><span>year_<wbr>initial</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff.projection_scenario" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.compute_life_expectancy_diff.projection_scenario (Python parameter) — The projection scenario, e.g."><span>projection_<wbr>scenario</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.compute_life_expectancy_diff-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.load_past_death_data" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.load_past_death_data (Python function) — Load the past death data from the StatCan CSV file."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>load_<wbr>past_<wbr>death_<wbr>data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.load_past_death_data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.load_past_death_data-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.load_projected_death_data" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.load_projected_death_data (Python function) — Load the projected death data from the StatCan CSV files."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>load_<wbr>projected_<wbr>death_<wbr>data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.load_projected_death_data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.load_projected_death_data-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_death_data (Python function) — Load the projected death data from StatCan CSV file."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>get_<wbr>projected_<wbr>death_<wbr>data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="leap.data_generation.death_data.get_projected_death_data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data-parameters" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Parameters</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data.past_life_table" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_death_data.past_life_table (Python parameter) — A dataframe containing the probability of death and the standard error for each year, province, age, and sex."><span>past_<wbr>life_<wbr>table</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data.df_calibration" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_death_data.df_calibration (Python parameter) — A dataframe containing the life expectancy projections for the calibration years."><span>df_<wbr>calibration</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data.x0" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_death_data.x0 (Python parameter) — The initial guess for the beta parameter."><span>x0</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data.xtol" class="md-nav__link">
+    
+      <span aria-label="Python parameter" class="objinfo-icon objinfo-icon__sub-data" title="Python parameter">p</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.get_projected_death_data.xtol (Python parameter) — The tolerance for the beta parameter."><span>xtol</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.get_projected_death_data-returns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Returns</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leap.data_generation.death_data.generate_death_data" class="md-nav__link">
+    
+      <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span>
+    
+    <span class="md-ellipsis">
+      <span title="leap.data_generation.death_data.generate_death_data (Python function) — Generate the mortality data CSV."><span>leap.<wbr>data_<wbr>generation.<wbr>death_<wbr>data.<wbr>generate_<wbr>death_<wbr>data</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                
+                
+                  
+
+
+  
+  
+
+<h1 id="death-data">Death Data<a class="headerlink" href="#death-data" title="Permalink to this heading">¶</a></h1>
+<p>To obtain the mortality data for each year, we used one table from <code class="docutils literal notranslate"><span class="pre">StatCan</span></code>:</p>
+<ol class="arabic">
+<li><p><strong>1996 - 2021:</strong></p>
+<p>For past years, we used
+<a class="reference external" href="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310083701">Table 13-10-00837-01 from StatCan</a>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">*.csv</span></code> file can be downloaded from here:
+<a class="reference external" href="https://www150.statcan.gc.ca/n1/tbl/csv/13100837-eng.zip">13100837-eng.zip</a>.</p>
+<p>and is saved as: <code class="docutils literal notranslate"><span class="pre">LEAP/leap/original_data/13100837.csv</span></code></p>
+</li>
+<li><p><strong>2021 - 2068:</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">StatCan</span></code> doesn’t provide annual projections for death probabilities, but does provide a
+projection for specific years (which we call calibration years) for the <code class="docutils literal notranslate"><span class="pre">M3</span></code> projection
+scenario only.
+For Canada, this is 2068, and for BC, 2043.
+The following equation can be used to obtain the probability of death in future years:</p>
+<div class="math notranslate nohighlight">
+\[\sigma^{-1}(p(s, a, y)) = \sigma^{-1}(p(s, a, y_0)) - e^{\beta(s)(y - y_0)}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\sigma^{-1}\)</span> is the inverse sigmoid function, also known as the logit function:</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\sigma^{-1}(p) = \ln\left(\dfrac{p}{1-p}\right)\]</div>
+<p>and:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(a\)</span> is the age</p></li>
+<li><p><span class="math notranslate nohighlight">\(s\)</span> is the sex</p></li>
+<li><p><span class="math notranslate nohighlight">\(y_0\)</span> is the year the collected data ends (in our case, 2020)</p></li>
+<li><p><span class="math notranslate nohighlight">\(y\)</span> is the future year</p></li>
+<li><p><span class="math notranslate nohighlight">\(p(s, a, y_0)\)</span> is the probability of death for a person of that age/sex in
+the year the collected data ends (in our case, 2020)</p></li>
+<li><p><span class="math notranslate nohighlight">\(p(s, a, y)\)</span> is the probability of death for a person of that age/sex in a future year.</p></li>
+</ul>
+<p>The parameter <span class="math notranslate nohighlight">\(\beta(s)\)</span> is unknown, and so we first need to calculate it.
+To do so, we set <span class="math notranslate nohighlight">\(y = \text{calibration_year}\)</span>, and use the <code class="docutils literal notranslate"><span class="pre">Brent</span></code> root-finding
+algorithm to optimize <span class="math notranslate nohighlight">\(\beta(s)\)</span> such that the life expectancy in the calibration year
+(which is known) matches the predicted life expectancy.</p>
+<p>Once we have found <span class="math notranslate nohighlight">\(\beta(s)\)</span>, we can use this formula to find the projected death
+probabilities.</p>
+</li>
+</ol>
+<p>To run the data generation for the mortality data:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>LEAP
+python3<span class="w"> </span>leap/data_generation/death_data.py
+</code></pre></div>
+</div>
+<p>This will update the following data file:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">leap/processed_data/life_table.csv</span></code></p></li>
+</ol>
+<h2 id="module-leap.data_generation.death_data"><span id="leap-data-generation-death-data-module"></span>leap.data_generation.death_data module<a class="headerlink" href="#module-leap.data_generation.death_data" title="Permalink to this heading">¶</a></h2>
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.data_generation.death_data.calculate_life_expectancy">
+<span class="sig-prename descclassname"><span class="pre">leap.data_generation.death_data.</span></span><span class="sig-name descname"><span class="pre">calculate_life_expectancy</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.calculate_life_expectancy.life_table" title="leap.data_generation.death_data.calculate_life_expectancy.life_table (Python parameter) — A dataframe containing the probability of death for a single year, province and sex, for each age."><span class="n"><span class="pre">life_table</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">float</span></span></span></span><a class="reference internal" href="../../../_modules/leap/data_generation/death_data.html#calculate_life_expectancy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.data_generation.death_data.calculate_life_expectancy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the life expectancy for a person born in a given year.</p>
+<p>The life expectancy can be calculated from the death probability using the formulae
+delineated here:
+<a class="reference external" href="https://www.ssa.gov/oact/HistEst/CohLifeTables/LifeTableDefinitions.pdf">Life Table Definitions</a></p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.data_generation.death_data.calculate_life_expectancy-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.data_generation.death_data.calculate_life_expectancy-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.data_generation.death_data.calculate_life_expectancy.life_table"><span class="n sig-name">life_table</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pandas.core.frame.DataFrame</span></span><a class="headerlink" href="#leap.data_generation.death_data.calculate_life_expectancy.life_table" title="Permalink to this definition">¶</a></dt><dd><p><p>A dataframe containing the probability of death for a single year,
+province and sex, for each age. Columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">age</span></code>: the integer age.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sex</span></code>: One of <code class="docutils literal notranslate"><span class="pre">M</span></code> = male, <code class="docutils literal notranslate"><span class="pre">F</span></code> = female.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">year</span></code>: the integer calendar year.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">province</span></code>: A string indicating the province abbreviation, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;BC&quot;</span></code>.</dt><dd><p>For all of Canada, set province to <code class="docutils literal notranslate"><span class="pre">&quot;CA&quot;</span></code>.</p>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prob_death</span></code>: the probability of death for a given age, province, sex, and year.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="leap.data_generation.death_data.calculate_life_expectancy-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.data_generation.death_data.calculate_life_expectancy-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>The life expectancy for a person born in the given year, in a given province,
+for a given sex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.data_generation.death_data.get_prob_death_projected">
+<span class="sig-prename descclassname"><span class="pre">leap.data_generation.death_data.</span></span><span class="sig-name descname"><span class="pre">get_prob_death_projected</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_prob_death_projected.prob_death" title="leap.data_generation.death_data.get_prob_death_projected.prob_death (Python parameter) — The probability of death for year_initial, the last year that past data was collected, for a given age, sex, province, and projection scenario."><span class="n"><span class="pre">prob_death</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">float</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_prob_death_projected.year_initial" title="leap.data_generation.death_data.get_prob_death_projected.year_initial (Python parameter) — The initial year with a known probability of death."><span class="n"><span class="pre">year_initial</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_prob_death_projected.year" title="leap.data_generation.death_data.get_prob_death_projected.year (Python parameter) — The current year."><span class="n"><span class="pre">year</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_prob_death_projected.beta_year" title="leap.data_generation.death_data.get_prob_death_projected.beta_year (Python parameter) — The beta parameter for the given sex, province, and projection scenario."><span class="n"><span class="pre">beta_year</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">float</span></span></span></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">float</span></span></span></span><a class="reference internal" href="../../../_modules/leap/data_generation/death_data.html#get_prob_death_projected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.data_generation.death_data.get_prob_death_projected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the (known) prob death for a past year, calculate the prob death in a future year.</p>
+<div class="math notranslate nohighlight">
+\[\sigma^{-1}(p(\text{sex}, \text{age}, \text{year})) =
+    \sigma^{-1}(p(\text{sex}, \text{age}, \text{year}_0)) -
+    \beta(\text{sex})(\text{year} - \text{year}_0)\]</div>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.data_generation.death_data.get_prob_death_projected-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.data_generation.death_data.get_prob_death_projected-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.data_generation.death_data.get_prob_death_projected.prob_death"><span class="n sig-name">prob_death</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">float</span></span><a class="headerlink" href="#leap.data_generation.death_data.get_prob_death_projected.prob_death" title="Permalink to this definition">¶</a></dt><dd><p>The probability of death for <code class="docutils literal notranslate"><span class="pre">year_initial</span></code>, the last year that past data was
+collected, for a given age, sex, province, and projection scenario.</p>
+</dd>
+<dt id="leap.data_generation.death_data.get_prob_death_projected.year_initial"><span class="n sig-name">year_initial</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">int</span></span><a class="headerlink" href="#leap.data_generation.death_data.get_prob_death_projected.year_initial" title="Permalink to this definition">¶</a></dt><dd><p>The initial year with a known probability of death. This is the last year
+that the past data was collected.</p>
+</dd>
+<dt id="leap.data_generation.death_data.get_prob_death_projected.year"><span class="n sig-name">year</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">int</span></span><a class="headerlink" href="#leap.data_generation.death_data.get_prob_death_projected.year" title="Permalink to this definition">¶</a></dt><dd><p>The current year.</p>
+</dd>
+<dt id="leap.data_generation.death_data.get_prob_death_projected.beta_year"><span class="n sig-name">beta_year</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">float</span></span><a class="headerlink" href="#leap.data_generation.death_data.get_prob_death_projected.beta_year" title="Permalink to this definition">¶</a></dt><dd><p>The beta parameter for the given sex, province, and projection scenario.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="leap.data_generation.death_data.get_prob_death_projected-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.data_generation.death_data.get_prob_death_projected-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>The projected probability of death for the current year.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.data_generation.death_data.get_projected_life_table_single_year">
+<span class="sig-prename descclassname"><span class="pre">leap.data_generation.death_data.</span></span><span class="sig-name descname"><span class="pre">get_projected_life_table_single_year</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_projected_life_table_single_year.beta_year" title="leap.data_generation.death_data.get_projected_life_table_single_year.beta_year (Python parameter) — The beta parameter for the given year."><span class="n"><span class="pre">beta_year</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">float</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_projected_life_table_single_year.life_table" title="leap.data_generation.death_data.get_projected_life_table_single_year.life_table (Python parameter) — A dataframe containing the projected probability of death for the starting year, for a given sex and province."><span class="n"><span class="pre">life_table</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_projected_life_table_single_year.year_initial" title="leap.data_generation.death_data.get_projected_life_table_single_year.year_initial (Python parameter) — The initial year with a known probability of death."><span class="n"><span class="pre">year_initial</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_projected_life_table_single_year.year" title="leap.data_generation.death_data.get_projected_life_table_single_year.year (Python parameter) — The current year."><span class="n"><span class="pre">year</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_projected_life_table_single_year.sex" title="leap.data_generation.death_data.get_projected_life_table_single_year.sex (Python parameter) — One of M = male, F = female."><span class="n"><span class="pre">sex</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_projected_life_table_single_year.province" title="leap.data_generation.death_data.get_projected_life_table_single_year.province (Python parameter) — a string indicating the province abbreviation, e.g."><span class="n"><span class="pre">province</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span></span></span></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></span><a class="reference internal" href="../../../_modules/leap/data_generation/death_data.html#get_projected_life_table_single_year"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.data_generation.death_data.get_projected_life_table_single_year" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the life table for a single year.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.data_generation.death_data.get_projected_life_table_single_year-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.data_generation.death_data.get_projected_life_table_single_year-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.data_generation.death_data.get_projected_life_table_single_year.beta_year"><span class="n sig-name">beta_year</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">float</span></span><a class="headerlink" href="#leap.data_generation.death_data.get_projected_life_table_single_year.beta_year" title="Permalink to this definition">¶</a></dt><dd><p>The beta parameter for the given year.</p>
+</dd>
+<dt id="leap.data_generation.death_data.get_projected_life_table_single_year.life_table"><span class="n sig-name">life_table</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pandas.core.frame.DataFrame</span></span><a class="headerlink" href="#leap.data_generation.death_data.get_projected_life_table_single_year.life_table" title="Permalink to this definition">¶</a></dt><dd><p><p>A dataframe containing the projected probability of death
+for the starting year, for a given sex and province. Columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">age</span></code>: the integer age.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sex</span></code>: One of <code class="docutils literal notranslate"><span class="pre">M</span></code> = male, <code class="docutils literal notranslate"><span class="pre">F</span></code> = female.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">year</span></code>: the starting calendar year.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">province</span></code>: a string indicating the province abbreviation, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;BC&quot;</span></code>.
+For all of Canada, set province to <code class="docutils literal notranslate"><span class="pre">&quot;CA&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prob_death</span></code>: the probability of death for a given age, province, sex, and year.</p></li>
+</ul>
+</p>
+</dd>
+<dt id="leap.data_generation.death_data.get_projected_life_table_single_year.year_initial"><span class="n sig-name">year_initial</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">int</span></span><a class="headerlink" href="#leap.data_generation.death_data.get_projected_life_table_single_year.year_initial" title="Permalink to this definition">¶</a></dt><dd><p>The initial year with a known probability of death. This is the last year
+that the past data was collected.</p>
+</dd>
+<dt id="leap.data_generation.death_data.get_projected_life_table_single_year.year"><span class="n sig-name">year</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">int</span></span><a class="headerlink" href="#leap.data_generation.death_data.get_projected_life_table_single_year.year" title="Permalink to this definition">¶</a></dt><dd><p>The current year.</p>
+</dd>
+<dt id="leap.data_generation.death_data.get_projected_life_table_single_year.sex"><span class="n sig-name">sex</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">str</span></span><a class="headerlink" href="#leap.data_generation.death_data.get_projected_life_table_single_year.sex" title="Permalink to this definition">¶</a></dt><dd><p>One of <code class="docutils literal notranslate"><span class="pre">M</span></code> = male, <code class="docutils literal notranslate"><span class="pre">F</span></code> = female.</p>
+</dd>
+<dt id="leap.data_generation.death_data.get_projected_life_table_single_year.province"><span class="n sig-name">province</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">str</span></span><a class="headerlink" href="#leap.data_generation.death_data.get_projected_life_table_single_year.province" title="Permalink to this definition">¶</a></dt><dd><p>a string indicating the province abbreviation, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;BC&quot;</span></code>.
+For all of Canada, set province to <code class="docutils literal notranslate"><span class="pre">&quot;CA&quot;</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="leap.data_generation.death_data.get_projected_life_table_single_year-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.data_generation.death_data.get_projected_life_table_single_year-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>A dataframe containing the projected probability of death for the given year,
+sex, and province.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.data_generation.death_data.compute_life_expectancy_diff">
+<span class="sig-prename descclassname"><span class="pre">leap.data_generation.death_data.</span></span><span class="sig-name descname"><span class="pre">compute_life_expectancy_diff</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.compute_life_expectancy_diff.beta_year" title="leap.data_generation.death_data.compute_life_expectancy_diff.beta_year (Python parameter) — The beta parameter for the given year."><span class="n"><span class="pre">beta_year</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">numpy.ndarray</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.compute_life_expectancy_diff.life_table" title="leap.data_generation.death_data.compute_life_expectancy_diff.life_table (Python parameter) — A dataframe containing the projected probability of death for the calibration year, for a given sex and province."><span class="n"><span class="pre">life_table</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.compute_life_expectancy_diff.df_calibration" title="leap.data_generation.death_data.compute_life_expectancy_diff.df_calibration (Python parameter) — A dataframe containing the life expectancy projections for the calibration years."><span class="n"><span class="pre">df_calibration</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.compute_life_expectancy_diff.sex" title="leap.data_generation.death_data.compute_life_expectancy_diff.sex (Python parameter) — one of M = male, F = female."><span class="n"><span class="pre">sex</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.compute_life_expectancy_diff.province" title="leap.data_generation.death_data.compute_life_expectancy_diff.province (Python parameter) — A 2-letter string indicating the province abbreviation, e.g."><span class="n"><span class="pre">province</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.compute_life_expectancy_diff.year_initial" title="leap.data_generation.death_data.compute_life_expectancy_diff.year_initial (Python parameter) — The initial year with a known probability of death."><span class="n"><span class="pre">year_initial</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">int</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.compute_life_expectancy_diff.projection_scenario" title="leap.data_generation.death_data.compute_life_expectancy_diff.projection_scenario (Python parameter) — The projection scenario, e.g."><span class="n"><span class="pre">projection_scenario</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span></span></span></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">numpy.ndarray</span></span></span></span><a class="reference internal" href="../../../_modules/leap/data_generation/death_data.html#compute_life_expectancy_diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.data_generation.death_data.compute_life_expectancy_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the difference between the projected life expectancy and desired life expectancy.</p>
+<p>This function is passed to the <code class="docutils literal notranslate"><span class="pre">scipy.optimize.brentq</span></code> function. We want to find <code class="docutils literal notranslate"><span class="pre">beta_year</span></code>
+such that the projected life expectancy is as close as possible to the desired life expectancy.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.data_generation.death_data.compute_life_expectancy_diff-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.data_generation.death_data.compute_life_expectancy_diff-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.data_generation.death_data.compute_life_expectancy_diff.beta_year"><span class="n sig-name">beta_year</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">numpy.ndarray</span></span><a class="headerlink" href="#leap.data_generation.death_data.compute_life_expectancy_diff.beta_year" title="Permalink to this definition">¶</a></dt><dd><p>The beta parameter for the given year. The <code class="docutils literal notranslate"><span class="pre">scipy.optimize.leastsq</span></code> function
+requires that this be a 1D array, but we only have a single parameter.</p>
+</dd>
+<dt id="leap.data_generation.death_data.compute_life_expectancy_diff.life_table"><span class="n sig-name">life_table</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pandas.core.frame.DataFrame</span></span><a class="headerlink" href="#leap.data_generation.death_data.compute_life_expectancy_diff.life_table" title="Permalink to this definition">¶</a></dt><dd><p><p>A dataframe containing the projected probability of death
+for the calibration year, for a given sex and province. Columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">age</span></code>: the integer age.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sex</span></code>: one of <code class="docutils literal notranslate"><span class="pre">M</span></code> = male, <code class="docutils literal notranslate"><span class="pre">F</span></code> = female.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">year</span></code>: the calibration calendar year.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">province</span></code>: a 2-letter string indicating the province abbreviation, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;BC&quot;</span></code>.
+For all of Canada, set province to <code class="docutils literal notranslate"><span class="pre">&quot;CA&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prob_death</span></code>: the probability of death for a given age, province, sex, and year.</p></li>
+</ul>
+</p>
+</dd>
+<dt id="leap.data_generation.death_data.compute_life_expectancy_diff.df_calibration"><span class="n sig-name">df_calibration</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pandas.core.frame.DataFrame</span></span><a class="headerlink" href="#leap.data_generation.death_data.compute_life_expectancy_diff.df_calibration" title="Permalink to this definition">¶</a></dt><dd><p><p>A dataframe containing the life expectancy projections for the calibration
+years. Columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">year</span></code>: The calendar year. Range <code class="docutils literal notranslate"><span class="pre">[1988,</span> <span class="pre">2073]</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">province</span></code>: A 2-letter string indicating the province abbreviation, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;BC&quot;</span></code>.
+For all of Canada, set province to <code class="docutils literal notranslate"><span class="pre">&quot;CA&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sex</span></code>: One of <code class="docutils literal notranslate"><span class="pre">F</span></code> = female, <code class="docutils literal notranslate"><span class="pre">M</span></code> = male.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">projection_scenario</span></code>: The projection scenario, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;M3&quot;</span></code>.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">mortality_scenario</span></code>: The mortality scenario. One of:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">LM</span></code>: Low mortality</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MM</span></code>: Medium mortality</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HM</span></code>: High mortality</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">life_expectancy</span></code>: The life expectancy in years for the given year, province,
+sex, projection scenario, and mortality scenario.</p></li>
+</ul>
+</p>
+</dd>
+<dt id="leap.data_generation.death_data.compute_life_expectancy_diff.sex"><span class="n sig-name">sex</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">str</span></span><a class="headerlink" href="#leap.data_generation.death_data.compute_life_expectancy_diff.sex" title="Permalink to this definition">¶</a></dt><dd><p>one of <code class="docutils literal notranslate"><span class="pre">M</span></code> = male, <code class="docutils literal notranslate"><span class="pre">F</span></code> = female.</p>
+</dd>
+<dt id="leap.data_generation.death_data.compute_life_expectancy_diff.province"><span class="n sig-name">province</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">str</span></span><a class="headerlink" href="#leap.data_generation.death_data.compute_life_expectancy_diff.province" title="Permalink to this definition">¶</a></dt><dd><p>A 2-letter string indicating the province abbreviation, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;BC&quot;</span></code>.
+For all of Canada, set province to <code class="docutils literal notranslate"><span class="pre">&quot;CA&quot;</span></code>.</p>
+</dd>
+<dt id="leap.data_generation.death_data.compute_life_expectancy_diff.year_initial"><span class="n sig-name">year_initial</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">int</span></span><a class="headerlink" href="#leap.data_generation.death_data.compute_life_expectancy_diff.year_initial" title="Permalink to this definition">¶</a></dt><dd><p>The initial year with a known probability of death. This is the last year
+that the past data was collected.</p>
+</dd>
+<dt id="leap.data_generation.death_data.compute_life_expectancy_diff.projection_scenario"><span class="n sig-name">projection_scenario</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">str</span></span><a class="headerlink" href="#leap.data_generation.death_data.compute_life_expectancy_diff.projection_scenario" title="Permalink to this definition">¶</a></dt><dd><p>The projection scenario, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;M3&quot;</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="leap.data_generation.death_data.compute_life_expectancy_diff-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.data_generation.death_data.compute_life_expectancy_diff-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p>The difference between the projected life expectancy of the calibration year
+and the desired life expectancy, for each of the calibration years.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.data_generation.death_data.load_past_death_data">
+<span class="sig-prename descclassname"><span class="pre">leap.data_generation.death_data.</span></span><span class="sig-name descname"><span class="pre">load_past_death_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></span><a class="reference internal" href="../../../_modules/leap/data_generation/death_data.html#load_past_death_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.data_generation.death_data.load_past_death_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the past death data from the <code class="docutils literal notranslate"><span class="pre">StatCan</span></code> CSV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.data_generation.death_data.load_past_death_data-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.data_generation.death_data.load_past_death_data-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p><p>A dataframe containing the probability of death and the standard error
+for each year, province, age, and sex.
+Columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">year</span></code>: The integer calendar year.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">province</span></code>: a 2-letter string indicating the province abbreviation, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;BC&quot;</span></code>.
+For all of Canada, set province to <code class="docutils literal notranslate"><span class="pre">&quot;CA&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sex</span></code>: One of <code class="docutils literal notranslate"><span class="pre">M</span></code> = male, <code class="docutils literal notranslate"><span class="pre">F</span></code> = female.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">age</span></code>: The integer age.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prob_death</span></code>: The probability that a person of the given age, sex, and province
+will die in the given year.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">se</span></code>: The standard error of the probability of death.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.data_generation.death_data.load_projected_death_data">
+<span class="sig-prename descclassname"><span class="pre">leap.data_generation.death_data.</span></span><span class="sig-name descname"><span class="pre">load_projected_death_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></span><a class="reference internal" href="../../../_modules/leap/data_generation/death_data.html#load_projected_death_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.data_generation.death_data.load_projected_death_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the projected death data from the <code class="docutils literal notranslate"><span class="pre">StatCan</span></code> CSV files.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Statistics</span> <span class="pre">Canada</span></code> provides two tables with life expectancy projections:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www150.statcan.gc.ca/n1/pub/91-620-x/91-620-x2025001-eng.html">Table 3.2 (Canada)</a></p></li>
+<li><p><a class="reference external" href="https://www150.statcan.gc.ca/n1/pub/91-620-x/91-620-x2025002-eng.html">Table 5.2 (Provinces)</a></p></li>
+</ul>
+<p>This data is only available for selected years.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.data_generation.death_data.load_projected_death_data-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.data_generation.death_data.load_projected_death_data-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><p><p>A dataframe containing the life expectancy from selected calibration years from
+<code class="docutils literal notranslate"><span class="pre">Statistics</span> <span class="pre">Canada</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">year</span> <span class="pre">(int)</span></code>: The calendar year. Range <code class="docutils literal notranslate"><span class="pre">[1988,</span> <span class="pre">2073]</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">province</span> <span class="pre">(str)</span></code>: A 2-letter string indicating the province abbreviation, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;BC&quot;</span></code>.
+For all of Canada, set province to <code class="docutils literal notranslate"><span class="pre">&quot;CA&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sex</span> <span class="pre">(str)</span></code>: One of <code class="docutils literal notranslate"><span class="pre">F</span></code> = female, <code class="docutils literal notranslate"><span class="pre">M</span></code> = male.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">projection_scenario</span> <span class="pre">(str)</span></code>: The projection scenario, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;M3&quot;</span></code>.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">mortality_scenario</span> <span class="pre">(str)</span></code>: The mortality scenario. One of:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">LM</span></code>: Low mortality</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MM</span></code>: Medium mortality</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HM</span></code>: High mortality</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">life_expectancy</span> <span class="pre">(float)</span></code>: The life expectancy in years for the given year, province,
+sex, projection scenario, and mortality scenario.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.data_generation.death_data.get_projected_death_data">
+<span class="sig-prename descclassname"><span class="pre">leap.data_generation.death_data.</span></span><span class="sig-name descname"><span class="pre">get_projected_death_data</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_projected_death_data.past_life_table" title="leap.data_generation.death_data.get_projected_death_data.past_life_table (Python parameter) — A dataframe containing the probability of death and the standard error for each year, province, age, and sex."><span class="n"><span class="pre">past_life_table</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_projected_death_data.df_calibration" title="leap.data_generation.death_data.get_projected_death_data.df_calibration (Python parameter) — A dataframe containing the life expectancy projections for the calibration years."><span class="n"><span class="pre">df_calibration</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_projected_death_data" title="leap.data_generation.death_data.get_projected_death_data.projection_scenario (Python parameter)"><span class="n"><span class="pre">projection_scenario</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">str</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="s1">&#39;M3&#39;</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_projected_death_data.x0" title="leap.data_generation.death_data.get_projected_death_data.x0 (Python parameter) — The initial guess for the beta parameter."><span class="n"><span class="pre">x0</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">float</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="o">-</span><span class="mf">0.02</span></code></em>, </span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.get_projected_death_data.xtol" title="leap.data_generation.death_data.get_projected_death_data.xtol (Python parameter) — The tolerance for the beta parameter."><span class="n"><span class="pre">xtol</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">float</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="mf">1e-05</span></code></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">pandas.core.frame.DataFrame</span></span></span></span><a class="reference internal" href="../../../_modules/leap/data_generation/death_data.html#get_projected_death_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.data_generation.death_data.get_projected_death_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the projected death data from <code class="docutils literal notranslate"><span class="pre">StatCan</span></code> CSV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd" id="leap.data_generation.death_data.get_projected_death_data-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#leap.data_generation.death_data.get_projected_death_data-parameters" title="Permalink to this headline">¶</a></dt>
+<dd class="field-odd"><dl class="simple api-field highlight">
+<dt id="leap.data_generation.death_data.get_projected_death_data.past_life_table"><span class="n sig-name">past_life_table</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pandas.core.frame.DataFrame</span></span><a class="headerlink" href="#leap.data_generation.death_data.get_projected_death_data.past_life_table" title="Permalink to this definition">¶</a></dt><dd><p><p>A dataframe containing the probability of death and the standard error
+for each year, province, age, and sex. Columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">year</span></code>: the integer calendar year.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">province</span></code>: A 2-letter string indicating the province abbreviation, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;BC&quot;</span></code>.
+For all of Canada, set province to <code class="docutils literal notranslate"><span class="pre">&quot;CA&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sex</span></code>: One of <code class="docutils literal notranslate"><span class="pre">M</span></code> = male, <code class="docutils literal notranslate"><span class="pre">F</span></code> = female.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">age</span></code>: the integer age.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prob_death</span></code>: the probability of death.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">se</span></code>: the standard error of the probability of death.</p></li>
+</ul>
+</p>
+</dd>
+<dt id="leap.data_generation.death_data.get_projected_death_data.df_calibration"><span class="n sig-name">df_calibration</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">pandas.core.frame.DataFrame</span></span><a class="headerlink" href="#leap.data_generation.death_data.get_projected_death_data.df_calibration" title="Permalink to this definition">¶</a></dt><dd><p><p>A dataframe containing the life expectancy projections for the calibration
+years. Columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">year</span></code>: The calendar year. Range <code class="docutils literal notranslate"><span class="pre">[1988,</span> <span class="pre">2073]</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">province</span></code>: A 2-letter string indicating the province abbreviation, e.g.
+<code class="docutils literal notranslate"><span class="pre">&quot;BC&quot;</span></code>. For all of Canada, set province to <code class="docutils literal notranslate"><span class="pre">&quot;CA&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sex</span></code>: One of <code class="docutils literal notranslate"><span class="pre">F</span></code> = female, <code class="docutils literal notranslate"><span class="pre">M</span></code> = male.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">projection_scenario</span></code>: The projection scenario, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;M3&quot;</span></code>.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">mortality_scenario</span></code>: The mortality scenario. One of:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">LM</span></code>: Low mortality</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MM</span></code>: Medium mortality</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HM</span></code>: High mortality</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">life_expectancy</span></code>: The life expectancy in years for the given year, province,
+sex, projection scenario, and mortality scenario.</p></li>
+</ul>
+</p>
+</dd>
+<dt id="leap.data_generation.death_data.get_projected_death_data.x0"><span class="n sig-name">x0</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">float</span></span><span class="w">   </span><span class="o">=</span><span class="w">   </span><code class="code python default_value docutils literal highlight highlight-python"><span class="o">-</span><span class="mf">0.02</span></code><a class="headerlink" href="#leap.data_generation.death_data.get_projected_death_data.x0" title="Permalink to this definition">¶</a></dt><dd><p>The initial guess for the beta parameter.</p>
+</dd>
+<dt id="leap.data_generation.death_data.get_projected_death_data.xtol"><span class="n sig-name">xtol</span><span class="p">:</span><span class="w">   </span><span class="n"><span class="desctype">float</span></span><span class="w">   </span><span class="o">=</span><span class="w">   </span><code class="code python default_value docutils literal highlight highlight-python"><span class="mf">1e-05</span></code><a class="headerlink" href="#leap.data_generation.death_data.get_projected_death_data.xtol" title="Permalink to this definition">¶</a></dt><dd><p>The tolerance for the beta parameter.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even" id="leap.data_generation.death_data.get_projected_death_data-returns">Returns<span class="colon">:</span><a class="headerlink" href="#leap.data_generation.death_data.get_projected_death_data-returns" title="Permalink to this headline">¶</a></dt>
+<dd class="field-even"><p><p>A dataframe containing the predicted probability of death and the standard error
+for each year, province, age, and sex.
+Columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">year</span></code>: The integer calendar year.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">province</span></code>: A 2-letter string indicating the province abbreviation, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;BC&quot;</span></code>.
+For all of Canada, set province to <code class="docutils literal notranslate"><span class="pre">&quot;CA&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sex</span></code>: One of <code class="docutils literal notranslate"><span class="pre">M</span></code> = male, <code class="docutils literal notranslate"><span class="pre">F</span></code> = female.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">age</span></code>: The integer age.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prob_death</span></code>: The probability that a person of the given age, sex, and province
+will die in the given year.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">se</span></code>: The standard error of the probability of death.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="leap.data_generation.death_data.generate_death_data">
+<span class="sig-prename descclassname"><span class="pre">leap.data_generation.death_data.</span></span><span class="sig-name descname"><span class="pre">generate_death_data</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#leap.data_generation.death_data.generate_death_data" title="leap.data_generation.death_data.generate_death_data.to_csv (Python parameter)"><span class="n"><span class="pre">to_csv</span></span></a><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="desctype"><span class="pre">bool</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><code class="code python default_value docutils literal highlight highlight-python"><span class="kc">True</span></code></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.core.frame.DataFrame</span></span></span></span><a class="reference internal" href="../../../_modules/leap/data_generation/death_data.html#generate_death_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#leap.data_generation.death_data.generate_death_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the mortality data CSV.</p>
+</dd></dl>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        &#169; Copyright 2024, Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert.
+        
+    </div>
+  
+    Created using
+    <a href="https://www.sphinx-doc.org/" target="_blank" rel="noopener">Sphinx</a>
+    7.0.0.
+     and
+    <a href="https://github.com/jbms/sphinx-immaterial/" target="_blank" rel="noopener">Sphinx-Immaterial</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/resplab/leap/" target="_blank" rel="noopener" title="Source on github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.sections", "navigation.top", "search.share", "toc.follow", "toc.sticky", "content.tabs.link", "announce.dismiss", "content.code.annotate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+        <script src="../../../_static/sphinx_immaterial_theme.32136f45f91ae6956.min.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script id="MathJax-script" src="../../../_static/mathjax/tex-mml-chtml.js"></script>
+    
+  </body>
+</html>
