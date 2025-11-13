@@ -2,5 +2,5 @@ References
 ==========
 
 .. bibliography:: ./_static/bibliography.bib
-   :style: plain
+   :style: authoryear
    :all:

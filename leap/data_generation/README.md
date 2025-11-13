@@ -125,12 +125,14 @@ population change to get the net number of people who migrated:
 delta_n = n - n_prev * (1 - prob_death)
 ```
 
+<!--
 **TODO**: The next part of the calculation is incorrect. `delta_N` is the change in population due
 to migration. This model currently assumes that if `delta_N < 0`, 100% of migration is
 emigration, and if `delta_N > 0`, 100% of migration is immigration. This has
 led to the data being very inaccurate (for example, it appears as though people in their
 90s are emigrating a lot and people in their 20s are not). This will be remedied in a
 separate PR.
+-->
 
 
 To run the data generation for the migration data:
@@ -258,11 +260,11 @@ BC Ministry of Health. This data had the following columns:
 | `fiscal_year` | `str` | format "XXXX[A-z0-9]" |
 | `age_group_desc` | `str` | format "X-Y years" or "<1 year" |
 | `gender` | `str` | "M" or "F" |
-| `incidence_numerator` | `float` | TODO |
-| `prevalence_numerator` | `float` | TODO |
+| `incidence_numerator` | `float` | <!--TODO--> |
+| `prevalence_numerator` | `float` | <!--TODO--> |
 | `pop` | `int` | the number of people for a given age group, gender, and year |
 
-TODO: prevalence / incidence calculation
+<!-- TODO: prevalence / incidence calculation -->
 
 This data was then processed and saved as `leap/original_data/private/asthma_inc_prev.csv`.
 
@@ -519,7 +521,7 @@ This is a private dataset, saved as ``df_EBA.csv``. To access the dataset, pleas
       <code class="notranslate">int</code>
       </td>
       <td>
-      1 = yes, 2 = no
+      1 = yes, 2 = no, 3 = unknown
       </td>
     </tr>
     <tr>
@@ -528,7 +530,7 @@ This is a private dataset, saved as ``df_EBA.csv``. To access the dataset, pleas
       <code class="notranslate">int</code>
       </td>
       <td>
-      1 = yes, 2 = no
+      1 = yes, 2 = no, 3 = unknown
       </td>
     </tr>
     <tr>
@@ -537,7 +539,8 @@ This is a private dataset, saved as ``df_EBA.csv``. To access the dataset, pleas
       <code class="notranslate">int</code>
       </td>
       <td>
-      1 = yes, 2 = no
+      Has the patient had to use an inhaler since the last visit? <br>
+      1 = yes, 2 = no, 3 = unknown
       </td>
     </tr>
     <tr>
@@ -546,7 +549,7 @@ This is a private dataset, saved as ``df_EBA.csv``. To access the dataset, pleas
       <code class="notranslate">int</code>
       </td>
       <td>
-      1 = yes, 2 = no
+      1 = yes, 2 = no, 3 = unknown
       </td>
     </tr>
     <tr>
@@ -555,7 +558,8 @@ This is a private dataset, saved as ``df_EBA.csv``. To access the dataset, pleas
       <code class="notranslate">int</code>
       </td>
       <td>
-      TODO
+      Has the patient had an asthma exacerbation since the last visit? <br>
+      1 = yes, 2 = no, 3 = unknown
       </td>
     </tr>
     <tr>
@@ -599,9 +603,12 @@ This is a private dataset, saved as ``df_EBA.csv``. To access the dataset, pleas
       <td>
       <code class="notranslate">int</code>
       </td>
-      <td>
-      1 = TODO, 2 = TODO, 3 = TODO
-      </td>
+        <td>
+        The time since diagnosis is broken into 3 categories: <br>
+        1 = 0 - 4.93 years <br>
+        2 = 5.00 - 19.95 years <br>
+        3 = 20.06 - 74.20 years
+        </td>
     </tr>
   </tbody>
 </table>

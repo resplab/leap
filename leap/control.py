@@ -141,11 +141,11 @@ class Control:
             >>> control_levels.as_array()
             array([0., 0., 1.])
             >>> control_levels.fully_controlled
-            np.float64(0.0)
+            0.0
             >>> control_levels.partially_controlled
-            np.float64(0.0)
+            0.0
             >>> control_levels.uncontrolled
-            np.float64(1.0)
+            1.0
 
         """
         if initial:

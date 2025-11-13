@@ -15,21 +15,23 @@ class Utility:
     Attributes:
         parameters: A dictionary containing the following keys:
 
-            * ``βcontrol``: A vector of 3 parameters to be multiplied by the control levels, i.e.
+            * ``βcontrol``: A vector of 3 parameters giving the disutility from asthma control levels:
 
               .. code-block:: python
 
-                βcontrol1 * fully_controlled +
-                βcontrol2 * partially_controlled +
-                βcontrol3 * uncontrolled
+                disutility = \
+                    βcontrol[0] * fully_controlled + \
+                    βcontrol[1] * partially_controlled + \
+                    βcontrol[2] * uncontrolled
 
-            * ``βexac_sev_hist``: A vector of 4 parameters to be multiplied by the exacerbation
-              severity history, i.e.
+            * ``βexac_sev_hist``: A vector of 4 parameters giving the disutility for an asthma
+              exacerbation of different severity levels:
 
               .. code-block:: python
-              
-                βexac_sev_hist1 * mild + βexac_sev_hist2 * moderate +
-                βexac_sev_hist3 * severe + βexac_sev_hist4 * very_severe
+          
+                disutility = \
+                    βexac_sev_hist[0] * n_mild + βexac_sev_hist[1] * n_moderate + \
+                    βexac_sev_hist[2] * n_severe + βexac_sev_hist[3] * n_very_severe
 
         table: A grouped data frame grouped by age and sex, containing information about
             EuroQol Group's quality of life metric called the EQ-5D.
@@ -67,21 +69,23 @@ class Utility:
     def parameters(self) -> dict:
         """A dictionary containing the following keys:
 
-        * ``βcontrol``: A vector of 3 parameters to be multiplied by the control levels, i.e.
+        * ``βcontrol``: A vector of 3 parameters giving the disutility from asthma control levels:
 
           .. code-block:: python
 
-            βcontrol1 * fully_controlled +
-            βcontrol2 * partially_controlled +
-            βcontrol3 * uncontrolled
+            disutility = \
+                βcontrol[0] * fully_controlled + \
+                βcontrol[1] * partially_controlled + \
+                βcontrol[2] * uncontrolled
 
-        * ``βexac_sev_hist``: A vector of 4 parameters to be multiplied by the exacerbation
-          severity history, i.e.
+        * ``βexac_sev_hist``: A vector of 4 parameters giving the disutility for an asthma
+          exacerbation of different severity levels:
 
           .. code-block:: python
           
-            βexac_sev_hist1 * mild + βexac_sev_hist2 * moderate +
-            βexac_sev_hist3 * severe + βexac_sev_hist4 * very_severe
+            disutility = \
+                βexac_sev_hist[0] * n_mild + βexac_sev_hist[1] * n_moderate + \
+                βexac_sev_hist[2] * n_severe + βexac_sev_hist[3] * n_very_severe
         """
         return self._parameters
     
@@ -103,9 +107,16 @@ class Utility:
         return grouped_df
 
     def compute_utility(self, agent: Agent) -> float:
-        """Compute the utility for the current year due to asthma exacerbations and control.
+        r"""Compute the utility for the current year due to asthma exacerbations and control.
 
         If the agent (person) doesn't have asthma, return the baseline utility.
+        Otherwise, return the utility:
+
+        .. math::
+
+            u = u_{\text{baseline}} - 
+                \sum_{S=1}^{4} d_E(S) \cdot n_E(S) - 
+                \sum_{L=1}^{3} d_C(L) \cdot C(L)
 
         Args:
             agent: A person in the model.
@@ -114,10 +125,10 @@ class Utility:
         if not agent.has_asthma:
             return baseline
         else:
-            disutility_exac = np.sum(
-                agent.exacerbation_severity_history.current_year * self.parameters["βexac_sev_hist"]
+            disutility_exac = np.dot(
+                agent.exacerbation_severity_history.current_year, self.parameters["βexac_sev_hist"]
             )
-            disutility_control = np.sum(
-                agent.control_levels.as_array() * self.parameters["βcontrol"]
+            disutility_control = np.dot(
+                agent.control_levels.as_array(), self.parameters["βcontrol"]
             )
             return max(0, (baseline - disutility_exac - disutility_control))

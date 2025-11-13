@@ -1,7 +1,7 @@
 {
     "simulation": {
         "min_year": 2024,
-        "time_horizon": 19,
+        "time_horizon": 2,
         "province": "BC",
         "population_growth_type": "LG",
         "num_births_initial": 100,
@@ -65,10 +65,6 @@
             "β0_σ": 1e-07
         },
         "parameters": {
-            "βage": 0.0,
-            "βsex": 0.0,
-            "β0_calibration": 0.0,
-            "βcontrol": 0.0,
             "βcontrol_C": -1.6712824655642424,
             "βcontrol_PC": -0.978135285004297,
             "βcontrol_UC": -0.5726701768961326

@@ -82,10 +82,6 @@ class Exacerbation:
 
         * ``β0``: float, a constant parameter, randomly selected from a normal distribution
           with mean ``β0_μ`` and standard deviation ``β0_σ``. See ``hyperparameters``.
-        * ``β0_calibration``: float, the parameter for the calibration term.
-        * ``βage``: float, the parameter for the age term.
-        * ``βsex``: float, the parameter for the sex term.
-        * ``βcontrol``: float, the parameter for the asthma control term.
         * ``βcontrol_C``: float, the parameter for the controlled asthma term.
         * ``βcontrol_PC``: float, the parameter for the partially-controlled asthma term.
         * ``βcontrol_UC``: float, the parameter for the uncontrolled asthma term.
@@ -97,7 +93,7 @@ class Exacerbation:
     @parameters.setter
     def parameters(self, parameters: dict):
         KEYS = [
-            "β0_calibration", "βage", "βsex", "βcontrol", "βcontrol_C", "βcontrol_PC", "βcontrol_UC"
+            "βcontrol_C", "βcontrol_PC", "βcontrol_UC"
         ]
         for key in KEYS:
             if key not in parameters:
@@ -106,12 +102,17 @@ class Exacerbation:
 
     @property
     def calibration_table(self) -> DataFrameGroupBy:
-        """A dataframe grouped by year and sex, with the following columns:
+        r"""A dataframe grouped by year and sex, with the following columns:
 
-        * ``year``: integer year.
-        * ``sex``: 1 = male, 0 = female.
-        * ``age``: integer age.
-        * ``calibrator_multiplier``: float, TODO.
+        * ``year (int)``: calendar year.
+        * ``sex (str)``: ``F`` = female, ``M`` = male.
+        * ``age (int)``: integer age.
+        * ``calibrator_multiplier (float)``: A multiplier used to calibrate the exacerbation rate;
+          used to compute the :math:`\lambda` parameter for the Poisson distribution:
+        
+        .. math::
+
+            \lambda = \alpha \cdot e^{\beta_0} \prod_{i=1}^3 e^{\beta_i c_i} 
 
         See ``exacerbation_calibration.csv``.
         """
@@ -129,7 +130,7 @@ class Exacerbation:
         )
 
     def load_exacerbation_calibration(self, province: str) -> DataFrameGroupBy:
-        """Load the exacerbation calibration table.
+        r"""Load the exacerbation calibration table.
 
         Args:
             province: A string indicating the province abbreviation, e.g. ``"BC"``.
@@ -140,10 +141,15 @@ class Exacerbation:
 
             Each entry is a dataframe with the following columns:
 
-            * ``year``: integer year.
-            * ``sex``: 1 = male, 0 = female.
-            * ``age``: integer age.
-            * ``calibrator_multiplier``: float, TODO.
+            * ``year (int)``: calendar year.
+            * ``sex (str)``: ``F`` = female, ``M`` = male.
+            * ``age (int)``: integer age.
+            * ``calibrator_multiplier (float)``: A multiplier used to calibrate the exacerbation rate;
+              used to compute the :math:`\lambda` parameter for the Poisson distribution:
+        
+            .. math::
+
+                \lambda = \alpha \cdot e^{\beta_0} \prod_{i=1}^3 e^{\beta_i c_i} 
         """
 
         df = pd.read_csv(
@@ -176,7 +182,7 @@ class Exacerbation:
             initial: If this is the initial computation.
 
         Returns:
-            The number of asthma exacerbations.
+            The number of asthma exacerbations in the given year.
         """
 
         if agent is not None:
@@ -201,9 +207,6 @@ class Exacerbation:
 
         μ = (
             self.parameters["β0"] +
-            int(not initial) * self.parameters["β0_calibration"] +
-            age * self.parameters["βage"] +
-            int(sex) * self.parameters["βsex"] +
             control_levels.uncontrolled * self.parameters["βcontrol_UC"] +
             control_levels.partially_controlled * self.parameters["βcontrol_PC"] +
             control_levels.fully_controlled * self.parameters["βcontrol_C"] +

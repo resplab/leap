@@ -32,8 +32,9 @@ class OutcomeTable:
 
         Args:
             column: The column to increment.
-            amount: The amount to increment the column by.
             filter_columns: A dictionary of columns to filter by.
+            amount: The amount to increment the column by.
+            
         """
 
         if filter_columns is not None:
@@ -348,7 +349,43 @@ class OutcomeMatrix:
 
     @property
     def asthma_incidence_contingency_table(self) -> OutcomeTable:
-        """TODO."""
+        """A contingency table with the following columns:
+        
+        .. list-table::
+           :widths: 12 12 12 12 12 15 15
+           :header-rows: 1
+
+           * - year
+             - age
+             - sex
+             - has_family_history
+             - abx_exposure
+             - n_asthma
+             - n_no_asthma
+           * - calendar year
+             - age in years
+             - one of ``F`` or ``M``
+             - whether the person has a family history of asthma
+             - number of courses of antibiotics in infancy
+             - number of people diagnosed with asthma in the given year, for the given
+               age, sex, family history, and antibiotic exposure
+             - number of people not diagnosed with asthma in the given year, for the given
+               age, sex, family history, and antibiotic exposure
+           * - 2024
+             - 15
+             - ``F``
+             - 0
+             - 2
+             - 10
+             - 5
+           * - ...
+             - ...
+             - ...
+             - ...
+             - ...
+             - ...
+             - ...
+        """
         return self._asthma_incidence_contingency_table
     
     @asthma_incidence_contingency_table.setter
@@ -359,7 +396,44 @@ class OutcomeMatrix:
 
     @property
     def asthma_prevalence_contingency_table(self) -> OutcomeTable:
-        """TODO."""
+        """A contingency table with the following columns:
+        
+        .. list-table::
+           :widths: 12 12 12 12 12 15 15
+           :header-rows: 1
+
+           * - year
+             - age
+             - sex
+             - has_family_history
+             - abx_exposure
+             - n_asthma
+             - n_no_asthma
+           * - calendar year
+             - age in years
+             - one of ``F`` or ``M``
+             - whether the person has a family history of asthma
+             - number of courses of antibiotics in infancy
+             - number of people with asthma for the given year, age, sex, family history,
+               and antibiotic exposure
+             - number of people without asthma for the given year, age, sex, family history,
+               and antibiotic exposure
+           * - 2024
+             - 15
+             - ``F``
+             - 0
+             - 2
+             - 100
+             - 46
+           * - ...
+             - ...
+             - ...
+             - ...
+             - ...
+             - ...
+             - ...
+
+        """
         return self._asthma_prevalence_contingency_table
     
     @asthma_prevalence_contingency_table.setter
@@ -469,13 +543,48 @@ class OutcomeMatrix:
     def utility(self, utility: OutcomeTable):
         self._utility = utility
 
-    def create_table(self, columns: list[str], group_by: list[str] | None, *args) -> OutcomeTable:
+    def create_table(
+        self,
+        columns: list[str],
+        group_by: list[str] | None,
+        *args
+    ) -> OutcomeTable:
         """Create an outcome table.
 
         Args:
             columns: The list of column names for the table.
-            group_by: The list of column names to group by.
-            args: TODO.
+            group_by: The list of column names to group by. Set to ``None`` if no grouping
+                is needed.
+            args: A list of lists, where each list corresponds to a column in the table.
+                Each list is used to create a Cartesian product of the columns,
+                so it should contain the set of possible values for that column.
+
+        Returns:
+            An ``OutcomeTable`` object containing the data for the table.
+
+        Examples:
+
+            >>> from leap.outcome_matrix import OutcomeMatrix
+            >>> outcome_matrix = OutcomeMatrix(until_all_die=False, min_year=2024, max_year=2030, max_age=100)
+            >>> table = outcome_matrix.create_table(
+            ...     ["year", "age", "sex", "n_alive"],
+            ...     None,
+            ...     range(2024, 2026),
+            ...     range(1, 3),
+            ...     ["F", "M"],
+            ...     [0]
+            ... )
+            >>> print(table) # doctest: +NORMALIZE_WHITESPACE
+            year  age sex  n_alive
+            0  2024    1   F        0
+            1  2024    1   M        0
+            2  2024    2   F        0
+            3  2024    2   M        0
+            4  2025    1   F        0
+            5  2025    1   M        0
+            6  2025    2   F        0
+            7  2025    2   M        0
+
         """
         product = itertools.product(
             *args
