@@ -31,9 +31,23 @@ virtual environment, go to the folder you installed the virtual environment in, 
 
 Then activate the virtual environment:
 
+**MacOS/Linux**:
+
 .. code:: bash
 
   source env/bin/activate
+
+**Windows Command Prompt**:
+
+.. code-block:: bash
+
+  env\Scripts\activate
+
+**Windows PowerShell**:
+
+.. code-block:: bash
+
+  .\env\Scripts\Activate.ps1
 
 
 **2. Run the Simulation**:
