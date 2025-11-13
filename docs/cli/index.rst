@@ -19,6 +19,25 @@ The default simulation configuration options are found in the
 file. You can modify these options by creating your own ``config.json`` file and passing it to the
 ``LEAP`` model. For more information on the configuration file, see: :doc:`config`.
 
+**1. Activate your virtual environment**:
+
+In the installation, we recommended installing ``LEAP`` in a virtual environment. To activate your
+virtual environment, go to the folder you installed the virtual environment in, say
+``my_folder``:
+
+.. code:: bash
+
+  cd my_folder
+
+Then activate the virtual environment:
+
+.. code:: bash
+
+  source env/bin/activate
+
+
+**2. Run the Simulation**:
+
 To run the ``LEAP`` model from the command line, using the default settings:
 
 .. code:: bash
