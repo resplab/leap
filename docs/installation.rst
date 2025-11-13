@@ -163,7 +163,7 @@ To get out of the virtual environment:
   deactivate
 
 
-... _linux-installation:
+.. _linux-installation:
 Linux
 ******
 
