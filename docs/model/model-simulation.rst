@@ -51,7 +51,7 @@ The ``num_births_initial`` parameter sets the number of agents at age 0. The num
 every other age is determined by multiplying ``num_births_initial`` by that age group's ``prop``
 value — the ratio of that age group's size to the newborn cohort in the Statistics Canada data.
 As a result, the total number of agents created in the first year is generally much larger than
-``num_births_initial``.
+``num_births_initial``, but is determined by this value.
 
 Subsequent Years
 *****************
