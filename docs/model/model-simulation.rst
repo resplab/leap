@@ -45,7 +45,7 @@ To start the simulation, we begin with the initial year, ``min_year``. Unlike su
 the first year does not introduce only newborns — instead, it creates a cross-sectional population
 spanning all ages from 0 to ``max_age``, representing the full age distribution of the province in
 the starting year, drawn from Statistics Canada population data
-(``initial_pop_distribution_prop.csv``).
+(``./leap/processed_data/birth/initial_pop_distribution_prop.csv``).
 
 The ``num_births_initial`` parameter sets the number of agents at age 0. The number of agents at
 every other age is determined by multiplying ``num_births_initial`` by that age group's ``prop``
