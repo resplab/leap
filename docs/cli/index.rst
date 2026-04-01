@@ -266,4 +266,24 @@ If you would like to use your own ``config.json`` file instead of the default on
   leap --run-simulation --config PATH/TO/YOUR/CONFIG.json
 
 
+Known Limitations
+*****************
+
+.. note::
+
+  * The ``--ignore-pollution`` flag is currently required when running the simulation, as the
+    pollution model is not yet fully implemented. Omitting this flag will cause the simulation
+    to fail.
+
+    Until the pollution model is fully implemented, always include the ``--ignore-pollution`` flag:
+
+    .. code-block:: bash
+
+      leap --run-simulation --ignore-pollution
+
+  * The ``--population-growth-type M6`` scenario is not currently implemented. Using ``M6``
+    will cause the simulation to fail. Please use one of the other available scenarios instead.
+
+
+
 
