@@ -168,9 +168,9 @@ def compute_ordinal_regression(
     Examples:
 
         >>> compute_ordinal_regression(0, 0.5)
-        [0.6224593312018546, 0.3775406687981454]
+        [np.float64(0.6224593312018546), np.float64(0.3775406687981454)]
         >>> compute_ordinal_regression(0, [0.5, 1.5])
-        [0.6224593312018546, 0.19511514499178906, 0.18242552380635635]
+        [np.float64(0.6224593312018546), np.float64(0.19511514499178906), np.float64(0.18242552380635635)]
     """
 
     if isinstance(θ, float):
@@ -332,9 +332,9 @@ def poly(
                [2, 4],
                [3, 9]])
 
-        >>> poly([1, 2, 3], degree=2, orthogonal=True) # doctest: +NORMALIZE_WHITESPACE
+        >>> poly([1, 2, 3], degree=2, orthogonal=True) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         (array([[-7.07106781e-01,  4.08248290e-01],
-               [-5.55111512e-17, -8.16496581e-01],
+               [..., -8.16496581e-01],
                [ 7.07106781e-01,  4.08248290e-01]]), array([2., 2.]), array([3.        , 2.        , 0.66666667]))
     """
     n = degree + 1
