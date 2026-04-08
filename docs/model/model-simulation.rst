@@ -131,27 +131,26 @@ A simplified excerpt:
 In the second year, 2022, we would calculate the number of births using the birth model:
 
 .. math::
-    
-    n(2022) &= n(2021) * \dfrac{N(2022)}{N(2021)} \\
-    &= 100 * \dfrac{46400}{42653} \\
-    &= 1.09\\
-    &\approx 109
 
-where:  
+    n(2022) &= n(2021) * \dfrac{N(2022)}{N(2021)} \\
+    &= 100 * \dfrac{49200}{42653} \\
+    &\approx 115
+
+where:
 
 * :math:`n(2022)` is the number of births in 2022, in the simulation
 * :math:`n(2021)` is the number of births in 2021, in the simulation
 * :math:`N(2022)` is the total number of births in 2022, for the ``HG`` scenario, from Statistics Canada
 * :math:`N(2021)` is the total number of births in 2021, for the ``HG`` scenario, from Statistics Canada
 
-We would then create 109 new agents, all aged 0, and add them to the list of agents for that year.
+We would then create 115 new agents, all aged 0, and add them to the list of agents for that year.
 For the number of immigrants:
 
 .. math::
 
     i(2022) &= n(2022) * \dfrac{I(2022)}{N(2022)} \\
-    &= 109 * \dfrac{67190}{46400} \\
-    &\approx 158
+    &= 115 * \dfrac{67190}{49200} \\
+    &\approx 157
 
 where:
 
@@ -188,15 +187,15 @@ So we have a list of agents for 2022 that looks like this:
      - ...
      - ...
      - ...
-   * - Agent 109
+   * - Agent 115
      - 0
      - F
      - no
-   * - Agent 110
+   * - Agent 116
      - 29
      - M
      - yes
-   * - Agent 111
+   * - Agent 117
      - 54
      - F
      - yes
@@ -204,7 +203,7 @@ So we have a list of agents for 2022 that looks like this:
      - ...
      - ...
      - ...
-   * - Agent 267
+   * - Agent 272
      - 45
      - M
      - yes
