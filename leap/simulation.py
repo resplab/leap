@@ -34,7 +34,7 @@ logger = get_logger(__name__)
 
 
 MIN_AGENTS_MP = 500
-mp.set_start_method("fork", force=True)
+_mp_context = mp.get_context("forkserver")
 
 
 class Simulation:
@@ -731,7 +731,7 @@ class Simulation:
             np.random.seed(seed)
 
         if n_cpu is None:
-            n_cpu = mp.cpu_count() - 1
+            n_cpu = _mp_context.cpu_count() - 1
             logger.message(f"Setting number of CPUs to use for multiprocessing to {n_cpu}")
 
         if until_all_die is not None:
@@ -795,7 +795,7 @@ class Simulation:
                     job_bar.update(1)
                     job_bar.set_description(f"Year: {year} | Agent {agent_id.short}")
             else:
-                queue = mp.Queue()
+                queue = _mp_context.Queue()
                 n_processes = n_cpu * 2
                 chunk_size = int(math.ceil(new_agents_df.shape[0] / (n_processes)))
                 chunk_indices = get_chunk_indices(
@@ -812,7 +812,7 @@ class Simulation:
                 for process_id in range(n_processes):
                     chunk_start = chunk_indices[process_id][0]
                     chunk_end = chunk_indices[process_id][1]
-                    p = mp.Process(
+                    p = _mp_context.Process(
                         target=self.worker,
                         args=(
                             year,
@@ -833,7 +833,7 @@ class Simulation:
                 counter = 0
                 while counter < new_agents_df.shape[0]:
                     try:
-                        agent_id, process_id, outcome_matrix_agent = queue.get_nowait()
+                        agent_id, process_id, outcome_matrix_agent = queue.get(timeout=1)
                         job_bar.update(1)
                         process_bars[process_id].update(1)
                         process_bars[process_id].set_description(
@@ -841,8 +841,15 @@ class Simulation:
                         )
                         outcome_matrices.append(outcome_matrix_agent)
                         counter += 1
-                    except:
-                        pass
+                    except Exception:
+                        # Check if all workers have died
+                        if all(not p.is_alive() for p in processes):
+                            failed = [p for p in processes if p.exitcode != 0]
+                            if failed:
+                                raise RuntimeError(
+                                    f"{len(failed)} worker process(es) died unexpectedly. "
+                                    f"Check logs for details."
+                                )
 
                 for p in processes:
                     p.join()

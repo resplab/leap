@@ -1150,7 +1150,7 @@ def test_run_simulation_two_years(
     )
 
     assert int(outcome_matrix.immigration.get(
-        columns=["n_immigrants"]
+        columns="n_immigrants"
     ).sum()) == expected_immigration_total
 
     assert outcome_matrix.family_history.data.shape == (2 * time_horizon * (max_age + 1), 4)
