@@ -178,7 +178,7 @@ def compute_ordinal_regression(
     else:
         θ = [-10**5] + θ + [10**5]
 
-    return [prob_function(θ[k + 1] - η) - prob_function(θ[k] - η) for k in range(len(θ) - 1)]
+    return [float(prob_function(θ[k + 1] - η) - prob_function(θ[k] - η)) for k in range(len(θ) - 1)]
 
 
 def get_data_path(data_path: str | pathlib.Path) -> pathlib.Path:
@@ -332,9 +332,9 @@ def poly(
                [2, 4],
                [3, 9]])
 
-        >>> poly([1, 2, 3], degree=2, orthogonal=True) # doctest: +NORMALIZE_WHITESPACE
+        >>> poly([1, 2, 3], degree=2, orthogonal=True) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         (array([[-7.07106781e-01,  4.08248290e-01],
-               [-5.55111512e-17, -8.16496581e-01],
+               [..., -8.16496581e-01],
                [ 7.07106781e-01,  4.08248290e-01]]), array([2., 2.]), array([3.        , 2.        , 0.66666667]))
     """
     n = degree + 1

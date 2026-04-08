@@ -105,3 +105,57 @@ The relevant columns are:
      - :code:`int`
      - the population in that year, province, sex, age group, and projection scenario
 
+
+Processed Data
+***************
+
+The two source tables are combined by `leap/data_generation/birth_data.py
+<https://github.com/resplab/leap/blob/main/leap/data_generation/birth_data.py>`_
+into a single processed file saved as:
+`leap/processed_data/birth/birth_estimate.csv
+<https://github.com/resplab/leap/blob/main/leap/processed_data/birth/birth_estimate.csv>`_.
+
+Past data (from ``17100005.csv``) covers years 1999 onwards using actual population counts.
+Projected data (from ``17100057.csv``) begins the year after the last available past year and
+covers projections up to 2065. In the projected source file, ``VALUE`` is stored in thousands
+and is multiplied by 1000 during processing.
+
+For both sources, only the ``AGE_GROUP = 0`` (newborns) rows are used. The ``N`` column
+represents the total number of births (both sexes combined), and ``prop_male`` is derived as
+the number of male births divided by the total.
+
+.. list-table::
+   :widths: 25 25 50
+   :header-rows: 1
+
+   * - Column
+     - Type
+     - Description
+   * - ``year``
+     - :code:`int`
+     - the calendar year
+   * - ``province``
+     - :code:`str`
+     - the 2-letter province or territory ID
+       (e.g., ``BC`` = British Columbia, ``AB`` = Alberta, ``CA`` = Canada)
+   * - ``N``
+     - :code:`int`
+     - the total number of births (both sexes) in that year and province
+   * - ``prop_male``
+     - :code:`float`
+     - the proportion of births that are male
+   * - ``projection_scenario``
+     - :code:`str`
+     - ``past`` for historical data, or one of the projection scenario IDs for future data:
+
+       * ``LG``: low-growth projection
+       * ``HG``: high-growth projection
+       * ``M1``: medium-growth 1 projection
+       * ``M2``: medium-growth 2 projection
+       * ``M3``: medium-growth 3 projection
+       * ``M4``: medium-growth 4 projection
+       * ``M5``: medium-growth 5 projection
+       * ``M6``: medium-growth 6 projection
+       * ``FA``: fast-aging projection
+       * ``SA``: slow-aging projection
+

@@ -1,4 +1,4 @@
 kaleido
 statsmodels==0.14.4
-rpy2
+rpy2==3.5.17
 openpyxl
