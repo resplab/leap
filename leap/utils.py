@@ -167,9 +167,9 @@ def compute_ordinal_regression(
 
     Examples:
 
-        >>> [float(x) for x in compute_ordinal_regression(0, 0.5)]
+        >>> compute_ordinal_regression(0, 0.5)
         [0.6224593312018546, 0.3775406687981454]
-        >>> [float(x) for x in compute_ordinal_regression(0, [0.5, 1.5])]
+        >>> compute_ordinal_regression(0, [0.5, 1.5])
         [0.6224593312018546, 0.19511514499178906, 0.18242552380635635]
     """
 
@@ -178,7 +178,7 @@ def compute_ordinal_regression(
     else:
         θ = [-10**5] + θ + [10**5]
 
-    return [prob_function(θ[k + 1] - η) - prob_function(θ[k] - η) for k in range(len(θ) - 1)]
+    return [float(prob_function(θ[k + 1] - η) - prob_function(θ[k] - η)) for k in range(len(θ) - 1)]
 
 
 def get_data_path(data_path: str | pathlib.Path) -> pathlib.Path:
