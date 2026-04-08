@@ -6,6 +6,7 @@ __pycache__/
 *.egg-info/
 *scratch*
 .vscode/
+leap_output/
 _build/
 build/
 leap/original_data/private/*

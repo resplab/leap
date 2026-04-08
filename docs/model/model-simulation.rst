@@ -20,8 +20,10 @@ First, let us take a look at the different input parameters:
      - Statistics Canada uses different population growth types to model different population
        growth possibilities.
    * - ``num_births_initial``
-     - The number of births in the initial year of the simulation. This determines the overall
-       population size at the start of the simulation.
+     - The number of agents aged 0 in the initial year of the simulation. This acts as a
+       scaling factor: agents at all other ages are created in proportion to the Statistics
+       Canada age distribution for the starting year and province, so the total initial
+       population is typically much larger than this value.
    * - ``max_age``
      - The maximum age of a person in the model.
    * - ``until_all_die``
@@ -39,9 +41,17 @@ Iterating Over Years
 Initial Year
 *************
 
-To start the simulation, we begin with the initial year, ``min_year``. For the first year, we
-create a list of ``agents``, or people, who are born in that year, aged 0. The number of agents
-in this list is determined by the ``num_births_initial`` parameter.
+To start the simulation, we begin with the initial year, ``min_year``. Unlike subsequent years,
+the first year does not introduce only newborns — instead, it creates a cross-sectional population
+spanning all ages from 0 to ``max_age``, representing the full age distribution of the province in
+the starting year, drawn from Statistics Canada population data
+(``./leap/processed_data/birth/initial_pop_distribution_prop.csv``).
+
+The ``num_births_initial`` parameter sets the number of agents at age 0. The number of agents at
+every other age is determined by multiplying ``num_births_initial`` by that age group's ``prop``
+value — the ratio of that age group's size to the newborn cohort in the Statistics Canada data.
+As a result, the total number of agents created in the first year is generally much larger than
+``num_births_initial``, but is determined by this value.
 
 Subsequent Years
 *****************
@@ -75,9 +85,13 @@ Let's suppose we have:
    * - maximum age
      - 90
 
-In the first year, we would create ``100`` agents, all aged ``0``:
+In the first year, we would create agents at all ages from 0 to 90, with the count at each age
+scaled from ``num_births_initial`` using Statistics Canada population proportions. For example,
+if age 30 has a ``prop`` of 2.5, then ``100 × 2.5 = 250`` agents are created at age 30. The
+total initial population is the sum of ``num_births_initial × prop`` across all age groups.
+A simplified excerpt:
 
-.. list-table:: Year: 2021
+.. list-table:: Year: 2021 (initial population, all ages)
    :widths: 25 25 25 25
    :header-rows: 1
 
@@ -93,16 +107,24 @@ In the first year, we would create ``100`` agents, all aged ``0``:
      - 0
      - M
      - no
-   * - Agent 3
-     - 0
-     - M
-     - no
    * - ...
      - ...
      - ...
      - ...
    * - Agent 100
      - 0
+     - F
+     - no
+   * - Agent 101
+     - 1
+     - M
+     - no
+   * - ...
+     - ...
+     - ...
+     - ...
+   * - Agent N
+     - 90
      - F
      - no
 
