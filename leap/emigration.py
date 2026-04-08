@@ -86,7 +86,7 @@ class Emigration:
             (df["proj_scenario"] == population_growth_type)
         ]
         df.drop(columns=["province", "proj_scenario"], inplace=True)
-        grouped_df = df.groupby(["year"])
+        grouped_df = df.groupby("year")
         return grouped_df
 
     def compute_probability(self, year: int, age: int, sex: str | Sex) -> bool:
@@ -111,6 +111,6 @@ class Emigration:
         if age == 0:
             return False
         else:
-            df = self.table.get_group((year,))
+            df = self.table.get_group(year)
             p = df[df["age"] == min(age, 100)][str(sex)].values[0]
             return bool(np.random.binomial(1, p))

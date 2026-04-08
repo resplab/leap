@@ -71,7 +71,7 @@ class Death:
         df.drop(columns=["se", "province"], inplace=True)
         df = df.pivot(index=["age", "year"], columns=["sex"], values="prob_death").reset_index()
         df.columns.name = ""
-        grouped_df = df.groupby(["year"])
+        grouped_df = df.groupby("year")
         return grouped_df
 
     def agent_dies(self, agent: Agent) -> bool:
@@ -84,7 +84,7 @@ class Death:
             ``True`` if the agent dies, ``False`` otherwise.
         """
 
-        df = self.life_table.get_group((agent.year,))
+        df = self.life_table.get_group(agent.year)
         p = df[df["age"] == agent.age][str(agent.sex)].values[0]
         is_dead = bool(np.random.binomial(1, p))
         return is_dead

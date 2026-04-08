@@ -306,12 +306,12 @@ class Simulation:
         else:
             # for a given year, sample from age/sex distribution of immigrants
             immigrant_indices = list(np.random.choice(
-                a=range(self.immigration.table.get_group((year,)).shape[0]),
+                a=range(self.immigration.table.get_group(year).shape[0]),
                 size=num_immigrants,
-                p=list(self.immigration.table.get_group((year,))["prop_immigrants_year"])
+                p=list(self.immigration.table.get_group(year)["prop_immigrants_year"])
             ))
 
-            immigrant_df = self.immigration.table.get_group((year,)).iloc[immigrant_indices]
+            immigrant_df = self.immigration.table.get_group(year).iloc[immigrant_indices]
             sexes_immigrant = immigrant_df["sex"].tolist()
             ages_immigrant = immigrant_df["age"].tolist()
 
