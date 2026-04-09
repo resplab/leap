@@ -587,3 +587,50 @@ calibration year (which is known) matches the predicted life expectancy.
 
 Once we have found :math:`\beta_{\text{sex}}`, we can use this formula to find the projected death
 probabilities.
+
+
+Processed Data
+***************
+
+The past and projected death probabilities are combined by `leap/data_generation/death_data.py
+<https://github.com/resplab/leap/blob/main/leap/data_generation/death_data.py>`_
+into a single processed file saved as:
+`leap/processed_data/life_table.csv
+<https://github.com/resplab/leap/blob/main/leap/processed_data/life_table.csv>`_.
+
+Past data (from ``13100837.csv``) covers years 1996 to the last available year using
+death probabilities directly from Statistics Canada.
+
+For projected years (up to 2068), death probabilities for every annual increment are filled in
+by fitting a linear trend (in logit space) that connects the last historical year to
+Statistics Canada's life expectancy targets at the calibration years. A separate slope is
+fitted for each sex and province.
+
+.. list-table::
+   :widths: 25 25 50
+   :header-rows: 1
+
+   * - Column
+     - Type
+     - Description
+   * - ``age``
+     - :code:`int`
+     - the age of the person in years
+   * - ``prob_death``
+     - :code:`float`
+     - the probability of death between age ``x`` and ``x+1`` for the given year,
+       province, sex, and age
+   * - ``se``
+     - :code:`float`
+     - the standard error of the probability of death; for projected years, this is
+       scaled proportionally from the base year's standard error
+   * - ``sex``
+     - :code:`str`
+     - one of ``M`` = male, ``F`` = female
+   * - ``year``
+     - :code:`int`
+     - the calendar year
+   * - ``province``
+     - :code:`str`
+     - the 2-letter province or territory ID
+       (e.g., ``BC`` = British Columbia, ``CA`` = Canada)

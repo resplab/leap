@@ -107,6 +107,7 @@ html_theme_options = {
     "palette": [
         {"primary": "blue"}
     ],
+    "font": False,
     "version_dropdown": False,
     "toc_title_is_page_title": True,
     "social": [
