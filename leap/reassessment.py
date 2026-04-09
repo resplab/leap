@@ -79,7 +79,7 @@ class Reassessment:
             (df["year"] >= starting_year) &
             (df["province"] == province)
         ]
-        grouped_df = df.groupby(["year"])
+        grouped_df = df.groupby("year")
         return grouped_df
 
     def agent_has_asthma(self, agent: Agent) -> bool:
@@ -122,7 +122,7 @@ class Reassessment:
         if agent.age < 4:
             return agent.has_asthma
         else:
-            df = self.table.get_group((min(agent.year, max_year),))
+            df = self.table.get_group(min(agent.year, max_year))
             df = df.loc[
                 (df["age"] == agent.age) &
                 (df["sex"] == str(agent.sex))

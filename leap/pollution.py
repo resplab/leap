@@ -49,12 +49,12 @@ class PollutionTable:
         self._data = data
 
     def __copy__(self):
-        data = self.data.apply(lambda x: x).reset_index(drop=True)
-        return PollutionTable(data=data.copy().groupby("SSP"))
+        data = self.data.obj.copy()
+        return PollutionTable(data=data.groupby("SSP"))
 
     def __deepcopy__(self, memo):
-        data = self.data.apply(lambda x: x).reset_index(drop=True)
-        return PollutionTable(data=data.copy(deep=True).groupby("SSP"))
+        data = self.data.obj.copy(deep=True)
+        return PollutionTable(data=data.groupby("SSP"))
 
     def copy(self, deep: bool = True) -> PollutionTable:
         if deep:

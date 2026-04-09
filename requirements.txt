@@ -1,5 +1,5 @@
 numpy
-pandas
+pandas>=3
 scipy
 shapely
 geopandas

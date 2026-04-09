@@ -136,7 +136,7 @@ def get_reassessment_data(
           maintain their asthma diagnosis in the given year. Range: ``[0, 1]``.
     """
 
-    df_asthma_grouped = df_asthma.groupby(["year"])
+    df_asthma_grouped = df_asthma.groupby("year")
 
     df_reassessment = pd.DataFrame({
         "year": np.array([], dtype=int),
@@ -149,7 +149,7 @@ def get_reassessment_data(
     for year in range(starting_year + 1, max_year + 1):
 
         # Get the predicted prevalence for the previous year
-        df_year_0 = df_asthma_grouped.get_group((year - 1,))
+        df_year_0 = df_asthma_grouped.get_group(year - 1)
         df_year_0 = df_year_0.loc[df_year_0["age"] < max_age]
         df_year_0["age_current"] = df_year_0.apply(
              lambda x: x["age"] + 1,
@@ -158,7 +158,7 @@ def get_reassessment_data(
         df_year_0.rename(columns={"age": "age_past", "year": "year_past"}, inplace=True)
 
         # Get the predicted prevalence for the current year
-        df_year_1 = df_asthma_grouped.get_group((year,))
+        df_year_1 = df_asthma_grouped.get_group(year)
         df_year_1 = df_year_1.loc[df_year_1["age"] > 3]
         df_year_1.rename(columns={"age": "age_current", "year": "year_current"}, inplace=True)
 

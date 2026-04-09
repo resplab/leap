@@ -26,7 +26,7 @@ class CensusTable:
         else:
             self.year = year
         self.data = self.load_census_data()
-        self.grouped_data = self.data.groupby(["province"])
+        self.grouped_data = self.data.groupby("province")
 
     @property
     def data(self) -> pd.DataFrame:
@@ -75,13 +75,13 @@ class CensusTable:
     def __copy__(self):
         census_table = CensusTable(year=self.year, config=None)
         census_table.data = self.data.copy()
-        census_table.grouped_data = census_table.data.groupby(["province"])
+        census_table.grouped_data = census_table.data.groupby("province")
         return census_table
 
     def __deepcopy__(self, memo):
         census_table = CensusTable(year=self.year, config=None)
         census_table.data = self.data.copy(deep=True)
-        census_table.grouped_data = census_table.data.groupby(["province"])
+        census_table.grouped_data = census_table.data.groupby("province")
         return census_table
 
     def copy(self, deep: bool = True):
@@ -123,7 +123,7 @@ class CensusDivision:
             if province == "CA":
                 df = census_table.data
             else:
-                df = census_table.grouped_data.get_group((province,))
+                df = census_table.grouped_data.get_group(province)
 
             probabilities = df["population"] / df["population"].sum()
             census_division_id = int(np.random.choice(

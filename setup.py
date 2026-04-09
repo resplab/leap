@@ -6,6 +6,7 @@ setup(
     description="Lifetime Exposures and Asthma outcomes Projection (LEAP)",
     author="Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert",
     author_email="ainsleighhill@gmail.com",
+    python_requires=">=3.11",
     packages=find_namespace_packages(include=["leap.*"]) + ["leap"],
     install_requires=[
       line.strip() for line in open("requirements.txt")

@@ -93,8 +93,8 @@ class Immigration:
             (df["province"] == province) &
             (df["projection_scenario"] == population_growth_type)
         ]
-        df.drop(columns=["province", "projection_scenario"], inplace=True)
-        df["sex"].replace({"F": 0, "M": 1}, inplace=True)
+        df = df.drop(columns=["province", "projection_scenario"])
+        df["sex"] = df["sex"].replace({"F": 0, "M": 1})
         for year in df["year"].unique():
             prop_immigrants_year = df.loc[df["year"] == year]["prop_immigrants_year"].copy()
             sum_year = prop_immigrants_year.sum()
@@ -103,7 +103,7 @@ class Immigration:
                     if x["year"] == year else x["prop_immigrants_year"],
                 axis=1
             )
-        grouped_df = df.groupby(["year"])
+        grouped_df = df.groupby("year")
         return grouped_df
 
     def get_num_new_immigrants(self, num_new_born: int, year: int) -> int:
@@ -129,6 +129,6 @@ class Immigration:
         """
 
         num_new_immigrants = int(math.ceil(
-            num_new_born * np.sum(self.table.get_group((year,))["prop_immigrants_birth"])
+            num_new_born * np.sum(self.table.get_group(year)["prop_immigrants_birth"])
         ))
         return num_new_immigrants
