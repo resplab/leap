@@ -55,7 +55,8 @@ nbsphinx_execute = "always"
 
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", ".DS_Store"]
+exclude_patterns = ["_build", "build", ".DS_Store", "model/model-antibiotics.ipynb"]
+suppress_warnings = ["myst.header"]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -164,8 +165,19 @@ class AuthorYearStyle(BaseLabelStyle):
         return f"{author}, {year}"
 
     def format_labels(self, sorted_entries):
-        # return a list of labels, same order as entries
-        return [self.format_label(entry) for entry in sorted_entries]
+        labels = [self.format_label(entry) for entry in sorted_entries]
+        from collections import Counter
+        counts = Counter(labels)
+        seen = {}
+        result = []
+        for label in labels:
+            if counts[label] > 1:
+                idx = seen.get(label, 0)
+                seen[label] = idx + 1
+                result.append(f"{label}{chr(ord('a') + idx)}")
+            else:
+                result.append(label)
+        return result
 
 class AuthorYear(UnsrtStyle):
     default_label_style = "authoryearlabel"
