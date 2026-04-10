@@ -23,7 +23,7 @@ open a terminal and type:
     python3 --version
 
 
-If the output is ``command not found: python3``, or the version is lower than ``Python 3.9``,
+If the output is ``command not found: python3``, or the version is lower than ``Python 3.12``,
 then you will need to install Python.
 
 .. md-tab-set::
@@ -32,8 +32,8 @@ then you will need to install Python.
 
   .. md-tab-item:: MacOS
 
-      To install Python, download the installer from:
-      `Mac Installer Python 3.10 <https://www.python.org/ftp/python/3.10.0/python-3.10.0post2-macos11.pkg>`_.
+      To install Python, download the appropriate installer from:
+      `MacOS Installer Python <https://www.python.org/downloads/macos/>`_.
 
       Once the install has finished, check to make sure that it's using the correct version:
 
@@ -41,7 +41,7 @@ then you will need to install Python.
 
         python3 --version
           # Expected output:
-          # Python 3.10.*
+          # Python 3.12.* or higher
 
   .. md-tab-item:: Linux
 
@@ -50,7 +50,7 @@ then you will need to install Python.
       .. code-block:: bash
 
           sudo apt update
-          sudo apt install python3.10
+          sudo apt install python3.12
 
       Once the install has finished, check to make sure that it's using the correct version:
 
@@ -58,13 +58,13 @@ then you will need to install Python.
 
         python3 --version
         # Expected output:
-        # Python 3.10.*
+        # Python 3.12.* 
 
   .. md-tab-item:: Windows Command Prompt
 
       To install Python, download the installer from:
-      `Windows Installer Python 3.10
-      <https://www.python.org/downloads/release/python-31016/>`_.
+      `Windows Installer Python 
+      <https://www.python.org/downloads/windows/>`_.
 
       .. note::
 
@@ -76,13 +76,13 @@ then you will need to install Python.
 
          python3 --version
          # Expected output:
-         # Python 3.10.*
+         # Python 3.12.* or higher
 
   .. md-tab-item:: Windows PowerShell
 
       To install Python, download the installer from:
-      `Windows Installer Python 3.10
-      <https://www.python.org/downloads/release/python-31016/>`_.
+      `Windows Installer Python
+      <https://www.python.org/downloads/windows/>`_.
 
       .. note::
 
@@ -94,7 +94,7 @@ then you will need to install Python.
 
          python3 --version
          # Expected output:
-         # Python 3.10.*
+         # Python 3.12.* or higher
 
 Step 2: Choose Install Folder
 -------------------------------
@@ -122,7 +122,7 @@ separate from the system Python.
   .. md-tab-item:: MacOS
 
       You will want to use your same Python version so if you
-      installed ``python3.10`` with the installer above, the command would be:
+      installed ``python3.12`` with the installer above, the command would be:
 
       .. code:: bash
 
@@ -130,29 +130,28 @@ separate from the system Python.
         source env/bin/activate
 
       where ``python3.x`` is your Python version. For example, if you installed Python with the installer
-      above, you installed ``python3.10``, so the command would be:
+      above, you installed ``python3.12``, so the command would be:
 
       .. code:: bash
 
-          python3.10 -m venv env
+          python3.12 -m venv env
           source env/bin/activate
 
   .. md-tab-item:: Linux
 
       You will want to use your same Python version so if you
-      installed ``python3.10`` with the installer above, the command would be:
+      installed ``python3.12`` with the installer above, the command would be:
 
       .. code:: bash
 
         python3.x -m venv env
         source env/bin/activate
 
-      where ``python3.x`` is your Python version. For example, if you installed Python with the installer
-      above, you installed ``python3.10``, so the command would be:
+      where ``python3.x`` is your Python version. For example, if you installed Python with the installer for v3.12, you installed ``python3.12``, so the command would be:
 
       .. code:: bash
 
-          python3.10 -m venv env
+          python3.12 -m venv env
           source env/bin/activate
 
   .. md-tab-item:: Windows Command Prompt
@@ -421,7 +420,7 @@ developers: :doc:`Developer Installation <../dev/dev-installation>`.
 Troubleshooting
 ****************
 
-- If ``python3 --version`` does not return Python 3.10 or higher, ensure Python 3.10 is installed
+- If ``python3 --version`` does not return Python 3.12 or higher, ensure Python 3.12 is installed
   and that the ``python3`` command points to the correct version.
 - If ``pip`` is not installed, you can install it manually:
 
