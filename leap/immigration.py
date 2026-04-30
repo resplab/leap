@@ -81,19 +81,21 @@ class Immigration:
             province, sex, and growth scenario.
         """
         df = pd.read_csv(
-            get_data_path("processed_data/migration/immigration_table.csv")
+            get_data_path("processed_data/migration/migration_table.csv")
         )
         check_year(starting_year + 1, df)
         check_province(province)
         check_projection_scenario(population_growth_type)
 
         df = df[
+            (df["delta_n"] > 0) &
             (df["age"] <= max_age) &
             (df["year"] >= starting_year) &
             (df["province"] == province) &
             (df["projection_scenario"] == population_growth_type)
         ]
-        df = df.drop(columns=["province", "projection_scenario"])
+        df = df.drop(columns=["province", "projection_scenario", "delta_n", "prop_emigrants_year", "prob_emigration"])
+        df = df.rename(columns={"prop_migrants_birth": "prop_immigrants_birth"})
         df["sex"] = df["sex"].replace({"F": 0, "M": 1})
         for year in df["year"].unique():
             prop_immigrants_year = df.loc[df["year"] == year]["prop_immigrants_year"].copy()

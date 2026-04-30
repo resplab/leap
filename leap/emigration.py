@@ -32,10 +32,11 @@ class Emigration:
 
         * ``year``: integer year the range 2001 - 2065.
         * ``age``: integer age.
-        * ``M``: the probability of a male emigrating.
-        * ``F``: the probability of a female emigrating.
+        * ``sex``: one of ``M`` = male, ``F`` = female.
+        * ``prob_emigration``: the per-person probability of emigrating. Zero for cells where
+          the net population change was non-negative (i.e. no net emigration).
 
-        See ``processed_data/migration/emigration_table.csv``.
+        See ``processed_data/migration/migration_table.csv``.
         """
         return self._table
     
@@ -74,7 +75,7 @@ class Emigration:
             age, province, sex, and growth scenario.
         """
         df = pd.read_csv(
-            get_data_path("processed_data/migration/emigration_table.csv")
+            get_data_path("processed_data/migration/migration_table.csv")
         )
         check_year(starting_year + 1, df)
         check_province(province)
@@ -83,9 +84,9 @@ class Emigration:
         df = df[
             (df["year"] >= starting_year) &
             (df["province"] == province) &
-            (df["proj_scenario"] == population_growth_type)
+            (df["projection_scenario"] == population_growth_type)
         ]
-        df.drop(columns=["province", "proj_scenario"], inplace=True)
+        df = df[["year", "age", "sex", "prob_emigration"]]
         grouped_df = df.groupby("year")
         return grouped_df
 
@@ -112,5 +113,5 @@ class Emigration:
             return False
         else:
             df = self.table.get_group(year)
-            p = df[df["age"] == min(age, 100)][str(sex)].values[0]
+            p = df[(df["age"] == min(age, 100)) & (df["sex"] == str(sex))]["prob_emigration"].values[0]
             return bool(np.random.binomial(1, p))
