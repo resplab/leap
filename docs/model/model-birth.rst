@@ -112,8 +112,8 @@ Processed Data
 The two source tables are combined by `leap/data_generation/birth_data.py
 <https://github.com/resplab/leap/blob/main/leap/data_generation/birth_data.py>`_
 into a single processed file saved as:
-`leap/processed_data/birth/birth_estimate.csv
-<https://github.com/resplab/leap/blob/main/leap/processed_data/birth/birth_estimate.csv>`_.
+`leap/processed_data/{time_interval_tag}/birth/birth_estimate.csv
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_interval_365/birth/birth_estimate.csv>`_.
 
 Past data (from ``17100005.csv``) covers years 1999 onwards using actual population counts.
 Projected data (from ``17100057.csv``) begins the year after the last available past year and

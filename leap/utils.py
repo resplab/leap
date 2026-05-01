@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import datetime as dt
 import functools
 import time
 import pathlib
@@ -249,20 +250,20 @@ def check_cduid(cduid: int, df: pd.DataFrame):
         raise ValueError(f"cduid must be one of {df['cduid'].unique()}, received {cduid}")
 
 
-def check_year(year: int, df: pd.DataFrame):
-    """Check if the year is valid.
+def check_timepoint(timepoint: dt.datetime, df: pd.DataFrame):
+    """Check if the timepoint is valid.
 
     Args:
-        year: The minimum year.
+        timepoint: The timepoint to check.
         df: The DataFrame to check.
 
     Raises:
-        ValueError: If the year is not valid.
+        ValueError: If the timepoint is not valid.
     """
-    if year < df["year"].min():
-        raise ValueError(f"year must be >= {df['year'].min()}")
-    elif year > df["year"].max():
-        raise ValueError(f"year must be <= {df['year'].max()}")
+    if timepoint < df["timepoint"].min():
+        raise ValueError(f"timepoint must be >= {df['timepoint'].min()}")
+    elif timepoint > df["timepoint"].max():
+        raise ValueError(f"timepoint must be <= {df['timepoint'].max()}")
 
 
 def check_province(province: str):
