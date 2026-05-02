@@ -2,7 +2,9 @@ from __future__ import annotations
 import copy
 import pandas as pd
 import numpy as np
-from leap.utils import get_data_path, check_province
+import datetime as dt
+from dateutil.relativedelta import relativedelta
+from leap.utils import get_data_path, check_province, get_time_interval_tag
 from leap.control import ControlLevels
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -15,12 +17,12 @@ class ExacerbationHistory:
     """A class containing information about the history of asthma exacerbations.
 
     Attributes:
-        num_current_year: the number of exacerbations in the current year.
-        num_prev_year: the number of exacerbations in the previous year.
+        num_current_timepoint: the number of exacerbations at the current timepoint.
+        num_prev_timepoint: the number of exacerbations at the previous timepoint.
     """
-    def __init__(self, num_current_year: int, num_prev_year: int):
-        self.num_current_year = num_current_year
-        self.num_prev_year = num_prev_year
+    def __init__(self, num_current_timepoint: int, num_prev_timepoint: int):
+        self.num_current_timepoint = num_current_timepoint
+        self.num_prev_timepoint = num_prev_timepoint
 
 
 class Exacerbation:
@@ -33,7 +35,8 @@ class Exacerbation:
         parameters: dict | None = None,
         hyperparameters: dict | None = None,
         calibration_table: DataFrameGroupBy | None = None,
-        initial_rate: float | None = None
+        initial_rate: float | None = None,
+        time_interval: dt.timedelta | relativedelta = relativedelta(years=1)
     ):
         if config is not None:
             self.hyperparameters = config["hyperparameters"]
@@ -49,14 +52,15 @@ class Exacerbation:
             )
         
         if calibration_table is None:
-            self.calibration_table = self.load_exacerbation_calibration(province)
+            self.calibration_table = self.load_exacerbation_calibration(province, time_interval)
         else:
             self.calibration_table = calibration_table
 
+        self.time_interval = time_interval
         self.assign_random_β0()
-        self.parameters["min_year"] = min(
+        self.parameters["min_timepoint"] = min(
             [key[0] for key in self.calibration_table.groups.keys()]
-        ) + 1
+        ) + time_interval
 
     @property
     def hyperparameters(self) -> dict:
@@ -85,7 +89,7 @@ class Exacerbation:
         * ``βcontrol_C``: float, the parameter for the controlled asthma term.
         * ``βcontrol_PC``: float, the parameter for the partially-controlled asthma term.
         * ``βcontrol_UC``: float, the parameter for the uncontrolled asthma term.
-        * ``min_year``: int, the minimum year for which exacerbation data exists + 1.
+        * ``min_timepoint``: int, the minimum timepoint for which exacerbation data exists + 1.
           Currently 2001.
         """
         return self._parameters
@@ -102,9 +106,9 @@ class Exacerbation:
 
     @property
     def calibration_table(self) -> DataFrameGroupBy:
-        r"""A dataframe grouped by year and sex, with the following columns:
+        r"""A dataframe grouped by timepoint and sex, with the following columns:
 
-        * ``year (int)``: calendar year.
+        * ``timepoint (int)``: a datetime timepoint.
         * ``sex (str)``: ``F`` = female, ``M`` = male.
         * ``age (int)``: integer age.
         * ``calibrator_multiplier (float)``: A multiplier used to calibrate the exacerbation rate;
@@ -129,19 +133,22 @@ class Exacerbation:
             self.hyperparameters["β0_σ"]
         )
 
-    def load_exacerbation_calibration(self, province: str) -> DataFrameGroupBy:
+    def load_exacerbation_calibration(
+        self, province: str, time_interval: dt.timedelta | relativedelta
+    ) -> DataFrameGroupBy:
         r"""Load the exacerbation calibration table.
 
         Args:
             province: A string indicating the province abbreviation, e.g. ``"BC"``.
                 For all of Canada, set province to ``"CA"``.
+            time_interval: A time interval for the calibration data, e.g. ``relativedelta(years=1)``.
 
         Returns:
-            A dataframe grouped by year and sex.
+            A dataframe grouped by timepoint and sex.
 
             Each entry is a dataframe with the following columns:
 
-            * ``year (int)``: calendar year.
+            * ``timepoint (int)``: calendar year.
             * ``sex (str)``: ``F`` = female, ``M`` = male.
             * ``age (int)``: integer age.
             * ``calibrator_multiplier (float)``: A multiplier used to calibrate the exacerbation rate;
@@ -151,15 +158,16 @@ class Exacerbation:
 
                 \lambda = \alpha \cdot e^{\beta_0} \prod_{i=1}^3 e^{\beta_i c_i} 
         """
-
+        time_interval_tag = get_time_interval_tag(time_interval)
         df = pd.read_csv(
-            get_data_path("processed_data/exacerbation_calibration.csv")
+            get_data_path(f"processed_data/{time_interval_tag}/exacerbation_calibration.csv"),
+            parse_dates=["timepoint"]
         )
         check_province(province)
 
         df = df[df["province"] == province]
         df.drop(["province"], axis=1, inplace=True)
-        grouped_df = df.groupby(["year", "sex"])
+        grouped_df = df.groupby(["timepoint", "sex"])
         return grouped_df
 
     def compute_num_exacerbations(
@@ -167,7 +175,7 @@ class Exacerbation:
         agent: Agent | None = None,
         age: int | None = None,
         sex: Sex | int | None = None,
-        year: int | None = None,
+        timepoint: dt.datetime | None = None,
         control_levels: ControlLevels | None = None,
         initial: bool = False
     ) -> int:
@@ -177,7 +185,7 @@ class Exacerbation:
             agent: A person in the model.
             age: The age of the person in years.
             sex: The sex of the agent (person), 0 = female, 1 = male.
-            year: The calendar year, e.g. 2024.
+            timepoint: The calendar year, e.g. 2024.
             control_levels: The asthma control levels.
             initial: If this is the initial computation.
 
@@ -188,21 +196,21 @@ class Exacerbation:
         if agent is not None:
             age = agent.age
             sex = int(agent.sex)
-            year = agent.year
+            timepoint = agent.timepoint
             control_levels = agent.control_levels
-        elif age is None or sex is None or year is None or control_levels is None:
-            raise ValueError("Either agent or age, sex, year, and control_levels must be provided.")
+        elif age is None or sex is None or timepoint is None or control_levels is None:
+            raise ValueError("Either agent or age, sex, timepoint, and control_levels must be provided.")
 
         if initial:
-            year = max(self.parameters["min_year"], year - 1)
+            timepoint = max(self.parameters["min_timepoint"], timepoint - self.time_interval)
             age = min(age - 1, 90)
             if age < 3:
                 return 0
         else:
-            year = max(self.parameters["min_year"], year)
+            timepoint = max(self.parameters["min_timepoint"], timepoint)
             age = min(age, 90)
 
-        df = self.calibration_table.get_group((year, int(sex)))
+        df = self.calibration_table.get_group((timepoint, int(sex)))
         calibrator_multiplier = df[df["age"] == age]["calibrator_multiplier"]
 
         μ = (
