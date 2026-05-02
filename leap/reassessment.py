@@ -1,7 +1,9 @@
 from __future__ import annotations
 import pandas as pd
 import numpy as np
-from leap.utils import get_data_path, check_year, check_province
+import datetime as dt
+from dateutil.relativedelta import relativedelta
+from leap.utils import get_data_path, check_timepoint, check_province, get_time_interval_tag
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -15,25 +17,26 @@ class Reassessment:
     """A class containing information about asthma diagnosis reassessment."""
     def __init__(
         self,
-        starting_year: int = 2000,
+        min_timepoint: dt.datetime = dt.datetime(2000, 1, 1),
         province: str = "CA",
-        table: DataFrameGroupBy | None = None
+        table: DataFrameGroupBy | None = None,
+        time_interval: dt.timedelta | relativedelta = relativedelta(years=1)
     ):
         if table is None:
-            self.table = self.load_reassessment_table(starting_year, province)
+            self.table = self.load_reassessment_table(min_timepoint, province, time_interval)
         else:
             self.table = table
 
     @property
     def table(self) -> DataFrameGroupBy:
-        """Grouped dataframe (by year) giving the probability of an agent still having asthma after
+        """Grouped dataframe (by timepoint) giving the probability of an agent still having asthma after
         reassessment for a given age, province, and sex:
 
-        * ``year (int)``: integer year.
+        * ``timepoint (dt.datetime)``: the timepoint, e.g. ``2024-01-01``.
         * ``age (int)``: integer age.
         * ``sex (str)``: one of ``"M"`` = male, ``"F"`` = female.
         * ``prob (float)``: the probability that an agent previously diagnosed with asthma
-          maintains their asthma diagnosis after reassessment in the given year.
+          maintains their asthma diagnosis after reassessment in the given timepoint.
           Value in ``[0, 1]``.
         * ``province (str)``: a string indicating the province abbreviation, e.g. ``"BC"``.
           For all of Canada, set province to ``"CA"``.
@@ -47,39 +50,46 @@ class Reassessment:
         self._table = table
 
     def load_reassessment_table(
-        self, starting_year: int, province: str
+        self,
+        min_timepoint: dt.datetime,
+        province: str,
+        time_interval: dt.timedelta | relativedelta
     ) -> DataFrameGroupBy:
         """Load the asthma diagnosis reassessment table.
 
         Args:
-            starting_year: the year to start the data at.
+            min_timepoint: the timepoint to start the data at.
             province: a string indicating the province abbreviation, e.g. "BC".
                 For all of Canada, set province to "CA".
+            time_interval: The time interval to use for the reassessment table, e.g. 1 year,
+                5 years, etc.
 
         Returns:
-            A grouped data frame grouped by year.
+            A grouped data frame grouped by timepoint.
             Each data frame contains the following columns:
 
-            * ``year (int)``: integer year.
+            * ``timepoint (dt.datetime)``: the timepoint, e.g. ``2024-01-01``.
             * ``age (int)``: integer age.
             * ``sex (str)``: one of ``"M"`` = male, ``"F"`` = female.
             * ``prob (float)``: the probability that an agent previously diagnosed with asthma
-              maintains their asthma diagnosis after reassessment in the given year.
+              maintains their asthma diagnosis after reassessment in the given timepoint.
               Value in ``[0, 1]``.
             * ``province (str)``: a string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
         """
+        time_interval_tag = get_time_interval_tag(time_interval)
         df = pd.read_csv(
-            get_data_path("processed_data/asthma_reassessment.csv")
+            get_data_path(f"processed_data/{time_interval_tag}/asthma_reassessment.csv"),
+            parse_dates=["timepoint"]
         )
-        check_year(starting_year, df)
+        check_timepoint(min_timepoint, df)
         check_province(province)
 
         df = df[
-            (df["year"] >= starting_year) &
+            (df["timepoint"] >= min_timepoint) &
             (df["province"] == province)
         ]
-        grouped_df = df.groupby("year")
+        grouped_df = df.groupby("timepoint")
         return grouped_df
 
     def agent_has_asthma(self, agent: Agent) -> bool:
@@ -100,11 +110,12 @@ class Reassessment:
 
             >>> from leap.agent import Agent
             >>> from leap.reassessment import Reassessment
+            >>> import datetime as dt
             >>> reassessment = Reassessment()
             >>> agent = Agent(
             ...     age=3,
-            ...     year=2024,
-            ...     year_index=0,
+            ...     timepoint=dt.datetime(2024, 1, 1),
+            ...     timepoint_index=0,
             ...     sex="F",
             ...     has_asthma=False,
             ...     num_antibiotic_use=0,
@@ -122,7 +133,7 @@ class Reassessment:
         if agent.age < 4:
             return agent.has_asthma
         else:
-            df = self.table.get_group(min(agent.year, max_year))
+            df = self.table.get_group(min(agent.timepoint, max_year))
             df = df.loc[
                 (df["age"] == agent.age) &
                 (df["sex"] == str(agent.sex))
