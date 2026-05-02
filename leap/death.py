@@ -3,7 +3,8 @@ import copy
 import pandas as pd
 import numpy as np
 import datetime as dt
-from leap.utils import get_data_path, check_timepoint, check_province
+from dateutil.relativedelta import relativedelta
+from leap.utils import get_data_path, check_timepoint, check_province, get_time_interval_tag
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -20,7 +21,7 @@ class Death:
         province: str = "CA",
         min_timepoint: dt.datetime = dt.datetime(2000, 1, 1),
         life_table: DataFrameGroupBy | None = None,
-        time_interval: dt.timedelta = dt.timedelta(days=365)
+        time_interval: dt.timedelta | relativedelta = relativedelta(years=1)
     ):
         if life_table is None:
             self.life_table = self.load_life_table(min_timepoint, province, time_interval)
@@ -45,7 +46,7 @@ class Death:
         self,
         min_timepoint: dt.datetime,
         province: str,
-        time_interval: dt.timedelta
+        time_interval: dt.timedelta | relativedelta
     ) -> DataFrameGroupBy:
         """Load the life table data.
         
@@ -66,7 +67,7 @@ class Death:
                 timepoint.
             * ``M (float)``: the probability of death for a male of a given age in a given timepoint.
         """
-        time_interval_tag = f"time_interval_{time_interval.days}"
+        time_interval_tag = get_time_interval_tag(time_interval)
         df = pd.read_csv(
             get_data_path(f"processed_data/{time_interval_tag}/life_table.csv"),
             parse_dates=["timepoint"]

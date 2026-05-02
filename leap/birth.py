@@ -2,7 +2,9 @@ from __future__ import annotations
 import math
 import pandas as pd
 import datetime as dt
-from leap.utils import get_data_path, check_timepoint, check_province, check_projection_scenario
+from dateutil.relativedelta import relativedelta
+from leap.utils import get_data_path, check_timepoint, check_province, check_projection_scenario, \
+    get_time_interval_tag
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -22,7 +24,7 @@ class Birth:
         max_age: int = 111,
         estimate: DataFrameGroupBy | None = None,
         initial_population: pd.DataFrame | None = None,
-        time_interval: dt.timedelta = dt.timedelta(days=365)
+        time_interval: dt.timedelta | relativedelta = relativedelta(years=1)
     ):
         if estimate is None:
             if min_timepoint is None or province is None or population_growth_type is None:
@@ -126,7 +128,7 @@ class Birth:
         min_timepoint: dt.datetime,
         province: str,
         population_growth_type: str,
-        time_interval: dt.timedelta
+        time_interval: dt.timedelta | relativedelta
     ) -> DataFrameGroupBy:
         """Load the data from ``birth_estimate.csv``.
         
@@ -178,7 +180,7 @@ class Birth:
               <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
         """
 
-        time_interval_tag = f"time_interval_{time_interval.days}"
+        time_interval_tag = get_time_interval_tag(time_interval)
         df = pd.read_csv(
             get_data_path(f"processed_data/{time_interval_tag}/birth/birth_estimate.csv"),
             parse_dates=["timepoint"]
@@ -203,7 +205,7 @@ class Birth:
         province: str,
         population_growth_type: str,
         max_age: int,
-        time_interval: dt.timedelta
+        time_interval: dt.timedelta | relativedelta
     ) -> pd.DataFrame:
         """Load the data from ``initial_pop_distribution_prop.csv``.
         
@@ -232,7 +234,7 @@ class Birth:
         Returns:
             A dataframe containing the population for the first year of the simulation.
         """
-        time_interval_tag = f"time_interval_{time_interval.days}"
+        time_interval_tag = get_time_interval_tag(time_interval)
         df = pd.read_csv(
             get_data_path(f"processed_data/{time_interval_tag}/birth/initial_pop_distribution_prop.csv"),
             parse_dates=["timepoint"]
