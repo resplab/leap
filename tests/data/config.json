@@ -1,6 +1,6 @@
 {
     "simulation": {
-        "min_year": 2001,
+        "min_timepoint": "2001-01-01 00:00:00",
         "time_horizon": 19,
         "province": "BC",
         "population_growth_type": "LG",
