@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import datetime as dt
+from dateutil.relativedelta import relativedelta
 import functools
 import time
 import pathlib
@@ -394,6 +395,22 @@ def convert_non_serializable(obj: np.ndarray | object) -> list | str:
         return obj.tolist()
     # Default for unsupported types
     return str(obj)
+
+
+def get_time_interval_tag(time_interval: dt.timedelta | relativedelta) -> str:
+    if isinstance(time_interval, dt.timedelta):
+        return f"time_interval_{time_interval.days}"
+    elif isinstance(time_interval, relativedelta):
+        days = 0
+        if time_interval.years > 0:
+            days += time_interval.years * 365
+        if time_interval.months > 0:
+            days += time_interval.months * 30
+        if time_interval.days > 0:
+            days += time_interval.days
+        return f"time_interval_{days}"
+    else:
+        raise TypeError("time_interval must be a timedelta or relativedelta.")
 
 
 class Sex:
