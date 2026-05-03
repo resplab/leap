@@ -113,7 +113,10 @@ class AntibioticExposure:
               infancy, per person.
         """
         time_interval_tag = get_time_interval_tag(time_interval)
-        df = pd.read_csv(get_data_path(f"processed_data/{time_interval_tag}/midtrends.csv"))
+        df = pd.read_csv(
+            get_data_path(f"processed_data/{time_interval_tag}/midtrends.csv"),
+            parse_dates=["timepoint"]
+        )
         grouped_df = df.groupby(["timepoint", "sex"])
         return grouped_df
 
