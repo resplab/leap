@@ -1,3 +1,4 @@
+from __future__ import annotations
 import numpy as np
 import pandas as pd
 import datetime as dt
@@ -12,9 +13,12 @@ import uuid
 from tqdm import tqdm
 from scipy.stats import logistic
 import importlib.resources as pkg_resources
-from typing import Callable, Tuple
+from typing import Callable, Tuple, TYPE_CHECKING
 import multiprocessing as mp
 from leap.logger import get_logger
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 logger = get_logger(__name__)
 
@@ -495,3 +499,12 @@ class Sex:
             return self._value_int == value
         elif isinstance(value, bool):
             return self._value_bool == value
+
+
+def date_range(
+    start: dt.datetime, stop: dt.datetime, step: dt.timedelta | relativedelta
+) -> Generator[dt.datetime, None, None]:
+    current = start
+    while current < stop:
+        yield current
+        current += step

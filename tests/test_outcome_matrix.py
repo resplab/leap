@@ -1,57 +1,63 @@
 import pytest
 import pandas as pd
+import datetime as dt
+from dateutil.relativedelta import relativedelta
 from leap.outcome_matrix import OutcomeMatrix, OutcomeTable, combine_outcome_matrices, \
     combine_outcome_tables
+from leap.utils import date_range
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
 
 
 @pytest.mark.parametrize(
-    "until_all_die, min_year, max_year, max_age",
+    "until_all_die, min_timepoint, max_timepoint, max_age, time_interval",
     [
         (
             False,
-            2001,
-            2041,
-            111
+            dt.datetime(2001, 1, 1),
+            dt.datetime(2041, 1, 1),
+            111,
+            relativedelta(years=1)
         ),
     ]
 )
 def test_outcome_matrix_constructor(
-    until_all_die, min_year, max_year, max_age
+    until_all_die, min_timepoint, max_timepoint, max_age, time_interval
 ):
 
     outcome_matrix = OutcomeMatrix(
         until_all_die=until_all_die,
-        min_year=min_year,
-        max_year=max_year,
-        max_age=max_age
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint,
+        max_age=max_age,
+        time_interval=time_interval
     )
-    time_horizon = max_year - min_year + 1
-    assert outcome_matrix.min_year == min_year
-    assert outcome_matrix.max_year == max_year
+    n_timepoints = len(list(date_range(min_timepoint, max_timepoint + time_interval, time_interval)))
+    assert outcome_matrix.min_timepoint == min_timepoint
+    assert outcome_matrix.max_timepoint == max_timepoint
     assert outcome_matrix.max_age == max_age
 
     alive_df = outcome_matrix.alive.data
-    assert alive_df.shape == ((max_age + 1) * 2 * time_horizon, 4)
-    control_df = outcome_matrix.control.grouped_data.get_group((min_year, 1))
+    assert alive_df.shape == ((max_age + 1) * 2 * n_timepoints, 4)
+    control_df = outcome_matrix.control.grouped_data.get_group((min_timepoint, 1))
     assert control_df.shape == ((max_age + 1) * 2, 5)
-    assert len(outcome_matrix.control.grouped_data.groups) == time_horizon * 3
+    assert len(outcome_matrix.control.grouped_data.groups) == n_timepoints * 3
     exacerbation_by_severity_df = outcome_matrix.exacerbation_by_severity.grouped_data.get_group(
-        (min_year, 3)
+        (min_timepoint, 3)
     )
     assert exacerbation_by_severity_df.shape == ((max_age + 1) * 2, 5)
     assert isinstance(outcome_matrix.asthma_prevalence_contingency_table, OutcomeTable)
 
 
 @pytest.mark.parametrize(
-    "until_all_die, min_year, max_year, max_age, age, sex, increment",
+    "until_all_die, min_timepoint, max_timepoint, time_interval, max_age, age, sex, increment",
     [
         (
             False,
-            2001,
-            2041,
+            dt.datetime(2001, 1, 1),
+            dt.datetime(2041, 1, 1),
+            relativedelta(years=1),
             111,
             4,
             "M",
@@ -60,26 +66,27 @@ def test_outcome_matrix_constructor(
     ]
 )
 def test_outcome_matrix_increment(
-    until_all_die, min_year, max_year, max_age, age, sex, increment
+    until_all_die, min_timepoint, max_timepoint, time_interval, max_age, age, sex, increment
 ):
 
     outcome_matrix = OutcomeMatrix(
         until_all_die=until_all_die,
-        min_year=min_year,
-        max_year=max_year,
-        max_age=max_age
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint,
+        max_age=max_age,
+        time_interval=time_interval
     )
     outcome_matrix.antibiotic_exposure.increment(
         column="n_antibiotic_exposure",
         filter_columns={
-            "year": min_year,
+            "timepoint": min_timepoint,
             "age": age,
             "sex": sex
         },
         amount=increment
     )
     df = outcome_matrix.antibiotic_exposure.data
-    df = df[(df["age"] == age) & (df["sex"] == sex) & (df["year"] == min_year)]
+    df = df[(df["age"] == age) & (df["sex"] == sex) & (df["timepoint"] == min_timepoint)]
     assert df["n_antibiotic_exposure"].values[0] == increment
 
 
@@ -89,26 +96,26 @@ def test_outcome_matrix_increment(
         (
             [
                 pd.DataFrame({
-                    "year": [2001, 2001, 2002, 2002],
+                    "timepoint": [dt.datetime(2001, 1, 1), dt.datetime(2001, 1, 1), dt.datetime(2002, 1, 1), dt.datetime(2002, 1, 1)],
                     "sex": ["M", "F", "M", "F"],
                     "age": [4, 4, 4, 4],
                     "n": [3, 5, 2, 4]
                 }),
                 pd.DataFrame({
-                    "year": [2001, 2001, 2002, 2002],
+                    "timepoint": [dt.datetime(2001, 1, 1), dt.datetime(2001, 1, 1), dt.datetime(2002, 1, 1), dt.datetime(2002, 1, 1)],
                     "sex": ["M", "F", "M", "F"],
                     "age": [4, 4, 4, 4],
                     "n": [5, 7, 3, 1]
                 }),
                 pd.DataFrame({
-                    "year": [2001, 2001, 2002, 2002],
+                    "timepoint": [dt.datetime(2001, 1, 1), dt.datetime(2001, 1, 1), dt.datetime(2002, 1, 1), dt.datetime(2002, 1, 1)],
                     "sex": ["M", "F", "M", "F"],
                     "age": [4, 4, 4, 4],
                     "n": [6, 0, 1, 3]
                 })
             ],
             pd.DataFrame({
-                "year": [2001, 2001, 2002, 2002],
+                "timepoint": [dt.datetime(2001, 1, 1), dt.datetime(2001, 1, 1), dt.datetime(2002, 1, 1), dt.datetime(2002, 1, 1)],
                 "sex": ["M", "F", "M", "F"],
                 "age": [4, 4, 4, 4],
                 "n": [14, 12, 6, 8]
@@ -132,37 +139,40 @@ def test_combine_outcome_tables(
 
 
 @pytest.mark.parametrize(
-    "until_all_die, min_year, max_year, max_age",
+    "until_all_die, min_timepoint, max_timepoint, time_interval, max_age",
     [
         (
             False,
-            2001,
-            2041,
+            dt.datetime(2001, 1, 1),
+            dt.datetime(2041, 1, 1),
+            relativedelta(years=1),
             111
         ),
     ]
 )
 def test_combine_outcome_matrices(
-    until_all_die, min_year, max_year, max_age
+    until_all_die, min_timepoint, max_timepoint, time_interval, max_age
 ):
 
     outcome_matrix1 = OutcomeMatrix(
         until_all_die=until_all_die,
-        min_year=min_year,
-        max_year=max_year,
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint,
+        time_interval=time_interval,
         max_age=max_age
     )
     outcome_matrix2 = OutcomeMatrix(
         until_all_die=until_all_die,
-        min_year=min_year,
-        max_year=max_year,
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint,
+        time_interval=time_interval,
         max_age=max_age
     )
 
     outcome_matrix1.antibiotic_exposure.increment(
         column="n_antibiotic_exposure",
         filter_columns={
-            "year": min_year,
+            "timepoint": min_timepoint,
             "age": 4,
             "sex": "M"
         },
@@ -171,7 +181,7 @@ def test_combine_outcome_matrices(
     outcome_matrix2.antibiotic_exposure.increment(
         column="n_antibiotic_exposure",
         filter_columns={
-            "year": min_year,
+            "timepoint": min_timepoint,
             "age": 4,
             "sex": "M"
         },
@@ -181,5 +191,5 @@ def test_combine_outcome_matrices(
         [outcome_matrix1, outcome_matrix2]
     )
     df = combined_outcome_matrix.antibiotic_exposure.data
-    df = df[(df["age"] == 4) & (df["sex"] == "M") & (df["year"] == min_year)]
+    df = df[(df["age"] == 4) & (df["sex"] == "M") & (df["timepoint"] == min_timepoint)]
     assert df["n_antibiotic_exposure"].values[0] == 8

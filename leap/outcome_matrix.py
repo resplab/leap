@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
 import itertools
+import datetime as dt
+from dateutil.relativedelta import relativedelta
 import pathlib
-from leap.utils import timer
+from leap.utils import timer, date_range
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -40,7 +42,7 @@ class OutcomeTable:
         if filter_columns is not None:
             f = "".join(
                 [
-                    f"({key} == '{value}') & " if isinstance(value, str) else
+                    f"({key} == '{value}') & " if isinstance(value, (str, dt.datetime)) else
                     f"({key} == {value}) & "
                     for key, value in filter_columns.items()]
             )[:-3]  # Remove the last '&'
@@ -122,22 +124,29 @@ class OutcomeTable:
 class OutcomeMatrix:
     """A class containing information about the outcomes of the model."""
     def __init__(
-        self, until_all_die: bool, min_year: int, max_year: int, max_age: int
+        self,
+        until_all_die: bool,
+        min_timepoint: dt.datetime,
+        max_timepoint: dt.datetime,
+        max_age: int,
+        time_interval: dt.timedelta | relativedelta
     ):
         """Initialize the ``OutcomeMatrix`` class.
         
         Args:
             until_all_die: A boolean indicating whether the simulation should run until all
                 people have died.
-            min_year: The minimum year of the simulation.
-            max_year: The maximum year of the simulation.
+            min_timepoint: The minimum timepoint of the simulation.
+            max_timepoint: The maximum timepoint of the simulation.
             max_age: The maximum age of the people in the simulation.
+            time_interval: The time interval between each timepoint in the simulation.
         """
 
         self.until_all_die = until_all_die
-        self.min_year = min_year
-        self.max_year = max_year
+        self.min_timepoint = min_timepoint
+        self.max_timepoint = max_timepoint
         self.max_age = max_age
+        self.time_interval = time_interval
         self.value_columns = {
             "alive": ["n_alive"],
             "antibiotic_exposure": ["n_antibiotic_exposure"],
@@ -157,43 +166,60 @@ class OutcomeMatrix:
             "immigration": ["n_immigrants"],
             "utility": ["utility"]
         }
+        time_interval_all_die = dt.timedelta(days=max_age * 365) if until_all_die else dt.timedelta(days=0)
 
         self.alive = self.create_table(
-            ["year", "age", "sex", "n_alive"],
+            ["timepoint", "age", "sex", "n_alive"],
             None,
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.antibiotic_exposure = self.create_table(
-            ["year", "age", "sex", "n_antibiotic_exposure"],
+            ["timepoint", "age", "sex", "n_antibiotic_exposure"],
             None,
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.asthma_incidence = self.create_table(
-            ["year", "age", "sex", "n_new_diagnoses"],
+            ["timepoint", "age", "sex", "n_new_diagnoses"],
             None,
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.asthma_prevalence = self.create_table(
-            ["year", "age", "sex", "n_asthma"],
+            ["timepoint", "age", "sex", "n_asthma"],
             None,
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.asthma_incidence_contingency_table = self.create_table(
-            ["year", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
-            ["year", "sex", "fam_history", "abx_exposure"],
-            range(min_year, max_year + 1),
+            ["timepoint", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
+            ["timepoint", "sex", "fam_history", "abx_exposure"],
+            date_range(min_timepoint, max_timepoint + time_interval, step=time_interval),
             range(0, 2),
             range(0, max_age + 2),
             range(0, 2),
@@ -202,9 +228,9 @@ class OutcomeMatrix:
             [0]
         )
         self.asthma_prevalence_contingency_table = self.create_table(
-            ["year", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
-            ["year", "sex", "fam_history", "abx_exposure"],
-            range(min_year, max_year + 1),
+            ["timepoint", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
+            ["timepoint", "sex", "fam_history", "abx_exposure"],
+            date_range(min_timepoint, max_timepoint + time_interval, step=time_interval),
             range(0, 2),
             range(0, max_age + 2),
             range(0, 2),
@@ -213,91 +239,134 @@ class OutcomeMatrix:
             [0]
         )
         self.asthma_status = self.create_table(
-            ["year", "age", "sex", "status"],
-            ["year"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["timepoint", "age", "sex", "status"],
+            ["timepoint"],
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.control = self.create_table(
-            ["year", "level", "age", "sex", "prob"],
-            ["year", "level"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["timepoint", "level", "age", "sex", "prob"],
+            ["timepoint", "level"],
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(3),
             range(max_age + 1),
             ["F", "M"],
             [0.0]
         )
         self.cost = self.create_table(
-            ["year", "age", "sex", "cost"],
+            ["timepoint", "age", "sex", "cost"],
             None,
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(max_age + 1),
             ["F", "M"],
             [0.0]
         )
         self.death = self.create_table(
-            ["year", "age", "sex", "n_deaths"],
+            ["timepoint", "age", "sex", "n_deaths"],
             None,
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
-            range(max_age + 1),
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),            range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.emigration = self.create_table(
-            ["year", "age", "sex", "n_emigrants"],
+            ["timepoint", "age", "sex", "n_emigrants"],
             None,
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.exacerbation = self.create_table(
-            ["year", "age", "sex", "n_exacerbations"],
+            ["timepoint", "age", "sex", "n_exacerbations"],
             None,
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.exacerbation_by_severity = self.create_table(
-            ["year", "severity", "age", "sex", "p_exacerbations"],
-            ["year", "severity"],
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            ["timepoint", "severity", "age", "sex", "p_exacerbations"],
+            ["timepoint", "severity"],
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(4),
             range(max_age + 1),
             ["F", "M"],
             [0.0]
         )
         self.exacerbation_hospital = self.create_table(
-            ["year", "age", "sex", "n_hospitalizations"],
+            ["timepoint", "age", "sex", "n_hospitalizations"],
             None,
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.family_history = self.create_table(
-            ["year", "age", "sex", "has_family_history"],
+            ["timepoint", "age", "sex", "has_family_history"],
             None,
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.immigration = self.create_table(
-            ["year", "age", "sex", "n_immigrants"],
+            ["timepoint", "age", "sex", "n_immigrants"],
             None,
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(max_age + 1),
             ["F", "M"],
             [0]
         )
         self.utility = self.create_table(
-            ["year", "age", "sex", "utility"],
+            ["timepoint", "age", "sex", "utility"],
             None,
-            range(min_year, max_year + 1 + (max_age if until_all_die else 0)),
+            date_range(
+                start=min_timepoint,
+                stop=max_timepoint + time_interval + time_interval_all_die,
+                step=time_interval
+            ),
             range(max_age + 1),
             ["F", "M"],
             [0.0]
@@ -313,7 +382,7 @@ class OutcomeMatrix:
 
     @property
     def alive(self) -> OutcomeTable:
-        """A table containing the number of people alive in each year, age, and sex."""
+        """A table containing the number of people alive in each timepoint, age, and sex."""
         return self._alive
 
     @alive.setter
@@ -322,7 +391,7 @@ class OutcomeMatrix:
 
     @property
     def antibiotic_exposure(self) -> OutcomeTable:
-        """A table containing the number of rounds of antibiotics for each year, age, and sex."""
+        """A table containing the number of rounds of antibiotics for each timepoint, age, and sex."""
         return self._antibiotic_exposure
     
     @antibiotic_exposure.setter
@@ -331,7 +400,7 @@ class OutcomeMatrix:
 
     @property
     def asthma_incidence(self) -> OutcomeTable:
-        """A table containing the number of new asthma diagnoses for each year, age, and sex."""
+        """A table containing the number of new asthma diagnoses for each timepoint, age, and sex."""
         return self._asthma_incidence
     
     @asthma_incidence.setter
@@ -340,7 +409,7 @@ class OutcomeMatrix:
 
     @property
     def asthma_prevalence(self) -> OutcomeTable:
-        """A table containing the number of people with asthma for each year, age, and sex."""
+        """A table containing the number of people with asthma for each timepoint, age, and sex."""
         return self._asthma_prevalence
     
     @asthma_prevalence.setter
@@ -355,23 +424,23 @@ class OutcomeMatrix:
            :widths: 12 12 12 12 12 15 15
            :header-rows: 1
 
-           * - year
+           * - timepoint
              - age
              - sex
              - has_family_history
              - abx_exposure
              - n_asthma
              - n_no_asthma
-           * - calendar year
+           * - timepoint in datetime format
              - age in years
              - one of ``F`` or ``M``
              - whether the person has a family history of asthma
              - number of courses of antibiotics in infancy
-             - number of people diagnosed with asthma in the given year, for the given
+             - number of people diagnosed with asthma in the given timepoint, for the given
                age, sex, family history, and antibiotic exposure
-             - number of people not diagnosed with asthma in the given year, for the given
+             - number of people not diagnosed with asthma in the given timepoint, for the given
                age, sex, family history, and antibiotic exposure
-           * - 2024
+           * - 2024-01-01 00:00:00
              - 15
              - ``F``
              - 0
@@ -402,23 +471,23 @@ class OutcomeMatrix:
            :widths: 12 12 12 12 12 15 15
            :header-rows: 1
 
-           * - year
+           * - timepoint
              - age
              - sex
              - has_family_history
              - abx_exposure
              - n_asthma
              - n_no_asthma
-           * - calendar year
+           * - timepoint in datetime format
              - age in years
              - one of ``F`` or ``M``
              - whether the person has a family history of asthma
              - number of courses of antibiotics in infancy
-             - number of people with asthma for the given year, age, sex, family history,
+             - number of people with asthma for the given timepoint, age, sex, family history,
                and antibiotic exposure
-             - number of people without asthma for the given year, age, sex, family history,
+             - number of people without asthma for the given timepoint, age, sex, family history,
                and antibiotic exposure
-           * - 2024
+           * - 2024-01-01 00:00:00
              - 15
              - ``F``
              - 0
@@ -453,7 +522,7 @@ class OutcomeMatrix:
 
     @property
     def control(self) -> OutcomeTable:
-        """A table containing the level of asthma control for each year, age, and sex."""
+        """A table containing the level of asthma control for each timepoint, age, and sex."""
         return self._control
     
     @control.setter
@@ -462,7 +531,7 @@ class OutcomeMatrix:
 
     @property
     def cost(self) -> OutcomeTable:
-        """A table containing the cost of asthma for each year, age, and sex."""
+        """A table containing the cost of asthma for each timepoint, age, and sex."""
         return self._cost
     
     @cost.setter
@@ -471,7 +540,7 @@ class OutcomeMatrix:
 
     @property
     def death(self) -> OutcomeTable:
-        """A table containing the number of people who died in a given year, age, and sex."""
+        """A table containing the number of people who died in a given timepoint, age, and sex."""
         return self._death
     
     @death.setter
@@ -480,7 +549,7 @@ class OutcomeMatrix:
 
     @property
     def emigration(self) -> OutcomeTable:
-        """A table containing the number of people who emigrated to Canada for each year, age,
+        """A table containing the number of people who emigrated to Canada for each timepoint, age,
         and sex."""
         return self._emigration
 
@@ -490,7 +559,7 @@ class OutcomeMatrix:
 
     @property
     def exacerbation(self) -> OutcomeTable:
-        """A table containing the number of asthma exacerbations for each year, age, and sex."""
+        """A table containing the number of asthma exacerbations for each timepoint, age, and sex."""
         return self._exacerbation
 
     @exacerbation.setter
@@ -526,7 +595,7 @@ class OutcomeMatrix:
 
     @property
     def immigration(self) -> OutcomeTable:
-        """A table containing the number of people who immigrated to Canada for each year, age,
+        """A table containing the number of people who immigrated to Canada for each timepoint, age,
         and sex."""
         return self._immigration
 
@@ -536,7 +605,7 @@ class OutcomeMatrix:
 
     @property
     def utility(self) -> OutcomeTable:
-        """A table containing the utility due to asthma for each year, age, and sex."""
+        """A table containing the utility due to asthma for each timepoint, age, and sex."""
         return self._utility
     
     @utility.setter
@@ -565,25 +634,31 @@ class OutcomeMatrix:
         Examples:
 
             >>> from leap.outcome_matrix import OutcomeMatrix
-            >>> outcome_matrix = OutcomeMatrix(until_all_die=False, min_year=2024, max_year=2030, max_age=100)
+            >>> outcome_matrix = OutcomeMatrix(
+            ...     until_all_die=False,
+            ...     min_timepoint=dt.datetime(2024, 1, 1),
+            ...     max_timepoint=dt.datetime(2030, 1, 1),
+            ...     max_age=100,
+            ...     time_interval=dt.timedelta(days=366)
+            ... )
             >>> table = outcome_matrix.create_table(
-            ...     ["year", "age", "sex", "n_alive"],
+            ...     ["timepoint", "age", "sex", "n_alive"],
             ...     None,
-            ...     range(2024, 2026),
+            ...     date_range(dt.datetime(2024, 1, 1), dt.datetime(2026, 1, 1), dt.timedelta(days=366)),
             ...     range(1, 3),
             ...     ["F", "M"],
             ...     [0]
             ... )
             >>> print(table) # doctest: +NORMALIZE_WHITESPACE
-            year  age sex  n_alive
-            0  2024    1   F        0
-            1  2024    1   M        0
-            2  2024    2   F        0
-            3  2024    2   M        0
-            4  2025    1   F        0
-            5  2025    1   M        0
-            6  2025    2   F        0
-            7  2025    2   M        0
+            timepoint  age sex  n_alive
+            0  2024-01-01    1   F        0
+            1  2024-01-01    1   M        0
+            2  2024-01-01    2   F        0
+            3  2024-01-01    2   M        0
+            4  2025-01-01    1   F        0
+            5  2025-01-01    1   M        0
+            6  2025-01-01    2   F        0
+            7  2025-01-01    2   M        0
 
         """
         product = itertools.product(
@@ -666,9 +741,10 @@ def combine_outcome_matrices(outcome_matrices: list[OutcomeMatrix]) -> OutcomeMa
 
     combined_matrix = OutcomeMatrix(
         until_all_die=outcome_matrices[0].until_all_die,
-        min_year=outcome_matrices[0].min_year,
-        max_year=outcome_matrices[0].max_year,
-        max_age=outcome_matrices[0].max_age
+        min_timepoint=outcome_matrices[0].min_timepoint,
+        max_timepoint=outcome_matrices[0].max_timepoint,
+        max_age=outcome_matrices[0].max_age,
+        time_interval=outcome_matrices[0].time_interval
     )
     
     for attribute in combined_matrix.__dict__.keys():
