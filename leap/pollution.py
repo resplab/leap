@@ -1,9 +1,11 @@
 from __future__ import annotations
+from ast import parse
 import pathlib
 import copy
 import pandas as pd
 import datetime as dt
-from leap.utils import get_data_path, check_timepoint, check_cduid
+from dateutil.relativedelta import relativedelta
+from leap.utils import get_data_path, check_timepoint, check_cduid, get_time_interval_tag
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -14,9 +16,13 @@ logger = get_logger(__name__)
 
 class PollutionTable:
     """A class containing information about PM 2.5 pollution in Canada."""
-    def __init__(self, data: DataFrameGroupBy | None = None):
+    def __init__(
+        self,
+        data: DataFrameGroupBy | None = None,
+        time_interval: dt.timedelta | relativedelta = relativedelta(years=1)
+    ):
         if data is None:
-            data = self.load_pollution_data()
+            data = self.load_pollution_data(time_interval=time_interval)
         self.data = data
 
     @property
@@ -59,20 +65,23 @@ class PollutionTable:
             return copy.copy(self)
 
     def load_pollution_data(
-        self, pm25_data_path: pathlib.Path = get_data_path("processed_data/pollution")
+        self, time_interval: dt.timedelta | relativedelta = relativedelta(years=1)
     ) -> DataFrameGroupBy:
         """Load the data from the PM2.5 SSP ``*.csv`` files.
 
         Args:
-            pm25_data_path: Full directory path for the PM2.5 ``*.csv`` files.
+            time_interval: The time interval to use for the pollution data, e.g. 1 year, 5 years, etc.
 
         Returns:
             A data frame grouped by the SSP scenario.
         """
+        time_interval_tag = get_time_interval_tag(time_interval)
+        pm25_data_path: pathlib.Path = get_data_path(f"processed_data/{time_interval_tag}/pollution")
         files = pm25_data_path.glob("*.csv")
         pollution_data = pd.DataFrame()
+       
         for file in files:
-            df = pd.read_csv(file)
+            df = pd.read_csv(file, parse_dates=["timepoint"])
             pollution_data = pd.concat([pollution_data, df])
         grouped_df = pollution_data.groupby("SSP")
         return grouped_df
