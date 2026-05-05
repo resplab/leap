@@ -508,3 +508,197 @@ def date_range(
     while current < stop:
         yield current
         current += step
+
+class TimeDelta(relativedelta):
+    def __init__(
+        self,
+        dt1=None,
+        dt2=None,
+        years: int = 0,
+        months: int = 0,
+        days: int = 0,
+        leapdays: int = 0,
+        weeks: int = 0,
+        hours: int = 0,
+        minutes: int = 0,
+        seconds: int = 0,
+        microseconds: int = 0,
+        year=None,
+        month=None,
+        day=None,
+        weekday=None,
+        yearday=None,
+        nlyearday=None,
+        hour=None,
+        minute=None,
+        second=None,
+        microsecond=None,
+        iso_string: str | None = None,
+        rd: relativedelta | None = None,
+        td: dt.timedelta | None = None
+    ):
+        if rd is not None:
+            super().__init__(
+                years=rd.years,
+                months=rd.months,
+                days=rd.days,
+                leapdays=rd.leapdays,
+                weeks=rd.weeks,
+                hours=rd.hours,
+                minutes=rd.minutes,
+                seconds=rd.seconds,
+                microseconds=rd.microseconds,
+                year=rd.year,
+                month=rd.month,
+                day=rd.day,
+                weekday=rd.weekday,
+                hour=rd.hour,
+                minute=rd.minute,
+                second=rd.second,
+                microsecond=rd.microsecond
+            )
+        elif td is not None:
+            super().__init__(
+                days=td.days,
+                seconds=td.seconds,
+                microseconds=td.microseconds
+            )
+        elif iso_string is not None:
+            self.iso_string = iso_string
+        else:
+            super().__init__(
+                dt1=dt1,
+                dt2=dt2,
+                years=years,
+                months=months,
+                days=days,
+                leapdays=leapdays,
+                weeks=weeks,
+                hours=hours,
+                minutes=minutes,
+                seconds=seconds,
+                microseconds=microseconds,
+                year=year,
+                month=month,
+                day=day,
+                weekday=weekday,
+                yearday=yearday,
+                nlyearday=nlyearday,
+                hour=hour,
+                minute=minute,
+                second=second,
+                microsecond=microsecond
+            )
+
+    @property
+    def iso_string(self) -> str | None:
+        """The ISO 8601 string representation of the time interval, e.g. ``"P1Y2M3DT4H5M6S"``."""
+        return self._iso_string
+
+    @iso_string.setter
+    def iso_string(self, iso_string: str | None):
+        if iso_string is not None:
+            if not iso_string.startswith("P"):
+                raise ValueError(f"iso_string must be in ISO 8601 format, received {iso_string}")
+
+            iso_string = iso_string[1:]
+            date_part, time_part = iso_string.split("T") if "T" in iso_string else (iso_string, "")
+ 
+            if len(date_part.split("Y")) == 2:
+                years = int(date_part.split("Y")[0])
+            else:
+                years = 0
+            if len(date_part.split("M")) == 2:
+                months = int(date_part.split("M")[0].split("Y")[-1])
+            else:
+                months = 0
+            if len(date_part.split("D")) == 2:
+                days = int(date_part.split("D")[0].split("M")[-1].split("Y")[-1])
+            else:
+                days = 0
+            if len(time_part.split("H")) == 2:
+                hours = int(time_part.split("H")[0])
+            else:
+                hours = 0
+            if len(time_part.split("M")) == 2:
+                minutes = int(time_part.split("M")[0].split("H")[-1])
+            else:
+                minutes = 0
+            if len(time_part.split("S")) == 2:
+                seconds = int(time_part.split("S")[0].split("M")[-1].split("H")[-1])
+            else:
+                seconds = 0
+
+            super().__init__(
+                years=years,
+                months=months,
+                days=days,
+                hours=hours,
+                minutes=minutes,
+                seconds=seconds
+            )
+        self._iso_string = iso_string
+    
+    def __lt__(self, other: TimeDelta | dt.timedelta | relativedelta) -> bool:
+        if isinstance(other, dt.timedelta) or isinstance(other, TimeDelta):
+            return self.total_seconds() < other.total_seconds()
+        elif isinstance(other, relativedelta):
+            total_seconds = (
+                other.years * 365 * 24 * 3600 + 
+                other.months * 30 * 24 * 3600 + 
+                other.days * 24 * 3600 + 
+                other.hours * 3600 + 
+                other.minutes * 60 + 
+                other.seconds + 
+                other.microseconds / 1e6
+            )
+            return self.total_seconds() < total_seconds
+        else:
+            raise TypeError(f"Unsupported type for comparison: {type(other)}")
+        
+    def __lte__(self, other: TimeDelta | dt.timedelta | relativedelta) -> bool:
+        if isinstance(other, dt.timedelta) or isinstance(other, TimeDelta) or isinstance(other, relativedelta):
+            return self.__lt__(other) or self.__eq__(other)
+        else:
+            raise TypeError(f"Unsupported type for comparison: {type(other)}")
+        
+    def __str__(self) -> str:
+        return self.to_isoformat()
+    
+    def __truediv__(self, other: TimeDelta | dt.timedelta) -> float:
+        if isinstance(other, TimeDelta) or isinstance(other, dt.timedelta):
+            return self.total_seconds() / other.total_seconds()
+        else:
+            raise TypeError(f"Unsupported type for division: {type(other)}")
+    
+    def __floordiv__(self, other: TimeDelta | dt.timedelta) -> int:
+        if isinstance(other, TimeDelta) or isinstance(other, dt.timedelta):
+            return int(self.total_seconds() // other.total_seconds())
+        else:
+            raise TypeError(f"Unsupported type for floor division: {type(other)}")
+        
+    def total_seconds(self) -> float:
+        return (
+            self.years * 365 * 24 * 3600 +
+            self.months * 30 * 24 * 3600 +
+            self.days * 24 * 3600 +
+            self.hours * 3600 +
+            self.minutes * 60 +
+            self.seconds +
+            self.microseconds / 1e6
+        )
+    
+    def to_isoformat(self) -> str:
+        date_part = "".join([
+            f"{self.years}Y" if self.years else "",
+            f"{self.months}M" if self.months else "",
+            f"{self.days}D" if self.days else "",
+        ])
+        time_part = "".join([
+            f"{self.hours}H" if self.hours else "",
+            f"{self.minutes}M" if self.minutes else "",
+            f"{self.seconds}S" if self.seconds else "",
+        ])
+        return f"P{date_part}" + (f"T{time_part}" if time_part else "")
+
+
