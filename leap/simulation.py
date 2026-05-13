@@ -86,7 +86,7 @@ class Simulation:
         if time_horizon is not None:
             self.time_horizon = time_horizon
         else:
-            self.time_horizon = config["simulation"]["time_horizon"]
+            self.time_horizon = TimeDelta(iso_string=config["simulation"]["time_horizon"])
         if population_growth_type is not None:
             self.population_growth_type = population_growth_type
         else:
@@ -327,7 +327,7 @@ class Simulation:
             >>> from leap.simulation import Simulation
             >>> from leap.utils import get_data_path
             >>> import datetime as dt
-            >>> config_path = get_data_path("processed_data/config.json")
+            >>> config_path = get_data_path("processed_data/time_interval_365/config.json")
             >>> simulation = Simulation(
             ...     config=config_path, min_timepoint=dt.datetime(2027, 1, 1), num_births_initial=5
             ... )

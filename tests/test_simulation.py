@@ -162,7 +162,7 @@ def test_simulation_generate_initial_asthma(
 
     config["simulation"] = {
         "min_timepoint": min_timepoint,
-        "time_horizon": time_horizon,
+        "time_horizon": str(time_horizon),
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
@@ -309,7 +309,7 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
 
     config["simulation"] = {
         "min_timepoint": min_timepoint,
-        "time_horizon": time_horizon,
+        "time_horizon": str(time_horizon),
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
@@ -367,7 +367,7 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
     [
         (
             dt.datetime(2024, 1, 1),
-            dt.timedelta(days=365),
+            TimeDelta(years=1),
             TimeDelta(years=1),
             "CA",
             "M3",
@@ -448,7 +448,7 @@ def test_simulation_update_asthma_effects(
     max_timepoint = min_timepoint + time_horizon - time_interval
     config["simulation"] = {
         "min_timepoint": min_timepoint,
-        "time_horizon": time_horizon,
+        "time_horizon": str(time_horizon),
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
@@ -576,7 +576,7 @@ def test_reassess_asthma_diagnosis(
     max_timepoint = min_timepoint + time_horizon - time_interval
     config["simulation"] = {
         "min_timepoint": min_timepoint,
-        "time_horizon": time_horizon,
+        "time_horizon": str(time_horizon),
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
@@ -675,7 +675,7 @@ def test_simulation_get_new_agents(
 
     config["simulation"] = {
         "min_timepoint": min_timepoint,
-        "time_horizon": time_horizon,
+        "time_horizon": str(time_horizon),
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
@@ -879,7 +879,7 @@ def test_run_simulation_one_year(
 
     config["simulation"] = {
         "min_timepoint": min_timepoint,
-        "time_horizon": time_horizon,
+        "time_horizon": str(time_horizon),
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
@@ -1106,7 +1106,7 @@ def test_run_simulation_two_years(
 
     config["simulation"] = {
         "min_timepoint": min_timepoint,
-        "time_horizon": time_horizon,
+        "time_horizon": str(time_horizon),
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
@@ -1239,7 +1239,7 @@ def test_run_simulation_full(
 
     config["simulation"] = {
         "min_timepoint": min_timepoint,
-        "time_horizon": time_horizon,
+        "time_horizon": str(time_horizon),
         "province": province,
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
