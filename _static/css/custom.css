@@ -1,0 +1,116 @@
+
+/* Colors */
+
+:root {
+    --md-primary-fg-color: #02377e;
+    --md-accent-fg-color: #0c2046;
+    --primary-color-light: #d1edf1;
+    --primary-color-hover: #0c2046;
+    --bs-primary-rgb: 57, 188, 206;
+    --bs-link-color: #46cbf0;
+    --bs-link-hover-color: #0c2046;
+    --md-code-kw-color: #e74c3c;
+    --mystnb-source-margin-color: #02377e;
+}
+
+[data-md-color-primary=blue] {
+    --md-primary-fg-color: #02377e;
+    --md-primary-bg-color: #fff;
+    --md-primary-bg-color--light: hsla(0, 0%, 100%, .7);
+    --md-typeset-a-color: #2069ff;
+}
+
+.md-typeset a:focus, .md-typeset a:hover {
+    color: #70a0ff;
+}
+
+
+/* Layout */
+
+.md-sidebar {
+    width: 10rem;
+}
+
+.md-grid {
+    margin-left: 10px;
+    margin-right: 10px;
+    max-width: 1400px;
+}
+
+/* Code */
+
+.md-typeset code.notranslate {
+    word-break: keep-all;
+    white-space: nowrap;
+}
+
+.md-typeset code.snippet {
+    word-break: keep-all;
+    white-space: normal;
+    padding: 8px;
+}
+
+.md-typeset code.notranslate {
+    color: var(--md-code-kw-color);
+}
+
+/* Sphinx Tables */
+
+.md-typeset table.plot-table.data:not(.plain) td,
+.md-typeset table.plot-table.data:not(.plain) th {
+    padding: 0px;
+}
+
+.md-typeset table.data:not(.plain) th {
+    font-weight: 700;
+    min-width: 1rem;
+    padding: .9375em 1.25em;
+    vertical-align: top;
+}
+
+.md-typeset table.data:not(.plain) {
+    width: fit-content;
+    max-height: 500px;
+    display: block;
+}
+
+/* Bootstrap Tables */
+
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+}
+
+.table th,
+.table td {
+    padding: 0.5rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 700;
+    text-align: left;
+}
+
+.table tbody+tbody {
+    border-top: 2px solid #dee2e6;
+}
+
+/* myst_nb code cells */
+
+.cell_output {
+    padding-left: 0em;
+    overflow-x: scroll;
+}
+
+/* nbsphinx */
+
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 0ex;
+    padding-top: 0px;
+}
