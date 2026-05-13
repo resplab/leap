@@ -2,13 +2,13 @@ from __future__ import annotations
 import pandas as pd
 import numpy as np
 import datetime as dt
-from dateutil.relativedelta import relativedelta
-from leap.utils import get_data_path, check_timepoint, check_province, get_time_interval_tag
+from leap.utils import get_data_path, check_timepoint, check_province, get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.agent import Agent
+    from dateutil.relativedelta import relativedelta
 
 logger = get_logger(__name__)
 
@@ -20,10 +20,10 @@ class Reassessment:
         min_timepoint: dt.datetime = dt.datetime(2000, 1, 1),
         province: str = "CA",
         table: DataFrameGroupBy | None = None,
-        time_interval: dt.timedelta | relativedelta = relativedelta(years=1)
+        time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if table is None:
-            self.table = self.load_reassessment_table(min_timepoint, province, time_interval)
+            self.table = self.load_reassessment_table(min_timepoint, province, time_delta)
         else:
             self.table = table
 
@@ -53,7 +53,7 @@ class Reassessment:
         self,
         min_timepoint: dt.datetime,
         province: str,
-        time_interval: dt.timedelta | relativedelta
+        time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
         """Load the asthma diagnosis reassessment table.
 
@@ -61,7 +61,7 @@ class Reassessment:
             min_timepoint: the timepoint to start the data at.
             province: a string indicating the province abbreviation, e.g. "BC".
                 For all of Canada, set province to "CA".
-            time_interval: The time interval to use for the reassessment table, e.g. 1 year,
+            time_delta: The time interval to use for the reassessment table, e.g. 1 year,
                 5 years, etc.
 
         Returns:
@@ -77,9 +77,9 @@ class Reassessment:
             * ``province (str)``: a string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
         """
-        time_interval_tag = get_time_interval_tag(time_interval)
+        time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_interval_tag}/asthma_reassessment.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/asthma_reassessment.csv"),
             parse_dates=["timepoint"]
         )
         check_timepoint(min_timepoint, df)

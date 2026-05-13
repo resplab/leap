@@ -161,7 +161,7 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
     (
         "poly_parameters_incidence, poly_parameters_prevalence, incidence_parameters,"
         "prevalence_parameters, family_history_parameters, max_age, age, sex,"
-        "min_timepoint, timepoint, time_interval, province, occurrence_type, has_asthma"
+        "min_timepoint, timepoint, time_delta, province, occurrence_type, has_asthma"
     ),
     [
         (
@@ -325,7 +325,7 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
 def test_agent_has_asthma(
     config, poly_parameters_incidence, poly_parameters_prevalence, incidence_parameters,
     prevalence_parameters, family_history_parameters, max_age, age, sex, min_timepoint, timepoint,
-    time_interval, province, occurrence_type, has_asthma
+    time_delta, province, occurrence_type, has_asthma
 ):
     """
     Setting the incidence parameter ``β_fam_hist = [100, 0]`` and the family history parameter
@@ -333,7 +333,7 @@ def test_agent_has_asthma(
     minimum age for an asthma diagnosis is 3, so setting the agent age to 24 ensures that the agent
     is diagnosed with asthma.
     """
-    timepoint_index = timepoint - min_timepoint + time_interval
+    timepoint_index = timepoint - min_timepoint + time_delta
     incidence = Incidence(
         parameters=incidence_parameters, poly_parameters=poly_parameters_incidence, max_age=max_age
     )

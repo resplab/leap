@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 from dateutil.relativedelta import relativedelta
-from leap.utils import get_data_path, check_province, get_time_interval_tag
+from leap.utils import get_data_path, check_province, get_time_delta_tag
 from leap.control import ControlLevels
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -36,7 +36,7 @@ class Exacerbation:
         hyperparameters: dict | None = None,
         calibration_table: DataFrameGroupBy | None = None,
         initial_rate: float | None = None,
-        time_interval: dt.timedelta | relativedelta = relativedelta(years=1)
+        time_delta: dt.timedelta | relativedelta = relativedelta(years=1)
     ):
         if config is not None:
             self.hyperparameters = config["hyperparameters"]
@@ -52,15 +52,15 @@ class Exacerbation:
             )
         
         if calibration_table is None:
-            self.calibration_table = self.load_exacerbation_calibration(province, time_interval)
+            self.calibration_table = self.load_exacerbation_calibration(province, time_delta)
         else:
             self.calibration_table = calibration_table
 
-        self.time_interval = time_interval
+        self.time_delta = time_delta
         self.assign_random_β0()
         self.parameters["min_timepoint"] = min(
             [key[0] for key in self.calibration_table.groups.keys()]
-        ) + time_interval
+        ) + time_delta
 
     @property
     def hyperparameters(self) -> dict:
@@ -134,14 +134,14 @@ class Exacerbation:
         )
 
     def load_exacerbation_calibration(
-        self, province: str, time_interval: dt.timedelta | relativedelta
+        self, province: str, time_delta: dt.timedelta | relativedelta
     ) -> DataFrameGroupBy:
         r"""Load the exacerbation calibration table.
 
         Args:
             province: A string indicating the province abbreviation, e.g. ``"BC"``.
                 For all of Canada, set province to ``"CA"``.
-            time_interval: A time interval for the calibration data, e.g. ``relativedelta(years=1)``.
+            time_delta: A time interval for the calibration data, e.g. ``relativedelta(years=1)``.
 
         Returns:
             A dataframe grouped by timepoint and sex.
@@ -158,9 +158,9 @@ class Exacerbation:
 
                 \lambda = \alpha \cdot e^{\beta_0} \prod_{i=1}^3 e^{\beta_i c_i} 
         """
-        time_interval_tag = get_time_interval_tag(time_interval)
+        time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_interval_tag}/exacerbation_calibration.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/exacerbation_calibration.csv"),
             parse_dates=["timepoint"]
         )
         check_province(province)
@@ -202,7 +202,7 @@ class Exacerbation:
             raise ValueError("Either agent or age, sex, timepoint, and control_levels must be provided.")
 
         if initial:
-            timepoint = max(self.parameters["min_timepoint"], timepoint - self.time_interval)
+            timepoint = max(self.parameters["min_timepoint"], timepoint - self.time_delta)
             age = min(age - 1, 90)
             if age < 3:
                 return 0

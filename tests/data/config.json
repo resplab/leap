@@ -7,7 +7,7 @@
         "num_births_initial": 100,
         "max_age": 111,
         "until_all_die": false,
-        "time_interval": "P1Y"
+        "time_delta": "P1Y"
     },
     "antibiotic_exposure": {
         "parameters": {

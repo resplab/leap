@@ -27,7 +27,7 @@ from leap.reassessment import Reassessment
 from leap.severity import ExacerbationSeverity
 from leap.utility import Utility
 from leap.utils import get_data_path, timer, get_chunk_indices, create_process_bars, \
-    get_time_interval_tag, TimeDelta, date_range
+    get_time_delta_tag, TimeDelta, date_range
 from leap.logger import get_logger
 from typing import Tuple, TYPE_CHECKING
 if TYPE_CHECKING:
@@ -55,13 +55,13 @@ class Simulation:
         num_births_initial: int | None = None,
         until_all_die: bool | None = None,
         ignore_pollution_flag: bool = False,
-        time_interval: dt.timedelta | relativedelta | TimeDelta | None = None
+        time_delta: dt.timedelta | relativedelta | TimeDelta | None = None
     ):
         if config is None:
-            if time_interval is None:
-                time_interval = TimeDelta(years=1)
-            time_interval_tag = get_time_interval_tag(time_interval)
-            with open(get_data_path(f"processed_data/{time_interval_tag}/config.json")) as file:
+            if time_delta is None:
+                time_delta = TimeDelta(years=1)
+            time_delta_tag = get_time_delta_tag(time_delta)
+            with open(get_data_path(f"processed_data/{time_delta_tag}/config.json")) as file:
                 config: dict = json.load(file)
         elif isinstance(config, str) or isinstance(config, pathlib.Path):
             with open(config) as file:
@@ -75,10 +75,10 @@ class Simulation:
             self.max_age = max_age
         else:
             self.max_age = config["simulation"]["max_age"]
-        if time_interval is not None:
-            self.time_interval = time_interval
+        if time_delta is not None:
+            self.time_delta = time_delta
         else:
-            self.time_interval = TimeDelta(iso_string=config["simulation"]["time_interval"])
+            self.time_delta = TimeDelta(iso_string=config["simulation"]["time_delta"])
         if min_timepoint is not None:
             self.min_timepoint = min_timepoint
         else:
@@ -160,23 +160,23 @@ class Simulation:
     def min_timepoint(self, min_timepoint: dt.datetime):
         self._min_timepoint = min_timepoint
         try:
-            self.max_timepoint = min_timepoint + self.time_horizon - self.time_interval
+            self.max_timepoint = min_timepoint + self.time_horizon - self.time_delta
         except AttributeError:
             pass
 
     @property
-    def time_interval(self) -> TimeDelta:
+    def time_delta(self) -> TimeDelta:
         """The time interval of the simulation, e.g. 1 year, 5 years, etc."""
-        return self._time_interval
+        return self._time_delta
     
-    @time_interval.setter
-    def time_interval(self, time_interval: dt.timedelta | relativedelta | TimeDelta):
-        if isinstance(time_interval, TimeDelta):
-            self._time_interval = time_interval
-        elif isinstance(time_interval, dt.timedelta):
-            self._time_interval = TimeDelta(td=time_interval)
-        elif isinstance(time_interval, relativedelta):
-            self._time_interval = TimeDelta(rd=time_interval)
+    @time_delta.setter
+    def time_delta(self, time_delta: dt.timedelta | relativedelta | TimeDelta):
+        if isinstance(time_delta, TimeDelta):
+            self._time_delta = time_delta
+        elif isinstance(time_delta, dt.timedelta):
+            self._time_delta = TimeDelta(td=time_delta)
+        elif isinstance(time_delta, relativedelta):
+            self._time_delta = TimeDelta(rd=time_delta)
 
     @property
     def time_horizon(self) -> TimeDelta:
@@ -193,12 +193,12 @@ class Simulation:
             self._time_horizon = TimeDelta(rd=time_horizon)
 
         try:
-            self.max_timepoint = self.min_timepoint + time_horizon - self.time_interval
+            self.max_timepoint = self.min_timepoint + time_horizon - self.time_delta
         except AttributeError as e:
             logger.message(e)
             logger.message(self.min_timepoint)
             logger.message(time_horizon)
-            logger.message(self.time_interval.months)
+            logger.message(self.time_delta.months)
             pass
 
     @property
@@ -327,7 +327,7 @@ class Simulation:
             >>> from leap.simulation import Simulation
             >>> from leap.utils import get_data_path
             >>> import datetime as dt
-            >>> config_path = get_data_path("processed_data/time_interval_365/config.json")
+            >>> config_path = get_data_path("processed_data/time_delta_365/config.json")
             >>> simulation = Simulation(
             ...     config=config_path, min_timepoint=dt.datetime(2027, 1, 1), num_births_initial=5
             ... )
@@ -578,8 +578,8 @@ class Simulation:
 
         The agent in this function is a person who is either:
 
-        1. A new immigrant to Canada in the interval [timepoint, timepoint + time_interval].
-        2. A newborn baby born in the interval [timepoint, timepoint + time_interval].
+        1. A new immigrant to Canada in the interval [timepoint, timepoint + time_delta].
+        2. A newborn baby born in the interval [timepoint, timepoint + time_delta].
 
         This function simulates the agent's life from birth/immigration until death or emigration.
         
@@ -592,7 +592,7 @@ class Simulation:
                 simulation starts in 2010, then the timepoint index for 2010 is 0, for 2011 is 1, etc.
         """
         outcome_matrix = OutcomeMatrix(
-            self.until_all_die, self.min_timepoint, self.max_timepoint, self.max_age, self.time_interval
+            self.until_all_die, self.min_timepoint, self.max_timepoint, self.max_age, self.time_delta
         )
         self.control.assign_random_β0()
         self.exacerbation.assign_random_β0()
@@ -626,13 +626,13 @@ class Simulation:
 
         logger.info(
             f"Agent {agent.uuid.short} born/immigrated between {timepoint.strftime('%Y-%m-%d')} "
-            f"and { (timepoint + self.time_interval).strftime('%Y-%m-%d')}, "
+            f"and { (timepoint + self.time_delta).strftime('%Y-%m-%d')}, "
             f"age {agent.age}, sex {int(agent.sex)}, "
             f"immigrant: {is_immigrant}, "
             f"newborn: {not is_immigrant}"
         )
         logger.info(
-            f"| -- Timepoint: {agent.timepoint - self.time_interval}, "
+            f"| -- Timepoint: {agent.timepoint - self.time_delta}, "
             f"age: {agent.age}"
         )
 
@@ -754,7 +754,7 @@ class Simulation:
 
                 # update the patient stats
                 agent.age += 1
-                agent.timepoint += self.time_interval
+                agent.timepoint += self.time_delta
                 agent.timepoint_index += 1
 
                 if agent.age <= self.max_age and agent.timepoint < self.max_time_horizon + self.min_timepoint:
@@ -799,15 +799,15 @@ class Simulation:
 
         timepoints = date_range(
             start=self.min_timepoint,
-            stop=self.max_timepoint + self.time_interval,
-            step=self.time_interval
+            stop=self.max_timepoint + self.time_delta,
+            step=self.time_delta
         )
 
-        total_timepoints = TimeDelta(dt1=self.max_timepoint + self.time_interval, dt2=self.min_timepoint) // self.time_interval
+        total_timepoints = TimeDelta(dt1=self.max_timepoint + self.time_delta, dt2=self.min_timepoint) // self.time_delta
 
         outcome_matrix = OutcomeMatrix(
             self.until_all_die, self.min_timepoint, self.max_timepoint, self.max_age,
-            self.time_interval
+            self.time_delta
         )
         outcome_matrices = []
         # loop over the timepoints

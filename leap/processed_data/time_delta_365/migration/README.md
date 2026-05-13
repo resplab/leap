@@ -24,7 +24,7 @@ The emigration table has the following columns:
 
 | column | type | description |
 |-----------|----------|------|
-|`timepoint`| `datetime` | The starting date / time for the entry. Data in the selected row applies to dates from `[timepoint, timepoint + time_interval]`.<br> Range 2001-2065.|
+|`timepoint`| `datetime` | The starting date / time for the entry. Data in the selected row applies to dates from `[timepoint, timepoint + time_delta]`.<br> Range 2001-2065.|
 |`age`| `int` | Age in years|
 |`sex`| `str` | `"F"` = female, `"M"` = male.|
 |`province`| `str` | Two-letter province abbreviation e.g. "BC". For all of Canada, set province to "CA".|
@@ -40,7 +40,7 @@ The immigration table has the following columns:
 
 | column | type | description |
 |-----------|----------|------|
-|`timepoint`| `datetime` | The starting date / time for the entry. Data in the selected row applies to dates from `[timepoint, timepoint + time_interval]` <br> Range 2001-2065.|
+|`timepoint`| `datetime` | The starting date / time for the entry. Data in the selected row applies to dates from `[timepoint, timepoint + time_delta]` <br> Range 2001-2065.|
 |`age`| `int` | Age in years|
 |`sex`| `str` | `"F"` = female, `"M"` = male.|
 |`province`| `str` | Two-letter province abbreviation e.g. "BC". For all of Canada, set province to "CA".|

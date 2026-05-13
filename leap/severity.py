@@ -156,7 +156,7 @@ class ExacerbationSeverity:
 
         Args:
             num_current_timepoint: the number of asthma exacerbations the patient has had this
-                in the time interval ``[timepoint, timepoint + time_interval]``.
+                in the time interval ``[timepoint, timepoint + time_delta]``.
                 Will be used as the number of trials in the Multinomial distribution.
             prev_hosp: has patient been previously hospitalized for asthma?
             age: the age of the person in years.

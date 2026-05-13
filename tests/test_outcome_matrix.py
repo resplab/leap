@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.parametrize(
-    "until_all_die, min_timepoint, max_timepoint, max_age, time_interval",
+    "until_all_die, min_timepoint, max_timepoint, max_age, time_delta",
     [
         (
             False,
@@ -23,7 +23,7 @@ logger = get_logger(__name__)
     ]
 )
 def test_outcome_matrix_constructor(
-    until_all_die, min_timepoint, max_timepoint, max_age, time_interval
+    until_all_die, min_timepoint, max_timepoint, max_age, time_delta
 ):
 
     outcome_matrix = OutcomeMatrix(
@@ -31,9 +31,9 @@ def test_outcome_matrix_constructor(
         min_timepoint=min_timepoint,
         max_timepoint=max_timepoint,
         max_age=max_age,
-        time_interval=time_interval
+        time_delta=time_delta
     )
-    n_timepoints = len(list(date_range(min_timepoint, max_timepoint + time_interval, time_interval)))
+    n_timepoints = len(list(date_range(min_timepoint, max_timepoint + time_delta, time_delta)))
     assert outcome_matrix.min_timepoint == min_timepoint
     assert outcome_matrix.max_timepoint == max_timepoint
     assert outcome_matrix.max_age == max_age
@@ -51,7 +51,7 @@ def test_outcome_matrix_constructor(
 
 
 @pytest.mark.parametrize(
-    "until_all_die, min_timepoint, max_timepoint, time_interval, max_age, age, sex, increment",
+    "until_all_die, min_timepoint, max_timepoint, time_delta, max_age, age, sex, increment",
     [
         (
             False,
@@ -66,7 +66,7 @@ def test_outcome_matrix_constructor(
     ]
 )
 def test_outcome_matrix_increment(
-    until_all_die, min_timepoint, max_timepoint, time_interval, max_age, age, sex, increment
+    until_all_die, min_timepoint, max_timepoint, time_delta, max_age, age, sex, increment
 ):
 
     outcome_matrix = OutcomeMatrix(
@@ -74,7 +74,7 @@ def test_outcome_matrix_increment(
         min_timepoint=min_timepoint,
         max_timepoint=max_timepoint,
         max_age=max_age,
-        time_interval=time_interval
+        time_delta=time_delta
     )
     outcome_matrix.antibiotic_exposure.increment(
         column="n_antibiotic_exposure",
@@ -139,7 +139,7 @@ def test_combine_outcome_tables(
 
 
 @pytest.mark.parametrize(
-    "until_all_die, min_timepoint, max_timepoint, time_interval, max_age",
+    "until_all_die, min_timepoint, max_timepoint, time_delta, max_age",
     [
         (
             False,
@@ -151,21 +151,21 @@ def test_combine_outcome_tables(
     ]
 )
 def test_combine_outcome_matrices(
-    until_all_die, min_timepoint, max_timepoint, time_interval, max_age
+    until_all_die, min_timepoint, max_timepoint, time_delta, max_age
 ):
 
     outcome_matrix1 = OutcomeMatrix(
         until_all_die=until_all_die,
         min_timepoint=min_timepoint,
         max_timepoint=max_timepoint,
-        time_interval=time_interval,
+        time_delta=time_delta,
         max_age=max_age
     )
     outcome_matrix2 = OutcomeMatrix(
         until_all_die=until_all_die,
         min_timepoint=min_timepoint,
         max_timepoint=max_timepoint,
-        time_interval=time_interval,
+        time_delta=time_delta,
         max_age=max_age
     )
 

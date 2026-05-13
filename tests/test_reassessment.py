@@ -33,7 +33,7 @@ def test_reassessment_constructor(min_timepoint, province):
 
 
 @pytest.mark.parametrize(
-    "min_timepoint, province, sex, age, timepoint, time_interval, has_asthma",
+    "min_timepoint, province, sex, age, timepoint, time_delta, has_asthma",
     [
         (
             dt.datetime(2020, 1, 1),
@@ -47,14 +47,14 @@ def test_reassessment_constructor(min_timepoint, province):
     ]
 )
 def test_reassessment_agent_has_asthma(
-    config, min_timepoint, province, sex, age, timepoint, time_interval, has_asthma
+    config, min_timepoint, province, sex, age, timepoint, time_delta, has_asthma
 ):
     """
     By the ``asthma_reassessment.csv`` table, the probability of still having asthma
     is 1 for a male aged 53 in 2024 in BC.
     """
     reassessment = Reassessment(min_timepoint, province)
-    timepoint_index = TimeDelta(td=timepoint - min_timepoint) // time_interval
+    timepoint_index = TimeDelta(td=timepoint - min_timepoint) // time_delta
     agent = Agent(
         sex=sex,
         age=age,

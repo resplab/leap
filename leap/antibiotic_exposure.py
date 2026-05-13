@@ -5,7 +5,7 @@ import time
 import pandas as pd
 import numpy as np
 import datetime as dt
-from leap.utils import get_data_path, get_time_interval_tag, TimeDelta
+from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
@@ -21,7 +21,7 @@ class AntibioticExposure:
         config: dict | None = None,
         parameters: dict | None = None,
         mid_trends: DataFrameGroupBy | None = None,
-        time_interval: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
+        time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if config is not None:
             self.parameters = config["parameters"]
@@ -31,7 +31,7 @@ class AntibioticExposure:
             raise ValueError("Either config dict or parameters must be provided.")
 
         if mid_trends is None:
-            self.mid_trends = self.load_abx_mid_trends(time_interval)
+            self.mid_trends = self.load_abx_mid_trends(time_delta)
         else:
             self.mid_trends = mid_trends
 
@@ -100,7 +100,7 @@ class AntibioticExposure:
         else:
             return self.__copy__()
 
-    def load_abx_mid_trends(self, time_interval: dt.timedelta | relativedelta | TimeDelta):
+    def load_abx_mid_trends(self, time_delta: dt.timedelta | relativedelta | TimeDelta):
         """Load the antibiotic mid trends table.
 
         Returns:
@@ -113,9 +113,9 @@ class AntibioticExposure:
             * ``rate (float)``: The average number of courses of antibiotics prescribed during
               infancy, per person.
         """
-        time_interval_tag = get_time_interval_tag(time_interval)
+        time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_interval_tag}/midtrends.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/midtrends.csv"),
             parse_dates=["timepoint"]
         )
         grouped_df = df.groupby(["timepoint", "sex"])
@@ -136,7 +136,7 @@ class AntibioticExposure:
             >>> from leap.antibiotic_exposure import AntibioticExposure
             >>> from leap.utils import get_data_path
             >>> import json
-            >>> with open(get_data_path("processed_data/time_interval_365/config.json"), "r") as file:
+            >>> with open(get_data_path("processed_data/time_delta_365/config.json"), "r") as file:
             ...     config = json.load(file)["antibiotic_exposure"]
             >>> antibiotic_exposure = AntibioticExposure(
             ...     config=config

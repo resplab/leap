@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 from dateutil.relativedelta import relativedelta
-from leap.utils import get_data_path, check_timepoint, check_province, get_time_interval_tag
+from leap.utils import get_data_path, check_timepoint, check_province, get_time_delta_tag
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -21,10 +21,10 @@ class Death:
         province: str = "CA",
         min_timepoint: dt.datetime = dt.datetime(2000, 1, 1),
         life_table: DataFrameGroupBy | None = None,
-        time_interval: dt.timedelta | relativedelta = relativedelta(years=1)
+        time_delta: dt.timedelta | relativedelta = relativedelta(years=1)
     ):
         if life_table is None:
-            self.life_table = self.load_life_table(min_timepoint, province, time_interval)
+            self.life_table = self.load_life_table(min_timepoint, province, time_delta)
 
     @property
     def life_table(self) -> DataFrameGroupBy:
@@ -46,7 +46,7 @@ class Death:
         self,
         min_timepoint: dt.datetime,
         province: str,
-        time_interval: dt.timedelta | relativedelta
+        time_delta: dt.timedelta | relativedelta
     ) -> DataFrameGroupBy:
         """Load the life table data.
         
@@ -54,7 +54,7 @@ class Death:
             min_timepoint: The timepoint to start the data at.
             province: A string indicating the province abbreviation, e.g. ``"BC"``.
                 For all of Canada, set province to ``"CA"``.
-            time_interval: The time interval to use for the life table, e.g. 1 year, 5 years, etc.
+            time_delta: The time interval to use for the life table, e.g. 1 year, 5 years, etc.
         
         Returns:
             A grouped data frame grouped by timepoint.
@@ -67,9 +67,9 @@ class Death:
                 timepoint.
             * ``M (float)``: the probability of death for a male of a given age in a given timepoint.
         """
-        time_interval_tag = get_time_interval_tag(time_interval)
+        time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_interval_tag}/life_table.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/life_table.csv"),
             parse_dates=["timepoint"]
         )
         check_timepoint(min_timepoint, df)

@@ -5,7 +5,7 @@ import numpy as np
 import datetime as dt
 from dateutil.relativedelta import relativedelta
 from leap.utils import get_data_path, check_province, check_timepoint, check_projection_scenario, \
-    get_time_interval_tag
+    get_time_delta_tag
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -23,11 +23,11 @@ class Immigration:
         population_growth_type: str = "LG",
         max_age: int = 111,
         table: DataFrameGroupBy | None = None,
-        time_interval: relativedelta | dt.timedelta = relativedelta(years=1)
+        time_delta: relativedelta | dt.timedelta = relativedelta(years=1)
     ):
         if table is None:
             self.table = self.load_immigration_table(
-                min_timepoint, province, population_growth_type, max_age, time_interval
+                min_timepoint, province, population_growth_type, max_age, time_delta
             )
         else:
             self.table = table
@@ -60,7 +60,7 @@ class Immigration:
         province: str,
         population_growth_type: str,
         max_age: int,
-        time_interval: dt.timedelta | relativedelta
+        time_delta: dt.timedelta | relativedelta
     ) -> DataFrameGroupBy:
         """Load the data from ``processed_data/migration/immigration_table.csv``.
 
@@ -85,18 +85,18 @@ class Immigration:
                 See: `StatCan Projection Scenarios
                 <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
             max_age: The maximum age to include in the data. Must be between 0 and 111, inclusive.
-            time_interval: The time interval to use for the data.
+            time_delta: The time interval to use for the data.
 
         Returns:
             A dataframe grouped by timepoint, giving the probability of immigration for a given age,
             province, sex, and growth scenario.
         """
-        time_interval_tag = get_time_interval_tag(time_interval)
+        time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_interval_tag}/migration/immigration_table.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/migration/immigration_table.csv"),
             parse_dates=["timepoint"]
         )
-        check_timepoint(min_timepoint + time_interval, df)
+        check_timepoint(min_timepoint + time_delta, df)
         check_province(province)
         check_projection_scenario(population_growth_type)
 

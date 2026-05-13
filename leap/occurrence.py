@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 from scipy.special import logit, expit
-from leap.utils import get_data_path, poly, get_time_interval_tag, TimeDelta
+from leap.utils import get_data_path, poly, get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
 from typing import TYPE_CHECKING, Dict
 if TYPE_CHECKING:
@@ -31,7 +31,7 @@ class Occurrence:
         poly_parameters: Dict[str, list[float]] | None = None,
         max_age: int = 110,
         correction_table: DataFrameGroupBy | None = None,
-        time_interval: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
+        time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if config is not None:
             self.parameters = config["parameters"]
@@ -48,13 +48,13 @@ class Occurrence:
 
         if correction_table is None:
             self.correction_table = self.load_occurrence_correction_table(
-                time_interval=time_interval
+                time_delta=time_delta
             )
         else:
             self.correction_table = correction_table
 
         timepoints = np.unique([key[0] for key in self.correction_table.groups.keys()])
-        self.min_timepoint = min(timepoints) + time_interval
+        self.min_timepoint = min(timepoints) + time_delta
         self.max_timepoint = max(timepoints)
 
     @property
@@ -110,7 +110,7 @@ class Occurrence:
         self._max_timepoint = max_timepoint
 
     def load_occurrence_correction_table(
-        self, occurrence_type: str, time_interval: dt.timedelta | relativedelta | TimeDelta
+        self, occurrence_type: str, time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
         """Load the asthma incidence correction table.
 
@@ -124,9 +124,9 @@ class Occurrence:
             * ``correction (float)``: The correction term for the occurrence equation.
 
         """
-        time_interval_tag = get_time_interval_tag(time_interval)
+        time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_interval_tag}/asthma_occurrence_correction.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/asthma_occurrence_correction.csv"),
             parse_dates=["timepoint"]
         )
         df = df[df["type"] == occurrence_type]
@@ -268,9 +268,9 @@ class Incidence(Occurrence):
         poly_parameters: Dict[str, list[float]] | None = None,
         max_age: int = 110,
         correction_table: DataFrameGroupBy | None = None,
-        time_interval: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
+        time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
-        super().__init__(config, parameters, poly_parameters, max_age, correction_table, time_interval)
+        super().__init__(config, parameters, poly_parameters, max_age, correction_table, time_delta)
         self.parameters["βage"] = np.array(self.parameters["βage"])
         self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
 
@@ -344,7 +344,7 @@ class Incidence(Occurrence):
         self._poly_parameters = copy.deepcopy(poly_parameters)
 
     def load_occurrence_correction_table(
-        self, time_interval: dt.timedelta | relativedelta | TimeDelta
+        self, time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
         """Load the asthma incidence correction table.
 
@@ -360,7 +360,7 @@ class Incidence(Occurrence):
 
         """
         grouped_df = super().load_occurrence_correction_table(
-            occurrence_type="incidence", time_interval=time_interval
+            occurrence_type="incidence", time_delta=time_delta
         )
         return grouped_df
 
@@ -423,10 +423,10 @@ class Prevalence(Occurrence):
         poly_parameters: Dict[str, list[float]] | None = None,
         max_age: int = 110,
         correction_table: DataFrameGroupBy | None = None,
-        time_interval: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
+        time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         super().__init__(
-            config, parameters, poly_parameters, max_age, correction_table, time_interval
+            config, parameters, poly_parameters, max_age, correction_table, time_delta
         )
         self.parameters["βage"] = np.array(self.parameters["βage"])
         self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
@@ -554,10 +554,10 @@ class Prevalence(Occurrence):
         self._poly_parameters = copy.deepcopy(poly_parameters)
 
     def load_occurrence_correction_table(
-        self, time_interval: dt.timedelta | relativedelta | TimeDelta
+        self, time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
         grouped_df = super().load_occurrence_correction_table(
-            occurrence_type="prevalence", time_interval=time_interval
+            occurrence_type="prevalence", time_delta=time_delta
         )
         return grouped_df
 
@@ -624,7 +624,7 @@ def compute_asthma_age(
     prevalence: Prevalence,
     current_age: int,
     max_asthma_age: int = 110,
-    time_interval: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
+    time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
 ) -> int:
     """Compute the age at which the person (agent) is first diagnosed with asthma.
 
@@ -662,9 +662,9 @@ def compute_asthma_age(
             )
             if has_asthma:
                 return asthma_age.years
-            asthma_age += time_interval
+            asthma_age += time_delta
             asthma_age = min(asthma_age, TimeDelta(years=incidence.max_age))
-            timepoint += time_interval
+            timepoint += time_delta
             timepoint = min(timepoint, max_timepoint)
         return asthma_age.years
 
@@ -676,7 +676,7 @@ def agent_has_asthma(
     incidence: Incidence | None = None,
     age: int | None = None,
     timepoint: dt.datetime | None = None,
-    time_interval: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
+    time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
 ) -> bool:
     """Determine whether the agent obtains a new asthma diagnosis based on age and sex.
 
@@ -700,7 +700,7 @@ def agent_has_asthma(
         if occurrence_type == "incidence":
             timepoint = agent.timepoint
         else:
-            timepoint = agent.timepoint - time_interval
+            timepoint = agent.timepoint - time_delta
 
     if age < MIN_ASTHMA_AGE:
         has_asthma = False

@@ -29,7 +29,7 @@ def config():
                 "βcontrol_PC": -0.9781,
                 "βcontrol_UC": -0.5727,
                 "min_timepoint": dt.datetime(2001, 1, 1),
-                "time_interval": relativedelta(years=1)
+                "time_delta": relativedelta(years=1)
             },
             "BC"
         ),
@@ -52,7 +52,7 @@ def test_exacerbation_constructor(config, hyperparameters, parameters, province)
     assert exacerbation.parameters["β0"] > -50
     assert exacerbation.parameters["min_timepoint"] == parameters["min_timepoint"]
     assert exacerbation.calibration_table.get_group(
-        (parameters["min_timepoint"] - parameters["time_interval"], 0)
+        (parameters["min_timepoint"] - parameters["time_delta"], 0)
     )["age"].iloc[0] == 3
 
 

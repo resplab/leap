@@ -5,7 +5,7 @@ import numpy as np
 import datetime as dt
 from dateutil.relativedelta import relativedelta
 from leap.utils import get_data_path, check_timepoint, check_province, check_projection_scenario, \
-    get_time_interval_tag
+    get_time_delta_tag
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -23,11 +23,11 @@ class Emigration:
         province: str = "CA",
         population_growth_type: str = "LG",
         table: DataFrameGroupBy | None = None,
-        time_interval: dt.timedelta | relativedelta = relativedelta(years=1)
+        time_delta: dt.timedelta | relativedelta = relativedelta(years=1)
     ):
         if table is None:
             self.table = self.load_emigration_table(
-                min_timepoint, province, population_growth_type, time_interval
+                min_timepoint, province, population_growth_type, time_delta
             )
         else:
             self.table = table
@@ -55,7 +55,7 @@ class Emigration:
         min_timepoint: dt.datetime,
         province: str,
         population_growth_type: str,
-        time_interval: dt.timedelta | relativedelta
+        time_delta: dt.timedelta | relativedelta
     ) -> DataFrameGroupBy:
         """Load the data from ``processed_data/migration/emigration_table.csv``.
 
@@ -84,12 +84,12 @@ class Emigration:
             A dataframe grouped by timepoint, giving the probability of emigration for a given
             age, province, sex, and growth scenario.
         """
-        time_interval_tag = get_time_interval_tag(time_interval)
+        time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_interval_tag}/migration/emigration_table.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/migration/emigration_table.csv"),
             parse_dates=["timepoint"]
         )
-        check_timepoint(min_timepoint + time_interval, df)
+        check_timepoint(min_timepoint + time_delta, df)
         check_province(province)
         check_projection_scenario(population_growth_type)
 

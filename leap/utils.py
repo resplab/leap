@@ -401,20 +401,20 @@ def convert_non_serializable(obj: np.ndarray | object) -> list | str:
     return str(obj)
 
 
-def get_time_interval_tag(time_interval: dt.timedelta | relativedelta) -> str:
-    if isinstance(time_interval, dt.timedelta):
-        return f"time_interval_{time_interval.days}"
-    elif isinstance(time_interval, relativedelta):
+def get_time_delta_tag(time_delta: dt.timedelta | relativedelta) -> str:
+    if isinstance(time_delta, dt.timedelta):
+        return f"time_delta_{time_delta.days}"
+    elif isinstance(time_delta, relativedelta):
         days = 0
-        if time_interval.years > 0:
-            days += time_interval.years * 365
-        if time_interval.months > 0:
-            days += time_interval.months * 30
-        if time_interval.days > 0:
-            days += time_interval.days
-        return f"time_interval_{days}"
+        if time_delta.years > 0:
+            days += time_delta.years * 365
+        if time_delta.months > 0:
+            days += time_delta.months * 30
+        if time_delta.days > 0:
+            days += time_delta.days
+        return f"time_delta_{days}"
     else:
-        raise TypeError("time_interval must be a timedelta or relativedelta.")
+        raise TypeError("time_delta must be a timedelta or relativedelta.")
 
 
 class Sex:

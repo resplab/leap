@@ -133,7 +133,7 @@ class OutcomeMatrix:
         min_timepoint: dt.datetime,
         max_timepoint: dt.datetime,
         max_age: int,
-        time_interval: dt.timedelta | relativedelta | TimeDelta
+        time_delta: dt.timedelta | relativedelta | TimeDelta
     ):
         """Initialize the ``OutcomeMatrix`` class.
         
@@ -143,14 +143,14 @@ class OutcomeMatrix:
             min_timepoint: The minimum timepoint of the simulation.
             max_timepoint: The maximum timepoint of the simulation.
             max_age: The maximum age of the people in the simulation.
-            time_interval: The time interval between each timepoint in the simulation.
+            time_delta: The time interval between each timepoint in the simulation.
         """
 
         self.until_all_die = until_all_die
         self.min_timepoint = min_timepoint
         self.max_timepoint = max_timepoint
         self.max_age = max_age
-        self.time_interval = time_interval
+        self.time_delta = time_delta
         self.value_columns = {
             "alive": ["n_alive"],
             "antibiotic_exposure": ["n_antibiotic_exposure"],
@@ -170,15 +170,15 @@ class OutcomeMatrix:
             "immigration": ["n_immigrants"],
             "utility": ["utility"]
         }
-        time_interval_all_die = TimeDelta(years=max_age) if until_all_die else TimeDelta(days=0)
+        time_delta_all_die = TimeDelta(years=max_age) if until_all_die else TimeDelta(days=0)
 
         self.alive = self.create_table(
             ["timepoint", "age", "sex", "n_alive"],
             None,
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(max_age + 1),
             ["F", "M"],
@@ -189,8 +189,8 @@ class OutcomeMatrix:
             None,
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(max_age + 1),
             ["F", "M"],
@@ -201,8 +201,8 @@ class OutcomeMatrix:
             None,
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(max_age + 1),
             ["F", "M"],
@@ -213,8 +213,8 @@ class OutcomeMatrix:
             None,
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(max_age + 1),
             ["F", "M"],
@@ -223,7 +223,7 @@ class OutcomeMatrix:
         self.asthma_incidence_contingency_table = self.create_table(
             ["timepoint", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
             ["timepoint", "sex", "fam_history", "abx_exposure"],
-            date_range(min_timepoint, max_timepoint + time_interval, step=time_interval),
+            date_range(min_timepoint, max_timepoint + time_delta, step=time_delta),
             range(0, 2),
             range(0, max_age + 2),
             range(0, 2),
@@ -234,7 +234,7 @@ class OutcomeMatrix:
         self.asthma_prevalence_contingency_table = self.create_table(
             ["timepoint", "sex", "age", "fam_history", "abx_exposure", "n_asthma", "n_no_asthma"],
             ["timepoint", "sex", "fam_history", "abx_exposure"],
-            date_range(min_timepoint, max_timepoint + time_interval, step=time_interval),
+            date_range(min_timepoint, max_timepoint + time_delta, step=time_delta),
             range(0, 2),
             range(0, max_age + 2),
             range(0, 2),
@@ -247,8 +247,8 @@ class OutcomeMatrix:
             ["timepoint"],
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(max_age + 1),
             ["F", "M"],
@@ -259,8 +259,8 @@ class OutcomeMatrix:
             ["timepoint", "level"],
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(3),
             range(max_age + 1),
@@ -272,8 +272,8 @@ class OutcomeMatrix:
             None,
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(max_age + 1),
             ["F", "M"],
@@ -284,8 +284,8 @@ class OutcomeMatrix:
             None,
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),            range(max_age + 1),
             ["F", "M"],
             [0]
@@ -295,8 +295,8 @@ class OutcomeMatrix:
             None,
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(max_age + 1),
             ["F", "M"],
@@ -307,8 +307,8 @@ class OutcomeMatrix:
             None,
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(max_age + 1),
             ["F", "M"],
@@ -319,8 +319,8 @@ class OutcomeMatrix:
             ["timepoint", "severity"],
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(4),
             range(max_age + 1),
@@ -332,8 +332,8 @@ class OutcomeMatrix:
             None,
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(max_age + 1),
             ["F", "M"],
@@ -344,8 +344,8 @@ class OutcomeMatrix:
             None,
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(max_age + 1),
             ["F", "M"],
@@ -356,8 +356,8 @@ class OutcomeMatrix:
             None,
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(max_age + 1),
             ["F", "M"],
@@ -368,8 +368,8 @@ class OutcomeMatrix:
             None,
             date_range(
                 start=min_timepoint,
-                stop=max_timepoint + time_interval + time_interval_all_die,
-                step=time_interval
+                stop=max_timepoint + time_delta + time_delta_all_die,
+                step=time_delta
             ),
             range(max_age + 1),
             ["F", "M"],
@@ -643,7 +643,7 @@ class OutcomeMatrix:
             ...     min_timepoint=dt.datetime(2024, 1, 1),
             ...     max_timepoint=dt.datetime(2030, 1, 1),
             ...     max_age=100,
-            ...     time_interval=dt.timedelta(days=366)
+            ...     time_delta=dt.timedelta(days=366)
             ... )
             >>> table = outcome_matrix.create_table(
             ...     ["timepoint", "age", "sex", "n_alive"],
@@ -748,7 +748,7 @@ def combine_outcome_matrices(outcome_matrices: list[OutcomeMatrix]) -> OutcomeMa
         min_timepoint=outcome_matrices[0].min_timepoint,
         max_timepoint=outcome_matrices[0].max_timepoint,
         max_age=outcome_matrices[0].max_age,
-        time_interval=outcome_matrices[0].time_interval
+        time_delta=outcome_matrices[0].time_delta
     )
     
     for attribute in combined_matrix.__dict__.keys():
