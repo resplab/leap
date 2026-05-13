@@ -99,44 +99,11 @@ Model: Generalized Linear Model - Poisson
 
 Since our model projects into the future, we would like to be able to extend this data beyond
 ``2019``. Our model also makes predictions at 1-year age intervals, not 5-year age intervals.
-To obtain these projections, we use a ``Generalized Linear Model (GLM)``. A ``GLM`` is a type of
-regression analysis which is a generalized form of linear regression. See :doc:`model-glm` for more
-information on ``GLMs``.
-
-Probability Distribution
-----------------------------
-
-When fitting a ``GLM``, first you must choose a distribution for the ``response variable``. In our
-case, the response variable is the asthma prevalence or incidence. Incidence and prevalence are
-counts of the number of people diagnosed with asthma and the number of people with asthma,
-respectively, in a given time interval (a year, in our case). Since these are counts, we need a
-discrete probability distribution. The ``Poisson distribution`` is a good choice for our data.
-
-.. math::
-
-    P(Y = y) = p(y; \mu^{(i)}) = \dfrac{(\mu^{(i)})^{y} ~ e^{-\mu^{(i)}}}{y!}
-
-
-Link Function
------------------
-
-We also need to choose a ``link function``. Recall that the link function :math:`g(\mu^{(i)})`
-is used to relate the mean to the predicted value :math:`\eta^{(i)}`:
-
-.. math::
-
-    g(\mu^{(i)}) &= \eta^{(i)} \\
-    \mu^{(i)} &= E(Y \mid X = x^{(i)})
-
-How do we choose a link function? Well, we are free to choose any link function we like, but there
-are some constraints. For example, in the Poisson distribution, the mean is always positive.
-However, :math:`\eta^{(i)}` can be any real number. Therefore, we need a link function that maps
-real numbers to positive numbers. The ``log link function`` is a good choice for this:
-
-.. math::
-
-    g(\mu^{(i)}) = \log(\mu^{(i)}) = \eta^{(i)}
-
+To obtain these projections, we use a ``Generalized Linear Model (GLM)`` with a
+``Poisson distribution`` and ``log link function``. Incidence and prevalence are counts of
+people diagnosed with or living with asthma in a given year, making the Poisson distribution a
+natural choice. See :doc:`model-glm` for more information on ``GLMs``, including the Poisson
+distribution and log link function.
 
 Formula
 -----------------
@@ -184,6 +151,78 @@ in asthma incidence and hence prevalence, so we should include sex in our formul
         \cdot (a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m
 
 There are :math:`6 * 3 * 2 = 36` coefficients in the prevalence model.
+
+
+Assumptions
+-----------------
+
+The following assumptions are applied when generating predictions from the fitted model:
+
+* **Age**: The training data contains 5-year age bands up to a maximum midpoint of 63 years.
+  For ages greater than 63, incidence and prevalence are assumed to remain constant at the
+  rates predicted for age 63.
+
+* **Year**: Incidence and prevalence trends are predicted for the years ``2020–2025`` using
+  the fitted GLM. From ``2025`` onwards, to the end of the model time horizon, incidence and
+  prevalence are assumed to remain constant at the ``2025`` rates.
+
+
+Processed Data
+-----------------
+
+The processed data produced by this model is stored in ``asthma_occurrence_predictions.csv``.
+The data contains predicted asthma incidence and prevalence at 1-year age and year intervals,
+for each sex. The variables are:
+
+.. raw:: html
+
+  <table class="table">
+    <thead>
+      <tr>
+          <th>Column</th>
+          <th>Type</th>
+          <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code class="notranslate">year</code></td>
+        <td><code class="notranslate">int</code></td>
+        <td>
+          Calendar year of the prediction
+        </td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">sex</code></td>
+        <td><code class="notranslate">str</code></td>
+        <td>
+          <code class="notranslate">"F"</code> = Female,
+          <code class="notranslate">"M"</code> = Male
+        </td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">age</code></td>
+        <td><code class="notranslate">int</code></td>
+        <td>
+          Age in years
+        </td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">incidence</code></td>
+        <td><code class="notranslate">float</code></td>
+        <td>
+          Predicted asthma incidence for the given year, age, and sex, per 100 people
+        </td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">prevalence</code></td>
+        <td><code class="notranslate">float</code></td>
+        <td>
+          Predicted asthma prevalence for the given year, age, and sex, per 100 people
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
 
 .. _occurrence-model-2:
