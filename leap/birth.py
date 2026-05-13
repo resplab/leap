@@ -2,13 +2,13 @@ from __future__ import annotations
 import math
 import pandas as pd
 import datetime as dt
-from dateutil.relativedelta import relativedelta
 from leap.utils import get_data_path, check_timepoint, check_province, check_projection_scenario, \
-    get_time_interval_tag
+    get_time_interval_tag, TimeDelta
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
+    from dateutil.relativedelta import relativedelta
 
 logger = get_logger(__name__)
 
@@ -24,7 +24,7 @@ class Birth:
         max_age: int = 111,
         estimate: DataFrameGroupBy | None = None,
         initial_population: pd.DataFrame | None = None,
-        time_interval: dt.timedelta | relativedelta = relativedelta(years=1)
+        time_interval: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if estimate is None:
             if min_timepoint is None or province is None or population_growth_type is None:
@@ -128,7 +128,7 @@ class Birth:
         min_timepoint: dt.datetime,
         province: str,
         population_growth_type: str,
-        time_interval: dt.timedelta | relativedelta
+        time_interval: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
         """Load the data from ``birth_estimate.csv``.
         
@@ -205,7 +205,7 @@ class Birth:
         province: str,
         population_growth_type: str,
         max_age: int,
-        time_interval: dt.timedelta | relativedelta
+        time_interval: dt.timedelta | relativedelta | TimeDelta
     ) -> pd.DataFrame:
         """Load the data from ``initial_pop_distribution_prop.csv``.
         
