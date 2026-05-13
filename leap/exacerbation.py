@@ -3,14 +3,14 @@ import copy
 import pandas as pd
 import numpy as np
 import datetime as dt
-from dateutil.relativedelta import relativedelta
-from leap.utils import get_data_path, check_province, get_time_delta_tag
+from leap.utils import get_data_path, check_province, get_time_delta_tag, TimeDelta
 from leap.control import ControlLevels
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.agent import Agent
     from leap.utils import Sex
+    from dateutil.relativedelta import relativedelta
 
 
 class ExacerbationHistory:
@@ -36,7 +36,7 @@ class Exacerbation:
         hyperparameters: dict | None = None,
         calibration_table: DataFrameGroupBy | None = None,
         initial_rate: float | None = None,
-        time_delta: dt.timedelta | relativedelta = relativedelta(years=1)
+        time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if config is not None:
             self.hyperparameters = config["hyperparameters"]
@@ -134,7 +134,7 @@ class Exacerbation:
         )
 
     def load_exacerbation_calibration(
-        self, province: str, time_delta: dt.timedelta | relativedelta
+        self, province: str, time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
         r"""Load the exacerbation calibration table.
 
@@ -148,7 +148,7 @@ class Exacerbation:
 
             Each entry is a dataframe with the following columns:
 
-            * ``timepoint (int)``: calendar year.
+            * ``timepoint (int)``: a datetime timepoint.
             * ``sex (str)``: ``F`` = female, ``M`` = male.
             * ``age (int)``: integer age.
             * ``calibrator_multiplier (float)``: A multiplier used to calibrate the exacerbation rate;
@@ -179,18 +179,19 @@ class Exacerbation:
         control_levels: ControlLevels | None = None,
         initial: bool = False
     ) -> int:
-        """Compute the number of asthma exacerbations in a given year.
+        """Compute the number of asthma exacerbations in a given time interval.
 
         Args:
             agent: A person in the model.
             age: The age of the person in years.
             sex: The sex of the agent (person), 0 = female, 1 = male.
-            timepoint: The calendar year, e.g. 2024.
+            timepoint: The starting date / time of the time interval to compute the number of
+                exacerbations in, e.g. ``2024-01-01``.
             control_levels: The asthma control levels.
             initial: If this is the initial computation.
 
         Returns:
-            The number of asthma exacerbations in the given year.
+            The number of asthma exacerbations in the given time interval.
         """
 
         if agent is not None:

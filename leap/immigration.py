@@ -3,13 +3,13 @@ import math
 import pandas as pd
 import numpy as np
 import datetime as dt
-from dateutil.relativedelta import relativedelta
 from leap.utils import get_data_path, check_province, check_timepoint, check_projection_scenario, \
-    get_time_delta_tag
+    get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
+    from dateutil.relativedelta import relativedelta
 
 logger = get_logger(__name__)
 
@@ -23,7 +23,7 @@ class Immigration:
         population_growth_type: str = "LG",
         max_age: int = 111,
         table: DataFrameGroupBy | None = None,
-        time_delta: relativedelta | dt.timedelta = relativedelta(years=1)
+        time_delta: relativedelta | dt.timedelta | TimeDelta = TimeDelta(years=1)
     ):
         if table is None:
             self.table = self.load_immigration_table(
@@ -60,7 +60,7 @@ class Immigration:
         province: str,
         population_growth_type: str,
         max_age: int,
-        time_delta: dt.timedelta | relativedelta
+        time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
         """Load the data from ``processed_data/migration/immigration_table.csv``.
 

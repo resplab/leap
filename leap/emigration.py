@@ -42,7 +42,7 @@ class Emigration:
         * ``M``: the probability of a male emigrating.
         * ``F``: the probability of a female emigrating.
 
-        See ``processed_data/migration/emigration_table.csv``.
+        See ``processed_data/{time_delta_tag}/migration/emigration_table.csv``.
         """
         return self._table
     
@@ -57,7 +57,7 @@ class Emigration:
         population_growth_type: str,
         time_delta: dt.timedelta | relativedelta
     ) -> DataFrameGroupBy:
-        """Load the data from ``processed_data/migration/emigration_table.csv``.
+        """Load the data from ``processed_data/{time_delta_tag}/migration/emigration_table.csv``.
 
         Args:
             min_timepoint: the timepoint for the data to start at. Must be between 2001-2065.
