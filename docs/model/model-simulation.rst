@@ -623,7 +623,7 @@ Finally, we determine if the agent dies using a Bernoulli distribution:
 
 .. math::
 
-  \text{is_dead} \sim \text{Bernoulli}(q_x(\text{sex}, \text{age}))
+  \text{is dead} \sim \text{Bernoulli}(q_x(\text{sex}, \text{age}))
 
 Step 11: Check if agent emigrates
 -----------------------------------
