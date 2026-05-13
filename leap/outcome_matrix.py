@@ -40,13 +40,17 @@ class OutcomeTable:
         """
 
         if filter_columns is not None:
-            f = "".join(
-                [
-                    f"({key} == '{value}') & " if isinstance(value, (str, dt.datetime)) else
-                    f"({key} == {value}) & "
-                    for key, value in filter_columns.items()]
-            )[:-3]  # Remove the last '&'
-            df_filtered = self.data.query(f)
+            # f = "".join(
+            #     [
+            #         f"({key} == '{value}') & " if isinstance(value, (str, dt.datetime)) else
+            #         f"({key} == {value}) & "
+            #         for key, value in filter_columns.items()]
+            # )[:-3]  # Remove the last '&'
+            f = " & ".join(
+                f"({key} == @{key})"
+                for key in filter_columns
+            )
+            df_filtered = self.data.query(f, local_dict=filter_columns)
             self.data.loc[df_filtered.index, column] += amount
         else:
             self.data[column] += amount
