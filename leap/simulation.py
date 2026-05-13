@@ -7,6 +7,8 @@ import sys
 import pandas as pd
 from tqdm import tqdm
 import multiprocessing as mp
+import datetime as dt
+from dateutil.relativedelta import relativedelta
 from leap.agent import Agent
 from leap.antibiotic_exposure import AntibioticExposure
 from leap.birth import Birth
@@ -24,7 +26,8 @@ from leap.pollution import PollutionTable, Pollution
 from leap.reassessment import Reassessment
 from leap.severity import ExacerbationSeverity
 from leap.utility import Utility
-from leap.utils import get_data_path, timer, get_chunk_indices, create_process_bars
+from leap.utils import get_data_path, timer, get_chunk_indices, create_process_bars, \
+    get_time_interval_tag, TimeDelta, date_range
 from leap.logger import get_logger
 from typing import Tuple, TYPE_CHECKING
 if TYPE_CHECKING:
@@ -46,15 +49,19 @@ class Simulation:
         config: dict | str | pathlib.Path | None = None,
         province: str | None = None,
         max_age: int | None = None,
-        min_year: int | None = None,
-        time_horizon: int | None = None,
+        min_timepoint: dt.datetime | None = None,
+        time_horizon: dt.timedelta | None = None,
         population_growth_type: str | None = None,
         num_births_initial: int | None = None,
         until_all_die: bool | None = None,
-        ignore_pollution_flag: bool = False
+        ignore_pollution_flag: bool = False,
+        time_interval: dt.timedelta | relativedelta | TimeDelta | None = None
     ):
         if config is None:
-            with open(get_data_path("processed_data/config.json")) as file:
+            if time_interval is None:
+                time_interval = TimeDelta(years=1)
+            time_interval_tag = get_time_interval_tag(time_interval)
+            with open(get_data_path(f"processed_data/{time_interval_tag}/config.json")) as file:
                 config: dict = json.load(file)
         elif isinstance(config, str) or isinstance(config, pathlib.Path):
             with open(config) as file:
@@ -68,10 +75,14 @@ class Simulation:
             self.max_age = max_age
         else:
             self.max_age = config["simulation"]["max_age"]
-        if min_year is not None:
-            self.min_year = min_year
+        if time_interval is not None:
+            self.time_interval = time_interval
         else:
-            self.min_year = config["simulation"]["min_year"]
+            self.time_interval = TimeDelta(iso_string=config["simulation"]["time_interval"])
+        if min_timepoint is not None:
+            self.min_timepoint = min_timepoint
+        else:
+            self.min_timepoint = config["simulation"]["min_timepoint"]
         if time_horizon is not None:
             self.time_horizon = time_horizon
         else:
@@ -89,15 +100,15 @@ class Simulation:
         else:
             self.until_all_die = config["simulation"]["until_all_die"]
         self.agent = None
-        self.birth = Birth(self.min_year, self.province, self.population_growth_type, self.max_age)
-        self.emigration = Emigration(self.min_year, self.province, self.population_growth_type)
+        self.birth = Birth(self.min_timepoint, self.province, self.population_growth_type, self.max_age)
+        self.emigration = Emigration(self.min_timepoint, self.province, self.population_growth_type)
         self.immigration = Immigration(
-            self.min_year, self.province, self.population_growth_type, self.max_age
+            self.min_timepoint, self.province, self.population_growth_type, self.max_age
         )
-        self.death = Death(self.province, self.min_year)
+        self.death = Death(self.province, self.min_timepoint)
         self.incidence = Incidence(config["incidence"])
         self.prevalence = Prevalence(config["prevalence"])
-        self.reassessment = Reassessment(self.min_year, self.province)
+        self.reassessment = Reassessment(self.min_timepoint, self.province)
         self.control = Control(config["control"])
         self.exacerbation = Exacerbation(config["exacerbation"], self.province)
         self.exacerbation_severity = ExacerbationSeverity(config["exacerbation_severity"])
@@ -116,7 +127,7 @@ class Simulation:
             f"Simulation("
             f"province='{self.province}', "
             f"max_age={self.max_age}, "
-            f"min_year={self.min_year}, "
+            f"min_timepoint={self.min_timepoint}, "
             f"time_horizon={self.time_horizon}, "
             f"population_growth_type='{self.population_growth_type}')"
             f"num_births_initial={self.num_births_initial}, "
@@ -141,40 +152,69 @@ class Simulation:
         self._max_age = max_age
 
     @property
-    def min_year(self) -> int:
-        """The starting year of the simulation."""
-        return self._min_year
+    def min_timepoint(self) -> dt.datetime:
+        """The starting timepoint of the simulation."""
+        return self._min_timepoint
 
-    @min_year.setter
-    def min_year(self, min_year: int):
-        self._min_year = min_year
+    @min_timepoint.setter
+    def min_timepoint(self, min_timepoint: dt.datetime):
+        self._min_timepoint = min_timepoint
         try:
-            self.max_year = min_year + self.time_horizon - 1
+            self.max_timepoint = min_timepoint + self.time_horizon - self.time_interval
         except AttributeError:
             pass
 
     @property
-    def time_horizon(self) -> int:
+    def time_interval(self) -> TimeDelta:
+        """The time interval of the simulation, e.g. 1 year, 5 years, etc."""
+        return self._time_interval
+    
+    @time_interval.setter
+    def time_interval(self, time_interval: dt.timedelta | relativedelta | TimeDelta):
+        if isinstance(time_interval, TimeDelta):
+            self._time_interval = time_interval
+        elif isinstance(time_interval, dt.timedelta):
+            self._time_interval = TimeDelta(td=time_interval)
+        elif isinstance(time_interval, relativedelta):
+            self._time_interval = TimeDelta(rd=time_interval)
+
+    @property
+    def time_horizon(self) -> TimeDelta:
         """The number of years the simulation will run for."""
         return self._time_horizon
 
     @time_horizon.setter
-    def time_horizon(self, time_horizon: int):
-        self._time_horizon = time_horizon
+    def time_horizon(self, time_horizon: dt.timedelta | TimeDelta):
+        if isinstance(time_horizon, TimeDelta):
+            self._time_horizon = time_horizon
+        elif isinstance(time_horizon, dt.timedelta):
+            self._time_horizon = TimeDelta(td=time_horizon)
+        elif isinstance(time_horizon, relativedelta):
+            self._time_horizon = TimeDelta(rd=time_horizon)
+
         try:
-            self.max_year = self.min_year + time_horizon - 1
-        except AttributeError:
+            self.max_timepoint = self.min_timepoint + time_horizon - self.time_interval
+        except AttributeError as e:
+            logger.message(e)
+            logger.message(self.min_timepoint)
+            logger.message(time_horizon)
+            logger.message(self.time_interval.months)
             pass
 
     @property
-    def max_time_horizon(self) -> int:
-        """The maximum number of years the simulation will run for."""
+    def max_time_horizon(self) -> TimeDelta:
+        """The maximum amount of time the simulation will run for."""
         return self._max_time_horizon
 
     @max_time_horizon.setter
-    def max_time_horizon(self, max_time_horizon: int):
-        """Set the maximum number of years the simulation will run for."""
-        self._max_time_horizon = max_time_horizon
+    def max_time_horizon(self, max_time_horizon: dt.timedelta | TimeDelta):
+        """Set the maximum amount of time the simulation will run for."""
+        if isinstance(max_time_horizon, TimeDelta):
+            self._max_time_horizon = max_time_horizon
+        elif isinstance(max_time_horizon, dt.timedelta):
+            self._max_time_horizon = TimeDelta(td=max_time_horizon)
+        elif isinstance(max_time_horizon, relativedelta):
+            self._max_time_horizon = TimeDelta(rd=max_time_horizon)
 
     @property
     def until_all_die(self) -> bool:
@@ -188,7 +228,7 @@ class Simulation:
             raise ValueError("until_all_die must be a boolean value.")
         self._until_all_die = until_all_die
         if until_all_die:
-            self.max_time_horizon = np.iinfo(np.int32).max
+            self.max_time_horizon = TimeDelta(days=np.iinfo(np.int32).max)
         else:
             self.max_time_horizon = self.time_horizon
 
@@ -228,17 +268,21 @@ class Simulation:
         self._num_births_initial = num_births_initial
 
     def get_num_new_agents(
-        self, year: int, min_year: int, num_new_born: int, num_immigrants: int
+        self,
+        timepoint: dt.datetime,
+        min_timepoint: dt.datetime,
+        num_new_born: int,
+        num_immigrants: int
     ) -> int:
-        """Get the number of new agents born/immigrated in a given year.
+        """Get the number of new agents born/immigrated at a given timepoint.
 
-        For the first year, we generate the initial population.
-        For subsequent years, we generate the sum of the number of newborn babies and
+        For the first time interval, we generate the initial population.
+        For subsequent time intervals, we generate the sum of the number of newborn babies and
         the number of immigrants to Canada.
 
         Args:
-            year: The calendar year of the current iteration, e.g. 2027.
-            min_year: The calendar year of the initial iteration, e.g. 2010.
+            timepoint: The timepoint of the current iteration, e.g. 2027.
+            min_timepoint: The calendar year of the initial iteration, e.g. 2010.
             num_new_born: The number of babies born in the specified year.
             num_immigrants: The number of immigrants who moved to Canada in the specified year.
 
@@ -248,7 +292,7 @@ class Simulation:
 
         df = self.birth.initial_population
 
-        if year == min_year:
+        if timepoint == min_timepoint:
             num_new_agents = int(math.ceil(
                 num_new_born / np.sum(
                     df[df["age"] == 0]["prop"]
@@ -261,11 +305,11 @@ class Simulation:
 
         return num_new_agents
 
-    def get_new_agents(self, year: int) -> pd.DataFrame:
-        """Get the new agents born/immigrated in a given year.
+    def get_new_agents(self, timepoint: dt.datetime) -> pd.DataFrame:
+        """Get the new agents born/immigrated in a given time interval.
 
         Args:
-            year: The calendar year.
+            timepoint: The given timepoint.
 
         Returns:
             A dataframe containing a list of new agents to add to the model.
@@ -282,20 +326,23 @@ class Simulation:
 
             >>> from leap.simulation import Simulation
             >>> from leap.utils import get_data_path
+            >>> import datetime as dt
             >>> config_path = get_data_path("processed_data/config.json")
-            >>> simulation = Simulation(config=config_path, min_year=2027, num_births_initial=5)
-            >>> new_agents_df = simulation.get_new_agents(year=2028)
+            >>> simulation = Simulation(
+            ...     config=config_path, min_timepoint=dt.datetime(2027, 1, 1), num_births_initial=5
+            ... )
+            >>> new_agents_df = simulation.get_new_agents(timepoint=dt.datetime(2028, 1, 1))
             >>> list(new_agents_df["immigrant"]) # doctest: +NORMALIZE_WHITESPACE
             [True, True, True, True, True, True, False, False, False, False, False]
         """
-        # number of newborns and immigrants in a year
-        num_new_born = self.birth.get_num_newborn(self.num_births_initial, year)
-        num_immigrants = self.immigration.get_num_new_immigrants(num_new_born, year)
+        # number of newborns and immigrants in the time interval
+        num_new_born = self.birth.get_num_newborn(self.num_births_initial, timepoint)
+        num_immigrants = self.immigration.get_num_new_immigrants(num_new_born, timepoint)
         num_new_agents = self.get_num_new_agents(
-            year, self.min_year, num_new_born, num_immigrants
+            timepoint, self.min_timepoint, num_new_born, num_immigrants
         )
 
-        if year == self.min_year:
+        if timepoint == self.min_timepoint:
             initial_pop_indices = self.birth.get_initial_population_indices(self.num_births_initial)
             initial_population_df = self.birth.initial_population.iloc[initial_pop_indices]
             new_agents_df = pd.DataFrame({
@@ -306,18 +353,18 @@ class Simulation:
         else:
             # for a given year, sample from age/sex distribution of immigrants
             immigrant_indices = list(np.random.choice(
-                a=range(self.immigration.table.get_group(year).shape[0]),
+                a=range(self.immigration.table.get_group(timepoint).shape[0]),
                 size=num_immigrants,
-                p=list(self.immigration.table.get_group(year)["prop_immigrants_year"])
+                p=list(self.immigration.table.get_group(timepoint)["prop_immigrants_timepoint"])
             ))
 
-            immigrant_df = self.immigration.table.get_group(year).iloc[immigrant_indices]
+            immigrant_df = self.immigration.table.get_group(timepoint).iloc[immigrant_indices]
             sexes_immigrant = immigrant_df["sex"].tolist()
             ages_immigrant = immigrant_df["age"].tolist()
 
             # for a given year, get the data for the newborns
             # NOTE: new_born_df is a DataFrame with only one row
-            new_born_df = self.birth.estimate.get_group(year)
+            new_born_df = self.birth.estimate.get_group(timepoint)
             sexes_birth = list(
                 np.random.binomial(n=1, p=new_born_df["prop_male"].iloc[0], size=num_new_born)
             )
@@ -357,19 +404,19 @@ class Simulation:
             agent.control_levels = self.control.compute_control_levels(
                 sex=agent.sex, age=agent.age, initial=True
             )
-            agent.exacerbation_history.num_current_year = \
+            agent.exacerbation_history.num_current_timepoint = \
                 self.exacerbation.compute_num_exacerbations(
                     agent=agent, initial=True
                 )
             # the number of exacerbations by severity
-            agent.exacerbation_severity_history.current_year = \
+            agent.exacerbation_severity_history.current_timepoint = \
                 self.exacerbation_severity.compute_distribution(
-                    num_current_year=agent.exacerbation_history.num_current_year,
+                    num_current_timepoint=agent.exacerbation_history.num_current_timepoint,
                     prev_hosp=(agent.total_hosp > 0),
                     age=agent.age
                 )
             # update total hospitalizations
-            agent.total_hosp += agent.exacerbation_severity_history.current_year[3]
+            agent.total_hosp += agent.exacerbation_severity_history.current_timepoint[3]
 
     def reassess_asthma_diagnosis(self, agent: Agent, outcome_matrix: OutcomeMatrix):
         """Reassess if the agent has asthma.
@@ -381,8 +428,8 @@ class Simulation:
         agent.has_asthma = self.reassessment.agent_has_asthma(agent)
 
         if agent.has_asthma:
-            agent.exacerbation_history.num_prev_year = agent.exacerbation_history.num_current_year
-            agent.exacerbation_severity_history.prev_year = agent.exacerbation_severity_history.current_year
+            agent.exacerbation_history.num_prev_timepoint = agent.exacerbation_history.num_current_timepoint
+            agent.exacerbation_severity_history.prev_timepoint = agent.exacerbation_severity_history.current_timepoint
             self.update_asthma_effects(agent, outcome_matrix)
 
     def update_asthma_effects(self, agent: Agent, outcome_matrix: OutcomeMatrix):
@@ -405,7 +452,7 @@ class Simulation:
             outcome_matrix.control.increment(
                 column="prob",
                 filter_columns={
-                    "year": agent.year,
+                    "timepoint": agent.timepoint,
                     "level": level,
                     "sex": str(agent.sex),
                     "age": agent.age
@@ -413,35 +460,35 @@ class Simulation:
                 amount=agent.control_levels.as_array()[level]
             )
 
-        agent.exacerbation_history.num_current_year = self.exacerbation.compute_num_exacerbations(
+        agent.exacerbation_history.num_current_timepoint = self.exacerbation.compute_num_exacerbations(
             agent=agent
         )
 
-        if agent.exacerbation_history.num_current_year != 0:
-            agent.exacerbation_severity_history.current_year = self.exacerbation_severity.compute_distribution(
-                agent.exacerbation_history.num_current_year,
+        if agent.exacerbation_history.num_current_timepoint != 0:
+            agent.exacerbation_severity_history.current_timepoint = self.exacerbation_severity.compute_distribution(
+                agent.exacerbation_history.num_current_timepoint,
                 agent.total_hosp > 0,
                 agent.age
             )
-            agent.total_hosp += agent.exacerbation_severity_history.current_year[3]
+            agent.total_hosp += agent.exacerbation_severity_history.current_timepoint[3]
             outcome_matrix.exacerbation.increment(
                 column="n_exacerbations",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
-                amount=agent.exacerbation_history.num_current_year
+                filter_columns={"timepoint": agent.timepoint, "age": agent.age, "sex": str(agent.sex)},
+                amount=agent.exacerbation_history.num_current_timepoint
             )
 
             outcome_matrix.exacerbation_hospital.increment(
                 column="n_hospitalizations",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
-                amount=agent.exacerbation_severity_history.current_year[3]
+                filter_columns={"timepoint": agent.timepoint, "age": agent.age, "sex": str(agent.sex)},
+                amount=agent.exacerbation_severity_history.current_timepoint[3]
             )
             for level in range(4):
                 outcome_matrix.exacerbation_by_severity.increment(
                     column="p_exacerbations",
                     filter_columns={
-                        "year": agent.year, "age": agent.age, "sex": str(agent.sex), "severity": level
+                        "timepoint": agent.timepoint, "age": agent.age, "sex": str(agent.sex), "severity": level
                     },
-                    amount=agent.exacerbation_severity_history.current_year[level]
+                    amount=agent.exacerbation_severity_history.current_timepoint[level]
                 )
 
     def check_if_agent_gets_new_asthma_diagnosis(self, agent: Agent, outcome_matrix: OutcomeMatrix):
@@ -463,7 +510,7 @@ class Simulation:
             agent.asthma_age = agent.age
             outcome_matrix.asthma_incidence.increment(
                 column="n_new_diagnoses",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
+                filter_columns={"timepoint": agent.timepoint, "age": agent.age, "sex": str(agent.sex)}
             )
             self.update_asthma_effects(agent, outcome_matrix)
 
@@ -472,13 +519,17 @@ class Simulation:
                 agent.asthma_status = True
                 outcome_matrix.asthma_status.increment(
                     column="status",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
+                    filter_columns={
+                        "timepoint": agent.timepoint,
+                        "age": agent.age,
+                        "sex": str(agent.sex)
+                    }
                 )
 
         outcome_matrix.asthma_incidence_contingency_table.increment(
             column="n_asthma" if agent.has_asthma else "n_no_asthma",
             filter_columns={
-                "year": agent.year, "age": agent.age, "sex": str(agent.sex),
+                "timepoint": agent.timepoint, "age": agent.age, "sex": str(agent.sex),
                 "fam_history": agent.has_family_history,
                 "abx_exposure": agent.num_antibiotic_use,
             }
@@ -486,9 +537,8 @@ class Simulation:
 
     def worker(
         self,
-        year: int,
-        year_index: int,
-        month: int,
+        timepoint: dt.datetime,
+        timepoint_index: int,
         new_agents_df: pd.DataFrame,
         indices: list[int],
         process_id: int,
@@ -497,10 +547,9 @@ class Simulation:
         """Worker function for multiprocessing.
         
         Args:
-            year: The current year of the simulation.
-            year_index: The index of the current year in the simulation. For example, if the
-                simulation starts in 2010, then the year index for 2010 is 0, for 2011 is 1, etc.
-            month: The month of the year when the agent is born/immigrates.
+            timepoint: The current timepoint of the simulation.
+            timepoint_index: The index of the current timepoint in the simulation. For example, if the
+                simulation starts in 2010, then the timepoint index for 2010 is 0, for 2011 is 1, etc.
             new_agents_df: A dataframe containing the new agents to simulate.
             indices: A list of indices of the new agents to simulate.
             process_id: The ID for the process.
@@ -512,9 +561,8 @@ class Simulation:
                 sex=new_agents_df["sex"].iloc[index],
                 age=new_agents_df["age"].iloc[index],
                 is_immigrant=new_agents_df["immigrant"].iloc[index],
-                year=year,
-                year_index=year_index,
-                month=month
+                timepoint=timepoint,
+                timepoint_index=timepoint_index
             )
             queue.put((agent_id.short, process_id, outcome_matrix))
 
@@ -523,16 +571,15 @@ class Simulation:
         sex: str,
         age: int,
         is_immigrant: bool,
-        year: int,
-        year_index: int,
-        month: int
+        timepoint: dt.datetime,
+        timepoint_index: int
     ) -> Tuple[UUID4, OutcomeMatrix]:
         """Simulate a new agent in the model.
 
         The agent in this function is a person who is either:
 
-        1. A new immigrant to Canada in the specified year.
-        2. A newborn baby born in the specified year.
+        1. A new immigrant to Canada in the interval [timepoint, timepoint + time_interval].
+        2. A newborn baby born in the interval [timepoint, timepoint + time_interval].
 
         This function simulates the agent's life from birth/immigration until death or emigration.
         
@@ -540,14 +587,12 @@ class Simulation:
             sex: One of ``"M"`` or ``"F"``.
             age: The age of the agent.
             is_immigrant: Whether or not the agent (person) is an immigrant.
-            year: The current year of the simulation.
-            year_index: The index of the current year in the simulation. For example, if the
-                simulation starts in 2010, then the year index for 2010 is 0, for 2011 is 1, etc.
-            month: The month of the year when the agent is born/immigrates.
-
+            timepoint: The current timepoint of the simulation.
+            timepoint_index: The index of the current timepoint in the simulation. For example, if the
+                simulation starts in 2010, then the timepoint index for 2010 is 0, for 2011 is 1, etc.
         """
         outcome_matrix = OutcomeMatrix(
-            self.until_all_die, self.min_year, self.max_year, self.max_age
+            self.until_all_die, self.min_timepoint, self.max_timepoint, self.max_age, self.time_interval
         )
         self.control.assign_random_β0()
         self.exacerbation.assign_random_β0()
@@ -562,19 +607,17 @@ class Simulation:
             pollution = Pollution(
                 pollution_table=self.pollution_table.copy(),
                 SSP=self.SSP,
-                year=year,
-                month=month,
+                timepoint=timepoint,
                 cduid=census_division.cduid
             )
         agent = Agent(
             sex=sex,
             age=age,
-            year=year,
-            year_index=year_index,
+            timepoint=timepoint,
+            timepoint_index=timepoint_index,
             family_history=self.family_history.copy(),
             antibiotic_exposure=self.antibiotic_exposure.copy(),
             province=self.province,
-            month=month,
             ssp=self.SSP,
             census_division=census_division,
             pollution=pollution
@@ -582,30 +625,31 @@ class Simulation:
         # pbar.set_description(f"Agent {agent.uuid.short}")
 
         logger.info(
-            f"Agent {agent.uuid.short} born/immigrated in year {year}, "
+            f"Agent {agent.uuid.short} born/immigrated between {timepoint.strftime('%Y-%m-%d')} "
+            f"and { (timepoint + self.time_interval).strftime('%Y-%m-%d')}, "
             f"age {agent.age}, sex {int(agent.sex)}, "
             f"immigrant: {is_immigrant}, "
             f"newborn: {not is_immigrant}"
         )
         logger.info(
-            f"| -- Year: {agent.year_index + self.min_year - 1}, "
+            f"| -- Timepoint: {agent.timepoint - self.time_interval}, "
             f"age: {agent.age}"
         )
 
         if is_immigrant:
             outcome_matrix.immigration.increment(
-                "n_immigrants", {"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
+                "n_immigrants", {"timepoint": agent.timepoint, "age": agent.age, "sex": str(agent.sex)}
             )
 
         outcome_matrix.antibiotic_exposure.increment(
             column="n_antibiotic_exposure",
-            filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
+            filter_columns={"timepoint": agent.timepoint, "age": agent.age, "sex": str(agent.sex)},
             amount=agent.num_antibiotic_use
         )
 
         outcome_matrix.family_history.increment(
             column="has_family_history",
-            filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
+            filter_columns={"timepoint": agent.timepoint, "age": agent.age, "sex": str(agent.sex)},
             amount=agent.has_family_history
         )
 
@@ -619,7 +663,7 @@ class Simulation:
             )
 
         # go through event processes for each agent
-        while agent.alive and agent.age <= self.max_age and agent.year_index < self.max_time_horizon:
+        while agent.alive and agent.age <= self.max_age and agent.timepoint < self.max_time_horizon + self.min_timepoint:
             if not agent.has_asthma:
                 self.check_if_agent_gets_new_asthma_diagnosis(agent, outcome_matrix)
                 logger.info(f"| ---- Agent has asthma (incidence)? {agent.has_asthma}")
@@ -634,13 +678,17 @@ class Simulation:
             if agent.has_asthma:
                 outcome_matrix.asthma_prevalence.increment(
                     column="n_asthma",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
+                    filter_columns={
+                        "timepoint": agent.timepoint,
+                        "age": agent.age,
+                        "sex": str(agent.sex)
+                    },
                 )
 
             outcome_matrix.asthma_prevalence_contingency_table.increment(
                 column="n_asthma" if agent.has_asthma else "n_no_asthma",
                 filter_columns={
-                    "year": agent.year,
+                    "timepoint": agent.timepoint,
                     "age": agent.age,
                     "sex": str(agent.sex),
                     "fam_history": agent.has_family_history,
@@ -653,7 +701,11 @@ class Simulation:
             logger.info(f"| ---- Utility of asthma: {utility}")
             outcome_matrix.utility.increment(
                 column="utility",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
+                filter_columns={
+                    "timepoint": agent.timepoint,
+                    "age": agent.age,
+                    "sex": str(agent.sex)
+                },
                 amount=utility
             )
 
@@ -663,7 +715,11 @@ class Simulation:
 
             outcome_matrix.cost.increment(
                 column="cost",
-                filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)},
+                filter_columns={
+                    "timepoint": agent.timepoint,
+                    "age": agent.age,
+                    "sex": str(agent.sex)
+                },
                 amount=cost
             )
 
@@ -672,34 +728,38 @@ class Simulation:
                 agent.alive = False
                 outcome_matrix.death.increment(
                     column="n_deaths",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
+                    filter_columns={"timepoint": agent.timepoint, "age": agent.age, "sex": str(agent.sex)}
                 )
                 logger.info(f"| ---- Agent has died at age {agent.age}")
             # emigration
             elif self.emigration.compute_probability(
-                agent.year, agent.age, str(agent.sex)
+                agent.timepoint, agent.age, str(agent.sex)
             ):
                 agent.alive = False
                 outcome_matrix.emigration.increment(
                     column="n_emigrants",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
+                    filter_columns={"timepoint": agent.timepoint, "age": agent.age, "sex": str(agent.sex)}
                 )
                 logger.info(f"| ---- Agent has emigrated at age {agent.age}")
             else:
                 # record alive
                 outcome_matrix.alive.increment(
                     column="n_alive",
-                    filter_columns={"year": agent.year, "age": agent.age, "sex": str(agent.sex)}
+                    filter_columns={
+                        "timepoint": agent.timepoint,
+                        "age": agent.age,
+                        "sex": str(agent.sex)
+                    }
                 )
 
                 # update the patient stats
                 agent.age += 1
-                agent.year += 1
-                agent.year_index += 1
+                agent.timepoint += self.time_interval
+                agent.timepoint_index += 1
 
-                if agent.age <= self.max_age and agent.year_index < self.max_time_horizon:
+                if agent.age <= self.max_age and agent.timepoint < self.max_time_horizon + self.min_timepoint:
                     logger.info(
-                        f"| -- Year: {agent.year_index + self.min_year - 1}, age: {agent.age}"
+                        f"| -- Timepoint: {agent.timepoint}, age: {agent.age}"
                     )
 
         return agent.uuid, outcome_matrix
@@ -737,40 +797,45 @@ class Simulation:
         if until_all_die is not None:
             self.until_all_die = until_all_die
 
-        month = 1
-        years = np.arange(self.min_year, self.max_year + 1)
-        total_years = len(years)
+        timepoints = date_range(
+            start=self.min_timepoint,
+            stop=self.max_timepoint + self.time_interval,
+            step=self.time_interval
+        )
+
+        total_timepoints = TimeDelta(dt1=self.max_timepoint + self.time_interval, dt2=self.min_timepoint) // self.time_interval
 
         outcome_matrix = OutcomeMatrix(
-            self.until_all_die, self.min_year, self.max_year, self.max_age
+            self.until_all_die, self.min_timepoint, self.max_timepoint, self.max_age,
+            self.time_interval
         )
         outcome_matrices = []
-        # loop by year
-        year_bar = tqdm(
-            years,
+        # loop over the timepoints
+        time_bar = tqdm(
+            timepoints,
             position=0,
-            desc=f"Years",
+            desc=f"Time",
             leave=True,
             bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
             file=sys.stdout
         )
-        for year in years:
+        for timepoint_index, timepoint in enumerate(timepoints):
             # pbar_year.set_description(f"Year {year}")
-            year = int(year)
-            year_index = year - self.min_year
 
             new_agents_df = self.get_new_agents(
-                year=year
+                timepoint=timepoint
             )
 
-            logger.info(f"Year {year}, year {year_index} of {total_years} years, "
-                        f"{new_agents_df.shape[0]} new agents born/immigrated.")
+            logger.info(
+                f"Timepoint {timepoint.strftime('%Y-%m-%d')}, {timepoint_index} of {total_timepoints} time intervals, "
+                f"{new_agents_df.shape[0]} new agents born/immigrated."
+            )
             logger.info(f"\n{new_agents_df}")
 
             job_bar = tqdm(
                 total=new_agents_df.shape[0],
                 position=1,
-                desc=f"Year: {year}",
+                desc=f"Timepoint: {timepoint.strftime('%Y-%m-%d')}",
                 leave=True,
                 bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
                 file=sys.stdout
@@ -787,13 +852,14 @@ class Simulation:
                         sex=new_agents_df["sex"].iloc[i],
                         age=new_agents_df["age"].iloc[i],
                         is_immigrant=new_agents_df["immigrant"].iloc[i],
-                        year=year,
-                        year_index=year_index,
-                        month=month
+                        timepoint=timepoint,
+                        timepoint_index=timepoint_index
                     )
                     outcome_matrices.append(outcome_matrix_agent)
                     job_bar.update(1)
-                    job_bar.set_description(f"Year: {year} | Agent {agent_id.short}")
+                    job_bar.set_description(
+                        f"Timepoint: {timepoint.strftime('%Y-%m-%d')} | Agent {agent_id.short}"
+                    )
             else:
                 queue = _mp_context.Queue()
                 n_processes = n_cpu * 2
@@ -815,9 +881,8 @@ class Simulation:
                     p = _mp_context.Process(
                         target=self.worker,
                         args=(
-                            year,
-                            year_index,
-                            month,
+                            timepoint,
+                            timepoint_index,
                             new_agents_df,
                             list(range(chunk_start, chunk_end)),
                             process_id,
@@ -859,10 +924,10 @@ class Simulation:
                 for pbar in process_bars:
                     pbar.close()
 
-            year_bar.update()
+            time_bar.update()
             logger.message("Combining OutcomeMatrix list...", tqdm=True)
             outcome_matrix = combine_outcome_matrices(outcome_matrices)
-        year_bar.close()
+        time_bar.close()
         sys.stdout.write('\033[F')    # Move cursor up one line
         sys.stdout.write('\033[2K') 
         sys.stdout.flush()
