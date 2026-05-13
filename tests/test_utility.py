@@ -2,12 +2,14 @@ import pytest
 import pathlib
 import json
 import numpy as np
+import datetime as dt
 from leap.utility import Utility
 from leap.agent import Agent
 from leap.family_history import FamilyHistory
 from leap.antibiotic_exposure import AntibioticExposure
 from leap.control import ControlLevels
 from leap.severity import ExacerbationSeverityHistory
+from leap.utils import TimeDelta
 from tests.utils import __test_dir__
 
 
@@ -41,7 +43,7 @@ def test_utility_constructor(parameters, age, sex, eq5d):
 
 @pytest.mark.parametrize(
     (
-        "parameters, age, sex, year, year_index, province, has_asthma, asthma_age, control_levels,"
+        "parameters, age, sex, timepoint, timepoint_index, province, has_asthma, asthma_age, control_levels,"
         "exacerbation_severity_history, value"
     ),
     [
@@ -52,7 +54,7 @@ def test_utility_constructor(parameters, age, sex, eq5d):
             },
             9,
             "F",
-            2024,
+            dt.datetime(2024, 1, 1),
             0,
             "BC",
             False,
@@ -68,7 +70,7 @@ def test_utility_constructor(parameters, age, sex, eq5d):
             },
             9,
             "F",
-            2024,
+            dt.datetime(2024, 1, 1),
             0,
             "BC",
             True,
@@ -80,20 +82,19 @@ def test_utility_constructor(parameters, age, sex, eq5d):
     ]
 )
 def test_utility_compute_utility(
-    config, parameters, age, sex, year, year_index, province, has_asthma, asthma_age,
+    config, parameters, age, sex, timepoint, timepoint_index, province, has_asthma, asthma_age,
     control_levels, exacerbation_severity_history, value
 ):
     utility = Utility(parameters=parameters)
     agent = Agent(
         sex=sex,
         age=age,
-        year=year,
-        year_index=year_index,
+        timepoint=timepoint,
+        timepoint_index=timepoint_index,
         family_history=FamilyHistory(config=config["family_history"]),
         antibiotic_exposure=AntibioticExposure(config=config["antibiotic_exposure"]),
         exacerbation_severity_history=exacerbation_severity_history,
         province=province,
-        month=1,
         ssp=config["pollution"]["SSP"],
         has_asthma=has_asthma,
         asthma_age=asthma_age,
