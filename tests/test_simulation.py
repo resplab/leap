@@ -1254,7 +1254,7 @@ def test_run_simulation_full(
         min_agents_mp=min_agents_mp
     )
 
-    assert outcome_matrix.immigration.data.shape == (2 * time_horizon * (max_age + 1), 4)
+    assert outcome_matrix.immigration.data.shape == (2 * (time_horizon // time_interval) * (max_age + 1), 4)
     pd.testing.assert_frame_equal(
         outcome_matrix.immigration.get(
             columns=["timepoint", "sex", "n_immigrants"], timepoint=dt.datetime(2024, 1, 1)
