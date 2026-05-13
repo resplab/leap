@@ -1,15 +1,16 @@
 from __future__ import annotations
 import copy
+from sqlite3 import Time
 import time
 import pandas as pd
 import numpy as np
 import datetime as dt
-from dateutil.relativedelta import relativedelta
-from leap.utils import get_data_path, get_time_interval_tag
+from leap.utils import get_data_path, get_time_interval_tag, TimeDelta
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.utils import Sex
+    from dateutil.relativedelta import relativedelta
 
 
 class AntibioticExposure:
@@ -20,7 +21,7 @@ class AntibioticExposure:
         config: dict | None = None,
         parameters: dict | None = None,
         mid_trends: DataFrameGroupBy | None = None,
-        time_interval: dt.timedelta | relativedelta = relativedelta(years=1)
+        time_interval: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if config is not None:
             self.parameters = config["parameters"]
@@ -99,7 +100,7 @@ class AntibioticExposure:
         else:
             return self.__copy__()
 
-    def load_abx_mid_trends(self, time_interval: dt.timedelta | relativedelta):
+    def load_abx_mid_trends(self, time_interval: dt.timedelta | relativedelta | TimeDelta):
         """Load the antibiotic mid trends table.
 
         Returns:
