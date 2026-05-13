@@ -1,6 +1,7 @@
 import pytest
 import json
 import pathlib
+import datetime as dt
 from leap.agent import Agent
 from leap.antibiotic_exposure import AntibioticExposure
 from leap.family_history import FamilyHistory
@@ -16,14 +17,14 @@ def config():
 
 @pytest.mark.parametrize(
     (
-        "sex, age, year, year_index, antibiotic_exposure_parameters, family_history_parameters,"
+        "sex, age, timepoint, timepoint_index, antibiotic_exposure_parameters, family_history_parameters,"
         "expected_num_antibiotic_use, expected_has_family_history"
     ),
     [
         (
             False,
             23,
-            2024,
+            dt.datetime(2024, 1, 1),
             1,
             {
                 "β0": -100000,
@@ -44,7 +45,7 @@ def config():
         (
             False,
             23,
-            2024,
+            dt.datetime(2024, 1, 1),
             1,
             None,
             None,
@@ -54,8 +55,8 @@ def config():
     ]
 )
 def test_agent_constructor(
-    config, sex, age, year, year_index, antibiotic_exposure_parameters, family_history_parameters,
-    expected_num_antibiotic_use, expected_has_family_history
+    config, sex, age, timepoint, timepoint_index, antibiotic_exposure_parameters,
+    family_history_parameters, expected_num_antibiotic_use, expected_has_family_history
 ):
 
     if antibiotic_exposure_parameters is None:
@@ -75,15 +76,20 @@ def test_agent_constructor(
         has_family_history = None
 
     agent = Agent(
-        sex=sex, age=age, year=year, year_index=year_index, antibiotic_exposure=antibiotic_exposure,
-        family_history=family_history, num_antibiotic_use=num_antibiotic_use,
+        sex=sex,
+        age=age,
+        timepoint=timepoint,
+        timepoint_index=timepoint_index,
+        antibiotic_exposure=antibiotic_exposure,
+        family_history=family_history,
+        num_antibiotic_use=num_antibiotic_use,
         has_family_history=has_family_history
     )
 
     assert agent.sex == sex
     assert agent.age == age
-    assert agent.year == year
-    assert agent.year_index == year_index
+    assert agent.timepoint == timepoint
+    assert agent.timepoint_index == timepoint_index
     assert agent.has_family_history == expected_has_family_history
     if antibiotic_exposure is not None:
         assert round(agent.num_antibiotic_use, 1) == expected_num_antibiotic_use

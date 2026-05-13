@@ -1,14 +1,17 @@
 from __future__ import annotations
 import abc
 import copy
+from sqlite3 import Time
 import pandas as pd
 import numpy as np
+import datetime as dt
 from scipy.special import logit, expit
-from leap.utils import get_data_path, poly
+from leap.utils import get_data_path, poly, get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
 from typing import TYPE_CHECKING, Dict
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
+    from dateutil.relativedelta import relativedelta
     from leap.agent import Agent
     from leap.utils import Sex
 
@@ -27,7 +30,8 @@ class Occurrence:
         parameters: dict | None = None,
         poly_parameters: Dict[str, list[float]] | None = None,
         max_age: int = 110,
-        correction_table: DataFrameGroupBy | None = None
+        correction_table: DataFrameGroupBy | None = None,
+        time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if config is not None:
             self.parameters = config["parameters"]
@@ -43,13 +47,15 @@ class Occurrence:
             )
 
         if correction_table is None:
-            self.correction_table = self.load_occurrence_correction_table()
+            self.correction_table = self.load_occurrence_correction_table(
+                time_delta=time_delta
+            )
         else:
             self.correction_table = correction_table
 
-        years = np.unique([key[0] for key in self.correction_table.groups.keys()])
-        self.min_year = int(np.min(years)) + 1
-        self.max_year = int(np.max(years))
+        timepoints = np.unique([key[0] for key in self.correction_table.groups.keys()])
+        self.min_timepoint = min(timepoints) + time_delta
+        self.max_timepoint = max(timepoints)
 
     @property
     def parameters(self) -> dict:
@@ -61,11 +67,11 @@ class Occurrence:
 
     @property
     def correction_table(self) -> DataFrameGroupBy:
-        """A dataframe grouped by year, age, and sex.
+        """A dataframe grouped by timepoint, age, and sex.
         
         Each dataframe contains the following columns:
 
-        * ``year (int)``: integer year.
+        * ``timepoint (datetime)``: the timepoint, e.g. ``2024-01-01``.
         * ``sex (str)``: ``F`` = female, ``M`` = male.
         * ``age (int)``: integer age.
         * ``correction (float)``: The correction term for the occurrence equation.
@@ -88,46 +94,48 @@ class Occurrence:
         self._max_age = max_age
 
     @property
-    def min_year(self) -> int:
-        return self._min_year
+    def min_timepoint(self) -> dt.datetime:
+        return self._min_timepoint
     
-    @min_year.setter
-    def min_year(self, min_year: int):
-        self._min_year = min_year
+    @min_timepoint.setter
+    def min_timepoint(self, min_timepoint: dt.datetime):
+        self._min_timepoint = min_timepoint
 
     @property
-    def max_year(self) -> int:
-        return self._max_year
+    def max_timepoint(self) -> dt.datetime:
+        return self._max_timepoint
     
-    @max_year.setter
-    def max_year(self, max_year: int):
-        self._max_year = max_year
+    @max_timepoint.setter
+    def max_timepoint(self, max_timepoint: dt.datetime):
+        self._max_timepoint = max_timepoint
 
     def load_occurrence_correction_table(
-        self, occurrence_type: str
+        self, occurrence_type: str, time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
         """Load the asthma incidence correction table.
 
         Returns:
-            Dataframe grouped by year, age, and sex.
+            Dataframe grouped by timepoint, age, and sex.
             Each dataframe contains the following columns:
 
-            * ``year (int)``: integer year.
+            * ``timepoint (datetime)``: the timepoint, e.g. ``2024-01-01``.
             * ``sex (str)``: ``"F"`` = female, ``"M"`` = male.
             * ``age (int)``: integer age.
             * ``correction (float)``: The correction term for the occurrence equation.
 
         """
+        time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path("processed_data/asthma_occurrence_correction.csv")
+            get_data_path(f"processed_data/{time_delta_tag}/asthma_occurrence_correction.csv"),
+            parse_dates=["timepoint"]
         )
         df = df[df["type"] == occurrence_type]
         df.drop(columns=["type"], inplace=True)
-        grouped_df = df.groupby(["year", "sex", "age"])
+        grouped_df = df.groupby(["timepoint", "sex", "age"])
         return grouped_df
 
     def equation(
-        self, sex: Sex, age: int, year: int, has_family_history: bool, dose: int
+        self, sex: Sex, age: int, timepoint: dt.datetime, has_family_history: bool, dose: int
     ) -> float:
         r"""Compute the asthma incidence / prevalence for a given risk factor combination.
 
@@ -145,16 +153,16 @@ class Occurrence:
         Args:
             sex: The sex of the agent.
             age: The age of the agent.
-            year: The calendar year.
+            timepoint: The calendar year.
             has_family_history: ``True`` if one or more parents of the agent has asthma,
                 otherwise ``False``.
             dose: The number of courses of antibiotics taken during the first year of life.
         """
-        correction_year = min(year, self.max_year)
-        year = min(year, self.max_year)
+        correction_timepoint = min(timepoint, self.max_timepoint)
+        timepoint = min(timepoint, self.max_timepoint)
 
         # Calculate asthma incidence / prevalence based on Model 1
-        β_eta = self.crude_occurrence(sex, age, year)
+        β_eta = self.crude_occurrence(sex, age, timepoint)
 
         # Calculate the odds ratio for asthma incidence / prevalence based on family history
         odds_ratio_fhx = self.calculate_odds_ratio_fam_history(age, has_family_history)
@@ -164,7 +172,7 @@ class Occurrence:
 
         # Get the incidence or prevalence correction term
         α = self.correction_table.get_group(
-            (correction_year, str(sex), min(age, 63))
+            (correction_timepoint, str(sex), min(age, 63))
         )["correction"].values[0]
 
         p = expit(
@@ -173,7 +181,7 @@ class Occurrence:
         return p
 
     @abc.abstractmethod
-    def crude_occurrence(self, sex: Sex, age: int, year: int) -> float:
+    def crude_occurrence(self, sex: Sex, age: int, timepoint: dt.datetime) -> float:
         return
 
     def calculate_odds_ratio_fam_history(self, age: int, fam_hist: int) -> float:
@@ -259,9 +267,10 @@ class Incidence(Occurrence):
         parameters: dict | None = None,
         poly_parameters: Dict[str, list[float]] | None = None,
         max_age: int = 110,
-        correction_table: DataFrameGroupBy | None = None
+        correction_table: DataFrameGroupBy | None = None,
+        time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
-        super().__init__(config, parameters, poly_parameters, max_age, correction_table)
+        super().__init__(config, parameters, poly_parameters, max_age, correction_table, time_delta)
         self.parameters["βage"] = np.array(self.parameters["βage"])
         self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
 
@@ -272,10 +281,10 @@ class Incidence(Occurrence):
             * ``β0 (float)``: A constant parameter.
             * ``βsex (float)``: The parameter for the sex term, i.e.
               :math:`\beta_{\text{sex}} * \text{sex}`.
-            * ``βyear (float)``: The parameter for the year term, i.e.
-              :math:`\beta_{\text{year}} * \text{year}`.
-            * ``βsexyear (float)``: The parameter to be multiplied by sex and year, i.e.
-              :math:`\beta_{\text{sexyear}} * \text{year} * \text{sex}`.
+            * ``βtime (float)``: The parameter for the time term, i.e.
+              :math:`\beta_{\text{time}} * \text{time}`.
+            * ``βsextime (float)``: The parameter to be multiplied by sex and time, i.e.
+              :math:`\beta_{\text{sextime}} * \text{time} * \text{sex}`.
             * ``βage (list[float])``: An array of 5 parameters to be multiplied by powers of age,
               i.e.
 
@@ -308,7 +317,7 @@ class Incidence(Occurrence):
     
     @parameters.setter
     def parameters(self, parameters: dict):
-        KEYS = ["β0", "βsex", "βage", "βyear", "βsexage", "βsexyear", "β_fam_hist", "β_abx"]
+        KEYS = ["β0", "βsex", "βage", "βtime", "βsexage", "βsextime", "β_fam_hist", "β_abx"]
         for key in KEYS:
             if key not in parameters.keys():
                 raise ValueError(f"Missing key {key} in parameters.")
@@ -334,28 +343,32 @@ class Incidence(Occurrence):
                 raise ValueError(f"Missing key {key} in poly_parameters.")
         self._poly_parameters = copy.deepcopy(poly_parameters)
 
-    def load_occurrence_correction_table(self) -> DataFrameGroupBy:
+    def load_occurrence_correction_table(
+        self, time_delta: dt.timedelta | relativedelta | TimeDelta
+    ) -> DataFrameGroupBy:
         """Load the asthma incidence correction table.
 
         Returns:
-            A dataframe grouped by year, age, and sex.
+            A dataframe grouped by timepoint, age, and sex.
             Each dataframe contains the following columns:
 
-            * ``year (int)``: integer year.
+            * ``timepoint (datetime)``: timepoint.
             * ``sex (str)``: ``"F"`` = female, ``"M"`` = male.
             * ``age (int)``: integer age.
             * ``correction (float)``: The correction term for the asthma incidence / prevalence
               equation.
 
         """
-        grouped_df = super().load_occurrence_correction_table(occurrence_type="incidence")
+        grouped_df = super().load_occurrence_correction_table(
+            occurrence_type="incidence", time_delta=time_delta
+        )
         return grouped_df
 
     def crude_occurrence(
         self,
         sex: Sex,
         age: int,
-        year: int
+        timepoint: dt.datetime
     ) -> float:
         r"""Calculate the crude asthma incidence.
 
@@ -378,10 +391,10 @@ class Incidence(Occurrence):
         Args:
             sex: The sex of the agent.
             age: The age of the agent.
-            year: The calendar year.
+            timepoint: The calendar year.
 
         Returns:
-            A float representing the crude asthma incidence for the given year, age, and sex.
+            A float representing the crude asthma incidence for the given timepoint, age, and sex.
         """
 
         poly_age = poly(
@@ -393,8 +406,8 @@ class Incidence(Occurrence):
         return np.exp(
             self.parameters["β0"] +
             self.parameters["βsex"] * int(sex) +
-            self.parameters["βyear"] * year +
-            self.parameters["βsexyear"] * int(sex) * year +
+            self.parameters["βtime"] * timepoint.year +
+            self.parameters["βsextime"] * int(sex) * timepoint.year +
             np.dot(self.parameters["βage"], poly_age) +
             np.dot(self.parameters["βsexage"], poly_age) * int(sex)
         )
@@ -409,16 +422,17 @@ class Prevalence(Occurrence):
         parameters: dict | None = None,
         poly_parameters: Dict[str, list[float]] | None = None,
         max_age: int = 110,
-        correction_table: DataFrameGroupBy | None = None
+        correction_table: DataFrameGroupBy | None = None,
+        time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         super().__init__(
-            config, parameters, poly_parameters, max_age, correction_table
+            config, parameters, poly_parameters, max_age, correction_table, time_delta
         )
         self.parameters["βage"] = np.array(self.parameters["βage"])
         self.parameters["βsexage"] = np.array(self.parameters["βsexage"])
-        self.parameters["βsexyear"] = np.array(self.parameters["βsexyear"])
-        self.parameters["βyearage"] = np.array(self.parameters["βyearage"])
-        self.parameters["βsexyearage"] = np.array(self.parameters["βsexyearage"])
+        self.parameters["βsextime"] = np.array(self.parameters["βsextime"])
+        self.parameters["βtimeage"] = np.array(self.parameters["βtimeage"])
+        self.parameters["βsextimeage"] = np.array(self.parameters["βsextimeage"])
 
     @property
     def parameters(self) -> dict:
@@ -427,20 +441,20 @@ class Prevalence(Occurrence):
             * ``β0 (float)``: A constant parameter, determined by Model 1.
             * ``βsex (float)``: The parameter for the sex term, i.e.
               :math:`\beta_{\text{sex}} * \text{sex}`.
-            * ``βyear (list[float])``: An array of 2 parameters to be multiplied by powers of year,
+            * ``βtime (list[float])``: An array of 2 parameters to be multiplied by powers of year,
               i.e.
               
               .. math::
               
-                \beta_{\text{year}1} * \text{year} + \beta_{\text{year}2} * \text{year}^2
+                \beta_{\text{time}1} * \text{time} + \beta_{\text{time}2} * \text{time}^2
 
-            * ``βsexyear (list[float])``: An array of 2 parameters to be multiplied by sex and
-              powers of year, i.e.
+            * ``βsextime (list[float])``: An array of 2 parameters to be multiplied by sex and
+              powers of time, i.e.
 
               .. math::
               
-                \beta_{\text{sexyear}1} * \text{sex} * \text{year} + 
-                \beta_{\text{sexyear}2} * \text{sex} * \text{year}^2
+                \beta_{\text{sextime}1} * \text{sex} * \text{time} + 
+                \beta_{\text{sextime}2} * \text{sex} * \text{time}^2
 
             * ``βage (list[float])``: An array of 5 parameters to be multiplied by powers of age,
               i.e.
@@ -464,37 +478,37 @@ class Prevalence(Occurrence):
                 \beta_{\text{sexage}4} * \text{sex} * \text{age}^4 +
                 \beta_{\text{sexage}5} * \text{sex} * \text{age}^5
 
-            * ``βyearage (list[float])``: An array of 10 parameters to be multiplied by powers of
-              age and year, i.e.
+            * ``βtimeage (list[float])``: An array of 10 parameters to be multiplied by powers of
+              age and time, i.e.
 
               .. math::
 
-                \beta_{\text{yearage}1} * \text{year} * \text{age} +
-                \beta_{\text{yearage}2} * \text{year}^2 * \text{age} + \\
-                \beta_{\text{yearage}3} * \text{year} * \text{age}^2 +
-                \beta_{\text{yearage}4} * \text{year}^2 * \text{age}^2 + \\
-                \beta_{\text{yearage}5} * \text{year} * \text{age}^3 +
-                \beta_{\text{yearage}6} * \text{year}^2 * \text{age}^3 + \\
-                \beta_{\text{yearage}7} * \text{year} * \text{age}^4 +
-                \beta_{\text{yearage}8} * \text{year}^2 * \text{age}^4 + \\
-                \beta_{\text{yearage}9} * \text{year} * \text{age}^5 +
-                \beta_{\text{yearage}10} * \text{year}^2 * \text{age}^5
+                \beta_{\text{timeage}1} * \text{time} * \text{age} +
+                \beta_{\text{timeage}2} * \text{time}^2 * \text{age} + \\
+                \beta_{\text{timeage}3} * \text{time} * \text{age}^2 +
+                \beta_{\text{timeage}4} * \text{time}^2 * \text{age}^2 + \\
+                \beta_{\text{timeage}5} * \text{time} * \text{age}^3 +
+                \beta_{\text{timeage}6} * \text{time}^2 * \text{age}^3 + \\
+                \beta_{\text{timeage}7} * \text{time} * \text{age}^4 +
+                \beta_{\text{timeage}8} * \text{time}^2 * \text{age}^4 + \\
+                \beta_{\text{timeage}9} * \text{time} * \text{age}^5 +
+                \beta_{\text{timeage}10} * \text{time}^2 * \text{age}^5
 
-            * ``βsexyearage (list[float])``: An array of 10 parameters to be multiplied by sex and
-              powers of age and year, i.e.
+            * ``βsextimeage (list[float])``: An array of 10 parameters to be multiplied by sex and
+              powers of age and time, i.e.
 
               .. math::
 
-                \beta_{\text{sexyearage}1} * \text{sex} * \text{year} * \text{age} +
-                \beta_{\text{sexyearage}2} * \text{sex} * \text{year}^2 * \text{age} + \\
-                \beta_{\text{sexyearage}3} * \text{sex} * \text{year} * \text{age}^2 +
-                \beta_{\text{sexyearage}4} * \text{sex} * \text{year}^2 * \text{age}^2 + \\
-                \beta_{\text{sexyearage}5} * \text{sex} * \text{year} * \text{age}^3 +
-                \beta_{\text{sexyearage}6} * \text{sex} * \text{year}^2 * \text{age}^3 + \\
-                \beta_{\text{sexyearage}7} * \text{sex} * \text{year} * \text{age}^4 +
-                \beta_{\text{sexyearage}8} * \text{sex} * \text{year}^2 * \text{age}^4 + \\
-                \beta_{\text{sexyearage}9} * \text{sex} * \text{year} * \text{age}^5 +
-                \beta_{\text{sexyearage}10} * \text{sex} * \text{year}^2 * \text{age}^5
+                \beta_{\text{sextimeage}1} * \text{sex} * \text{time} * \text{age} +
+                \beta_{\text{sextimeage}2} * \text{sex} * \text{time}^2 * \text{age} + \\
+                \beta_{\text{sextimeage}3} * \text{sex} * \text{time} * \text{age}^2 +
+                \beta_{\text{sextimeage}4} * \text{sex} * \text{time}^2 * \text{age}^2 + \\
+                \beta_{\text{sextimeage}5} * \text{sex} * \text{time} * \text{age}^3 +
+                \beta_{\text{sextimeage}6} * \text{sex} * \text{time}^2 * \text{age}^3 + \\
+                \beta_{\text{sextimeage}7} * \text{sex} * \text{time} * \text{age}^4 +
+                \beta_{\text{sextimeage}8} * \text{sex} * \text{time}^2 * \text{age}^4 + \\
+                \beta_{\text{sextimeage}9} * \text{sex} * \text{time} * \text{age}^5 +
+                \beta_{\text{sextimeage}10} * \text{sex} * \text{time}^2 * \text{age}^5
 
             * ``β_fam_hist (dict)``: A dictionary of 2 parameters to be multiplied by functions of
               age. See ``calculate_odds_ratio_fam_history``.
@@ -506,8 +520,8 @@ class Prevalence(Occurrence):
     @parameters.setter
     def parameters(self, parameters: dict):
         KEYS = [
-            "β0", "βsex", "βage", "βyear", "βsexage", "βsexyear", "βyearage",
-            "βsexyearage", "β_fam_hist", "β_abx"
+            "β0", "βsex", "βage", "βtime", "βsexage", "βsextime", "βtimeage",
+            "βsextimeage", "β_fam_hist", "β_abx"
         ]
         for key in KEYS:
             if key not in parameters.keys():
@@ -523,31 +537,35 @@ class Prevalence(Occurrence):
             * ``norm2_age (list[float])``: The :math:`\text{norm}^2` vector from the normalization
               of the training data in the ``poly`` function.
               Length = degree of age polynomial + 1 = 6.
-            * ``alpha_year (list[float])``: The alpha vector from the normalization of the training
-              data in the ``poly`` function. Length = degree of year polynomial = 2.
-            * ``norm2_year (list[float])``: The :math:`\text{norm}^2` vector from the normalization
+            * ``alpha_time (list[float])``: The alpha vector from the normalization of the training
+              data in the ``poly`` function. Length = degree of time polynomial = 2.
+            * ``norm2_time (list[float])``: The :math:`\text{norm}^2` vector from the normalization
               of the training data in the ``poly`` function.
-              Length = degree of year polynomial + 1 = 3.
+              Length = degree of time polynomial + 1 = 3.
         """
         return self._poly_parameters
     
     @poly_parameters.setter
     def poly_parameters(self, poly_parameters: Dict[str, list[float]]):
-        KEYS = ["alpha_age", "norm2_age", "alpha_year", "norm2_year"]
+        KEYS = ["alpha_age", "norm2_age", "alpha_time", "norm2_time"]
         for key in KEYS:
             if key not in poly_parameters.keys():
                 raise ValueError(f"Missing key {key} in poly_parameters.")
         self._poly_parameters = copy.deepcopy(poly_parameters)
 
-    def load_occurrence_correction_table(self) -> DataFrameGroupBy:
-        grouped_df = super().load_occurrence_correction_table(occurrence_type="prevalence")
+    def load_occurrence_correction_table(
+        self, time_delta: dt.timedelta | relativedelta | TimeDelta
+    ) -> DataFrameGroupBy:
+        grouped_df = super().load_occurrence_correction_table(
+            occurrence_type="prevalence", time_delta=time_delta
+        )
         return grouped_df
 
     def crude_occurrence(
         self,
         sex: Sex,
         age: int,
-        year: int
+        timepoint: dt.datetime
     ) -> float:
         r"""Calculate the crude asthma prevalence.
 
@@ -569,17 +587,17 @@ class Prevalence(Occurrence):
         Args:
             sex: The sex of the agent.
             age: The age of the agent.
-            year: The calendar year.
+            timepoint: The timepoint.
 
         Returns:
-            A float representing the crude asthma prevalence for the given year, age, and sex.
+            A float representing the crude asthma prevalence for the given timepoint, age, and sex.
         """
 
         poly_year = poly(
-            year,
+            timepoint.year,
             degree=2,
-            alpha=self.poly_parameters["alpha_year"],
-            norm2=self.poly_parameters["norm2_year"]
+            alpha=self.poly_parameters["alpha_time"],
+            norm2=self.poly_parameters["norm2_time"]
         ).flatten()
         poly_age = poly(
             age,
@@ -591,12 +609,12 @@ class Prevalence(Occurrence):
         return np.exp(
             self.parameters["β0"] +
             self.parameters["βsex"] * int(sex) +
-            np.dot(self.parameters["βyear"], poly_year) +
+            np.dot(self.parameters["βtime"], poly_year) +
             np.dot(self.parameters["βage"], poly_age) +
-            np.dot(self.parameters["βsexyear"], poly_year) * int(sex) +
+            np.dot(self.parameters["βsextime"], poly_year) * int(sex) +
             np.dot(self.parameters["βsexage"], poly_age) * int(sex) +
-            np.dot(self.parameters["βyearage"], poly_yearage) +
-            np.dot(self.parameters["βsexyearage"], poly_yearage) * int(sex)
+            np.dot(self.parameters["βtimeage"], poly_yearage) +
+            np.dot(self.parameters["βsextimeage"], poly_yearage) * int(sex)
         )
 
 
@@ -605,7 +623,8 @@ def compute_asthma_age(
     incidence: Incidence,
     prevalence: Prevalence,
     current_age: int,
-    max_asthma_age: int = 110
+    max_asthma_age: int = 110,
+    time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
 ) -> int:
     """Compute the age at which the person (agent) is first diagnosed with asthma.
 
@@ -616,31 +635,38 @@ def compute_asthma_age(
         current_age: The current age of the agent.
     """
     # obtain the previous incidence
-    min_year = incidence.min_year
-    max_year = incidence.max_year
+    min_timepoint = incidence.min_timepoint
+    max_timepoint = incidence.max_timepoint
 
     if current_age == MIN_ASTHMA_AGE:
         return MIN_ASTHMA_AGE
     else:
         find_asthma_age = True
-        asthma_age = MIN_ASTHMA_AGE
-        year = min(max(agent.year - current_age + asthma_age, min_year), max_year)
-        while find_asthma_age and asthma_age < max_asthma_age:
+        asthma_age = TimeDelta(years=MIN_ASTHMA_AGE)
+        timepoint = min(
+            max(
+                agent.timepoint - TimeDelta(years=current_age) + asthma_age,
+                min_timepoint
+            ),
+            max_timepoint
+        )
+        while find_asthma_age and asthma_age < TimeDelta(years=max_asthma_age):
+            logger.info(asthma_age.years)
             has_asthma = agent_has_asthma(
                 agent=agent,
                 occurrence_type="incidence",
                 incidence=incidence,
                 prevalence=prevalence,
-                age=asthma_age,
-                year=year
+                age=asthma_age.years,
+                timepoint=timepoint
             )
             if has_asthma:
-                return asthma_age
-            asthma_age += 1
-            asthma_age = min(asthma_age, incidence.max_age)
-            year += 1
-            year = min(year, max_year)
-        return asthma_age
+                return asthma_age.years
+            asthma_age += time_delta
+            asthma_age = min(asthma_age, TimeDelta(years=incidence.max_age))
+            timepoint += time_delta
+            timepoint = min(timepoint, max_timepoint)
+        return asthma_age.years
 
 
 def agent_has_asthma(
@@ -649,7 +675,8 @@ def agent_has_asthma(
     prevalence: Prevalence,
     incidence: Incidence | None = None,
     age: int | None = None,
-    year: int | None = None,
+    timepoint: dt.datetime | None = None,
+    time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
 ) -> bool:
     """Determine whether the agent obtains a new asthma diagnosis based on age and sex.
 
@@ -659,7 +686,7 @@ def agent_has_asthma(
         prevalence: Asthma prevalence object.
         incidence: Asthma incidence object.
         age: The age of the agent.
-        year: The calendar year.
+        timepoint: The timepoint.
     """
     if occurrence_type == "incidence" and incidence is None:
         raise ValueError("Incidence must be provided for incidence calculations.")
@@ -669,17 +696,20 @@ def agent_has_asthma(
             age = min(agent.age, incidence.max_age)
         else:
             age = min(agent.age - 1, prevalence.max_age)
-    if year is None:
+    if timepoint is None:
         if occurrence_type == "incidence":
-            year = agent.year
+            timepoint = agent.timepoint
         else:
-            year = agent.year - 1
+            timepoint = agent.timepoint - time_delta
 
     if age < MIN_ASTHMA_AGE:
         has_asthma = False
     elif age == MIN_ASTHMA_AGE:
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
-            sex=agent.sex, age=age, year=year, has_family_history=agent.has_family_history,
+            sex=agent.sex,
+            age=age,
+            timepoint=timepoint,
+            has_family_history=agent.has_family_history,
             dose=agent.num_antibiotic_use
         ))) # type: ignore
     elif age > MIN_ASTHMA_AGE and occurrence_type == "incidence":
@@ -687,12 +717,16 @@ def agent_has_asthma(
             np.random.binomial(
                 n=1,
                 p=incidence.equation(
-                    agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
+                    agent.sex,
+                    age,
+                    timepoint,
+                    agent.has_family_history,
+                    agent.num_antibiotic_use
                 )
             ) # type: ignore
         ) 
     elif age > MIN_ASTHMA_AGE and occurrence_type == "prevalence":
         has_asthma = bool(np.random.binomial(1, prevalence.equation(
-            agent.sex, age, year, agent.has_family_history, agent.num_antibiotic_use
+            agent.sex, age, timepoint, agent.has_family_history, agent.num_antibiotic_use
         ))) # type: ignore
     return has_asthma

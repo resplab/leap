@@ -1,6 +1,7 @@
 from __future__ import annotations
 import copy
 import numpy as np
+import datetime as dt
 from scipy.special import gamma
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
@@ -136,15 +137,17 @@ class ExacerbationSeverity:
         p = np.random.dirichlet(np.array(self.hyperparameters["α"]) * self.hyperparameters["k"])
         self.severity_levels = SeverityLevels(p[0], p[1], p[2], p[3])
 
-    def compute_distribution(self, num_current_year: int, prev_hosp: bool, age: int) -> np.ndarray:
+    def compute_distribution(
+        self, num_current_timepoint: int, prev_hosp: bool, age: int
+    ) -> np.ndarray:
         """Compute the exacerbation severity distribution.
 
-        Compute the exacerbation severity distribution for a patient in a given year using the
-        Dirichlet probability vector ``p`` in the Multinomial distribution. See:
+        Compute the exacerbation severity distribution for a patient in a given time interval using
+        the Dirichlet probability vector ``p`` in the Multinomial distribution. See:
         https://juliastats.org/Distributions.jl/stable/multivariate/#Distributions.Multinomial.
 
-        For example, if the patient has ``num_current_year = 10`` exacerbations in the current year,
-        then the output might be:
+        For example, if the patient has ``num_current_timepoint = 10`` exacerbations at the current
+        timepoint, then the output might be:
 
         .. code-block::
 
@@ -152,13 +155,14 @@ class ExacerbationSeverity:
             2    | 1        | 6      | 1
 
         Args:
-            num_current_year: the number of asthma exacerbations the patient has had this year.
+            num_current_timepoint: the number of asthma exacerbations the patient has had this
+                in the time interval ``[timepoint, timepoint + time_delta]``.
                 Will be used as the number of trials in the Multinomial distribution.
             prev_hosp: has patient been previously hospitalized for asthma?
             age: the age of the person in years.
 
         Returns:
-            The distribution of asthma exacerbations by exacerbation type for the current year.
+            The distribution of asthma exacerbations by exacerbation type for the current timepoint.
 
         Examples:
 
@@ -168,7 +172,7 @@ class ExacerbationSeverity:
             ...     parameters={"βprev_hosp_ped": 1.79, "βprev_hosp_adult": 2.88}
             ... )
             >>> exacerbation_severity.compute_distribution(
-            ...     num_current_year=10,
+            ...     num_current_timepoint=10,
             ...     prev_hosp=True,
             ...     age=85
             ... ) # doctest: +NORMALIZE_WHITESPACE
@@ -177,7 +181,7 @@ class ExacerbationSeverity:
         severity_levels = copy.deepcopy(self.severity_levels)
         severity_levels_array = severity_levels.as_array()
 
-        if num_current_year == 0:
+        if num_current_timepoint == 0:
             return np.zeros(4)
         else:
             if prev_hosp:
@@ -189,7 +193,7 @@ class ExacerbationSeverity:
                 severity_levels_array[0:3] = weights * (1 - severity_levels.very_severe)
                 severity_levels_array[3] = severity_levels.very_severe
 
-        return np.random.multinomial(num_current_year, severity_levels_array)
+        return np.random.multinomial(num_current_timepoint, severity_levels_array)
 
     def compute_hospitalization_prob(
         self, agent: Agent, control: Control, exacerbation: Exacerbation
@@ -224,12 +228,12 @@ class ExacerbationSeverity:
             if agent.asthma_age is None:
                 raise ValueError("Asthma age is not set.")
 
-            year = agent.year - (agent.age - agent.asthma_age)
+            year = agent.timepoint.year - (agent.age - agent.asthma_age)
             total_rate = 0
             for age in range(agent.asthma_age, max_age + 1):
                 control_levels = control.compute_control_levels(sex=sex, age=age)
                 total_rate += exacerbation.compute_num_exacerbations(
-                    age=age, sex=sex, year=year, control_levels=control_levels
+                    age=age, sex=sex, timepoint=dt.datetime(year, 1, 1), control_levels=control_levels
                 )
                 year += 1
 
@@ -257,11 +261,11 @@ class ExacerbationSeverityHistory:
     * 4 = very severe
 
     Attributes:
-        current_year: An array of 4 integers indicating the number of exacerbations for
-            that severity level in the current year.
-        prev_year: An array of 4 integers indicating the number of exacerbations for
-            that severity level in the previous year.
+        current_timepoint: An array of 4 integers indicating the number of exacerbations for
+            that severity level in the current timepoint.
+        prev_timepoint: An array of 4 integers indicating the number of exacerbations for
+            that severity level in the previous timepoint.
     """
-    def __init__(self, current_year: np.ndarray, prev_year: np.ndarray):
-        self.current_year = current_year
-        self.prev_year = prev_year
+    def __init__(self, current_timepoint: np.ndarray, prev_timepoint: np.ndarray):
+        self.current_timepoint = current_timepoint
+        self.prev_timepoint = prev_timepoint
