@@ -4,7 +4,6 @@ import json
 import numpy as np
 import pandas as pd
 import datetime as dt
-from dateutil.relativedelta import relativedelta
 from leap.agent import Agent
 from leap.exacerbation import ExacerbationHistory
 from leap.simulation import Simulation, MIN_AGENTS_MP
@@ -34,7 +33,7 @@ def config():
     [
         (
             dt.datetime(2024, 1, 1),
-            relativedelta(years=1),
+            TimeDelta(years=1),
             "CA",
             "M3",
             10,
@@ -82,7 +81,7 @@ def config():
         ),
         (
             dt.datetime(2024, 1, 1),
-            relativedelta(years=1),
+            TimeDelta(years=1),
             "CA",
             "M3",
             10,
@@ -209,8 +208,8 @@ def test_simulation_generate_initial_asthma(
     [
         (
             dt.datetime(2024, 1, 1),
-            relativedelta(years=1),
-            relativedelta(years=1),
+            TimeDelta(years=1),
+            TimeDelta(years=1),
             "CA",
             "M3",
             10,
@@ -245,8 +244,8 @@ def test_simulation_generate_initial_asthma(
         ),
         (
             dt.datetime(2024, 1, 1),
-            relativedelta(years=1),
-            relativedelta(years=1),
+            TimeDelta(years=1),
+            TimeDelta(years=1),
             "CA",
             "M3",
             10,
@@ -1215,12 +1214,13 @@ def test_run_simulation_two_years(
 
 @pytest.mark.parametrize(
     (
-        "min_timepoint, time_horizon, province, population_growth_type, num_births_initial, max_age,"
+        "min_timepoint, time_horizon, time_interval, province, population_growth_type, num_births_initial, max_age,"
     ),
     [
         (
             dt.datetime(2024, 1, 1),
-            relativedelta(years=3),
+            TimeDelta(years=3),
+            TimeDelta(years=1),
             "CA",
             "M3",
             10,
@@ -1233,7 +1233,7 @@ def test_run_simulation_two_years(
     [0, MIN_AGENTS_MP]
 )
 def test_run_simulation_full(
-    config, min_agents_mp, min_timepoint, time_horizon, province, population_growth_type,
+    config, min_agents_mp, min_timepoint, time_horizon, time_interval, province, population_growth_type,
     num_births_initial, max_age
 ):
 
@@ -1244,7 +1244,8 @@ def test_run_simulation_full(
         "population_growth_type": population_growth_type,
         "num_births_initial": num_births_initial,
         "max_age": max_age,
-        "until_all_die": False
+        "until_all_die": False,
+        "time_interval": str(time_interval)
     }
     simulation = Simulation(config)
     outcome_matrix = simulation.run(
