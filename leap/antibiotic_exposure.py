@@ -136,7 +136,7 @@ class AntibioticExposure:
             >>> from leap.antibiotic_exposure import AntibioticExposure
             >>> from leap.utils import get_data_path
             >>> import json
-            >>> with open(get_data_path("processed_data/config.json"), "r") as file:
+            >>> with open(get_data_path("processed_data/time_interval_365/config.json"), "r") as file:
             ...     config = json.load(file)["antibiotic_exposure"]
             >>> antibiotic_exposure = AntibioticExposure(
             ...     config=config
