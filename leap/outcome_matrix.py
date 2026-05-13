@@ -4,7 +4,7 @@ import itertools
 import datetime as dt
 from dateutil.relativedelta import relativedelta
 import pathlib
-from leap.utils import timer, date_range
+from leap.utils import timer, date_range, TimeDelta
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -133,7 +133,7 @@ class OutcomeMatrix:
         min_timepoint: dt.datetime,
         max_timepoint: dt.datetime,
         max_age: int,
-        time_interval: dt.timedelta | relativedelta
+        time_interval: dt.timedelta | relativedelta | TimeDelta
     ):
         """Initialize the ``OutcomeMatrix`` class.
         
@@ -170,7 +170,7 @@ class OutcomeMatrix:
             "immigration": ["n_immigrants"],
             "utility": ["utility"]
         }
-        time_interval_all_die = dt.timedelta(days=max_age * 365) if until_all_die else dt.timedelta(days=0)
+        time_interval_all_die = TimeDelta(years=max_age) if until_all_die else TimeDelta(days=0)
 
         self.alive = self.create_table(
             ["timepoint", "age", "sex", "n_alive"],
