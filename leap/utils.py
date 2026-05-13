@@ -502,7 +502,7 @@ class Sex:
 
 
 def date_range(
-    start: dt.datetime, stop: dt.datetime, step: dt.timedelta | relativedelta
+    start: dt.datetime, stop: dt.datetime, step: dt.timedelta | relativedelta | TimeDelta
 ) -> Generator[dt.datetime, None, None]:
     current = start
     while current < stop:
