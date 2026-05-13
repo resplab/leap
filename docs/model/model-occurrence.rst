@@ -292,7 +292,7 @@ target asthma prevalence / incidence in this model. The data is formatted as fol
 ******************************
 
 We want to incorporate the effects of family history and antibiotic use on asthma incidence and
-prevalence.
+prevalence. d
 
 .. raw:: html
 
