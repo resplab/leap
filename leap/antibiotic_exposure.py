@@ -1,12 +1,16 @@
 from __future__ import annotations
 import copy
+from sqlite3 import Time
+import time
 import pandas as pd
 import numpy as np
-from leap.utils import get_data_path
+import datetime as dt
+from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.utils import Sex
+    from dateutil.relativedelta import relativedelta
 
 
 class AntibioticExposure:
@@ -16,7 +20,8 @@ class AntibioticExposure:
         self,
         config: dict | None = None,
         parameters: dict | None = None,
-        mid_trends: DataFrameGroupBy | None = None
+        mid_trends: DataFrameGroupBy | None = None,
+        time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if config is not None:
             self.parameters = config["parameters"]
@@ -26,7 +31,7 @@ class AntibioticExposure:
             raise ValueError("Either config dict or parameters must be provided.")
 
         if mid_trends is None:
-            self.mid_trends = self.load_abx_mid_trends()
+            self.mid_trends = self.load_abx_mid_trends(time_delta)
         else:
             self.mid_trends = mid_trends
 
@@ -95,7 +100,7 @@ class AntibioticExposure:
         else:
             return self.__copy__()
 
-    def load_abx_mid_trends(self):
+    def load_abx_mid_trends(self, time_delta: dt.timedelta | relativedelta | TimeDelta):
         """Load the antibiotic mid trends table.
 
         Returns:
@@ -108,8 +113,12 @@ class AntibioticExposure:
             * ``rate (float)``: The average number of courses of antibiotics prescribed during
               infancy, per person.
         """
-        df = pd.read_csv(get_data_path("processed_data/midtrends.csv"))
-        grouped_df = df.groupby(["year", "sex"])
+        time_delta_tag = get_time_delta_tag(time_delta)
+        df = pd.read_csv(
+            get_data_path(f"processed_data/{time_delta_tag}/midtrends.csv"),
+            parse_dates=["timepoint"]
+        )
+        grouped_df = df.groupby(["timepoint", "sex"])
         return grouped_df
 
     def compute_num_antibiotic_use(self, sex: Sex | int, birth_year: int) -> int:
@@ -127,7 +136,7 @@ class AntibioticExposure:
             >>> from leap.antibiotic_exposure import AntibioticExposure
             >>> from leap.utils import get_data_path
             >>> import json
-            >>> with open(get_data_path("processed_data/config.json"), "r") as file:
+            >>> with open(get_data_path("processed_data/time_delta_365/config.json"), "r") as file:
             ...     config = json.load(file)["antibiotic_exposure"]
             >>> antibiotic_exposure = AntibioticExposure(
             ...     config=config
@@ -136,12 +145,12 @@ class AntibioticExposure:
 
         """
         if birth_year < 2001:
-            p = self.compute_probability(sex=sex, year=2000)
+            p = self.compute_probability(sex=sex, timepoint=dt.datetime(2000, 1, 1))
         elif self.parameters["fixyear"] is not None:
             if isinstance(self.parameters["fixyear"], (int, float)):
                 p = self.compute_probability(
                     sex=sex,
-                    year=int(self.parameters["fixyear"])
+                    timepoint=dt.datetime(int(self.parameters["fixyear"]), 1, 1)
                 )
             else:
                 μ = max(
@@ -152,17 +161,17 @@ class AntibioticExposure:
         else:
             p = self.compute_probability(
                 sex=sex,
-                year=birth_year
+                timepoint=dt.datetime(birth_year, 1, 1)
             )
         r = self.parameters["θ"]
         return np.random.negative_binomial(r, p)
 
-    def compute_probability(self, sex: Sex | int, year: int) -> float:
+    def compute_probability(self, sex: Sex | int, timepoint: dt.datetime) -> float:
         """Compute the probability of antibiotic exposure for a given year and sex.
 
         Args:
             sex: Sex of agent, 1 = male, 0 = female.
-            year: The calendar year, e.g. 2024.
+            timepoint: The given timepoint (year) to compute the probability for, e.g. ``2024``.
 
         Returns:
             The ``p`` parameter for the Negative Binomial distribution, used to calculate
@@ -184,15 +193,15 @@ class AntibioticExposure:
             >>> antibiotic_exposure = AntibioticExposure(
             ...     parameters=parameters
             ... )
-            >>> antibiotic_exposure.compute_probability(sex=1, year=2000)
+            >>> antibiotic_exposure.compute_probability(sex=1, timepoint=dt.datetime(2000, 1, 1))
             1.0
         """
         η = (
             self.parameters["β0"] +
             self.parameters["βsex"] * int(sex) +
-            self.parameters["βyear"] * year +
-            self.parameters["β2005"] * (year > 2005) +
-            self.parameters["β2005_year"] * (year > 2005) * year
+            self.parameters["βyear"] * timepoint.year +
+            self.parameters["β2005"] * (timepoint.year > 2005) +
+            self.parameters["β2005_year"] * (timepoint.year > 2005) * timepoint.year
         )
 
         μ = max(np.exp(η), self.parameters["βfloor"] / 1000)

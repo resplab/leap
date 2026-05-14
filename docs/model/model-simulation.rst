@@ -20,46 +20,62 @@ First, let us take a look at the different input parameters:
      - Statistics Canada uses different population growth types to model different population
        growth possibilities.
    * - ``num_births_initial``
-     - The number of agents aged 0 in the initial year of the simulation. This acts as a
+     - The number of agents aged 0 in the initial timepoint of the simulation. This acts as a
        scaling factor: agents at all other ages are created in proportion to the Statistics
-       Canada age distribution for the starting year and province, so the total initial
+       Canada age distribution for the starting timepoint and province, so the total initial
        population is typically much larger than this value.
    * - ``max_age``
      - The maximum age of a person in the model.
    * - ``until_all_die``
      - Whether or not to keep the simulation running until all members of the population have
        died.
-   * - ``min_year``
-     - The year to start the simulation.
+   * - ``min_timepoint``
+     - The date and time to start the simulation.
    * - ``time_horizon``
-     - How many years to run the simulation for.
+     - How long to run the simulation for.
+   * - ``time_delta``
+     - The time delta to use for the simulation. For example, if ``time_delta`` is 1 year,
+       then we will simulate the population at yearly time intervals. If ``time_delta`` is 1 month,
+       then we will simulate the population at monthly time intervals.
 
 
-Iterating Over Years
-=====================
+Iterating Over Timepoints
+==========================
 
-Initial Year
-*************
+Initial Timepoint
+**********************
 
-To start the simulation, we begin with the initial year, ``min_year``. Unlike subsequent years,
-the first year does not introduce only newborns — instead, it creates a cross-sectional population
-spanning all ages from 0 to ``max_age``, representing the full age distribution of the province in
-the starting year, drawn from Statistics Canada population data
-(``./leap/processed_data/birth/initial_pop_distribution_prop.csv``).
+To start the simulation, we begin with the initial timepoint, ``min_timepoint``. At each timepoint,
+a time interval is defined as:
+
+.. math::
+
+    \text{time_interval} := [\text{timepoint}, \text{timepoint} + \text{time_delta})
+
+
+For example, if the ``min_timepoint`` is January 1, 2020, and the ``time_delta`` is 1 year, then the
+first time interval would be ``[2020-01-01, 2021-01-01)``, i.e., the year ``2020``.
+
+Unlike at subsequent timepoints, at the initial timepoint the simulation does not introduce only
+newborns — instead, it creates a cross-sectional population spanning all ages from ``0`` to
+``max_age``, representing the full age distribution of the province at the initial timepoint, drawn
+from Statistics Canada population data
+(``./leap/processed_data/{time_delta_tag}birth/initial_pop_distribution_prop.csv``).
 
 The ``num_births_initial`` parameter sets the number of agents at age 0. The number of agents at
 every other age is determined by multiplying ``num_births_initial`` by that age group's ``prop``
 value — the ratio of that age group's size to the newborn cohort in the Statistics Canada data.
-As a result, the total number of agents created in the first year is generally much larger than
-``num_births_initial``, but is determined by this value.
+As a result, the total number of agents created in the initial timepoint is generally much larger
+than ``num_births_initial``, but is determined by this value.
 
-Subsequent Years
-*****************
+Subsequent Timepoints
+**********************
 
-For all subsequent years, we create a list of agents who are either born in that year or who
-immigrated to the province in that year. The number of births in subsequent years is determined by
-the :ref:`birth-model`, which factors in the population growth type and the number of births
-in the previous year. The number of immigrants is determined by the :ref:`migration-model`.
+For all subsequent timepoints, we create a list of agents who are either born during that time
+interval or who immigrated to the province during that time interval. The number of births at
+subsequent timepoints is determined by the :ref:`birth-model`, which factors in the population
+growth type and the number of births during the previous time interval. The number of immigrants is
+determined by the :ref:`migration-model`.
 
 Example
 *************
@@ -72,21 +88,23 @@ Let's suppose we have:
 
    * - Parameter
      - Value
-   * - starting year
-     - 2021
+   * - starting timepoint
+     - 2021-01-01 00:00:00
    * - time horizon
      - 10 years
+   * - time delta
+     - 1 year
    * - province
      - BC
    * - population growth type
      - HG (High Growth)
-   * - number of births in initial year
+   * - number of births in initial time interval
      - 100
    * - maximum age
      - 90
 
-In the first year, we would create agents at all ages from 0 to 90, with the count at each age
-scaled from ``num_births_initial`` using Statistics Canada population proportions. For example,
+In the first time interval, we would create agents at all ages from 0 to 90, with the count at each
+age scaled from ``num_births_initial`` using Statistics Canada population proportions. For example,
 if age 30 has a ``prop`` of 2.5, then ``100 × 2.5 = 250`` agents are created at age 30. The
 total initial population is the sum of ``num_births_initial × prop`` across all age groups.
 A simplified excerpt:
@@ -128,7 +146,8 @@ A simplified excerpt:
      - F
      - no
 
-In the second year, 2022, we would calculate the number of births using the birth model:
+In the second time interval, which is the year 2022, we would calculate the number of births using
+the birth model:
 
 .. math::
 
@@ -143,7 +162,8 @@ where:
 * :math:`N(2022)` is the total number of births in 2022, for the ``HG`` scenario, from Statistics Canada
 * :math:`N(2021)` is the total number of births in 2021, for the ``HG`` scenario, from Statistics Canada
 
-We would then create 115 new agents, all aged 0, and add them to the list of agents for that year.
+We would then create 115 new agents, all aged 0, and add them to the list of agents for that
+time interval.
 For the number of immigrants:
 
 .. math::
@@ -214,8 +234,8 @@ reach 2031.
 Iterating Over Agents
 ========================
 
-Once we have our list of agents for a given year, we then simulate the lifetime of each agent, from
-birth or immigration until either death or the maximum age is reached.
+Once we have our list of agents for a given timepoint, we then simulate the lifetime of each agent,
+from birth or immigration until either death or the maximum age is reached.
 
 
 Agent Initialization
@@ -251,8 +271,8 @@ To initialize an agent, we set the following initial attributes:
    * - exacerbation history
      - Initial exacerbation history is set to:
 
-       * number of exacerbations previous year: 0
-       * number of exacerbations current year: 0
+       * number of exacerbations previous timepoint: 0
+       * number of exacerbations current timepoint: 0
 
 
 Step 1: Check if the agent is over 3 years old
@@ -315,12 +335,12 @@ where:
         \text{age}^2 \cdot \beta_{\text{age}^2}
 
 
-Step 6: Compute the number of asthma exacerbations in the current year
------------------------------------------------------------------------
+Step 6: Compute the number of asthma exacerbations in the current timepoint
+----------------------------------------------------------------------------
 
-To compute the number of asthma exacerbations in the current year, we use the
+To compute the number of asthma exacerbations in the current timepoint, we use the
 exacerbation model, which takes into account the agent's asthma control level, age, and sex,
-as well as the current year. The probability of having :math:`n` exacerbations is given by a
+as well as the current timepoint. The probability of having :math:`n` exacerbations is given by a
 Poisson distribution:
 
 .. math::
@@ -338,13 +358,13 @@ We determine the expected number of exacerbations, :math:`\lambda`, using the fo
         &+\beta_{uc} \cdot P(\text{uncontrolled}) +
         \beta_{pc} \cdot P(\text{partially controlled}) +
         \beta_{c} \cdot P(\text{fully controlled}) \\
-        &+\log(\alpha(\text{year}, \text{sex}, \text{age}))
+        &+\log(\alpha(\text{timepoint}, \text{sex}, \text{age}))
 
 If the number of exacerbations is ``0``, skip to the end. Otherwise, go to Step 7.
 
 
-Step 7: Compute the severity of the asthma exacerbations in the current year
------------------------------------------------------------------------------
+Step 7: Compute the severity of the asthma exacerbations in the current timepoint
+----------------------------------------------------------------------------------
 
 There are four levels of severity for asthma exacerbations:
 
@@ -382,7 +402,7 @@ number of exacerbations of each severity level, we use a multinomial distributio
 Step 8: Update the number of hospitalizations
 -----------------------------------------------------------------------------
 
-We add the total previous hospitalizations to the current year's number of exacerbations at
+We add the total previous hospitalizations to the current timepoint's number of exacerbations at
 severity level 4:
 
 .. math::
@@ -395,12 +415,13 @@ where :math:`x_4` is the number of exacerbations at severity level 4.
 Iterating Over Lifetime
 ************************
 
-For each agent, we simulate their lifetime by iterating over each year of their life. We start with
-the year they were born or immigrated, and we continue until they reach the maximum age or
-until they die. Each year, we update their age and check if they are still alive based
-on the mortality model. If they are still alive, we update their health status, asthma control,
+For each agent, we simulate their lifetime by iterating over the time intervals of their life. 
+
+We start with the timepoint when they were born or immigrated, and we continue until they reach the
+maximum age or until they die. At each timepoint, we update their age and check if they are still
+alive based on the mortality model. If they are still alive, we update their health status, asthma control,
 and other health-related variables based on the model's parameters and the agent's characteristics.
-During a given year, the following events can occur:
+During a given time interval, the following events can occur:
 
 1. Agent dies or reaches the maximum age. If so, we finish simulating that agent and go on to the next agent.
 2. Agent has an asthma exacerbation.
@@ -422,7 +443,7 @@ Step 2: Check if agent gets a new asthma diagnosis
 ---------------------------------------------------
 
 We use the asthma incidence model to determine if the agent gets a new asthma diagnosis
-in the current year of their lifetime. If they do not, skip to Step 4. If they do, we
+in the current time interval of their lifetime. If they do not, skip to Step 4. If they do, we
 set the age of diagnosis to the current age of the agent and go to Step 3.
 
 Step 3: Compute the control levels
@@ -460,12 +481,12 @@ where:
         \text{age}^2 \cdot \beta_{\text{age}^2}
 
 
-Step 4: Compute the number of asthma exacerbations in the current year
------------------------------------------------------------------------
+Step 4: Compute the number of asthma exacerbations in the current timepoint
+----------------------------------------------------------------------------
 
-To compute the number of asthma exacerbations in the current year, we use the
+To compute the number of asthma exacerbations in the current timepoint, we use the
 :ref:`exacerbation-model`, which takes into account the agent's asthma control level, age, and sex,
-as well as the current year. The probability of having :math:`n` exacerbations is given by a
+as well as the current timepoint. The probability of having :math:`n` exacerbations is given by a
 Poisson distribution:
 
 .. math::
@@ -483,13 +504,13 @@ We determine the expected number of exacerbations, :math:`\lambda`, using the fo
         &+\beta_{uc} \cdot P(\text{uncontrolled}) +
         \beta_{pc} \cdot P(\text{partially controlled}) +
         \beta_{c} \cdot P(\text{fully controlled}) \\
-        &+\log(\alpha(\text{year}, \text{sex}, \text{age}))
+        &+\log(\alpha(\text{timepoint}, \text{sex}, \text{age}))
 
 If the number of exacerbations is ``0``, skip to Step 8. Otherwise, go to Step 5.
 
 
-Step 5: Compute the severity of the asthma exacerbations in the current year
------------------------------------------------------------------------------
+Step 5: Compute the severity of the asthma exacerbations in the current timepoint
+----------------------------------------------------------------------------------
 
 There are four levels of severity for asthma exacerbations:
 
@@ -525,7 +546,7 @@ number of exacerbations of each severity level, we use a multinomial distributio
 Step 6: Update the number of hospitalizations
 -----------------------------------------------------------------------------
 
-We add the total previous hospitalizations to the current year's number of exacerbations at
+We add the total previous hospitalizations to the current timepoint's number of exacerbations at
 severity level 4:
 
 .. math::
@@ -551,7 +572,7 @@ Step 8: Compute utility
 ---------------------------
 
 Utility is a measure of the agent's quality of life, which can be affected by asthma control,
-exacerbations, and hospitalizations. We compute the utility for the agent in the current year
+exacerbations, and hospitalizations. We compute the utility for the agent in the current timepoint
 using the :ref:`utility-model`:
 
 .. math::
@@ -565,11 +586,11 @@ where:
 * :math:`u_{\text{baseline}}` is the baseline utility for a person of a given age and sex
   (without asthma)
 * :math:`d_{E}(S)` is the disutility due to an asthma exacerbation of severity level :math:`S`
-* :math:`n_E(S)` is the number of asthma exacerbations of severity level :math:`S` in a year
+* :math:`n_E(S)` is the number of asthma exacerbations of severity level :math:`S` in a time interval
 * :math:`S \in \{1, 2, 3, 4\}` is the asthma exacerbation severity level (1 = mild, 2 =
   moderate, 3 = severe, 4 = very severe)
 * :math:`d_{C}` is the disutility due to having asthma at control level :math:`L`
-* :math:`C(L)` is the proportion of the year spent at asthma control level :math:`L`
+* :math:`C(L)` is the proportion of the time interval spent at asthma control level :math:`L`
 * :math:`L \in \{1, 2, 3\}` is the asthma control level (1 = well-controlled, 2 =
   partially-controlled, 3 = uncontrolled)
 * :math:`A` is a boolean indicating whether the person has asthma
@@ -597,10 +618,10 @@ where:
 Step 10: Check if agent dies
 -------------------------------
 
-We use the :ref:`mortality-model` to determine if the agent dies in the current year of their lifetime.
-If the agent dies, we finish simulating that agent and go on to the next agent. If the agent does
-not die, we increment their age by 1 and go back to :ref:`step-1-lifetime-iteration` to repeat the
-process for the next year of their life.
+We use the :ref:`mortality-model` to determine if the agent dies in the current time interval of
+their lifetime. If the agent dies, we finish simulating that agent and go on to the next agent.
+If the agent does not die, we increment their age by 1 and go back to :ref:`step-1-lifetime-iteration`
+to repeat the process for the next time interval of their life.
 
 To compute the probability of death, we use the following formula:
 
@@ -608,16 +629,16 @@ To compute the probability of death, we use the following formula:
 
   \sigma^{-1}(q_x(\text{sex}, \text{age})) = 
       \sigma^{-1}(q_{x_0}(\text{sex}, \text{age})) -
-      \beta_{\text{sex}}(\text{year} - \text{year}_0)
+      \beta_{\text{sex}}(\text{timepoint} - \text{timepoint}_0)
 
 where:
 
 * :math:`q_x` is the probability of death between age :math:`x` and :math:`x + 1`
 * :math:`\sigma^{-1}` is the logit function
 * :math:`q_{x_0}` is the baseline probability of death between age :math:`x_0` and :math:`x_0 + 1`,
-  where :math:`x_0` is the age in the base year :math:`\text{year}_0`
-* :math:`\text{year}` is the current year in the simulation
-* :math:`\text{year}_0` is the starting year in the simulation
+  where :math:`x_0` is the age at the base timepoint :math:`\text{timepoint}_0`
+* :math:`\text{timepoint}` is the current timepoint in the simulation
+* :math:`\text{timepoint}_0` is the starting timepoint in the simulation
 
 Finally, we determine if the agent dies using a Bernoulli distribution:
 
@@ -629,11 +650,11 @@ Step 11: Check if agent emigrates
 -----------------------------------
 
 We use the :ref:`migration-model` to determine if the agent emigrates to another province or country
-in the current year of their lifetime. If the agent emigrates, we finish simulating that agent and
+in the current time interval of their lifetime. If the agent emigrates, we finish simulating that agent and
 go on to the next agent. If the agent does not emigrate, we increment their age by 1 and go back to
-:ref:`step-1-lifetime-iteration` to repeat the process for the next year of their life.
+:ref:`step-1-lifetime-iteration` to repeat the process for the next time interval of their life.
 
 .. math::
 
-  \text{emigrates} \sim \text{Bernoulli}(p_{\text{emigrate}}(\text{sex}, \text{age}, \text{year}))
+  \text{emigrates} \sim \text{Bernoulli}(p_{\text{emigrate}}(\text{sex}, \text{age}, \text{timepoint}))
 

@@ -1,14 +1,15 @@
 import pytest
+import datetime as dt
 from leap.emigration import Emigration
 from leap.utils import round_number
 
 
 @pytest.mark.parametrize(
-    "starting_year, year, age, sex, province, population_growth_type, value",
+    "min_timepoint, timepoint, age, sex, province, population_growth_type, value",
     [
         (
-            2024,
-            2025,
+            dt.datetime(2024, 1, 1),
+            dt.datetime(2025, 1, 1),
             89,
             "F",
             "BC",
@@ -18,26 +19,28 @@ from leap.utils import round_number
     ]
 )
 def test_emigration_constructor(
-    starting_year, year, age, sex, province, population_growth_type, value
+    min_timepoint, timepoint, age, sex, province, population_growth_type, value
 ):
     emigration = Emigration(
-        starting_year=starting_year,
+        min_timepoint=min_timepoint,
         province=province,
         population_growth_type=population_growth_type
     )
-    df = emigration.table.get_group((year))
+
+    df = emigration.table.get_group((timepoint))
     assert round_number(
         df[(df["age"] == age) & (df["sex"] == sex)]["prob_emigration"].values[0],
         sigdigits=4
     ) == value
 
 
+
 @pytest.mark.parametrize(
-    "starting_year, year, age, sex, province, population_growth_type, lower_bound, upper_bound",
+    "min_timepoint, timepoint, age, sex, province, population_growth_type, lower_bound, upper_bound",
     [
         (
-            2020,
-            2023,
+            dt.datetime(2020, 1, 1),
+            dt.datetime(2023, 1, 1),
             0,
             "F",
             "BC",
@@ -46,8 +49,8 @@ def test_emigration_constructor(
             0
         ),
         (
-            2020,
-            2023,
+            dt.datetime(2020, 1, 1),
+            dt.datetime(2023, 1, 1),
             99,
             "M",
             "BC",
@@ -58,26 +61,26 @@ def test_emigration_constructor(
     ]
 )
 def test_emigration_compute_probability(
-    starting_year, year, age, sex, province, population_growth_type, lower_bound, upper_bound
+    min_timepoint, timepoint, age, sex, province, population_growth_type, lower_bound, upper_bound
 ):
     """Test the ``compute_probability`` method of the ``Emigration`` class.
     
     The ``compute_probability`` method should return a boolean value indicating
-    whether the agent emigrates in a given year. This is computed using the binomial distribution.
+    whether the agent emigrates in a given timepoint. This is computed using the binomial distribution.
     For the purposes of testing, we will run the method 100,000 times and check that the number of
     emigrants falls within a certain range. Please see
     ``processed_data/migration/migration_table.csv`` for the corresponding values.
     """
 
     emigration = Emigration(
-        starting_year=starting_year,
+        min_timepoint=min_timepoint,
         province=province,
         population_growth_type=population_growth_type
     )
 
     count = 0
     for _ in range(100000):
-        if emigration.compute_probability(year, age, sex):
+        if emigration.compute_probability(timepoint, age, sex):
             count += 1
 
     assert round_number(count, sigdigits=3) <= upper_bound

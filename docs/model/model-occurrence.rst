@@ -8,7 +8,7 @@ This document describes the asthma occurrence model, which is used to predict th
 prevalence of asthma in British Columbia. The model is divided into two parts:
 
 1. :ref:`occurrence-model-1`: A ``Generalized Linear Model (GLM)`` that predicts asthma incidence
-   and prevalence based on age, sex, and year.
+   and prevalence based on age, sex, and timepoint.
 2. :ref:`occurrence-model-2`: A model that incorporates risk factors such as family history and
    antibiotic use during infancy to predict asthma incidence and prevalence, along with the
    results from the first model.
@@ -21,8 +21,8 @@ Occurrence Model 1: Crude Occurrence
 In the first model, we will use data collected from the ``BC Ministry of Health`` on the
 incidence and prevalence of asthma in British Columbia. We will use this data to fit a 
 ``Generalized Linear Model (GLM)`` to predict the incidence and prevalence of asthma
-based on the age, sex, and year. However, asthma occurrence doesn't just depend on someone's age or
-sex, but it also depends on risk factors such as family history and antibiotic use during
+based on the age, sex, and timepoint. However, asthma occurrence doesn't just depend on someone's
+age or sex, but it also depends on risk factors such as family history and antibiotic use during
 infancy. We will address these in the second model: :ref:`occurrence-model-2`.
 
 Datasets
@@ -98,7 +98,7 @@ Model: Generalized Linear Model - Poisson
 ****************************************************
 
 Since our model projects into the future, we would like to be able to extend this data beyond
-``2019``. Our model also makes predictions at 1-year age intervals, not 5-year age intervals.
+``2019``. Our model also makes predictions at customized age intervals, not 5-year age intervals.
 To obtain these projections, we use a ``Generalized Linear Model (GLM)``. A ``GLM`` is a type of
 regression analysis which is a generalized form of linear regression. See :doc:`model-glm` for more
 information on ``GLMs``.
@@ -109,7 +109,7 @@ Probability Distribution
 When fitting a ``GLM``, first you must choose a distribution for the ``response variable``. In our
 case, the response variable is the asthma prevalence or incidence. Incidence and prevalence are
 counts of the number of people diagnosed with asthma and the number of people with asthma,
-respectively, in a given time interval (a year, in our case). Since these are counts, we need a
+respectively, in a given time interval. Since these are counts, we need a
 discrete probability distribution. The ``Poisson distribution`` is a good choice for our data.
 
 .. math::
@@ -145,9 +145,9 @@ Now that we have our distribution and link function, we need to decide on a form
 :math:`\eta^{(i)}`. We are permitted to use linear combinations of functions of the features
 in our dataset.
 
-Let's start with ``incidence``. We want a formula using ``age``, ``sex``, and ``year``.
+Let's start with ``incidence``. We want a formula using ``age``, ``sex``, and ``timepoint``.
 Since asthma depends on factors such as pollution and antibiotic use, and these factors change
-from year to year, it follows that asthma incidence should depend on the year. Antibiotic use
+over time, it follows that asthma incidence should depend on the timepoint. Antibiotic use
 also depends on age, so we should include age in our formula. Finally, there is a sex difference
 in asthma incidence, so we should include sex in our formula. 
 
@@ -165,15 +165,15 @@ where:
 
 * :math:`\beta_{k\ell m}` is the coefficient for the feature :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
 * :math:`a^{(i)}` is the age
-* :math:`t^{(i)}` is the year
+* :math:`t^{(i)}` is the timepoint
 * :math:`s^{(i)}` is the sex
 
 There are :math:`2 + 6 * 2 = 14` coefficients in the incidence model.
 
 
-Next we have the ``prevalence``. We again want a formula using ``age``, ``sex``, and ``year``.
+Next we have the ``prevalence``. We again want a formula using ``age``, ``sex``, and ``timepoint``.
 Since asthma prevalence depends on the number of people who have asthma, and this number changes
-from year to year, we should include year in our formula. Asthma prevalence also depends on age,
+over time, we should include timepoint in our formula. Asthma prevalence also depends on age,
 so we should include age in our formula. Finally, there is a sex difference
 in asthma incidence and hence prevalence, so we should include sex in our formula.
 
@@ -214,7 +214,7 @@ target asthma prevalence / incidence in this model. The data is formatted as fol
     </thead>
     <tbody>
       <tr>
-        <td><code class="notranslate">year</code></td>
+        <td><code class="notranslate">timepoint</code></td>
         <td>
           <code class="notranslate">int</code>
         </td>
@@ -247,7 +247,7 @@ target asthma prevalence / incidence in this model. The data is formatted as fol
           <code class="notranslate">float</code>
         </td>
         <td>
-          The predicted incidence of asthma in BC for a given year, age, and sex, per 100 people
+          The predicted incidence of asthma in BC for a given time interval, age, and sex, per 100 people
         </td>
       </tr>
       <tr>
@@ -256,7 +256,7 @@ target asthma prevalence / incidence in this model. The data is formatted as fol
           <code class="notranslate">float</code>
         </td>
         <td>
-          The predicted prevalence of asthma in BC for a given year, age, and sex, per 100 people
+          The predicted prevalence of asthma in BC for a given time interval, age, and sex, per 100 people
         </td>
       </tr>
     </tbody>
@@ -512,9 +512,9 @@ difference between :math:`\zeta` and :math:`\eta`.
 Solving for the Correction Term: Incidence
 --------------------------------------------
 
-In our model, asthma incidence is defined as the number of new diagnoses between the previous year
-and the current year, divided by the total population. To calibrate the incidence, we first
-find the calibrated prevalence for the previous year:
+In our model, asthma incidence is defined as the number of new diagnoses between the previous
+timepoint and the current timepoint, divided by the total population. To calibrate the incidence,
+we first find the calibrated prevalence for the previous timepoint:
 
 .. math::
 
@@ -541,7 +541,7 @@ So, we can rewrite the joint probability as:
   p(\lambda, A = 0 \mid t-1) = (1 - \zeta_{\text{prev}, \lambda}(t-1)) \cdot p(\lambda, t-1)
 
 
-Next, we find the calibrated asthma incidence for the current year:
+Next, we find the calibrated asthma incidence for the current timepoint:
 
 .. math::
 
@@ -936,7 +936,7 @@ where:
 Current Contingency Table
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Finally, we can compute the contingency table for the current year, :math:`t=1`:
+Finally, we can compute the contingency table for the current timepoint, :math:`t=1`:
 
 .. raw:: html
 

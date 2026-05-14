@@ -76,14 +76,15 @@ class AsthmaCost:
             >>> from leap.control import ControlLevels
             >>> from leap.severity import ExacerbationSeverityHistory
             >>> from leap.cost import AsthmaCost
+            >>> import datetime as dt
             >>> agent = Agent(
             ...     sex="F",
             ...     age=30,
-            ...     year=2027,
-            ...     year_index=0,
+            ...     timepoint=dt.datetime(2027, 1, 1),
+            ...     timepoint_index=0,
             ...     control_levels=ControlLevels(0.1, 0.2, 0.7),
             ...     exacerbation_severity_history=ExacerbationSeverityHistory(
-            ...         current_year=[0, 1, 5, 6], prev_year=[0, 0, 0, 0]
+            ...         current_timepoint=[0, 1, 5, 6], prev_timepoint=[0, 0, 0, 0]
             ...     ),
             ...     has_family_history=True,
             ...     has_asthma=True,
@@ -107,7 +108,7 @@ class AsthmaCost:
 
             return (
                 np.dot(
-                    agent.exacerbation_severity_history.current_year,
+                    agent.exacerbation_severity_history.current_timepoint,
                     self.exac
                 ) +
                 np.dot(control_levels.as_array(), self.control_probs)

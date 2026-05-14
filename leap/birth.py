@@ -1,11 +1,14 @@
 from __future__ import annotations
 import math
 import pandas as pd
-from leap.utils import get_data_path, check_year, check_province, check_projection_scenario
+import datetime as dt
+from leap.utils import get_data_path, check_timepoint, check_province, check_projection_scenario, \
+    get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
+    from dateutil.relativedelta import relativedelta
 
 logger = get_logger(__name__)
 
@@ -15,32 +18,33 @@ class Birth:
 
     def __init__(
         self,
-        starting_year: int | None = None,
+        min_timepoint: dt.datetime | None = None,
         province: str | None = None,
         population_growth_type: str | None = None,
         max_age: int = 111,
         estimate: DataFrameGroupBy | None = None,
-        initial_population: pd.DataFrame | None = None
+        initial_population: pd.DataFrame | None = None,
+        time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if estimate is None:
-            if starting_year is None or province is None or population_growth_type is None:
+            if min_timepoint is None or province is None or population_growth_type is None:
                 raise ValueError(
-                    "Either starting_year, province, and population_growth_type or "
+                    "Either min_timepoint, province, and population_growth_type or "
                     "estimate must be provided."
                 )
             self.estimate = self.load_birth_estimate(
-                starting_year, province, population_growth_type
+                min_timepoint, province, population_growth_type, time_delta
             )
         else:
             self.estimate = estimate
         if initial_population is None:
-            if starting_year is None or province is None or population_growth_type is None:
+            if min_timepoint is None or province is None or population_growth_type is None:
                 raise ValueError(
-                    "Either starting_year, province, and population_growth_type or "
+                    "Either min_timepoint, province, and population_growth_type or "
                     "initial_population must be provided."
                 )
             self.initial_population = self.load_population_initial_distribution(
-                starting_year, province, population_growth_type, max_age
+                min_timepoint, province, population_growth_type, max_age, time_delta
             )
         else:
             self.initial_population = initial_population
@@ -120,12 +124,16 @@ class Birth:
         self._initial_population = initial_population
 
     def load_birth_estimate(
-        self, starting_year: int, province: str, population_growth_type: str
+        self,
+        min_timepoint: dt.datetime,
+        province: str,
+        population_growth_type: str,
+        time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
         """Load the data from ``birth_estimate.csv``.
         
         Args:
-            starting_year: The year for the data to start at. Must be between ``2000-2065``.
+            min_timepoint: The year for the data to start at. Must be between ``2000-2065``.
             province: A string indicating the province abbreviation, e.g. ``"BC"``.
                 For all of Canada, set province to ``"CA"``.
             population_growth_type: Population growth type, one of:
@@ -172,30 +180,37 @@ class Birth:
               <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
         """
 
+        time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path("processed_data/birth/birth_estimate.csv")
+            get_data_path(f"processed_data/{time_delta_tag}/birth/birth_estimate.csv"),
+            parse_dates=["timepoint"]
         )
-        check_year(starting_year, df)
+        check_timepoint(min_timepoint, df)
         check_province(province)
         check_projection_scenario(population_growth_type)
 
         df = df[
-            (df["year"] >= starting_year) &
+            (df["timepoint"] >= min_timepoint) &
             (df["province"] == province) &
             ((df["projection_scenario"] == population_growth_type) |
              (df["projection_scenario"] == "past"))
         ]
-        df["N_relative"] = df["N"] / df.loc[df["year"] == starting_year]["N"].values[0]
-        grouped_df = df.groupby("year")
+        df["N_relative"] = df["N"] / df.loc[df["timepoint"] == min_timepoint]["N"].values[0]
+        grouped_df = df.groupby("timepoint")
         return grouped_df
 
     def load_population_initial_distribution(
-        self, starting_year: int, province: str, population_growth_type: str, max_age: int
+        self,
+        min_timepoint: dt.datetime,
+        province: str,
+        population_growth_type: str,
+        max_age: int,
+        time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> pd.DataFrame:
         """Load the data from ``initial_pop_distribution_prop.csv``.
         
         Args:
-            starting_year: The year for the data to start at. Must be between ``2000-2065``.
+            min_timepoint: The year for the data to start at. Must be between ``2000-2065``.
             province: A string indicating the province abbreviation, e.g. ``"BC"``.
                 For all of Canada, set province to ``"CA"``.
             population_growth_type: Population growth type, one of:
@@ -219,18 +234,19 @@ class Birth:
         Returns:
             A dataframe containing the population for the first year of the simulation.
         """
-
+        time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
+            get_data_path(f"processed_data/{time_delta_tag}/birth/initial_pop_distribution_prop.csv"),
+            parse_dates=["timepoint"]
         )
 
-        check_year(starting_year, df)
+        check_timepoint(min_timepoint, df)
         check_province(province)
         check_projection_scenario(population_growth_type)
 
         df = df[
             (df["age"] <= max_age) &
-            (df["year"] == starting_year) &
+            (df["timepoint"] == min_timepoint) &
             (df["province"] == province) &
             ((df["projection_scenario"] == population_growth_type) |
              (df["projection_scenario"] == "past"))
@@ -251,12 +267,13 @@ class Birth:
             >>> from leap.birth import Birth
             >>> from leap.utils import get_data_path
             >>> import pandas as pd
+            >>> import datetime as dt
             >>> initial_population = pd.DataFrame({
             ...     "age": [0, 1, 2],
             ...     "prop": [1.0, 2.0, 0.5]
             ... })
             >>> birth = Birth(
-            ...     starting_year=2000,
+            ...     min_timepoint=dt.datetime(2000, 1, 1),
             ...     province="CA",
             ...     population_growth_type="LG",
             ...     initial_population=initial_population
@@ -273,12 +290,12 @@ class Birth:
             initial_population_indices.extend([age_index] * num_agents)
         return initial_population_indices
 
-    def get_num_newborn(self, num_births_initial: int, year: int) -> int:
-        """Get the number of births in a given year.
+    def get_num_newborn(self, num_births_initial: int, timepoint: dt.datetime) -> int:
+        """Get the number of births in a given time interval.
 
         Args:
             num_births_initial: Number of births in the initial year of the simulation.
-            year: The calendar year.
+            timepoint: The current timepoint of the simulation.
 
         Returns:
             The number of births for the given year.
@@ -287,21 +304,22 @@ class Birth:
 
             >>> from leap.birth import Birth
             >>> from leap.utils import get_data_path
+            >>> import datetime as dt
             >>> birth = Birth(
-            ...     starting_year=2000,
+            ...     min_timepoint=dt.datetime(2000, 1, 1),
             ...     province="CA",
             ...     population_growth_type="LG"
             ... )
-            >>> birth.get_num_newborn(num_births_initial=100, year=2000)
+            >>> birth.get_num_newborn(num_births_initial=100, timepoint=dt.datetime(2000, 1, 1))
             100
 
-            >>> birth.get_num_newborn(num_births_initial=100, year=2001)
+            >>> birth.get_num_newborn(num_births_initial=100, timepoint=dt.datetime(2001, 1, 1))
             97
 
         """
         num_new_born = int(
             math.ceil(
-                num_births_initial * self.estimate.get_group((year))["N_relative"].iloc[0] # type: ignore
+                num_births_initial * self.estimate.get_group((timepoint))["N_relative"].iloc[0] # type: ignore
             ) 
         ) 
         return num_new_born

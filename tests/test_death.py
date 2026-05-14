@@ -1,6 +1,7 @@
 import pytest
 import pathlib
 import json
+import datetime as dt
 from leap.death import Death
 from leap.agent import Agent
 from leap.family_history import FamilyHistory
@@ -16,26 +17,26 @@ def config():
 
 
 @pytest.mark.parametrize(
-    "province, starting_year",
+    "province, min_timepoint",
     [
         (
             "BC",
-            2024
+            dt.datetime(2024, 1, 1)
         ),
     ]
 )
-def test_death_constructor(config, province, starting_year):
-    death = Death(province=province, starting_year=starting_year)
+def test_death_constructor(config, province, min_timepoint):
+    death = Death(province=province, min_timepoint=min_timepoint)
     assert death.life_table is not None
 
 
 @pytest.mark.parametrize(
-    "province, starting_year, year, year_index, sex, age, is_dead",
+    "province, min_timepoint, timepoint, timepoint_index, sex, age, is_dead",
     [
         (
             "BC",
-            2024,
-            2024,
+            dt.datetime(2024, 1, 1),
+            dt.datetime(2024, 1, 1),
             0,
             True,
             110,
@@ -43,8 +44,8 @@ def test_death_constructor(config, province, starting_year):
         ),
         (
             "BC",
-            2024,
-            2025,
+            dt.datetime(2024, 1, 1),
+            dt.datetime(2025, 1, 1),
             1,
             True,
             7,
@@ -53,14 +54,14 @@ def test_death_constructor(config, province, starting_year):
     ]
 )
 def test_death_agent_dies(
-    config, province, starting_year, year, year_index, sex, age, is_dead
+    config, province, min_timepoint, timepoint, timepoint_index, sex, age, is_dead
 ):
-    death = Death(province=province, starting_year=starting_year)
+    death = Death(province=province, min_timepoint=min_timepoint)
     agent = Agent(
         sex=sex,
         age=age,
-        year=year,
-        year_index=year_index,
+        timepoint=timepoint,
+        timepoint_index=timepoint_index,
         family_history=FamilyHistory(config=config["family_history"]),
         antibiotic_exposure=AntibioticExposure(config=config["antibiotic_exposure"]),
         province=province,

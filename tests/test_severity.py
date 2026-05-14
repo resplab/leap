@@ -2,6 +2,7 @@ import pytest
 import pathlib
 import json
 import numpy as np
+import datetime as dt
 from leap.agent import Agent
 from leap.family_history import FamilyHistory
 from leap.antibiotic_exposure import AntibioticExposure
@@ -52,7 +53,7 @@ def test_exacerbation_severity_constructor(hyperparameters, parameters, p):
 
 @pytest.mark.parametrize(
     (
-        "hyperparameters, parameters, sex, age, year, year_index, province, asthma_age,"
+        "hyperparameters, parameters, sex, age, timepoint, timepoint_index, province, asthma_age,"
         "expected_prob"
     ),
     [
@@ -67,7 +68,7 @@ def test_exacerbation_severity_constructor(hyperparameters, parameters, p):
             },
             True,
             90,
-            2024,
+            dt.datetime(2024, 1, 1),
             0,
             "BC",
             85,
@@ -76,7 +77,7 @@ def test_exacerbation_severity_constructor(hyperparameters, parameters, p):
     ]
 )
 def test_exacerbation_severity_compute_hospitalization_prob(
-    config, hyperparameters, parameters, sex, age, year, year_index, province, asthma_age,
+    config, hyperparameters, parameters, sex, age, timepoint, timepoint_index, province, asthma_age,
     expected_prob
 ):
     """Test the ``compute_hospitalization_prob`` method of the ``ExacerbationSeverity`` class.
@@ -96,8 +97,8 @@ def test_exacerbation_severity_compute_hospitalization_prob(
     agent = Agent(
         sex=sex,
         age=age,
-        year=year,
-        year_index=year_index,
+        timepoint=timepoint,
+        timepoint_index=timepoint_index,
         family_history=FamilyHistory(config=config["family_history"]),
         antibiotic_exposure=AntibioticExposure(config=config["antibiotic_exposure"]),
         province=province,

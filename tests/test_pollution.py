@@ -1,4 +1,5 @@
 import pytest
+import datetime as dt
 from leap.pollution import PollutionTable, Pollution
 
 
@@ -12,16 +13,15 @@ def test_pollution_table_constructor():
 
 
 @pytest.mark.parametrize(
-    "cduid, year, month, ssp, wildfire_pm25_scaled, total_pm25",
+    "cduid, timepoint, ssp, wildfire_pm25_scaled, total_pm25",
     [
-        (5915, 2028, 2, "SSP2_4.5", 0.09851602637, 3.168516026)
+        (5915, dt.datetime(2028, 2, 1), "SSP2_4.5", 0.09851602637, 3.168516026)
     ]
 )
-def test_pollution_constructor(cduid, year, month, ssp, wildfire_pm25_scaled, total_pm25):
-    pollution = Pollution(cduid, year, month, ssp)
+def test_pollution_constructor(cduid, timepoint, ssp, wildfire_pm25_scaled, total_pm25):
+    pollution = Pollution(cduid, timepoint, ssp)
     assert pollution.cduid == cduid
-    assert pollution.year == year
-    assert pollution.month == month
+    assert pollution.timepoint == timepoint
     assert pollution.SSP == ssp
     assert pollution.wildfire_pm25_scaled == wildfire_pm25_scaled
     assert pollution.total_pm25 == total_pm25
