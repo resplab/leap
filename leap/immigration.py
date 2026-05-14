@@ -93,7 +93,7 @@ class Immigration:
         """
         time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_delta_tag}/migration/immigration_table.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/migration/migration_table.csv"),
             parse_dates=["timepoint"]
         )
         check_timepoint(min_timepoint + time_delta, df)
@@ -101,12 +101,14 @@ class Immigration:
         check_projection_scenario(population_growth_type)
 
         df = df[
+            (df["delta_n"] > 0) &
             (df["age"] <= max_age) &
             (df["timepoint"] >= min_timepoint) &
             (df["province"] == province) &
             (df["projection_scenario"] == population_growth_type)
         ]
-        df = df.drop(columns=["province", "projection_scenario"])
+        df = df.drop(columns=["province", "projection_scenario", "delta_n", "prop_emigrants_year", "prob_emigration"])
+        df = df.rename(columns={"prop_migrants_birth": "prop_immigrants_birth"})
         df["sex"] = df["sex"].replace({"F": 0, "M": 1})
         for timepoint in df["timepoint"].unique():
             prop_immigrants_timepoint = df.loc[df["timepoint"] == timepoint]["prop_immigrants_timepoint"].copy()

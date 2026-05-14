@@ -26,10 +26,13 @@ def test_emigration_constructor(
         province=province,
         population_growth_type=population_growth_type
     )
+
     df = emigration.table.get_group((timepoint))
-    assert df["F"].iloc[0] == 0.0
-    assert df["M"].iloc[0] == 0.0
-    assert round_number(df[df["age"] == age][sex].values[0], sigdigits=4) == value
+    assert round_number(
+        df[(df["age"] == age) & (df["sex"] == sex)]["prob_emigration"].values[0],
+        sigdigits=4
+    ) == value
+
 
 
 @pytest.mark.parametrize(
@@ -66,7 +69,7 @@ def test_emigration_compute_probability(
     whether the agent emigrates in a given timepoint. This is computed using the binomial distribution.
     For the purposes of testing, we will run the method 100,000 times and check that the number of
     emigrants falls within a certain range. Please see
-    ``processed_data/migration/emigration_table.csv`` for the corresponding values.
+    ``processed_data/migration/migration_table.csv`` for the corresponding values.
     """
 
     emigration = Emigration(

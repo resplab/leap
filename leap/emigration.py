@@ -39,11 +39,12 @@ class Emigration:
 
         * ``timepoint``: timepoint in the range 2001 - 2065.
         * ``age``: integer age.
-        * ``M``: the probability of a male emigrating.
-        * ``F``: the probability of a female emigrating.
+        * ``sex``: one of ``M`` = male, ``F`` = female.
+        * ``prob_emigration``: the per-person probability of emigrating. Zero for cells where
+          the net population change was non-negative (i.e. no net emigration).
 
-        See ``processed_data/{time_delta_tag}/migration/emigration_table.csv``.
-        """
+        See ``processed_data/{time_delta_tag}/migration/migration_table.csv``.
+
         return self._table
     
     @table.setter
@@ -86,7 +87,7 @@ class Emigration:
         """
         time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_delta_tag}/migration/emigration_table.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/migration/migration_table.csv"),
             parse_dates=["timepoint"]
         )
         check_timepoint(min_timepoint + time_delta, df)
@@ -96,10 +97,12 @@ class Emigration:
         df = df[
             (df["timepoint"] >= min_timepoint) &
             (df["province"] == province) &
-            (df["proj_scenario"] == population_growth_type)
+            (df["projection_scenario"] == population_growth_type)
         ]
+
         df.drop(columns=["province", "proj_scenario"], inplace=True)
         grouped_df = df.groupby("timepoint")
+
         return grouped_df
 
     def compute_probability(
@@ -130,5 +133,5 @@ class Emigration:
             return False
         else:
             df = self.table.get_group(timepoint)
-            p = df[df["age"] == min(age, 100)][str(sex)].values[0]
+            p = df[(df["age"] == min(age, 100)) & (df["sex"] == str(sex))]["prob_emigration"].values[0]
             return bool(np.random.binomial(1, p))
