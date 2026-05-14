@@ -2,8 +2,6 @@ import pandas as pd
 import os
 import pathlib
 import datetime as dt
-
-from sqlalchemy import TIME
 from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group, get_parser
 from leap.logger import get_logger
