@@ -1,5 +1,4 @@
 import pytest
-import pandas as pd
 import datetime as dt
 from leap.data_generation.birth_data import get_projection_scenario_id, MIN_TIMEPOINT, \
     CENSUS_TIMEPOINT, load_past_births_population_data, load_projected_births_population_data, \
