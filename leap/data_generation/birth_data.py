@@ -2,6 +2,8 @@ import pandas as pd
 import os
 import pathlib
 import datetime as dt
+
+from sqlalchemy import TIME
 from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group, get_parser
 from leap.logger import get_logger
@@ -10,6 +12,9 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 MIN_TIMEPOINT = dt.datetime(1999, 1, 1)
+
+# Time duration between data points in the original data from StatsCan
+TIME_DELTA_OD = TimeDelta(years=1)
 
 
 def get_projection_scenario_id(projection_scenario: str) -> str:
@@ -248,10 +253,10 @@ def load_past_initial_population_data(time_delta: TimeDelta) -> pd.DataFrame:
 
     # create a df to replace missing values with those of the next timepoint and age
     replacement_df = df.loc[
-        (df["timepoint"].isin(missing_df["timepoint"] + time_delta.to_dateoffset())) & 
-        (df["age"].isin(missing_df["age"] + 1))
+        (df["timepoint"].isin(missing_df["timepoint"] + TIME_DELTA_OD.to_dateoffset())) & 
+        (df["age"].isin(missing_df["age"] + TIME_DELTA_OD.years))
     ]
-    replacement_df["age"] = replacement_df["age"] - 1
+    replacement_df["age"] = replacement_df["age"] - TIME_DELTA_OD.years
     replacement_df = replacement_df.drop(columns=["timepoint"])
     replacement_df.rename(columns={"N": "N_replace"}, inplace=True)
 
