@@ -711,6 +711,10 @@ class TimeDelta(relativedelta):
             self.microseconds / 1e6
         )
     
+    def total_years(self) -> float:
+        """Convert the total duration of time into units of years."""
+        return self.total_seconds() / (365 * 24 * 3600)
+    
     def to_isoformat(self) -> str:
         date_part = "".join([
             f"{self.years}Y" if self.years else "",
