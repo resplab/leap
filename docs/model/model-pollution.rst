@@ -12,7 +12,7 @@ PM2.5 Data
 
 The baseline projections are obtained from the ``ECCC`` using their ``GEM-MACH`` model, which
 gives us a prediction for background PM2.5 levels and wildfire PM2.5 levels for the years
-2026, 2031, and 2036. All other years are calculated using linear interpolation:
+2026, 2031, and 2036. All other timepoints are calculated using linear interpolation:
 
 .. list-table::
    :widths: 25 25 50
@@ -21,15 +21,9 @@ gives us a prediction for background PM2.5 levels and wildfire PM2.5 levels for 
    * - Column
      - Type
      - Description
-   * - ``year``
+   * - ``timepoint``
      - :code:`int`
-     - the calendar year
-   * - ``month``
-     - :code:`int`
-     - the numeric month, with ``1`` = January, ``2`` = February, etc.
-   * - ``date``
-     - :code:`str`
-     - the date in ``YYYY-MM-DD`` format
+     - the starting date / time of the time interval that the data applies to
    * - ``CDUID``
      - :code:`int`
      - the Statistics Canada Census Division Unique Identifier

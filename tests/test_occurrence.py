@@ -2,6 +2,8 @@ import pytest
 import pathlib
 import json
 import numpy as np
+import datetime as dt
+from dateutil.relativedelta import relativedelta
 from leap.agent import Agent
 from leap.family_history import FamilyHistory
 from leap.antibiotic_exposure import AntibioticExposure
@@ -43,11 +45,11 @@ POLY_PARAMETERS_PREVALENCE = {
         3212003819462.7515,
         712446143502445.5
     ],
-    "alpha_year": [
+    "alpha_time": [
         2009.5,
         2009.5
     ],
-    "norm2_year": [
+    "norm2_time": [
         519.9999999999999,
         17290.0,
         456456.00000000006
@@ -70,9 +72,9 @@ def config():
                 "β0": 34.6,
                 "βsex": -9.5,
                 "βage": [-6.6, 7.7, -5.6, 3.9, -1.3],
-                "βyear": -0.019,
+                "βtime": -0.019,
                 "βsexage": [-4.4, 4.7, -2.6, 0.79, 0.95],
-                "βsexyear": 0.0046,
+                "βsextime": 0.0046,
                 "β_fam_hist": {
                     "β_fhx_0": 0.12,
                     "β_fhx_age": 0.36
@@ -95,9 +97,9 @@ def test_incidence_constructor(parameters, poly_parameters, max_age):
     assert incidence.parameters["β0"] == parameters["β0"]
     assert incidence.parameters["βsex"] == parameters["βsex"]
     np.testing.assert_array_equal(incidence.parameters["βage"], parameters["βage"])
-    assert incidence.parameters["βyear"] == parameters["βyear"]
+    assert incidence.parameters["βtime"] == parameters["βtime"]
     np.testing.assert_array_equal(incidence.parameters["βsexage"], parameters["βsexage"])
-    assert incidence.parameters["βsexyear"] == parameters["βsexyear"]
+    assert incidence.parameters["βsextime"] == parameters["βsextime"]
     np.testing.assert_array_equal(incidence.parameters["β_fam_hist"], parameters["β_fam_hist"])
     np.testing.assert_array_equal(incidence.parameters["β_abx"], parameters["β_abx"])
     assert incidence.max_age == max_age
@@ -112,11 +114,11 @@ def test_incidence_constructor(parameters, poly_parameters, max_age):
                 "β0": -2.28,
                 "βsex": -0.11,
                 "βage": [1.7, -2.1, 3.6, -2.9, 1.4],
-                "βyear": [2.8, -1.1],
+                "βtime": [2.8, -1.1],
                 "βsexage": [-7.69, 2.68, 0.86, -0.656, -0.027],
-                "βsexyear": [1.29, 0.036],
-                "βyearage": [50.6, 6.5, -39.4, 3.6, 15.9, -4.7, -7.1, 4.1, -4.8, -3.3],
-                "βsexyearage": [-3.1, 7.2, -25.7, 0.2, 11.3, -2.5, 7.6, 4.1, -15.2, 3.7],
+                "βsextime": [1.29, 0.036],
+                "βtimeage": [50.6, 6.5, -39.4, 3.6, 15.9, -4.7, -7.1, 4.1, -4.8, -3.3],
+                "βsextimeage": [-3.1, 7.2, -25.7, 0.2, 11.3, -2.5, 7.6, 4.1, -15.2, 3.7],
                 "β_fam_hist": {
                     "β_fhx_0": 0.122,
                     "β_fhx_age": 0.376
@@ -137,19 +139,19 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
         prevalence.poly_parameters["norm2_age"], poly_parameters["norm2_age"]
     )
     np.testing.assert_array_equal(
-        prevalence.poly_parameters["alpha_year"], poly_parameters["alpha_year"]
+        prevalence.poly_parameters["alpha_time"], poly_parameters["alpha_time"]
     )
     np.testing.assert_array_equal(
-        prevalence.poly_parameters["norm2_year"], poly_parameters["norm2_year"]
+        prevalence.poly_parameters["norm2_time"], poly_parameters["norm2_time"]
     )
     assert prevalence.parameters["β0"] == parameters["β0"]
     assert prevalence.parameters["βsex"] == parameters["βsex"]
     np.testing.assert_array_equal(prevalence.parameters["βage"], parameters["βage"])
-    np.testing.assert_array_equal(prevalence.parameters["βyear"], parameters["βyear"])
+    np.testing.assert_array_equal(prevalence.parameters["βtime"], parameters["βtime"])
     np.testing.assert_array_equal(prevalence.parameters["βsexage"], parameters["βsexage"])
-    np.testing.assert_array_equal(prevalence.parameters["βsexyear"], parameters["βsexyear"])
-    np.testing.assert_array_equal(prevalence.parameters["βyearage"], parameters["βyearage"])
-    np.testing.assert_array_equal(prevalence.parameters["βsexyearage"], parameters["βsexyearage"])
+    np.testing.assert_array_equal(prevalence.parameters["βsextime"], parameters["βsextime"])
+    np.testing.assert_array_equal(prevalence.parameters["βtimeage"], parameters["βtimeage"])
+    np.testing.assert_array_equal(prevalence.parameters["βsextimeage"], parameters["βsextimeage"])
     np.testing.assert_array_equal(prevalence.parameters["β_fam_hist"], parameters["β_fam_hist"])
     np.testing.assert_array_equal(prevalence.parameters["β_abx"], parameters["β_abx"])
     assert prevalence.max_age == max_age
@@ -158,8 +160,8 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
 @pytest.mark.parametrize(
     (
         "poly_parameters_incidence, poly_parameters_prevalence, incidence_parameters,"
-        "prevalence_parameters, family_history_parameters,"
-        "max_age, age, sex, starting_year, year, province, occurrence_type, has_asthma"
+        "prevalence_parameters, family_history_parameters, max_age, age, sex,"
+        "min_timepoint, timepoint, time_delta, province, occurrence_type, has_asthma"
     ),
     [
         (
@@ -169,9 +171,9 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
                 "β0": 34.6,
                 "βsex": -9.5,
                 "βage": [-6.6, 7.7, -5.6, 3.9, -1.3],
-                "βyear": -0.019,
+                "βtime": -0.019,
                 "βsexage": [-4.4, 4.7, -2.6, 0.79, 0.95],
-                "βsexyear": 0.0046,
+                "βsextime": 0.0046,
                 "β_fam_hist": {
                     "β_fhx_0": 100,
                     "β_fhx_age": 0
@@ -186,11 +188,11 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
                 "β0": -2.28,
                 "βsex": -0.11,
                 "βage": [1.7, -2.1, 3.6, -2.9, 1.4],
-                "βyear": [2.8, -1.1],
+                "βtime": [2.8, -1.1],
                 "βsexage": [-7.69, 2.68, 0.86, -0.656, -0.027],
-                "βsexyear": [1.29, 0.036],
-                "βyearage": [50.6, 6.5, -39.4, 3.6, 15.9, -4.7, -7.1, 4.1, -4.8, -3.3],
-                "βsexyearage": [-3.1, 7.2, -25.7, 0.2, 11.3, -2.5, 7.6, 4.1, -15.2, 3.7],
+                "βsextime": [1.29, 0.036],
+                "βtimeage": [50.6, 6.5, -39.4, 3.6, 15.9, -4.7, -7.1, 4.1, -4.8, -3.3],
+                "βsextimeage": [-3.1, 7.2, -25.7, 0.2, 11.3, -2.5, 7.6, 4.1, -15.2, 3.7],
                 "β_fam_hist": {
                     "β_fhx_0": 0.122,
                     "β_fhx_age": 0.376
@@ -207,8 +209,9 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
             63,
             24,
             False,
-            2024,
-            2025,
+            dt.datetime(2024, 1, 1),
+            dt.datetime(2025, 1, 1),
+            relativedelta(years=1),
             "CA",
             "incidence",
             True
@@ -220,9 +223,9 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
                 "β0": 34.6,
                 "βsex": -9.5,
                 "βage": [-6.6, 7.7, -5.6, 3.9, -1.3],
-                "βyear": -0.019,
+                "βtime": -0.019,
                 "βsexage": [-4.4, 4.7, -2.6, 0.79, 0.95],
-                "βsexyear": 0.0046,
+                "βsextime": 0.0046,
                 "β_fam_hist": {
                     "β_fhx_0": 100,
                     "β_fhx_age": 0
@@ -237,11 +240,11 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
                 "β0": -2.28,
                 "βsex": -0.11,
                 "βage": [1.7, -2.1, 3.6, -2.9, 1.4],
-                "βyear": [2.8, -1.1],
+                "βtime": [2.8, -1.1],
                 "βsexage": [-7.69, 2.68, 0.86, -0.656, -0.027],
-                "βsexyear": [1.29, 0.036],
-                "βyearage": [50.6, 6.5, -39.4, 3.6, 15.9, -4.7, -7.1, 4.1, -4.8, -3.3],
-                "βsexyearage": [-3.1, 7.2, -25.7, 0.2, 11.3, -2.5, 7.6, 4.1, -15.2, 3.7],
+                "βsextime": [1.29, 0.036],
+                "βtimeage": [50.6, 6.5, -39.4, 3.6, 15.9, -4.7, -7.1, 4.1, -4.8, -3.3],
+                "βsextimeage": [-3.1, 7.2, -25.7, 0.2, 11.3, -2.5, 7.6, 4.1, -15.2, 3.7],
                 "β_fam_hist": {
                     "β_fhx_0": 100,
                     "β_fhx_age": 0
@@ -258,8 +261,9 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
             111,
             24,
             False,
-            2024,
-            2025,
+            dt.datetime(2024, 1, 1),
+            dt.datetime(2025, 1, 1),
+            relativedelta(years=1),
             "CA",
             "prevalence",
             True
@@ -271,9 +275,9 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
                 "β0": 34.6,
                 "βsex": -9.5,
                 "βage": [-6.6, 7.7, -5.6, 3.9, -1.3],
-                "βyear": -0.019,
+                "βtime": -0.019,
                 "βsexage": [-4.4, 4.7, -2.6, 0.79, 0.95],
-                "βsexyear": 0.0046,
+                "βsextime": 0.0046,
                 "β_fam_hist": {
                     "β_fhx_0": 100,
                     "β_fhx_age": 0
@@ -288,11 +292,11 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
                 "β0": -2.28,
                 "βsex": -0.11,
                 "βage": [1.7, -2.1, 3.6, -2.9, 1.4],
-                "βyear": [2.8, -1.1],
+                "βtime": [2.8, -1.1],
                 "βsexage": [-7.69, 2.68, 0.86, -0.656, -0.027],
-                "βsexyear": [1.29, 0.036],
-                "βyearage": [50.6, 6.5, -39.4, 3.6, 15.9, -4.7, -7.1, 4.1, -4.8, -3.3],
-                "βsexyearage": [-3.1, 7.2, -25.7, 0.2, 11.3, -2.5, 7.6, 4.1, -15.2, 3.7],
+                "βsextime": [1.29, 0.036],
+                "βtimeage": [50.6, 6.5, -39.4, 3.6, 15.9, -4.7, -7.1, 4.1, -4.8, -3.3],
+                "βsextimeage": [-3.1, 7.2, -25.7, 0.2, 11.3, -2.5, 7.6, 4.1, -15.2, 3.7],
                 "β_fam_hist": {
                     "β_fhx_0": 0.122,
                     "β_fhx_age": 0.376
@@ -309,8 +313,9 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
             111,
             0,
             False,
-            2024,
-            2025,
+            dt.datetime(2024, 1, 1),
+            dt.datetime(2025, 1, 1),
+            relativedelta(years=1),
             "CA",
             "prevalence",
             False
@@ -319,8 +324,8 @@ def test_prevalence_constructor(parameters, poly_parameters, max_age):
 )
 def test_agent_has_asthma(
     config, poly_parameters_incidence, poly_parameters_prevalence, incidence_parameters,
-    prevalence_parameters, family_history_parameters, max_age, age, sex, starting_year, year,
-    province, occurrence_type, has_asthma
+    prevalence_parameters, family_history_parameters, max_age, age, sex, min_timepoint, timepoint,
+    time_delta, province, occurrence_type, has_asthma
 ):
     """
     Setting the incidence parameter ``β_fam_hist = [100, 0]`` and the family history parameter
@@ -328,7 +333,7 @@ def test_agent_has_asthma(
     minimum age for an asthma diagnosis is 3, so setting the agent age to 24 ensures that the agent
     is diagnosed with asthma.
     """
-    year_index = year - starting_year + 1
+    timepoint_index = timepoint - min_timepoint + time_delta
     incidence = Incidence(
         parameters=incidence_parameters, poly_parameters=poly_parameters_incidence, max_age=max_age
     )
@@ -338,12 +343,11 @@ def test_agent_has_asthma(
     agent = Agent(
         sex=sex,
         age=age,
-        year=year,
-        year_index=year_index,
+        timepoint=timepoint,
+        timepoint_index=timepoint_index,
         family_history=FamilyHistory(probability=family_history_parameters["p"]),
         antibiotic_exposure=AntibioticExposure(config=config["antibiotic_exposure"]),
         province=province,
-        month=1,
         ssp=config["pollution"]["SSP"]
     )
 

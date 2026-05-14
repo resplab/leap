@@ -71,7 +71,7 @@ population data to convert this to a *per infant* value. We obtained population 
     </thead>
     <tbody>
       <tr>
-        <td><code class="notranslate">year</code></td>
+        <td><code class="notranslate">timepoint</code></td>
         <td>
           <code class="notranslate">int</code>
         </td>
@@ -93,7 +93,7 @@ population data to convert this to a *per infant* value. We obtained population 
           <code class="notranslate">int</code>
         </td>
         <td>
-          The total number of births in BC in a given year.
+          The total number of births in BC in a given time interval.
         </td>
       </tr>
     </tbody>
@@ -114,8 +114,8 @@ Probability Distribution
 
 When fitting a ``GLM``, first you must choose a distribution for the ``response variable``. In our
 case, the response variable is the number of antibiotics prescribed during the first year of life.
-The number of antibiotics prescribed is a count variable, in a given time interval
-(a year, in our case). Since it is count data, we need a discrete probability distribution.
+The number of antibiotics prescribed is a count variable, in a given time interval. Since it is
+count data, we need a discrete probability distribution.
 The ``Poisson distribution`` is a good choice for our data, but it has some limitations. The
 ``Poisson distribution`` assumes that the mean and variance are equal, i.e:
 
@@ -221,10 +221,10 @@ Now that we have our distribution and link function, we need to decide on a form
 :math:`\eta^{(i)}`. We are permitted to use linear combinations of functions of the features
 in our dataset.
 
-For our dataset, we want a formula using ``sex`` and ``year``. Since prescribing practices change
+For our dataset, we want a formula using ``sex`` and ``timepoint``. Since prescribing practices change
 over time, and since infections requiring antibiotic prescriptions also change over time,
-we should include year in our formula. We also want to include sex, since there are sex differences
-in antibiotic prescriptions.
+we should include the timepoint in our formula. We also want to include sex, since there are sex
+differences in antibiotic prescriptions.
 
 There is an additional factor specific to BC regulations. In 2005, the BC government introduced
 an antibiotic conservation program, which reduced the number of antibiotics prescribed
@@ -257,16 +257,16 @@ where:
    * - :math:`\beta_{s}`
      - sex constant
    * - :math:`t^{(i)}`
-     - year of birth of the infant
+     - timepoint of birth of the infant
    * - :math:`\beta_t`
-     - year constant
+     - timepoint constant
    * - :math:`H(t^{(i)} - 2005)`
-     - Heaviside step function, which is ``0`` for years before ``2005`` and ``1`` for years
-       after ``2005``
+     - Heaviside step function, which is ``0`` for timepoints before ``2005`` and ``1`` for
+       timepoints after ``2005``
    * - :math:`\beta_h`
      - Heaviside step function constant
    * - :math:`\beta_{th}`
-     - year and Heaviside step function constant
+     - timepoint and Heaviside step function constant
 
 
 Example

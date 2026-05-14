@@ -1,10 +1,12 @@
 import pytest
 import pathlib
 import json
+import datetime as dt
 from leap.agent import Agent
 from leap.family_history import FamilyHistory
 from leap.antibiotic_exposure import AntibioticExposure
 from leap.reassessment import Reassessment
+from leap.utils import TimeDelta
 from tests.utils import __test_dir__
 
 
@@ -16,45 +18,48 @@ def config():
 
 
 @pytest.mark.parametrize(
-    "starting_year, province",
+    "min_timepoint, province",
     [
         (
-            2020,
+            dt.datetime(2020, 1, 1),
             "BC"
         ),
     ]
 )
-def test_reassessment_constructor(starting_year, province):
-    reassessment = Reassessment(starting_year, province)
-    df = reassessment.table.get_group((starting_year))
+def test_reassessment_constructor(min_timepoint, province):
+    reassessment = Reassessment(min_timepoint, province)
+    df = reassessment.table.get_group((min_timepoint))
     assert df.iloc[0]["age"] == 4
 
 
 @pytest.mark.parametrize(
-    "starting_year, province, sex, age, year, has_asthma",
+    "min_timepoint, province, sex, age, timepoint, time_delta, has_asthma",
     [
         (
-            2020,
+            dt.datetime(2020, 1, 1),
             "BC",
             True,
             53,
-            2024,
+            dt.datetime(2024, 1, 1),
+            TimeDelta(years=1),
             True
         ),
     ]
 )
-def test_reassessment_agent_has_asthma(config, starting_year, province, sex, age, year, has_asthma):
+def test_reassessment_agent_has_asthma(
+    config, min_timepoint, province, sex, age, timepoint, time_delta, has_asthma
+):
     """
     By the ``asthma_reassessment.csv`` table, the probability of still having asthma
     is 1 for a male aged 53 in 2024 in BC.
     """
-    reassessment = Reassessment(starting_year, province)
-    year_index = year - starting_year
+    reassessment = Reassessment(min_timepoint, province)
+    timepoint_index = TimeDelta(td=timepoint - min_timepoint) // time_delta
     agent = Agent(
         sex=sex,
         age=age,
-        year=year,
-        year_index=year_index,
+        timepoint=timepoint,
+        timepoint_index=timepoint_index,
         family_history=FamilyHistory(config=config["family_history"]),
         antibiotic_exposure=AntibioticExposure(config=config["antibiotic_exposure"]),
         province=province,
