@@ -7,11 +7,36 @@ Asthma Occurrence Model
 This document describes the asthma occurrence model, which is used to predict the incidence and
 prevalence of asthma in British Columbia. The model is divided into two parts:
 
-1. :ref:`occurrence-model-1`: A ``Generalized Linear Model (GLM)`` that predicts asthma incidence
-   and prevalence based on age, sex, and timepoint.
-2. :ref:`occurrence-model-2`: A model that incorporates risk factors such as family history and
-   antibiotic use during infancy to predict asthma incidence and prevalence, along with the
-   results from the first model.
+1. :ref:`occurrence-model-1`
+
+   A ``Generalized Linear Model (GLM)`` that predicts asthma incidence and prevalence based on age,
+   sex, and year.
+
+   * 1.1 Datasets
+   * 1.2 Model: Generalized Linear Model - Poisson
+   * 1.3 Probability Distribution
+   * 1.4 Link Function
+   * 1.5 Formula
+
+2. :ref:`occurrence-model-2`
+
+   A model that incorporates risk factors such as family history and antibiotic use during infancy
+   to predict asthma incidence and prevalence, along with the results from the first model.
+
+   * 2.1 Datasets
+   * 2.2 Model: Risk Factors
+   * 2.3 Formula
+   * 2.4 Antibiotic Risk Factors
+   * 2.5 Family History Risk Factors
+   * 2.6 Solving for the Correction Term: Prevalence
+   * 2.7 Solving for the Correction Term: Incidence
+   * 2.8 Optimizing the Initial Beta Parameters for the Incidence Equation
+   * 2.9 Example
+   * 2.10 Past Contingency Table
+   * 2.11 Current Contingency Table: Reassessment
+   * 2.12 Current Contingency Table: New Diagnosis
+   * 2.13 Current Contingency Table
+   * 2.14 Optimization
 
 .. _occurrence-model-1:
 
@@ -25,7 +50,7 @@ based on the age, sex, and timepoint. However, asthma occurrence doesn't just de
 age or sex, but it also depends on risk factors such as family history and antibiotic use during
 infancy. We will address these in the second model: :ref:`occurrence-model-2`.
 
-Datasets
+1.1 Datasets
 *****************
 
 The BC Ministry of Health Administrative Dataset contains asthma incidence and prevalence data
@@ -94,7 +119,7 @@ The data is formatted as follows:
 
 
 
-Model: Generalized Linear Model - Poisson
+1.2 Model: Generalized Linear Model - Poisson
 ****************************************************
 
 Since our model projects into the future, we would like to be able to extend this data beyond
@@ -103,7 +128,7 @@ To obtain these projections, we use a ``Generalized Linear Model (GLM)``. A ``GL
 regression analysis which is a generalized form of linear regression. See :doc:`model-glm` for more
 information on ``GLMs``.
 
-Probability Distribution
+1.3 Probability Distribution
 ----------------------------
 
 When fitting a ``GLM``, first you must choose a distribution for the ``response variable``. In our
@@ -117,7 +142,7 @@ discrete probability distribution. The ``Poisson distribution`` is a good choice
     P(Y = y) = p(y; \mu^{(i)}) = \dfrac{(\mu^{(i)})^{y} ~ e^{-\mu^{(i)}}}{y!}
 
 
-Link Function
+1.4 Link Function
 -----------------
 
 We also need to choose a ``link function``. Recall that the link function :math:`g(\mu^{(i)})`
@@ -138,7 +163,7 @@ real numbers to positive numbers. The ``log link function`` is a good choice for
     g(\mu^{(i)}) = \log(\mu^{(i)}) = \eta^{(i)}
 
 
-Formula
+1.5 Formula
 -----------------
 
 Now that we have our distribution and link function, we need to decide on a formula for
@@ -196,7 +221,7 @@ In the second model, we will use the predicted asthma incidence and prevalence f
 incorporate the risk factors of family history and antibiotic use on asthma incidence and
 prevalence.
 
-Datasets
+2.1 Datasets
 *****************
 
 We use the predicted asthma incidence and prevalence from the first model, :math:`\eta`, as our
@@ -263,11 +288,11 @@ target asthma prevalence / incidence in this model. The data is formatted as fol
     </table>
 
 
-Model: Risk Factors
+2.2 Model: Risk Factors
 ******************************
 
 We want to incorporate the effects of family history and antibiotic use on asthma incidence and
-prevalence.
+prevalence. d
 
 .. raw:: html
 
@@ -306,12 +331,13 @@ prevalence.
     </table>
 
 
-Formula
+2.3 Formula
 ---------------------------------------
 
 Before we begin, let us define some terms. We have two risk factors we are interested in:
 family history and antibiotic use. There are :math:`2 * 4 = 8` possible combinations of these two
-risk factors:
+risk factors. We use :math:`\lambda` as an index to identify each combination of family history
+and antibiotic dose:
 
 
 .. raw:: html
@@ -368,6 +394,12 @@ risk factors:
     </tbody>
     </table>
 
+
+For example, :math:`\lambda = 5` represents the risk factor combination where Family History = 1
+and Antibiotic Dose = 2. This means the person has at least one parent with asthma and took two
+courses of antibiotics during the first year of life. Similarly, :math:`\lambda = 0` is the
+reference group, where Family History = 0 and Antibiotic Dose = 0, meaning neither parent has
+asthma and the person took no antibiotics during the first year of life.
 
 We can represent each combination as a vector of the form:
 
@@ -437,8 +469,8 @@ where:
 
 Let's break this formula down:
 
-Antibiotic Risk Factors
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.4 Antibiotic Risk Factors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The antibiotic terms were fit by Lee et al. :cite:`lee2024`, using a random effects meta-regression
 model:
@@ -466,8 +498,8 @@ The beta coefficients were found to be:
 * :math:`\beta_{\text{abx_age}} = 0.2253`
 * :math:`\beta_{\text{abx_dose}} = 0.0531475`
 
-Family History Risk Factors
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.5 Family History Risk Factors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The family history terms were fit using the ``CHILD Study`` data, in the paper by Patrick et al.
 :cite:`patrick2020`, using logistic regression:
@@ -494,8 +526,8 @@ The beta coefficients were found to be:
 So, the only unknown term in our formula is the correction term :math:`\alpha`. To solve this,
 we separate the formulae for incidence and prevalence. We will begin with prevalence.
 
-Solving for the Correction Term: Prevalence
---------------------------------------------
+2.6 Solving for the Correction Term: Prevalence
+------------------------------------------------
 
 .. math::
 
@@ -509,8 +541,8 @@ we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the
 difference between :math:`\zeta` and :math:`\eta`.
 
 
-Solving for the Correction Term: Incidence
---------------------------------------------
+2.7 Solving for the Correction Term: Incidence
+-----------------------------------------------
 
 In our model, asthma incidence is defined as the number of new diagnoses between the previous
 timepoint and the current timepoint, divided by the total population. To calibrate the incidence,
@@ -580,16 +612,16 @@ To do this, we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to 
 absolute difference between :math:`\zeta` and :math:`\eta`.
 
 
-Optimizing the Initial Beta Parameters for the Incidence Equation
-------------------------------------------------------------------
+2.8 Optimizing the Initial Beta Parameters for the Incidence Equation
+---------------------------------------------------------------------
 
 For the incidence equation, we need to optimize two of the initial beta parameters:
 
 * :math:`\beta_{\text{fhx}_\text{age}}`
 * :math:`\beta_{\text{abx}_\text{age}}`
 
-Example
-^^^^^^^^^
+2.9 Example
+^^^^^^^^^^^
 
 Before we begin, let us first define what we mean by a ``contingency table``. A contingency
 table is a table that displays two categorical variables and their joint frequency distribution.
@@ -646,8 +678,8 @@ In our model, we want to compute the contingency table for the risk factor combi
 :math:`\lambda` and the asthma diagnosis.
 
 
-Past Contingency Table
-^^^^^^^^^^^^^^^^^^^^^^^
+2.10 Past Contingency Table
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. raw:: html
 
@@ -719,8 +751,8 @@ To obtain :math:`a_0`, we follow the methods described in the paper :cite:`dipie
 See :doc:`conv_2x2 <../dev/api/data_generation/leap.data_generation.utils>` for the Python
 implementation of this method.
 
-Current Contingency Table: Reassessment
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.11 Current Contingency Table: Reassessment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 According to our model, an asthma diagnosis is not static; a patient may be diagnosed with asthma
 and then later be reassessed as not having asthma. We would like to compute the updated contingency
@@ -820,8 +852,8 @@ where:
   at :math:`t=1` given that they had an asthma diagnosis at :math:`t=0`
 
 
-Current Contingency Table: New Diagnosis
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.12 Current Contingency Table: New Diagnosis
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For the reassessment table, we considered only the patients who were diagnosed with asthma.
 We will now consider those who were not diagnosed with asthma:
@@ -933,8 +965,8 @@ where:
   :math:`t=1`, :math:`\rightarrow` don't have asthma at :math:`t=1`
 
 
-Current Contingency Table
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.13 Current Contingency Table
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Finally, we can compute the contingency table for the current timepoint, :math:`t=1`:
 
@@ -986,7 +1018,7 @@ From these values, we can compute the odds ratio:
     \Omega = \dfrac{a_1 \cdot d_1}{b_1 \cdot c_1}
 
 
-Optimization
+2.14 Optimization
 ^^^^^^^^^^^^^^^^^
 
 We want to find the beta parameters that minimize the difference between the predicted odds
