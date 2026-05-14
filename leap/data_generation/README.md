@@ -35,7 +35,7 @@ To run the data processing for the population data:
 
 ```sh
 cd LEAP
-python3 leap/data_generation/birth_data.py
+python leap/data_generation/birth_data.py --time-delta P1Y
 ```
 
 This will update the following data files: 
