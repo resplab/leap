@@ -59,7 +59,11 @@ def load_past_births_population_data() -> pd.DataFrame:
     """
 
     logger.info("Loading past population data from CSV file...")
-    df = pd.read_csv(get_data_path("original_data/17100005.csv"), parse_dates=["REF_DATE"])
+    df = pd.read_csv(
+        get_data_path("original_data/17100005.csv"),
+        parse_dates=["REF_DATE"],
+        low_memory=False
+    )
 
     # select only the age = 0 age group and the timepoints >= MIN_TIMEPOINT
     df = df.loc[(df["REF_DATE"] >= MIN_TIMEPOINT) & (df["AGE_GROUP"] == "0 years")]
@@ -129,7 +133,11 @@ def load_projected_births_population_data(min_timepoint: dt.datetime) -> pd.Data
     """
     logger.info("Loading projected population data from CSV file...")
     
-    df = pd.read_csv(get_data_path("original_data/17100057.csv"), parse_dates=["REF_DATE"])
+    df = pd.read_csv(
+        get_data_path("original_data/17100057.csv"),
+        parse_dates=["REF_DATE"],
+        low_memory=False
+    )
 
     # remove spaces from column names and make uppercase
     column_names = {}
@@ -212,8 +220,12 @@ def load_past_initial_population_data(time_delta: TimeDelta) -> pd.DataFrame:
           to the total number of births in that time interval.
         * ``projection_scenario``: The projection scenario; all values are "past".
     """
-    logger.info("Loading past population data from CSV file...")
-    df = pd.read_csv(get_data_path("original_data/17100005.csv"), parse_dates=["REF_DATE"])
+    logger.info("Loading past population data from CSV file (StatCan 17100005)...")
+    df = pd.read_csv(
+        get_data_path("original_data/17100005.csv"),
+        parse_dates=["REF_DATE"],
+        low_memory=False
+    )
 
     # remove spaces from column names and make uppercase
     column_names = {}
@@ -331,7 +343,11 @@ def load_projected_initial_population_data(min_timepoint: dt.datetime) -> pd.Dat
     """
 
     logger.info("Loading projected population data from CSV file...")
-    df = pd.read_csv(get_data_path("original_data/17100057.csv"), parse_dates=["REF_DATE"])
+    df = pd.read_csv(
+        get_data_path("original_data/17100057.csv"),
+        parse_dates=["REF_DATE"],
+        low_memory=False
+    )
 
     # remove spaces from column names and make uppercase
     column_names = {}
