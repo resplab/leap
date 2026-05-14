@@ -267,9 +267,9 @@ def load_past_initial_population_data(time_delta: TimeDelta) -> pd.DataFrame:
     # create a df to replace missing values with those of the next timepoint and age
     replacement_df = df.loc[
         (df["timepoint"].isin(missing_df["timepoint"] + TIME_DELTA_OD.to_dateoffset())) & 
-        (df["age"].isin(missing_df["age"] + TIME_DELTA_OD.years))
+        (df["age"].isin(missing_df["age"] + TIME_DELTA_OD.total_years()))
     ]
-    replacement_df["age"] = replacement_df["age"] - TIME_DELTA_OD.years
+    replacement_df["age"] = replacement_df["age"] - TIME_DELTA_OD.total_years()
     replacement_df = replacement_df.drop(columns=["timepoint"])
     replacement_df.rename(columns={"N": "N_replace"}, inplace=True)
 
