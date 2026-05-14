@@ -11,7 +11,10 @@ logger = get_logger(__name__, 20)
 
 MIN_TIMEPOINT = dt.datetime(1999, 1, 1)
 
-# Time duration between data points in the original data from StatsCan
+# Most recent census date from StatCan; data switches from past to projected at this timepoint
+CENSUS_TIMEPOINT = dt.datetime(2021, 1, 1)
+
+# Time duration between data points in the original data from StatCan
 TIME_DELTA_OD = TimeDelta(years=1)
 
 
