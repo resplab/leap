@@ -700,5 +700,16 @@ class TimeDelta(relativedelta):
             f"{self.seconds}S" if self.seconds else "",
         ])
         return f"P{date_part}" + (f"T{time_part}" if time_part else "")
+    
+    def to_dateoffset(self) -> pd.DateOffset:
+        return pd.DateOffset(
+            years=self.years,
+            months=self.months,
+            days=self.days,
+            hours=self.hours,
+            minutes=self.minutes,
+            seconds=self.seconds,
+            microseconds=self.microseconds
+        )
 
 
