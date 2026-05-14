@@ -1,12 +1,15 @@
 import pandas as pd
-from leap.utils import get_data_path
-from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group
+import os
+import pathlib
+import datetime as dt
+from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
+from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group, get_parser
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-STARTING_YEAR = 1999
+MIN_TIMEPOINT = dt.datetime(1999, 1, 1)
 
 
 def get_projection_scenario_id(projection_scenario: str) -> str:
@@ -45,21 +48,21 @@ def load_past_births_population_data() -> pd.DataFrame:
         The past birth data.
         Columns:
         
-        * ``year``: The year of the data.
+        * ``timepoint``: The date / time of the data.
         * ``province``: The 2-letter province ID.
-        * ``N``: The total number of births in that year.
-        * ``prop_male``: The proportion of births in that year that are male.
+        * ``N``: The total number of births in that time interval.
+        * ``prop_male``: The proportion of births in that time interval that are male.
         * ``projection_scenario``: The projection scenario; all values are ``"past"``.
     """
 
     logger.info("Loading past population data from CSV file...")
-    df = pd.read_csv(get_data_path("original_data/17100005.csv"))
+    df = pd.read_csv(get_data_path("original_data/17100005.csv"), parse_dates=["REF_DATE"])
 
-    # select only the age = 0 age group and the years >= STARTING_YEAR
-    df = df.loc[(df["REF_DATE"] >= STARTING_YEAR) & (df["AGE_GROUP"] == "0 years")]
+    # select only the age = 0 age group and the timepoints >= MIN_TIMEPOINT
+    df = df.loc[(df["REF_DATE"] >= MIN_TIMEPOINT) & (df["AGE_GROUP"] == "0 years")]
     df = df[["REF_DATE", "GEO", "SEX", "VALUE"]]
     df.rename(
-        columns={"REF_DATE": "year", "GEO": "province", "SEX": "sex", "VALUE": "N"},
+        columns={"REF_DATE": "timepoint", "GEO": "province", "SEX": "sex", "VALUE": "N"},
         inplace=True
     )
 
@@ -73,7 +76,7 @@ def load_past_births_population_data() -> pd.DataFrame:
     df["N"] = df["N"].apply(lambda x: int(x))
 
     # get the proportion male / female
-    grouped_df = df.groupby(["year", "province"])
+    grouped_df = df.groupby(["timepoint", "province"])
     df["prop"] = grouped_df["N"].transform(lambda x: x / x.max())
     df["max_N"] = grouped_df["N"].transform(lambda x: x.max())
 
@@ -88,25 +91,25 @@ def load_past_births_population_data() -> pd.DataFrame:
 
     # add projection_scenario column, all values = "past"
     df["projection_scenario"] = ["past"] * df.shape[0]
-    df.sort_values(["province", "year", "projection_scenario"], inplace=True)
+    df.sort_values(["province", "timepoint", "projection_scenario"], inplace=True)
 
     return df
 
 
-def load_projected_births_population_data(min_year: int) -> pd.DataFrame:
+def load_projected_births_population_data(min_timepoint: dt.datetime) -> pd.DataFrame:
     """Load the projected births data from the CSV file from ``StatCan``.
 
     Args:
-        min_year: The starting year for the projected data.
+        min_timepoint: The starting timepoint for the projected data.
     
     Returns:
         The projected births data.
         Columns:
         
-        * ``year``: The year of the data.
+        * ``timepoint``: The starting date / time of the time interval.
         * ``province``: The 2-letter province ID.
-        * ``N``: The total number of births predicted for that year.
-        * ``prop_male``: The proportion of predicted births in that year that are male.
+        * ``N``: The total number of births predicted for that time interval.
+        * ``prop_male``: The proportion of predicted births in that time interval that are male.
         * ``projection_scenario``: The projection scenario, one of:
 
           * ``LG``: low-growth projection
@@ -123,7 +126,7 @@ def load_projected_births_population_data(min_year: int) -> pd.DataFrame:
     """
     logger.info("Loading projected population data from CSV file...")
     
-    df = pd.read_csv(get_data_path("original_data/17100057.csv"))
+    df = pd.read_csv(get_data_path("original_data/17100057.csv"), parse_dates=["REF_DATE"])
 
     # remove spaces from column names and make uppercase
     column_names = {}
@@ -131,23 +134,23 @@ def load_projected_births_population_data(min_year: int) -> pd.DataFrame:
         column_names[column] = column.upper().replace(" ", "_")
     df.rename(columns=column_names, inplace=True)
 
-    # keep only rows where REF_DATE >= min_year and AGE_GROUP == "Under 1 year" (babies)
-    df = df.loc[
-        (df["REF_DATE"] >= min_year) & 
-        (df["AGE_GROUP"] == "Under 1 year")
-    ]
-
-    # select columns
-    df = df[["REF_DATE", "GEO", "PROJECTION_SCENARIO", "SEX", "AGE_GROUP", "VALUE"]]
-
     # rename columns
     df.rename(
         columns={
-            "REF_DATE": "year", "GEO": "province", "SEX": "sex", "AGE_GROUP": "age",
+            "REF_DATE": "timepoint", "GEO": "province", "SEX": "sex", "AGE_GROUP": "age",
             "VALUE": "N", "PROJECTION_SCENARIO": "projection_scenario"
         },
         inplace=True
     )
+
+    # keep only rows where timepoint >= min_timepoint and age == "Under 1 year" (babies)
+    df = df.loc[
+        (df["timepoint"] >= min_timepoint) & 
+        (df["age"] == "Under 1 year")
+    ]
+
+    # select columns
+    df = df[["timepoint", "province", "projection_scenario", "sex", "age", "N"]]
 
     # convert the long form of the projection scenario to the 2-letter ID
     df["projection_scenario"] = df["projection_scenario"].apply(get_projection_scenario_id)
@@ -168,7 +171,7 @@ def load_projected_births_population_data(min_year: int) -> pd.DataFrame:
     df["N"] = df["N"].apply(lambda x: int(round(x * 1000, 0)))
 
     # get the proportion male / female
-    grouped_df = df.groupby(["year", "province", "projection_scenario"])
+    grouped_df = df.groupby(["timepoint", "province", "projection_scenario"])
     df["prop"] = grouped_df["N"].transform(lambda x: x / x.max())
     df["max_N"] = grouped_df["N"].transform(lambda x: x.max())
 
@@ -178,33 +181,36 @@ def load_projected_births_population_data(min_year: int) -> pd.DataFrame:
     # drop N and sex columns
     df = df.drop(columns=["N", "sex", "age"])
     df.rename(columns={"max_N": "N", "prop": "prop_male"}, inplace=True)
-    df.sort_values(["province", "year", "projection_scenario"], inplace=True)
+    df.sort_values(["province", "timepoint", "projection_scenario"], inplace=True)
 
     return df
 
 
 
-def load_past_initial_population_data() -> pd.DataFrame:
+def load_past_initial_population_data(time_delta: TimeDelta) -> pd.DataFrame:
     """Load the past initial population data from the CSV file.
+
+    Args:
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
     
     Returns:
         The past initial population data.
         Columns:
         
-        * ``year``: The calendar year.
+        * ``timepoint``: The date / time of the data.
         * ``province``: The 2-letter province ID, e.g. ``BC``.
         * ``age``: The age of the population.
         * ``prop_male``: The proportion of the population in that age group that are male.
-        * ``n_age``: The total number of people in that age group for the given year, province, and
-          projection scenario.
-        * ``n_birth``: The total number of births in the given year, province, and
+        * ``n_age``: The total number of people in that age group for the given time interval,
+          province, and projection scenario.
+        * ``n_birth``: The total number of births in the given time interval, province, and
           projection scenario.
         * ``prop``: The proportion of the total number of people in that age group
-          to the total number of births in that year.
+          to the total number of births in that time interval.
         * ``projection_scenario``: The projection scenario; all values are "past".
     """
     logger.info("Loading past population data from CSV file...")
-    df = pd.read_csv(get_data_path("original_data/17100005.csv"))
+    df = pd.read_csv(get_data_path("original_data/17100005.csv"), parse_dates=["REF_DATE"])
 
     # remove spaces from column names and make uppercase
     column_names = {}
@@ -215,13 +221,13 @@ def load_past_initial_population_data() -> pd.DataFrame:
     # rename the columns
     df.rename(
         columns={
-            "REF_DATE": "year", "GEO": "province", "SEX": "sex", "AGE_GROUP": "age", "VALUE": "N"
+            "REF_DATE": "timepoint", "GEO": "province", "SEX": "sex", "AGE_GROUP": "age", "VALUE": "N"
         },
         inplace=True
     )
 
     # select the required columns
-    df = df.loc[(df["year"] >= STARTING_YEAR + 1)][["year", "province", "sex", "age", "N"]]
+    df = df.loc[(df["timepoint"] >= MIN_TIMEPOINT + time_delta)][["timepoint", "province", "sex", "age", "N"]]
 
     # remove grouped categories such as "Median", "Average", "All" and format age as integer
     df = df.loc[df["age"].apply(filter_age_group)]
@@ -240,19 +246,20 @@ def load_past_initial_population_data() -> pd.DataFrame:
     missing_df = df.loc[df["N"].isnull()]
     missing_df = missing_df.drop(columns=["N"])
 
-    # create a df to replace missing values with those of the next year and age
+    # create a df to replace missing values with those of the next timepoint and age
     replacement_df = df.loc[
-        (df["year"].isin(missing_df["year"] + 1)) & (df["age"].isin(missing_df["age"] + 1))
+        (df["timepoint"].isin(missing_df["timepoint"] + time_delta.to_dateoffset())) & 
+        (df["age"].isin(missing_df["age"] + 1))
     ]
     replacement_df["age"] = replacement_df["age"] - 1
-    replacement_df = replacement_df.drop(columns=["year"])
+    replacement_df = replacement_df.drop(columns=["timepoint"])
     replacement_df.rename(columns={"N": "N_replace"}, inplace=True)
 
     # merge the two dfs
     replacement_df = pd.merge(missing_df, replacement_df, on=["sex", "age", "province"], how="left")
 
     # replace the missing values in the original df
-    df = pd.merge(df, replacement_df, on=["sex", "age", "province", "year"], how="left")
+    df = pd.merge(df, replacement_df, on=["sex", "age", "province", "timepoint"], how="left")
     df["N"] = df.apply(lambda x: x["N_replace"] if pd.isnull(x["N"]) else x["N"], axis=1)
     df = df.drop(columns=["N_replace"])
 
@@ -262,18 +269,18 @@ def load_past_initial_population_data() -> pd.DataFrame:
     # convert N to integer
     df["N"] = df["N"].apply(lambda x: int(x))
 
-    # get the total population for a given year, province, and age
-    grouped_df = df.groupby(["year", "age", "province"])
+    # get the total population for a given time interval, province, and age
+    grouped_df = df.groupby(["timepoint", "age", "province"])
     df["prop_male"] = grouped_df["N"].transform(lambda x: x / x.sum())
     df["n_age"] = grouped_df["N"].transform(lambda x: x.sum())
 
-    # get the total number of births for a given year and province
+    # get the total number of births for a given time interval and province
     df_birth = df.loc[df["age"] == 0]
     df_birth["n_birth"] = df_birth["n_age"].values
     df_birth.drop(columns=["age", "N", "n_age", "prop_male"], inplace=True)
 
     # add the births column to the main df
-    df = pd.merge(df, df_birth, on=["province", "sex", "year"], how="left")
+    df = pd.merge(df, df_birth, on=["province", "sex", "timepoint"], how="left")
     df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
 
     # keep only male entries
@@ -282,30 +289,30 @@ def load_past_initial_population_data() -> pd.DataFrame:
 
     # add projection_scenario column, all values = "past"
     df["projection_scenario"] = ["past"] * df.shape[0]
-    df = df.sort_values(["province", "year", "age"]).reset_index(drop=True)
+    df = df.sort_values(["province", "timepoint", "age"]).reset_index(drop=True)
     return df
 
 
-def load_projected_initial_population_data(min_year: int) -> pd.DataFrame:
+def load_projected_initial_population_data(min_timepoint: dt.datetime) -> pd.DataFrame:
     """Load the projected initial population data from the CSV file.
 
     Args:
-        min_year: The starting year for the projected data.
+        min_timepoint: The starting timepoint for the projected data.
 
     Returns:
         The projected initial population data.
         Columns:
 
-        * ``year``: The calendar year.
+        * ``timepoint``: The starting date / time of the time interval.
         * ``province``: The 2-letter province ID, e.g. ``BC``.
         * ``age``: The age of the population.
         * ``prop_male``: The proportion of the population in that age group that are male.
-        * ``n_age``: The total number of people in that age group for the given year, province, and
-          projection scenario.
-        * ``n_birth``: The total number of births in the given year, province, and
+        * ``n_age``: The total number of people in that age group for the given time interval,
+          province, and projection scenario.
+        * ``n_birth``: The total number of births in the given time interval, province, and
           projection scenario.
         * ``prop``: The proportion of the total number of people in that age group to the total
-          number of births in that year.
+          number of births in that time interval.
         * ``projection_scenario``: The projection scenario, one of:
 
           * ``LG``: low-growth projection
@@ -321,7 +328,7 @@ def load_projected_initial_population_data(min_year: int) -> pd.DataFrame:
     """
 
     logger.info("Loading projected population data from CSV file...")
-    df = pd.read_csv(get_data_path("original_data/17100057.csv"))
+    df = pd.read_csv(get_data_path("original_data/17100057.csv"), parse_dates=["REF_DATE"])
 
     # remove spaces from column names and make uppercase
     column_names = {}
@@ -332,15 +339,15 @@ def load_projected_initial_population_data(min_year: int) -> pd.DataFrame:
     # rename the columns
     df.rename(
         columns={
-            "REF_DATE": "year", "GEO": "province", "SEX": "sex", "AGE_GROUP": "age", "VALUE": "N",
+            "REF_DATE": "timepoint", "GEO": "province", "SEX": "sex", "AGE_GROUP": "age", "VALUE": "N",
             "PROJECTION_SCENARIO": "projection_scenario"
         },
         inplace=True
     )
 
     # select the required columns
-    df = df.loc[(df["year"] >= min_year)]
-    df = df[["year", "province", "sex", "age", "N", "projection_scenario"]]
+    df = df.loc[(df["timepoint"] >= min_timepoint)]
+    df = df[["timepoint", "province", "sex", "age", "N", "projection_scenario"]]
 
     # convert the long form of the projection scenario to the 2-letter ID
     df["projection_scenario"] = df["projection_scenario"].apply(get_projection_scenario_id)
@@ -364,50 +371,69 @@ def load_projected_initial_population_data(min_year: int) -> pd.DataFrame:
     # multiply the :N column by 1000 and convert to integer
     df["N"] = df["N"].apply(lambda x: int(round(x * 1000, 0)))
 
-    # get the total population for a given year, province, age, and projection scenario
-    grouped_df = df.groupby(["year", "age", "province", "projection_scenario"])
+    # get the total population for a given timepoint, province, age, and projection scenario
+    grouped_df = df.groupby(["timepoint", "age", "province", "projection_scenario"])
     df["prop_male"] = grouped_df["N"].transform(lambda x: x / x.sum())
     df["n_age"] = grouped_df["N"].transform(lambda x: x.sum())
 
-    # get the total number of births for a given year, province, and projection scenario
+    # get the total number of births for a given timepoint, province, and projection scenario
     df_birth = df.loc[df["age"] == 0]
     df_birth["n_birth"] = df_birth["n_age"].values
     df_birth.drop(columns=["age", "N", "n_age", "prop_male"], inplace=True)
 
     # add the births column to the main df
-    df = pd.merge(df, df_birth, on=["province", "sex", "year", "projection_scenario"], how="left")
+    df = pd.merge(df, df_birth, on=["province", "sex", "timepoint", "projection_scenario"], how="left")
     df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
     df.drop(columns=["sex", "N"], inplace=True)
 
-    df = df.sort_values(["province", "year", "age"]).reset_index(drop=True)
+    df = df.sort_values(["province", "timepoint", "age"]).reset_index(drop=True)
     return df
 
 
-def generate_birth_estimate_data():
-    """Create/update the ``birth_estimate.csv`` file."""
+def generate_birth_estimate_data(time_delta: TimeDelta):
+    """Create/update the ``birth_estimate.csv`` file.
+    
+    Args:
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
+    """
     past_population_data = load_past_births_population_data()
-    min_year = past_population_data["year"].max() + 1
-    projected_population_data = load_projected_births_population_data(min_year)
+    min_timepoint = past_population_data["timepoint"].max() + time_delta
+    projected_population_data = load_projected_births_population_data(min_timepoint)
     birth_estimate = pd.concat([past_population_data, projected_population_data], axis=0)
-    file_path = get_data_path("processed_data/birth/birth_estimate.csv")
+    data_path = get_data_path(f"processed_data")
+    time_delta_tag = get_time_delta_tag(time_delta)
+    file_path = pathlib.Path(data_path, f"{time_delta_tag}/birth/birth_estimate.csv")
+    if not os.path.exists(os.path.dirname(file_path)):
+        os.makedirs(os.path.dirname(file_path))
     logger.info(f"Saving data to {file_path}")
     birth_estimate.to_csv(file_path, index=False)
 
 
-def generate_initial_population_data():
-    """Create/update the ``initial_pop_distribution_prop.csv`` file."""
-    past_population_data = load_past_initial_population_data()
-    min_year = past_population_data["year"].max()
-    projected_population_data = load_projected_initial_population_data(min_year)
+def generate_initial_population_data(time_delta: TimeDelta):
+    """Create/update the ``initial_pop_distribution_prop.csv`` file.
+    
+    Args:
+         time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
+    """
+    past_population_data = load_past_initial_population_data(time_delta)
+    min_timepoint = past_population_data["timepoint"].max()
+    projected_population_data = load_projected_initial_population_data(min_timepoint)
     initial_population = pd.concat([past_population_data, projected_population_data], axis=0)
-    file_path = get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
+    data_path = get_data_path(f"processed_data")
+    time_delta_tag = get_time_delta_tag(time_delta)
+    file_path = pathlib.Path(data_path, f"{time_delta_tag}/birth/initial_pop_distribution_prop.csv")
+    if not os.path.exists(os.path.dirname(file_path)):
+        os.makedirs(os.path.dirname(file_path))
     logger.info(f"Saving data to {file_path}")
     initial_population.to_csv(file_path, index=False)
 
 
 if __name__ == "__main__":
-    generate_initial_population_data()
-    generate_birth_estimate_data()
+    parser = get_parser()
+    args = parser.parse_args()
+    time_delta = TimeDelta(iso_string=args.time_delta)
+    generate_initial_population_data(time_delta)
+    generate_birth_estimate_data(time_delta)
