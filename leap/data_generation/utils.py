@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import argparse
 from leap.logger import get_logger
 from typing import Tuple
 
@@ -22,6 +23,27 @@ PROVINCE_MAP = {
     "Northwest Territories": "NT",
     "Nunavut": "NU"
 }
+
+
+def get_parser() -> argparse.ArgumentParser:
+    """Get the command line interface parser."""
+
+    parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
+
+    args = parser.add_argument_group("ARGUMENTS")
+    args.add_argument(
+        "-td",
+        "--time-delta",
+        dest="time_delta",
+        required=False,
+        default="P1Y",
+        type=str,
+        help="""The time delta to use for the data, e.g. "P1Y" for 1 year, "P5Y" for 5 years, 
+        P0Y1M for 1 month, etc. Must be in ISO 8601 duration format."""
+    )
+
+
+    return parser
 
 
 def get_province_id(province: str) -> str:
