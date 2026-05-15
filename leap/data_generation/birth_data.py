@@ -112,9 +112,12 @@ def interpolate(
 
 
 
-def load_past_births_population_data() -> pd.DataFrame:
+def load_past_births_population_data(min_timepoint: dt.datetime = MIN_TIMEPOINT) -> pd.DataFrame:
     """Load the past birth data from the CSV file.
     
+    Args:
+        min_timepoint: The minimum timepoint to include in the data.
+
     Returns:
         The past birth data.
         Columns:
@@ -133,8 +136,8 @@ def load_past_births_population_data() -> pd.DataFrame:
         low_memory=False
     )
 
-    # select only the age = 0 age group and the timepoints >= MIN_TIMEPOINT
-    df = df.loc[(df["REF_DATE"] >= MIN_TIMEPOINT) & (df["AGE_GROUP"] == "0 years")]
+    # select only the age = 0 age group and the timepoints >= min_timepoint
+    df = df.loc[(df["REF_DATE"] >= min_timepoint) & (df["AGE_GROUP"] == "0 years")]
     df = df[["REF_DATE", "GEO", "SEX", "VALUE"]]
     df.rename(
         columns={"REF_DATE": "timepoint", "GEO": "province", "SEX": "sex", "VALUE": "N"},
@@ -271,11 +274,16 @@ def load_projected_births_population_data(
 
 
 
-def load_past_initial_population_data(time_delta: TimeDelta) -> pd.DataFrame:
+def load_past_initial_population_data(
+    time_delta: TimeDelta, min_timepoint: dt.datetime = MIN_TIMEPOINT
+) -> pd.DataFrame:
     """Load the past initial population data from the CSV file.
 
     Args:
-        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years,
+            1 month, etc.
+        min_timepoint: The starting timepoint for the past data; only timepoints >= this value will
+            be included in the returned data.
     
     Returns:
         The past initial population data.
@@ -315,7 +323,7 @@ def load_past_initial_population_data(time_delta: TimeDelta) -> pd.DataFrame:
     )
 
     # select the required columns
-    df = df.loc[(df["timepoint"] >= MIN_TIMEPOINT + time_delta)][["timepoint", "province", "sex", "age", "N"]]
+    df = df.loc[(df["timepoint"] > min_timepoint)][["timepoint", "province", "sex", "age", "N"]]
 
     # remove grouped categories such as "Median", "Average", "All" and format age as integer
     df = df.loc[df["age"].apply(filter_age_group)]
