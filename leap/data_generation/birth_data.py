@@ -367,21 +367,32 @@ def load_past_initial_population_data(
 
     # get the total population for a given time interval, province, and age
     grouped_df = df.groupby(["timepoint", "age", "province"])
-    df["prop_male"] = grouped_df["N"].transform(lambda x: x / x.sum())
     df["n_age"] = grouped_df["N"].transform(lambda x: x.sum())
-
-    # get the total number of births for a given time interval and province
-    df_birth = df.loc[df["age"] == 0]
-    df_birth["n_birth"] = df_birth["n_age"].values
-    df_birth.drop(columns=["age", "N", "n_age", "prop_male"], inplace=True)
-
-    # add the births column to the main df
-    df = pd.merge(df, df_birth, on=["province", "sex", "timepoint"], how="left")
-    df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
+    df["prop_male"] = df.apply(lambda x: x["N"] / x["n_age"] if x["n_age"] != 0 else 0, axis=1)
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
     df.drop(columns=["sex", "N"], inplace=True)
+
+    # interpolate
+    grouped_df = df.groupby(["province", "age"])
+    df = grouped_df.apply(lambda x: interpolate(
+        data=x.reset_index(drop=True),
+        col_pred="n_age",
+        formula="timepoint",
+        time_delta=time_delta
+    )).reset_index(drop=True)
+
+    # get the total number of births for a given time interval and province
+    df_birth = df.loc[df["age"] == 0]
+    df_birth["n_birth"] = df_birth["n_age"].values
+    df_birth.drop(columns=["age", "n_age", "prop_male"], inplace=True)
+
+    # add the births column to the main df
+    df = pd.merge(df, df_birth, on=["province", "timepoint"], how="left")
+    df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
+
+
 
     # add projection_scenario column, all values = "past"
     df["projection_scenario"] = ["past"] * df.shape[0]
@@ -390,12 +401,15 @@ def load_past_initial_population_data(
 
 
 def load_projected_initial_population_data(
+    time_delta: TimeDelta,
     min_timepoint: dt.datetime,
     max_timepoint: dt.datetime = MAX_TIMEPOINT
 ) -> pd.DataFrame:
     """Load the projected initial population data from the CSV file.
 
     Args:
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years,
+            1 month, etc.
         min_timepoint: The starting timepoint for the projected data.
         max_timepoint: The ending timepoint for the projected data.
 
@@ -480,18 +494,27 @@ def load_projected_initial_population_data(
     df["prop_male"] = grouped_df["N"].transform(lambda x: x / x.sum())
     df["n_age"] = grouped_df["N"].transform(lambda x: x.sum())
 
-    # get the total number of births for a given timepoint, province, and projection scenario
-    df_birth = df.loc[df["age"] == 0]
-    df_birth["n_birth"] = df_birth["n_age"].values
-    df_birth.drop(columns=["age", "N", "n_age", "prop_male"], inplace=True)
-
-    # add the births column to the main df
-    df = pd.merge(df, df_birth, on=["province", "sex", "timepoint", "projection_scenario"], how="left")
-    df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
-
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
     df.drop(columns=["sex", "N"], inplace=True)
+
+    # interpolate
+    grouped_df = df.groupby(["province", "age", "projection_scenario"])
+    df = grouped_df.apply(lambda x: interpolate(
+        data=x.reset_index(drop=True),
+        col_pred="n_age",
+        formula="timepoint",
+        time_delta=time_delta
+    )).reset_index(drop=True)
+
+    # get the total number of births for a given timepoint, province, and projection scenario
+    df_birth = df.loc[df["age"] == 0]
+    df_birth["n_birth"] = df_birth["n_age"].values
+    df_birth.drop(columns=["age", "n_age", "prop_male"], inplace=True)
+
+    # add the births column to the main df
+    df = pd.merge(df, df_birth, on=["province", "timepoint", "projection_scenario"], how="left")
+    df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
 
     df = df.sort_values(["province", "timepoint", "age"]).reset_index(drop=True)
     return df
@@ -522,10 +545,14 @@ def generate_initial_population_data(time_delta: TimeDelta):
     Args:
          time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
     """
-    past_population_data = load_past_initial_population_data(time_delta)
+    past_population_data = load_past_initial_population_data(time_delta=time_delta)
     min_timepoint = past_population_data["timepoint"].max()
-    projected_population_data = load_projected_initial_population_data(min_timepoint)
+    projected_population_data = load_projected_initial_population_data(
+        time_delta=time_delta, min_timepoint=min_timepoint
+    )
     initial_population = pd.concat([past_population_data, projected_population_data], axis=0)
+
+    # Save the initial population distribution data to a CSV file
     data_path = get_data_path(f"processed_data")
     time_delta_tag = get_time_delta_tag(time_delta)
     file_path = pathlib.Path(data_path, f"{time_delta_tag}/birth/initial_pop_distribution_prop.csv")
