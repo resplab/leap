@@ -87,11 +87,9 @@ def interpolate(
     formula = f"{col_pred} ~ {formula}"
     model = smf.glm(formula=formula, data=data, family=sm.families.Gaussian())
     if data[col_pred].nunique() == 1:
-        # return the constant value as your "prediction"
         df_pred[f"{col_pred}_pred"] = data[col_pred].iloc[0]
     else:
         results = model.fit(maxiter=100)
-        logger.info(results.summary())
         df_pred[f"{col_pred}_pred"] = results.predict(df_pred, which="mean", transform=True)
     
     df_pred["timepoint"] = df_pred["timepoint"].apply(lambda x: initial_timepoint + dt.timedelta(seconds=x))
