@@ -2,7 +2,10 @@ import pandas as pd
 import os
 import pathlib
 import datetime as dt
-from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
+import itertools
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from leap.utils import get_data_path, get_time_delta_tag, date_range, TimeDelta
 from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group, get_parser
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
@@ -46,6 +49,69 @@ def filter_age_group(age_group: str) -> bool:
         return True
     else:
         return not any(word in age_group for word in FILTER_WORDS)
+    
+def interpolate(
+    data: pd.DataFrame,
+    col_pred: str,
+    formula: str,
+    time_delta: TimeDelta
+) -> pd.DataFrame:
+    """Interpolate the values of a column for missing timepoints using a GLM.
+    
+    Args:
+        data: The data to interpolate. Must contain a ``"timepoint"`` column.
+        col_pred: The name of the column to predict.
+        formula: The formula to use for the GLM, e.g. "timepoint + age".
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
+
+    Returns:
+        A dataframe with the same columns as the input data, but with the values of the column to
+        predict interpolated for the missing timepoints. The dataframe will contain rows for all
+        timepoints between the minimum and maximum timepoints in the input data, with a step size of
+        ``time_delta``.
+    """
+
+    initial_timepoint = data["timepoint"].min()
+    final_timepoint = data["timepoint"].max()
+
+    df_pred = pd.DataFrame(
+        data=list(itertools.product(
+            list(date_range(start=initial_timepoint, stop=final_timepoint + TIME_DELTA_OD, step=time_delta))
+        )),
+        columns=["timepoint"]
+    )
+
+    data["timepoint"] = data["timepoint"].apply(lambda x: (x - initial_timepoint).total_seconds())
+    df_pred["timepoint"] = df_pred["timepoint"].apply(lambda x: (x - initial_timepoint).total_seconds())
+
+    formula = f"{col_pred} ~ {formula}"
+    model = smf.glm(formula=formula, data=data, family=sm.families.Gaussian())
+    if data[col_pred].nunique() == 1:
+        # return the constant value as your "prediction"
+        df_pred[f"{col_pred}_pred"] = data[col_pred].iloc[0]
+    else:
+        results = model.fit(maxiter=100)
+        logger.info(results.summary())
+        df_pred[f"{col_pred}_pred"] = results.predict(df_pred, which="mean", transform=True)
+    
+    df_pred["timepoint"] = df_pred["timepoint"].apply(lambda x: initial_timepoint + dt.timedelta(seconds=x))
+    data["timepoint"] = data["timepoint"].apply(lambda x: initial_timepoint + dt.timedelta(seconds=x))
+    df = pd.merge(df_pred, data, on=["timepoint"], how="left").sort_values(["timepoint"])
+    for _, row in data.iterrows():
+        timepoint = row["timepoint"]
+        for col in [x for x in data.columns if x not in ["timepoint", col_pred]]:
+            df.loc[
+                (df["timepoint"] > timepoint) & 
+                (df["timepoint"] < timepoint + TIME_DELTA_OD.to_dateoffset()), 
+                col
+            ] = row[col]
+        df.loc[(df["timepoint"] == timepoint), f"{col_pred}_pred"] = row[col_pred]
+    df.drop(columns=[col_pred], inplace=True)
+    df.rename(columns={f"{col_pred}_pred": col_pred}, inplace=True)
+
+    return df
+    
+
 
 
 def load_past_births_population_data() -> pd.DataFrame:
