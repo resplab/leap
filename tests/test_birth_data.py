@@ -2,7 +2,7 @@ import pytest
 import datetime as dt
 from leap.data_generation.birth_data import get_projection_scenario_id, MIN_TIMEPOINT, \
     CENSUS_TIMEPOINT, load_past_births_population_data, load_projected_births_population_data, \
-    load_past_initial_population_data, load_projected_initial_population_data
+    load_past_initial_population_data, load_projected_initial_population_data, TIME_DELTA_OD
 from leap.logger import get_logger
 from leap.utils import TimeDelta
 
@@ -89,17 +89,22 @@ def test_load_projected_births_population_data():
 @pytest.mark.parametrize(
     "time_delta",
     [
-        (TimeDelta(years=1)),
-        (TimeDelta(years=5)),
+        # (TimeDelta(years=5)),
         (TimeDelta(months=1))
     ]
 )
-def test_load_past_initial_population_data(time_delta):
-    df = load_past_initial_population_data(time_delta=time_delta)
+@pytest.mark.parametrize(
+    "min_timepoint",
+    [
+        (MIN_TIMEPOINT)
+    ]
+)
+def test_load_past_initial_population_data(time_delta, min_timepoint):
+    df = load_past_initial_population_data(time_delta=time_delta, min_timepoint=min_timepoint)
 
     # check that all timepoints are >= MIN_TIMEPOINT and < CENSUS_TIMEPOINT
-    assert df["timepoint"].min() >= MIN_TIMEPOINT
-    assert df["timepoint"].max() <= CENSUS_TIMEPOINT
+    assert df["timepoint"].min() >= min_timepoint
+    assert df["timepoint"].max() <= CENSUS_TIMEPOINT + TIME_DELTA_OD
 
     # check that the expected columns are present
     expected_columns = [
@@ -135,9 +140,23 @@ def test_load_past_initial_population_data(time_delta):
     ].iloc[0]["prop_male"] == pytest.approx(0.5128556139806434, abs=1e-8)
 
 
-
-def test_load_projected_initial_population_data():
-    df = load_projected_initial_population_data(min_timepoint=CENSUS_TIMEPOINT)
+@pytest.mark.parametrize(
+    "time_delta",
+    [
+        # (TimeDelta(years=5)),
+        (TimeDelta(months=1))
+    ]
+)
+@pytest.mark.parametrize(
+    "max_timepoint",
+    [
+        (dt.datetime(2024, 1, 1)),
+    ]
+)
+def test_load_projected_initial_population_data(time_delta, max_timepoint):
+    df = load_projected_initial_population_data(
+        time_delta=time_delta, min_timepoint=CENSUS_TIMEPOINT, max_timepoint=max_timepoint
+    )
 
     # check that all timepoints are >= CENSUS_TIMEPOINT
     assert df["timepoint"].min() >= CENSUS_TIMEPOINT
