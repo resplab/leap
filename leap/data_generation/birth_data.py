@@ -10,6 +10,7 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 MIN_TIMEPOINT = dt.datetime(1999, 1, 1)
+MAX_TIMEPOINT = dt.datetime(2070, 1, 1)
 
 # Most recent census date from StatCan; data switches from past to projected at this timepoint
 CENSUS_TIMEPOINT = dt.datetime(2021, 1, 1)
@@ -106,12 +107,16 @@ def load_past_births_population_data() -> pd.DataFrame:
     return df
 
 
-def load_projected_births_population_data(min_timepoint: dt.datetime) -> pd.DataFrame:
+def load_projected_births_population_data(
+    min_timepoint: dt.datetime,
+    max_timepoint: dt.datetime = MAX_TIMEPOINT
+) -> pd.DataFrame:
     """Load the projected births data from the CSV file from ``StatCan``.
 
     Args:
         min_timepoint: The starting timepoint for the projected data.
-    
+        max_timepoint: The ending timepoint for the projected data.
+
     Returns:
         The projected births data.
         Columns:
@@ -159,7 +164,8 @@ def load_projected_births_population_data(min_timepoint: dt.datetime) -> pd.Data
 
     # keep only rows where timepoint >= min_timepoint and age == "Under 1 year" (babies)
     df = df.loc[
-        (df["timepoint"] >= min_timepoint) & 
+        (df["timepoint"] >= min_timepoint) &
+        (df["timepoint"] <= max_timepoint) &
         (df["age"] == "Under 1 year")
     ]
 
@@ -311,11 +317,15 @@ def load_past_initial_population_data(time_delta: TimeDelta) -> pd.DataFrame:
     return df
 
 
-def load_projected_initial_population_data(min_timepoint: dt.datetime) -> pd.DataFrame:
+def load_projected_initial_population_data(
+    min_timepoint: dt.datetime,
+    max_timepoint: dt.datetime = MAX_TIMEPOINT
+) -> pd.DataFrame:
     """Load the projected initial population data from the CSV file.
 
     Args:
         min_timepoint: The starting timepoint for the projected data.
+        max_timepoint: The ending timepoint for the projected data.
 
     Returns:
         The projected initial population data.
@@ -368,7 +378,7 @@ def load_projected_initial_population_data(min_timepoint: dt.datetime) -> pd.Dat
     )
 
     # select the required columns
-    df = df.loc[(df["timepoint"] >= min_timepoint)]
+    df = df.loc[(df["timepoint"] >= min_timepoint) & (df["timepoint"] <= max_timepoint)]
     df = df[["timepoint", "province", "sex", "age", "N", "projection_scenario"]]
 
     # convert the long form of the projection scenario to the 2-letter ID
