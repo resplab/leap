@@ -4,8 +4,7 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 from dateutil.relativedelta import relativedelta
-from leap.utils import get_data_path, check_timepoint, check_province, check_projection_scenario, \
-    get_time_delta_tag
+from leap.utils import get_data_path, check_timepoint, check_province, check_projection_scenario
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -43,7 +42,7 @@ class Emigration:
         * ``prob_emigration``: the per-person probability of emigrating. Zero for cells where
           the net population change was non-negative (i.e. no net emigration).
 
-        See ``processed_data/{time_delta_tag}/migration/migration_table.csv``.
+        See ``processed_data/migration/migration_table.csv``.
         """
         return self._table
 
@@ -58,7 +57,7 @@ class Emigration:
         population_growth_type: str,
         time_delta: dt.timedelta | relativedelta
     ) -> DataFrameGroupBy:
-        """Load the data from ``processed_data/{time_delta_tag}/migration/migration_table.csv``.
+        """Load the data from ``processed_data/migration/migration_table.csv``.
 
         Args:
             min_timepoint: the timepoint for the data to start at. Must be between 2001-2068 (CA)
@@ -86,11 +85,8 @@ class Emigration:
             A dataframe grouped by timepoint, giving the probability of emigration for a given
             age, province, sex, and growth scenario.
         """
-        time_delta_tag = get_time_delta_tag(time_delta)
-        df = pd.read_csv(
-            get_data_path(f"processed_data/{time_delta_tag}/migration/migration_table.csv"),
-            parse_dates=["timepoint"]
-        )
+        df = pd.read_csv(get_data_path("processed_data/migration/migration_table.csv"))
+        df["timepoint"] = df["year"].apply(lambda y: dt.datetime(y, 1, 1))
         check_province(province)
         check_projection_scenario(population_growth_type)
         check_timepoint(min_timepoint + time_delta, df[df["province"] == province])
@@ -101,7 +97,7 @@ class Emigration:
             (df["projection_scenario"] == population_growth_type)
         ]
 
-        df.drop(columns=["province", "projection_scenario"], inplace=True)
+        df.drop(columns=["year", "province", "projection_scenario"], inplace=True)
         grouped_df = df.groupby("timepoint")
 
         return grouped_df
