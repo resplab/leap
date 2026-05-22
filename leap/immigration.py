@@ -3,8 +3,7 @@ import math
 import pandas as pd
 import numpy as np
 import datetime as dt
-from leap.utils import get_data_path, check_province, check_timepoint, check_projection_scenario, \
-    get_time_delta_tag, TimeDelta
+from leap.utils import get_data_path, check_province, check_timepoint, check_projection_scenario, TimeDelta
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -37,7 +36,7 @@ class Immigration:
         """Grouped dataframe (by timepoint) giving the probability of immigration for a given age,
         province, sex, and growth scenario:
 
-        * ``timepoint``: integer timepoint the range ``2001 - 2065``.
+        * ``timepoint``: timepoint in the range ``2001-2068`` (CA) or ``2001-2043`` (BC).
         * ``age``: integer age.
         * ``sex``: integer, ``0 = female``, ``1 = male``.
         * ``prop_immigrants_birth``: The number of immigrants relative to the number of
@@ -46,10 +45,10 @@ class Immigration:
         * ``prop_immigrants_timepoint``: The proportion of immigrants for a given age and sex
           relative to the total number of immigrants for a given timepoint and projection scenario.
 
-        See ``processed_data/migration/immigration_table.csv``.
+        See ``processed_data/migration/migration_table.csv``.
         """
         return self._table
-    
+
     @table.setter
     def table(self, table: DataFrameGroupBy):
         self._table = table
@@ -62,10 +61,11 @@ class Immigration:
         max_age: int,
         time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
-        """Load the data from ``processed_data/migration/immigration_table.csv``.
+        """Load the data from ``processed_data/migration/migration_table.csv``.
 
         Args:
-            min_timepoint: The timepoint for the data to start at. Must be between ``2001-2065``.
+            min_timepoint: The timepoint for the data to start at. Must be between ``2001-2068``
+                (CA) or ``2001-2043`` (BC).
             province: A string indicating the province abbreviation, e.g. ``"BC"``.
                 For all of Canada, set province to ``"CA"``.
             population_growth_type: Population growth type, one of:
@@ -91,31 +91,28 @@ class Immigration:
             A dataframe grouped by timepoint, giving the probability of immigration for a given age,
             province, sex, and growth scenario.
         """
-        time_delta_tag = get_time_delta_tag(time_delta)
-        df = pd.read_csv(
-            get_data_path(f"processed_data/{time_delta_tag}/migration/immigration_table.csv"),
-            parse_dates=["timepoint"]
-        )
-        check_timepoint(min_timepoint + time_delta, df)
+        df = pd.read_csv(get_data_path("processed_data/migration/migration_table.csv"))
+        df["timepoint"] = df["year"].apply(lambda y: dt.datetime(y, 1, 1))
         check_province(province)
         check_projection_scenario(population_growth_type)
+        check_timepoint(min_timepoint + time_delta, df[df["province"] == province])
 
         df = df[
+            (df["delta_n"] > 0) &
             (df["age"] <= max_age) &
             (df["timepoint"] >= min_timepoint) &
             (df["province"] == province) &
             (df["projection_scenario"] == population_growth_type)
         ]
-        df = df.drop(columns=["province", "projection_scenario"])
+        df = df.drop(columns=["year", "province", "projection_scenario", "delta_n", "prop_emigrants_year", "prob_emigration"])
+        df = df.rename(columns={
+            "prop_migrants_birth": "prop_immigrants_birth",
+            "prop_immigrants_year": "prop_immigrants_timepoint"
+        })
         df["sex"] = df["sex"].replace({"F": 0, "M": 1})
-        for timepoint in df["timepoint"].unique():
-            prop_immigrants_timepoint = df.loc[df["timepoint"] == timepoint]["prop_immigrants_timepoint"].copy()
-            sum_timepoint = prop_immigrants_timepoint.sum()
-            df["prop_immigrants_timepoint"] = df.apply(
-                lambda x: x["prop_immigrants_timepoint"] / sum_timepoint
-                    if x["timepoint"] == timepoint else x["prop_immigrants_timepoint"],
-                axis=1
-            )
+        df["prop_immigrants_timepoint"] = df.groupby("timepoint")["prop_immigrants_timepoint"].transform(
+            lambda x: x / x.sum()
+        )
         grouped_df = df.groupby("timepoint")
         return grouped_df
 
@@ -138,7 +135,7 @@ class Immigration:
             ... )
             >>> n_immigrants = immigration.get_num_new_immigrants(num_new_born=1000, timepoint=dt.datetime(2022, 1, 1))
             >>> print(f"Number of immigrants to BC in 2022 for low growth scenario: {n_immigrants}")
-            Number of immigrants to BC in 2022 for low growth scenario: 974
+            Number of immigrants to BC in 2022 for low growth scenario: 973
 
         """
 

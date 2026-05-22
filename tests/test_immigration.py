@@ -18,8 +18,8 @@ from leap.utils import round_number
             0,
             "BC",
             "LG",
-            0.004980,
-            0.004936
+            0.004955,
+            0.004911
         ),
         (
             dt.datetime(2024, 1, 1),
@@ -29,8 +29,8 @@ from leap.utils import round_number
             1,
             "BC",
             "LG",
-            0.007383,
-            0.007294
+            0.007408,
+            0.007319
         ),
     ]
 )
