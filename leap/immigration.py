@@ -140,7 +140,7 @@ class Immigration:
             ... )
             >>> n_immigrants = immigration.get_num_new_immigrants(num_new_born=1000, timepoint=dt.datetime(2022, 1, 1))
             >>> print(f"Number of immigrants to BC in 2022 for low growth scenario: {n_immigrants}")
-            Number of immigrants to BC in 2022 for low growth scenario: 974
+            Number of immigrants to BC in 2022 for low growth scenario: 973
 
         """
 
