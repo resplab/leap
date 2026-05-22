@@ -110,14 +110,9 @@ class Immigration:
             "prop_immigrants_year": "prop_immigrants_timepoint"
         })
         df["sex"] = df["sex"].replace({"F": 0, "M": 1})
-        for timepoint in df["timepoint"].unique():
-            prop_immigrants_timepoint = df.loc[df["timepoint"] == timepoint]["prop_immigrants_timepoint"].copy()
-            sum_timepoint = prop_immigrants_timepoint.sum()
-            df["prop_immigrants_timepoint"] = df.apply(
-                lambda x: x["prop_immigrants_timepoint"] / sum_timepoint
-                    if x["timepoint"] == timepoint else x["prop_immigrants_timepoint"],
-                axis=1
-            )
+        df["prop_immigrants_timepoint"] = df.groupby("timepoint")["prop_immigrants_timepoint"].transform(
+            lambda x: x / x.sum()
+        )
         grouped_df = df.groupby("timepoint")
         return grouped_df
 
