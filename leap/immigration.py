@@ -3,7 +3,7 @@ import math
 import pandas as pd
 import numpy as np
 import datetime as dt
-from leap.utils import get_data_path, check_province, check_timepoint, check_projection_scenario
+from leap.utils import get_data_path, check_province, check_timepoint, check_projection_scenario, TimeDelta
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
