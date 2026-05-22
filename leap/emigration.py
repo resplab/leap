@@ -37,16 +37,16 @@ class Emigration:
         """Grouped dataframe (by timepoint) giving the probability of emigration for a given age,
         province, sex, and growth scenario:
 
-        * ``timepoint``: timepoint in the range 2001 - 2065.
+        * ``timepoint``: timepoint in the range 2001-2068 (CA) or 2001-2043 (BC).
         * ``age``: integer age.
         * ``sex``: one of ``M`` = male, ``F`` = female.
         * ``prob_emigration``: the per-person probability of emigrating. Zero for cells where
           the net population change was non-negative (i.e. no net emigration).
 
         See ``processed_data/{time_delta_tag}/migration/migration_table.csv``.
-
+        """
         return self._table
-    
+
     @table.setter
     def table(self, table: DataFrameGroupBy):
         self._table = table
@@ -58,10 +58,11 @@ class Emigration:
         population_growth_type: str,
         time_delta: dt.timedelta | relativedelta
     ) -> DataFrameGroupBy:
-        """Load the data from ``processed_data/{time_delta_tag}/migration/emigration_table.csv``.
+        """Load the data from ``processed_data/{time_delta_tag}/migration/migration_table.csv``.
 
         Args:
-            min_timepoint: the timepoint for the data to start at. Must be between 2001-2065.
+            min_timepoint: the timepoint for the data to start at. Must be between 2001-2068 (CA)
+                or 2001-2043 (BC).
             province: a string indicating the province abbreviation, e.g. "BC".
                 For all of Canada, set province to "CA".
             population_growth_type: Population growth type, one of:
@@ -90,9 +91,9 @@ class Emigration:
             get_data_path(f"processed_data/{time_delta_tag}/migration/migration_table.csv"),
             parse_dates=["timepoint"]
         )
-        check_timepoint(min_timepoint + time_delta, df)
         check_province(province)
         check_projection_scenario(population_growth_type)
+        check_timepoint(min_timepoint + time_delta, df[df["province"] == province])
 
         df = df[
             (df["timepoint"] >= min_timepoint) &
@@ -100,7 +101,7 @@ class Emigration:
             (df["projection_scenario"] == population_growth_type)
         ]
 
-        df.drop(columns=["province", "proj_scenario"], inplace=True)
+        df.drop(columns=["province", "projection_scenario"], inplace=True)
         grouped_df = df.groupby("timepoint")
 
         return grouped_df

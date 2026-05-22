@@ -3,48 +3,38 @@
 ## Population Data
 
 The data for the population was generated from the StatsCan website. For the years 2001-2019, we
-used Table 17-10-0005-01, and for the years 2020-2065, we used Table 17-10-0057-01:
+used Table 17-10-0005-01, and for the years 2020-2068, we used Table 17-10-0057-01:
 
 2001-2019: https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710000501
-2020-2065: https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710005701
+2020-2068: https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710005701
 
-Note: For the latter table, the projection goes to 2065 for Canada, but only to 2043 for the
-provinces.
+Note: The projection table goes to 2068 for Canada (CA), but only to 2043 for British Columbia
+(BC). No other provinces are currently supported.
 
 Since StatsCan does not provide a breakdown of population projections/estimates by emigration
-or immigration, we calculated the average number of individuals required to emigrate/immigrate to
-match the projected demographics. These results are saved in:
+or immigration, we calculated the net migration for each age, sex, timepoint, province, and
+projection scenario from the population and mortality data. See
+`leap/data_generation/migration_data.py` for details, and `docs/model/model-migration.rst` for
+the mathematical description.
 
-`emigration_table.csv`
-`immigration_table.csv`
+## Migration Table
 
-### Emigration Table
+Both immigration and emigration data are stored in a single file:
 
-The emigration table has the following columns:
+`migration_table.csv`
 
-| column | type | description |
-|-----------|----------|------|
-|`timepoint`| `datetime` | The starting date / time for the entry. Data in the selected row applies to dates from `[timepoint, timepoint + time_delta]`.<br> Range 2001-2065.|
-|`age`| `int` | Age in years|
-|`sex`| `str` | `"F"` = female, `"M"` = male.|
-|`province`| `str` | Two-letter province abbreviation e.g. "BC". For all of Canada, set province to "CA".|
-|`n_emigrants`| `int` | The number of immigrants for a given timepoint, sex, age, province, and projection scenario.|
-|`prop_emigrants_birth`| `float`| The proportion of emigrants for a given age and sex relative to the total number of births for a given timepoint and projection scenario. To compute the number of emigrants for a given timepoint, projection scenario, age, and sex, multiply the number of births by `prop_emigrants_birth`.|
-|`prop_emigrants_timepoint`| `float` | The proportion of emigrants for a given age and sex relative to the total number of emigrants for a given timepoint and projection scenario. To compute the number of emigrants for a given timepoint, projection scenario, age, and sex, multiply the total number of emigrants for that timepoint and projection scenario by `prop_immigrants_timepoint`.|
-|`projection_scenario`| `str` | Population growth type, one of:<br>`["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"]`. <br> See [Stats Canada](https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm).|
-
-
-### Immigration Table
-
-The immigration table has the following columns:
+Each row corresponds to a unique combination of `timepoint`, `province`, `age`, `sex`, and
+`projection_scenario`. The columns are:
 
 | column | type | description |
-|-----------|----------|------|
-|`timepoint`| `datetime` | The starting date / time for the entry. Data in the selected row applies to dates from `[timepoint, timepoint + time_delta]` <br> Range 2001-2065.|
-|`age`| `int` | Age in years|
-|`sex`| `str` | `"F"` = female, `"M"` = male.|
-|`province`| `str` | Two-letter province abbreviation e.g. "BC". For all of Canada, set province to "CA".|
-|`n_immigrants`| `int` | The number of immigrants for a given timepoint, sex, age, province, and projection scenario.|
-|`prop_immigrants_birth`| `float` | The proportion of immigrants for a given age and sex relative to the total number of births for a given timepoint and projection scenario. To compute the number of immigrants for a given timepoint, projection scenario, age, and sex, multiply the number of births by `prop_immigrants_birth`.|
-|`prop_immigrants_timepoint`| `float` | The proportion of immigrants for a given age and sex relative to the total number of immigrants for a given timepoint and projection scenario. To compute the number of immigrants for a given timepoint, projection scenario, age, and sex, multiply the total number of immigrants for that timepoint and projection scenario by `prop_immigrants_timepoint`.|
-|`projection_scenario`| `str` | Population growth type, one of:<br>`["past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", FA", "SA"]`. <br> See [Stats Canada](https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm).|
+|--------|------|-------------|
+| `timepoint` | `datetime` | The starting date / time for the entry. Data applies to the interval `[timepoint, timepoint + time_delta]`. Range is 2001-2068 for CA and 2001-2043 for BC. |
+| `province` | `str` | Province abbreviation. One of `CA` (all of Canada) or `BC` (British Columbia). |
+| `age` | `int` | Age in years, in the range 1-100. Age 0 (newborns) is excluded because births are handled separately by the birth model. |
+| `sex` | `str` | `"F"` = female, `"M"` = male. |
+| `projection_scenario` | `str` | Population growth type, one of: `LG` (low growth), `HG` (high growth), `M1`-`M5` (medium growth variants), `FA` (fast aging), `SA` (slow aging). Note: `M6` is a placeholder scenario present in the StatCan data but not yet implemented. See [StatCan Projection Scenarios](https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm). |
+| `delta_n` | `float` | The signed net migration for this age, sex, timepoint, province, and projection scenario. Positive values indicate net immigration; negative values indicate net emigration. |
+| `prop_migrants_birth` | `float` | `delta_n` divided by the total number of births in that timepoint, province, and projection scenario. Signed — positive for immigration cells, negative for emigration cells. Used to compute the total number of immigrant agents to create each timepoint, scaled to the simulation's birth count. |
+| `prop_immigrants_year` | `float` | For cells where `delta_n > 0`, the proportion of immigrants for this age and sex relative to the total number of immigrants in that timepoint. Zero for emigration cells. Sums to 1.0 across all immigration cells for a given timepoint, province, and projection scenario. Used to sample the age and sex of new immigrant agents. |
+| `prop_emigrants_year` | `float` | For cells where `delta_n < 0`, the proportion of emigrants for this age and sex relative to the total number of emigrants in that timepoint. Zero for immigration cells. Sums to 1.0 across all emigration cells for a given timepoint, province, and projection scenario. |
+| `prob_emigration` | `float` | For cells where `delta_n < 0`, the per-person probability of emigrating during this timepoint, computed as `\|delta_n\| / N` where `N` is the population for that age, sex, province, and projection scenario. Zero for immigration cells. Applied as a Bernoulli trial to each existing agent each timepoint. |

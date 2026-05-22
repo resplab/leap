@@ -108,6 +108,12 @@ that younger cohort. This is computed separately for each combination of age, se
 and projection scenario. Age 0 is excluded because newborns are handled separately by the
 birth model.
 
+.. math::
+
+    \Delta n_{(a,\ s,\ t)} = n_{(a,\ s,\ t)} - n_{(a-1,\ s,\ t-1)} \cdot \left(1 - q_{x_{(a-1,\ s,\ t-1)}}\right)
+
+where :math:`a` = age, :math:`s` = sex, :math:`t` = year.
+
 If :math:`\Delta n > 0`, the surplus is attributed to immigration. If :math:`\Delta n < 0`,
 the deficit is attributed to emigration.
 
@@ -187,6 +193,8 @@ for the same age and year.
 .. math::
 
     \text{prop migrants birth}_{(a,\ s,\ t)} = \dfrac{\Delta n_{(a,\ s,\ t)}}{n^{\text{birth}}_{(t)}}
+
+where :math:`a` = age, :math:`s` = sex, :math:`t` = year.
 
 The total number of immigrant agents created in a given year is:
 
