@@ -12,6 +12,7 @@ outcomes over a lifetime.
 
   model-simulation
   model-glm
+  model-contingency-tables
   model-birth
   model-death
   model-migration

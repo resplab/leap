@@ -123,19 +123,41 @@ in asthma incidence, so we should include sex in our formula.
 
 .. math::
 
-    \eta^{(i)} = 
-        \sum_{m=0}^1 \beta_{01m} t^{(i)} \cdot (s^{(i)})^m +
-        \sum_{k=0}^{5} \sum_{m=0}^{1} \beta_{k0m} \cdot (a^{(i)})^k \cdot (s^{(i)})^m
+    \eta^{(i)} = \beta_0 + \beta_s \cdot s^{(i)} + \beta_t \cdot t^{(i)} + \beta_{ts} \cdot t^{(i)} \cdot s^{(i)}
+        + \sum_{k=1}^{5} \left( \beta_k \cdot (a^{(i)})^k + \beta_{ks} \cdot (a^{(i)})^k \cdot s^{(i)} \right)
 
 
 where:
 
-* :math:`\beta_{k\ell m}` is the coefficient for the feature :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
-* :math:`a^{(i)}` is the age
-* :math:`t^{(i)}` is the year
-* :math:`s^{(i)}` is the sex
+.. list-table::
+   :widths: 25 25 50
+   :header-rows: 1
 
-There are :math:`2 + 6 * 2 = 14` coefficients in the incidence model.
+   * - Coefficient
+     - Term
+     - Description
+   * - :math:`\beta_0`
+     - :math:`1`
+     - intercept
+   * - :math:`\beta_s`
+     - :math:`s^{(i)}`
+     - sex main effect
+   * - :math:`\beta_t`
+     - :math:`t^{(i)}`
+     - year main effect
+   * - :math:`\beta_{ts}`
+     - :math:`t^{(i)} \cdot s^{(i)}`
+     - year × sex interaction
+   * - :math:`\beta_k` (:math:`k = 1, \ldots, 5`)
+     - :math:`(a^{(i)})^k`
+     - age polynomial terms
+   * - :math:`\beta_{ks}` (:math:`k = 1, \ldots, 5`)
+     - :math:`(a^{(i)})^k \cdot s^{(i)}`
+     - age × sex interaction terms
+
+And :math:`a^{(i)}` is the age, :math:`t^{(i)}` is the year, :math:`s^{(i)}` is the sex.
+
+There are :math:`4 + 5 + 5 = 14` coefficients in the incidence model.
 
 
 Next we have the ``prevalence``. We again want a formula using ``age``, ``sex``, and ``year``.
@@ -147,10 +169,52 @@ in asthma incidence and hence prevalence, so we should include sex in our formul
 
 .. math::
 
-    \eta^{(i)} = \sum_{k=0}^{5} \sum_{\ell=0}^2 \sum_{m=0}^1 \beta_{k \ell m} 
-        \cdot (a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m
+    \begin{align}
+    \eta^{(i)} &= \beta_0 + \beta_s \cdot s^{(i)} \\
+        &+ \sum_{k=1}^{5} \left( \beta_k \cdot (a^{(i)})^k + \beta_{ks} \cdot (a^{(i)})^k \cdot s^{(i)} \right) \\
+        &+ \sum_{\ell=1}^{2} \left( \beta_{t^\ell} \cdot (t^{(i)})^\ell + \beta_{t^\ell s} \cdot (t^{(i)})^\ell \cdot s^{(i)} \right) \\
+        &+ \sum_{\ell=1}^{2} \sum_{k=1}^{5} \left( \beta_{k\ell} \cdot (a^{(i)})^k \cdot (t^{(i)})^\ell
+        + \beta_{k\ell s} \cdot (a^{(i)})^k \cdot (t^{(i)})^\ell \cdot s^{(i)} \right)
+    \end{align}
 
-There are :math:`6 * 3 * 2 = 36` coefficients in the prevalence model.
+
+where:
+
+.. list-table::
+   :widths: 30 30 40
+   :header-rows: 1
+
+   * - Coefficient
+     - Term
+     - Description
+   * - :math:`\beta_0`
+     - :math:`1`
+     - intercept
+   * - :math:`\beta_s`
+     - :math:`s^{(i)}`
+     - sex main effect
+   * - :math:`\beta_k` (:math:`k = 1, \ldots, 5`)
+     - :math:`(a^{(i)})^k`
+     - age polynomial terms
+   * - :math:`\beta_{ks}` (:math:`k = 1, \ldots, 5`)
+     - :math:`(a^{(i)})^k \cdot s^{(i)}`
+     - age × sex interactions
+   * - :math:`\beta_{t^\ell}` (:math:`\ell = 1, 2`)
+     - :math:`(t^{(i)})^\ell`
+     - year polynomial terms
+   * - :math:`\beta_{t^\ell s}` (:math:`\ell = 1, 2`)
+     - :math:`(t^{(i)})^\ell \cdot s^{(i)}`
+     - year × sex interactions
+   * - :math:`\beta_{k\ell}` (:math:`k = 1, \ldots, 5`,  :math:`\ell = 1, 2`)
+     - :math:`(a^{(i)})^k \cdot (t^{(i)})^\ell`
+     - age × year interactions
+   * - :math:`\beta_{k\ell s}` (:math:`k = 1, \ldots, 5`, :math:`\ell = 1, 2`)
+     - :math:`(a^{(i)})^k \cdot (t^{(i)})^\ell \cdot s^{(i)}`
+     - age × year × sex interactions
+
+And :math:`a^{(i)}` is the age, :math:`t^{(i)}` is the year, :math:`s^{(i)}` is the sex.
+
+There are :math:`(1 + 1 + 5 + 5) + (2 + 2 + 10 + 10) = 36` coefficients in the prevalence model.
 
 
 Assumptions
@@ -230,77 +294,24 @@ for each sex. The variables are:
 Occurrence Model 2: Risk Factors
 =================================
 
-In the second model, we will use the predicted asthma incidence and prevalence from the first model,
-:math:`\eta`, as our target asthma prevalence / incidence in this model. We would now like to
-incorporate the risk factors of family history and antibiotic use on asthma incidence and
-prevalence.
+Model 1 produces age-, sex-, and year-specific rates for the general population, but it treats
+everyone in a stratum identically. In reality, individuals differ in ways that affect their
+asthma risk — most notably whether a parent has asthma, and whether they received antibiotics
+in early life. Model 2 builds on Model 1 by incorporating these risk factors, so that
+the simulation can assign each agent an individualised probability of asthma incidence or
+prevalence rather than a population average.
 
-Datasets
-*****************
+This is done in two phases:
 
-We use the predicted asthma incidence and prevalence from the first model, :math:`\eta`, as our
-target asthma prevalence / incidence in this model. The data is formatted as follows:
+* **Offline calibration** (run once during data generation): for every combination of age,
+  sex, and year, a calibration term :math:`\alpha` is computed that ensures the
+  population-weighted average of the risk-factor-adjusted probabilities still matches the
+  target rate :math:`\eta` from Model 1. The results are saved to
+  ``asthma_occurrence_correction.csv``.
 
-.. raw:: html
-
-  <table class="table">
-    <thead>
-      <tr>
-          <th>Column</th>
-          <th>Type</th>
-          <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><code class="notranslate">year</code></td>
-        <td>
-          <code class="notranslate">int</code>
-        </td>
-        <td>
-          format <code>XXXX</code>, e.g <code>2000</code>, range <code>[2000, 2019]</code>
-        </td>
-      </tr>
-      <tr>
-        <td><code class="notranslate">age</code></td>
-        <td>
-          <code class="notranslate">int</code>
-        </td>
-        <td>
-          The age in years, a value in <code class="notranslate">[3, 100]</code>
-        </td>
-      </tr>
-      <tr>
-        <td><code class="notranslate">sex</code></td>
-        <td>
-          <code class="notranslate">str</code>
-        </td>
-        <td>
-          <code class="notranslate">"F"</code> = Female <br>
-          <code class="notranslate">"M"</code> = Male
-        </td>
-      </tr>
-      <tr>
-        <td><code class="notranslate">incidence</code></td>
-        <td>
-          <code class="notranslate">float</code>
-        </td>
-        <td>
-          The predicted incidence of asthma in BC for a given year, age, and sex, per 100 people
-        </td>
-      </tr>
-      <tr>
-        <td><code class="notranslate">prevalence</code></td>
-        <td>
-          <code class="notranslate">float</code>
-        </td>
-        <td>
-          The predicted prevalence of asthma in BC for a given year, age, and sex, per 100 people
-        </td>
-      </tr>
-    </tbody>
-    </table>
-
+* **Online simulation** (at runtime): each agent's individual risk factors are combined with
+  :math:`\alpha` from the lookup table to produce a personalised asthma probability on every
+  simulated year of life.
 
 Model: Risk Factors
 ******************************
@@ -419,7 +430,14 @@ We can represent each combination as a vector of the form:
 
 where :math:`f_{\lambda}` is the family history and :math:`d_{\lambda}` is the antibiotic dose.
 
-We next define the odds ratio for a given risk factor as:
+The effect of each risk factor on asthma risk is expressed as an **odds ratio (OR)** sourced
+from external published studies. An odds ratio of :math:`\omega` means that a person with the
+risk factor has :math:`\omega` times the odds of having asthma compared to a person without it.
+We work in log-odds (logit) space rather than probability space because log-odds are additive:
+the combined effect of independent risk factors is simply the sum of their individual
+log-odds contributions.
+
+We define the odds ratio for a given risk factor as:
 
 .. math::
 
@@ -443,38 +461,59 @@ Since these are multiplicative, the log of the odds ratios is additive:
   \log(\omega_{\lambda}) = \log(\omega(f = f_{\lambda})) + 
     \log(\omega(d = d_{\lambda}))
 
-We can now define our formula for the calibration model:
+Applying the combined OR :math:`\omega_\lambda` directly to the Model 1 log-odds would shift
+the population-weighted average probability away from the target :math:`\eta`. The calibration
+term :math:`\alpha` corrects for this: it is a single scalar per (age, sex, year) stratum that
+shifts the baseline log-odds up or down so that the population-weighted average of
+:math:`\zeta_\lambda` over all risk factor combinations matches :math:`\eta`. It plays the
+same role as an intercept correction in a regression model.
+
+We can now define our formula for the calibration model, where
+:math:`\sigma(x) = 1 / (1 + e^{-x})` is the logistic (sigmoid) function:
 
 .. math::
 
-  \zeta_{\lambda}^{(i)} = \sigma\left(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) + \alpha\right)
-
-where:
+  \zeta_{\lambda}^{(i)} = \sigma\left(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) - \alpha\right)
 
 .. list-table::
-   :widths: 25 75
+   :widths: 22 18 12 48
    :header-rows: 1
 
    * - Variable
+     - Domain
+     - Role
      - Description
-   * - :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)})`
-     - determined by the output of the first model
    * - :math:`\eta^{(i)}`
-     - the predicted incidence or prevalence from the first model
-   * - :math:`\sigma(x)`
-     - the logistic function
-   * - :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda}`
-     - the correction / calibration term for either the incidence or prevalence
-   * - :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda}^{(i)}`
-     - predicted asthma prevalence / incidence for the model. We want this to be as close as
-       possible to :math:`\eta^{(i)}`.
+     - probability :math:`\in [0, 1]`
+     - Input
+     - predicted incidence or prevalence from Model 1
+   * - :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)})`
+     - log-odds :math:`\in \mathbb{R}`
+     - Intermediate
+     - logit-transformed Model 1 prediction; the baseline log-odds before risk factor adjustment
+   * - :math:`\log(\omega_{\lambda}^{(i)})`
+     - log-odds :math:`\in \mathbb{R}`
+     - Input
+     - combined log-OR for risk factor combination :math:`\lambda`; sourced from external studies
+   * - :math:`\alpha`
+     - log-odds :math:`\in \mathbb{R}`
+     - Intermediate
+     - per-stratum calibration term; looked up from ``asthma_occurrence_correction.csv`` at runtime
    * - :math:`\zeta_{\lambda}^{(i)}`
-     - the predicted asthma incidence or prevalence from the model for the risk factor combination
-       indexed by :math:`\lambda`
+     - probability :math:`\in [0, 1]`
+     - Intermediate
+     - predicted asthma probability for agents with risk factor combination :math:`\lambda`
    * - :math:`p(\lambda)`
-     - the probability of the risk factor combination indexed by :math:`\lambda`
+     - probability :math:`\in [0, 1]`
+     - Input
+     - population proportion with risk factor combination :math:`\lambda`
+   * - :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda)\, \zeta_{\lambda}^{(i)}`
+     - probability :math:`\in [0, 1]`
+     - Output
+     - population-weighted predicted probability; calibrated to match :math:`\eta^{(i)}`
 
-Let's break this formula down:
+Let's break this formula down. The log-OR terms for each risk factor are derived from
+external published studies and are treated as fixed inputs to the calibration.
 
 Antibiotic Risk Factors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -588,29 +627,41 @@ Next, we find the calibrated asthma incidence for the current year:
   &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
 
 
-where we recall that:
+where:
 
 .. list-table::
-   :widths: 25 75
+   :widths: 28 18 12 42
    :header-rows: 1
 
    * - Variable
+     - Domain
+     - Role
      - Description
-   * - :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)}(t))`
-     - determined by the output of the first model
    * - :math:`\eta^{(i)}(t)`
-     - defined above; the predicted incidence from the first model
-   * - :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda, A = 0 \mid t-1) \cdot \beta_{\lambda}`
-     - the correction / calibration term for the incidence
-   * - :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \zeta_{\lambda}^{(i)}`
-     - predicted asthma incidence for the model. We want this to be as close as
-       possible to :math:`\eta^{(i)}`.
-   * - :math:`\zeta_{\lambda}^{(i)}`
-     - the predicted asthma incidence from the model for the risk factor combination
-       indexed by :math:`\lambda`
+     - probability :math:`\in [0, 1]`
+     - Input
+     - predicted incidence from Model 1 at time :math:`t`
+   * - :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)}(t))`
+     - log-odds :math:`\in \mathbb{R}`
+     - Intermediate
+     - logit-transformed Model 1 incidence prediction
    * - :math:`p(\lambda, A = 0 \mid t-1)`
-     - the joint probability of the risk factor combination indexed by :math:`\lambda`, for a
-       person who did not have asthma at time :math:`t-1`
+     - probability :math:`\in [0, 1]`
+     - Input
+     - proportion of the population with risk factor combination :math:`\lambda` who did not have
+       asthma at time :math:`t-1`
+   * - :math:`\alpha`
+     - log-odds :math:`\in \mathbb{R}`
+     - Intermediate
+     - per-stratum calibration term for incidence; looked up from ``asthma_occurrence_correction.csv``
+   * - :math:`\zeta_{\lambda}^{(i)}`
+     - probability :math:`\in [0, 1]`
+     - Intermediate
+     - predicted incidence probability for risk factor combination :math:`\lambda`
+   * - :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1)\, \zeta_{\lambda}^{(i)}`
+     - probability :math:`\in [0, 1]`
+     - Output
+     - population-weighted predicted incidence; calibrated to match :math:`\eta^{(i)}`
 
 
 We again want to find a correction term :math:`\alpha` such that the predicted asthma incidence
@@ -618,6 +669,8 @@ We again want to find a correction term :math:`\alpha` such that the predicted a
 To do this, we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the
 absolute difference between :math:`\zeta` and :math:`\eta`.
 
+
+.. _optimizing-beta-parameters:
 
 Optimizing the Initial Beta Parameters for the Incidence Equation
 ------------------------------------------------------------------
@@ -627,59 +680,9 @@ For the incidence equation, we need to optimize two of the initial beta paramete
 * :math:`\beta_{\text{fhx}_\text{age}}`
 * :math:`\beta_{\text{abx}_\text{age}}`
 
-Example
-^^^^^^^^^
-
-Before we begin, let us first define what we mean by a ``contingency table``. A contingency
-table is a table that displays two categorical variables and their joint frequency distribution.
-For example, suppose we have two categorical variables: ``smoking`` and ``lung cancer``, with
-``n = 300`` patients in total:
-
-.. raw:: html
-
-    <table class="table">
-        <thead>
-        <tr>
-            <th></th>
-            <th>lung cancer</th>
-            <th>no lung cancer</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>smoker</td>
-            <td><code class="notranslate">a0 = 100</code></td>
-            <td><code class="notranslate">b0 = 50</code></td>
-            <td><code class="notranslate">n1 = 150</code></td>
-        </tr>
-        <tr>
-            <td>non-smoker</td>
-            <td><code class="notranslate">c0 = 25</code></td>
-            <td><code class="notranslate">d0 = 125</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code class="notranslate">n2 = 125</code></td>
-            <td></td>
-            <td><code class="notranslate">n = 300</code></td>
-        </tr>
-        </tbody>
-    </table>
-
-The variables ``n1`` and ``n2`` are called the marginal totals:
-
-.. math::
-
-    n_1 &= a_0 + b_0 = \text{total number of patients with lung cancer} \\
-    n_2 &= c_0 + d_0 = \text{total number of patients who smoke}
-
-The variable ``n`` is the total number of patients:
-
-.. math::
-
-    n = a_0 + b_0 + c_0 + d_0 = \text{total number of patients}
+This optimization uses contingency tables — 2×2 tables that display the joint frequency
+distribution of two categorical variables. See :doc:`model-contingency-tables` for an
+introduction to contingency tables and worked examples.
 
 In our model, we want to compute the contingency table for the risk factor combinations
 :math:`\lambda` and the asthma diagnosis.
@@ -1032,5 +1035,64 @@ We want to find the beta parameters that minimize the difference between the pre
 ratio :math:`\Omega` and the observed odds ratio :math:`\omega_{\lambda}`.
 
 .. math::
-    \sum_{i=1}^{N}\sum_{\lambda=1}^{n} 
+    \sum_{i=1}^{N}\sum_{\lambda=1}^{n}
       \dfrac{\left| \log(\Omega^{(i)}) - \log(\omega_{\lambda}^{(i)}) \right|}{N}
+
+
+Processed Data
+--------------
+
+The calibration terms produced by Model 2 are stored in ``asthma_occurrence_correction.csv``.
+Each row gives the value of :math:`\alpha` for a specific age, sex, year, and outcome type
+(prevalence or incidence). This file is used at runtime by the simulation to look up the
+correction for each agent at each year of life.
+
+.. raw:: html
+
+  <table class="table">
+    <thead>
+      <tr>
+          <th>Column</th>
+          <th>Type</th>
+          <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code class="notranslate">year</code></td>
+        <td><code class="notranslate">int</code></td>
+        <td>Calendar year of the prediction</td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">sex</code></td>
+        <td><code class="notranslate">str</code></td>
+        <td>
+          <code class="notranslate">"F"</code> = Female,
+          <code class="notranslate">"M"</code> = Male
+        </td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">age</code></td>
+        <td><code class="notranslate">int</code></td>
+        <td>Age in years</td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">correction</code></td>
+        <td><code class="notranslate">float</code></td>
+        <td>
+          The calibration term :math:`\alpha` for this stratum. Subtracted from the log-odds
+          in the simulation to ensure the population-weighted average probability matches
+          the Model 1 target.
+        </td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">type</code></td>
+        <td><code class="notranslate">str</code></td>
+        <td>
+          <code class="notranslate">"prevalence"</code> or
+          <code class="notranslate">"incidence"</code> — separate correction terms are
+          computed for each outcome type.
+        </td>
+      </tr>
+    </tbody>
+  </table>
