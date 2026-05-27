@@ -112,10 +112,14 @@ def interpolate(
 
 
 
-def load_past_births_population_data(min_timepoint: dt.datetime = MIN_TIMEPOINT) -> pd.DataFrame:
+def load_past_births_population_data(
+    time_delta: TimeDelta,
+    min_timepoint: dt.datetime = MIN_TIMEPOINT
+) -> pd.DataFrame:
     """Load the past birth data from the CSV file.
     
     Args:
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
         min_timepoint: The minimum timepoint to include in the data.
 
     Returns:
