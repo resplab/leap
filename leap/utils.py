@@ -656,9 +656,32 @@ class TimeDelta(relativedelta):
         else:
             raise TypeError(f"Unsupported type for comparison: {type(other)}")
         
-    def __lte__(self, other: TimeDelta | dt.timedelta | relativedelta) -> bool:
+    def __le__(self, other: TimeDelta | dt.timedelta | relativedelta) -> bool:
         if isinstance(other, dt.timedelta) or isinstance(other, TimeDelta) or isinstance(other, relativedelta):
             return self.__lt__(other) or self.__eq__(other)
+        else:
+            raise TypeError(f"Unsupported type for comparison: {type(other)}")
+        
+    def __gt__(self, other: TimeDelta | dt.timedelta | relativedelta) -> bool:
+        if isinstance(other, dt.timedelta) or isinstance(other, TimeDelta):
+            return self.total_seconds() > other.total_seconds()
+        elif isinstance(other, relativedelta):
+            total_seconds = (
+                other.years * 365 * 24 * 3600 + 
+                other.months * 30 * 24 * 3600 + 
+                other.days * 24 * 3600 + 
+                other.hours * 3600 + 
+                other.minutes * 60 + 
+                other.seconds + 
+                other.microseconds / 1e6
+            )
+            return self.total_seconds() > total_seconds
+        else:
+            raise TypeError(f"Unsupported type for comparison: {type(other)}")
+        
+    def __ge__(self, other: TimeDelta | dt.timedelta | relativedelta) -> bool:
+        if isinstance(other, dt.timedelta) or isinstance(other, TimeDelta) or isinstance(other, relativedelta):
+            return self.__gt__(other) or self.__eq__(other)
         else:
             raise TypeError(f"Unsupported type for comparison: {type(other)}")
         
