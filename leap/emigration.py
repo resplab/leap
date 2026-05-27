@@ -1,15 +1,15 @@
 from __future__ import annotations
-from ast import parse
 import pandas as pd
 import numpy as np
 import datetime as dt
-from dateutil.relativedelta import relativedelta
-from leap.utils import get_data_path, check_timepoint, check_province, check_projection_scenario
+from leap.utils import get_data_path, check_timepoint, check_province, check_projection_scenario, \
+    get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
     from leap.utils import Sex
+    from dateutil.relativedelta import relativedelta
 
 logger = get_logger(__name__)
 
@@ -22,7 +22,7 @@ class Emigration:
         province: str = "CA",
         population_growth_type: str = "LG",
         table: DataFrameGroupBy | None = None,
-        time_delta: dt.timedelta | relativedelta = relativedelta(years=1)
+        time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if table is None:
             self.table = self.load_emigration_table(
@@ -42,7 +42,7 @@ class Emigration:
         * ``prob_emigration``: the per-person probability of emigrating. Zero for cells where
           the net population change was non-negative (i.e. no net emigration).
 
-        See ``processed_data/migration/migration_table.csv``.
+        See ``processed_data/{time_delta_tag}/migration/migration_table.csv``.
         """
         return self._table
 
@@ -55,9 +55,9 @@ class Emigration:
         min_timepoint: dt.datetime,
         province: str,
         population_growth_type: str,
-        time_delta: dt.timedelta | relativedelta
+        time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
-        """Load the data from ``processed_data/migration/migration_table.csv``.
+        """Load the data from ``processed_data/{time_delta_tag}/migration/migration_table.csv``.
 
         Args:
             min_timepoint: the timepoint for the data to start at. Must be between 2001-2068 (CA)
@@ -85,8 +85,11 @@ class Emigration:
             A dataframe grouped by timepoint, giving the probability of emigration for a given
             age, province, sex, and growth scenario.
         """
-        df = pd.read_csv(get_data_path("processed_data/migration/migration_table.csv"))
-        df["timepoint"] = df["year"].apply(lambda y: dt.datetime(y, 1, 1))
+        time_delta_tag = get_time_delta_tag(time_delta)
+        df = pd.read_csv(
+            get_data_path(f"processed_data/{time_delta_tag}/migration/migration_table.csv"),
+            parse_dates=["timepoint"]
+        )
         check_province(province)
         check_projection_scenario(population_growth_type)
         check_timepoint(min_timepoint + time_delta, df[df["province"] == province])
@@ -97,7 +100,7 @@ class Emigration:
             (df["projection_scenario"] == population_growth_type)
         ]
 
-        df.drop(columns=["year", "province", "projection_scenario"], inplace=True)
+        df.drop(columns=["province", "projection_scenario"], inplace=True)
         grouped_df = df.groupby("timepoint")
 
         return grouped_df
@@ -111,7 +114,7 @@ class Emigration:
         """Determine the probability of emigration of an agent (person) in a given timepoint.
 
         Args:
-            timepoint: The timepoint, e.g. ``2022``.
+            timepoint: The timepoint, e.g. ``dt.datetime(2022, 1, 1)``.
             age: Age of the person.
             sex: Sex of the person, "M" = male, "F" = female.
 
@@ -121,7 +124,7 @@ class Emigration:
         Examples:
 
             >>> emigration = Emigration()
-            >>> emigration.compute_probability(timepoint=2022, age=0, sex="F")
+            >>> emigration.compute_probability(timepoint=dt.datetime(2022, 1, 1), age=0, sex="F")
             False
 
         """
