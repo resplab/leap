@@ -408,7 +408,7 @@ def load_past_initial_population_data(
 
     # add the births column to the main df
     df = pd.merge(df, df_birth, on=["province", "timepoint"], how="left")
-    df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
+    df["prop"] = df.apply(lambda x: 0 if x["n_birth"] == 0 else x["n_age"] / x["n_birth"], axis=1)
 
 
 
