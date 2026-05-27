@@ -12,7 +12,7 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-MIN_TIMEPOINT = dt.datetime(1999, 1, 1)
+MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
 MAX_TIMEPOINT = dt.datetime(2070, 1, 1)
 
 # Most recent census date from StatCan; data switches from past to projected at this timepoint
@@ -345,7 +345,7 @@ def load_past_initial_population_data(
     )
 
     # select the required columns
-    df = df.loc[(df["timepoint"] > min_timepoint)][["timepoint", "province", "sex", "age", "N"]]
+    df = df.loc[(df["timepoint"] >= min_timepoint)][["timepoint", "province", "sex", "age", "N"]]
 
     # remove grouped categories such as "Median", "Average", "All" and format age as integer
     df = df.loc[df["age"].apply(filter_age_group)]
@@ -413,8 +413,6 @@ def load_past_initial_population_data(
     # add the births column to the main df
     df = pd.merge(df, df_birth, on=["province", "timepoint"], how="left")
     df["prop"] = df.apply(lambda x: 0 if x["n_birth"] == 0 else x["n_age"] / x["n_birth"], axis=1)
-
-
 
     # add projection_scenario column, all values = "past"
     df["projection_scenario"] = ["past"] * df.shape[0]
