@@ -169,7 +169,16 @@ def load_past_births_population_data(min_timepoint: dt.datetime = MIN_TIMEPOINT)
 
     # add projection_scenario column, all values = "past"
     df["projection_scenario"] = ["past"] * df.shape[0]
-    df.sort_values(["province", "timepoint", "projection_scenario"], inplace=True)
+
+    # Interpolate the birth estimates for the missing timepoints in the past data
+    grouped_df = df.groupby(["province", "projection_scenario"])
+    df = grouped_df.apply(lambda x: interpolate(
+        data=x.reset_index(drop=True),
+        col_pred="N",
+        formula="timepoint",
+        time_delta=time_delta
+    )).reset_index(drop=True)
+    df.sort_values(["province", "projection_scenario", "timepoint"], inplace=True)
 
     return df
 
@@ -268,6 +277,15 @@ def load_projected_births_population_data(
     # drop N and sex columns
     df = df.drop(columns=["N", "sex", "age"])
     df.rename(columns={"max_N": "N", "prop": "prop_male"}, inplace=True)
+
+    # Interpolate the birth estimates for the missing timepoints in the past data
+    grouped_df = df.groupby(["province", "projection_scenario"])
+    df = grouped_df.apply(lambda x: interpolate(
+        data=x.reset_index(drop=True),
+        col_pred="N",
+        formula="timepoint",
+        time_delta=time_delta
+    )).reset_index(drop=True)
     df.sort_values(["province", "timepoint", "projection_scenario"], inplace=True)
 
     return df
@@ -530,6 +548,8 @@ def generate_birth_estimate_data(time_delta: TimeDelta):
     min_timepoint = past_population_data["timepoint"].max() + time_delta
     projected_population_data = load_projected_births_population_data(min_timepoint)
     birth_estimate = pd.concat([past_population_data, projected_population_data], axis=0)
+
+    # Save the birth estimate data to a CSV file
     data_path = get_data_path(f"processed_data")
     time_delta_tag = get_time_delta_tag(time_delta)
     file_path = pathlib.Path(data_path, f"{time_delta_tag}/birth/birth_estimate.csv")
