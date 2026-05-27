@@ -77,7 +77,6 @@ Column |	Type | Description
 -------- | ------- | ---------
 `timepoint`	| `dt.datetime` | the date and time of the start of the time interval (e.g. `2020-01-01 00:00:00`)
 `province`	| `str` | 2-letter province or territory ID (e.g. `BC` = British Columbia, `AB` = Alberta, `CA` = Canada)
-`N` | `int` | total number of births (both sexes) during the given time interval and in the given province
 `age` | `int` | age in years
 `prop_male` | `float` | proportion of births that are male
 `n_age` | `float` | number of people of the given age living in the given province during the given time interval
