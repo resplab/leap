@@ -485,61 +485,6 @@ the population-weighted average match the Model 1 target:
 where :math:`p(\lambda)` is the proportion of the population with risk factor combination
 :math:`\lambda`.
 
-The log-OR terms for each risk factor are detailed below.
-
-Antibiotic Risk Factors
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The antibiotic terms were fit by Lee et al. :cite:`lee2024`, using a random effects meta-regression
-model:
-
-.. math::
-
-  \log(\omega(d_{\lambda})) =
-    \begin{cases}
-      \beta_{\text{abx_0}} + 
-      \beta_{\text{abx_age}} \cdot \text{min}(a^{(i)}, 7) +
-      \beta_{\text{abx_dose}} \cdot \text{min}(d^{(i)}, 3)
-      && d^{(i)} > 0 \text{ and } a^{(i)} \leq 7 \\ \\
-      0 && \text{otherwise}
-    \end{cases}
-
-where:
-
-* :math:`\beta_{\text{abx_xxx}}` is a constant coefficient
-* :math:`a^{(i)}` is the age
-* :math:`d^{(i)}` is the number of courses of antibiotics taken during the first year of life
-
-The beta coefficients were found to be:
-
-* :math:`\beta_{\text{abx_0}} = 1.82581`
-* :math:`\beta_{\text{abx_age}} = 0.2253`
-* :math:`\beta_{\text{abx_dose}} = 0.0531475`
-
-Family History Risk Factors
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The family history terms were fit using the ``CHILD Study`` data, in the paper by Patrick et al.
-:cite:`patrick2020`, using logistic regression:
-
-.. math::
-
-  \log(\omega(f_{\lambda})) = 
-    \beta_{\text{hx_0}} \cdot f^{(i)} + 
-    \beta_{\text{hx_age}} \cdot (\text{min}(a^{(i)}, 5) - 3) \cdot f^{(i)}
-
-where:
-
-* :math:`\beta_{\text{hx_xxx}}` is a constant coefficient
-* :math:`a^{(i)}` is the age
-* :math:`f^{(i)}` is the family history of asthma; 1 = at least one parent has asthma,
-  0 = neither parent has asthma
-
-The beta coefficients were found to be:
-
-* :math:`\beta_{\text{hx_0}} = \log(1.13) = 0.122`
-* :math:`\beta_{\text{hx_age}} = \dfrac{\log(2.4) - \log(1.13)}{2} = 0.377`
-
 
 So, the only unknown term in our formula is the correction term :math:`\alpha`. To solve this,
 we separate the formulae for incidence and prevalence. We will begin with prevalence.
