@@ -656,7 +656,7 @@ class TimeDelta(relativedelta):
         else:
             raise TypeError(f"Unsupported type for comparison: {type(other)}")
         
-    def __lte__(self, other: TimeDelta | dt.timedelta | relativedelta) -> bool:
+    def __le__(self, other: TimeDelta | dt.timedelta | relativedelta) -> bool:
         if isinstance(other, dt.timedelta) or isinstance(other, TimeDelta) or isinstance(other, relativedelta):
             return self.__lt__(other) or self.__eq__(other)
         else:
