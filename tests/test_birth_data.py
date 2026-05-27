@@ -23,13 +23,19 @@ def test_get_projection_scenario_id(projection_scenario, expected_id):
     assert get_projection_scenario_id(projection_scenario) == expected_id
 
 
-
-def test_load_past_births_population_data():
-    df = load_past_births_population_data()
+@pytest.mark.parametrize(
+    "time_delta",
+    [
+        (TimeDelta(years=5)),
+        (TimeDelta(months=1))
+    ]
+)
+def test_load_past_births_population_data(time_delta):
+    df = load_past_births_population_data(time_delta)
 
     # check that all timepoints are >= MIN_TIMEPOINT and < CENSUS_TIMEPOINT
     assert df["timepoint"].min() >= MIN_TIMEPOINT
-    assert df["timepoint"].max() <= CENSUS_TIMEPOINT
+    assert df["timepoint"].max() <= CENSUS_TIMEPOINT + TIME_DELTA_OD
 
     # check that all projection scenarios are "past"
     assert (df["projection_scenario"] == "past").all()
@@ -40,13 +46,18 @@ def test_load_past_births_population_data():
 
     # check specific values from 17100005.csv
     assert df.loc[
-        (df["timepoint"] == dt.datetime(2006, 1, 1)) & 
-        (df["province"] == "CA")
-    ].iloc[0]["N"] == 344791
-    assert df.loc[
-        (df["timepoint"] == dt.datetime(2006, 1, 1)) & 
-        (df["province"] == "CA")
-    ].iloc[0]["prop_male"] == pytest.approx(0.5128556139806434, abs=1e-8)
+        (df["timepoint"] == dt.datetime(2000, 1, 1)) & 
+        (df["province"] == "BC")
+    ].iloc[0]["N"] == 41433
+    if time_delta <= TIME_DELTA_OD:
+        assert df.loc[
+            (df["timepoint"] == dt.datetime(2006, 1, 1)) & 
+            (df["province"] == "CA")
+        ].iloc[0]["N"] == 344791
+        assert df.loc[
+            (df["timepoint"] == dt.datetime(2006, 1, 1)) & 
+            (df["province"] == "CA")
+        ].iloc[0]["prop_male"] == pytest.approx(0.5128556139806434, abs=1e-8)
 
 
 def test_load_projected_births_population_data():
