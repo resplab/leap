@@ -419,101 +419,73 @@ risk factors:
     </table>
 
 
-We can represent each combination as a vector of the form:
-
-.. math::
-
-  \begin{bmatrix}
-    f_{\lambda} \\
-    d_{\lambda}
-  \end{bmatrix}
-
-where :math:`f_{\lambda}` is the family history and :math:`d_{\lambda}` is the antibiotic dose.
-
 The effect of each risk factor on asthma risk is expressed as an **odds ratio (OR)** sourced
 from external published studies. An odds ratio of :math:`\omega` means that a person with the
 risk factor has :math:`\omega` times the odds of having asthma compared to a person without it.
 We work in log-odds (logit) space rather than probability space because log-odds are additive:
 the combined effect of independent risk factors is simply the sum of their individual
-log-odds contributions.
-
-We define the odds ratio for a given risk factor as:
+log-odds contributions. Because independent ORs are multiplicative, their logarithms are additive:
 
 .. math::
 
-  \omega(r=k) = \dfrac{P(A = 1 \mid r = k)}{P(A = 1 \mid r = 0)}
+  \log(\omega_{\lambda}) = \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}})
 
-where :math:`A` is the asthma incidence or prevalence and :math:`r` is the risk factor.
-To combine odds ratios, we have:
-
-.. math::
-
-  \omega_{\lambda} &= \omega(f = f_{\lambda}, d = d_{\lambda}) \\
-  &= \dfrac{P(A = 1 \mid f = f_{\lambda}, d = d_{\lambda})}{P(A = 1 \mid f = 0, d = 0)} \\
-  &= \dfrac{P(A = 1 \mid f = f_{\lambda})}{P(A = 1 \mid f = 0)} \cdot 
-    \dfrac{P(A = 1 \mid d = d_{\lambda})}{P(A = 1 \mid d = 0)} \\
-  &= \omega(f = f_{\lambda}) \cdot \omega(d = d_{\lambda})
-
-Since these are multiplicative, the log of the odds ratios is additive:
-
-.. math::
-
-  \log(\omega_{\lambda}) = \log(\omega(f = f_{\lambda})) + 
-    \log(\omega(d = d_{\lambda}))
-
-Applying the combined OR :math:`\omega_\lambda` directly to the Model 1 log-odds would shift
-the population-weighted average probability away from the target :math:`\eta`. The calibration
+Applying individual risk factor ORs directly to the Model 1 log-odds would shift the
+population-weighted average probability away from the target :math:`\eta`. The calibration
 term :math:`\alpha` corrects for this: it is a single scalar per (age, sex, year) stratum that
-shifts the baseline log-odds up or down so that the population-weighted average of
-:math:`\zeta_\lambda` over all risk factor combinations matches :math:`\eta`. It plays the
-same role as an intercept correction in a regression model.
+shifts the baseline log-odds so that the population-weighted average of :math:`p_{\text{prev}}`
+across all 8 risk factor combinations matches :math:`\eta`. It plays the same role as an
+intercept correction in a regression model.
 
-We can now define our formula for the calibration model, where
-:math:`\sigma(x) = 1 / (1 + e^{-x})` is the logistic (sigmoid) function:
+The predicted prevalence for an individual agent is:
 
 .. math::
 
-  \zeta_{\lambda}^{(i)} = \sigma\left(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) - \alpha\right)
+  \text{logit}(p_{\text{prev}}) = \text{logit}(\eta) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha
 
 .. list-table::
-   :widths: 22 18 12 48
+   :widths: 20 18 12 50
    :header-rows: 1
 
    * - Variable
      - Domain
      - Role
      - Description
-   * - :math:`\eta^{(i)}`
+   * - :math:`\eta`
      - probability :math:`\in [0, 1]`
      - Input
-     - predicted incidence or prevalence from Model 1
-   * - :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)})`
-     - log-odds :math:`\in \mathbb{R}`
-     - Intermediate
-     - logit-transformed Model 1 prediction; the baseline log-odds before risk factor adjustment
-   * - :math:`\log(\omega_{\lambda}^{(i)})`
+     - predicted prevalence from Model 1 for this (age, sex, year) stratum
+   * - :math:`\log(\omega_{\text{fhx}})`
      - log-odds :math:`\in \mathbb{R}`
      - Input
-     - combined log-OR for risk factor combination :math:`\lambda`; sourced from external studies
+     - log-OR for family history of asthma; from Patrick et al. :cite:`patrick2020`
+   * - :math:`\log(\omega_{\text{abx}})`
+     - log-odds :math:`\in \mathbb{R}`
+     - Input
+     - log-OR for antibiotic exposure in infancy; from Lee et al. :cite:`lee2024`
    * - :math:`\alpha`
      - log-odds :math:`\in \mathbb{R}`
      - Intermediate
      - per-stratum calibration term; looked up from ``asthma_occurrence_correction.csv`` at runtime
-   * - :math:`\zeta_{\lambda}^{(i)}`
-     - probability :math:`\in [0, 1]`
-     - Intermediate
-     - predicted asthma probability for agents with risk factor combination :math:`\lambda`
-   * - :math:`p(\lambda)`
-     - probability :math:`\in [0, 1]`
-     - Input
-     - population proportion with risk factor combination :math:`\lambda`
-   * - :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda)\, \zeta_{\lambda}^{(i)}`
+   * - :math:`p_{\text{prev}}`
      - probability :math:`\in [0, 1]`
      - Output
-     - population-weighted predicted probability; calibrated to match :math:`\eta^{(i)}`
+     - predicted asthma prevalence for an individual agent
 
-Let's break this formula down. The log-OR terms for each risk factor are derived from
-external published studies and are treated as fixed inputs to the calibration.
+Because the formula above is applied separately for each of the 8 risk factor combinations
+:math:`\lambda`, each with its own :math:`\omega_{\text{fhx}}` and :math:`\omega_{\text{abx}}`,
+it produces a different predicted prevalence :math:`p_{\text{prev},\lambda}` per combination.
+:math:`\alpha` is then solved offline using the ``BFGS`` algorithm to find the value that makes
+the population-weighted average match the Model 1 target:
+
+.. math::
+
+  \sum_{\lambda} p(\lambda) \cdot p_{\text{prev},\lambda} = \eta
+
+where :math:`p(\lambda)` is the proportion of the population with risk factor combination
+:math:`\lambda`.
+
+The log-OR terms for each risk factor are detailed below.
 
 Antibiotic Risk Factors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
