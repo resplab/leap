@@ -306,7 +306,8 @@ This is done in two phases:
 * **Offline calibration** (run once during data generation): for every combination of age,
   sex, and year, a calibration term :math:`\alpha` is computed that ensures the
   population-weighted average of the risk-factor-adjusted probabilities still matches the
-  target rate :math:`\eta` from Model 1. The results are saved to
+  target rates :math:`\bar{p}_{\text{prev}}` and :math:`\bar{p}_{\text{inc}}` from Model 1.
+  The results are saved to
   ``asthma_occurrence_correction.csv``.
 
 * **Online simulation** (at runtime): each agent's individual risk factors are combined with
@@ -431,17 +432,17 @@ log-odds contributions. Because independent ORs are multiplicative, their logari
   \log(\omega_{\lambda}) = \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}})
 
 Applying individual risk factor ORs directly to the Model 1 log-odds would shift the
-population-weighted average probability away from the target :math:`\eta`. The calibration
+population-weighted average probability away from the target :math:`\bar{p}_{\text{prev}}`. The calibration
 term :math:`\alpha` corrects for this: it is a single scalar per (age, sex, year) stratum that
 shifts the baseline log-odds so that the population-weighted average of :math:`p_{\text{prev}}`
-across all 8 risk factor combinations matches :math:`\eta`. It plays the same role as an
+across all 8 risk factor combinations matches :math:`\bar{p}_{\text{prev}}`. It plays the same role as an
 intercept correction in a regression model.
 
 The predicted prevalence for an individual agent is:
 
 .. math::
 
-  \text{logit}(p_{\text{prev}}) = \text{logit}(\eta) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha
+  \text{logit}(p_{\text{prev}}) = \text{logit}(\bar{p}_{\text{prev}}) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha
 
 .. list-table::
    :widths: 20 18 12 50
@@ -451,7 +452,7 @@ The predicted prevalence for an individual agent is:
      - Domain
      - Role
      - Description
-   * - :math:`\eta`
+   * - :math:`\bar{p}_{\text{prev}}`
      - probability :math:`\in [0, 1]`
      - Input
      - predicted prevalence from Model 1 for this (age, sex, year) stratum
@@ -472,120 +473,69 @@ The predicted prevalence for an individual agent is:
      - Output
      - predicted asthma prevalence for an individual agent
 
-Because the formula above is applied separately for each of the 8 risk factor combinations
-:math:`\lambda`, each with its own :math:`\omega_{\text{fhx}}` and :math:`\omega_{\text{abx}}`,
-it produces a different predicted prevalence :math:`p_{\text{prev},\lambda}` per combination.
-:math:`\alpha` is then solved offline using the ``BFGS`` algorithm to find the value that makes
-the population-weighted average match the Model 1 target:
+:math:`\alpha` is solved offline using the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)``
+algorithm to find the value that minimises the difference between the population-weighted
+average and the Model 1 target:
 
 .. math::
 
-  \sum_{\lambda} p(\lambda) \cdot p_{\text{prev},\lambda} = \eta
+  \sum_{\lambda} p(\lambda) \cdot p_{\text{prev},\lambda} = \bar{p}_{\text{prev}}
 
 where :math:`p(\lambda)` is the proportion of the population with risk factor combination
 :math:`\lambda`.
 
 
-So, the only unknown term in our formula is the correction term :math:`\alpha`. To solve this,
-we separate the formulae for incidence and prevalence. We will begin with prevalence.
-
-Solving for the Correction Term: Prevalence
+Incidence
 --------------------------------------------
 
-.. math::
-
-  \zeta_{\text{prev}} &= \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda} \\
-  &= \sum_{\lambda=0}^{n} p(\lambda) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha) 
-
-
-We want to find a correction term :math:`\alpha` such that the predicted asthma prevalence
-:math:`\zeta` is as close as possible to the predicted asthma prevalence :math:`\eta`. To do this,
-we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the absolute
-difference between :math:`\zeta` and :math:`\eta`.
-
-
-Solving for the Correction Term: Incidence
---------------------------------------------
-
-In our model, asthma incidence is defined as the number of new diagnoses between the previous year
-and the current year, divided by the total population. To calibrate the incidence, we first
-find the calibrated prevalence for the previous year:
+The incidence formula has the same structure as prevalence, but applies only to the at-risk
+population — agents who do not currently have asthma. The predicted incidence for an
+individual agent is:
 
 .. math::
 
-  \zeta_{\text{prev}}(t-1) &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \zeta_{\text{prev}, \lambda}(t-1) \\
-  &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
-
-Now, what we want to find is the joint probability of each risk factor combination,
-:math:`p(\lambda, A = 0 \mid t-1)`, for the population without asthma.
-
-.. math::
-
-  P(\lambda, A = 0) = P(A = 0 \mid \lambda) \cdot P(\lambda)
-
-Now, we must have:
-
-.. math::
-
-  P(A = 0 \mid \lambda) = 1 - P(A = 1 \mid \lambda) = 1 - \zeta_{\text{prev}, \lambda}(t-1)
-
-So, we can rewrite the joint probability as:
-
-.. math::
-
-  p(\lambda, A = 0 \mid t-1) = (1 - \zeta_{\text{prev}, \lambda}(t-1)) \cdot p(\lambda, t-1)
-
-
-Next, we find the calibrated asthma incidence for the current year:
-
-.. math::
-
-  \zeta_{\text{inc}}(t) &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \zeta_{\text{inc}, \lambda}(t) \\
-  &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
-
-
-where:
+  \text{logit}(p_{\text{inc}}) = \text{logit}(\bar{p}_{\text{inc}}) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha
 
 .. list-table::
-   :widths: 28 18 12 42
+   :widths: 20 18 12 50
    :header-rows: 1
 
    * - Variable
      - Domain
      - Role
      - Description
-   * - :math:`\eta^{(i)}(t)`
+   * - :math:`\bar{p}_{\text{inc}}`
      - probability :math:`\in [0, 1]`
      - Input
-     - predicted incidence from Model 1 at time :math:`t`
-   * - :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)}(t))`
+     - predicted incidence from Model 1 for this (age, sex, year) stratum
+   * - :math:`\log(\omega_{\text{fhx}})`
      - log-odds :math:`\in \mathbb{R}`
-     - Intermediate
-     - logit-transformed Model 1 incidence prediction
-   * - :math:`p(\lambda, A = 0 \mid t-1)`
-     - probability :math:`\in [0, 1]`
      - Input
-     - proportion of the population with risk factor combination :math:`\lambda` who did not have
-       asthma at time :math:`t-1`
+     - log-OR for family history of asthma; from Patrick et al. :cite:`patrick2020`
+   * - :math:`\log(\omega_{\text{abx}})`
+     - log-odds :math:`\in \mathbb{R}`
+     - Input
+     - log-OR for antibiotic exposure in infancy; from Lee et al. :cite:`lee2024`
    * - :math:`\alpha`
      - log-odds :math:`\in \mathbb{R}`
      - Intermediate
-     - per-stratum calibration term for incidence; looked up from ``asthma_occurrence_correction.csv``
-   * - :math:`\zeta_{\lambda}^{(i)}`
-     - probability :math:`\in [0, 1]`
-     - Intermediate
-     - predicted incidence probability for risk factor combination :math:`\lambda`
-   * - :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1)\, \zeta_{\lambda}^{(i)}`
+     - per-stratum calibration term; looked up from ``asthma_occurrence_correction.csv`` at runtime
+   * - :math:`p_{\text{inc}}`
      - probability :math:`\in [0, 1]`
      - Output
-     - population-weighted predicted incidence; calibrated to match :math:`\eta^{(i)}`
+     - predicted asthma incidence for an individual agent
 
+:math:`\alpha` is solved offline using the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)``
+algorithm to find the value that minimises the difference between the population-weighted
+average and the Model 1 target:
 
-We again want to find a correction term :math:`\alpha` such that the predicted asthma incidence
-:math:`\zeta` is as close as possible to the asthma incidence from the first model, :math:`\eta`.
-To do this, we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the
-absolute difference between :math:`\zeta` and :math:`\eta`.
+.. math::
 
+  \sum_{\lambda} p_{\text{no asthma},\lambda}(t-1) \cdot p_{\text{inc},\lambda} = \bar{p}_{\text{inc}}
+
+where :math:`p_{\text{no asthma},\lambda}(t-1)` is the proportion of the population who
+are asthma-free at :math:`t-1` and have risk factor combination :math:`\lambda`. Only
+asthma-free agents are included because incidence counts new diagnoses only.
 
 .. _optimizing-beta-parameters:
 
@@ -999,7 +949,7 @@ correction for each agent at each year of life.
         <td>
           The calibration term :math:`\alpha` for this stratum. Subtracted from the log-odds
           in the simulation to ensure the population-weighted average probability matches
-          the Model 1 target.
+          :math:`\bar{p}_{\text{prev}}` or :math:`\bar{p}_{\text{inc}}` from Model 1.
         </td>
       </tr>
       <tr>
