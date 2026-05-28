@@ -108,23 +108,25 @@ distribution and log link function.
 Formula
 -----------------
 
-Now that we have our distribution and link function, we need to decide on a formula for
-:math:`\eta^{(i)}`. We are permitted to use linear combinations of functions of the features
-in our dataset.
+Now that we have our distribution and link function, we need to decide on a formula for the
+linear predictor. The log link means we are modelling :math:`\log(\bar{p}_{\text{inc}})` for
+incidence and :math:`\log(\bar{p}_{\text{prev}})` for prevalence. The scaling of the data
+(rates per 100 people) is absorbed into the intercept :math:`\beta_0`. We are permitted to
+use linear combinations of functions of the features in our dataset.
 
 Let's start with ``incidence``. We want a formula using ``age``, ``sex``, and ``year``.
 Since asthma depends on factors such as pollution and antibiotic use, and these factors change
 from year to year, it follows that asthma incidence should depend on the year. Antibiotic use
 also depends on age, so we should include age in our formula. Finally, there is a sex difference
-in asthma incidence, so we should include sex in our formula. 
+in asthma incidence, so we should include sex in our formula.
 
 .. TODO: Why was this formula chosen?
 
 
 .. math::
 
-    \eta^{(i)} = \beta_0 + \beta_s \cdot s^{(i)} + \beta_t \cdot t^{(i)} + \beta_{ts} \cdot t^{(i)} \cdot s^{(i)}
-        + \sum_{k=1}^{5} \left( \beta_k \cdot (a^{(i)})^k + \beta_{ks} \cdot (a^{(i)})^k \cdot s^{(i)} \right)
+    \log(\bar{p}_{\text{inc},i}) = \beta_0 + \beta_s \cdot s_i + \beta_t \cdot t_i + \beta_{ts} \cdot t_i \cdot s_i
+        + \sum_{k=1}^{5} \left( \beta_k \cdot a_i^k + \beta_{ks} \cdot a_i^k \cdot s_i \right)
 
 
 where:
@@ -140,22 +142,22 @@ where:
      - :math:`1`
      - intercept
    * - :math:`\beta_s`
-     - :math:`s^{(i)}`
+     - :math:`s_i`
      - sex main effect
    * - :math:`\beta_t`
-     - :math:`t^{(i)}`
+     - :math:`t_i`
      - year main effect
    * - :math:`\beta_{ts}`
-     - :math:`t^{(i)} \cdot s^{(i)}`
+     - :math:`t_i \cdot s_i`
      - year × sex interaction
    * - :math:`\beta_k` (:math:`k = 1, \ldots, 5`)
-     - :math:`(a^{(i)})^k`
+     - :math:`a_i^k`
      - age polynomial terms
    * - :math:`\beta_{ks}` (:math:`k = 1, \ldots, 5`)
-     - :math:`(a^{(i)})^k \cdot s^{(i)}`
+     - :math:`a_i^k \cdot s_i`
      - age × sex interaction terms
 
-And :math:`a^{(i)}` is the age, :math:`t^{(i)}` is the year, :math:`s^{(i)}` is the sex.
+And :math:`a_i` is the age, :math:`t_i` is the year, :math:`s_i` is the sex of individual :math:`i`.
 
 There are :math:`4 + 5 + 5 = 14` coefficients in the incidence model.
 
@@ -170,11 +172,11 @@ in asthma incidence and hence prevalence, so we should include sex in our formul
 .. math::
 
     \begin{align}
-    \eta^{(i)} &= \beta_0 + \beta_s \cdot s^{(i)} \\
-        &+ \sum_{k=1}^{5} \left( \beta_k \cdot (a^{(i)})^k + \beta_{ks} \cdot (a^{(i)})^k \cdot s^{(i)} \right) \\
-        &+ \sum_{\ell=1}^{2} \left( \beta_{t^\ell} \cdot (t^{(i)})^\ell + \beta_{t^\ell s} \cdot (t^{(i)})^\ell \cdot s^{(i)} \right) \\
-        &+ \sum_{\ell=1}^{2} \sum_{k=1}^{5} \left( \beta_{k\ell} \cdot (a^{(i)})^k \cdot (t^{(i)})^\ell
-        + \beta_{k\ell s} \cdot (a^{(i)})^k \cdot (t^{(i)})^\ell \cdot s^{(i)} \right)
+    \log(\bar{p}_{\text{prev},i}) &= \beta_0 + \beta_s \cdot s_i \\
+        &+ \sum_{k=1}^{5} \left( \beta_k \cdot a_i^k + \beta_{ks} \cdot a_i^k \cdot s_i \right) \\
+        &+ \sum_{\ell=1}^{2} \left( \beta_{t^\ell} \cdot t_i^\ell + \beta_{t^\ell s} \cdot t_i^\ell \cdot s_i \right) \\
+        &+ \sum_{\ell=1}^{2} \sum_{k=1}^{5} \left( \beta_{k\ell} \cdot a_i^k \cdot t_i^\ell
+        + \beta_{k\ell s} \cdot a_i^k \cdot t_i^\ell \cdot s_i \right)
     \end{align}
 
 
@@ -191,28 +193,28 @@ where:
      - :math:`1`
      - intercept
    * - :math:`\beta_s`
-     - :math:`s^{(i)}`
+     - :math:`s_i`
      - sex main effect
    * - :math:`\beta_k` (:math:`k = 1, \ldots, 5`)
-     - :math:`(a^{(i)})^k`
+     - :math:`a_i^k`
      - age polynomial terms
    * - :math:`\beta_{ks}` (:math:`k = 1, \ldots, 5`)
-     - :math:`(a^{(i)})^k \cdot s^{(i)}`
+     - :math:`a_i^k \cdot s_i`
      - age × sex interactions
    * - :math:`\beta_{t^\ell}` (:math:`\ell = 1, 2`)
-     - :math:`(t^{(i)})^\ell`
+     - :math:`(t_i)^\ell`
      - year polynomial terms
    * - :math:`\beta_{t^\ell s}` (:math:`\ell = 1, 2`)
-     - :math:`(t^{(i)})^\ell \cdot s^{(i)}`
+     - :math:`(t_i)^\ell \cdot s_i`
      - year × sex interactions
    * - :math:`\beta_{k\ell}` (:math:`k = 1, \ldots, 5`,  :math:`\ell = 1, 2`)
-     - :math:`(a^{(i)})^k \cdot (t^{(i)})^\ell`
+     - :math:`a_i^k \cdot (t_i)^\ell`
      - age × year interactions
    * - :math:`\beta_{k\ell s}` (:math:`k = 1, \ldots, 5`, :math:`\ell = 1, 2`)
-     - :math:`(a^{(i)})^k \cdot (t^{(i)})^\ell \cdot s^{(i)}`
+     - :math:`a_i^k \cdot (t_i)^\ell \cdot s_i`
      - age × year × sex interactions
 
-And :math:`a^{(i)}` is the age, :math:`t^{(i)}` is the year, :math:`s^{(i)}` is the sex.
+And :math:`a_i` is the age, :math:`t_i` is the year, :math:`s_i` is the sex of individual :math:`i`.
 
 There are :math:`(1 + 1 + 5 + 5) + (2 + 2 + 10 + 10) = 36` coefficients in the prevalence model.
 
@@ -275,14 +277,16 @@ for each sex. The variables are:
         <td><code class="notranslate">incidence</code></td>
         <td><code class="notranslate">float</code></td>
         <td>
-          Predicted asthma incidence for the given year, age, and sex, per 100 people
+          Predicted asthma incidence for the given year, age, and sex, per 100 people.
+          Used as \(\bar{p}_{\text{inc}}\) in Model 2 (divided by 100 to convert to a probability).
         </td>
       </tr>
       <tr>
         <td><code class="notranslate">prevalence</code></td>
         <td><code class="notranslate">float</code></td>
         <td>
-          Predicted asthma prevalence for the given year, age, and sex, per 100 people
+          Predicted asthma prevalence for the given year, age, and sex, per 100 people.
+          Used as \(\bar{p}_{\text{prev}}\) in Model 2 (divided by 100 to convert to a probability).
         </td>
       </tr>
     </tbody>
@@ -543,7 +547,7 @@ Calibrating Age-Dependent Odds Ratios for Prevalence and Incidence
 ------------------------------------------------------------------
 
 Both :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` are
-age-dependent — the strength of association with asthma changes as a child ages:
+age-dependent — the strength of association with asthma changes as a person ages:
 
 * **Family history**: the OR is aplied from age 3, with the age-dependent slope applying
   up to age 5, after which it plateaus.
@@ -555,7 +559,7 @@ prevalence formula, each OR is evaluated at the agent's age at entry. In the inc
 formula, the ORs are re-evaluated each year as the agent ages, changing until the agent
 ages out of the relevant window.
 
-The age-dependent slopes are not fixed by external studies and must be estimated from data.
+The age-dependent slopes are not determined by external studies and must be estimated from data.
 They are calibrated in the incidence context — where agents pass through multiple ages
 year by year, making the slope estimable from the change in OR across age groups — and the
 resulting slopes are then used in both formulas. This is done by finding the slope values
@@ -568,8 +572,8 @@ In our model, we want to compute the contingency table for the risk factor combi
 :math:`\lambda` and the asthma diagnosis.
 
 
-Past Contingency Table
-^^^^^^^^^^^^^^^^^^^^^^^
+Baseline Contingency Table (t=0)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. raw:: html
 
@@ -593,7 +597,7 @@ Past Contingency Table
             <td>risk factor &lambda; -</td>
             <td><code class="notranslate">c0</code></td>
             <td><code class="notranslate">d0</code></td>
-            <td></td>
+            <td><code class="notranslate">n0</code></td>
         </tr>
         <tr>
             <td></td>
@@ -612,27 +616,37 @@ non-binary nature of antibiotic dose is handled implicitly through the :math:`\l
 indexing: dose levels 1, 2, and 3 each appear as distinct combinations and are each
 compared independently against the baseline rather than against each other.
 
-For each comparison, we have three quantities from the model: the population proportion
-with risk factor combination :math:`\lambda`, the predicted prevalence for that combination
-(:math:`p_{\text{prev},\lambda}`), and the predicted prevalence for the baseline
-(:math:`p_{\text{prev},0}`). Together these determine the row total :math:`n_1` (people
-with risk factor :math:`\lambda`) and the column total :math:`n_2` (people with asthma).
+For each comparison, let :math:`N` be the total population across all risk factor
+combinations (a hypothetical size, e.g. 100,000 — the odds ratio is scale-invariant).
+The row and column totals are then:
 
-Given :math:`n_1`, :math:`n_2`, :math:`n`, and the odds ratio :math:`\omega_\lambda`, we
+.. math::
+
+    n_1 &= p(\lambda) \cdot N \\
+    n_0 &= p(0) \cdot N \\
+    n   &= n_1 + n_0 \\
+    n_2 &= p_{\text{prev},\lambda} \cdot n_1 + p_{\text{prev},0} \cdot n_0
+
+where :math:`n_1` is the number of people with risk factor :math:`\lambda`, :math:`n_0` is
+the number with no risk factors, :math:`n` is the grand total of the 2×2 table, and
+:math:`n_2` is the total number with asthma across both groups.
+
+Given :math:`n_1`, :math:`n_0`, :math:`n_2`, :math:`n`, and the odds ratio :math:`\omega_\lambda`, we
 solve for the cell count :math:`a_0` (people with both risk factor :math:`\lambda` and
 asthma) such that the implied odds ratio of the table matches :math:`\omega_\lambda`. This
 is a non-trivial solve because all four cells are simultaneously constrained by the marginal
 totals and the odds ratio — we use the method from Di Pietrantonj (2006)
 :cite:`dipietrantonj2006`. The remaining cells follow directly from :math:`a_0` and the
-marginal totals. See :doc:`conv_2x2 <../dev/api/data_generation/leap.data_generation.utils>`
-for the Python implementation.
+marginal totals.
 
-Current Contingency Table: Reassessment
+Existing Diagnoses: Reassessment at t=1
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-According to our model, an asthma diagnosis is not static; a patient may be diagnosed with asthma
-and then later be reassessed as not having asthma. We would like to compute the updated contingency
-table:
+In our model, an asthma diagnosis is not permanent — a person may be reassessed and lose
+their diagnosis from one year to the next. This table tracks what happens at :math:`t=1` to
+the :math:`a_0 + c_0` people who already had asthma at :math:`t=0`. Let :math:`\rho` be
+the probability of retaining a diagnosis. Then each cell is simply the corresponding
+baseline cell scaled by :math:`\rho` (retained) or :math:`1 - \rho` (lost):
 
 .. raw:: html
 
@@ -640,99 +654,44 @@ table:
         <thead>
         <tr>
             <th></th>
-            <th>asthma, outcome +</th>
-            <th>asthma, outcome -</th>
+            <th>asthma +</th>
+            <th>asthma -</th>
             <th></th>
         </tr>
         </thead>
         <tbody>
         <tr>
-            <td>risk factor <code class="notranslate">λ</code>, outcome +</td>
-            <td><code class="notranslate">a1_ra</code></td>
-            <td><code class="notranslate">b1_ra</code></td>
-            <td><code class="notranslate">n1</code></td>
+            <td>risk factor &lambda; +</td>
+            <td><code class="notranslate">a1_existing</code></td>
+            <td><code class="notranslate">b1_existing</code></td>
+            <td><code class="notranslate">a0</code></td>
         </tr>
         <tr>
-            <td>risk factor <code class="notranslate">λ</code>, outcome -</td>
-            <td><code class="notranslate">c1_ra</code></td>
-            <td><code class="notranslate">d1_ra</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code class="notranslate">n2</code></td>
-            <td></td>
-            <td><code class="notranslate">n</code></td>
+            <td>risk factor &lambda; -</td>
+            <td><code class="notranslate">c1_existing</code></td>
+            <td><code class="notranslate">d1_existing</code></td>
+            <td><code class="notranslate">c0</code></td>
         </tr>
         </tbody>
     </table>
-
-To calculate the updated contingency table, we have:
 
 .. math::
-    a_{1, \text{ra}} &= a_0 \cdot \rho \\
-    b_{1, \text{ra}} &= a_0 \cdot (1 - \rho) \\
-    c_{1, \text{ra}} &= c_0 \cdot \rho \\
-    d_{1, \text{ra}} &= c_0 \cdot (1 - \rho)
+    a_{1, \text{existing}} &= a_0 \cdot \rho \\
+    b_{1, \text{existing}} &= a_0 \cdot (1 - \rho) \\
+    c_{1, \text{existing}} &= c_0 \cdot \rho \\
+    d_{1, \text{existing}} &= c_0 \cdot (1 - \rho)
 
-where:
-
-.. raw:: html
-
-    <table class="table">
-        <thead>
-        <tr>
-            <th></th>
-            <th>Risk Factors</th>
-            <th>t=0</th>
-            <th>t=1</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td><code class="notranslate">a1_ra</code></td>
-            <td><code class="notranslate">λ</code></td>
-            <td>has asthma diagnosis</td>
-            <td>reassessed: has asthma diagnosis</td>
-        </tr>
-        <tr>
-            <td><code class="notranslate">b1_ra</code></td>
-            <td><code class="notranslate">λ</code></td>
-            <td>has asthma diagnosis</td>
-            <td>reassessed: no asthma diagnosis</td>
-        </tr>
-        <tr>
-            <td><code class="notranslate">c1_ra</code></td>
-            <td>None</td>
-            <td>has asthma diagnosis</td>
-            <td>reassessed: has asthma diagnosis</td>
-        </tr>
-        <tr>
-            <td><code class="notranslate">d1_ra</code></td>
-            <td>None</td>
-            <td>has asthma diagnosis</td>
-            <td>reassessed: no asthma diagnosis</td>
-        </tr>
-        </tbody>
-    </table>
-
-* :math:`a_{1, \text{ra}}` is the proportion of the population with risk factor combination :math:`\lambda`
-  who had an asthma diagnosis at :math:`t=0` and still have it at :math:`t=1`
-* :math:`b_{1, \text{ra}}` is the proportion of the population with risk factor combination :math:`\lambda`
-  who had an asthma diagnosis at :math:`t=0` but no longer have it at :math:`t=1`
-* :math:`c_{1, \text{ra}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
-  who had an asthma diagnosis at :math:`t=0` and still have it at :math:`t=1`
-* :math:`d_{1, \text{ra}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
-  who had an asthma diagnosis at :math:`t=0` but no longer have it at :math:`t=1`
-* :math:`\rho` is the probability that a person would be reassessed as having an asthma diagnosis
-  at :math:`t=1` given that they had an asthma diagnosis at :math:`t=0`
+where :math:`\rho` is the probability of retaining an asthma diagnosis from one year to the
+next, applied equally regardless of risk factor status.
 
 
-Current Contingency Table: New Diagnosis
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+New Diagnoses at t=1
+^^^^^^^^^^^^^^^^^^^^^
 
-For the reassessment table, we considered only the patients who were diagnosed with asthma.
-We will now consider those who were not diagnosed with asthma:
+This table tracks what happens at :math:`t=1` to the :math:`b_0 + d_0` people who were
+asthma-free at :math:`t=0`. Each person may receive a new diagnosis based on their
+incidence probability: :math:`p_{\text{inc},\lambda}` for those with risk factor
+:math:`\lambda`, and :math:`p_{\text{inc},0}` for those with no risk factors.
 
 .. raw:: html
 
@@ -740,111 +699,40 @@ We will now consider those who were not diagnosed with asthma:
         <thead>
         <tr>
             <th></th>
-            <th>asthma, outcome +</th>
-            <th>asthma, outcome -</th>
+            <th>asthma +</th>
+            <th>asthma -</th>
             <th></th>
         </tr>
         </thead>
         <tbody>
         <tr>
-            <td>risk factor <code class="notranslate">λ</code>, outcome +</td>
-            <td><code class="notranslate">a1_dx</code></td>
-            <td><code class="notranslate">b1_dx</code></td>
-            <td><code class="notranslate">n1</code></td>
+            <td>risk factor &lambda; +</td>
+            <td><code class="notranslate">a1_new</code></td>
+            <td><code class="notranslate">b1_new</code></td>
+            <td><code class="notranslate">b0</code></td>
         </tr>
         <tr>
-            <td>risk factor <code class="notranslate">λ</code>, outcome -</td>
-            <td><code class="notranslate">c1_dx</code></td>
-            <td><code class="notranslate">d1_dx</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code class="notranslate">n2</code></td>
-            <td></td>
-            <td><code class="notranslate">n</code></td>
+            <td>risk factor &lambda; -</td>
+            <td><code class="notranslate">c1_new</code></td>
+            <td><code class="notranslate">d1_new</code></td>
+            <td><code class="notranslate">d0</code></td>
         </tr>
         </tbody>
     </table>
-
-
-To calculate the updated contingency table, we have:
 
 .. math::
-    a_{1, \text{dx}} &= b_0 \cdot \zeta_{\text{inc}, \lambda}(t=1) \\
-    b_{1, \text{dx}} &= b_0 \cdot (1 - \zeta_{\text{inc}, \lambda}(t=1)) \\
-    c_{1, \text{dx}} &= d_0 \cdot \zeta_{\text{inc}, 0}(t=1) \\
-    d_{1, \text{dx}} &= d_0 \cdot (1 - \zeta_{\text{inc}, 0}(t=1))
-
-where:
-
-.. raw:: html
-
-    <table class="table">
-        <thead>
-        <tr>
-            <th></th>
-            <th>Risk Factors</th>
-            <th>t=0</th>
-            <th colspan="3">t=1</th>
-        </tr>
-        <tr>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th>incidence</th>
-            <th>net</th>
-        </thead>
-        <tbody>
-        <tr>
-            <td><code class="notranslate">a1_dx</code></td>
-            <td><code class="notranslate">λ</code></td>
-            <td>no asthma diagnosis</td>
-            <td>new asthma diagnosis</td>
-            <td>asthma</td>
-        </tr>
-        <tr>
-            <td><code class="notranslate">b1_dx</code></td>
-            <td><code class="notranslate">λ</code></td>
-            <td>no asthma diagnosis</td>
-            <td>no new asthma diagnosis</td>
-            <td>no asthma</td>
-        </tr>
-        <tr>
-            <td><code class="notranslate">c1_dx</code></td>
-            <td>None</td>
-            <td>no asthma diagnosis</td>
-            <td>new asthma diagnosis</td>
-            <td>asthma</td>
-        </tr>
-        <tr>
-            <td><code class="notranslate">d1_dx</code></td>
-            <td>None</td>
-            <td>no asthma diagnosis</td>
-            <td>no new asthma diagnosis</td>
-            <td>no asthma</td>
-        </tr>
-        </tbody>
-    </table>
-
-* :math:`a_{1, \text{dx}}` is the proportion of the population with risk factor combination :math:`\lambda`
-  who didn't have an asthma diagnosis at :math:`t=0` and were diagnosed at :math:`t=1`
-  :math:`\rightarrow` have asthma at :math:`t=1`
-* :math:`b_{1, \text{dx}}` is the proportion of the population with risk factor combination :math:`\lambda`
-  who didn't have an asthma diagnosis at :math:`t=0` and were not diagnosed with asthma at :math:`t=1`,
-  :math:`\rightarrow` don't have asthma at :math:`t=1`
-* :math:`c_{1, \text{dx}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
-  who didn't have an asthma diagnosis at :math:`t=0` and were diagnosed at :math:`t=1`
-  :math:`\rightarrow` have asthma at :math:`t=1`
-* :math:`d_{1, \text{dx}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
-  who didn't have an asthma diagnosis at :math:`t=0` and were not diagnosed with asthma at
-  :math:`t=1`, :math:`\rightarrow` don't have asthma at :math:`t=1`
+    a_{1, \text{new}} &= b_0 \cdot p_{\text{inc},\lambda} \\
+    b_{1, \text{new}} &= b_0 \cdot (1 - p_{\text{inc},\lambda}) \\
+    c_{1, \text{new}} &= d_0 \cdot p_{\text{inc},0} \\
+    d_{1, \text{new}} &= d_0 \cdot (1 - p_{\text{inc},0})
 
 
-Current Contingency Table
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Combined Contingency Table: Existing and New Diagnoses (t=1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Finally, we can compute the contingency table for the current year, :math:`t=1`:
+The combined table at :math:`t=1` sums the reassessment and new diagnosis components for
+each cell, giving the full joint distribution of risk factor status and asthma diagnosis
+at the end of the year:
 
 .. raw:: html
 
@@ -852,29 +740,23 @@ Finally, we can compute the contingency table for the current year, :math:`t=1`:
         <thead>
         <tr>
             <th></th>
-            <th>asthma, outcome +</th>
-            <th>asthma, outcome -</th>
+            <th>asthma +</th>
+            <th>asthma -</th>
             <th></th>
         </tr>
         </thead>
         <tbody>
         <tr>
-            <td>risk factor <code class="notranslate">λ</code>, outcome +</td>
+            <td>risk factor &lambda; +</td>
             <td><code class="notranslate">a1</code></td>
             <td><code class="notranslate">b1</code></td>
             <td><code class="notranslate">n1</code></td>
         </tr>
         <tr>
-            <td>risk factor <code class="notranslate">λ</code>, outcome -</td>
+            <td>risk factor &lambda; -</td>
             <td><code class="notranslate">c1</code></td>
             <td><code class="notranslate">d1</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code class="notranslate">n2</code></td>
-            <td></td>
-            <td><code class="notranslate">n</code></td>
+            <td><code class="notranslate">n0</code></td>
         </tr>
         </tbody>
     </table>
@@ -883,26 +765,30 @@ Finally, we can compute the contingency table for the current year, :math:`t=1`:
 where:
 
 .. math::
-    a_1 &= a_{1, \text{ra}} + a_{1, \text{dx}} \\
-    b_1 &= b_{1, \text{ra}} + b_{1, \text{dx}} \\
-    c_1 &= c_{1, \text{ra}} + c_{1, \text{dx}} \\
-    d_1 &= d_{1, \text{ra}} + d_{1, \text{dx}}
+    a_1 &= a_{1, \text{existing}} + a_{1, \text{new}} \\
+    b_1 &= b_{1, \text{existing}} + b_{1, \text{new}} \\
+    c_1 &= c_{1, \text{existing}} + c_{1, \text{new}} \\
+    d_1 &= d_{1, \text{existing}} + d_{1, \text{new}}
 
 From these values, we can compute the odds ratio:
 
 .. math::
-    \Omega = \dfrac{a_1 \cdot d_1}{b_1 \cdot c_1}
+    \hat{\omega} = \dfrac{a_1 \cdot d_1}{b_1 \cdot c_1}
 
 
 Optimization
 ^^^^^^^^^^^^^^^^^
 
-We want to find the beta parameters that minimize the difference between the predicted odds
-ratio :math:`\Omega` and the observed odds ratio :math:`\omega_{\lambda}`.
+We want to find the age-dependent slope values (:math:`\beta_{\lambda, \text{age}}`) 
+that minimize the mean absolute difference between :math:`\log(\hat{\omega})` 
+and :math:`\log(\omega_{\lambda})` — the fixed, age-independent log-ORs sourced from 
+external studies — averaged across all age groups and all 7 non-baseline risk factor combinations.
 
-.. math::
-    \sum_{i=1}^{N}\sum_{\lambda=1}^{n}
-      \dfrac{\left| \log(\Omega^{(i)}) - \log(\omega_{\lambda}^{(i)}) \right|}{N}
+Once optimised, these slopes (:math:`\beta_{\lambda, \text{age}}`) are used
+to compute :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
+each (age, sex, year) stratum. BFGS then uses those stratum-specific log-ORs to solve for
+the calibration term :math:`\alpha` per stratum, which is stored in
+``asthma_occurrence_correction.csv`` as described in the Processed Data section below.
 
 
 Processed Data
@@ -946,9 +832,9 @@ correction for each agent at each year of life.
         <td><code class="notranslate">correction</code></td>
         <td><code class="notranslate">float</code></td>
         <td>
-          The calibration term :math:`\alpha` for this stratum. Subtracted from the log-odds
+          The calibration term \(\alpha\) for this stratum. Subtracted from the log-odds
           in the simulation to ensure the population-weighted average probability matches
-          :math:`\bar{p}_{\text{prev}}` or :math:`\bar{p}_{\text{inc}}` from Model 1.
+          \(\bar{p}_{\text{prev}}\) or \(\bar{p}_{\text{inc}}\) from Model 1.
         </td>
       </tr>
       <tr>
