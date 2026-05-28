@@ -539,17 +539,30 @@ asthma-free agents are included because incidence counts new diagnoses only.
 
 .. _optimizing-beta-parameters:
 
-Optimizing the Initial Beta Parameters for the Incidence Equation
+Calibrating Age-Dependent Odds Ratios for Prevalence and Incidence
 ------------------------------------------------------------------
 
-For the incidence equation, we need to optimize two of the initial beta parameters:
+Both :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` are
+age-dependent — the strength of association with asthma changes as a child ages:
 
-* :math:`\beta_{\text{fhx}_\text{age}}`
-* :math:`\beta_{\text{abx}_\text{age}}`
+* **Family history**: the OR is aplied from age 3, with the age-dependent slope applying
+  up to age 5, after which it plateaus.
+* **Antibiotic exposure**: the OR is only active for agents aged ≤ 7 who received
+  antibiotics in infancy; it is zero otherwise.
 
-This optimization uses contingency tables — 2×2 tables that display the joint frequency
-distribution of two categorical variables. See :doc:`model-contingency-tables` for an
-introduction to contingency tables and worked examples.
+These same age-dependent ORs feed into both the prevalence and incidence formulas. In the
+prevalence formula, each OR is evaluated at the agent's age at entry. In the incidence
+formula, the ORs are re-evaluated each year as the agent ages, changing until the agent
+ages out of the relevant window.
+
+The age-dependent slopes are not fixed by external studies and must be estimated from data.
+They are calibrated in the incidence context — where agents pass through multiple ages
+year by year, making the slope estimable from the change in OR across age groups — and the
+resulting slopes are then used in both formulas. This is done by finding the slope values
+that minimise the difference between the model-predicted odds ratios and the odds ratios
+observed in the literature across age groups, using contingency tables.
+See :doc:`model-contingency-tables` for an introduction to contingency tables and worked
+examples.
 
 In our model, we want to compute the contingency table for the risk factor combinations
 :math:`\lambda` and the asthma diagnosis.
@@ -564,20 +577,20 @@ Past Contingency Table
         <thead>
         <tr>
             <th></th>
-            <th>variable 2, outcome +</th>
-            <th>variable 2, outcome -</th>
+            <th>asthma +</th>
+            <th>asthma -</th>
             <th></th>
         </tr>
         </thead>
         <tbody>
         <tr>
-            <td>variable 1, outcome +</td>
+            <td>risk factor &lambda; +</td>
             <td><code class="notranslate">a0</code></td>
             <td><code class="notranslate">b0</code></td>
             <td><code class="notranslate">n1</code></td>
         </tr>
         <tr>
-            <td>variable 1, outcome -</td>
+            <td>risk factor &lambda; -</td>
             <td><code class="notranslate">c0</code></td>
             <td><code class="notranslate">d0</code></td>
             <td></td>
@@ -592,41 +605,27 @@ Past Contingency Table
     </table>
 
 
-We want to calculate :math:`a_0`, :math:`b_0`, :math:`c_0`, and :math:`d_0` using :math:`n_1`,
-:math:`n_2`, :math:`n`, and :math:`\omega_{\lambda}`. Now, we have the probabilities of each of the
-risk factor combinations, :math:`p(\lambda)`, but for the contingency table, we only want to
-consider one risk factor combination at a time. To do this, we compute the conditional probability:
+Since the table is 2×2, we compare one risk factor combination at a time against the
+no-risk-factor baseline (:math:`\lambda = 0`, i.e. no family history and no antibiotic
+exposure). This produces 7 separate tables — one for each non-baseline combination. The
+non-binary nature of antibiotic dose is handled implicitly through the :math:`\lambda`
+indexing: dose levels 1, 2, and 3 each appear as distinct combinations and are each
+compared independently against the baseline rather than against each other.
 
-.. math::
+For each comparison, we have three quantities from the model: the population proportion
+with risk factor combination :math:`\lambda`, the predicted prevalence for that combination
+(:math:`p_{\text{prev},\lambda}`), and the predicted prevalence for the baseline
+(:math:`p_{\text{prev},0}`). Together these determine the row total :math:`n_1` (people
+with risk factor :math:`\lambda`) and the column total :math:`n_2` (people with asthma).
 
-    p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) = 
-      \dfrac{p(\Lambda = \lambda)}{p(\Lambda = \lambda) + p(\Lambda = 0)}
-
-To obtain :math:`n_1`, the number of people with risk factor combination :math:`\lambda` with or
-without an asthma diagnosis, we multiply the conditional probability by the total population
-:math:`n`:
-
-.. math::
-    n_1 = p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) \cdot n
-
-To obtain :math:`n_2`, the number of people diagnosed with asthma with or without risk factor
-combination :math:`\lambda`:
-
-.. math::
-    n_2 = (1 - p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\})) \cdot \zeta_{\text{prev}, 0}(t=0) \cdot n +
-      p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) \cdot \zeta_{\text{prev}, \lambda}(t=0) \cdot n
-
-From this, we can calculate the values for the contingency table:
-
-.. math::
-
-    b_0 &= n_1 - a_0 \\
-    c_0 &= n_2 - a_0 \\
-    d_0 &= n - n_1 - n_2 - a_0
-
-To obtain :math:`a_0`, we follow the methods described in the paper :cite:`dipietrantonj2006`.
-See :doc:`conv_2x2 <../dev/api/data_generation/leap.data_generation.utils>` for the Python
-implementation of this method.
+Given :math:`n_1`, :math:`n_2`, :math:`n`, and the odds ratio :math:`\omega_\lambda`, we
+solve for the cell count :math:`a_0` (people with both risk factor :math:`\lambda` and
+asthma) such that the implied odds ratio of the table matches :math:`\omega_\lambda`. This
+is a non-trivial solve because all four cells are simultaneously constrained by the marginal
+totals and the odds ratio — we use the method from Di Pietrantonj (2006)
+:cite:`dipietrantonj2006`. The remaining cells follow directly from :math:`a_0` and the
+marginal totals. See :doc:`conv_2x2 <../dev/api/data_generation/leap.data_generation.utils>`
+for the Python implementation.
 
 Current Contingency Table: Reassessment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
