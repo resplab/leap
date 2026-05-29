@@ -3,6 +3,7 @@ import os
 import pathlib
 import datetime as dt
 import itertools
+import plotly.express as px
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from leap.utils import get_data_path, get_time_delta_tag, date_range, TimeDelta
@@ -582,6 +583,77 @@ def generate_initial_population_data(time_delta: TimeDelta):
         os.makedirs(os.path.dirname(file_path))
     logger.info(f"Saving data to {file_path}")
     initial_population.to_csv(file_path, index=False)
+
+
+def plot(
+    df: pd.DataFrame,
+    y: str,
+    title: str = "",
+    file_path: pathlib.Path | None = None,
+    width: int = 2000,
+    height: int = 1500
+):
+    """Plot the incidence or prevalence of asthma.
+    
+    Args:
+        df: A dataframe containing either incidence or prevalence data. Must have columns:
+
+            * ``timepoint (dt.datetime)``: The given timepoint.
+            * ``province (str)``: The 2-letter province ID, e.g. ``BC``.
+            * ``projection_scenario (str)``: The projection scenario, one of:
+                * ``past``: past data from StatCan, up to the most recent census date (2021-01-01)
+                * ``LG``: low-growth projection
+                * ``HG``: high-growth projection
+                * ``M1``: medium-growth 1 projection
+                * ``M2``: medium-growth 2 projection
+                * ``M3``: medium-growth 3 projection
+                * ``M4``: medium-growth 4 projection
+                * ``M5``: medium-growth 5 projection
+                * ``M6``: medium-growth 6 projection
+                * ``FA``: fast-aging projection
+                * ``SA``: slow-aging projection
+
+        y: The name of the column in the dataframe which will be plotted as the ``y`` data.
+        title: The title of the plot.
+        file_path: The path to save the plot to.
+        width: The width of the plot.
+        height: The height of the plot.
+    """
+
+    fig = px.line(
+        df.loc[df["province"].isin(["BC", "CA"])].dropna(),
+        x="timepoint",
+        y=y,
+        render_mode="svg",
+        color="projection_scenario",
+        markers=True,
+        facet_col="province",
+        facet_row="projection_scenario",
+        facet_row_spacing=0.01,  # Shrink vertical gap to 1%
+        facet_col_spacing=0.01,   # Shrink horizontal gap to 1%
+        title=title
+    )
+    fig.update_yaxes(matches=None)
+    
+    fig.update_layout(
+        font=dict(size=30),
+        title=dict(font=dict(size=50)),
+        showlegend=False,
+        width=width,
+        height=height,
+        autosize=False,
+        margin=dict(l=120, r=220, t=120, b=120)
+    )
+
+    fig.for_each_annotation(
+        lambda annotation: annotation.update(
+            text=annotation.text.split("=")[-1],
+            font=dict(size=30),
+            textangle=0,
+        )
+    )
+
+    fig.write_image(str(file_path), scale=2, width=width, height=height)
 
 
 if __name__ == "__main__":
