@@ -549,7 +549,7 @@ def generate_birth_estimate_data(time_delta: TimeDelta):
     """
     past_population_data = load_past_births_population_data(time_delta)
     min_timepoint = past_population_data["timepoint"].max() + time_delta
-    projected_population_data = load_projected_births_population_data(min_timepoint)
+    projected_population_data = load_projected_births_population_data(time_delta, min_timepoint)
     birth_estimate = pd.concat([past_population_data, projected_population_data], axis=0)
 
     # Save the birth estimate data to a CSV file
