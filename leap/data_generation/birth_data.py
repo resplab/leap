@@ -4,8 +4,6 @@ import pathlib
 import datetime as dt
 import itertools
 import plotly.express as px
-import statsmodels.api as sm
-import statsmodels.formula.api as smf
 from leap.utils import get_data_path, get_time_delta_tag, date_range, TimeDelta
 from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group, get_parser
 from leap.logger import get_logger
@@ -50,19 +48,18 @@ def filter_age_group(age_group: str) -> bool:
         return True
     else:
         return not any(word in age_group for word in FILTER_WORDS)
-    
+
+
 def interpolate(
     data: pd.DataFrame,
     col_pred: str,
-    formula: str,
     time_delta: TimeDelta
 ) -> pd.DataFrame:
-    """Interpolate the values of a column for missing timepoints using a GLM.
+    """Interpolate the values of a column for missing timepoints.
     
     Args:
         data: The data to interpolate. Must contain a ``"timepoint"`` column.
         col_pred: The name of the column to predict.
-        formula: The formula to use for the GLM, e.g. "timepoint + age".
         time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
 
     Returns:
@@ -82,20 +79,10 @@ def interpolate(
         columns=["timepoint"]
     )
 
-    data["timepoint"] = data["timepoint"].apply(lambda x: (x - initial_timepoint).total_seconds())
-    df_pred["timepoint"] = df_pred["timepoint"].apply(lambda x: (x - initial_timepoint).total_seconds())
-
-    formula = f"{col_pred} ~ {formula}"
-    model = smf.glm(formula=formula, data=data, family=sm.families.Poisson(link=sm.families.links.Log()))
-    if data[col_pred].nunique() == 1:
-        df_pred[f"{col_pred}_pred"] = data[col_pred].iloc[0]
-    else:
-        results = model.fit(maxiter=100)
-        df_pred[f"{col_pred}_pred"] = results.predict(df_pred, which="mean", transform=True)
-    
-    df_pred["timepoint"] = df_pred["timepoint"].apply(lambda x: initial_timepoint + dt.timedelta(seconds=x))
-    data["timepoint"] = data["timepoint"].apply(lambda x: initial_timepoint + dt.timedelta(seconds=x))
     df = pd.merge(df_pred, data, on=["timepoint"], how="left").sort_values(["timepoint"])
+    df.set_index("timepoint", inplace=True)
+    df[col_pred] = df[col_pred].interpolate(method="time")
+    df.reset_index(drop=False, inplace=True)
     for _, row in data.iterrows():
         timepoint = row["timepoint"]
         for col in [x for x in data.columns if x not in ["timepoint", col_pred]]:
@@ -104,13 +91,8 @@ def interpolate(
                 (df["timepoint"] < timepoint + TIME_DELTA_OD.to_dateoffset()), 
                 col
             ] = row[col]
-        df.loc[(df["timepoint"] == timepoint), f"{col_pred}_pred"] = row[col_pred]
-    df.drop(columns=[col_pred], inplace=True)
-    df.rename(columns={f"{col_pred}_pred": col_pred}, inplace=True)
 
     return df
-    
-
 
 
 def load_past_births_population_data(
@@ -180,7 +162,6 @@ def load_past_births_population_data(
     df = grouped_df.apply(lambda x: interpolate(
         data=x.reset_index(drop=True),
         col_pred="N",
-        formula="timepoint",
         time_delta=time_delta
     )).reset_index(drop=True)
     df.sort_values(["province", "projection_scenario", "timepoint"], inplace=True)
@@ -290,7 +271,6 @@ def load_projected_births_population_data(
     df = grouped_df.apply(lambda x: interpolate(
         data=x.reset_index(drop=True),
         col_pred="N",
-        formula="timepoint",
         time_delta=time_delta
     )).reset_index(drop=True)
     df.sort_values(["province", "timepoint", "projection_scenario"], inplace=True)
@@ -404,7 +384,6 @@ def load_past_initial_population_data(
     df = grouped_df.apply(lambda x: interpolate(
         data=x.reset_index(drop=True),
         col_pred="n_age",
-        formula="timepoint",
         time_delta=time_delta
     )).reset_index(drop=True)
 
@@ -526,7 +505,6 @@ def load_projected_initial_population_data(
     df = grouped_df.apply(lambda x: interpolate(
         data=x.reset_index(drop=True),
         col_pred="n_age",
-        formula="timepoint",
         time_delta=time_delta
     )).reset_index(drop=True)
 
