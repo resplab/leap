@@ -86,7 +86,7 @@ def interpolate(
     df_pred["timepoint"] = df_pred["timepoint"].apply(lambda x: (x - initial_timepoint).total_seconds())
 
     formula = f"{col_pred} ~ {formula}"
-    model = smf.glm(formula=formula, data=data, family=sm.families.Gaussian())
+    model = smf.glm(formula=formula, data=data, family=sm.families.Poisson(link=sm.families.links.Log()))
     if data[col_pred].nunique() == 1:
         df_pred[f"{col_pred}_pred"] = data[col_pred].iloc[0]
     else:
