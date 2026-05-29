@@ -561,6 +561,15 @@ def generate_birth_estimate_data(time_delta: TimeDelta):
     logger.info(f"Saving data to {file_path}")
     birth_estimate.to_csv(file_path, index=False)
 
+    plot(
+        df=birth_estimate,
+        y="N",
+        title="Birth Estimate",
+        file_path=get_data_path(f"data_generation/figures/{time_delta_tag}/birth_estimate.png"),
+        height=6000,
+        width=2500
+    )
+
 
 def generate_initial_population_data(time_delta: TimeDelta):
     """Create/update the ``initial_pop_distribution_prop.csv`` file.
