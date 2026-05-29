@@ -189,12 +189,14 @@ def load_past_births_population_data(
 
 
 def load_projected_births_population_data(
+    time_delta: TimeDelta,
     min_timepoint: dt.datetime,
     max_timepoint: dt.datetime = MAX_TIMEPOINT
 ) -> pd.DataFrame:
     """Load the projected births data from the CSV file from ``StatCan``.
 
     Args:
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
         min_timepoint: The starting timepoint for the projected data.
         max_timepoint: The ending timepoint for the projected data.
 
