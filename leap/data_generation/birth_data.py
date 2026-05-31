@@ -562,11 +562,12 @@ def generate_birth_estimate_data(time_delta: TimeDelta):
     )
 
 
-def generate_initial_population_data(time_delta: TimeDelta):
+def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = True):
     """Create/update the ``initial_pop_distribution_prop.csv`` file.
     
     Args:
          time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
+         draw_plot: If ``True``, generate a plot for validation.
     """
     past_population_data = load_past_initial_population_data(time_delta=time_delta)
     min_timepoint = past_population_data["timepoint"].max()
@@ -583,6 +584,17 @@ def generate_initial_population_data(time_delta: TimeDelta):
         os.makedirs(os.path.dirname(file_path))
     logger.info(f"Saving data to {file_path}")
     initial_population.to_csv(file_path, index=False)
+
+    if draw_plot:
+        plot(
+            df=initial_population.loc[initial_population["age"].isin([0, 10, 20, 40, 60, 80, 100])],
+            y="n_age",
+            color="age",
+            title="Initial Population",
+            file_path=get_data_path(f"data_generation/figures/{time_delta_tag}/initial_population.png"),
+            height=6000,
+            width=2500
+        )
 
 
 def plot(
