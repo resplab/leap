@@ -526,7 +526,8 @@ def load_projected_initial_population_data(
     df = pd.merge(df, df_birth, on=["province", "timepoint", "projection_scenario"], how="left")
     df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
 
-    df = df.sort_values(["province", "timepoint", "age"]).reset_index(drop=True)
+    df = df.sort_values(["province", "projection_scenario", "age", "timepoint"]).reset_index(drop=True)
+
     return df
 
 
