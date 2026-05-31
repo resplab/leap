@@ -554,6 +554,7 @@ def generate_birth_estimate_data(time_delta: TimeDelta):
     plot(
         df=birth_estimate,
         y="N",
+        color="projection_scenario",
         title="Birth Estimate",
         file_path=get_data_path(f"data_generation/figures/{time_delta_tag}/birth_estimate.png"),
         height=6000,
@@ -587,6 +588,7 @@ def generate_initial_population_data(time_delta: TimeDelta):
 def plot(
     df: pd.DataFrame,
     y: str,
+    color: str,
     title: str = "",
     file_path: pathlib.Path | None = None,
     width: int = 2000,
@@ -613,6 +615,7 @@ def plot(
                 * ``SA``: slow-aging projection
 
         y: The name of the column in the dataframe which will be plotted as the ``y`` data.
+        color: The name of the column in the dataframe which will be used to color the data.
         title: The title of the plot.
         file_path: The path to save the plot to.
         width: The width of the plot.
@@ -624,7 +627,7 @@ def plot(
         x="timepoint",
         y=y,
         render_mode="svg",
-        color="projection_scenario",
+        color=color,
         markers=True,
         facet_col="province",
         facet_row="projection_scenario",
