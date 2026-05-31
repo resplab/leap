@@ -7,6 +7,7 @@ import plotly.express as px
 from leap.utils import get_data_path, get_time_delta_tag, date_range, TimeDelta
 from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group, get_parser
 from leap.logger import get_logger
+from typing import List
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
@@ -53,7 +54,8 @@ def filter_age_group(age_group: str) -> bool:
 def interpolate(
     data: pd.DataFrame,
     col_pred: str,
-    time_delta: TimeDelta
+    time_delta: TimeDelta,
+    columns_group: List[str]
 ) -> pd.DataFrame:
     """Interpolate the values of a column for missing timepoints.
     
@@ -68,29 +70,36 @@ def interpolate(
         timepoints between the minimum and maximum timepoints in the input data, with a step size of
         ``time_delta``.
     """
-
+        
     initial_timepoint = data["timepoint"].min()
     final_timepoint = data["timepoint"].max()
 
+    iter_values = [
+        list(date_range(start=initial_timepoint, stop=final_timepoint + TIME_DELTA_OD, step=time_delta))
+    ]
+    for col in columns_group:
+        iter_values += [data[col].unique()]
+
     df_pred = pd.DataFrame(
         data=list(itertools.product(
-            list(date_range(start=initial_timepoint, stop=final_timepoint + TIME_DELTA_OD, step=time_delta))
+            *iter_values
         )),
-        columns=["timepoint"]
+        columns=["timepoint"] + columns_group
     )
 
-    df = pd.merge(df_pred, data, on=["timepoint"], how="left").sort_values(["timepoint"])
+    df = pd.merge(
+        df_pred, data,
+        on=["timepoint"] + columns_group,
+        how="left"
+    ).sort_values(columns_group + ["timepoint"])
     df.set_index("timepoint", inplace=True)
-    df[col_pred] = df[col_pred].interpolate(method="time")
+    grouped_df = df[[col_pred] + columns_group].groupby(columns_group)
+    df[col_pred] = grouped_df.transform(lambda x: x.interpolate(method="time"))
     df.reset_index(drop=False, inplace=True)
-    for _, row in data.iterrows():
-        timepoint = row["timepoint"]
-        for col in [x for x in data.columns if x not in ["timepoint", col_pred]]:
-            df.loc[
-                (df["timepoint"] > timepoint) & 
-                (df["timepoint"] < timepoint + TIME_DELTA_OD.to_dateoffset()), 
-                col
-            ] = row[col]
+    df.sort_values(columns_group + ["timepoint"], inplace=True)
+    df = df.ffill(limit=(TIME_DELTA_OD // time_delta) - 1)
+    df.dropna(inplace=True)
+
 
     return df
 
@@ -158,12 +167,12 @@ def load_past_births_population_data(
     df["projection_scenario"] = ["past"] * df.shape[0]
 
     # Interpolate the birth estimates for the missing timepoints in the past data
-    grouped_df = df.groupby(["province", "projection_scenario"])
-    df = grouped_df.apply(lambda x: interpolate(
-        data=x.reset_index(drop=True),
+    df = interpolate(
+        data=df.reset_index(drop=True),
         col_pred="N",
-        time_delta=time_delta
-    )).reset_index(drop=True)
+        time_delta=time_delta,
+        columns_group=["province", "projection_scenario"]
+    ).reset_index(drop=True)
     df.sort_values(["province", "projection_scenario", "timepoint"], inplace=True)
 
     return df
@@ -267,13 +276,13 @@ def load_projected_births_population_data(
     df.rename(columns={"max_N": "N", "prop": "prop_male"}, inplace=True)
 
     # Interpolate the birth estimates for the missing timepoints in the past data
-    grouped_df = df.groupby(["province", "projection_scenario"])
-    df = grouped_df.apply(lambda x: interpolate(
-        data=x.reset_index(drop=True),
+    df = interpolate(
+        data=df.reset_index(drop=True),
         col_pred="N",
-        time_delta=time_delta
-    )).reset_index(drop=True)
-    df.sort_values(["province", "timepoint", "projection_scenario"], inplace=True)
+        time_delta=time_delta,
+        columns_group=["province", "projection_scenario"]
+    ).reset_index(drop=True)
+    df.sort_values(["province", "projection_scenario", "timepoint"], inplace=True)
 
     return df
 
@@ -380,12 +389,12 @@ def load_past_initial_population_data(
     df.drop(columns=["sex", "N"], inplace=True)
 
     # interpolate
-    grouped_df = df.groupby(["province", "age"])
-    df = grouped_df.apply(lambda x: interpolate(
-        data=x.reset_index(drop=True),
+    df = interpolate(
+        data=df.copy(),
         col_pred="n_age",
-        time_delta=time_delta
-    )).reset_index(drop=True)
+        time_delta=time_delta,
+        columns_group=["province", "age"]
+    ).reset_index(drop=True)
 
     # get the total number of births for a given time interval and province
     df_birth = df.loc[df["age"] == 0]
@@ -501,12 +510,12 @@ def load_projected_initial_population_data(
     df.drop(columns=["sex", "N"], inplace=True)
 
     # interpolate
-    grouped_df = df.groupby(["province", "age", "projection_scenario"])
-    df = grouped_df.apply(lambda x: interpolate(
-        data=x.reset_index(drop=True),
+    df = interpolate(
+        data=df.copy(),
         col_pred="n_age",
-        time_delta=time_delta
-    )).reset_index(drop=True)
+        time_delta=time_delta,
+        columns_group=["province", "projection_scenario", "age"]
+    ).reset_index(drop=True)
 
     # get the total number of births for a given timepoint, province, and projection scenario
     df_birth = df.loc[df["age"] == 0]
