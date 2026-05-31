@@ -531,11 +531,12 @@ def load_projected_initial_population_data(
     return df
 
 
-def generate_birth_estimate_data(time_delta: TimeDelta):
+def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
     """Create/update the ``birth_estimate.csv`` file.
     
     Args:
         time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
+        draw_plot: If ``True``, generate a plot for validation.
     """
     past_population_data = load_past_births_population_data(time_delta)
     min_timepoint = past_population_data["timepoint"].max() + time_delta
@@ -551,15 +552,16 @@ def generate_birth_estimate_data(time_delta: TimeDelta):
     logger.info(f"Saving data to {file_path}")
     birth_estimate.to_csv(file_path, index=False)
 
-    plot(
-        df=birth_estimate,
-        y="N",
-        color="projection_scenario",
-        title="Birth Estimate",
-        file_path=get_data_path(f"data_generation/figures/{time_delta_tag}/birth_estimate.png"),
-        height=6000,
-        width=2500
-    )
+    if draw_plot:
+        plot(
+            df=birth_estimate,
+            y="N",
+            color="projection_scenario",
+            title="Birth Estimate",
+            file_path=get_data_path(f"data_generation/figures/{time_delta_tag}/birth_estimate.png"),
+            height=6000,
+            width=2500
+        )
 
 
 def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = True):
