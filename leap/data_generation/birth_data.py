@@ -70,7 +70,10 @@ def interpolate(
         timepoints between the minimum and maximum timepoints in the input data, with a step size of
         ``time_delta``.
     """
-        
+    
+    if time_delta == TIME_DELTA_OD:
+        return data
+    
     initial_timepoint = data["timepoint"].min()
     final_timepoint = data["timepoint"].max()
 
