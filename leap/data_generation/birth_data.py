@@ -280,7 +280,7 @@ def load_projected_births_population_data(
 
     # Interpolate the birth estimates for the missing timepoints in the past data
     df = interpolate(
-        data=df.reset_index(drop=True),
+        data=df.copy().reset_index(drop=True),
         col_pred="N",
         time_delta=time_delta,
         columns_group=["province", "projection_scenario"]
