@@ -573,7 +573,7 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
     if not os.path.exists(os.path.dirname(file_path)):
         os.makedirs(os.path.dirname(file_path))
     logger.info(f"Saving data to {file_path}")
-    birth_estimate.to_csv(file_path, index=False, date_format="%Y-%m-%dT%H:%M:%SZ")
+    birth_estimate.to_csv(file_path, index=False, date_format="%Y-%m-%dT%H:%M:%S")
 
     if draw_plot:
         plot(
@@ -609,7 +609,7 @@ def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = Tr
     if not os.path.exists(os.path.dirname(file_path)):
         os.makedirs(os.path.dirname(file_path))
     logger.info(f"Saving data to {file_path}")
-    initial_population.to_csv(file_path, index=False, date_format="%Y-%m-%dT%H:%M:%SZ")
+    initial_population.to_csv(file_path, index=False, date_format="%Y-%m-%dT%H:%M:%S")
 
     if draw_plot:
         plot(
