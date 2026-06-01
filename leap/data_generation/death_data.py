@@ -505,7 +505,7 @@ def get_projected_death_data(
 
 
 
-def generate_death_data(to_csv: bool = True) -> None | pd.DataFrame:
+def generate_death_data(time_delta: TimeDelta, to_csv: bool = True) -> None | pd.DataFrame:
     """Generate the mortality data CSV."""
     past_life_table = load_past_death_data()
     df_calibration = load_projected_death_data()
@@ -523,4 +523,7 @@ def generate_death_data(to_csv: bool = True) -> None | pd.DataFrame:
 
 
 if __name__ == "__main__":
-    generate_death_data(to_csv=True)
+    parser = get_parser()
+    args = parser.parse_args()
+    time_delta = TimeDelta(iso_string=args.time_delta)
+    generate_death_data(time_delta=time_delta, to_csv=True)
