@@ -556,6 +556,9 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
     min_timepoint = past_population_data["timepoint"].max() + time_delta
     projected_population_data = load_projected_births_population_data(time_delta, min_timepoint)
     birth_estimate = pd.concat([past_population_data, projected_population_data], axis=0)
+    birth_estimate.sort_values(["province", "projection_scenario", "timepoint"], inplace=True)
+    birth_estimate = birth_estimate[["province", "projection_scenario", "timepoint", "N", "prop_male"]]
+    birth_estimate = birth_estimate.loc[birth_estimate["province"].isin(["BC", "CA"])]
 
     # Save the birth estimate data to a CSV file
     data_path = get_data_path(f"processed_data")
@@ -564,7 +567,7 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
     if not os.path.exists(os.path.dirname(file_path)):
         os.makedirs(os.path.dirname(file_path))
     logger.info(f"Saving data to {file_path}")
-    birth_estimate.to_csv(file_path, index=False)
+    birth_estimate.to_csv(file_path, index=False, date_format="%Y-%m-%dT%H:%M:%SZ")
 
     if draw_plot:
         plot(
