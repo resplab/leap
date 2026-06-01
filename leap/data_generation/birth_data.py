@@ -422,6 +422,9 @@ def load_past_initial_population_data(
     # add projection_scenario column, all values = "past"
     df["projection_scenario"] = ["past"] * df.shape[0]
     df = df.sort_values(["province", "timepoint", "age"]).reset_index(drop=True)
+    df = df[
+        ["province", "projection_scenario", "timepoint", "age", "n_age", "n_birth", "prop_male"]
+    ]
     return df
 
 
@@ -541,6 +544,9 @@ def load_projected_initial_population_data(
     df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
 
     df = df.sort_values(["province", "projection_scenario", "age", "timepoint"]).reset_index(drop=True)
+    df = df[
+        ["province", "projection_scenario", "timepoint", "age", "n_age", "n_birth", "prop_male"]
+    ]
 
     return df
 
@@ -594,6 +600,7 @@ def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = Tr
         time_delta=time_delta, min_timepoint=min_timepoint
     )
     initial_population = pd.concat([past_population_data, projected_population_data], axis=0)
+    initial_population = initial_population.loc[initial_population["province"].isin(["BC", "CA"])]
 
     # Save the initial population distribution data to a CSV file
     data_path = get_data_path(f"processed_data")
@@ -602,7 +609,7 @@ def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = Tr
     if not os.path.exists(os.path.dirname(file_path)):
         os.makedirs(os.path.dirname(file_path))
     logger.info(f"Saving data to {file_path}")
-    initial_population.to_csv(file_path, index=False)
+    initial_population.to_csv(file_path, index=False, date_format="%Y-%m-%dT%H:%M:%SZ")
 
     if draw_plot:
         plot(
