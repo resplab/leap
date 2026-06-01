@@ -15,8 +15,8 @@ logger = get_logger(__name__)
             dt.datetime(2022, 1, 1),
             "BC",
             "LG",
-            42200,
-            0.51185
+            42300,
+            0.51300
         ),
     ]
 )
@@ -80,7 +80,7 @@ def test_birth_get_initial_population_indices(
             2,
             dt.datetime(2024, 1, 1),
             1000,
-            982
+            993
         ),
     ]
 )

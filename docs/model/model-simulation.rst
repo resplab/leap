@@ -60,7 +60,7 @@ Unlike at subsequent timepoints, at the initial timepoint the simulation does no
 newborns — instead, it creates a cross-sectional population spanning all ages from ``0`` to
 ``max_age``, representing the full age distribution of the province at the initial timepoint, drawn
 from Statistics Canada population data
-(``./leap/processed_data/{time_delta_tag}birth/initial_pop_distribution_prop.csv``).
+(``./leap/processed_data/{time_delta_tag}birth/initial_population.csv``).
 
 The ``num_births_initial`` parameter sets the number of agents at age 0. The number of agents at
 every other age is determined by multiplying ``num_births_initial`` by that age group's ``prop``

@@ -651,8 +651,8 @@ def test_reassess_asthma_diagnosis(
             10,
             111,
             dt.datetime(2024, 1, 1),
-            999,
-            pd.Series([False] * 999, dtype=bool, name="immigrant")
+            1071,
+            pd.Series([False] * 1071, dtype=bool, name="immigrant")
         ),
         (
             dt.datetime(2024, 1, 1),
