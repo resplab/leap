@@ -207,7 +207,7 @@ class Birth:
         max_age: int,
         time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> pd.DataFrame:
-        """Load the data from ``initial_pop_distribution_prop.csv``.
+        """Load the data from ``initial_population.csv``.
         
         Args:
             min_timepoint: The year for the data to start at. Must be between ``2000-2065``.
@@ -236,7 +236,7 @@ class Birth:
         """
         time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_delta_tag}/birth/initial_pop_distribution_prop.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/birth/initial_population.csv"),
             parse_dates=["timepoint"]
         )
 

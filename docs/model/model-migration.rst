@@ -15,8 +15,8 @@ Population Data
 *****************
 
 We use the Statistics Canada population data that was generated and saved as:
-`processed_data/{time_delta_tag}/birth/initial_pop_distribution_prop.csv 
-<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/birth/initial_pop_distribution_prop.csv>`_.
+`processed_data/{time_delta_tag}/birth/initial_population.csv 
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/birth/initial_population.csv>`_.
 
 This table contains the number of people in a given age, sex, province,
 and projection scenario, along with the number of births for that timepoint. This data is the net number

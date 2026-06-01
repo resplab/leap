@@ -268,7 +268,7 @@ def load_population_data(
     """
 
     df = pd.read_csv(
-        get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
+        get_data_path("processed_data/birth/initial_population.csv")
     )
 
     # Filter the population data by province and starting year

@@ -105,7 +105,7 @@ def load_migration_data() -> pd.DataFrame:
     """
     logger.info("Loading initial population data from CSV file...")
     df_population = pd.read_csv(
-        get_data_path("processed_data/birth/initial_pop_distribution_prop.csv")
+        get_data_path("processed_data/birth/initial_population.csv")
     )
     logger.info("Loading mortality data from CSV file...")
     life_table = pd.read_csv(get_data_path("processed_data/life_table.csv"))

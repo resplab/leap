@@ -43,7 +43,7 @@ To run the data processing for the population data, with data points taken every
 This will update the following data files: 
 
 1. ``leap/processed_data/{time_delta_tag}/birth/birth_estimate.csv``
-2. ``leap/processed_data/{time_delta_tag}/birth/initial_pop_distribution_prop.csv``
+2. ``leap/processed_data/{time_delta_tag}/birth/initial_population.csv``
 
 The ``--time-delta`` argument must be in **ISO 8601** format:
 
@@ -113,7 +113,7 @@ The output of the data generation for the ``Birth`` module is two ``.csv`` files
 
 
 
-``initial_pop_distribution_prop.csv``
+``initial_population.csv``
 
 .. list-table::
    :widths: 25 25 50

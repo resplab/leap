@@ -588,7 +588,7 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
 
 
 def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = True):
-    """Create/update the ``initial_pop_distribution_prop.csv`` file.
+    """Create/update the ``initial_population.csv`` file.
     
     Args:
          time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
@@ -605,7 +605,7 @@ def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = Tr
     # Save the initial population distribution data to a CSV file
     data_path = get_data_path(f"processed_data")
     time_delta_tag = get_time_delta_tag(time_delta)
-    file_path = pathlib.Path(data_path, f"{time_delta_tag}/birth/initial_pop_distribution_prop.csv")
+    file_path = pathlib.Path(data_path, f"{time_delta_tag}/birth/initial_population.csv")
     if not os.path.exists(os.path.dirname(file_path)):
         os.makedirs(os.path.dirname(file_path))
     logger.info(f"Saving data to {file_path}")

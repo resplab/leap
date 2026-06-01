@@ -11,8 +11,8 @@ Population Data
 *****************
 
 We use the Statistics Canada population data that was generated and saved as:
-`processed_data/birth/initial_pop_distribution_prop.csv 
-<https://github.com/resplab/leap/blob/main/leap/processed_data/birth/initial_pop_distribution_prop.csv>`_.
+`processed_data/birth/initial_population.csv 
+<https://github.com/resplab/leap/blob/main/leap/processed_data/birth/initial_population.csv>`_.
 
 
 .. list-table::
