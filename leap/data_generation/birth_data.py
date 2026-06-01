@@ -99,6 +99,10 @@ def interpolate(
         ))
 
     df_pred = pd.concat(chunks, ignore_index=True)
+
+    data[col_pred] = data[col_pred].apply(
+        lambda x: x * time_delta.total_seconds() / TIME_DELTA_OD.total_seconds()
+    )
     df = pd.merge(
         df_pred, data,
         on=["timepoint"] + columns_group,
