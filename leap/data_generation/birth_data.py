@@ -425,7 +425,7 @@ def load_past_initial_population_data(
     df["projection_scenario"] = ["past"] * df.shape[0]
     df = df.sort_values(["province", "timepoint", "age"]).reset_index(drop=True)
     df = df[
-        ["province", "projection_scenario", "timepoint", "age", "n_age", "n_birth", "prop_male"]
+        ["province", "projection_scenario", "timepoint", "age", "n_age", "n_birth", "prop", "prop_male"]
     ]
     return df
 
@@ -547,7 +547,7 @@ def load_projected_initial_population_data(
 
     df = df.sort_values(["province", "projection_scenario", "age", "timepoint"]).reset_index(drop=True)
     df = df[
-        ["province", "projection_scenario", "timepoint", "age", "n_age", "n_birth", "prop_male"]
+        ["province", "projection_scenario", "timepoint", "age", "n_age", "n_birth", "prop", "prop_male"]
     ]
 
     return df
