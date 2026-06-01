@@ -73,23 +73,32 @@ def interpolate(
     
     if time_delta == TIME_DELTA_OD:
         return data
-    
-    initial_timepoint = data["timepoint"].min()
-    final_timepoint = data["timepoint"].max()
 
-    iter_values = [
-        list(date_range(start=initial_timepoint, stop=final_timepoint + TIME_DELTA_OD, step=time_delta))
-    ]
-    for col in columns_group:
-        iter_values += [data[col].unique()]
+    # Get the fixed values for non-province columns
+    fixed_cols = [col for col in columns_group if col != "province"]
+    fixed_values = [data[col].unique() for col in fixed_cols]
 
-    df_pred = pd.DataFrame(
-        data=list(itertools.product(
-            *iter_values
-        )),
-        columns=["timepoint"] + columns_group
-    )
+    # Build per-province timepoint ranges, then product with fixed cols
+    chunks = []
+    for province, df_group in data.groupby("province"):
+        initial_timepoint = df_group["timepoint"].min()
+        final_timepoint = df_group["timepoint"].max()
 
+        timepoints = list(date_range(
+            start=initial_timepoint,
+            stop=final_timepoint + TIME_DELTA_OD,
+            step=time_delta
+        ))
+
+        iter_values = [timepoints, [province]] + fixed_values
+        col_order = ["timepoint", "province"] + fixed_cols
+
+        chunks.append(pd.DataFrame(
+            data=list(itertools.product(*iter_values)),
+            columns=col_order
+        ))
+
+    df_pred = pd.concat(chunks, ignore_index=True)
     df = pd.merge(
         df_pred, data,
         on=["timepoint"] + columns_group,
@@ -100,9 +109,7 @@ def interpolate(
     df[col_pred] = grouped_df.transform(lambda x: x.interpolate(method="time"))
     df.reset_index(drop=False, inplace=True)
     df.sort_values(columns_group + ["timepoint"], inplace=True)
-    df = df.ffill(limit=(TIME_DELTA_OD // time_delta) - 1)
-    df.dropna(inplace=True)
-
+    df.ffill(inplace=True)
 
     return df
 
