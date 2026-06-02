@@ -6,7 +6,7 @@ from leap.utils import get_data_path
 from leap.logger import get_logger
 from leap.data_generation.utils import format_age_group, get_province_id, get_sex_id, get_parser, \
     interpolate
-from leap.utils import TimeDelta
+from leap.utils import TimeDelta, date_range, get_time_delta_tag
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
@@ -537,8 +537,9 @@ def generate_death_data(time_delta: TimeDelta, to_csv: bool = True) -> None | pd
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
 
     # save the data
+    time_delta_tag = get_time_delta_tag(time_delta)
     if to_csv:
-        file_path = get_data_path("processed_data/life_table.csv")
+        file_path = get_data_path(f"processed_data/{time_delta_tag}/life_table.csv")
         logger.info(f"Saving data to {file_path}")
         life_table.to_csv(file_path, index=False)
     else:
