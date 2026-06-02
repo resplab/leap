@@ -1,6 +1,8 @@
+import pathlib
 import pandas as pd
 import numpy as np
 import datetime as dt
+import plotly.express as px
 from scipy import optimize
 from leap.utils import get_data_path
 from leap.logger import get_logger
@@ -536,14 +538,92 @@ def generate_death_data(time_delta: TimeDelta, to_csv: bool = True) -> None | pd
     # projected_life_table_2 = get_projected_death_data(past_life_table, df_calibration)
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
 
-    # save the data
     time_delta_tag = get_time_delta_tag(time_delta)
+
+    if draw_plot:
+        plot(
+            life_table.loc[life_table["age"].isin([0, 10, 20, 40, 60, 80, 100])].copy(),
+            y="prob_death",
+            color="age",
+            title="Mortality Data",
+            file_path=get_data_path(f"data_generation/figures/{time_delta_tag}/life_expectancy.png")
+        )
+
+    # save the data
     if to_csv:
         file_path = get_data_path(f"processed_data/{time_delta_tag}/life_table.csv")
         logger.info(f"Saving data to {file_path}")
         life_table.to_csv(file_path, index=False)
     else:
         return life_table
+    
+
+
+
+
+def plot(
+    df: pd.DataFrame,
+    y: str,
+    color: str,
+    title: str = "",
+    file_path: pathlib.Path | None = None,
+    width: int = 2000,
+    height: int = 1500
+):
+    """Plot the mortality data for validation.
+    
+    Args:
+        df: A dataframe containing the life table data. Must have columns:
+
+            * ``timepoint (dt.datetime)``: The given timepoint.
+            * ``province (str)``: The 2-letter province ID, e.g. ``BC``.
+            * ``age (int)``: The integer age.
+            * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+            * ``prob_death (float)``: The probability of death for the given timepoint, province,
+              age, and sex.
+
+        y: The name of the column in the dataframe which will be plotted as the ``y`` data.
+        color: The name of the column in the dataframe which will be used to color the data.
+        title: The title of the plot.
+        file_path: The path to save the plot to.
+        width: The width of the plot.
+        height: The height of the plot.
+    """
+
+    fig = px.line(
+        df.loc[df["province"].isin(["BC", "CA"])].dropna(),
+        x="timepoint",
+        y=y,
+        render_mode="svg",
+        color=color,
+        markers=True,
+        facet_col="province",
+        facet_row="sex",
+        facet_row_spacing=0.01,  # Shrink vertical gap to 1%
+        facet_col_spacing=0.01,   # Shrink horizontal gap to 1%
+        title=title
+    )
+    fig.update_yaxes(matches=None)
+    
+    fig.update_layout(
+        font=dict(size=30),
+        title=dict(font=dict(size=50)),
+        showlegend=False,
+        width=width,
+        height=height,
+        autosize=False,
+        margin=dict(l=120, r=220, t=120, b=120)
+    )
+
+    fig.for_each_annotation(
+        lambda annotation: annotation.update(
+            text=annotation.text.split("=")[-1],
+            font=dict(size=30),
+            textangle=0,
+        )
+    )
+
+    fig.write_image(str(file_path), scale=2, width=width, height=height)
 
 
 if __name__ == "__main__":
