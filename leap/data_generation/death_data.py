@@ -1,16 +1,21 @@
 import pandas as pd
 import numpy as np
+import datetime as dt
 from scipy import optimize
 from leap.utils import get_data_path
 from leap.logger import get_logger
-from leap.data_generation.utils import format_age_group, get_province_id, get_sex_id
+from leap.data_generation.utils import format_age_group, get_province_id, get_sex_id, get_parser, \
+    interpolate
+from leap.utils import TimeDelta
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
 
-STARTING_YEAR = 1996
-FINAL_YEAR = 2068
+STARTING_TIMEPOINT = dt.datetime(1996, 1, 1)
+FINAL_TIMEPOINT = dt.datetime(2068, 12, 31)
+
+TIME_DELTA_OD = TimeDelta(years=1) # original time delta of the data
 
 
 
@@ -239,16 +244,19 @@ def compute_life_expectancy_diff(
     return np.array(diff)
 
 
-def load_past_death_data() -> pd.DataFrame:
+def load_past_death_data(time_delta: TimeDelta) -> pd.DataFrame:
     """Load the past death data from the ``StatCan`` CSV file.
+
+    Args:
+        time_delta: The duration of time between data points.
     
     Returns:
         A dataframe containing the probability of death and the standard error
-        for each year, province, age, and sex.
+        for each timepoint, province, age, and sex.
         Columns:
 
-        * ``year``: The integer calendar year.
-        * ``province``: a 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+        * ``timepoint``: The starting timepoint of the interval during which the data was collected.
+        * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
           For all of Canada, set province to ``"CA"``.
         * ``sex``: One of ``M`` = male, ``F`` = female.
         * ``age``: The integer age.
@@ -257,7 +265,7 @@ def load_past_death_data() -> pd.DataFrame:
         * ``se``: The standard error of the probability of death.
     """ 
     logger.info("Loading mortality data from CSV file...")
-    df = pd.read_csv(get_data_path("original_data/13100837.csv"))
+    df = pd.read_csv(get_data_path("original_data/13100837.csv"), parse_dates=["REF_DATE"])
 
     # remove spaces from column names and make uppercase
     column_names = {}
@@ -267,12 +275,15 @@ def load_past_death_data() -> pd.DataFrame:
 
     # rename the columns
     df.rename(
-        columns={"REF_DATE": "year", "GEO": "province", "SEX": "sex", "AGE_GROUP": "age"},
+        columns={"REF_DATE": "timepoint", "GEO": "province", "SEX": "sex", "AGE_GROUP": "age"},
         inplace=True
     )
 
     # select the required columns
-    df = df.loc[df["year"] >= STARTING_YEAR, ["year", "province", "sex", "age", "ELEMENT", "VALUE"]]
+    df = df.loc[
+        df["timepoint"] >= STARTING_TIMEPOINT,
+        ["timepoint", "province", "sex", "age", "ELEMENT", "VALUE"]
+    ]
 
     # format the age group into an integer age
     df["age"] = df["age"].apply(lambda x: format_age_group(x, "110 years and over"))
@@ -303,9 +314,21 @@ def load_past_death_data() -> pd.DataFrame:
     df_se.rename(columns={"VALUE": "se"}, inplace=True)
 
     # join the two tables
-    df = pd.merge(df_prob, df_se, on=["year", "province", "sex", "age"], how="left")
+    df = pd.merge(df_prob, df_se, on=["timepoint", "province", "sex", "age"], how="left")
+
+    # Interpolate the birth estimates for the missing timepoints in the past data
+    df = interpolate(
+        data=df.copy().reset_index(drop=True),
+        col_pred="prob_death",
+        time_delta=time_delta,
+        time_delta_od=TIME_DELTA_OD,
+        columns_group=["province", "age", "sex"]
+    ).reset_index(drop=True)
+    df.sort_values(["province", "age", "sex", "timepoint"], inplace=True)
+    df = df[["province", "age", "sex", "timepoint", "prob_death", "se"]]
 
     return df
+
 
 def load_projected_death_data() -> pd.DataFrame:
     """Load the projected death data from the ``StatCan`` CSV files.
@@ -507,7 +530,7 @@ def get_projected_death_data(
 
 def generate_death_data(time_delta: TimeDelta, to_csv: bool = True) -> None | pd.DataFrame:
     """Generate the mortality data CSV."""
-    past_life_table = load_past_death_data()
+    past_life_table = load_past_death_data(time_delta)
     df_calibration = load_projected_death_data()
     projected_life_table = get_projected_death_data(past_life_table, df_calibration)
     # projected_life_table_2 = get_projected_death_data(past_life_table, df_calibration)
