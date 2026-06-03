@@ -228,9 +228,10 @@ The following assumptions are applied when generating predictions from the fitte
   For ages greater than 63, incidence and prevalence are assumed to remain constant at the
   rates predicted for age 63.
 
-* **Year**: Incidence and prevalence trends are predicted for the years ``2020–2025`` using
-  the fitted GLM. From ``2025`` onwards, to the end of the model time horizon, incidence and
-  prevalence are assumed to remain constant at the ``2025`` rates.
+* **Year**: Incidence and prevalence trends are predicted for all years using the fitted GLM.
+  At runtime, the year is capped at ``2026`` — the maximum year in
+  ``asthma_occurrence_correction.csv`` — so that incidence and prevalence remain constant at
+  the ``2026`` rates for all subsequent years.
 
 
 Processed Data
@@ -541,28 +542,80 @@ where :math:`p_{\text{no asthma},\lambda}(t-1)` is the proportion of the populat
 are asthma-free at :math:`t-1` and have risk factor combination :math:`\lambda`. Only
 asthma-free agents are included because incidence counts new diagnoses only.
 
-.. _optimizing-beta-parameters:
-
-Calibrating Age-Dependent Odds Ratios for Prevalence and Incidence
+Age-dependent Odds Ratios for Prevalence
 ------------------------------------------------------------------
 
-Both :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` are
-age-dependent — the strength of association with asthma changes as a person ages:
+The log-ORs for each risk factor are age-dependent — their functional forms and fixed
+coefficients are derived from external published studies.
 
-* **Family history**: the OR is aplied from age 3, with the age-dependent slope applying
-  up to age 5, after which it plateaus.
-* **Antibiotic exposure**: the OR is only active for agents aged ≤ 7 who received
-  antibiotics in infancy; it is zero otherwise.
+Antibiotic Exposure
+^^^^^^^^^^^^^^^^^^^
 
-These same age-dependent ORs feed into both the prevalence and incidence formulas. In the
-prevalence formula, each OR is evaluated at the agent's age at entry. In the incidence
-formula, the ORs are re-evaluated each year as the agent ages, changing until the agent
-ages out of the relevant window.
+The antibiotic log-OR was derived by Lee et al. :cite:`lee2024` using a random effects
+meta-regression model. It applies only to children aged 7 or under who received antibiotics
+in infancy, and is zero otherwise:
 
-The age-dependent slopes are not determined by external studies and must be estimated from data.
-They are calibrated in the incidence context — where agents pass through multiple ages
-year by year, making the slope estimable from the change in OR across age groups — and the
-resulting slopes are then used in both formulas. This is done by finding the slope values
+.. math::
+
+  \log(\omega_{\text{abx}}) =
+    \begin{cases}
+      \beta_{\text{abx}_0} +
+      \beta_{\text{abx}_\text{age}} \cdot \min(a_i, 7) +
+      \beta_{\text{abx}_\text{dose}} \cdot \min(d_i, 3)
+      & d_i > 0 \text{ and } a_i \leq 7 \\[6pt]
+      0 & \text{otherwise}
+    \end{cases}
+
+where :math:`a_i` is the agent's age and :math:`d_i` is the number of courses of antibiotics
+taken during the first year of life (capped at 3). All three coefficients are sourced directly
+from the Lee et al. meta-regression, which estimated age as an explicit covariate:
+
+* :math:`\beta_{\text{abx}_0} = 1.826`
+* :math:`\beta_{\text{abx}_\text{age}} = 0.225`
+* :math:`\beta_{\text{abx}_\text{dose}} = 0.053`
+
+Family History
+^^^^^^^^^^^^^^
+
+The family history log-OR was derived from the ``CHILD Study`` by Patrick et al.
+:cite:`patrick2020` using logistic regression. It applies to all ages but the age-dependent
+component plateaus at age 5:
+
+.. math::
+
+  \log(\omega_{\text{fhx}}) =
+    \beta_{\text{fhx}_0} \cdot f_i +
+    \beta_{\text{fhx}_\text{age}} \cdot (\min(a_i, 5) - 3) \cdot f_i
+
+where :math:`f_i = 1` if at least one parent has asthma, 0 otherwise. Both coefficients
+are derived from the two empirical ORs reported by Patrick et al. at ages 3 and 5 —
+OR = 1.13 at age 3 and OR = 2.40 at age 5. The age-dependent slope is the linear
+interpolation between those two points on the log-OR scale:
+
+* :math:`\beta_{\text{fhx}_0} = \log(1.13) = 0.122`
+* :math:`\beta_{\text{fhx}_\text{age}} = \dfrac{\log(2.40) - \log(1.13)}{2} = 0.377`
+
+For ages above 5, the OR is held constant at the age-5 value.
+
+
+For prevalence, all OR coefficients — including the age-dependent slopes — are fully
+determined by the literature before calibration runs. The only quantity calibrated for
+prevalence is the scalar correction term :math:`\alpha`, which shifts the population-weighted
+average onto the Model 1 target :math:`\bar{p}_{\text{prev}}`.
+
+.. _optimizing-beta-parameters:
+
+Calibrating Age-Dependent Odds Ratios for Incidence
+------------------------------------------------------------------
+
+Unlike prevalence, there are no published studies that directly estimate the age-dependent
+slopes of :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
+incidence. Instead, the prevalence ORs serve as the fixed reference target, and the incidence
+age-dependent slopes (:math:`\beta_{\lambda, \text{age}}`) are estimated by requiring that
+the incidence equation's implied ORs, tracked over time via contingency tables, match the
+literature-derived prevalence ORs. This calibration runs in the incidence context because
+agents pass through multiple ages year by year, making the slope estimable from the change
+in OR across age groups. This is done by finding the slope values
 that minimise the difference between the model-predicted odds ratios and the odds ratios
 observed in the literature across age groups, using contingency tables.
 See :doc:`model-contingency-tables` for an introduction to contingency tables and worked
