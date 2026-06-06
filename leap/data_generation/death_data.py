@@ -608,7 +608,7 @@ def plot(
     fig.update_layout(
         font=dict(size=30),
         title=dict(font=dict(size=50)),
-        showlegend=False,
+        showlegend=True,
         width=width,
         height=height,
         autosize=False,
