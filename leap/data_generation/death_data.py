@@ -537,7 +537,6 @@ def generate_death_data(
     past_life_table = load_past_death_data(time_delta)
     df_calibration = load_projected_death_data()
     projected_life_table = get_projected_death_data(past_life_table, df_calibration)
-    # projected_life_table_2 = get_projected_death_data(past_life_table, df_calibration)
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
 
     time_delta_tag = get_time_delta_tag(time_delta)
