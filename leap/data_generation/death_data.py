@@ -332,6 +332,11 @@ def load_past_death_data(time_delta: TimeDelta) -> pd.DataFrame:
     df.sort_values(["province", "age", "sex", "timepoint"], inplace=True)
     df = df[["province", "age", "sex", "timepoint", "prob_death", "se"]]
 
+    if time_delta < TimeDelta(years=1):
+        n_intervals = TimeDelta(years=1) // time_delta
+        df = df.loc[df.index.repeat(n_intervals)].reset_index(drop=True)
+        df["age"] = df["age"] + np.arange(len(df)) % n_intervals / n_intervals
+
     return df
 
 
