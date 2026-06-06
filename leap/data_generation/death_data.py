@@ -21,7 +21,7 @@ TIME_DELTA_OD = TimeDelta(years=1) # original time delta of the data
 
 
 
-def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
+def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -> float:
     """Determine the life expectancy for a person born in a given year.
 
     The life expectancy can be calculated from the death probability using the formulae
@@ -38,6 +38,7 @@ def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
             * ``province``: A string indicating the province abbreviation, e.g. ``"BC"``.
                 For all of Canada, set province to ``"CA"``.
             * ``prob_death``: the probability of death for a given age, province, sex, and year.
+        time_delta: The duration of time between data points.
 
     Returns:
         The life expectancy for a person born in the given year, in a given province,
@@ -60,11 +61,11 @@ def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
             )
     df["n_alive_by_age"] = n_alive_by_age
 
-    # L(x): calculate the number of person-years lived between ages [x, x+1)
-    # L(x) = l(x) - 0.5 * d(x)
+    # L(x): calculate the number of person-years lived between ages [x, x+dx)
+    # L(x) = (l(x) - 0.5 * d(x)) * dx
     # d(x) = l(x) * q(x)
     df["n_person_years_interval"] = df.apply(
-        lambda x: x["n_alive_by_age"] - 0.5 * x["prob_death"] * x["n_alive_by_age"], axis=1
+        lambda x: (x["n_alive_by_age"] - 0.5 * x["prob_death"] * x["n_alive_by_age"]) * time_delta.total_years(), axis=1
     )
 
     # L(0): calculate the number of person-years lived between ages [0, 1)
@@ -181,6 +182,7 @@ def compute_life_expectancy_diff(
     sex: str,
     province: str, 
     timepoint_initial: int,
+    time_delta: TimeDelta
 ) -> np.ndarray:
     """Calculate the difference between the projected life expectancy and desired life expectancy.
 
@@ -221,6 +223,7 @@ def compute_life_expectancy_diff(
         timepoint_initial: The initial timepoint with a known probability of death. This is the last
             timepoint that the past data was collected.
         projection_scenario: The projection scenario, e.g. ``"M3"``.
+        time_delta: The duration of time between data points.
     
     Returns:
         The difference between the projected life expectancy of the calibration year
@@ -240,7 +243,7 @@ def compute_life_expectancy_diff(
         )
         logger.info(f"Calculating life expectancy for {timepoint}, {sex}, {province}, beta_year={beta_year}")
 
-        life_expectancy = calculate_life_expectancy(projected_life_table)
+        life_expectancy = calculate_life_expectancy(projected_life_table, time_delta)
         desired_life_expectancy = desired_life_expectancies.loc[
             desired_life_expectancies["timepoint"] == timepoint, "life_expectancy"
         ].values[0]
@@ -496,6 +499,7 @@ def get_projected_death_data(
                 province,
                 max_timepoint_past,
                 projection_scenario,
+                time_delta
             ),
             xtol=xtol,
         )[0][0]
@@ -510,6 +514,7 @@ def get_projected_death_data(
                 province,
                 max_timepoint_past,
                 projection_scenario,
+                time_delta
             ),
             xtol=xtol
         )[0][0]
