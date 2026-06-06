@@ -98,7 +98,10 @@ def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -
 
 
 def get_prob_death_projected(
-    prob_death: float, year_initial: int, year: int, beta_year: float
+    prob_death: float,
+    timepoint_initial: dt.datetime,
+    timepoint: dt.datetime,
+    beta_year: float
 ) -> float:
     r"""Given the (known) prob death for a past year, calculate the prob death in a future year.
 
@@ -111,16 +114,17 @@ def get_prob_death_projected(
     Args:
         prob_death: The probability of death for ``year_initial``, the last year that past data was
             collected, for a given age, sex, province, and projection scenario.
-        year_initial: The initial year with a known probability of death. This is the last year
-            that the past data was collected.
-        year: The current year.
+        timepoint_initial: The initial timepoint with a known probability of death. This is the last
+            timepoint that the past data was collected.
+        timepoint: The current timepoint.
         beta_year: The beta parameter for the given sex, province, and projection scenario.
 
     Returns:
         The projected probability of death for the current year.
     """
+    time_diff = TimeDelta(dt1=timepoint_initial, dt2=timepoint).total_years()
     prob_death = min(prob_death, 0.9999999999)
-    odds = (prob_death / (1 - prob_death)) * np.exp((year - year_initial) * beta_year)
+    odds = (prob_death / (1 - prob_death)) * np.exp(time_diff * beta_year)
     prob_death_projected = max(min(odds / (1 + odds), 1), 0)
     return prob_death_projected
 
