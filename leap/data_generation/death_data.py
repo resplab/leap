@@ -406,6 +406,7 @@ def load_projected_death_data() -> pd.DataFrame:
 def get_projected_death_data(
     past_life_table: pd.DataFrame,
     df_calibration: pd.DataFrame,
+    time_delta: TimeDelta,
     projection_scenario: str = "M3",
     x0: float = -0.02,
     xtol: float = 0.00001
@@ -439,6 +440,7 @@ def get_projected_death_data(
             * ``life_expectancy``: The life expectancy in years for the given year, province,
               sex, projection scenario, and mortality scenario.
 
+        time_delta: The duration of time between data points.
         x0: The initial guess for the beta parameter.
         xtol: The tolerance for the beta parameter.
     
@@ -536,7 +538,7 @@ def generate_death_data(
     """Generate the mortality data CSV."""
     past_life_table = load_past_death_data(time_delta)
     df_calibration = load_projected_death_data()
-    projected_life_table = get_projected_death_data(past_life_table, df_calibration)
+    projected_life_table = get_projected_death_data(past_life_table, df_calibration, time_delta)
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
 
     time_delta_tag = get_time_delta_tag(time_delta)
