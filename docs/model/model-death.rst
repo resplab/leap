@@ -588,9 +588,111 @@ calibration year (which is known) matches the predicted life expectancy.
 Once we have found :math:`\beta_{\text{sex}}`, we can use this formula to find the projected death
 probabilities.
 
+Life Expectancy
+*****************
+
+We first define some variables:
+
+.. list-table::
+   :widths: 15 15 80
+   :header-rows: 1
+
+   * - Variable
+     - Type
+     - Definition
+   * - :math:`x`
+     - :code:`int`
+     - age in years
+   * - :math:`l(x)`
+     - :code:`int`
+     - the number of people alive up to age :math:`x`
+   * - :math:`q(x)`
+     - :code:`float`
+     - the probability of death between ages :math:`[x, x + \Delta x)`
+   * - :math:`d(x)`
+     - :code:`int`
+     - the number of deaths between ages :math:`[x, x + \Delta x)`
+   * - :math:`a(x)`
+     - :code:`float`
+     - the average fraction of the interval :math:`[x, x + \Delta x)` lived by those who die in the interval
+   * - :math:`L(x)`
+     - :code:`int`
+     - the area under the survival curve between ages :math:`[x, x + \Delta x)`
+   * - :math:`T(x)`
+     - :code:`int`
+     - the total number of person-years lived after age :math:`x`
+   * - :math:`E(x)`
+     - :code:`float`
+     - the number of years left to live at age :math:`x`
+   * - :math:`E(0)`
+     - :code:`float`
+     - the number of years left to live at age :math:`0`, i.e. ``life expectancy``
+
+
+First, we set the number of people alive at age :math:`0`:
+
+
+.. math::
+
+  l(0) := 10000
+
+Next, we calculate the number of people alive up to age :math:`x`:
+
+.. math::
+
+  l(x) = l(x-\Delta x) \cdot (1 - q(x-\Delta x))
+
+The number of deaths :math:`d(x)` between ages :math:`[x, x + \Delta x)`, is given by the number of
+people alive at age :math:`x` multiplied by the probability of death between
+ages :math:`[x, x + \Delta x)`:
+
+.. math::
+
+  d(x) = l(x) * q(x)
+
+Next, we calculate the number of person-times lived between ages :math:`[x, x + \Delta x)`:
+
+.. math::
+
+  L(x) = \Delta x \cdot l(x + \Delta x) + a(x) \cdot d(x) \cdot \Delta x
+
+Assuming that deaths are uniform across the interval :math:`[x, x + \Delta x)`, we have
+:math:`a(x) = 0.5` for all :math:`x`. Thus, we can simplify the above equation to:
+
+.. math::
+
+  \begin{align}
+  L(x) &= (l(x + \Delta x) + 0.5 \cdot d(x)) \Delta x \\
+  &= (l(x) \cdot (1 - q(x)) + 0.5 \cdot d(x))\Delta x  \\
+  &= (l(x) - l(x) \cdot q(x) + 0.5 \cdot d(x))\Delta x  \\
+  &= (l(x) - d(x) + 0.5 \cdot d(x)) \Delta x \\
+  &= (l(x) - 0.5 \cdot d(x))\Delta x 
+  \end{align}
+
+:math:`T(x)`: calculate the total time lived after age :math:`x` by all people alive at age :math:`x`
+
+.. math::
+
+    T(x) = \sum_{n = 0}^{N} L(x + n \cdot \Delta x)
+
+where :math:`x + N \cdot \Delta x = 110` is the maximum age in the life table.
+
+The number of years left to live at age :math:`x` is given by :math:`E(x)`:
+
+.. math::
+
+    E(x) = \dfrac{T(x)}{l(x)}
+
+Finally, to get the ``life expectancy``, we calculate the number of years left to live at
+age ``0``, i.e. :math:`E(0)`:
+
+.. math::
+
+    \text{life expectancy} := E(0) = \dfrac{T(0)}{l(0)}
+
 
 Processed Data
-***************
+=================
 
 The past and projected death probabilities are combined by `leap/data_generation/death_data.py
 <https://github.com/resplab/leap/blob/main/leap/data_generation/death_data.py>`_
