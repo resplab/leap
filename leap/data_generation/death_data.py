@@ -186,6 +186,7 @@ def compute_life_expectancy_diff(
     sex: str,
     province: str, 
     timepoint_initial: int,
+    projection_scenario: str,
     time_delta: TimeDelta
 ) -> np.ndarray:
     """Calculate the difference between the projected life expectancy and desired life expectancy.
