@@ -101,7 +101,7 @@ def get_prob_death_projected(
     prob_death: float,
     timepoint_initial: dt.datetime,
     timepoint: dt.datetime,
-    beta_year: float
+    beta_time: float
 ) -> float:
     r"""Given the (known) prob death for a past year, calculate the prob death in a future year.
 
@@ -117,21 +117,21 @@ def get_prob_death_projected(
         timepoint_initial: The initial timepoint with a known probability of death. This is the last
             timepoint that the past data was collected.
         timepoint: The current timepoint.
-        beta_year: The beta parameter for the given sex, province, and projection scenario.
+        beta_time: The beta parameter for the given sex, province, and projection scenario.
 
     Returns:
         The projected probability of death for the current year.
     """
     time_diff = TimeDelta(dt1=timepoint_initial, dt2=timepoint).total_years()
     prob_death = min(prob_death, 0.9999999999)
-    odds = (prob_death / (1 - prob_death)) * np.exp(time_diff * beta_year)
+    odds = (prob_death / (1 - prob_death)) * np.exp(time_diff * beta_time)
     prob_death_projected = max(min(odds / (1 + odds), 1), 0)
     return prob_death_projected
 
 
 
 def get_projected_life_table_single_timepoint(
-    beta_year: float,
+    beta_time: float,
     life_table: pd.DataFrame,
     timepoint_initial: dt.datetime,
     timepoint: dt.datetime,
@@ -141,7 +141,7 @@ def get_projected_life_table_single_timepoint(
     """Get the life table for a single year.
 
     Args:
-        beta_year: The beta parameter for the given timepoint.
+        beta_time: The beta parameter for the given timepoint.
         life_table: A dataframe containing the projected probability of death
             for the starting year, for a given sex and province. Columns:
 
@@ -165,7 +165,7 @@ def get_projected_life_table_single_timepoint(
     """
     df = life_table.loc[(life_table["sex"] == sex) & (life_table["province"] == province)].copy()
     df["prob_death_proj"] = df["prob_death"].apply(
-        lambda x: get_prob_death_projected(x, timepoint_initial, timepoint, beta_year)
+        lambda x: get_prob_death_projected(x, timepoint_initial, timepoint, beta_time)
     )
 
     df["timepoint"] = [timepoint] * df.shape[0]
@@ -180,7 +180,7 @@ def get_projected_life_table_single_timepoint(
 
 
 def compute_life_expectancy_diff(
-    beta_year: np.ndarray,
+    beta_time: np.ndarray,
     life_table: pd.DataFrame,
     df_calibration: pd.DataFrame,
     sex: str,
@@ -194,8 +194,8 @@ def compute_life_expectancy_diff(
     such that the projected life expectancy is as close as possible to the desired life expectancy.
     
     Args:
-        beta_year: The beta parameter for the given year. The ``scipy.optimize.leastsq`` function
-            requires that this be a 1D array, but we only have a single parameter.
+        beta_time: The beta parameter for the given timepoint. The ``scipy.optimize.leastsq``
+            function requires that this be a 1D array, but we only have a single parameter.
         life_table: A dataframe containing the projected probability of death
             for the calibration year, for a given sex and province. Columns:
 
@@ -233,7 +233,7 @@ def compute_life_expectancy_diff(
         The difference between the projected life expectancy of the calibration year
         and the desired life expectancy, for each of the calibration years.
     """
-    beta_year = beta_year[0]
+    beta_time = beta_time[0]
     desired_life_expectancies = df_calibration.loc[
         (df_calibration["sex"] == sex) &
         (df_calibration["province"] == province) &
@@ -243,9 +243,9 @@ def compute_life_expectancy_diff(
     diff = []
     for timepoint in desired_life_expectancies["timepoint"]:
         projected_life_table = get_projected_life_table_single_timepoint(
-            beta_year, life_table, timepoint_initial, timepoint, sex, province
+            beta_time, life_table, timepoint_initial, timepoint, sex, province
         )
-        logger.info(f"Calculating life expectancy for {timepoint}, {sex}, {province}, beta_year={beta_year}")
+        logger.info(f"Calculating life expectancy for {timepoint}, {sex}, {province}, beta_time={beta_time}")
 
         life_expectancy = calculate_life_expectancy(projected_life_table, time_delta)
         desired_life_expectancy = desired_life_expectancies.loc[
@@ -493,7 +493,7 @@ def get_projected_death_data(
         starting_timepoint = max_timepoint_past + time_delta
         life_table = life_table[life_table["timepoint"] == max_timepoint_past]
 
-        beta_year_female = optimize.leastsq(
+        beta_time_female = optimize.leastsq(
             compute_life_expectancy_diff,
             x0=[x0],
             args=(
@@ -508,7 +508,7 @@ def get_projected_death_data(
             xtol=xtol,
         )[0][0]
 
-        beta_year_male = optimize.leastsq(
+        beta_time_male = optimize.leastsq(
             compute_life_expectancy_diff,
             x0=[x0],
             args=(
@@ -534,10 +534,10 @@ def get_projected_death_data(
         for timepoint in date_range(starting_timepoint, FINAL_TIMEPOINT + time_delta, time_delta):
             # get the prob_death projections for the year and add to dataframe
             df_female = get_projected_life_table_single_timepoint(
-                beta_year_female, life_table, starting_timepoint - time_delta, timepoint, "F", province
+                beta_time_female, life_table, starting_timepoint - time_delta, timepoint, "F", province
             )
             df_male = get_projected_life_table_single_timepoint(
-                beta_year_male, life_table, starting_timepoint - time_delta, timepoint, "M", province
+                beta_time_male, life_table, starting_timepoint - time_delta, timepoint, "M", province
             )
             # combine the dataframes
             projected_life_table_single_timepoint = pd.concat([df_female, df_male], axis=0)
