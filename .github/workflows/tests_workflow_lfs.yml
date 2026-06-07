@@ -115,6 +115,10 @@ jobs:
         run: |
           pytest tests/test_birth_data.py
         continue-on-error: false
+      - name: Run Python tests death data generation
+        run: |
+          pytest tests/test_death_data.py
+        continue-on-error: false
       - name: Run doctests
         run: |
           pytest leap/ --doctest-modules
