@@ -2,29 +2,11 @@ import pandas as pd
 import numpy as np
 import argparse
 import itertools
-from leap.utils import TimeDelta, date_range
+from leap.utils import TimeDelta, date_range, PROVINCE_MAP
 from leap.logger import get_logger
 from typing import Tuple, List
 
 logger = get_logger(__name__)
-
-
-PROVINCE_MAP = {
-    "Canada": "CA",
-    "British Columbia": "BC",
-    "Alberta": "AB",
-    "Saskatchewan": "SK",
-    "Manitoba": "MB",
-    "Ontario": "ON",
-    "Quebec": "QC",
-    "Newfoundland and Labrador": "NL",
-    "Nova Scotia": "NS",
-    "New Brunswick": "NB",
-    "Prince Edward Island": "PE",
-    "Yukon": "YT",
-    "Northwest Territories": "NT",
-    "Nunavut": "NU"
-}
 
 
 def get_parser() -> argparse.ArgumentParser:

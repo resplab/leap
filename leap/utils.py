@@ -25,6 +25,29 @@ logger = get_logger(__name__)
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
 
+PROJECTION_SCENARIOS = (
+    "past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", "FA", "SA"
+)
+
+PROVINCE_MAP = {
+    "Canada": "CA",
+    "British Columbia": "BC",
+    "Alberta": "AB",
+    "Saskatchewan": "SK",
+    "Manitoba": "MB",
+    "Ontario": "ON",
+    "Quebec": "QC",
+    "Newfoundland and Labrador": "NL",
+    "Nova Scotia": "NS",
+    "New Brunswick": "NB",
+    "Prince Edward Island": "PE",
+    "Yukon": "YT",
+    "Northwest Territories": "NT",
+    "Nunavut": "NU"
+}
+
+MORTALITY_SCENARIOS = ("HM", "MM", "LM")
+
 
 
 def get_chunk_indices(
@@ -288,11 +311,8 @@ def check_province(province: str):
         ValueError: If the province is not valid.
     """
 
-    PROVINCES = [
-        "CA", "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"
-    ]
-    if province not in PROVINCES:
-        raise ValueError(f"province must be one of {PROVINCES}, received {province}")
+    if province not in PROVINCE_MAP.values():
+        raise ValueError(f"province must be one of {PROVINCE_MAP.values()}, received {province}")
 
 
 def check_projection_scenario(projection_scenario: str):
@@ -305,9 +325,6 @@ def check_projection_scenario(projection_scenario: str):
         ValueError: If the projection scenario is not valid.
     """
 
-    PROJECTION_SCENARIOS = [
-        "past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", "FA", "SA"
-    ]
     if projection_scenario not in PROJECTION_SCENARIOS:
         raise ValueError(
             f"projection_scenario must be one of {PROJECTION_SCENARIOS}, "
