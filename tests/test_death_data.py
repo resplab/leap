@@ -1,12 +1,32 @@
 import pytest
 import datetime as dt
+import numpy as np
 import pandas as pd
+import itertools
 from leap.data_generation.death_data import load_past_death_data, \
-    load_projected_death_data, get_prob_death_projected, STARTING_TIMEPOINT
+    load_projected_death_data, get_prob_death_projected, get_projected_life_table_single_timepoint, \
+    STARTING_TIMEPOINT
 from leap.logger import get_logger
 from leap.utils import TimeDelta, PROJECTION_SCENARIOS, MORTALITY_SCENARIOS, PROVINCE_MAP
 
 logger = get_logger(__name__)
+
+
+@pytest.fixture
+def life_table():
+    life_table = pd.DataFrame(
+        list(itertools.product(
+            list(PROVINCE_MAP.values())[0:2],
+            np.arange(0, 4, 0.25),
+            ["F", "M"],
+            [STARTING_TIMEPOINT]
+        )),
+        columns=["province", "age", "sex", "timepoint"]
+    )
+    life_table["prob_death"] = np.random.sample(life_table.shape[0]) / 1000.0
+    life_table["se"] = np.random.sample(life_table.shape[0]) / 10000.0
+    return life_table
+
 
 @pytest.mark.parametrize(
     "prob_death_initial, timepoint_initial, timepoint, beta_time",
@@ -30,6 +50,35 @@ def test_get_prob_death_projected(
     )
     assert prob_death >= 0.0
     assert prob_death <= 1.0
+
+
+@pytest.mark.parametrize(
+    "sex, province, timepoint",
+    [
+        ("F", "BC", dt.datetime(2026, 1, 1))
+    ]
+)
+def test_get_projected_life_table_single_timepoint(life_table, sex, province, timepoint):
+    projected_life_table = get_projected_life_table_single_timepoint(
+        beta_time=0.1,
+        life_table=life_table,
+        timepoint_initial=life_table["timepoint"].iloc[0],
+        timepoint=timepoint,
+        sex=sex,
+        province=province
+    )
+    assert projected_life_table["timepoint"].nunique() == 1
+    assert projected_life_table["timepoint"].iloc[0] == timepoint
+    assert projected_life_table["sex"].nunique() == 1
+    assert projected_life_table["sex"].iloc[0] == sex
+    assert projected_life_table["province"].nunique() == 1
+    assert projected_life_table["province"].iloc[0] == province
+    assert set(projected_life_table.columns) == set(
+        ["province", "age", "sex", "timepoint", "prob_death", "se"]
+    )
+    assert set(projected_life_table["age"].unique()) == set(life_table["age"].unique())
+    assert projected_life_table["prob_death"].between(0.0, 1.0).all()
+    assert projected_life_table["se"].between(0.0, 1.0).all()
 
 
 @pytest.mark.parametrize(
