@@ -5,7 +5,7 @@ import pandas as pd
 import itertools
 from leap.data_generation.death_data import load_past_death_data, \
     load_projected_death_data, get_prob_death_projected, get_projected_life_table_single_timepoint, \
-    STARTING_TIMEPOINT
+    MIN_TIMEPOINT
 from leap.logger import get_logger
 from leap.utils import TimeDelta, PROJECTION_SCENARIOS, MORTALITY_SCENARIOS, PROVINCE_MAP
 
@@ -19,7 +19,7 @@ def life_table():
             list(PROVINCE_MAP.values())[0:2],
             np.arange(0, 4, 0.25),
             ["F", "M"],
-            [STARTING_TIMEPOINT]
+            [MIN_TIMEPOINT]
         )),
         columns=["province", "age", "sex", "timepoint"]
     )
@@ -90,7 +90,7 @@ def test_get_projected_life_table_single_timepoint(life_table, sex, province, ti
 )
 def test_load_past_death_data(time_delta):
     df = load_past_death_data(time_delta)
-    assert df["timepoint"].min() >= STARTING_TIMEPOINT
+    assert df["timepoint"].min() >= MIN_TIMEPOINT
     assert df["sex"].isin(["M", "F"]).all()
     assert set(df.columns) == set(["province", "age", "sex", "prob_death", "timepoint", "se"])
     assert df["province"].isin(PROVINCE_MAP.values()).all()

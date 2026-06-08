@@ -14,8 +14,8 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 
-STARTING_TIMEPOINT = dt.datetime(1996, 1, 1)
-FINAL_TIMEPOINT = dt.datetime(2068, 12, 31)
+MIN_TIMEPOINT = dt.datetime(1996, 1, 1)
+MAX_TIMEPOINT = dt.datetime(2068, 12, 31)
 
 TIME_DELTA_OD = TimeDelta(years=1) # original time delta of the data
 
@@ -36,7 +36,7 @@ def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -
             * ``sex``: One of ``M`` = male, ``F`` = female.
             * ``timepoint``: the timepoint of the data in the row.
             * ``province``: A string indicating the province abbreviation, e.g. ``"BC"``.
-                For all of Canada, set province to ``"CA"``.
+              For all of Canada, set province to ``"CA"``.
             * ``prob_death``: the probability of death for a given age, province, sex, and timepoint.
         time_delta: The duration of time between data points.
 
@@ -299,7 +299,7 @@ def load_past_death_data(time_delta: TimeDelta) -> pd.DataFrame:
 
     # select the required columns
     df = df.loc[
-        df["timepoint"] >= STARTING_TIMEPOINT,
+        df["timepoint"] >= MIN_TIMEPOINT,
         ["timepoint", "province", "sex", "age", "ELEMENT", "VALUE"]
     ]
 
@@ -537,7 +537,7 @@ def get_projected_death_data(
             "prob_death": [],
             "se": []
         })
-        for timepoint in date_range(starting_timepoint, FINAL_TIMEPOINT + time_delta, time_delta):
+        for timepoint in date_range(starting_timepoint, MAX_TIMEPOINT + time_delta, time_delta):
             # get the prob_death projections for the year and add to dataframe
             df_female = get_projected_life_table_single_timepoint(
                 beta_time_female, life_table, starting_timepoint - time_delta, timepoint, "F", province
