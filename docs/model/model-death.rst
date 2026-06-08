@@ -629,8 +629,10 @@ We first define some variables:
      - the number of years left to live at age :math:`0`, i.e. ``life expectancy``
 
 
-First, we set the number of people alive at age :math:`0`:
+Number of People Alive
+-----------------------
 
+First, we set the number of people alive at age :math:`0`:
 
 .. math::
 
@@ -642,6 +644,9 @@ Next, we calculate the number of people alive up to age :math:`x`:
 
   l(x) = l(x-\Delta x) \cdot (1 - q(x-\Delta x))
 
+Total Deaths
+--------------
+
 The number of deaths :math:`d(x)` between ages :math:`[x, x + \Delta x)`, is given by the number of
 people alive at age :math:`x` multiplied by the probability of death between
 ages :math:`[x, x + \Delta x)`:
@@ -650,7 +655,16 @@ ages :math:`[x, x + \Delta x)`:
 
   d(x) = l(x) * q(x)
 
-Next, we calculate the number of person-times lived between ages :math:`[x, x + \Delta x)`:
+Survival Curve
+----------------
+
+Formally, the area under the survival curve between ages :math:`[x, x + \Delta x)` is given by:
+
+.. math::
+
+  L(x) = \int_{x}^{x + \Delta x} l(\chi) d\chi
+
+However, we can approximate this using the midpoint formula for numerical integration:
 
 .. math::
 
@@ -669,6 +683,25 @@ Assuming that deaths are uniform across the interval :math:`[x, x + \Delta x)`, 
   &= (l(x) - 0.5 \cdot d(x))\Delta x 
   \end{align}
 
+Because infant mortality is highest in the first few days of life, if :math:`\Delta x < 7 \text{days}`,
+we set :math:`a(x_0) = 0.1`.
+
+For the final age group, since everyone dies, :math:`l(x_f + \Delta x) = 0`, and :math:`q(x_f) = 1`.
+Thus, we have:
+
+.. math::
+
+  \begin{align}
+  L(x_f) &= (l(x_f + \Delta x) + a(x_f) \cdot d(x_f)) \Delta x \\
+  &= (0 + a(x_f) \cdot d(x_f)) \Delta x \\
+  &= a(x_f) \cdot d(x_f) \cdot \Delta x \\
+  &= a(x_f) \cdot l(x_f) \cdot q(x_f) \cdot \Delta x \\
+  &= a(x_f) \cdot l(x_f) \cdot \Delta x
+  \end{align}
+
+Time Lived After Age :math:`x`
+------------------------------
+
 :math:`T(x)`: calculate the total time lived after age :math:`x` by all people alive at age :math:`x`
 
 .. math::
@@ -676,6 +709,9 @@ Assuming that deaths are uniform across the interval :math:`[x, x + \Delta x)`, 
     T(x) = \sum_{n = 0}^{N} L(x + n \cdot \Delta x)
 
 where :math:`x + N \cdot \Delta x = 110` is the maximum age in the life table.
+
+Number of Years Left to Live
+----------------------------
 
 The number of years left to live at age :math:`x` is given by :math:`E(x)`:
 
