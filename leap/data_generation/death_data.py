@@ -360,7 +360,7 @@ def load_past_death_data(time_delta: TimeDelta) -> pd.DataFrame:
     return df
 
 
-def load_projected_death_data() -> pd.DataFrame:
+def load_projected_death_data(min_timepoint: dt.datetime) -> pd.DataFrame:
     """Load the projected death data from the ``StatCan`` CSV files.
 
     ``Statistics Canada`` provides two tables with life expectancy projections:
@@ -432,6 +432,8 @@ def load_projected_death_data() -> pd.DataFrame:
     # Convert year to timepoint
     df["timepoint"] = df["year"].apply(lambda x: dt.datetime(x, 1, 1))
     df = df.drop(columns=["year"])
+
+    df = df.loc[df["timepoint"] >= min_timepoint].reset_index(drop=True)
 
     return df
 
@@ -578,7 +580,7 @@ def generate_death_data(
 ) -> None | pd.DataFrame:
     """Generate the mortality data CSV."""
     past_life_table = load_past_death_data(time_delta)
-    df_calibration = load_projected_death_data()
+    df_calibration = load_projected_death_data(min_timepoint=past_life_table["timepoint"].max() + time_delta)
     projected_life_table = get_projected_death_data(past_life_table, df_calibration, time_delta)
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
 
