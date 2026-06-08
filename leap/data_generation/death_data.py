@@ -134,7 +134,7 @@ def get_prob_death_projected(
         >>> get_prob_death_projected(0.01, timepoint_initial, timepoint, -0.02)
         np.float64(0.005512990331820702)
     """
-    time_diff = TimeDelta(dt1=timepoint_initial, dt2=timepoint).total_years()
+    time_diff = TimeDelta(dt1=timepoint, dt2=timepoint_initial).total_years()
     prob_death = min(prob_death, 0.9999999999)
     odds = (prob_death / (1 - prob_death)) * np.exp(time_diff * beta_time)
     prob_death_projected = max(min(odds / (1 + odds), 1), 0)
