@@ -126,6 +126,13 @@ def get_prob_death_projected(
 
     Returns:
         The projected probability of death for the current year.
+
+    Examples:
+
+        >>> timepoint_initial = dt.datetime(1996, 1, 1)
+        >>> timepoint = dt.datetime(2026, 1, 1)
+        >>> get_prob_death_projected(0.01, timepoint_initial, timepoint, -0.02)
+        np.float64(0.005512990331820702)
     """
     time_diff = TimeDelta(dt1=timepoint_initial, dt2=timepoint).total_years()
     prob_death = min(prob_death, 0.9999999999)
