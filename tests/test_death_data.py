@@ -5,7 +5,7 @@ import pandas as pd
 import itertools
 from leap.data_generation.death_data import load_past_death_data, \
     load_projected_death_data, get_prob_death_projected, get_projected_life_table_single_timepoint, \
-    MIN_TIMEPOINT, TIME_DELTA_OD
+    get_projected_death_data, MIN_TIMEPOINT, TIME_DELTA_OD
 from leap.logger import get_logger
 from leap.utils import TimeDelta, PROJECTION_SCENARIOS, MORTALITY_SCENARIOS, PROVINCE_MAP
 
@@ -127,7 +127,7 @@ def test_load_past_death_data(time_delta, expected_rows):
     ]
 )
 def test_load_projected_death_data(expected_rows):
-    df = load_projected_death_data()
+    df = load_projected_death_data(min_timepoint=dt.datetime(2022, 1, 1))
     assert df["life_expectancy"].min() > 50.0
     assert df["life_expectancy"].max() < 120.0
     assert df["sex"].isin(["M", "F"]).all()
@@ -146,3 +146,46 @@ def test_load_projected_death_data(expected_rows):
             (df["projection_scenario"] == row[3])
         ].iloc[0]["life_expectancy"] == row[4]
 
+
+@pytest.mark.parametrize(
+    "time_delta, expected_rows",
+    [
+        (
+            TimeDelta(years=1),
+            [
+                (dt.datetime(2057, 1, 1), "CA", 60, "F", 0.0027035098555941027),
+                (dt.datetime(2042, 1, 1), "BC", 22, "M", 0.0007291262068477189)
+            ],
+        ),
+        (
+            TimeDelta(months=1),
+            [
+                (
+                    dt.datetime(2057, 1, 1), "CA", 60, "F",
+                    0.0027035098555941027 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds()
+                )
+            ],
+        ),
+    ]
+)
+def test_get_projected_death_data(time_delta, expected_rows):
+    past_life_table = load_past_death_data(time_delta)
+    df_calibration = load_projected_death_data(
+        min_timepoint=past_life_table["timepoint"].max() + time_delta
+    )
+    df = get_projected_death_data(
+        past_life_table=past_life_table.loc[past_life_table["province"].isin(["BC", "CA"])],
+        df_calibration=df_calibration.loc[df_calibration["province"].isin(["BC", "CA"])],
+        time_delta=time_delta
+    )
+    assert df["timepoint"].min() >= MIN_TIMEPOINT
+    assert df["sex"].isin(["M", "F"]).all()
+    assert set(df.columns) == set(["province", "age", "sex", "prob_death", "timepoint", "se"])
+    assert df["province"].isin(PROVINCE_MAP.values()).all()
+    for row in expected_rows:
+        assert df.loc[
+            (df["timepoint"] == row[0]) &
+            (df["province"] == row[1]) &
+            (df["age"] == row[2]) &
+            (df["sex"] == row[3])
+        ].iloc[0]["prob_death"] == pytest.approx(row[4], rel=0.05)
