@@ -79,8 +79,10 @@ def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -
         axis=1
     )
 
-    # L(110): calculate the number of person-years lived between ages [110, 111)
-    df.loc[110, "n_person_years_interval"] = df.loc[110, "n_alive_by_age"] * 1.4
+    # L(x_f): calculate the number of person-years lived between ages [x_f, infinity)
+    max_age = df.index.max()
+    factor = 1.4 * TIME_DELTA_OD.total_years() / time_delta.total_years()
+    df.loc[max_age, "n_person_years_interval"] = df.loc[max_age, "n_alive_by_age"] * factor
 
     # T(x): calculate the total number of person-years lived after age x
     # T(x) = sum(L(x) for x in [x, 110])
