@@ -22,26 +22,26 @@ TIME_DELTA_OD = TimeDelta(years=1) # original time delta of the data
 
 
 def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -> float:
-    """Determine the life expectancy for a person born in a given year.
+    """Determine the life expectancy for a person born in a given time interval.
 
     The life expectancy can be calculated from the death probability using the formulae
     delineated here:
     `Life Table Definitions <https://www.ssa.gov/oact/HistEst/CohLifeTables/LifeTableDefinitions.pdf>`_
     
     Args:
-        life_table: A dataframe containing the probability of death for a single year,
+        life_table: A dataframe containing the probability of death for a single timepoint,
             province and sex, for each age. Columns:
 
             * ``age``: the integer age.
             * ``sex``: One of ``M`` = male, ``F`` = female.
-            * ``year``: the integer calendar year.
+            * ``timepoint``: the timepoint of the data in the row.
             * ``province``: A string indicating the province abbreviation, e.g. ``"BC"``.
                 For all of Canada, set province to ``"CA"``.
-            * ``prob_death``: the probability of death for a given age, province, sex, and year.
+            * ``prob_death``: the probability of death for a given age, province, sex, and timepoint.
         time_delta: The duration of time between data points.
 
     Returns:
-        The life expectancy for a person born in the given year, in a given province,
+        The life expectancy for a person born in the given time interval, in a given province,
         for a given sex.
     """
     assert life_table["sex"].nunique() == 1, "Dataframe should only contain one sex."
@@ -106,17 +106,17 @@ def get_prob_death_projected(
     timepoint: dt.datetime,
     beta_time: float
 ) -> float:
-    r"""Given the (known) prob death for a past year, calculate the prob death in a future year.
+    r"""Given the (known) prob death for a past timepoint, calculate the prob death in a future year.
 
     .. math::
 
-        \sigma^{-1}(p(\text{sex}, \text{age}, \text{year})) =
-            \sigma^{-1}(p(\text{sex}, \text{age}, \text{year}_0)) - 
-            \beta(\text{sex})(\text{year} - \text{year}_0)
+        \sigma^{-1}(p(\text{sex}, \text{age}, \text{timepoint})) =
+            \sigma^{-1}(p(\text{sex}, \text{age}, \text{timepoint}_0)) - 
+            \beta(\text{sex})(\text{timepoint} - \text{timepoint}_0)
 
     Args:
-        prob_death: The probability of death for ``year_initial``, the last year that past data was
-            collected, for a given age, sex, province, and projection scenario.
+        prob_death: The probability of death for ``timepoint_initial``, the last timepoint that past
+            data was collected, for a given age, sex, province, and projection scenario.
         timepoint_initial: The initial timepoint with a known probability of death. This is the last
             timepoint that the past data was collected.
         timepoint: The current timepoint.
@@ -141,12 +141,12 @@ def get_projected_life_table_single_timepoint(
     sex: str,
     province: str
 ) -> pd.DataFrame:
-    """Get the life table for a single year.
+    """Get the life table for a single timepoint.
 
     Args:
         beta_time: The beta parameter for the given timepoint.
         life_table: A dataframe containing the projected probability of death
-            for the starting year, for a given sex and province. Columns:
+            for the starting timepoint, for a given sex and province. Columns:
 
             * ``age``: the integer age.
             * ``sex``: One of ``M`` = male, ``F`` = female.
@@ -205,7 +205,7 @@ def compute_life_expectancy_diff(
 
             * ``age``: the integer age.
             * ``sex``: one of ``M`` = male, ``F`` = female.
-            * ``timepoint``: the calibration calendar year.
+            * ``timepoint``: the calibration timepoint.
             * ``province``: a 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
             * ``prob_death``: the probability of death for a given age, province, sex, and year.
