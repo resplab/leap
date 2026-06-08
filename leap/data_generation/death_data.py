@@ -188,7 +188,7 @@ def compute_life_expectancy_diff(
     df_calibration: pd.DataFrame,
     sex: str,
     province: str, 
-    timepoint_initial: int,
+    timepoint_initial: dt.datetime,
     projection_scenario: str,
     time_delta: TimeDelta
 ) -> np.ndarray:
