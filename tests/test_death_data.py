@@ -115,7 +115,18 @@ def test_load_past_death_data(time_delta, expected_rows):
         ].iloc[0]["prob_death"] == row[4]
 
 
-def test_load_projected_death_data():
+@pytest.mark.parametrize(
+    "expected_rows",
+    [
+        [
+            ("CA", "F", dt.datetime(2028, 1, 1), "M3", 85.0),
+            ("CA", "M", dt.datetime(2028, 1, 1), "M3", 80.9),
+            ("CA", "F", dt.datetime(2073, 1, 1), "LG", 89.7),
+            ("BC", "M", dt.datetime(2058, 1, 1), "HG", 86.7)
+        ]
+    ]
+)
+def test_load_projected_death_data(expected_rows):
     df = load_projected_death_data()
     assert df["life_expectancy"].min() > 50.0
     assert df["life_expectancy"].max() < 120.0
@@ -127,4 +138,11 @@ def test_load_projected_death_data():
     assert df["province"].isin(PROVINCE_MAP.values()).all()
     assert df["projection_scenario"].isin(PROJECTION_SCENARIOS).all()
     assert df["mortality_scenario"].isin(MORTALITY_SCENARIOS).all()
+    for row in expected_rows:
+        assert df.loc[
+            (df["province"] == row[0]) &
+            (df["sex"] == row[1]) &
+            (df["timepoint"] == row[2]) &
+            (df["projection_scenario"] == row[3])
+        ].iloc[0]["life_expectancy"] == row[4]
 
