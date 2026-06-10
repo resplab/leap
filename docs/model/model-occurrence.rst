@@ -102,7 +102,7 @@ Since our model projects into the future, we would like to be able to extend thi
 To obtain these projections, we use a ``Generalized Linear Model (GLM)`` with a
 ``Poisson distribution`` and ``log link function``. Incidence and prevalence are counts of
 people diagnosed with or living with asthma in a given year, making the Poisson distribution a
-natural choice. See :doc:`model-glm` for more information on ``GLMs``, including the Poisson
+natural choice. See :doc:`model-statistical-background` for more information on ``GLMs``, including the Poisson
 distribution and log link function.
 
 Formula
@@ -618,7 +618,7 @@ agents pass through multiple ages year by year, making the slope estimable from 
 in OR across age groups. This is done by finding the slope values
 that minimise the difference between the model-predicted odds ratios and the odds ratios
 observed in the literature across age groups, using contingency tables.
-See :doc:`model-contingency-tables` for an introduction to contingency tables and worked
+See :doc:`model-statistical-background` for an introduction to contingency tables and worked
 examples.
 
 In our model, we want to compute the contingency table for the risk factor combinations

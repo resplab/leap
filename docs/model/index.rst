@@ -11,8 +11,6 @@ outcomes over a lifetime.
   :hidden:
 
   model-simulation
-  model-glm
-  model-contingency-tables
   model-birth
   model-death
   model-migration
@@ -23,3 +21,4 @@ outcomes over a lifetime.
   model-cost
   model-utility
   model-pollution
+  model-statistical-background
