@@ -319,6 +319,39 @@ This is done in two phases:
   :math:`\alpha` from the lookup table to produce a personalised asthma probability on every
   simulated year of life.
 
+Within the offline calibration, there is a fixed order of operations across three steps.
+Computing :math:`\alpha` requires knowing :math:`\log(\omega_{\text{fhx}})` and
+:math:`\log(\omega_{\text{abx}})` for each risk factor combination :math:`\lambda` at each
+(age, sex, year) stratum, since these determine the individual-level probabilities that must be
+population-weighted to match the Model 1 targets :math:`\bar{p}_{\text{prev}}` and
+:math:`\bar{p}_{\text{inc}}`. The log-ORs depend on age-dependent slope parameters
+:math:`\beta_{\lambda,\text{age}}`, which are known from the literature for prevalence but
+must be estimated for incidence — which creates the following sequence:
+
+1. **Prevalence calibration.** The age-dependent OR slope coefficients
+   (:math:`\beta_{\text{fhx,age}}`, :math:`\beta_{\text{abx,age}}`) for prevalence are
+   derived directly from the literature, so :math:`\log(\omega_{\text{fhx}})` and
+   :math:`\log(\omega_{\text{abx}})` are fully determined at each age. BFGS then solves for
+   :math:`\alpha_{\text{prev}}` per stratum as the value that makes the population-weighted
+   average of the individual prevalence probabilities match the Model 1 target
+   :math:`\bar{p}_{\text{prev}}`.
+
+2. **Incidence :math:`\beta_{\lambda,\text{age}}` estimation.** Because no published studies
+   provide age-dependent OR slopes for incidence, these are estimated by optimisation. A cohort
+   is simulated from age :math:`t-1` — using the calibrated prevalence distribution from
+   step 1 as the baseline — forward to age :math:`t`, using candidate slope values proposed
+   by the optimiser. The optimisation finds the slopes for which the ORs implied by the
+   contingency table are self-consistent with the :math:`\log(\omega_{\text{fhx}})` and
+   :math:`\log(\omega_{\text{abx}})` values that the Model 2 incidence formula (described
+   below) computes directly from those same candidate slopes at each age. The converged slopes
+   are saved to ``occurrence_calibration_parameters.json``.
+
+3. **Incidence calibration.** With the estimated :math:`\beta_{\lambda,\text{age}}` slopes
+   from step 2, :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
+   incidence are fully determined. BFGS then solves for :math:`\alpha_{\text{inc}}` per
+   stratum: the value that makes the population-weighted average of the at-risk incidence
+   probabilities match the Model 1 target :math:`\bar{p}_{\text{inc}}`.
+
 Model: Risk Factors
 ******************************
 
@@ -610,14 +643,14 @@ Calibrating Age-Dependent Odds Ratios for Incidence
 
 Unlike prevalence, there are no published studies that directly estimate the age-dependent
 slopes of :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
-incidence. Instead, the prevalence ORs serve as the fixed reference target, and the incidence
-age-dependent slopes (:math:`\beta_{\lambda, \text{age}}`) are estimated by requiring that
-the incidence equation's implied ORs, tracked over time via contingency tables, match the
-literature-derived prevalence ORs. This calibration runs in the incidence context because
-agents pass through multiple ages year by year, making the slope estimable from the change
-in OR across age groups. This is done by finding the slope values
-that minimise the difference between the model-predicted odds ratios and the odds ratios
-observed in the literature across age groups, using contingency tables.
+incidence. Instead, the slopes are estimated through a self-consistency optimisation using
+contingency tables. The calibrated prevalence distribution from the previous age (step 1
+above) serves as the baseline, and incidence is simulated forward one year using candidate
+slope values proposed by the optimiser. The optimisation finds the slopes for which the ORs
+implied by the contingency table are consistent with the ORs the incidence risk factor
+equation predicts directly at each age — meaning the model's cumulative behaviour (tracked
+via contingency tables) agrees with its instantaneous predictions. The converged slopes are
+anchored to reality through the prevalence baseline, which is itself derived from literature.
 See :doc:`model-statistical-background` for an introduction to contingency tables and worked
 examples.
 
@@ -833,8 +866,8 @@ Optimization
 ^^^^^^^^^^^^^^^^^
 
 We want to find the age-dependent slope values (:math:`\beta_{\lambda, \text{age}}`) 
-that minimize the mean absolute difference between :math:`\log(\hat{\omega})` 
-and :math:`\log(\omega_{\lambda})` — the fixed, age-independent log-ORs sourced from 
+that minimize the mean absolute difference between :math:`\log(\hat{\omega})`
+and :math:`\log(\omega_{\lambda})` — the fixed, age-dependent log-ORs for prevalence sourced from
 external studies — averaged across all age groups and all 7 non-baseline risk factor combinations.
 
 Once optimised, these slopes (:math:`\beta_{\lambda, \text{age}}`) are used
