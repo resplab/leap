@@ -578,7 +578,18 @@ def get_projected_death_data(
 def generate_death_data(
     time_delta: TimeDelta, to_csv: bool = True, draw_plot: bool = False
 ) -> None | pd.DataFrame:
-    """Generate the mortality data CSV."""
+    """Generate the mortality data CSV.
+    
+    Args:
+        time_delta: The duration of time between data points.
+        to_csv: Whether to save the data to a CSV file. If False, the dataframe will be returned
+            instead.
+        draw_plot: Whether to draw a plot of the mortality data for validation.
+
+    Returns:
+        If ``to_csv`` is False, a dataframe containing the probability of death and the standard
+        error for each timepoint, province, age, and sex.
+    """
     past_life_table = load_past_death_data(time_delta)
     df_calibration = load_projected_death_data(min_timepoint=past_life_table["timepoint"].max() + time_delta)
     projected_life_table = get_projected_death_data(past_life_table, df_calibration, time_delta)
