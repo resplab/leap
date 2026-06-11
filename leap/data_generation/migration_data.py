@@ -6,9 +6,9 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-STARTING_YEAR = 2000
-STARTING_YEAR_PROJ = 2021
-MAX_YEAR = 2065
+MIN_TIMEPOINT = 2000
+MIN_TIMEPOINT_PROJ = 2021
+MAX_TIMEPOINT = 2065
 PROVINCES = ["CA", "BC"]
 TIME_DELTA_OD = TimeDelta(years=1) # migration data is generated at annual resolution
 
@@ -140,7 +140,7 @@ def load_migration_data() -> pd.DataFrame:
 
         # Select only the data for the given province and the years after the starting year
         df = df_population.loc[
-            (df_population["year"] >= STARTING_YEAR) &
+            (df_population["year"] >= MIN_TIMEPOINT) &
             (df_population["province"] == province)
         ]
         df = df[["year", "age", "province", "n_age", "prop_male", "projection_scenario"]]
@@ -170,7 +170,7 @@ def load_migration_data() -> pd.DataFrame:
             # select only the current projection scenario and the past projection scenario
             df_proj = df.loc[
                 (df["projection_scenario"].isin(["past", projection_scenario])) &
-                ~((df["projection_scenario"] == "past") & (df["year"] == STARTING_YEAR_PROJ))
+                ~((df["projection_scenario"] == "past") & (df["year"] == MIN_TIMEPOINT_PROJ))
             ]
 
             # join to the life table to get death probabilities
