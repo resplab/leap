@@ -14,42 +14,50 @@ MAX_TIMEPOINT = 2065
 PROVINCES = ["CA", "BC"]
 
 
-def get_prev_year_population(
-    df: pd.DataFrame, sex: str, year: int, age: int, min_year: int, min_age: int
+def get_prev_timepoint_population(
+    df: pd.DataFrame,
+    sex: str,
+    timepoint: dt.datetime,
+    age: int,
+    min_timepoint: dt.datetime,
+    min_age: int,
+    time_delta: TimeDelta
 ) -> pd.Series:
-    """Get the age, sex, probability of death, and population for the previous year.
+    """Get the age, sex, probability of death, and population for the previous timepoint.
 
     Args:
         df: A dataframe with the following columns:
 
-            * ``year``: The calendar year.
+            * ``timepoint``: The calendar year.
             * ``sex``: One of ``M`` = male, ``F`` = female.
             * ``age``: The integer age.
-            * ``N``: The population for a given year, age, sex, province, and projection scenario.
-            * ``prob_death``: The probability that a person in the given year, age, sex,
-              province, and projection scenario will die within the year.
+            * ``N``: The population for a given timepoint, age, sex, province, and projection scenario.
+            * ``prob_death``: The probability that a person in the given timepoint, age, sex,
+              province, and projection scenario will die within the time interval
+              ``[timepoint, timepoint + time_delta]``.
 
         sex: One of ``F`` = female, ``M`` = male.
-        year: The calendar year.
+        timepoint: The calendar year.
         age: The integer age.
-        min_year: The minimum year in the dataframe.
+        min_timepoint: The minimum year in the dataframe.
         min_age: The minimum age in the dataframe.
+        time_delta: The duration of time between subsequent data points.
 
     Returns:
-        The age, sex, probability of death, and population for the previous year.
+        The age, sex, probability of death, and population for the previous timepoint.
     """
-    if year == min_year or age == min_age:
+    if timepoint == min_timepoint or age == min_age:
         return pd.Series(
             [np.nan, np.nan, np.nan, np.nan],
-            index=["year_prev", "age_prev", "n_prev", "prob_death_prev"]
+            index=["timepoint_prev", "age_prev", "n_prev", "prob_death_prev"]
         )
     else:
         return df.loc[
             (df["sex"] == sex) & 
-            (df["year"] == year - 1) & 
-            (df["age"] == age - 1)
-        ][["year", "age", "N", "prob_death"]].iloc[0].rename({
-            "year": "year_prev",
+            (df["timepoint"] == timepoint - time_delta) & 
+            (df["age"] == age - time_delta.total_years())
+        ][["timepoint", "age", "N", "prob_death"]].iloc[0].rename({
+            "timepoint": "timepoint_prev",
             "age": "age_prev",
             "N": "n_prev",
             "prob_death": "prob_death_prev"
@@ -184,7 +192,7 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
 
             # get the previous timepoint's cohort for each entry
             df_proj[["timepoint_prev", "age_prev", "n_prev", "prob_death_prev"]] = df_proj.apply(
-                lambda x: get_prev_year_population(
+                lambda x: get_prev_timepoint_population(
                     df_proj, x["sex"], x["timepoint"], x["age"], min_timepoint, min_age
                 ),
                 axis=1
