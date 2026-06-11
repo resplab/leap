@@ -594,6 +594,14 @@ def generate_death_data(
     df_calibration = load_projected_death_data(min_timepoint=past_life_table["timepoint"].max() + time_delta)
     projected_life_table = get_projected_death_data(past_life_table, df_calibration, time_delta)
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
+    life_table["age_int"] = life_table["age"].apply(lambda x: int(x))
+    grouped_df = life_table.groupby(["age_int", "province", "sex", "timepoint"], as_index=False).agg({
+        "prob_death": "mean",
+        "se": lambda x: np.sqrt(np.sum(x**2)) / len(x)
+    })
+    life_table = grouped_df[["province", "age_int", "sex", "timepoint", "prob_death", "se"]]
+    life_table.rename(columns={"age_int": "age"}, inplace=True)
+    life_table.sort_values(["province", "sex", "timepoint", "age"], inplace=True)
 
     time_delta_tag = get_time_delta_tag(time_delta)
 
