@@ -603,12 +603,15 @@ def generate_death_data(
             y="prob_death",
             color="age",
             title="Mortality Data",
-            file_path=get_data_path(f"data_generation/figures/{time_delta_tag}/life_expectancy.png")
+            file_path=get_data_path(
+                f"data_generation/figures/{time_delta_tag}/life_expectancy.png",
+                mkdirs=True
+            )
         )
 
     # save the data
     if to_csv:
-        file_path = get_data_path(f"processed_data/{time_delta_tag}/life_table.csv")
+        file_path = get_data_path(f"processed_data/{time_delta_tag}/life_table.csv", mkdirs=True)
         logger.info(f"Saving data to {file_path}")
         life_table.to_csv(file_path, index=False)
     else:
