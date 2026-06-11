@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
-from leap.utils import get_data_path
+from leap.utils import get_data_path, TimeDelta
 from leap.logger import get_logger
+from leap.data_generation.utils import get_parser
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
@@ -240,4 +241,6 @@ def generate_migration_data():
 
 
 if __name__ == "__main__":
-    generate_migration_data()
+    parser = get_parser()
+    args = parser.parse_args()
+    time_delta = TimeDelta(iso_string=args.time_delta)
