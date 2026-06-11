@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from leap.utils import get_data_path, TimeDelta, get_time_delta_tag
+from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
 from leap.data_generation.utils import get_parser
 pd.options.mode.copy_on_write = True
@@ -245,9 +245,10 @@ def load_migration_data() -> pd.DataFrame:
     return df_migration
 
 
-def generate_migration_data():
+def generate_migration_data(time_delta: TimeDelta):
     df_migration = load_migration_data()
-    file_path = get_data_path("processed_data/migration") / "migration_table.csv"
+    time_delta_tag = get_time_delta_tag(time_delta)
+    file_path = get_data_path(f"processed_data/{time_delta_tag}/migration_table.csv", mkdirs=True)
     logger.info(f"Saving data to {file_path}")
     df_migration.to_csv(file_path, index=False)
 
@@ -256,3 +257,4 @@ if __name__ == "__main__":
     parser = get_parser()
     args = parser.parse_args()
     time_delta = TimeDelta(iso_string=args.time_delta)
+    generate_migration_data(time_delta=time_delta)
