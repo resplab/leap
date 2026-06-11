@@ -187,11 +187,12 @@ def compute_ordinal_regression(
     return [float(prob_function(θ[k + 1] - η) - prob_function(θ[k] - η)) for k in range(len(θ) - 1)]
 
 
-def get_data_path(data_path: str | pathlib.Path) -> pathlib.Path:
+def get_data_path(data_path: str | pathlib.Path, mkdirs: bool = False) -> pathlib.Path:
     """Get the full path to a data file or folder in the ``LEAP`` package.
 
     Args:
         data_path: The path to the file or folder.
+        mkdirs: Whether to create the directories if they don't exist.
 
     Returns:
         The full path to the file or folder.
@@ -210,13 +211,19 @@ def get_data_path(data_path: str | pathlib.Path) -> pathlib.Path:
     elif data_path.parts[0] == "original_data":
         data_path = data_path.relative_to("original_data")
         data_folder = "leap.original_data"
+    else:
+        raise FileNotFoundError(f"Path {data_path} not found.")
   
     package_path = str(pkg_resources.files(data_folder).joinpath(str(data_path)))
 
     if os.path.isfile(package_path) or os.path.isdir(package_path):
         return pathlib.Path(package_path)
     else:
-        raise FileNotFoundError(f"Path {data_path} not found.")
+        if mkdirs:
+            os.makedirs(os.path.dirname(package_path), exist_ok=True)
+            return pathlib.Path(package_path)
+        else:
+            raise FileNotFoundError(f"Path {data_path} not found.")
 
 
 def check_file(file_path: str | pathlib.Path, ext: str):
