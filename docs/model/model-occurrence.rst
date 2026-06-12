@@ -331,26 +331,69 @@ must be estimated for incidence — which creates the following sequence:
 1. **Prevalence calibration.** The age-dependent OR slope coefficients
    (:math:`\beta_{\text{fhx,age}}`, :math:`\beta_{\text{abx,age}}`) for prevalence are
    derived directly from the literature, so :math:`\log(\omega_{\text{fhx}})` and
-   :math:`\log(\omega_{\text{abx}})` are fully determined at each age. BFGS then solves for
+   :math:`\log(\omega_{\text{abx}})` are fully determined at each age. 
+   ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` then solves for
    :math:`\alpha_{\text{prev}}` per stratum as the value that makes the population-weighted
    average of the individual prevalence probabilities match the Model 1 target
    :math:`\bar{p}_{\text{prev}}`.
 
-2. **Incidence :math:`\beta_{\lambda,\text{age}}` estimation.** Because no published studies
-   provide age-dependent OR slopes for incidence, these are estimated by optimisation. A cohort
-   is simulated from age :math:`t-1` — using the calibrated prevalence distribution from
-   step 1 as the baseline — forward to age :math:`t`, using candidate slope values proposed
-   by the optimiser. The optimisation finds the slopes for which the ORs implied by the
-   contingency table are self-consistent with the :math:`\log(\omega_{\text{fhx}})` and
-   :math:`\log(\omega_{\text{abx}})` values that the Model 2 incidence formula (described
-   below) computes directly from those same candidate slopes at each age. The converged slopes
-   are saved to ``occurrence_calibration_parameters.json``.
+2. **Incidence** :math:`\beta_{\lambda,\text{age}}` **estimation.** Because no published
+   studies provide age-dependent OR slopes for incidence, these are estimated by optimisation
+   under two constraining assumptions: the intercept :math:`\beta_0` and antibiotic dose
+   coefficient :math:`\beta_{\text{abx,dose}}` in the incidence OR equations are inherited
+   directly from the prevalence values and held fixed — only the age slopes
+   :math:`\beta_{\text{fhx,age}}` and :math:`\beta_{\text{abx,age}}` are free to vary; and
+   the prevalence and incidence OR equations are equal at age 3, which is guaranteed by the
+   shared intercepts. The optimiser is initialised from the prevalence slope values and finds
+   the age slopes that simultaneously satisfy two conditions: (i) the average incidence
+   across risk factor combinations :math:`\lambda`, weighted by their population proportions
+   :math:`p(\lambda)` within each (age, sex, year) stratum, matches :math:`\bar{p}_{\text{inc}}`
+   from Model 1; and (ii) the ORs implied by
+   the :ref:`contingency tables <optimizing-beta-parameters>` simulated forward one year
+   from the calibrated prevalence distribution at age :math:`t-1` match the
+   literature-derived prevalence ORs across age groups. The converged slopes are saved to
+   ``occurrence_calibration_parameters.json``.
 
 3. **Incidence calibration.** With the estimated :math:`\beta_{\lambda,\text{age}}` slopes
    from step 2, :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
    incidence are fully determined. BFGS then solves for :math:`\alpha_{\text{inc}}` per
    stratum: the value that makes the population-weighted average of the at-risk incidence
    probabilities match the Model 1 target :math:`\bar{p}_{\text{inc}}`.
+
+The diagram below summarises how the components relate, from the Model 1 targets through the
+offline calibration steps to the personalised probabilities used at runtime.
+
+.. md-mermaid::
+
+    flowchart TD
+        M1["<b>Model 1 population targets</b><br/>p̄_prev and p̄_inc"]
+        LIT["<b>Literature ORs (prevalence)</b>"]
+
+        subgraph OFFLINE["Offline calibration (run once)"]
+            direction TB
+            S1["<b>Step 1 — Prevalence calibration</b><br/>Σ p(λ)·p_prev,λ = p̄_prev"]
+            S2["<b>Step 2 — Incidence β_age estimation</b><br/>optimise β_fhx_age, β_abx_age"]
+            S3["<b>Step 3 — Incidence calibration</b><br/>Σ p(λ)·p_inc,λ = p̄_inc"]
+            S1 -->|"calibrated prevalence at age t−1"| S2
+            S2 -->|"β_fhx_age, β_abx_age"| S3
+        end
+
+        SIM["<b>Online simulation (runtime)</b><br/>logit(p) = logit(p̄) + log(ω_fhx) + log(ω_abx) − α"]
+
+        M1 -->|"p̄_prev"| S1
+        LIT --> S1
+        M1 -->|"p̄_inc target +<br/>literature prevalence ORs"| S2
+        M1 -->|"p̄_inc"| S3
+        S1 -->|"α_prev"| SIM
+        S3 -->|"α_inc"| SIM
+        M1 -->|"p̄_prev, p̄_inc"| SIM
+
+        classDef target fill:#e3f2fd,stroke:#1565c0,color:#0d2b45;
+        classDef lit fill:#fff3e0,stroke:#e65100,color:#3a2400;
+        classDef sim fill:#e8f5e9,stroke:#2e7d32,color:#10300f;
+        class M1 target;
+        class LIT lit;
+        class SIM sim;
 
 Model: Risk Factors
 ******************************
@@ -523,6 +566,8 @@ where :math:`p(\lambda)` is the proportion of the population with risk factor co
 :math:`\lambda`.
 
 
+.. _occurrence-model-2-incidence:
+
 Incidence
 --------------------------------------------
 
@@ -643,19 +688,55 @@ Calibrating Age-Dependent Odds Ratios for Incidence
 
 Unlike prevalence, there are no published studies that directly estimate the age-dependent
 slopes of :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
-incidence. Instead, the slopes are estimated through a self-consistency optimisation using
-contingency tables. The calibrated prevalence distribution from the previous age (step 1
-above) serves as the baseline, and incidence is simulated forward one year using candidate
-slope values proposed by the optimiser. The optimisation finds the slopes for which the ORs
-implied by the contingency table are consistent with the ORs the incidence risk factor
-equation predicts directly at each age — meaning the model's cumulative behaviour (tracked
-via contingency tables) agrees with its instantaneous predictions. The converged slopes are
-anchored to reality through the prevalence baseline, which is itself derived from literature.
+incidence. Instead, the slopes are estimated by optimisation under two constraining
+assumptions:
+
+* The intercept :math:`\beta_0` and antibiotic dose coefficient :math:`\beta_{\text{abx,dose}}`
+  in the incidence OR equations are **inherited from prevalence** and held fixed. Only the age
+  slopes :math:`\beta_{\text{fhx,age}}` and :math:`\beta_{\text{abx,age}}` are free to vary.
+* The prevalence and incidence OR equations are **equal at age 3**, which is guaranteed by
+  sharing the same intercept.
+
+The optimiser is initialised from the corresponding prevalence slope values and must
+simultaneously satisfy two conditions:
+
+1. The average incidence across risk factor combinations :math:`\lambda`, weighted by their
+   population proportions :math:`p(\lambda)` within each (age, sex, year) stratum, matches
+   the Model 1 target :math:`\bar{p}_{\text{inc}}`.
+2. The ORs implied by the contingency tables — simulated forward one year from the calibrated
+   prevalence distribution at age :math:`t-1` — match the literature-derived prevalence ORs
+   across age groups.
+
+Condition 2 ensures that introducing individual-level incidence risk does not distort the
+aggregate OR structure established by the prevalence literature.
 See :doc:`model-statistical-background` for an introduction to contingency tables and worked
 examples.
 
 In our model, we want to compute the contingency table for the risk factor combinations
-:math:`\lambda` and the asthma diagnosis.
+:math:`\lambda` and the asthma diagnosis. This is built up over the next four tables: the
+baseline population at :math:`t=0` splits into those who already have asthma and those who do
+not, each group evolves over one year, and the two are recombined into a single table at
+:math:`t=1`.
+
+.. md-mermaid::
+
+    flowchart LR
+        BASE["<b>Baseline (t=0)</b>"]
+        EX["<b>Existing diagnoses</b><br/>reassessment at t=1"]
+        NEW["<b>New diagnoses</b><br/>at t=1"]
+        COMB["<b>Combined table (t=1)</b>"]
+
+        BASE -->|"had asthma at t=0"| EX
+        BASE -->|"no asthma at t=0"| NEW
+        EX --> COMB
+        NEW --> COMB
+
+        classDef base fill:#e3f2fd,stroke:#1565c0,color:#0d2b45;
+        classDef mid fill:#fff3e0,stroke:#e65100,color:#3a2400;
+        classDef comb fill:#e8f5e9,stroke:#2e7d32,color:#10300f;
+        class BASE base;
+        class EX,NEW mid;
+        class COMB comb;
 
 
 Baseline Contingency Table (t=0)
