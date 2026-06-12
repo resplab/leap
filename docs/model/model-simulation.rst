@@ -50,7 +50,7 @@ a time interval is defined as:
 
 .. math::
 
-    \text{time_interval} := [\text{timepoint}, \text{timepoint} + \text{time_delta})
+    \text{time interval} = [\text{timepoint}, \text{timepoint} + \text{time delta})
 
 
 For example, if the ``min_timepoint`` is January 1, 2020, and the ``time_delta`` is 1 year, then the
@@ -59,8 +59,7 @@ first time interval would be ``[2020-01-01, 2021-01-01)``, i.e., the year ``2020
 Unlike at subsequent timepoints, at the initial timepoint the simulation does not introduce only
 newborns — instead, it creates a cross-sectional population spanning all ages from ``0`` to
 ``max_age``, representing the full age distribution of the province at the initial timepoint, drawn
-from Statistics Canada population data
-(``./leap/processed_data/{time_delta_tag}birth/initial_population.csv``).
+from Statistics Canada population data (see the :ref:`birth-model`).
 
 The ``num_births_initial`` parameter sets the number of agents at age 0. The number of agents at
 every other age is determined by multiplying ``num_births_initial`` by that age group's ``prop``
@@ -296,11 +295,9 @@ asthma at the agent's current age, sex, and timepoint, adjusted for their indivi
 
 .. math::
 
-    p_{\text{prev}} = \sigma\!\left(
-        \beta_{\eta} + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha
-    \right)
+    \text{logit}(p_{\text{prev}}) = \text{logit}(\bar{p}_{\text{prev}}) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha
 
-where :math:`\beta_{\eta} = \sigma^{-1}(\eta)` is the logit of the Model 1 prevalence target,
+where :math:`\bar{p}_{\text{prev}}` is the Model 1 prevalence target for the agent's stratum,
 :math:`\omega_{\text{fhx}}` and :math:`\omega_{\text{abx}}` are the odds ratios for the agent's
 family history and antibiotic exposure, and :math:`\alpha` is the per-stratum calibration term
 looked up from ``asthma_occurrence_correction.csv``. The agent is then assigned an asthma status
@@ -473,11 +470,9 @@ individual risk factors:
 
 .. math::
 
-    p_{\text{inc}} = \sigma\!\left(
-        \beta_{\eta} + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha
-    \right)
+    \text{logit}(p_{\text{inc}}) = \text{logit}(\bar{p}_{\text{inc}}) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha
 
-where :math:`\beta_{\eta} = \sigma^{-1}(\eta)` is the logit of the Model 1 incidence target,
+where :math:`\bar{p}_{\text{inc}}` is the Model 1 incidence target for the agent's stratum,
 :math:`\omega_{\text{fhx}}` and :math:`\omega_{\text{abx}}` are the odds ratios for the agent's
 family history and antibiotic exposure (both age-dependent and zero once the agent ages out of
 the relevant windows), and :math:`\alpha` is the per-stratum calibration term looked up from

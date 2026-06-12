@@ -238,8 +238,8 @@ Processed Data
 -----------------
 
 The processed data produced by this model is stored in ``asthma_occurrence_predictions.csv``
-(under the ``time_delta_<n>`` directory matching the simulation's time step, e.g.
-``time_delta_365`` for yearly intervals). The data contains predicted asthma incidence and
+(under the ``time_delta_<days>`` directory, where ``<days>`` is the number of days in the
+simulation's time step — e.g. ``time_delta_365`` for yearly intervals). The data contains predicted asthma incidence and
 prevalence at 1-year age intervals, for each timepoint and sex. The variables are:
 
 .. raw:: html
@@ -713,30 +713,40 @@ aggregate OR structure established by the prevalence literature.
 See :doc:`model-statistical-background` for an introduction to contingency tables and worked
 examples.
 
-In our model, we want to compute the contingency table for the risk factor combinations
-:math:`\lambda` and the asthma diagnosis. This is built up over the next four tables: the
-baseline population at :math:`t=0` splits into those who already have asthma and those who do
-not, each group evolves over one timepoint, and the two are recombined into a single table at
-:math:`t=1`.
+To evaluate condition 2, we track a cohort across one timepoint using contingency tables of
+risk factor combination :math:`\lambda` against asthma diagnosis. The labels :math:`t=0` and
+:math:`t=1` denote two consecutive timepoints. The procedure is:
+
+1. **Build the baseline table at** :math:`t=0` so that its odds ratio equals the (literature-anchored)
+   prevalence OR at the previous timepoint.
+2. **Step forward one timepoint** by applying reassessment to those who already had asthma and
+   **new incidence — computed with the candidate age-slopes** :math:`\beta_{\lambda,\text{age}}` —
+   to those who did not, producing the combined table at :math:`t=1`.
+3. **Compare** the odds ratio of that combined table (the prevalence OR the model actually
+   produces at age :math:`a`) against the target prevalence OR, and adjust
+   :math:`\beta_{\lambda,\text{age}}` until they match.
+
+The four tables below build this up step by step, and the diagram summarises the flow.
 
 .. md-mermaid::
 
     flowchart LR
-        BASE["<b>Baseline (t=0)</b>"]
-        EX["<b>Existing diagnoses</b><br/>reassessment at t=1"]
-        NEW["<b>New diagnoses</b><br/>at t=1"]
-        COMB["<b>Combined table (t=1)</b>"]
+        BASE["<b>Baseline table (t=0)</b><br/>built from literature-based<br/>prevalence OR"]
+        NEW["<b>New diagnoses (t=1)</b><br/>incidence with candidate β_age"]
+        EX["<b>Existing diagnoses (t=1)</b><br/>reassessment with prob ρ"]
+        COMB["<b>Combined table (t=1)</b><br/>prevalence at age a:<br/> evaluate prevalence OR vs target prevalence OR"]
 
-        BASE -->|"had asthma at t=0"| EX
         BASE -->|"no asthma at t=0"| NEW
-        EX --> COMB
+        BASE -->|"had asthma at t=0"| EX
         NEW --> COMB
+        EX --> COMB
+        COMB -.->|"adjust β_age"| NEW
 
         classDef base fill:#e3f2fd,stroke:#1565c0,color:#0d2b45;
         classDef mid fill:#fff3e0,stroke:#e65100,color:#3a2400;
         classDef comb fill:#e8f5e9,stroke:#2e7d32,color:#10300f;
         class BASE base;
-        class EX,NEW mid;
+        class NEW,EX mid;
         class COMB comb;
 
 
@@ -963,7 +973,7 @@ Processed Data
 --------------
 
 The calibration terms produced by Model 2 are stored in ``asthma_occurrence_correction.csv``
-(under the ``time_delta_<n>`` directory matching the simulation's time step). Each row gives
+(under the ``time_delta_<days>`` directory matching the simulation's time step). Each row gives
 the value of :math:`\alpha` for a specific age, sex, timepoint, and outcome type
 (prevalence or incidence). This file is used at runtime by the simulation to look up the
 correction for each agent at each timepoint of life.
