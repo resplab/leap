@@ -15,11 +15,11 @@ Population Data
 *****************
 
 We use the Statistics Canada population data that was generated and saved as:
-`processed_data/birth/initial_pop_distribution_prop.csv 
-<https://github.com/resplab/leap/blob/main/leap/processed_data/birth/initial_pop_distribution_prop.csv>`_.
+`processed_data/{time_delta_tag}/birth/initial_population.csv 
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/birth/initial_population.csv>`_.
 
 This table contains the number of people in a given age, sex, province,
-and projection scenario, along with the number of births for that year. This data is the net number
+and projection scenario, along with the number of births for that timepoint. This data is the net number
 of people, factoring in death, immigration, and emigration.
 
 
@@ -30,9 +30,9 @@ of people, factoring in death, immigration, and emigration.
    * - Column
      - Type
      - Description
-   * - ``year``
+   * - ``timepoint``
      - :code:`int`
-     - the calendar year
+     - the starting date / time of the time interval that the data applies to
    * - ``age``
      - :code:`int`
      - the age of the person in years
@@ -42,18 +42,18 @@ of people, factoring in death, immigration, and emigration.
        (e.g., ``AB`` = Alberta, ``BC`` = British Columbia, etc.)
    * - ``n_age``
      - :code:`int`
-     - the number of people in a given age group, year, province, and projection scenario
+     - the number of people in a given age group, time interval, province, and projection scenario
    * - ``n_birth``
      - :code:`int`
-     - the number of births in that year, province, and projection scenario
+     - the number of births in that time interval, province, and projection scenario
    * - ``prop``
      - :code:`float`
-     - the proportion of the population in that age group, year, province, and projection scenario
-       relative to the number of births in that year, province, and projection scenario
+     - the proportion of the population in that age group, time interval, province, and projection scenario
+       relative to the number of births in that time interval, province, and projection scenario
    * - ``prop_male``
      - :code:`float`
-     - the proportion of the population in a given age group, year, province, and projection scenario
-       who are male
+     - the proportion of the population in a given age group, time interval, province, and
+       projection scenario who are male
    * - ``projection_scenario``
      - :code:`str`
      - the projection scenario used to generate the data
@@ -63,8 +63,8 @@ Mortality Data
 *****************
 
 We use the Statistics Canada population data that was generated and saved as:
-`processed_data/life_table.csv 
-<https://github.com/resplab/leap/blob/main/leap/processed_data/life_table.csv>`_.
+`processed_data/{time_delta_tag}/life_table.csv 
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/life_table.csv>`_.
 
 
 .. list-table::
@@ -74,9 +74,9 @@ We use the Statistics Canada population data that was generated and saved as:
    * - Column
      - Type
      - Description
-   * - ``year``
+   * - ``timepoint``
      - :code:`int`
-     - the calendar year
+     - the starting date / time of the time interval that the data applies to
    * - ``age``
      - :code:`int`
      - the age of the person in years
@@ -90,7 +90,7 @@ We use the Statistics Canada population data that was generated and saved as:
    * - ``prob_death``
      - :code:`float`
      - the probability that a person of the given age and sex, living in the given province, will
-       die during the given year.
+       die during the given time interval.
    * - ``se``
      - :code:`float`
      - the standard error on the probability of death
@@ -99,15 +99,141 @@ Model
 =====
 
 To obtain the net migration, for anyone aged > 0, we compute the number of people in each age
-group projected to die during that year based on the ``prob_death`` given by the mortality model.
-Then we calculate the net change in people using the ``n_age`` column in the
-``initial_pop_distribution_prop.csv``. We subtract the number of people who died from the net
-population change to get the net number of people who migrated:
+group
+where :math:`\Delta n` is the net migration, :math:`n_{(\text{age},\ \text{timepoint})}` is the number
+of people at the current age and timepoint, :math:`n_{(\text{age}-1,\ \text{timepoint}-1)}` is the
+number of people one year younger at the previous year, and
+:math:`q_{x_{(\text{age}-1,\ \text{year}-1)}}` is the sex-specific probability of death for
+that younger cohort. This is computed separately for each combination of age, sex, province,
+and projection scenario. Age 0 is excluded because newborns are handled separately by the
+birth model.
 
 .. math::
 
-    \Delta n = n - n_{\text{prev}} * (1 - q_x)
+    \Delta n_{(a,\ s,\ t)} = n_{(a,\ s,\ t)} - n_{(a-1,\ s,\ t-1)} \cdot \left(1 - q_{x_{(a-1,\ s,\ t-1)}}\right)
 
-where :math:`\Delta n` is the net migration, :math:`n` is the number of people in that age
-group, :math:`n_{\text{prev}}` is the number of people in that age group in the previous year,
-and :math:`q_x` is the probability of death for that age group in that year.
+where :math:`a` = age, :math:`s` = sex, :math:`t` = year.
+
+If :math:`\Delta n > 0`, the surplus is attributed to immigration. If :math:`\Delta n < 0`,
+the deficit is attributed to emigration.
+
+
+Processed Data
+==============
+
+The migration model produces a single processed data file generated by
+`leap/data_generation/migration_data.py
+<https://github.com/resplab/leap/blob/main/leap/data_generation/migration_data.py>`_,
+covering the provinces ``CA`` (all of Canada) and ``BC`` (British Columbia).
+
+Migration Table
+***************
+
+Saved as:
+`leap/processed_data/{time_delta_tab}/migration/migration_table.csv
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/migration/migration_table.csv>`_.
+
+Each row corresponds to a unique combination of ``year``, ``province``, ``age``, ``sex``, and
+``projection_scenario``. The table records the signed net migration (:math:`\Delta n`) for each
+group, along with derived columns used by the simulation at runtime for both immigration and
+emigration.
+
+:math:`\Delta n` is computed independently for each sex. Because males and females are computed
+separately, it is possible for one sex to have net immigration while the other has net emigration
+for the same age and year.
+
+.. list-table::
+   :widths: 25 15 60
+   :header-rows: 1
+
+   * - Column
+     - Type
+     - Description
+   * - ``year``
+     - :code:`int`
+     - the calendar year
+   * - ``province``
+     - :code:`str`
+     - the province abbreviation (``BC`` or ``CA``)
+   * - ``age``
+     - :code:`int`
+     - the age in years
+   * - ``sex``
+     - :code:`str`
+     - ``M`` = male, ``F`` = female
+   * - ``projection_scenario``
+     - :code:`str`
+     - the StatCan population projection scenario
+   * - ``delta_n``
+     - :code:`float`
+     - the signed net migration for this age, sex, year, province, and projection scenario;
+       positive values indicate net immigration, negative values indicate net emigration
+   * - ``prop_migrants_birth``
+     - :code:`float`
+     - ``delta_n`` divided by the number of births that year; signed — positive for net
+       immigration cells, negative for net emigration cells
+   * - ``prop_immigrants_year``
+     - :code:`float`
+     - for cells where ``delta_n > 0``, each age and sex group's share of all immigrants
+       arriving in a given year (denominator is the sum of positive ``delta_n`` values only);
+       zero for emigration cells
+   * - ``prop_emigrants_year``
+     - :code:`float`
+     - for cells where ``delta_n < 0``, each age and sex group's share of all emigrants
+       leaving in a given year (denominator is the sum of negative ``delta_n`` values only);
+       zero for immigration cells
+   * - ``prob_emigration``
+     - :code:`float`
+     - for cells where ``delta_n < 0``, the per-person annual probability of emigrating,
+       computed as :math:`|\Delta n| / N`; zero for immigration cells
+
+``prop_migrants_birth`` is computed as:
+
+
+.. math::
+
+    \text{prop migrants birth}_{(a,\ s,\ t)} = \dfrac{\Delta n_{(a,\ s,\ t)}}{n^{\text{birth}}_{(t)}}
+
+where :math:`a` = age, :math:`s` = sex, :math:`t` = year.
+
+The total number of immigrant agents created in a given year is:
+
+.. math::
+
+    i_{(t)} = \left\lceil n_{(t)} \cdot \sum_{\substack{a,\ s \\ \Delta n > 0}}\ \text{prop migrants birth}_{(a,\ s,\ t)} \right\rceil
+
+where :math:`n_{(t)}` is the number of simulated births in that year.
+
+``prop_immigrants_year`` is computed as:
+
+.. math::
+
+    \text{prop immigrants year}_{(a,\ s,\ t)} = \dfrac{\Delta n_{(a,\ s,\ t)}}{\sum_{\substack{a,\ s \\ \Delta n > 0}}\ \Delta n_{(a,\ s,\ t)}}
+    \quad \text{if } \Delta n > 0, \text{ else } 0
+
+``prob_emigration`` is computed as:
+
+.. math::
+
+    \text{prob emigration}_{(a,\ s,\ t)} = \dfrac{|\Delta n_{(a,\ s,\ t)}|}{N_{(a,\ s,\ t)}}
+    \quad \text{if } \Delta n < 0, \text{ else } 0
+
+At runtime, the simulation uses ``prob_emigration`` directly in a Bernoulli trial each year to
+determine whether an agent emigrates:
+
+.. math::
+
+    \text{emigrates} \sim \text{Bernoulli}(p_{\text{emigrate}}(\text{sex}, \text{age}, \text{year}))
+
+Agents aged 0 are excluded — newborns never emigrate.
+
+Both immigration and emigration are rooted in the same StatCan population-level counts
+(:math:`\Delta n`), and are converted into agent-level operations to fit LEAP's microsimulation
+framework:
+
+
+* For **immigration**, rows where ``delta_n > 0`` are used. ``prop_migrants_birth`` (positive)
+  determines how many immigrant agents to create at each timepoint, and ``prop_immigrants_timepoint``
+  determines the age and sex of each agent.
+* For **emigration**, rows where ``delta_n < 0`` are used. ``prob_emigration`` is applied to
+  each existing agent individually via a Bernoulli trial for each timepoint.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import numpy as np
+import datetime as dt
 from leap.antibiotic_exposure import AntibioticExposure
 from leap.census_division import CensusDivision
 from leap.control import ControlLevels
@@ -16,19 +17,19 @@ class Agent:
     """A person in the model.
 
     Attributes:
-        year:
+        timepoint:
             The calendar year of the current iteration, e.g. 2027.
-        year_index:
+        timepoint_index:
             An integer representing the year of the simulation. For example, if
-            the simulation starts in 2023, then the ``year_index`` for 2023 is 1, for 2024 is 2, etc.
+            the simulation starts in 2023, then the ``timepoint_index`` for 2023 is 1, for 2024 is 2, etc.
     """
 
     def __init__(
         self,
         sex: str | int | bool | Sex,
         age: int,
-        year: int,
-        year_index: int,
+        timepoint: dt.datetime,
+        timepoint_index: int,
         month: int = 1,
         province: str = "CA",
         uuid: UUID4 | None = None,
@@ -54,8 +55,8 @@ class Agent:
         self.uuid = uuid
         self.sex = sex
         self.age = age
-        self.year = year
-        self.year_index = year_index
+        self.timepoint = timepoint
+        self.timepoint_index = timepoint_index
         self.month = month
         self.alive = alive
         self.has_asthma = has_asthma
@@ -68,7 +69,7 @@ class Agent:
         if num_antibiotic_use is None and antibiotic_exposure is not None:
             self.num_antibiotic_use = antibiotic_exposure.compute_num_antibiotic_use(
                 sex=int(self.sex),
-                birth_year=year - age
+                birth_year=timepoint.year - age
             )
         elif num_antibiotic_use is not None:
             self.num_antibiotic_use = num_antibiotic_use
@@ -81,7 +82,7 @@ class Agent:
         else:
             raise ValueError("Either has_family_history or family_history must be provided.")
         if census_division is None:
-            self.census_division = CensusDivision(province=province, year=year)
+            self.census_division = CensusDivision(province=province)
         else:
             self.census_division = census_division
         self.pollution = pollution

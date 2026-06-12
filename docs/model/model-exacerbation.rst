@@ -11,8 +11,8 @@ Population Data
 *****************
 
 We use the Statistics Canada population data that was generated and saved as:
-`processed_data/birth/initial_pop_distribution_prop.csv 
-<https://github.com/resplab/leap/blob/main/leap/processed_data/birth/initial_pop_distribution_prop.csv>`_.
+`processed_data/birth/initial_population.csv 
+<https://github.com/resplab/leap/blob/main/leap/processed_data/birth/initial_population.csv>`_.
 
 
 .. list-table::
@@ -22,9 +22,9 @@ We use the Statistics Canada population data that was generated and saved as:
    * - Column
      - Type
      - Description
-   * - ``year``
+   * - ``timepoint``
      - :code:`int`
-     - the calendar year
+     - the starting date / time of the time interval that the data applies to
    * - ``age``
      - :code:`int`
      - the age of the person in years
@@ -34,18 +34,19 @@ We use the Statistics Canada population data that was generated and saved as:
        (e.g., ``AB`` = Alberta, ``BC`` = British Columbia, etc.)
    * - ``n_age``
      - :code:`int`
-     - the number of people in a given age group, year, province, and projection scenario
+     - the number of people in a given age group, time interval, province, and projection scenario
    * - ``n_birth``
      - :code:`int`
-     - the number of births in that year, province, and projection scenario
+     - the number of births in that time interval, province, and projection scenario
    * - ``prop``
      - :code:`float`
-     - the proportion of the population in that age group, year, province, and projection scenario
-       relative to the number of births in that year, province, and projection scenario
+     - the proportion of the population in that age group, time interval, province, and projection
+       scenario relative to the number of births in that time interval, province, and projection
+       scenario
    * - ``prop_male``
      - :code:`float`
-     - the proportion of the population in a given age group, year, province, and projection scenario
-       who are male
+     - the proportion of the population in a given age group, time interval, province, and
+       projection scenario who are male
    * - ``projection_scenario``
      - :code:`str`
      - the projection scenario used to generate the data
@@ -68,9 +69,9 @@ See :ref:`occurrence-model-1` for more details about this dataset.
    * - Column
      - Type
      - Description
-   * - ``year``
+   * - ``timepoint``
      - :code:`int`
-     - the calendar year
+     - the starting date / time of the time interval that the data applies to
    * - ``sex``
      - :code:`str`
      - ``F`` = female, ``M`` = male
@@ -79,10 +80,10 @@ See :ref:`occurrence-model-1` for more details about this dataset.
      - the age of the patient in years
    * - ``incidence``
      - :code:`float`
-     - the predicted asthma incidence for the given year, age, and sex
+     - the predicted asthma incidence for the given time interval, age, and sex
    * - ``prevalence``
      - :code:`float`
-     - the predicted asthma prevalence for the given year, age, and sex
+     - the predicted asthma prevalence for the given time interval, age, and sex
 
 
 Hospitalization Data
@@ -162,16 +163,17 @@ are female and over 90 during the given year. This can be calculated:
 Model
 ======
 
-The number of exacerbations in a given year is modelled using a Poisson distribution. The formula is:
+The number of exacerbations in a given time interval is modelled using a Poisson distribution.
+The formula is:
 
 .. math::
 
     N_{\text{exacerbations}} \sim \text{Poisson}(\lambda) = \dfrac{\lambda^k e^{-\lambda}}{k!}
 
 
-Here :math:`\lambda` is the expected number of exacerbations per year. To obtain :math:`\lambda`,
-we must perform a Poisson regression. The Poisson regression assumes that the value we are
-interested in can be approximated using the following formula:
+Here :math:`\lambda` is the expected number of exacerbations per time interval. To obtain
+:math:`\lambda`, we must perform a Poisson regression. The Poisson regression assumes that the value
+we are interested in can be approximated using the following formula:
 
 .. math::
 
@@ -197,7 +199,7 @@ where:
 
 To calculate the :math:`\beta_i` values, we consider the discrete random variable :math:`S`, which
 is the severity of an asthma exacerbation, and the continuous random variable :math:`R`, which is
-the rate of exacerbations per year.
+the rate of exacerbations per time interval.
 
 Calibration
 ******************
@@ -218,7 +220,7 @@ Poisson regression, with the following formula:
     \ln(\lambda_{C}) = \sum_{i=1}^3 \beta_i c_i 
 
 
-* :math:`\lambda_C`: the average number of exacerbations in a given year
+* :math:`\lambda_C`: the average number of exacerbations in a given time interval
 * :math:`c_i`: relative time spent in control level :math:`i`
 * :math:`\beta_i`: control level constant
 
@@ -240,9 +242,9 @@ The number of exacerbations predicted by the model is then:
     N_{\text{exac}}^{\text{(pred)}} &= \lambda_C \cdot N_{\text{asthma}} \\
     N_{\text{asthma}} &= N \cdot \eta_{\text{prev}}
 
-* :math:`N_{\text{asthma}}`: the number of people in a given year, age, sex with asthma
-* :math:`N`: the number of people in a given year, age, and sex
-* :math:`\eta_{\text{prev}}`: the prevalence of asthma in a given year, age, and sex, from
+* :math:`N_{\text{asthma}}`: the number of people in a given time interval, age, sex with asthma
+* :math:`N`: the number of people in a given time interval, age, and sex
+* :math:`\eta_{\text{prev}}`: the prevalence of asthma in a given time interval, age, and sex, from
   :ref:`occurrence-model-1`
 
 and number of hospitalizations is:
@@ -253,7 +255,7 @@ and number of hospitalizations is:
 
 
 * :math:`N_{\text{exac}}^{\text{(pred)}}`: the predicted number of exacerbations (of any severity)
-  for a given year, age, and sex
+  for a given time interval, age, and sex
 * :math:`P(\text{hosp})`: the probability of hospitalization due to asthma given the patient has an
   asthma exacerbation
 

@@ -1,6 +1,8 @@
 import pytest
 import pathlib
 import json
+import datetime as dt
+from dateutil.relativedelta import relativedelta
 from leap.exacerbation import Exacerbation
 from leap.control import ControlLevels
 from leap.utils import round_number
@@ -26,7 +28,8 @@ def config():
                 "βcontrol_C": -1.671,
                 "βcontrol_PC": -0.9781,
                 "βcontrol_UC": -0.5727,
-                "min_year": 2001
+                "min_timepoint": dt.datetime(2001, 1, 1),
+                "time_delta": relativedelta(years=1)
             },
             "BC"
         ),
@@ -47,14 +50,14 @@ def test_exacerbation_constructor(config, hyperparameters, parameters, province)
     ) == parameters["βcontrol_UC"]
     assert exacerbation.parameters["β0"] < 50
     assert exacerbation.parameters["β0"] > -50
-    assert exacerbation.parameters["min_year"] == parameters["min_year"]
+    assert exacerbation.parameters["min_timepoint"] == parameters["min_timepoint"]
     assert exacerbation.calibration_table.get_group(
-        (parameters["min_year"] - 1, 0)
+        (parameters["min_timepoint"] - parameters["time_delta"], 0)
     )["age"].iloc[0] == 3
 
 
 @pytest.mark.parametrize(
-    "hyperparameters, control_levels, province, year, age, sex, lower_bound",
+    "hyperparameters, control_levels, province, timepoint, age, sex, lower_bound",
     [
         (
             {
@@ -63,7 +66,7 @@ def test_exacerbation_constructor(config, hyperparameters, parameters, province)
             },
             ControlLevels(fully_controlled=0.0, partially_controlled=0.0, uncontrolled=1.0),
             "BC",
-            2001,
+            dt.datetime(2001, 1, 1),
             4,
             False,
             1
@@ -71,11 +74,11 @@ def test_exacerbation_constructor(config, hyperparameters, parameters, province)
     ]
 )
 def test_exacerbation_compute_num_exacerbations(
-    config, hyperparameters, control_levels, province, year, age, sex, lower_bound
+    config, hyperparameters, control_levels, province, timepoint, age, sex, lower_bound
 ):
     config["hyperparameters"] = hyperparameters
     exacerbation = Exacerbation(config=config, province=province)
     num_exacerbations = exacerbation.compute_num_exacerbations(
-        age=age, sex=sex, year=year, control_levels=control_levels
+        age=age, sex=sex, timepoint=timepoint, control_levels=control_levels
     )
     assert num_exacerbations > lower_bound

@@ -1,6 +1,7 @@
 import pytest
 import pathlib
 import json
+import datetime as dt
 from leap.antibiotic_exposure import AntibioticExposure
 from leap.utils import round_number
 from tests.utils import __test_dir__
@@ -16,11 +17,13 @@ def config():
 def test_antibiotic_exposure_constructor(config):
     antibiotic_exposure = AntibioticExposure(config=config)
     assert antibiotic_exposure.parameters["β0"] == 110.000442
-    assert antibiotic_exposure.mid_trends.get_group((2002, 0))["year"].iloc[0] == 2002
+    assert antibiotic_exposure.mid_trends.get_group(
+        (dt.datetime(2002, 1, 1), 0)
+    )["timepoint"].iloc[0] == dt.datetime(2002, 1, 1)
 
 
 @pytest.mark.parametrize(
-    "parameters, year, sex, expected_probability",
+    "parameters, timepoint, sex, expected_probability",
     [
         (
             {
@@ -33,15 +36,15 @@ def test_antibiotic_exposure_constructor(config):
                 "β2005": 1,
                 "β2005_year": 1
             },
-            2001,
+            dt.datetime(2001, 1, 1),
             False,
             0.000000375
         ),
     ]
 )
-def test_antibiotic_exposure_compute_probability(parameters, year, sex, expected_probability):
+def test_antibiotic_exposure_compute_probability(parameters, timepoint, sex, expected_probability):
     antibiotic_exposure = AntibioticExposure(parameters=parameters)
-    probability = antibiotic_exposure.compute_probability(sex, year)
+    probability = antibiotic_exposure.compute_probability(sex=sex, timepoint=timepoint)
     assert round_number(probability, sigdigits=3) == expected_probability
 
 

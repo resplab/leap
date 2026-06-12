@@ -126,9 +126,11 @@ class Utility:
             return baseline
         else:
             disutility_exac = np.dot(
-                agent.exacerbation_severity_history.current_year, self.parameters["βexac_sev_hist"]
+                agent.exacerbation_severity_history.current_timepoint,
+                self.parameters["βexac_sev_hist"]
             )
             disutility_control = np.dot(
-                agent.control_levels.as_array(), self.parameters["βcontrol"]
+                agent.control_levels.as_array(),
+                self.parameters["βcontrol"]
             )
             return max(0, (baseline - disutility_exac - disutility_control))

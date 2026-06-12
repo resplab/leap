@@ -570,7 +570,7 @@ The last term is much smaller than the first term, and so we can ignore it. Thus
 
     \sigma^{-1}(q_x) \approx \sigma^{-1}(q_{x_0}) + \beta (x - x_0)
 
-If :math:`x_0` is the age of the person in the starting year of the simulation, then
+If :math:`x_0` is the age of the person at the starting timepoint of the simulation, then
 :math:`(\text{year} - \text{year}_0) = (x - x_0)`:
 
 .. math::
@@ -595,8 +595,8 @@ Processed Data
 The past and projected death probabilities are combined by `leap/data_generation/death_data.py
 <https://github.com/resplab/leap/blob/main/leap/data_generation/death_data.py>`_
 into a single processed file saved as:
-`leap/processed_data/life_table.csv
-<https://github.com/resplab/leap/blob/main/leap/processed_data/life_table.csv>`_.
+`leap/processed_data/{time_delta_tag}/life_table.csv
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/life_table.csv>`_.
 
 Past data (from ``13100837.csv``) covers years 1996 to the last available year using
 death probabilities directly from Statistics Canada.
@@ -627,9 +627,9 @@ fitted for each sex and province.
    * - ``sex``
      - :code:`str`
      - one of ``M`` = male, ``F`` = female
-   * - ``year``
+   * - ``timepoint``
      - :code:`int`
-     - the calendar year
+     - the starting date / time of the time interval that the data applies to
    * - ``province``
      - :code:`str`
      - the 2-letter province or territory ID

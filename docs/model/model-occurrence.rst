@@ -8,7 +8,7 @@ This document describes the asthma occurrence model, which is used to predict th
 prevalence of asthma in British Columbia. The model is divided into two parts:
 
 1. :ref:`occurrence-model-1`: A ``Generalized Linear Model (GLM)`` that predicts asthma incidence
-   and prevalence based on age, sex, and year.
+   and prevalence based on age, sex, and timepoint.
 2. :ref:`occurrence-model-2`: A model that incorporates risk factors such as family history and
    antibiotic use during infancy to predict asthma incidence and prevalence, along with the
    results from the first model.
@@ -21,7 +21,7 @@ Occurrence Model 1: Crude Occurrence
 In the first model, we will use data collected from the ``BC Ministry of Health`` on the
 incidence and prevalence of asthma in British Columbia. We will use this data to fit a 
 ``Generalized Linear Model (GLM)`` to predict the incidence and prevalence of asthma
-based on the age, sex, and year. However, asthma occurrence doesn't just depend on someone's age or
+based on the age, sex, and timepoint. However, asthma occurrence doesn't just depend on someone's age or
 sex, but it also depends on risk factors such as family history and antibiotic use during
 infancy. We will address these in the second model: :ref:`occurrence-model-2`.
 
@@ -98,10 +98,10 @@ Model: Generalized Linear Model - Poisson
 ****************************************************
 
 Since our model projects into the future, we would like to be able to extend this data beyond
-``2019``. Our model also makes predictions at 1-year age intervals, not 5-year age intervals.
+``2019``. Our model also makes predictions at customized age intervals, not 5-year age intervals.
 To obtain these projections, we use a ``Generalized Linear Model (GLM)`` with a
 ``Poisson distribution`` and ``log link function``. Incidence and prevalence are counts of
-people diagnosed with or living with asthma in a given year, making the Poisson distribution a
+people diagnosed with or living with asthma in a given time interval, making the Poisson distribution a
 natural choice. See :doc:`model-statistical-background` for more information on ``GLMs``, including the Poisson
 distribution and log link function.
 
@@ -114,9 +114,9 @@ incidence and :math:`\log(\bar{p}_{\text{prev}})` for prevalence. The scaling of
 (rates per 100 people) is absorbed into the intercept :math:`\beta_0`. We are permitted to
 use linear combinations of functions of the features in our dataset.
 
-Let's start with ``incidence``. We want a formula using ``age``, ``sex``, and ``year``.
+Let's start with ``incidence``. We want a formula using ``age``, ``sex``, and ``timepoint``.
 Since asthma depends on factors such as pollution and antibiotic use, and these factors change
-from year to year, it follows that asthma incidence should depend on the year. Antibiotic use
+over time, it follows that asthma incidence should depend on the timepoint. Antibiotic use
 also depends on age, so we should include age in our formula. Finally, there is a sex difference
 in asthma incidence, so we should include sex in our formula.
 
@@ -146,10 +146,10 @@ where:
      - sex main effect
    * - :math:`\beta_t`
      - :math:`t_i`
-     - year main effect
+     - timepoint main effect
    * - :math:`\beta_{ts}`
      - :math:`t_i \cdot s_i`
-     - year × sex interaction
+     - timepoint × sex interaction
    * - :math:`\beta_k` (:math:`k = 1, \ldots, 5`)
      - :math:`a_i^k`
      - age polynomial terms
@@ -157,14 +157,14 @@ where:
      - :math:`a_i^k \cdot s_i`
      - age × sex interaction terms
 
-And :math:`a_i` is the age, :math:`t_i` is the year, :math:`s_i` is the sex of individual :math:`i`.
+And :math:`a_i` is the age, :math:`t_i` is the timepoint, :math:`s_i` is the sex of individual :math:`i`.
 
 There are :math:`4 + 5 + 5 = 14` coefficients in the incidence model.
 
 
-Next we have the ``prevalence``. We again want a formula using ``age``, ``sex``, and ``year``.
+Next we have the ``prevalence``. We again want a formula using ``age``, ``sex``, and ``timepoint``.
 Since asthma prevalence depends on the number of people who have asthma, and this number changes
-from year to year, we should include year in our formula. Asthma prevalence also depends on age,
+over time, we should include timepoint in our formula. Asthma prevalence also depends on age,
 so we should include age in our formula. Finally, there is a sex difference
 in asthma incidence and hence prevalence, so we should include sex in our formula.
 
@@ -203,18 +203,18 @@ where:
      - age × sex interactions
    * - :math:`\beta_{t^\ell}` (:math:`\ell = 1, 2`)
      - :math:`(t_i)^\ell`
-     - year polynomial terms
+     - timepoint polynomial terms
    * - :math:`\beta_{t^\ell s}` (:math:`\ell = 1, 2`)
      - :math:`(t_i)^\ell \cdot s_i`
-     - year × sex interactions
+     - timepoint × sex interactions
    * - :math:`\beta_{k\ell}` (:math:`k = 1, \ldots, 5`,  :math:`\ell = 1, 2`)
      - :math:`a_i^k \cdot (t_i)^\ell`
-     - age × year interactions
+     - age × timepoint interactions
    * - :math:`\beta_{k\ell s}` (:math:`k = 1, \ldots, 5`, :math:`\ell = 1, 2`)
      - :math:`a_i^k \cdot (t_i)^\ell \cdot s_i`
-     - age × year × sex interactions
+     - age × timepoint × sex interactions
 
-And :math:`a_i` is the age, :math:`t_i` is the year, :math:`s_i` is the sex of individual :math:`i`.
+And :math:`a_i` is the age, :math:`t_i` is the timepoint, :math:`s_i` is the sex of individual :math:`i`.
 
 There are :math:`(1 + 1 + 5 + 5) + (2 + 2 + 10 + 10) = 36` coefficients in the prevalence model.
 
@@ -228,18 +228,19 @@ The following assumptions are applied when generating predictions from the fitte
   For ages greater than 63, incidence and prevalence are assumed to remain constant at the
   rates predicted for age 63.
 
-* **Year**: Incidence and prevalence trends are predicted for all years using the fitted GLM.
-  At runtime, the year is capped at ``2026`` — the maximum year in
+* **Timepoint**: Incidence and prevalence trends are predicted for all timepoints using the
+  fitted GLM. At runtime, the timepoint is capped at ``2026-01-01`` — the maximum timepoint in
   ``asthma_occurrence_correction.csv`` — so that incidence and prevalence remain constant at
-  the ``2026`` rates for all subsequent years.
+  the ``2026`` rates for all subsequent timepoints.
 
 
 Processed Data
 -----------------
 
-The processed data produced by this model is stored in ``asthma_occurrence_predictions.csv``.
-The data contains predicted asthma incidence and prevalence at 1-year age and year intervals,
-for each sex. The variables are:
+The processed data produced by this model is stored in ``asthma_occurrence_predictions.csv``
+(under the ``time_delta_<n>`` directory matching the simulation's time step, e.g.
+``time_delta_365`` for yearly intervals). The data contains predicted asthma incidence and
+prevalence at 1-year age intervals, for each timepoint and sex. The variables are:
 
 .. raw:: html
 
@@ -253,10 +254,10 @@ for each sex. The variables are:
     </thead>
     <tbody>
       <tr>
-        <td><code class="notranslate">year</code></td>
-        <td><code class="notranslate">int</code></td>
+        <td><code class="notranslate">timepoint</code></td>
+        <td><code class="notranslate">datetime</code></td>
         <td>
-          Calendar year of the prediction
+          The timepoint of the prediction, e.g. <code>2024-01-01</code>
         </td>
       </tr>
       <tr>
@@ -278,7 +279,7 @@ for each sex. The variables are:
         <td><code class="notranslate">incidence</code></td>
         <td><code class="notranslate">float</code></td>
         <td>
-          Predicted asthma incidence for the given year, age, and sex, per 100 people.
+          Predicted asthma incidence for the given timepoint, age, and sex, per 100 people.
           Used as \(\bar{p}_{\text{inc}}\) in Model 2 (divided by 100 to convert to a probability).
         </td>
       </tr>
@@ -286,7 +287,7 @@ for each sex. The variables are:
         <td><code class="notranslate">prevalence</code></td>
         <td><code class="notranslate">float</code></td>
         <td>
-          Predicted asthma prevalence for the given year, age, and sex, per 100 people.
+          Predicted asthma prevalence for the given timepoint, age, and sex, per 100 people.
           Used as \(\bar{p}_{\text{prev}}\) in Model 2 (divided by 100 to convert to a probability).
         </td>
       </tr>
@@ -299,7 +300,7 @@ for each sex. The variables are:
 Occurrence Model 2: Risk Factors
 =================================
 
-Model 1 produces age-, sex-, and year-specific rates for the general population, but it treats
+Model 1 produces age-, sex-, and timepoint-specific rates for the general population, but it treats
 everyone in a stratum identically. In reality, individuals differ in ways that affect their
 asthma risk — most notably whether a parent has asthma, and whether they received antibiotics
 in early life. Model 2 builds on Model 1 by incorporating these risk factors, so that
@@ -309,7 +310,7 @@ prevalence rather than a population average.
 This is done in two phases:
 
 * **Offline calibration** (run once during data generation): for every combination of age,
-  sex, and year, a calibration term :math:`\alpha` is computed that ensures the
+  sex, and timepoint, a calibration term :math:`\alpha` is computed that ensures the
   population-weighted average of the risk-factor-adjusted probabilities still matches the
   target rates :math:`\bar{p}_{\text{prev}}` and :math:`\bar{p}_{\text{inc}}` from Model 1.
   The results are saved to
@@ -317,12 +318,12 @@ This is done in two phases:
 
 * **Online simulation** (at runtime): each agent's individual risk factors are combined with
   :math:`\alpha` from the lookup table to produce a personalised asthma probability on every
-  simulated year of life.
+  simulated timepoint of life.
 
 Within the offline calibration, there is a fixed order of operations across three steps.
 Computing :math:`\alpha` requires knowing :math:`\log(\omega_{\text{fhx}})` and
 :math:`\log(\omega_{\text{abx}})` for each risk factor combination :math:`\lambda` at each
-(age, sex, year) stratum, since these determine the individual-level probabilities that must be
+(age, sex, timepoint) stratum, since these determine the individual-level probabilities that must be
 population-weighted to match the Model 1 targets :math:`\bar{p}_{\text{prev}}` and
 :math:`\bar{p}_{\text{inc}}`. The log-ORs depend on age-dependent slope parameters
 :math:`\beta_{\lambda,\text{age}}`, which are known from the literature for prevalence but
@@ -347,9 +348,9 @@ must be estimated for incidence — which creates the following sequence:
    shared intercepts. The optimiser is initialised from the prevalence slope values and finds
    the age slopes that simultaneously satisfy two conditions: (i) the average incidence
    across risk factor combinations :math:`\lambda`, weighted by their population proportions
-   :math:`p(\lambda)` within each (age, sex, year) stratum, matches :math:`\bar{p}_{\text{inc}}`
+   :math:`p(\lambda)` within each (age, sex, timepoint) stratum, matches :math:`\bar{p}_{\text{inc}}`
    from Model 1; and (ii) the ORs implied by
-   the :ref:`contingency tables <optimizing-beta-parameters>` simulated forward one year
+   the :ref:`contingency tables <optimizing-beta-parameters>` simulated forward one timepoint
    from the calibrated prevalence distribution at age :math:`t-1` match the
    literature-derived prevalence ORs across age groups. The converged slopes are saved to
    ``occurrence_calibration_parameters.json``.
@@ -514,7 +515,7 @@ log-odds contributions. Because independent ORs are multiplicative, their logari
 
 Applying individual risk factor ORs directly to the Model 1 log-odds would shift the
 population-weighted average probability away from the target :math:`\bar{p}_{\text{prev}}`. The calibration
-term :math:`\alpha` corrects for this: it is a single scalar per (age, sex, year) stratum that
+term :math:`\alpha` corrects for this: it is a single scalar per (age, sex, timepoint) stratum that
 shifts the baseline log-odds so that the population-weighted average of :math:`p_{\text{prev}}`
 across all 8 risk factor combinations matches :math:`\bar{p}_{\text{prev}}`. It plays the same role as an
 intercept correction in a regression model.
@@ -536,7 +537,7 @@ The predicted prevalence for an individual agent is:
    * - :math:`\bar{p}_{\text{prev}}`
      - probability :math:`\in [0, 1]`
      - Input
-     - predicted prevalence from Model 1 for this (age, sex, year) stratum
+     - predicted prevalence from Model 1 for this (age, sex, timepoint) stratum
    * - :math:`\log(\omega_{\text{fhx}})`
      - log-odds :math:`\in \mathbb{R}`
      - Input
@@ -590,7 +591,7 @@ individual agent is:
    * - :math:`\bar{p}_{\text{inc}}`
      - probability :math:`\in [0, 1]`
      - Input
-     - predicted incidence from Model 1 for this (age, sex, year) stratum
+     - predicted incidence from Model 1 for this (age, sex, timepoint) stratum
    * - :math:`\log(\omega_{\text{fhx}})`
      - log-odds :math:`\in \mathbb{R}`
      - Input
@@ -701,9 +702,9 @@ The optimiser is initialised from the corresponding prevalence slope values and 
 simultaneously satisfy two conditions:
 
 1. The average incidence across risk factor combinations :math:`\lambda`, weighted by their
-   population proportions :math:`p(\lambda)` within each (age, sex, year) stratum, matches
+   population proportions :math:`p(\lambda)` within each (age, sex, timepoint) stratum, matches
    the Model 1 target :math:`\bar{p}_{\text{inc}}`.
-2. The ORs implied by the contingency tables — simulated forward one year from the calibrated
+2. The ORs implied by the contingency tables — simulated forward one timepoint from the calibrated
    prevalence distribution at age :math:`t-1` — match the literature-derived prevalence ORs
    across age groups.
 
@@ -715,7 +716,7 @@ examples.
 In our model, we want to compute the contingency table for the risk factor combinations
 :math:`\lambda` and the asthma diagnosis. This is built up over the next four tables: the
 baseline population at :math:`t=0` splits into those who already have asthma and those who do
-not, each group evolves over one year, and the two are recombined into a single table at
+not, each group evolves over one timepoint, and the two are recombined into a single table at
 :math:`t=1`.
 
 .. md-mermaid::
@@ -810,7 +811,7 @@ Existing Diagnoses: Reassessment at t=1
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In our model, an asthma diagnosis is not permanent — a person may be reassessed and lose
-their diagnosis from one year to the next. This table tracks what happens at :math:`t=1` to
+their diagnosis from one timepoint to the next. This table tracks what happens at :math:`t=1` to
 the :math:`a_0 + c_0` people who already had asthma at :math:`t=0`. Let :math:`\rho` be
 the probability of retaining a diagnosis. Then each cell is simply the corresponding
 baseline cell scaled by :math:`\rho` (retained) or :math:`1 - \rho` (lost):
@@ -848,7 +849,7 @@ baseline cell scaled by :math:`\rho` (retained) or :math:`1 - \rho` (lost):
     c_{1, \text{existing}} &= c_0 \cdot \rho \\
     d_{1, \text{existing}} &= c_0 \cdot (1 - \rho)
 
-where :math:`\rho` is the probability of retaining an asthma diagnosis from one year to the
+where :math:`\rho` is the probability of retaining an asthma diagnosis from one timepoint to the
 next, applied equally regardless of risk factor status.
 
 
@@ -899,7 +900,7 @@ Combined Contingency Table: Existing and New Diagnoses (t=1)
 
 The combined table at :math:`t=1` sums the reassessment and new diagnosis components for
 each cell, giving the full joint distribution of risk factor status and asthma diagnosis
-at the end of the year:
+at the end of the time interval:
 
 .. raw:: html
 
@@ -953,7 +954,7 @@ external studies — averaged across all age groups and all 7 non-baseline risk 
 
 Once optimised, these slopes (:math:`\beta_{\lambda, \text{age}}`) are used
 to compute :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
-each (age, sex, year) stratum. BFGS then uses those stratum-specific log-ORs to solve for
+each (age, sex, timepoint) stratum. BFGS then uses those stratum-specific log-ORs to solve for
 the calibration term :math:`\alpha` per stratum, which is stored in
 ``asthma_occurrence_correction.csv`` as described in the Processed Data section below.
 
@@ -961,10 +962,11 @@ the calibration term :math:`\alpha` per stratum, which is stored in
 Processed Data
 --------------
 
-The calibration terms produced by Model 2 are stored in ``asthma_occurrence_correction.csv``.
-Each row gives the value of :math:`\alpha` for a specific age, sex, year, and outcome type
+The calibration terms produced by Model 2 are stored in ``asthma_occurrence_correction.csv``
+(under the ``time_delta_<n>`` directory matching the simulation's time step). Each row gives
+the value of :math:`\alpha` for a specific age, sex, timepoint, and outcome type
 (prevalence or incidence). This file is used at runtime by the simulation to look up the
-correction for each agent at each year of life.
+correction for each agent at each timepoint of life.
 
 .. raw:: html
 
@@ -978,9 +980,9 @@ correction for each agent at each year of life.
     </thead>
     <tbody>
       <tr>
-        <td><code class="notranslate">year</code></td>
-        <td><code class="notranslate">int</code></td>
-        <td>Calendar year of the prediction</td>
+        <td><code class="notranslate">timepoint</code></td>
+        <td><code class="notranslate">datetime</code></td>
+        <td>The timepoint of the prediction, e.g. <code>2024-01-01</code></td>
       </tr>
       <tr>
         <td><code class="notranslate">sex</code></td>

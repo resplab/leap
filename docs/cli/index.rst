@@ -102,22 +102,10 @@ Simulation Arguments
         <td><code class="notranslate">--province</code></td>
         <td><code class="notranslate">"BC"</code></td>
         <td>The province in which to run the simulation. Must be the 2-letter abbreviation for
-          the province. One of:
+          the province. Currently supported values are:
           <ul>
-            <li><code class="notranslate">CA</code>: All of Canada</li>
-            <li><code class="notranslate">AB</code>: Alberta</li>
-            <li><code class="notranslate">BC</code>: British Columbia</li>
-            <li><code class="notranslate">MB</code>: Manitoba</li>
-            <li><code class="notranslate">NB</code>: New Brunswick</li>
-            <li><code class="notranslate">NL</code>: Newfoundland and Labrador</li>
-            <li><code class="notranslate">NS</code>: Nova Scotia</li>
-            <li><code class="notranslate">NT</code>: Northwest Territories</li>
-            <li><code class="notranslate">NU</code>: Nunavut</li>
-            <li><code class="notranslate">ON</code>: Ontario</li>
-            <li><code class="notranslate">PE</code>: Prince Edward Island</li>
-            <li><code class="notranslate">QC</code>: Quebec</li>
-            <li><code class="notranslate">SK</code>: Saskatchewan</li>
-            <li><code class="notranslate">YT</code>: Yukon</li>
+            <li><code class="notranslate">CA</code>: All of Canada (data available 2001-2068)</li>
+            <li><code class="notranslate">BC</code>: British Columbia (data available 2001-2043)</li>
           </ul>
         </td>
       </tr>
@@ -143,6 +131,8 @@ Simulation Arguments
         <td><code class="notranslate">2</code></td>
         <td>The number of years to run the simulation for. For example:
         <code>--time-horizon 2</code>
+        Note: when <code>--province BC</code> is set, the simulation cannot extend past 2043
+        due to data availability limits in the StatCan population projections.
         </td>
       </tr>
 
@@ -159,13 +149,15 @@ Simulation Arguments
             <li><code class="notranslate">M3</code>: medium-growth 3 projection</li>
             <li><code class="notranslate">M4</code>: medium-growth 4 projection</li>
             <li><code class="notranslate">M5</code>: medium-growth 5 projection</li>
-            <li><code class="notranslate">M6</code>: medium-growth 6 projection</li>
             <li><code class="notranslate">FA</code>: fast-aging projection</li>
             <li><code class="notranslate">SA</code>: slow-aging projection</li>
           </ul>
 
+        Note: <code class="notranslate">M6</code> (medium-growth 6) is a StatCan scenario that
+        is not yet implemented in LEAP and will produce an error if specified.
+
         See
-        <a href="https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm">StatCan</a>.         
+        <a href="https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm">StatCan</a>.
         For example:
         <code>--population-growth-type "M3"</code>
         </td>
@@ -281,8 +273,6 @@ Known Limitations
 
       leap --run-simulation --ignore-pollution
 
-  * The ``--population-growth-type M6`` scenario is not currently implemented. Using ``M6``
-    will cause the simulation to fail. Please use one of the other available scenarios instead.
 
 
 

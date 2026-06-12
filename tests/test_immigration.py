@@ -1,63 +1,64 @@
 import pytest
+import datetime as dt
 from leap.immigration import Immigration
 from leap.utils import round_number
 
 
 @pytest.mark.parametrize(
     (
-        "starting_year, year, age, max_age, sex, province, population_growth_type,"
-        "prop_immigrants_birth, prop_immigrants_year"
+        "min_timepoint, timepoint, age, max_age, sex, province, population_growth_type,"
+        "prop_immigrants_birth, prop_immigrants_timepoint"
     ),
     [
         (
-            2024,
-            2026,
+            dt.datetime(2024, 1, 1),
+            dt.datetime(2026, 1, 1),
             4,
             111,
             0,
             "BC",
             "LG",
-            0.004980,
-            0.004936
+            0.004955,
+            0.004911
         ),
         (
-            2024,
-            2025,
+            dt.datetime(2024, 1, 1),
+            dt.datetime(2025, 1, 1),
             4,
             111,
             1,
             "BC",
             "LG",
-            0.007383,
-            0.007294
+            0.007408,
+            0.007319
         ),
     ]
 )
 def test_immigration_constructor(
-    starting_year, year, age, max_age, sex, province, population_growth_type,
-    prop_immigrants_birth, prop_immigrants_year
+    min_timepoint, timepoint, age, max_age, sex, province, population_growth_type,
+    prop_immigrants_birth, prop_immigrants_timepoint
 ):
     immigration = Immigration(
-        starting_year=starting_year,
+        min_timepoint=min_timepoint,
         province=province,
         population_growth_type=population_growth_type,
         max_age=max_age
     )
-    df = immigration.table.get_group((year))
+    df = immigration.table.get_group((timepoint))
     row = df[(df["age"] == age) & (df["sex"] == sex)]
     assert round_number(row["prop_immigrants_birth"].values[0], sigdigits=4) == prop_immigrants_birth
-    assert round_number(row["prop_immigrants_year"].values[0], sigdigits=4) == prop_immigrants_year
+    assert round_number(row["prop_immigrants_timepoint"].values[0], sigdigits=4) == prop_immigrants_timepoint
 
 
 @pytest.mark.parametrize(
     (
-        "starting_year, year, max_age, province, population_growth_type,"
+        "min_timepoint, timepoint, max_age, province, population_growth_type,"
         "num_new_born, num_new_immigrants"
     ),
     [
         (
-            2024,
-            2025,
+            dt.datetime(2024, 1, 1),
+            dt.datetime(2025, 1, 1),
             111,
             "BC",
             "LG",
@@ -67,13 +68,13 @@ def test_immigration_constructor(
     ]
 )
 def test_immigration_get_num_new_immigrants(
-    starting_year, year, max_age, province, population_growth_type, num_new_born,
+    min_timepoint, timepoint, max_age, province, population_growth_type, num_new_born,
     num_new_immigrants
 ):
     immigration = Immigration(
-        starting_year=starting_year,
+        min_timepoint=min_timepoint,
         province=province,
         population_growth_type=population_growth_type,
         max_age=max_age
     )
-    assert immigration.get_num_new_immigrants(num_new_born, year) == num_new_immigrants
+    assert immigration.get_num_new_immigrants(num_new_born, timepoint) == num_new_immigrants
