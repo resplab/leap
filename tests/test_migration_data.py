@@ -1,0 +1,67 @@
+import pytest
+import datetime as dt
+import numpy as np
+import pandas as pd
+import itertools
+from leap.data_generation.migration_data import get_prev_timepoint_population, \
+    MIN_TIMEPOINT
+from leap.logger import get_logger
+from leap.utils import TimeDelta, date_range, PROJECTION_SCENARIOS, PROVINCE_MAP
+
+logger = get_logger(__name__)
+
+
+
+@pytest.fixture
+def df_projection():
+    df_projection = pd.DataFrame(
+        list(itertools.product(
+            list(PROVINCE_MAP.values())[0:2],
+            PROJECTION_SCENARIOS,
+            list(date_range(dt.datetime(2025, 1, 1), dt.datetime(2027, 1, 1), TimeDelta(months=1))),
+            np.arange(0, 4, 1/12),
+            ["F", "M"]
+        )),
+        columns=[
+            "province", "projection_scenario", "timepoint", "age", "sex"
+        ]
+    )
+    df_projection["N"] = np.random.randint(1000, 10000, df_projection.shape[0])
+    df_projection["prob_death"] = np.random.uniform(0.0001, 0.01, df_projection.shape[0])
+    return df_projection
+
+
+@pytest.mark.parametrize(
+    "province, sex, timepoint, age, projection_scenario, min_timepoint, min_age, time_delta",
+    [
+        (
+            "BC", "F", dt.datetime(2026, 1, 1), 3, "LG", MIN_TIMEPOINT, 0, TimeDelta(months=1)
+        )
+    ]
+)
+def test_get_prev_timepoint_population(
+    df_projection, province, sex, timepoint, age, projection_scenario, min_timepoint, min_age, time_delta
+):
+    df = df_projection.copy()
+    df = df.loc[
+        (df["province"] == province) & 
+        (df["projection_scenario"].isin(["past", projection_scenario]))
+    ]
+    row = get_prev_timepoint_population(
+        df=df,
+        sex=sex,
+        timepoint=timepoint,
+        age=age,
+        min_timepoint=min_timepoint,
+        min_age=min_age,
+        time_delta=time_delta
+    )
+
+    assert row.index.tolist() == ["timepoint_prev", "age_prev", "n_prev", "prob_death_prev"]
+    assert row["timepoint_prev"] == timepoint - time_delta
+    assert row["age_prev"] == age - time_delta.total_years()
+    assert row["n_prev"] >= 0
+    assert row["prob_death_prev"] >= 0.0
+    assert row["prob_death_prev"] <= 1.0
+
+
