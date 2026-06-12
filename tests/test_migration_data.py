@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import itertools
 from leap.data_generation.migration_data import get_prev_timepoint_population, \
+    get_delta_n, \
     MIN_TIMEPOINT
 from leap.logger import get_logger
 from leap.utils import TimeDelta, date_range, PROJECTION_SCENARIOS, PROVINCE_MAP
@@ -63,5 +64,18 @@ def test_get_prev_timepoint_population(
     assert row["n_prev"] >= 0
     assert row["prob_death_prev"] >= 0.0
     assert row["prob_death_prev"] <= 1.0
+
+
+@pytest.mark.parametrize(
+    "n, n_prev, prob_death",
+    [
+        (1000, 1100, 0.01),
+        (1000, 900, 0.01)
+    ]
+)
+def test_get_delta_n(n, n_prev, prob_death):
+    delta_n = get_delta_n(n=n, n_prev=n_prev, prob_death=prob_death)
+    assert np.abs(delta_n) <= n
+
 
 
