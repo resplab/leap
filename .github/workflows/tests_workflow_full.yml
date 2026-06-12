@@ -119,6 +119,10 @@ jobs:
         run: |
           pytest tests/test_death_data.py
         continue-on-error: false
+      - name: Run Python tests migration data generation
+        run: |
+          pytest tests/test_migration_data.py
+        continue-on-error: false
       - name: Run doctests
         run: |
           TQDM_DISABLE=1 pytest leap/ --doctest-modules
