@@ -8,9 +8,9 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-MIN_TIMEPOINT = 2000
-MIN_TIMEPOINT_PROJ = 2021
-MAX_TIMEPOINT = 2065
+MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
+MIN_TIMEPOINT_PROJ = dt.datetime(2021, 1, 1)
+MAX_TIMEPOINT = dt.datetime(2065, 1, 1)
 PROVINCES = ["CA", "BC"]
 
 
