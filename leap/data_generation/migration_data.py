@@ -66,22 +66,22 @@ def get_prev_timepoint_population(
     
 
 def get_delta_n(n: float, n_prev: float, prob_death: float) -> float:
-    """Get the population change due to migration for a given age and sex in a single year.
+    """Get the population change due to migration for a given age and sex in a single time interval.
 
     Args:
-        n: The number of people living in Canada for a single age, sex, year, province, and
+        n: The number of people living in Canada for a single age, sex, timepoint, province, and
             projection scenario.
-        n_prev: The number of people living in Canada in the previous year for the same
+        n_prev: The number of people living in Canada in the previous time interval for the same
             age, sex, province, and projection scenario as defined for ``n``.
             So if ``n`` is the number of females aged ``10`` in the year
             ``2020``, ``n_prev`` is the number of females aged ``9`` in the year ``2019``.
-        prob_death: The probability that a person with a given age and sex in a given
-            year will die between the previous year and this year. So if the person is
+        prob_death: The probability that a person with a given age and sex at a given
+            timepoint will die between the previous timepoint and this timepoint. So if the person is
             a female aged ``10`` in ``2020``, ``prob_death`` is the probability that a
             female aged ``9`` in ``2019`` will die by the age of ``10``.
 
     Returns:
-        The change in population for a given year, age, and sex due to migration.
+        The change in population for a given timepoint, age, and sex due to migration.
     """
     return n - n_prev * (1 - prob_death)
 
