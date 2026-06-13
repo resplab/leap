@@ -102,18 +102,16 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
         df = df[["timepoint", "age", "province", "n_age", "prop_male", "projection_scenario"]]
 
         # Get the total number of M / F for each year, age, and projection scenario
-        df_male = df.copy()
-        df_female = df.copy()
-        df_male["N"] = df_male.apply(
-            lambda x: int(x["n_age"] * x["prop_male"]), axis=1
+        df["prop_female"] = 1 - df["prop_male"]
+        df.rename(columns={"prop_female": "F", "prop_male": "M"}, inplace=True)
+        df = df.melt(
+            id_vars=["timepoint", "age", "province", "projection_scenario", "n_age"],
+            value_vars=["M", "F"],
+            var_name="sex",
+            value_name="prop"
         )
-        df_male["sex"] = ["M"] * df_male.shape[0]
-        df_female["N"] = df_female.apply(
-            lambda x: int(x["n_age"] * (1 - x["prop_male"])), axis=1
-        )
-        df_female["sex"] = ["F"] * df_female.shape[0]
-        df = pd.concat([df_male, df_female], axis=0)
-        df.drop(columns=["n_age", "prop_male"], inplace=True)
+        df["N"] = (df["n_age"] * df["prop"]).astype(int)
+        df.drop(columns=["n_age", "prop"], inplace=True)
 
         # Get the list of projection scenarios, excluding "past"
         projection_scenarios = df.loc[df["projection_scenario"] != "past", "projection_scenario"].unique()
