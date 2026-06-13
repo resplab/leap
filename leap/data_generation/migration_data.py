@@ -110,7 +110,7 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
             var_name="sex",
             value_name="prop"
         )
-        df["N"] = (df["n_age"] * df["prop"]).astype(int)
+        df["n"] = (df["n_age"] * df["prop"]).astype(int)
         df.drop(columns=["n_age", "prop"], inplace=True)
 
         # Get the list of projection scenarios, excluding "past"
@@ -135,7 +135,7 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
             # get the number of births in each year
             df_birth = df_proj.loc[df_proj["age"] == 0]
             grouped_df = df_birth.groupby("timepoint")
-            df_birth["n_birth"] = grouped_df.transform("sum")["N"]
+            df_birth["n_birth"] = grouped_df.transform("sum")["n"]
             df_birth = df_birth.loc[df_birth["sex"] == "F", ["timepoint", "n_birth"]]
 
             # get the previous timepoint's cohort for each entry
@@ -144,10 +144,10 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
                 lambda x: x - time_delta
             )
 
-            df_prev = df_proj[["sex", "age", "timepoint", "N", "prob_death"]].rename(columns={
+            df_prev = df_proj[["sex", "age", "timepoint", "n", "prob_death"]].rename(columns={
                 "age": "age_key",
                 "timepoint": "timepoint_key",
-                "N": "n_prev",
+                "n": "n_prev",
                 "prob_death": "prob_death_prev"
             })
 
@@ -161,7 +161,7 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
 
             # compute the signed population change due to net migration
             df_proj["delta_n"] = df_proj.apply(
-                lambda x: get_delta_n(x["N"], x["n_prev"], x["prob_death_prev"]), axis=1
+                lambda x: get_delta_n(x["n"], x["n_prev"], x["prob_death_prev"]), axis=1
             )
 
             # add the n_birth column to df_proj
@@ -190,7 +190,7 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
 
             # per-person probability of emigrating
             df_proj["prob_emigration"] = df_proj.apply(
-                lambda x: -x["delta_n"] / x["N"] if x["delta_n"] < 0 and x["N"] > 0 else 0.0,
+                lambda x: -x["delta_n"] / x["n"] if x["delta_n"] < 0 and x["n"] > 0 else 0.0,
                 axis=1
             )
 
