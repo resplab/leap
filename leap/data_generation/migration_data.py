@@ -3,7 +3,7 @@ import numpy as np
 import datetime as dt
 from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
-from leap.data_generation.utils import get_parser
+from leap.data_generation.utils import get_parser, split_ages
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
@@ -74,6 +74,7 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
         parse_dates=["timepoint"]
     )
     logger.info("Loading mortality data from CSV file...")
+
     life_table = pd.DataFrame({
         "province": [],
         "projection_scenario": [],
@@ -85,6 +86,10 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
     for file_path in get_data_path(f"processed_data/{time_delta_tag}/death").glob("life_table_*.csv"):
         df = pd.read_csv(get_data_path(file_path), parse_dates=["timepoint"])
         life_table = pd.concat([life_table, df], axis=0)
+
+    if time_delta < TimeDelta(years=1):
+        life_table = split_ages(life_table, time_delta, TimeDelta(years=1), [])
+        df_population = split_ages(df_population, time_delta, TimeDelta(years=1), ["n_age", "n_birth"])
 
     df_migration = pd.DataFrame({
         "timepoint": np.array([], dtype=dt.datetime),
