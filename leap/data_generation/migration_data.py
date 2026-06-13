@@ -14,56 +14,6 @@ MAX_TIMEPOINT = dt.datetime(2065, 1, 1)
 PROVINCES = ["CA", "BC"]
 
 
-def get_prev_timepoint_population(
-    df: pd.DataFrame,
-    sex: str,
-    timepoint: dt.datetime,
-    age: int,
-    min_timepoint: dt.datetime,
-    min_age: int,
-    time_delta: TimeDelta
-) -> pd.Series:
-    """Get the age, sex, probability of death, and population for the previous timepoint.
-
-    Args:
-        df: A dataframe with the following columns:
-
-            * ``timepoint``: The calendar year.
-            * ``sex``: One of ``M`` = male, ``F`` = female.
-            * ``age``: The integer age.
-            * ``N``: The population for a given timepoint, age, sex, province, and projection scenario.
-            * ``prob_death``: The probability that a person in the given timepoint, age, sex,
-              province, and projection scenario will die within the time interval
-              ``[timepoint, timepoint + time_delta]``.
-
-        sex: One of ``F`` = female, ``M`` = male.
-        timepoint: The calendar year.
-        age: The integer age.
-        min_timepoint: The minimum year in the dataframe.
-        min_age: The minimum age in the dataframe.
-        time_delta: The duration of time between subsequent data points.
-
-    Returns:
-        The age, sex, probability of death, and population for the previous timepoint.
-    """
-    if timepoint == min_timepoint or age == min_age:
-        return pd.Series(
-            [np.nan, np.nan, np.nan, np.nan],
-            index=["timepoint_prev", "age_prev", "n_prev", "prob_death_prev"]
-        )
-    else:
-        return df.loc[
-            (df["sex"] == sex) & 
-            (df["timepoint"] == timepoint - time_delta) & 
-            (df["age"] == age - time_delta.total_years())
-        ][["timepoint", "age", "N", "prob_death"]].iloc[0].rename({
-            "timepoint": "timepoint_prev",
-            "age": "age_prev",
-            "N": "n_prev",
-            "prob_death": "prob_death_prev"
-        })
-    
-
 def get_delta_n(n: float, n_prev: float, prob_death: float) -> float:
     """Get the population change due to migration for a given age and sex in a single time interval.
 
@@ -191,12 +141,22 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
             df_birth = df_birth.loc[df_birth["sex"] == "F", ["timepoint", "n_birth"]]
 
             # get the previous timepoint's cohort for each entry
-            df_proj[["timepoint_prev", "age_prev", "n_prev", "prob_death_prev"]] = df_proj.apply(
-                lambda x: get_prev_timepoint_population(
-                    df_proj, x["sex"], x["timepoint"], x["age"], min_timepoint, min_age, time_delta
-                ),
-                axis=1
+            df_proj["age_key"] = df_proj["age"] - time_delta.total_years()
+            df_proj["timepoint_key"] = df_proj["timepoint"].apply(
+                lambda x: x - time_delta
             )
+
+            df_prev = df_proj[["sex", "age", "timepoint", "N", "prob_death"]].rename(columns={
+                "age": "age_key",
+                "timepoint": "timepoint_key",
+                "N": "n_prev",
+                "prob_death": "prob_death_prev"
+            })
+
+            df_proj = df_proj.merge(df_prev, on=["sex", "age_key", "timepoint_key"], how="left")
+            df_proj["age_prev"] = df_proj["age_key"]
+            df_proj["timepoint_prev"] = df_proj["timepoint_key"]
+            df_proj = df_proj.drop(columns=["age_key", "timepoint_key"])
 
             # remove the missing data
             df_proj = df_proj.dropna(subset=["n_prev"])
