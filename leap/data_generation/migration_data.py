@@ -193,7 +193,7 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
             # get the previous timepoint's cohort for each entry
             df_proj[["timepoint_prev", "age_prev", "n_prev", "prob_death_prev"]] = df_proj.apply(
                 lambda x: get_prev_timepoint_population(
-                    df_proj, x["sex"], x["timepoint"], x["age"], min_timepoint, min_age
+                    df_proj, x["sex"], x["timepoint"], x["age"], min_timepoint, min_age, time_delta
                 ),
                 axis=1
             )
