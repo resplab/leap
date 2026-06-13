@@ -94,8 +94,8 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
         "projection_scenario": [],
         "delta_n": [],
         "prop_migrants_birth": [],
-        "prop_immigrants_year": [],
-        "prop_emigrants_year": [],
+        "prop_immigrants_timepoint": [],
+        "prop_emigrants_timepoint": [],
         "prob_emigration": []
     })
 
