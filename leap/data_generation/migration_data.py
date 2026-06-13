@@ -3,7 +3,7 @@ import numpy as np
 import datetime as dt
 from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
-from leap.data_generation.utils import get_parser
+from leap.data_generation.utils import get_parser, split_ages
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
@@ -77,6 +77,9 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
         get_data_path(f"processed_data/{time_delta_tag}/life_table.csv"),
         parse_dates=["timepoint"]
     )
+    if time_delta < TimeDelta(years=1):
+        life_table = split_ages(life_table, time_delta, TimeDelta(years=1), [])
+        df_population = split_ages(df_population, time_delta, TimeDelta(years=1), ["n_age", "n_birth"])
 
     df_migration = pd.DataFrame({
         "timepoint": np.array([], dtype=dt.datetime),
