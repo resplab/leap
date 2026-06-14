@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import datetime as dt
+import plotly.express as px
+import pathlib
 from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
 from leap.data_generation.utils import get_parser, split_ages
@@ -217,6 +219,70 @@ def generate_migration_data(time_delta: TimeDelta):
     file_path = get_data_path(f"processed_data/{time_delta_tag}/migration_table.csv", mkdirs=True)
     logger.info(f"Saving data to {file_path}")
     df_migration.to_csv(file_path, index=False)
+
+def plot(
+    df: pd.DataFrame,
+    y: str,
+    color: str,
+    title: str = "",
+    file_path: pathlib.Path | None = None,
+    width: int = 2000,
+    height: int = 1500
+):
+    """Plot the migration data for validation.
+    
+    Args:
+        df: A dataframe containing the life table data. Must have columns:
+
+            * ``timepoint (dt.datetime)``: The given timepoint.
+            * ``province (str)``: The 2-letter province ID, e.g. ``BC``.
+            * ``age (int)``: The integer age.
+            * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+            * ``prob_death (float)``: The probability of death for the given timepoint, province,
+              age, and sex.
+
+        y: The name of the column in the dataframe which will be plotted as the ``y`` data.
+        color: The name of the column in the dataframe which will be used to color the data.
+        title: The title of the plot.
+        file_path: The path to save the plot to.
+        width: The width of the plot.
+        height: The height of the plot.
+    """
+
+    fig = px.line(
+        df.loc[df["province"].isin(["BC", "CA"])].dropna(),
+        x="age",
+        y=y,
+        render_mode="svg",
+        color=color,
+        markers=True,
+        facet_col="sex",
+        facet_row="timepoint",
+        facet_row_spacing=0.01,  # Shrink vertical gap to 1%
+        facet_col_spacing=0.01,   # Shrink horizontal gap to 1%
+        title=title
+    )
+    fig.update_yaxes(matches=None)
+    
+    fig.update_layout(
+        font=dict(size=30),
+        title=dict(font=dict(size=50)),
+        showlegend=True,
+        width=width,
+        height=height,
+        autosize=False,
+        margin=dict(l=120, r=220, t=120, b=120)
+    )
+
+    fig.for_each_annotation(
+        lambda annotation: annotation.update(
+            text=annotation.text.split("=")[-1],
+            font=dict(size=30),
+            textangle=0,
+        )
+    )
+
+    fig.write_image(str(file_path), scale=2, width=width, height=height)
 
 
 if __name__ == "__main__":
