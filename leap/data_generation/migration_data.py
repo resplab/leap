@@ -202,6 +202,50 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
 def generate_migration_data(time_delta: TimeDelta):
     df_migration = load_migration_data(time_delta)
     time_delta_tag = get_time_delta_tag(time_delta)
+
+    # Create validation plots for the migration data
+    timepoints = df_migration["timepoint"].unique()
+    indices = np.arange(start=0, stop=len(timepoints), step=max(1, len(timepoints) // 5))
+    timepoints = timepoints[indices]
+
+    df = df_migration.loc[df_migration["timepoint"].isin(timepoints)].copy()
+    df = df.melt(
+        id_vars=["age", "sex", "province", "timepoint", "projection_scenario"],
+        value_vars=[
+            "n_immigrants",
+            "n_emigrants",
+            "delta_n",
+            "prop_immigrants_timepoint",
+            "prop_emigrants_timepoint",
+            "prob_emigration"
+        ],
+        var_name="series",
+        value_name="value"
+    )
+    plot(
+        df=df.loc[df["series"].isin(["n_immigrants", "n_emigrants", "delta_n"])],
+        y="value",
+        color="series",
+        title=f"Net Migration",
+        file_path=get_data_path(
+            f"data_generation/figures/{time_delta_tag}/migration_delta_n.png", mkdirs=True
+        ),
+        height=3000
+    )
+    plot(
+        df=df.loc[df["series"].isin(
+            ["prop_immigrants_timepoint", "prop_emigrants_timepoint", "prob_emigration"]
+        )],
+        y="value",
+        color="series",
+        title=f"Migration Proportions",
+        file_path=get_data_path(
+            f"data_generation/figures/{time_delta_tag}/migration_proportions.png", mkdirs=True
+        ),
+        height=3000
+    )
+
+    # Save the migration data to a CSV file
     file_path = get_data_path(f"processed_data/{time_delta_tag}/migration_table.csv", mkdirs=True)
     logger.info(f"Saving data to {file_path}")
     df_migration.drop(
