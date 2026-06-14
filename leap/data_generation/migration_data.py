@@ -36,6 +36,53 @@ def get_delta_n(n: float, n_prev: float, prob_death: float) -> float:
     """
     return n - n_prev * (1 - prob_death)
 
+def load_population_data(time_delta: TimeDelta) -> pd.DataFrame:
+    """Load the population data for the given time delta.
+
+    Args:
+        time_delta: The duration of time between subsequent data points.
+    
+    Returns:
+        A dataframe with the following columns:
+
+        * ``timepoint``: The timepoint which the data applies to.
+        * ``province``: A string indicating the 2-letter province abbreviation, e.g. ``"BC"``.
+          For all of Canada, set province to ``"CA"``.
+        * ``age``: The integer age.
+        * ``sex``: One of ``M`` = male, ``F`` = female.
+        * ``n``: The number of people living in Canada for a single age, sex, timepoint, province,
+          and projection scenario.
+        * ``projection_scenario``: The projection scenario.
+    """
+    logger.info("Loading initial population data from CSV file...")
+    time_delta_tag = get_time_delta_tag(time_delta)
+    df = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/birth/initial_population.csv"),
+        parse_dates=["timepoint"]
+    )
+
+    # Select only the data for timepoints after the min timepoint
+    df = df.loc[df["timepoint"] >= MIN_TIMEPOINT]
+
+    df = df[["timepoint", "age", "province", "n_age", "prop_male", "projection_scenario"]]
+
+    # Get the total number of M / F for each year, age, and projection scenario
+    df["prop_female"] = 1 - df["prop_male"]
+    df.rename(columns={"prop_female": "F", "prop_male": "M"}, inplace=True)
+    df = df.melt(
+        id_vars=["timepoint", "age", "province", "projection_scenario", "n_age"],
+        value_vars=["M", "F"],
+        var_name="sex",
+        value_name="prop"
+    )
+    df["n"] = (df["n_age"] * df["prop"]).astype(int)
+    df.drop(columns=["n_age", "prop"], inplace=True)
+
+    if time_delta < TimeDelta(years=1):
+        df = split_ages(df, time_delta, TimeDelta(years=1), ["n"])
+
+    return df
+
 
 def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
     """Generate migration data for the given provinces and years.
@@ -68,39 +115,18 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
           emigrating (``abs(delta_n) / N``). Zero for immigration cells.
 
     """
-    logger.info("Loading initial population data from CSV file...")
-    time_delta_tag = get_time_delta_tag(time_delta)
-    df_population = pd.read_csv(
-        get_data_path(f"processed_data/{time_delta_tag}/birth/initial_population.csv"),
-        parse_dates=["timepoint"]
-    )
+
     logger.info("Loading mortality data from CSV file...")
+    time_delta_tag = get_time_delta_tag(time_delta)
     life_table = pd.read_csv(
         get_data_path(f"processed_data/{time_delta_tag}/life_table.csv"),
         parse_dates=["timepoint"]
     )
     if time_delta < TimeDelta(years=1):
         life_table = split_ages(life_table, time_delta, TimeDelta(years=1), [])
-        df_population = split_ages(df_population, time_delta, TimeDelta(years=1), ["n_age", "n_birth"])
 
-    # Select only the data for timepoints after the min timepoint
-    df_population = df_population.loc[df_population["timepoint"] >= MIN_TIMEPOINT]
-
-    df_population = df_population[
-        ["timepoint", "age", "province", "n_age", "prop_male", "projection_scenario"]
-    ]
-
-    # Get the total number of M / F for each year, age, and projection scenario
-    df_population["prop_female"] = 1 - df_population["prop_male"]
-    df_population.rename(columns={"prop_female": "F", "prop_male": "M"}, inplace=True)
-    df_population = df_population.melt(
-        id_vars=["timepoint", "age", "province", "projection_scenario", "n_age"],
-        value_vars=["M", "F"],
-        var_name="sex",
-        value_name="prop"
-    )
-    df_population["n"] = (df_population["n_age"] * df_population["prop"]).astype(int)
-    df_population.drop(columns=["n_age", "prop"], inplace=True)
+    # Load the population data from the CSV file
+    df_population = load_population_data(time_delta)
 
     df_migration = pd.DataFrame({
         "timepoint": np.array([], dtype=dt.datetime),
