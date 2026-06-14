@@ -204,7 +204,15 @@ def generate_migration_data(time_delta: TimeDelta):
     time_delta_tag = get_time_delta_tag(time_delta)
     file_path = get_data_path(f"processed_data/{time_delta_tag}/migration_table.csv", mkdirs=True)
     logger.info(f"Saving data to {file_path}")
+    df_migration.drop(
+        columns=[
+            "n_immigrants", "n_emigrants", "n", "n_birth", "n_immigrants_timepoint",
+            "n_emigrants_timepoint"
+        ],
+        inplace=True
+    )
     df_migration.to_csv(file_path, index=False)
+
 
 def plot(
     df: pd.DataFrame,
