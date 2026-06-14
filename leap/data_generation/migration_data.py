@@ -179,6 +179,10 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
                 lambda x: get_delta_n(x["n"], x["n_prev"], x["prob_death_prev"]), axis=1
             )
 
+            # number of migrants
+            df_proj["n_immigrants"] = df_proj["delta_n"].clip(lower=0)
+            df_proj["n_emigrants"] = (-df_proj["delta_n"]).clip(lower=0)
+
             # add the n_birth column to df_proj
             df_proj = pd.merge(df_proj, df_birth, on="timepoint", how="left")
 
@@ -186,28 +190,14 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
             df_proj["prop_migrants_birth"] = df_proj["delta_n"] / df_proj["n_birth"]
 
             # timepoint proportions with separate denominators for immigration and emigration
-            df_proj["n_immigrants_timepoint"] = df_proj.groupby("timepoint")["delta_n"].transform(
-                lambda x: x.clip(lower=0).sum()
-            )
-            df_proj["n_emigrants_timepoint"] = df_proj.groupby("timepoint")["delta_n"].transform(
-                lambda x: (-x).clip(lower=0).sum()
-            )
-            df_proj["prop_immigrants_timepoint"] = df_proj.apply(
-                lambda x: x["delta_n"] / x["n_immigrants_timepoint"]
-                    if x["delta_n"] > 0 and x["n_immigrants_timepoint"] > 0 else 0.0,
-                axis=1
-            )
-            df_proj["prop_emigrants_timepoint"] = df_proj.apply(
-                lambda x: -x["delta_n"] / x["n_emigrants_timepoint"]
-                    if x["delta_n"] < 0 and x["n_emigrants_timepoint"] > 0 else 0.0,
-                axis=1
-            )
+            df_proj["n_immigrants_timepoint"] = df_proj.groupby("timepoint")["n_immigrants"].transform("sum")
+            df_proj["n_emigrants_timepoint"] = df_proj.groupby("timepoint")["n_emigrants"].transform("sum")
+            df_proj["prop_immigrants_timepoint"] = df_proj["n_immigrants"] / df_proj["n_immigrants_timepoint"]
+            df_proj["prop_emigrants_timepoint"] = df_proj["n_emigrants"] / df_proj["n_emigrants_timepoint"]
+            df_proj = df_proj.fillna(0)
 
             # per-person probability of emigrating
-            df_proj["prob_emigration"] = df_proj.apply(
-                lambda x: -x["delta_n"] / x["n"] if x["delta_n"] < 0 and x["n"] > 0 else 0.0,
-                axis=1
-            )
+            df_proj["prob_emigration"] = df_proj["n_emigrants"] / df_proj["n"]
 
             df_migration_proj = df_proj[[
                 "timepoint", "province", "age", "sex", "projection_scenario",
