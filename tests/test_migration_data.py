@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import itertools
 from leap.data_generation.migration_data import get_delta_n,  \
-    load_migration_data, MIN_TIMEPOINT
+    load_population_data, load_migration_data, MIN_TIMEPOINT
 from leap.logger import get_logger
 from leap.utils import TimeDelta, date_range, PROJECTION_SCENARIOS, PROVINCE_MAP
 
@@ -41,6 +41,23 @@ def df_projection():
 def test_get_delta_n(n, n_prev, prob_death):
     delta_n = get_delta_n(n=n, n_prev=n_prev, prob_death=prob_death)
     assert np.abs(delta_n) <= n
+
+
+@pytest.mark.parametrize(
+    "time_delta",
+    [
+        (TimeDelta(years=1)),
+        (TimeDelta(months=1))
+    ]
+)
+def test_load_population_data(time_delta):
+    df = load_population_data(time_delta)
+    assert set(df.columns) == set(
+        ["province", "projection_scenario", "timepoint", "age", "sex", "n"]
+    )
+    assert df["province"].isin(list(PROVINCE_MAP.values())).all()
+    assert df["projection_scenario"].isin(PROJECTION_SCENARIOS).all()
+    assert df["sex"].isin(["F", "M"]).all()
 
 
 @pytest.mark.parametrize(
