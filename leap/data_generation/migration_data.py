@@ -93,6 +93,25 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
         life_table = split_ages(life_table, time_delta, TimeDelta(years=1), [])
         df_population = split_ages(df_population, time_delta, TimeDelta(years=1), ["n_age", "n_birth"])
 
+    # Select only the data for timepoints after the min timepoint
+    df_population = df_population.loc[df_population["timepoint"] >= MIN_TIMEPOINT]
+
+    df_population = df_population[
+        ["timepoint", "age", "province", "n_age", "prop_male", "projection_scenario"]
+    ]
+
+    # Get the total number of M / F for each year, age, and projection scenario
+    df_population["prop_female"] = 1 - df_population["prop_male"]
+    df_population.rename(columns={"prop_female": "F", "prop_male": "M"}, inplace=True)
+    df_population = df_population.melt(
+        id_vars=["timepoint", "age", "province", "projection_scenario", "n_age"],
+        value_vars=["M", "F"],
+        var_name="sex",
+        value_name="prop"
+    )
+    df_population["n"] = (df_population["n_age"] * df_population["prop"]).astype(int)
+    df_population.drop(columns=["n_age", "prop"], inplace=True)
+
     df_migration = pd.DataFrame({
         "timepoint": np.array([], dtype=dt.datetime),
         "province": [],
@@ -109,24 +128,8 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
     for province in PROVINCES:
         logger.info(f"Processing migration data for province {province}...")
 
-        # Select only the data for the given province and the years after the starting year
-        df = df_population.loc[
-            (df_population["timepoint"] >= MIN_TIMEPOINT) &
-            (df_population["province"] == province)
-        ]
-        df = df[["timepoint", "age", "province", "n_age", "prop_male", "projection_scenario"]]
-
-        # Get the total number of M / F for each year, age, and projection scenario
-        df["prop_female"] = 1 - df["prop_male"]
-        df.rename(columns={"prop_female": "F", "prop_male": "M"}, inplace=True)
-        df = df.melt(
-            id_vars=["timepoint", "age", "province", "projection_scenario", "n_age"],
-            value_vars=["M", "F"],
-            var_name="sex",
-            value_name="prop"
-        )
-        df["n"] = (df["n_age"] * df["prop"]).astype(int)
-        df.drop(columns=["n_age", "prop"], inplace=True)
+        # Select only the data for the given province
+        df = df_population.loc[df_population["province"] == province].copy()
 
         # Get the list of projection scenarios, excluding "past"
         projection_scenarios = df.loc[df["projection_scenario"] != "past", "projection_scenario"].unique()
