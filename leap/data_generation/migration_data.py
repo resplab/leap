@@ -189,11 +189,7 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
             # per-person probability of emigrating
             df_proj["prob_emigration"] = df_proj["n_emigrants"] / df_proj["n"]
 
-            df_migration_proj = df_proj[[
-                "timepoint", "province", "age", "sex", "projection_scenario",
-                "delta_n", "prop_migrants_birth",
-                "prop_immigrants_timepoint", "prop_emigrants_timepoint", "prob_emigration"
-            ]].copy()
+            df_migration_proj = df_proj.copy()
 
             # convert the "past" projection scenario to the given projection scenario
             df_migration_proj["projection_scenario"] = projection_scenario
