@@ -72,4 +72,7 @@ def test_load_migration_data(time_delta):
     assert set(df.columns) == set(
         ["province", "projection_scenario", "timepoint", "age", "sex", "n_prev", "prob_death_prev"]
     )
+    assert df["province"].isin(list(PROVINCE_MAP.values())).all()
+    assert df["projection_scenario"].isin(PROJECTION_SCENARIOS).all()
+    assert df["sex"].isin(["F", "M"]).all()
 
