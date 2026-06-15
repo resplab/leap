@@ -202,7 +202,7 @@ def generate_migration_data(time_delta: TimeDelta):
     time_delta_tag = get_time_delta_tag(time_delta)
 
     # Create validation plots for the migration data
-    timepoints = df_migration["timepoint"].unique()
+    timepoints = df_migration.loc[df_migration["timepoint"] > MIN_TIMEPOINT_PROJ, "timepoint"].unique()
     indices = np.arange(start=0, stop=len(timepoints), step=max(1, len(timepoints) // 5))
     timepoints = timepoints[indices]
 
