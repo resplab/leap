@@ -279,7 +279,10 @@ def generate_migration_data(time_delta: TimeDelta):
             )
 
     # Save the migration data to a CSV file
-    file_path = get_data_path(f"processed_data/{time_delta_tag}/migration_table.csv", mkdirs=True)
+    file_path = get_data_path(
+        f"processed_data/{time_delta_tag}/migration/migration_table.csv",
+        mkdirs=True
+    )
     logger.info(f"Saving data to {file_path}")
     df_migration.drop(
         columns=[
