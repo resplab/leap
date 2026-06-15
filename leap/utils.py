@@ -25,6 +25,8 @@ logger = get_logger(__name__)
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
 
+DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
+
 PROJECTION_SCENARIOS = (
     "past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", "FA", "SA"
 )
