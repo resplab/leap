@@ -220,28 +220,44 @@ def generate_migration_data(time_delta: TimeDelta):
         var_name="series",
         value_name="value"
     )
-    plot(
-        df=df.loc[df["series"].isin(["n_immigrants", "n_emigrants", "delta_n"])],
-        y="value",
-        color="series",
-        title=f"Net Migration",
-        file_path=get_data_path(
-            f"data_generation/figures/{time_delta_tag}/migration_delta_n.png", mkdirs=True
-        ),
-        height=3000
-    )
-    plot(
-        df=df.loc[df["series"].isin(
-            ["prop_immigrants_timepoint", "prop_emigrants_timepoint", "prob_emigration"]
-        )],
-        y="value",
-        color="series",
-        title=f"Migration Proportions",
-        file_path=get_data_path(
-            f"data_generation/figures/{time_delta_tag}/migration_proportions.png", mkdirs=True
-        ),
-        height=3000
-    )
+    for province in df["province"].unique():
+        for sex in df["sex"].unique():
+            plot(
+                df=df.loc[
+                    (df["series"].isin(["n_immigrants", "n_emigrants", "delta_n"])) &
+                    (df["province"] == province) &
+                    (df["sex"] == sex)
+                ],
+                y="value",
+                ylabel="N",
+                color="series",
+                title=f"Net Migration, Sex = {sex}, Province = {province}",
+                file_path=get_data_path(
+                    f"data_generation/figures/{time_delta_tag}/migration/delta_n_{province}_{sex}.png",
+                    mkdirs=True
+                ),
+                height=5000,
+                width=3000
+            )
+            plot(
+                df=df.loc[
+                    (df["series"].isin(
+                        ["prop_immigrants_timepoint", "prop_emigrants_timepoint", "prob_emigration"]
+                    )) &
+                    (df["province"] == province) &
+                    (df["sex"] == sex)
+                ],
+                y="value",
+                ylabel="Proportion",
+                color="series",
+                title=f"Migration Proportions, Sex = {sex}, Province = {province}",
+                file_path=get_data_path(
+                    f"data_generation/figures/{time_delta_tag}/migration/proportions_{province}_{sex}.png",
+                    mkdirs=True
+                ),
+                height=5000,
+                width=3000
+            )
 
     # Save the migration data to a CSV file
     file_path = get_data_path(f"processed_data/{time_delta_tag}/migration_table.csv", mkdirs=True)
@@ -294,8 +310,8 @@ def plot(
         render_mode="svg",
         color=color,
         markers=True,
-        facet_col="sex",
-        facet_row="timepoint",
+        facet_row="projection_scenario",
+        facet_col="timepoint",
         facet_row_spacing=0.01,  # Shrink vertical gap to 1%
         facet_col_spacing=0.01,   # Shrink horizontal gap to 1%
         title=title,
