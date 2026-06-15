@@ -138,104 +138,73 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
     # Load the population data from the CSV file
     df_population = load_population_data(time_delta)
 
-    df_migration = pd.DataFrame({
-        "timepoint": np.array([], dtype=dt.datetime),
-        "province": [],
-        "age": np.array([], dtype=int),
-        "sex": [],
-        "projection_scenario": [],
-        "delta_n": [],
-        "prop_migrants_birth": [],
-        "prop_immigrants_timepoint": [],
-        "prop_emigrants_timepoint": [],
-        "prob_emigration": []
+    # Select only the data for the given province
+    df = df_population.copy()
+
+    # join to the life table to get death probabilities
+    df = df.merge(
+        life_table, on=["timepoint", "age", "province", "sex"], how="left"
+    )
+
+    # get the number of births in each year
+    df_birth = df.loc[df["age"] == 0]
+    grouped_df = df_birth.groupby(["timepoint", "province", "projection_scenario"])
+    df_birth["n_birth"] = grouped_df.transform("sum")["n"]
+    df_birth = df_birth.loc[df_birth["sex"] == "F", ["timepoint", "n_birth", "projection_scenario", "province"]]
+
+    # get the previous timepoint's cohort for each entry
+    df["age_key"] = df["age"] - time_delta.total_years()
+    df["timepoint_key"] = df["timepoint"].apply(
+        lambda x: x - time_delta
+    )
+
+    df_prev = df[
+        ["province", "projection_scenario", "sex", "age", "timepoint", "n", "prob_death"]
+    ].rename(columns={
+        "age": "age_key",
+        "timepoint": "timepoint_key",
+        "n": "n_prev",
+        "prob_death": "prob_death_prev"
     })
 
-    for province in PROVINCES:
-        logger.info(f"Processing migration data for province {province}...")
+    df = df.merge(
+        df_prev,
+        on=["province", "projection_scenario", "sex", "age_key", "timepoint_key"],
+        how="left"
+    )
+    df["age_prev"] = df["age_key"]
+    df["timepoint_prev"] = df["timepoint_key"]
+    df = df.drop(columns=["age_key", "timepoint_key"])
 
-        # Select only the data for the given province
-        df = df_population.loc[df_population["province"] == province].copy()
+    # remove the missing data
+    df = df.dropna(subset=["n_prev"])
 
-        # Get the list of projection scenarios, excluding "past"
-        projection_scenarios = df.loc[df["projection_scenario"] != "past", "projection_scenario"].unique()
-        min_timepoint = df["timepoint"].min()
-        min_age = 0
+    # compute the signed population change due to net migration
+    df["delta_n"] = df["n"] - df["n_prev"] * (1 - df["prob_death_prev"])
 
-        for projection_scenario in projection_scenarios:
-            logger.info(f"Projection scenario: {projection_scenario}")
+    # number of migrants
+    df["n_immigrants"] = df["delta_n"].clip(lower=0)
+    df["n_emigrants"] = (-df["delta_n"]).clip(lower=0)
 
-            # select only the current projection scenario and the past projection scenario
-            df_proj = df.loc[
-                (df["projection_scenario"].isin(["past", projection_scenario])) &
-                ~((df["projection_scenario"] == "past") & (df["timepoint"] == MIN_TIMEPOINT_PROJ))
-            ]
+    # add the n_birth column to df
+    df = pd.merge(
+        df, df_birth, on=["province", "projection_scenario", "timepoint"], how="left"
+    )
 
-            # join to the life table to get death probabilities
-            df_proj = df_proj.merge(
-                life_table, on=["timepoint", "age", "province", "sex"], how="left"
-            )
+    # signed proportion relative to births
+    df["prop_migrants_birth"] = df["delta_n"] / df["n_birth"]
 
-            # get the number of births in each year
-            df_birth = df_proj.loc[df_proj["age"] == 0]
-            grouped_df = df_birth.groupby("timepoint")
-            df_birth["n_birth"] = grouped_df.transform("sum")["n"]
-            df_birth = df_birth.loc[df_birth["sex"] == "F", ["timepoint", "n_birth"]]
+    # timepoint proportions with separate denominators for immigration and emigration
+    df["n_immigrants_timepoint"] = df.groupby("timepoint")["n_immigrants"].transform("sum")
+    df["n_emigrants_timepoint"] = df.groupby("timepoint")["n_emigrants"].transform("sum")
+    df["prop_immigrants_timepoint"] = df["n_immigrants"] / df["n_immigrants_timepoint"]
+    df["prop_emigrants_timepoint"] = df["n_emigrants"] / df["n_emigrants_timepoint"]
+    df = df.fillna(0)
 
-            # get the previous timepoint's cohort for each entry
-            df_proj["age_key"] = df_proj["age"] - time_delta.total_years()
-            df_proj["timepoint_key"] = df_proj["timepoint"].apply(
-                lambda x: x - time_delta
-            )
+    # per-person probability of emigrating
+    df["prob_emigration"] = df["n_emigrants"] / df["n"]
 
-            df_prev = df_proj[["sex", "age", "timepoint", "n", "prob_death"]].rename(columns={
-                "age": "age_key",
-                "timepoint": "timepoint_key",
-                "n": "n_prev",
-                "prob_death": "prob_death_prev"
-            })
-
-            df_proj = df_proj.merge(df_prev, on=["sex", "age_key", "timepoint_key"], how="left")
-            df_proj["age_prev"] = df_proj["age_key"]
-            df_proj["timepoint_prev"] = df_proj["timepoint_key"]
-            df_proj = df_proj.drop(columns=["age_key", "timepoint_key"])
-
-            # remove the missing data
-            df_proj = df_proj.dropna(subset=["n_prev"])
-
-            # compute the signed population change due to net migration
-            df_proj["delta_n"] = df_proj.apply(
-                lambda x: get_delta_n(x["n"], x["n_prev"], x["prob_death_prev"]), axis=1
-            )
-
-            # number of migrants
-            df_proj["n_immigrants"] = df_proj["delta_n"].clip(lower=0)
-            df_proj["n_emigrants"] = (-df_proj["delta_n"]).clip(lower=0)
-
-            # add the n_birth column to df_proj
-            df_proj = pd.merge(df_proj, df_birth, on="timepoint", how="left")
-
-            # signed proportion relative to births
-            df_proj["prop_migrants_birth"] = df_proj["delta_n"] / df_proj["n_birth"]
-
-            # timepoint proportions with separate denominators for immigration and emigration
-            df_proj["n_immigrants_timepoint"] = df_proj.groupby("timepoint")["n_immigrants"].transform("sum")
-            df_proj["n_emigrants_timepoint"] = df_proj.groupby("timepoint")["n_emigrants"].transform("sum")
-            df_proj["prop_immigrants_timepoint"] = df_proj["n_immigrants"] / df_proj["n_immigrants_timepoint"]
-            df_proj["prop_emigrants_timepoint"] = df_proj["n_emigrants"] / df_proj["n_emigrants_timepoint"]
-            df_proj = df_proj.fillna(0)
-
-            # per-person probability of emigrating
-            df_proj["prob_emigration"] = df_proj["n_emigrants"] / df_proj["n"]
-
-            df_migration_proj = df_proj.copy()
-
-            # convert the "past" projection scenario to the given projection scenario
-            df_migration_proj["projection_scenario"] = projection_scenario
-
-            df_migration = pd.concat([df_migration, df_migration_proj], axis=0)
-
-    return df_migration
+    return df
 
 
 def generate_migration_data(time_delta: TimeDelta):
