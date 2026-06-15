@@ -37,6 +37,7 @@ def get_delta_n(n: float, n_prev: float, prob_death: float) -> float:
     """
     return n - n_prev * (1 - prob_death)
 
+
 def load_population_data(time_delta: TimeDelta) -> pd.DataFrame:
     """Load the population data for the given time delta.
 
@@ -216,7 +217,7 @@ def generate_migration_data(time_delta: TimeDelta):
     # Convert the age back to integer
     df_migration["age_int"] = df_migration["age"].apply(lambda x: int(x))
     df_migration = df_migration.groupby(
-        ["age_int", "province", "sex", "timepoint", "projection_scenario"],
+        ["province", "projection_scenario", "timepoint", "sex", "age_int"],
         as_index=False
     ).agg({
         "delta_n": "sum",
@@ -322,8 +323,7 @@ def plot(
             * ``province (str)``: The 2-letter province ID, e.g. ``BC``.
             * ``age (int)``: The integer age.
             * ``sex (str)``: One of ``M`` = male, ``F`` = female.
-            * ``prob_death (float)``: The probability of death for the given timepoint, province,
-              age, and sex.
+            * ``projection_scenario (str)``: The projection scenario abbreviation.
 
         y: The name of the column in the dataframe which will be plotted as the ``y`` data.
         color: The name of the column in the dataframe which will be used to color the data.
