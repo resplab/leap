@@ -283,8 +283,7 @@ def generate_migration_data(time_delta: TimeDelta):
     logger.info(f"Saving data to {file_path}")
     df_migration.drop(
         columns=[
-            "n_immigrants", "n_emigrants", "n", "n_birth", "n_immigrants_timepoint",
-            "n_emigrants_timepoint"
+            "n_immigrants", "n_emigrants"
         ],
         inplace=True
     )
