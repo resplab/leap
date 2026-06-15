@@ -203,6 +203,23 @@ def generate_migration_data(time_delta: TimeDelta):
     df_migration = load_migration_data(time_delta)
     time_delta_tag = get_time_delta_tag(time_delta)
 
+    # Convert the age back to integer
+    df_migration["age_int"] = df_migration["age"].apply(lambda x: int(x))
+    df_migration = df_migration.groupby(
+        ["age_int", "province", "sex", "timepoint", "projection_scenario"],
+        as_index=False
+    ).agg({
+        "delta_n": "sum",
+        "prop_migrants_birth": "mean",
+        "prop_immigrants_timepoint": "mean",
+        "prop_emigrants_timepoint": "mean",
+        "prob_emigration": "mean",
+        "n_immigrants": "sum",
+        "n_emigrants": "sum"
+    })
+    df_migration.rename(columns={"age_int": "age"}, inplace=True)
+    df_migration.sort_values(["province", "sex", "timepoint", "age"], inplace=True)
+
     # Create validation plots for the migration data
     timepoints = df_migration.loc[df_migration["timepoint"] > MIN_TIMEPOINT_PROJ, "timepoint"].unique()
     indices = np.arange(start=0, stop=len(timepoints), step=max(1, len(timepoints) // 4))
