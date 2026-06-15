@@ -271,6 +271,7 @@ def plot(
     y: str,
     color: str,
     title: str = "",
+    ylabel: str = "",
     file_path: pathlib.Path | None = None,
     width: int = 2000,
     height: int = 1500
@@ -290,6 +291,7 @@ def plot(
         y: The name of the column in the dataframe which will be plotted as the ``y`` data.
         color: The name of the column in the dataframe which will be used to color the data.
         title: The title of the plot.
+        ylabel: The label for the y-axis.
         file_path: The path to save the plot to.
         width: The width of the plot.
         height: The height of the plot.
@@ -306,7 +308,8 @@ def plot(
         facet_row="timepoint",
         facet_row_spacing=0.01,  # Shrink vertical gap to 1%
         facet_col_spacing=0.01,   # Shrink horizontal gap to 1%
-        title=title
+        title=title,
+        labels={y: ylabel}
     )
     fig.update_yaxes(matches=None)
     
