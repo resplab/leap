@@ -204,6 +204,8 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
     # per-person probability of emigrating
     df["prob_emigration"] = df["n_emigrants"] / df["n"]
 
+    df = df.drop(columns=["n_prev", "prob_death_prev", "age_prev", "timepoint_prev"])
+
     return df
 
 
