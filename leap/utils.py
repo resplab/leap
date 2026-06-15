@@ -230,8 +230,8 @@ def get_data_path(data_path: str | pathlib.Path, mkdirs: bool = False) -> pathli
         data_folder = "leap.processed_data"
         data_path = data_path.relative_to("processed_data")
     elif data_path.parts[0] == "data_generation":
-        data_folder = "leap.data_generation" + "." + ".".join(data_path.parts[1:-1])
-        data_path = data_path.parts[-1]
+        data_folder = "leap.data_generation"
+        data_path = data_path.relative_to("data_generation")
     elif data_path.parts[0] == "original_data":
         data_path = data_path.relative_to("original_data")
         data_folder = "leap.original_data"
