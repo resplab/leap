@@ -50,6 +50,7 @@ myst_enable_extensions = [
 myst_dmath_double_inline = True
 myst_dmath_allow_space = True
 nbsphinx_execute = "always"
+nbsphinx_requirejs_path = ""
 # object_description_options = []
 # object_description_options.append(("py:.*", dict(wrap_signatures_with_css=True)))
 
