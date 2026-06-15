@@ -3,7 +3,7 @@ import numpy as np
 import datetime as dt
 import plotly.express as px
 import pathlib
-from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
+from leap.utils import get_data_path, get_time_delta_tag, TimeDelta, DATE_FORMAT
 from leap.logger import get_logger
 from leap.data_generation.utils import get_parser, split_ages
 pd.options.mode.copy_on_write = True
@@ -300,7 +300,7 @@ def generate_migration_data(time_delta: TimeDelta):
         ],
         inplace=True
     )
-    df_migration.to_csv(file_path, index=False)
+    df_migration.to_csv(file_path, index=False, date_format=DATE_FORMAT)
 
 
 def plot(
