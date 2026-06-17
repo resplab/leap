@@ -112,3 +112,14 @@ To install a development version of the ``LEAP`` package:
   pip install -e ".[dev]"
   pip install -r requirements-docs.txt
   pip install -r requirements-data-generation.txt
+
+
+If you will be working on the ``data_generation`` code, then you will need the ``Git LFS`` 
+files. By default, we have set ``git clone`` to ignore the ``Git LFS`` files in order to keep
+the ``Git LFS`` bandwidth usage down. To download these large files, you will need to run the
+following command:
+
+.. code:: bash
+
+  cd leap
+  git lfs pull -X ""
