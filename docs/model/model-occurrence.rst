@@ -367,27 +367,31 @@ offline calibration steps to the personalised probabilities used at runtime.
 .. md-mermaid::
 
     flowchart TD
-        M1["<b>Model 1 population targets</b><br/>p̄_prev and p̄_inc"]
+        M1["<b>Model 1 population targets</b><br/>$$\bar{p}_{prev} \text{ and } \bar{p}_{inc}$$"]
         LIT["<b>Literature ORs (prevalence)</b>"]
 
         subgraph OFFLINE["Offline calibration (run once)"]
             direction TB
-            S1["<b>Step 1 — Prevalence calibration</b><br/>Σ p(λ)·p_prev,λ = p̄_prev"]
-            S2["<b>Step 2 — Incidence β_age estimation</b><br/>optimise β_fhx_age, β_abx_age"]
-            S3["<b>Step 3 — Incidence calibration</b><br/>Σ p(λ)·p_inc,λ = p̄_inc"]
-            S1 -->|"calibrated prevalence at age t−1"| S2
-            S2 -->|"β_fhx_age, β_abx_age"| S3
+            S1["<b>Step 1 — Prevalence calibration</b><br/>
+            $$\sum p(\lambda) \cdot p_{prev}, \quad \lambda = \bar{p}_{prev}$$"]
+            S2["<b>Step 2 — Incidence β_age estimation</b><br/>optimise $$\quad \beta_{fhx_{age}}, \beta_{abx_{age}}$$"]
+            S3["<b>Step 3 — Incidence calibration</b><br/>
+            $$\sum p(\lambda) \cdot p_{inc}, \quad \lambda = \bar{p}_{inc}$$"]
+            S1 -->|"calibrated prevalence at age $$~ t-1$$"| S2
+            S2 -->|"$$\beta_{fhx_{age}}, \beta_{abx_{age}}$$"| S3
         end
 
-        SIM["<b>Online simulation (runtime)</b><br/>logit(p) = logit(p̄) + log(ω_fhx) + log(ω_abx) − α"]
+        SIM["<b>Online simulation (runtime)</b><br/>
+        $$\text{logit}(p) = \text{logit}(\bar{p}) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha$$
+        "]
 
-        M1 -->|"p̄_prev"| S1
+        M1 -->|"$$\bar{p}_{prev}$$"| S1
         LIT --> S1
-        M1 -->|"p̄_inc target +<br/>literature prevalence ORs"| S2
-        M1 -->|"p̄_inc"| S3
-        S1 -->|"α_prev"| SIM
-        S3 -->|"α_inc"| SIM
-        M1 -->|"p̄_prev, p̄_inc"| SIM
+        M1 -->|"$$\bar{p}_{inc} ~$$ target + literature prevalence ORs"| S2
+        M1 -->|"$$\bar{p}_{inc}$$"| S3
+        S1 -->|"$$\alpha_{prev}$$"| SIM
+        S3 -->|"$$\alpha_{inc}$$"| SIM
+        M1 -->|"$$\bar{p}_{prev}, \bar{p}_{inc}$$"| SIM
 
         classDef target fill:#e3f2fd,stroke:#1565c0,color:#0d2b45;
         classDef lit fill:#fff3e0,stroke:#e65100,color:#3a2400;
@@ -732,15 +736,15 @@ The four tables below build this up step by step, and the diagram summarises the
 
     flowchart LR
         BASE["<b>Baseline table (t=0)</b><br/>built from literature-based<br/>prevalence OR"]
-        NEW["<b>New diagnoses (t=1)</b><br/>incidence with candidate β_age"]
-        EX["<b>Existing diagnoses (t=1)</b><br/>reassessment with prob ρ"]
+        NEW["<b>New diagnoses (t=1)</b><br/>incidence with candidate $$~\beta_{age}$$"]
+        EX["<b>Existing diagnoses (t=1)</b><br/>reassessment with prob $$~\rho$$"]
         COMB["<b>Combined table (t=1)</b><br/>prevalence at age a:<br/> evaluate prevalence OR vs target prevalence OR"]
 
         BASE -->|"no asthma at t=0"| NEW
         BASE -->|"had asthma at t=0"| EX
         NEW --> COMB
         EX --> COMB
-        COMB -.->|"adjust β_age"| NEW
+        COMB -.->|"adjust $$~\beta_{age}$$"| NEW
 
         classDef base fill:#e3f2fd,stroke:#1565c0,color:#0d2b45;
         classDef mid fill:#fff3e0,stroke:#e65100,color:#3a2400;
