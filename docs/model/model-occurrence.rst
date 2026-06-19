@@ -1034,3 +1034,16 @@ correction for each agent at each timepoint of life.
       </tr>
     </tbody>
   </table>
+
+Technical Appendix
+------------------
+
+For the full mathematical derivations behind the calibration model — including the risk factor
+formula, correction term derivations, and the beta parameter optimisation — see the
+:ref:`occurrence-model-appendix`.
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   model-occurrence-appendix
