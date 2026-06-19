@@ -108,7 +108,7 @@ def get_prob_death_projected(
     timepoint: dt.datetime,
     beta_time: float
 ) -> float:
-    r"""Given the (known) prob death for a past timepoint, calculate the prob death in a future year.
+    r"""Given the (known) prob death for a past timepoint, calculate the prob death at a future timepoint.
 
     .. math::
 
