@@ -293,17 +293,6 @@ to determine whether an agent emigrates:
 
 Agents aged 0 are excluded — newborns never emigrate.
 
-Both immigration and emigration are rooted in the same StatCan population-level counts
-(:math:`\Delta n`), and are converted into agent-level operations to fit LEAP's microsimulation
-framework:
-
-
-* For **immigration**, rows where ``delta_n > 0`` are used. ``prop_migrants_birth`` (positive)
-  determines how many immigrant agents to create at each timepoint, and ``prop_immigrants_timepoint``
-  determines the age and sex of each agent.
-* For **emigration**, rows where ``delta_n < 0`` are used. ``prob_emigration`` is applied to
-  each existing agent individually via a Bernoulli trial for each timepoint.
-
 
 
 
