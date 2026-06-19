@@ -246,3 +246,14 @@ Usage in LEAP
 Contingency tables are used in LEAP to optimize the age-dependent beta parameters for the
 incidence equation in :ref:`occurrence-model-2`. See the
 :ref:`optimizing-beta-parameters` section of the Asthma Occurrence Model for details.
+
+Python Examples
+================
+
+For a hands-on walkthrough of GLMs using ``statsmodels`` and ``plotly`` — including runnable
+code you can execute locally — see the notebook below.
+
+.. toctree::
+   :maxdepth: 1
+
+   model-glm

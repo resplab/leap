@@ -125,14 +125,14 @@ in asthma incidence, so we should include sex in our formula.
 
 .. math::
 
-    \log(\bar{p}_{\text{inc},i}) = \beta_0 + \beta_s \cdot s_i + \beta_t \cdot t_i + \beta_{ts} \cdot t_i \cdot s_i
-        + \sum_{k=1}^{5} \left( \beta_k \cdot a_i^k + \beta_{ks} \cdot a_i^k \cdot s_i \right)
+    \log(\bar{p}_{\text{inc},i}) = \beta_0 + \beta_{\text{sex}} \cdot s_i + \beta_{\text{time}} \cdot t_i + \beta_{\text{time,sex}} \cdot t_i \cdot s_i
+        + \sum_{k=1}^{5} \left( \beta_{\text{age},k} \cdot a_i^k + \beta_{\text{age,sex},k} \cdot a_i^k \cdot s_i \right)
 
 
 where:
 
 .. list-table::
-   :widths: 25 25 50
+   :widths: 50 20 30
    :header-rows: 1
 
    * - Coefficient
@@ -141,19 +141,19 @@ where:
    * - :math:`\beta_0`
      - :math:`1`
      - intercept
-   * - :math:`\beta_s`
+   * - :math:`\beta_{\text{sex}}`
      - :math:`s_i`
      - sex main effect
-   * - :math:`\beta_t`
+   * - :math:`\beta_{\text{time}}`
      - :math:`t_i`
      - timepoint main effect
-   * - :math:`\beta_{ts}`
+   * - :math:`\beta_{\text{time,sex}}`
      - :math:`t_i \cdot s_i`
      - timepoint × sex interaction
-   * - :math:`\beta_k` (:math:`k = 1, \ldots, 5`)
+   * - :math:`\beta_{\text{age},k}` (:math:`k = 1, \ldots, 5`)
      - :math:`a_i^k`
      - age polynomial terms
-   * - :math:`\beta_{ks}` (:math:`k = 1, \ldots, 5`)
+   * - :math:`\beta_{\text{age,sex},k}` (:math:`k = 1, \ldots, 5`)
      - :math:`a_i^k \cdot s_i`
      - age × sex interaction terms
 
@@ -172,11 +172,11 @@ in asthma incidence and hence prevalence, so we should include sex in our formul
 .. math::
 
     \begin{align}
-    \log(\bar{p}_{\text{prev},i}) &= \beta_0 + \beta_s \cdot s_i \\
-        &+ \sum_{k=1}^{5} \left( \beta_k \cdot a_i^k + \beta_{ks} \cdot a_i^k \cdot s_i \right) \\
-        &+ \sum_{\ell=1}^{2} \left( \beta_{t^\ell} \cdot t_i^\ell + \beta_{t^\ell s} \cdot t_i^\ell \cdot s_i \right) \\
-        &+ \sum_{\ell=1}^{2} \sum_{k=1}^{5} \left( \beta_{k\ell} \cdot a_i^k \cdot t_i^\ell
-        + \beta_{k\ell s} \cdot a_i^k \cdot t_i^\ell \cdot s_i \right)
+    \log(\bar{p}_{\text{prev},i}) &= \beta_0 + \beta_{\text{sex}} \cdot s_i \\
+        &+ \sum_{k=1}^{5} \left( \beta_{\text{age},k} \cdot a_i^k + \beta_{\text{age,sex},k} \cdot a_i^k \cdot s_i \right) \\
+        &+ \sum_{\ell=1}^{2} \left( \beta_{\text{time},\ell} \cdot t_i^\ell + \beta_{\text{time,sex},\ell} \cdot t_i^\ell \cdot s_i \right) \\
+        &+ \sum_{\ell=1}^{2} \sum_{k=1}^{5} \left( \beta_{\text{age,time},k,\ell} \cdot a_i^k \cdot t_i^\ell
+        + \beta_{\text{age,time,sex},k,\ell} \cdot a_i^k \cdot t_i^\ell \cdot s_i \right)
     \end{align}
 
 
@@ -192,25 +192,25 @@ where:
    * - :math:`\beta_0`
      - :math:`1`
      - intercept
-   * - :math:`\beta_s`
+   * - :math:`\beta_{\text{sex}}`
      - :math:`s_i`
      - sex main effect
-   * - :math:`\beta_k` (:math:`k = 1, \ldots, 5`)
+   * - :math:`\beta_{\text{age},k}` (:math:`k = 1, \ldots, 5`)
      - :math:`a_i^k`
      - age polynomial terms
-   * - :math:`\beta_{ks}` (:math:`k = 1, \ldots, 5`)
+   * - :math:`\beta_{\text{age,sex},k}` (:math:`k = 1, \ldots, 5`)
      - :math:`a_i^k \cdot s_i`
      - age × sex interactions
-   * - :math:`\beta_{t^\ell}` (:math:`\ell = 1, 2`)
+   * - :math:`\beta_{\text{time},\ell}` (:math:`\ell = 1, 2`)
      - :math:`(t_i)^\ell`
      - timepoint polynomial terms
-   * - :math:`\beta_{t^\ell s}` (:math:`\ell = 1, 2`)
+   * - :math:`\beta_{\text{time,sex},\ell}` (:math:`\ell = 1, 2`)
      - :math:`(t_i)^\ell \cdot s_i`
      - timepoint × sex interactions
-   * - :math:`\beta_{k\ell}` (:math:`k = 1, \ldots, 5`,  :math:`\ell = 1, 2`)
+   * - :math:`\beta_{\text{age,time},k,\ell}` (:math:`k = 1, \ldots, 5`,  :math:`\ell = 1, 2`)
      - :math:`a_i^k \cdot (t_i)^\ell`
      - age × timepoint interactions
-   * - :math:`\beta_{k\ell s}` (:math:`k = 1, \ldots, 5`, :math:`\ell = 1, 2`)
+   * - :math:`\beta_{\text{age,time,sex},k,\ell}` (:math:`k = 1, \ldots, 5`, :math:`\ell = 1, 2`)
      - :math:`a_i^k \cdot (t_i)^\ell \cdot s_i`
      - age × timepoint × sex interactions
 
@@ -257,7 +257,7 @@ prevalence at 1-year age intervals, for each timepoint and sex. The variables ar
         <td><code class="notranslate">timepoint</code></td>
         <td><code class="notranslate">datetime</code></td>
         <td>
-          The timepoint of the prediction, e.g. <code>2024-01-01</code>
+          The start of the time interval, e.g. <code>2024-01-01</code>
         </td>
       </tr>
       <tr>
@@ -279,16 +279,16 @@ prevalence at 1-year age intervals, for each timepoint and sex. The variables ar
         <td><code class="notranslate">incidence</code></td>
         <td><code class="notranslate">float</code></td>
         <td>
-          Predicted asthma incidence for the given timepoint, age, and sex, per 100 people.
-          Used as \(\bar{p}_{\text{inc}}\) in Model 2 (divided by 100 to convert to a probability).
+          Predicted asthma incidence for the given time interval, age, and sex, per 100 people.
+          Used as \(\bar{p}_{\text{inc}}\) in <a href="#occurrence-model-2">Model 2</a> (divided by 100 to convert to a probability).
         </td>
       </tr>
       <tr>
         <td><code class="notranslate">prevalence</code></td>
         <td><code class="notranslate">float</code></td>
         <td>
-          Predicted asthma prevalence for the given timepoint, age, and sex, per 100 people.
-          Used as \(\bar{p}_{\text{prev}}\) in Model 2 (divided by 100 to convert to a probability).
+          Predicted asthma prevalence for the given time interval, age, and sex, per 100 people.
+          Used as \(\bar{p}_{\text{prev}}\) in <a href="#occurrence-model-2">Model 2</a> (divided by 100 to convert to a probability).
         </td>
       </tr>
     </tbody>
@@ -309,18 +309,18 @@ prevalence rather than a population average.
 
 This is done in two phases:
 
-* **Offline calibration** (run once during data generation): for every combination of age,
+* **Data generation** (run once, before simulation): for every combination of age,
   sex, and timepoint, a calibration term :math:`\alpha` is computed that ensures the
   population-weighted average of the risk-factor-adjusted probabilities still matches the
   target rates :math:`\bar{p}_{\text{prev}}` and :math:`\bar{p}_{\text{inc}}` from Model 1.
   The results are saved to
   ``asthma_occurrence_correction.csv``.
 
-* **Online simulation** (at runtime): each agent's individual risk factors are combined with
+* **Simulation** (at runtime): each agent's individual risk factors are combined with
   :math:`\alpha` from the lookup table to produce a personalised asthma probability on every
   simulated timepoint of life.
 
-Within the offline calibration, there is a fixed order of operations across three steps.
+Within the data generation phase, there is a fixed order of operations across three steps.
 Computing :math:`\alpha` requires knowing :math:`\log(\omega_{\text{fhx}})` and
 :math:`\log(\omega_{\text{abx}})` for each risk factor combination :math:`\lambda` at each
 (age, sex, timepoint) stratum, since these determine the individual-level probabilities that must be
@@ -348,7 +348,7 @@ must be estimated for incidence — which creates the following sequence:
    shared intercepts. The optimiser is initialised from the prevalence slope values and finds
    the age slopes that simultaneously satisfy two conditions: (i) the average incidence
    across risk factor combinations :math:`\lambda`, weighted by their population proportions
-   :math:`p(\lambda)` within each (age, sex, timepoint) stratum, matches :math:`\bar{p}_{\text{inc}}`
+   :math:`\text{prop}(\lambda)` within each (age, sex, timepoint) stratum, matches :math:`\bar{p}_{\text{inc}}`
    from Model 1; and (ii) the ORs implied by
    the :ref:`contingency tables <optimizing-beta-parameters>` simulated forward one timepoint
    from the calibrated prevalence distribution at age :math:`t-1` match the
@@ -367,31 +367,31 @@ offline calibration steps to the personalised probabilities used at runtime.
 .. md-mermaid::
 
     flowchart TD
-        M1["<b>Model 1 population targets</b><br/>$$\bar{p}_{prev} \text{ and } \bar{p}_{inc}$$"]
+        M1["<b>Model 1 population targets</b><br/>$$\overline{\vphantom{b}p}_{\text{prev}} \text{ and } \overline{\vphantom{b}p}_{\text{inc}}$$"]
         LIT["<b>Literature ORs (prevalence)</b>"]
 
-        subgraph OFFLINE["Offline calibration (run once)"]
+        subgraph OFFLINE["Data generation (run once)"]
             direction TB
             S1["<b>Step 1 — Prevalence calibration</b><br/>
-            $$\sum p(\lambda) \cdot p_{prev}, \quad \lambda = \bar{p}_{prev}$$"]
+            $$\sum_\lambda \text{prop}(\lambda) \cdot p_{\text{prev},\lambda} = \overline{\vphantom{b}p}_{\text{prev}}$$"]
             S2["<b>Step 2 — Incidence β_age estimation</b><br/>optimise $$\quad \beta_{fhx_{age}}, \beta_{abx_{age}}$$"]
             S3["<b>Step 3 — Incidence calibration</b><br/>
-            $$\sum p(\lambda) \cdot p_{inc}, \quad \lambda = \bar{p}_{inc}$$"]
+            $$\sum_\lambda \text{prop}(\lambda) \cdot p_{\text{inc},\lambda} = \overline{\vphantom{b}p}_{\text{inc}}$$"]
             S1 -->|"calibrated prevalence at age $$~ t-1$$"| S2
             S2 -->|"$$\beta_{fhx_{age}}, \beta_{abx_{age}}$$"| S3
         end
 
-        SIM["<b>Online simulation (runtime)</b><br/>
-        $$\text{logit}(p) = \text{logit}(\bar{p}) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha$$
+        SIM["<b>Simulation (runtime)</b><br/>
+        $$\text{logit}(p) = \text{logit}(\overline{\vphantom{b}p}) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha$$
         "]
 
-        M1 -->|"$$\bar{p}_{prev}$$"| S1
+        M1 -->|"$$\overline{\vphantom{b}p}_{\text{prev}}$$"| S1
         LIT --> S1
-        M1 -->|"$$\bar{p}_{inc} ~$$ target + literature prevalence ORs"| S2
-        M1 -->|"$$\bar{p}_{inc}$$"| S3
-        S1 -->|"$$\alpha_{prev}$$"| SIM
-        S3 -->|"$$\alpha_{inc}$$"| SIM
-        M1 -->|"$$\bar{p}_{prev}, \bar{p}_{inc}$$"| SIM
+        M1 -->|"$$\overline{\vphantom{b}p}_{\text{inc}}$$ target + literature prevalence ORs"| S2
+        M1 -->|"$$\overline{\vphantom{b}p}_{\text{inc}}$$"| S3
+        S1 -->|"$$\alpha_{\text{prev}}$$"| SIM
+        S3 -->|"$$\alpha_{\text{inc}}$$"| SIM
+        M1 -->|"$$\overline{\vphantom{b}p}_{\text{prev}}, \overline{\vphantom{b}p}_{\text{inc}}$$"| SIM
 
         classDef target fill:#e3f2fd,stroke:#1565c0,color:#0d2b45;
         classDef lit fill:#fff3e0,stroke:#e65100,color:#3a2400;
@@ -565,9 +565,9 @@ average and the Model 1 target:
 
 .. math::
 
-  \sum_{\lambda} p(\lambda) \cdot p_{\text{prev},\lambda} = \bar{p}_{\text{prev}}
+  \sum_{\lambda} \text{prop}(\lambda) \cdot p_{\text{prev},\lambda} = \bar{p}_{\text{prev}}
 
-where :math:`p(\lambda)` is the proportion of the population with risk factor combination
+where :math:`\text{prop}(\lambda)` is the proportion of the population with risk factor combination
 :math:`\lambda`.
 
 
@@ -619,9 +619,9 @@ average and the Model 1 target:
 
 .. math::
 
-  \sum_{\lambda} p_{\text{no asthma},\lambda}(t-1) \cdot p_{\text{inc},\lambda} = \bar{p}_{\text{inc}}
+  \sum_{\lambda} \text{prop}_{\text{no asthma},\lambda}(t-1) \cdot p_{\text{inc},\lambda} = \bar{p}_{\text{inc}}
 
-where :math:`p_{\text{no asthma},\lambda}(t-1)` is the proportion of the population who
+where :math:`\text{prop}_{\text{no asthma},\lambda}(t-1)` is the proportion of the population who
 are asthma-free at :math:`t-1` and have risk factor combination :math:`\lambda`. Only
 asthma-free agents are included because incidence counts new diagnoses only.
 
@@ -706,7 +706,7 @@ The optimiser is initialised from the corresponding prevalence slope values and 
 simultaneously satisfy two conditions:
 
 1. The average incidence across risk factor combinations :math:`\lambda`, weighted by their
-   population proportions :math:`p(\lambda)` within each (age, sex, timepoint) stratum, matches
+   population proportions :math:`\text{prop}(\lambda)` within each (age, sex, timepoint) stratum, matches
    the Model 1 target :math:`\bar{p}_{\text{inc}}`.
 2. The ORs implied by the contingency tables — simulated forward one timepoint from the calibrated
    prevalence distribution at age :math:`t-1` — match the literature-derived prevalence ORs
@@ -714,8 +714,7 @@ simultaneously satisfy two conditions:
 
 Condition 2 ensures that introducing individual-level incidence risk does not distort the
 aggregate OR structure established by the prevalence literature.
-See :doc:`model-statistical-background` for an introduction to contingency tables and worked
-examples.
+See :ref:`contingency-tables` for an introduction to contingency tables and worked examples.
 
 To evaluate condition 2, we track a cohort across one timepoint using contingency tables of
 risk factor combination :math:`\lambda` against asthma diagnosis. The labels :math:`t=0` and
@@ -804,8 +803,8 @@ The row and column totals are then:
 
 .. math::
 
-    n_1 &= p(\lambda) \cdot N \\
-    n_0 &= p(0) \cdot N \\
+    n_1 &= \text{prop}(\lambda) \cdot N \\
+    n_0 &= \text{prop}(0) \cdot N \\
     n   &= n_1 + n_0 \\
     n_2 &= p_{\text{prev},\lambda} \cdot n_1 + p_{\text{prev},0} \cdot n_0
 
@@ -970,13 +969,17 @@ Once optimised, these slopes (:math:`\beta_{\lambda, \text{age}}`) are used
 to compute :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
 each (age, sex, timepoint) stratum. BFGS then uses those stratum-specific log-ORs to solve for
 the calibration term :math:`\alpha` per stratum, which is stored in
-``asthma_occurrence_correction.csv`` as described in the Processed Data section below.
+`asthma_occurrence_correction.csv <https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/asthma_occurrence_correction.csv>`_
+as described in the :ref:`occurrence-model-2-processed-data` section below.
 
+
+.. _occurrence-model-2-processed-data:
 
 Processed Data
 --------------
 
-The calibration terms produced by Model 2 are stored in ``asthma_occurrence_correction.csv``
+The calibration terms produced by Model 2 are stored in
+`asthma_occurrence_correction.csv <https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/asthma_occurrence_correction.csv>`_
 (under the ``time_delta_<days>`` directory matching the simulation's time step). Each row gives
 the value of :math:`\alpha` for a specific age, sex, timepoint, and outcome type
 (prevalence or incidence). This file is used at runtime by the simulation to look up the
