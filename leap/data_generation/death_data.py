@@ -341,7 +341,7 @@ def load_past_death_data(time_delta: TimeDelta) -> pd.DataFrame:
     # join the two tables
     df = pd.merge(df_prob, df_se, on=["timepoint", "province", "sex", "age"], how="left")
 
-    # Interpolate the birth estimates for the missing timepoints in the past data
+    # Interpolate the mortality estimates for the missing timepoints in the past data
     df = interpolate(
         data=df.copy().reset_index(drop=True),
         col_pred="prob_death",
