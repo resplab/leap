@@ -125,7 +125,7 @@ def get_prob_death_projected(
         beta_time: The beta parameter for the given sex, province, and projection scenario.
 
     Returns:
-        The projected probability of death for the current year.
+        The projected probability of death for the current timepoint.
 
     Examples:
 
