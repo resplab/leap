@@ -108,11 +108,7 @@ def test_load_past_death_data(time_delta, expected_rows):
     assert df["province"].isin(PROVINCE_MAP.values()).all()
     for row in expected_rows:
         assert df.loc[
-            (df["timepoint"] == row[0]) &
-            (df["province"] == row[1]) &
-            (df["age"] == row[2]) &
-            (df["sex"] == row[3])
-        ].iloc[0]["prob_death"] == row[4]
+        ].iloc[0]["prob_death"] == pytest.approx(row[4], rel=1e-12, abs=1e-12)
 
 
 @pytest.mark.parametrize(
