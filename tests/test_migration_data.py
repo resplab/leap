@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 def df_projection():
     df_projection = pd.DataFrame(
         list(itertools.product(
-            list(PROVINCE_MAP.values())[0:2],
+            ["BC", "CA"],
             PROJECTION_SCENARIOS,
             list(date_range(dt.datetime(2025, 1, 1), dt.datetime(2027, 1, 1), TimeDelta(months=1))),
             np.arange(0, 4, 1/12),
