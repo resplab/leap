@@ -186,8 +186,9 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
     df["prop_migrants_birth"] = df["delta_n"] / df["n_birth"]
 
     # timepoint proportions with separate denominators for immigration and emigration
-    df["n_immigrants_timepoint"] = df.groupby("timepoint")["n_immigrants"].transform("sum")
-    df["n_emigrants_timepoint"] = df.groupby("timepoint")["n_emigrants"].transform("sum")
+    grouped_df = df.groupby(["timepoint", "province", "projection_scenario"])
+    df["n_immigrants_timepoint"] = grouped_df["n_immigrants"].transform("sum")
+    df["n_emigrants_timepoint"] = grouped_df["n_emigrants"].transform("sum")
     df["prop_immigrants_timepoint"] = df["n_immigrants"] / df["n_immigrants_timepoint"]
     df["prop_emigrants_timepoint"] = df["n_emigrants"] / df["n_emigrants_timepoint"]
     df = df.fillna(0)
