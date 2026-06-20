@@ -38,7 +38,7 @@ The relevant columns are:
      - the age of the person in years
    * - ``GEO``
      - :code:`str`
-     - the province or terriroty full name
+     - the province or territory full name
    * - ``SEX``
      - :code:`str`
      - one of "Both sexes", "Females", or "Males"
@@ -303,445 +303,68 @@ This data can be found in the ``Statistics Canada Population Projections Technic
 Model
 ========
 
-We have mortality data for past years (1996 - 2020), and life expectancy projections for
-specific future years; but we would like to have mortality data for all future years in our
-model. ``Statistics Canada`` describes how they model mortality here:
-`Methods for Constructing Life Tables for Canada, Provinces and Territories
-<https://www150.statcan.gc.ca/n1/en/pub/84-538-x/84-538-x2021001-eng.pdf>`_.
+Statistics Canada provides observed death probabilities for past years (1996–2021) and
+life expectancy projections at a handful of future calibration years (2028, 2048, 2073). To
+run the simulation, we need death probabilities for every time interval across the full
+range — so we project forward from the last observed year.
 
-In particular, the model they use is the ``Kannisto-Thatcher model``, described in this paper:
-`On the use of Kannisto model for mortality trajectory modelling at very old ages
-<https://ipc2025.popconf.org/uploads/252146>`_.
-
-According to the Kannisto-Thatcher model, the instantaneous probability of death at age :math:`x`
-is given by:
+The projection follows the approach used by Statistics Canada, based on the
+`Kannisto-Thatcher model
+<https://ipc2025.popconf.org/uploads/252146>`_. The key result is that, under this model,
+the logit of the probability of death changes linearly over time at a sex-specific rate.
+This gives the projection formula:
 
 .. math::
 
-    \mu(x) &= \dfrac{a e^{\beta x}}{1 + a e^{\beta x}} \\
-    &= \lim_{\Delta x \to 0} \dfrac{P(\text{death between age $x$ and $x + \Delta x$} \mid \text{survived till $x$})}{\Delta x}
-
-In mathematical terms, :math:`\mu(x)` is the ``hazard rate``. Let's break this down further.
-Let :math:`F_X(x)` be the cumulative distribution function for age at death, :math:`X`:
-
-.. math::
-
-    F_X(x) :&= P(\text{age at death} \leq \text{given age}) \\ 
-    &= P(X \leq x)
-
-We want the conditional probability of death between age :math:`x` and :math:`x + \Delta x`,
-given that the person has survived till age :math:`x`. This is given by:
-
-.. math::
-
-    P(x < X \leq x + \Delta x \mid X > x)
-
-Recall that for a conditional probability:
-
-.. math::
-    
-    P(A \mid B) = \dfrac{P(A \cap B)}{P(B)}
-
-and so:
-
-.. math::
-
-    P(x < X \leq x + \Delta x \mid X > x) = \dfrac{P(x < X \leq x + \Delta x \bigcap X > x)}{P(X > x)}
-
-Since :math:`F_X(x)` is the cumulative distribution function, by definition it must sum to 1:
-
-.. math::
-
-    P(X > x) = 1 - F_X(x)
-
-Since :math:`X > x` if :math:`x < X \leq x + \Delta x`, we can rewrite the numerator as:
-
-.. math::
-
-    P(x < X \leq x + \Delta x \bigcap X > x) &= P(x < X \leq x + \Delta x) \\
-    &= F_X(x + \Delta x) - F_X(x)
-
-Putting it all together, we have:
-
-.. math::
-
-    P(x < X \leq x + \Delta x \mid X > x) = 
-    \dfrac{F_X(x + \Delta x) - F_X(x)}{1 - F_X(x)}
-
-Now, we want to find the instantaneous rate of death; the probability of death per unit time.
-If we take the limit as :math:`\Delta x \to 0`, we will find the instantaneous probability of
-death at age :math:`x`. To get the probability of death per unit time, we need to divide by
-:math:`\Delta x`:
-
-.. math::
-
-    \mu(x) = \lim_{\Delta x \to 0} \dfrac{F_X(x + \Delta x) - F_X(x)}{\Delta x (1 - F_X(x))}
-
-You will recognize the derivative of :math:`F_X(x)`:
-
-.. math::
-
-    \dfrac{d}{dx} F_X(x) = \lim_{\Delta x \to 0} \dfrac{F_X(x + \Delta x) - F_X(x)}{\Delta x}
-
-and so:
-
-.. math::
-
-    \mu(x) = \dfrac{F_X'(x)}{1 - F_X(x)}
-
-The data in the ``Statistics Canada`` mortality table is the probability of death between age
-:math:`x` and :math:`x + 1`, which is denoted as :math:`q_x`. This is the same as the probability
-:math:`P(x < X \leq x + \Delta x \mid X > x)`, with :math:`\Delta x = 1`. We would like to solve
-for :math:`q_x`, using the ``Kannisto-Thatcher Equation`` for :math:`\mu(x)`. First, we can
-write :math:`q_x` in terms of :math:`F_X(x)`:
-
-.. math::
-
-    q_x &= P(x < X \leq x + 1 \mid X > x) \\
-    &= \dfrac{F_X(x + 1) - F_X(x)}{1 - F_X(x)}
-
-Let us define :math:`S_X(x)`, the survival function, for convenience:
-
-.. math::
-
-    S_X(x) &:= 1 - F_X(x) \\
-    &= P(X > x)
-
-Then we have:
-
-.. math::
-
-    \dfrac{dS}{dx} = -F_X'(x)
-
-and so :math:`\mu(x)` can be rewritten as:
-
-.. math::
-
-    \mu(x) = -\dfrac{dS}{dx}\dfrac{1}{S_X(x)}
-
-Solving this first order separable linear differential equation, we have:
-
-.. math::
-
-    \int \dfrac{dS}{S_X} &= -\int \mu(x) dx \\
-    \ln(S_X(x)) &= -\int \mu(x) dx + C \\
-    &= -\int \dfrac{a e^{\beta x}}{1 + a e^{\beta x}} dx + C
-
-Letting :math:`u(x) := 1 + a e^{\beta x}`, we have:
-
-.. math::
-
-    \ln(S_X(x)) &= - \dfrac{1}{\beta} \int \dfrac{du}{u} + C \\
-    &= - \dfrac{1}{\beta} \ln(u(x)) + C \\
-    S_X(x) &= e^C (1 + a e^{\beta x})^{-\frac{1}{\beta}} \\
-    &= k (1 + a e^{\beta x})^{-\frac{1}{\beta}} \\
-    1 - F_X(x) &= k (1 + a e^{\beta x})^{-\frac{1}{\beta}} \\
-    F_X(x) &= 1 - k (1 + a e^{\beta x})^{-\frac{1}{\beta}}
-
-Now, we can substitute this into the equation for :math:`q_x`:
-
-.. math::
-
-    q_x &= \dfrac{F_X(x + \Delta x) - F_X(x)}{1 - F_X(x)} \\
-    &= \dfrac{
-        1 - k (1 + a e^{\beta (x + \Delta x)})^{-\frac{1}{\beta}} - 
-        1 + k (1 + a e^{\beta x})^{-\frac{1}{\beta}}
-    }{k (1 + a e^{\beta x})^{-\frac{1}{\beta}}} \\
-    &= \dfrac{
-        - k (1 + a e^{\beta (x + \Delta x)})^{-\frac{1}{\beta}}
-        + k (1 + a e^{\beta x})^{-\frac{1}{\beta}}
-    }{k (1 + a e^{\beta x})^{-\frac{1}{\beta}}} \\
-    &= 1 - \left(\dfrac{1 + a e^{\beta (x + \Delta x)}}{1 + a e^{\beta x}}\right)^{-\frac{1}{\beta}} \\
-    &= 1 - \left(\dfrac{1 + a e^{\beta x}}{1 + a e^{\beta (x + \Delta x)}}\right)^{\frac{1}{\beta}}
-
-If we take the ``logit`` of :math:`q_x`, we have:
-
-.. math::
-
-    \sigma^{-1}(q_x) &= \ln\left(\dfrac{q_x}{1 - q_x}\right) \\
-    &= \ln\left(\dfrac{
-        1 - \left(\dfrac{1 + a e^{\beta x}}{1 + a e^{\beta (x + \Delta x)}}\right)^{\frac{1}{\beta}}
-    }{
-        \left(\dfrac{1 + a e^{\beta x}}{1 + a e^{\beta (x + \Delta x)}}\right)^{\frac{1}{\beta}}
-    }\right) \\
-    &= \ln\left(
-        \left(\dfrac{1 + a e^{\beta (x + \Delta x)}}{1 + a e^{\beta x}}\right)^{\frac{1}{\beta}} - 1
-    \right) \\
-    &= \ln
-        \left(\dfrac{
-            (1 + \alpha e^{\beta (x + \Delta x)})^{\frac{1}{\beta}} - 
-            (1 + \alpha e^{\beta x})^{\frac{1}{\beta}}
-        }{(1 + \alpha e^{\beta x})^{\frac{1}{\beta}}}\right)
-     \\
-    &= \ln\left(
-            (1 + \alpha e^{\beta (x + \Delta x)})^{\frac{1}{\beta}} - 
-            (1 + \alpha e^{\beta x})^{\frac{1}{\beta}}
-        \right) -
-        \dfrac{1}{\beta}\ln(1 + \alpha e^{\beta x})
-
-Let us now look at :math:`\sigma^{-1}(q_x) - \sigma^{-1}(q_{x_0})`:
-
-.. math::
-
-    \sigma^{-1}(q_x) - \sigma^{-1}(q_{x_0}) &= 
-        \ln\left(
-            (1 + \alpha e^{\beta (x + \Delta x)})^{\frac{1}{\beta}} - 
-            (1 + \alpha e^{\beta x})^{\frac{1}{\beta}}
-        \right) -
-        \dfrac{1}{\beta}\ln(1 + a e^{\beta x}) \\
-        &- 
-            \ln\left(
-                (1 + \alpha e^{\beta (x_0 + \Delta x)})^{\frac{1}{\beta}} - 
-                (1 + \alpha e^{\beta x_0})^{\frac{1}{\beta}}
-            \right) +
-            \dfrac{1}{\beta}\ln(1 + \alpha e^{\beta x_0})
-
-Now, based on fitting the model to empirical data, typically we have
-[Appendix D, Table 5, :cite:`kannisto`]:
-
-1. :math:`\beta \approx \mathcal{O}(10^{-1})`
-2. :math:`\alpha \approx \mathcal{O}(10^{-5})`
-
-
-We can use the binomial approximation to simplify the above equation. Let us take:
-
-.. math::
-
-    (1 + \alpha e^{\beta x})^{\frac{1}{\beta}}
-
-In order to use the binomial approximation, we must have:
-
-.. math::
-
-    \left|\alpha e^{\beta x}\right| &< 1 \\
-    \left|\dfrac{\alpha e^{\beta x}}{\beta}\right| &\ll 1 \\
-    
-Since :math:`x` represents the age in years, we have :math:`x \in [0, 120]`. These conditions hold
-for all ages. Using the binomial approximation, we have:
-
-.. math::
-
-    (1 + \alpha e^{\beta x})^{\frac{1}{\beta}} \approx 1 + \dfrac{\alpha e^{\beta x}}{\beta}
-
-Going back to our equation for :math:`\sigma^{-1}(q_x) - \sigma^{-1}(q_{x_0})`, we have:
-
-.. math::
-
-    \sigma^{-1}(q_x) - \sigma^{-1}(q_{x_0}) &\approx
-        \ln\left(
-            1 + \dfrac{\alpha e^{\beta (x + \Delta x)}}{\beta} - 
-            1 - \dfrac{\alpha e^{\beta x}}{\beta}
-        \right) -
-        \ln\left(1 + \dfrac{\alpha e^{\beta x}}{\beta}\right) \\
-        &- 
-            \ln\left(
-               1 + \dfrac{\alpha e^{\beta (x_0 + \Delta x)}}{\beta} - 
-               1 - \dfrac{\alpha e^{\beta x_0}}{\beta}
-            \right) +
-            \ln\left(1 + \dfrac{\alpha e^{\beta x_0}}{\beta}\right) \\
-    &=  \ln\left(
-            \dfrac{\alpha e^{\beta (x + \Delta x)}}{\beta} - 
-            \dfrac{\alpha e^{\beta x}}{\beta}
-        \right) -
-        \ln\left(1 + \dfrac{\alpha e^{\beta x}}{\beta}\right) \\
-        &- 
-            \ln\left(
-               \dfrac{\alpha e^{\beta (x_0 + \Delta x)}}{\beta} - 
-               \dfrac{\alpha e^{\beta x_0}}{\beta}
-            \right) +
-            \ln\left(1 + \dfrac{\alpha e^{\beta x_0}}{\beta}\right) \\
-    &= \textcolor{orange}{\cancel{\ln\left(\dfrac{\alpha}{\beta}\right)}} + \ln(e^{\beta x})+
-        \textcolor{magenta}{\cancel{\ln\left(e^{\beta \Delta x} - 1\right)}} -
-        \ln\left(1 + \dfrac{\alpha e^{\beta x}}{\beta}\right) \\
-        &- 
-            \textcolor{orange}{\cancel{\ln\left(\dfrac{\alpha}{\beta}\right)}} - \ln(e^{\beta x_0}) -
-            \textcolor{magenta}{\cancel{\ln\left(e^{\beta \Delta x} - 1\right)}} +
-            \ln\left(1 + \dfrac{\alpha e^{\beta x_0}}{\beta}\right) \\
-    &= \ln(e^{\beta x})+
-        \ln\left(1 + \dfrac{\alpha e^{\beta x_0}}{\beta}\right) -
-        \ln\left(1 + \dfrac{\alpha e^{\beta x}}{\beta}\right) -
-        \ln(e^{\beta x_0}) \\
-    &= \beta (x - x_0) + 
-    \ln\left(\dfrac{1 + \dfrac{\alpha e^{\beta x_0}}{\beta}}{1 + \dfrac{\alpha e^{\beta x}}{\beta}}\right)
-
-The last term is much smaller than the first term, and so we can ignore it. Thus, we have:
-
-.. math::
-
-    \sigma^{-1}(q_x) \approx \sigma^{-1}(q_{x_0}) + \beta (x - x_0)
-
-If :math:`x_0` is the age of the person at the starting timepoint of the simulation, then
-:math:`(\text{year} - \text{year}_0) = (x - x_0)`:
-
-.. math::
-
-    \sigma^{-1}(q_x(\text{sex}, \text{age})) = 
-        \sigma^{-1}(q_{x_0}(\text{sex}, \text{age})) -
-        \beta_{\text{sex}}(\text{year} - \text{year}_0)
-
-
-The parameter :math:`\beta_{\text{sex}}` is unknown, and so we first need to calculate it.
-To do so, we set :math:`\text{year} = \text{year}_C`, the calibration year, and use the ``Brent``
-root-finding algorithm to optimize :math:`\beta_{\text{sex}}` such that the life expectancy in the
-calibration year (which is known) matches the predicted life expectancy.
-
-Once we have found :math:`\beta_{\text{sex}}`, we can use this formula to find the projected death
-probabilities.
-
-Life Expectancy
-*****************
-
-We first define some variables:
-
-.. list-table::
-   :widths: 15 15 80
-   :header-rows: 1
-
-   * - Variable
-     - Type
-     - Definition
-   * - :math:`x`
-     - :code:`int`
-     - age in years
-   * - :math:`l(x)`
-     - :code:`int`
-     - the number of people alive up to age :math:`x`
-   * - :math:`q(x)`
-     - :code:`float`
-     - the probability of death between ages :math:`[x, x + \Delta x)`
-   * - :math:`d(x)`
-     - :code:`int`
-     - the number of deaths between ages :math:`[x, x + \Delta x)`
-   * - :math:`a(x)`
-     - :code:`float`
-     - the average fraction of the interval :math:`[x, x + \Delta x)` lived by those who die in the interval
-   * - :math:`L(x)`
-     - :code:`int`
-     - the area under the survival curve between ages :math:`[x, x + \Delta x)`
-   * - :math:`T(x)`
-     - :code:`int`
-     - the total number of person-years lived after age :math:`x`
-   * - :math:`E(x)`
-     - :code:`float`
-     - the number of years left to live at age :math:`x`
-   * - :math:`E(0)`
-     - :code:`float`
-     - the number of years left to live at age :math:`0`, i.e. ``life expectancy``
-
-
-Number of People Alive
------------------------
-
-First, we set the number of people alive at age :math:`0`:
-
-.. math::
-
-  l(0) := 100000
-
-Next, we calculate the number of people alive up to age :math:`x`:
-
-.. math::
-
-  l(x) = l(x-\Delta x) \cdot (1 - q(x-\Delta x))
-
-Total Deaths
---------------
-
-The number of deaths :math:`d(x)` between ages :math:`[x, x + \Delta x)`, is given by the number of
-people alive at age :math:`x` multiplied by the probability of death between
-ages :math:`[x, x + \Delta x)`:
-
-.. math::
-
-  d(x) = l(x) * q(x)
-
-Survival Curve
-----------------
-
-Formally, the area under the survival curve between ages :math:`[x, x + \Delta x)` is given by:
-
-.. math::
-
-  L(x) = \int_{x}^{x + \Delta x} l(\chi) d\chi
-
-However, we can approximate this using the midpoint formula for numerical integration:
-
-.. math::
-
-  L(x) = \Delta x \cdot l(x + \Delta x) + a(x) \cdot d(x) \cdot \Delta x
-
-Assuming that deaths are uniform across the interval :math:`[x, x + \Delta x)`, we have
-:math:`a(x) = 0.5` for all :math:`x`. Thus, we can simplify the above equation to:
-
-.. math::
-
-  \begin{align}
-  L(x) &= (l(x + \Delta x) + 0.5 \cdot d(x)) \Delta x \\
-  &= (l(x) \cdot (1 - q(x)) + 0.5 \cdot d(x))\Delta x  \\
-  &= (l(x) - l(x) \cdot q(x) + 0.5 \cdot d(x))\Delta x  \\
-  &= (l(x) - d(x) + 0.5 \cdot d(x)) \Delta x \\
-  &= (l(x) - 0.5 \cdot d(x))\Delta x 
-  \end{align}
-
-Because infant mortality is highest in the first few days of life, if :math:`\Delta x > 7 \text{days}`,
-we set :math:`a(x_0) = 0.1`.
-
-For the final age group, since everyone dies, :math:`l(x_f + \Delta x) = 0`, and :math:`q(x_f) = 1`.
-Thus, we have:
-
-.. math::
-
-  \begin{align}
-  L(x_f) &= (l(x_f + \Delta x) + a(x_f) \cdot d(x_f)) \Delta x \\
-  &= (0 + a(x_f) \cdot d(x_f)) \Delta x \\
-  &= a(x_f) \cdot d(x_f) \cdot \Delta x \\
-  &= a(x_f) \cdot l(x_f) \cdot q(x_f) \cdot \Delta x \\
-  &= a(x_f) \cdot l(x_f) \cdot \Delta x
-  \end{align}
-
-Time Lived After Age :math:`x`
-------------------------------
-
-:math:`T(x)`: calculate the total time lived after age :math:`x` by all people alive at age :math:`x`
-
-.. math::
-
-    T(x) = \sum_{n = 0}^{N} L(x + n \cdot \Delta x)
-
-where :math:`x + N \cdot \Delta x = 110` is the maximum age in the life table.
-
-Number of Years Left to Live
-----------------------------
-
-The number of years left to live at age :math:`x` is given by :math:`E(x)`:
-
-.. math::
-
-    E(x) = \dfrac{T(x)}{l(x)}
-
-Finally, to get the ``life expectancy``, we calculate the number of years left to live at
-age ``0``, i.e. :math:`E(0)`:
-
-.. math::
-
-    \text{life expectancy} := E(0) = \dfrac{T(0)}{l(0)}
-
+    \text{logit}(p(\text{sex}, \text{age}, t)) =
+        \text{logit}(p(\text{sex}, \text{age}, t_0)) -
+        \beta_{\text{sex}} \cdot (t - t_0)
+
+where:
+
+- :math:`p(\text{sex}, \text{age}, t)` is the probability of death for a person of a given
+  sex and age during time interval :math:`t`
+- :math:`\text{logit}(p) = \ln\!\left(\tfrac{p}{1-p}\right)`
+- :math:`t_0` is the last observed timepoint (2021)
+- :math:`\beta_{\text{sex}}` is the sex-specific rate of mortality improvement — a negative value
+  means mortality is declining over time
+
+The derivation of this formula from the Kannisto-Thatcher hazard model is given in the
+:doc:`Technical Appendix <model-death-technical>`.
+
+Calibrating :math:`\beta_{\text{sex}}`
+*****************************************
+
+The slope :math:`\beta_{\text{sex}}` is not observed directly. We calibrate it separately
+for each sex and province by finding the value that makes our projected life expectancy
+match Statistics Canada's published life expectancy targets at the calibration timepoints.
+
+To evaluate a candidate :math:`\beta_{\text{sex}}`, we apply the projection formula above to
+construct a full life table of death probabilities across all ages at a given calibration
+timepoint, then compute life expectancy from that table (see :ref:`life-expectancy-appendix`).
+The calibration minimises the discrepancy between this computed life expectancy and the
+Statistics Canada target across all available calibration timepoints using
+``scipy.optimize.leastsq``. Once :math:`\beta_{\text{sex}}` is fixed, the projection formula
+is applied to fill in death probabilities for every time interval in the simulation.
 
 Processed Data
 =================
 
 The past and projected death probabilities are combined by `leap/data_generation/death_data.py
 <https://github.com/resplab/leap/blob/main/leap/data_generation/death_data.py>`_
-into a single processed file saved as:
-`leap/processed_data/{time_delta_tag}/death/life_table_{province}.csv
-<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/death/life_table_CA.csv>`_.
+into a set of processed files, with one file per time interval and province:
 
-Past data (from ``13100837.csv``) covers years 1996 to the last available year using
+- `leap/processed_data/time_delta_365/death/life_table_{province}.csv
+  <https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/death/life_table_CA.csv>`_ (annual)
+- `leap/processed_data/time_delta_30/death/life_table_{province}.csv
+  <https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_30/death/life_table_CA.csv>`_ (monthly)
+
+Past data (from ``13100837.csv``) covers timepoints 1996 to 2021 using
 death probabilities directly from Statistics Canada.
 
-For projected years (up to 2068), death probabilities for every annual increment are filled in
-by fitting a linear trend (in logit space) that connects the last historical year to
-Statistics Canada's life expectancy targets at the calibration years. A separate slope is
+For projected timepoints (up to 2068), death probabilities for every time interval are filled in
+by fitting a linear trend (in logit space) that connects the last historical timepoint to
+Statistics Canada's life expectancy targets at the calibration timepoints. A separate slope is
 fitted for each sex and province.
 
 .. list-table::
@@ -772,3 +395,8 @@ fitted for each sex and province.
      - :code:`str`
      - the population growth / mortality projection scenario, e.g. ``"FA"``, ``"M3"``;
        historical rows use ``"past"``
+
+.. toctree::
+   :hidden:
+
+   model-death-technical
