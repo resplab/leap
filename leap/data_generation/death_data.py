@@ -203,7 +203,7 @@ def compute_life_expectancy_diff(
 ) -> np.ndarray:
     """Calculate the difference between the projected life expectancy and desired life expectancy.
 
-    This function is passed to the ``scipy.optimize.brentq`` function. We want to find ``beta_year``
+    This function is passed to the ``scipy.optimize.leastsq`` function. We want to find ``beta_time``
     such that the projected life expectancy is as close as possible to the desired life expectancy.
     
     Args:
