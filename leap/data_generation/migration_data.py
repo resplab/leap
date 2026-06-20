@@ -76,7 +76,7 @@ def load_population_data(time_delta: TimeDelta) -> pd.DataFrame:
         var_name="sex",
         value_name="prop"
     )
-    df["n"] = (df["n_age"] * df["prop"]).astype(int)
+    df["n"] = (df["n_age"] * df["prop"])
     df.drop(columns=["n_age", "prop"], inplace=True)
 
     if time_delta < TimeDelta(years=1):
