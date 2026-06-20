@@ -3,6 +3,7 @@ import numpy as np
 import datetime as dt
 import plotly.express as px
 import pathlib
+from typing import Dict
 from leap.utils import get_data_path, get_time_delta_tag, TimeDelta, DATE_FORMAT
 from leap.logger import get_logger
 from leap.data_generation.utils import get_parser, split_ages
@@ -35,6 +36,38 @@ def get_delta_n(n: float, n_prev: float, prob_death: float) -> float:
         The change in population for a given timepoint, age, and sex due to migration.
     """
     return n - n_prev * (1 - prob_death)
+
+
+def convert_age_to_int(
+    df: pd.DataFrame,
+    agg: Dict[str, str],
+    groupby_cols: list[str]
+) -> pd.DataFrame:
+    """Convert age values to integer years.
+    
+    Args:
+        df: A dataframe containing an ``age`` column with age values which may be non-integer
+            years.
+        agg: A dictionary specifying the aggregation method to use for other columns when
+            grouping by integer age. The keys should be the column names, and the values should be
+            the aggregation method to use for that column, e.g. ``"sum"`` or ``"mean"``.
+        groupby_cols: The columns to group by when converting age to integer. Should not include
+            the ``age`` column, but should include all other columns which are needed to uniquely
+            identify rows after grouping by integer age.
+
+    Returns:
+        A dataframe with the same columns as the input dataframe, but with the ``age`` column
+        converted to integer years. The values in the other columns are aggregated according to the
+        specified aggregation methods when grouping by integer age.
+    """
+    # Convert the age back to integer
+    df["age_int"] = df["age"].apply(lambda x: int(x))
+    df = df.groupby(
+        groupby_cols + ["age_int"],
+        as_index=False
+    ).agg(agg)
+    df.rename(columns={"age_int": "age"}, inplace=True)
+    return df
 
 
 def load_population_data(time_delta: TimeDelta) -> pd.DataFrame:
@@ -224,20 +257,20 @@ def generate_migration_data(time_delta: TimeDelta):
     df_migration = load_migration_data(df_population, life_table, time_delta)
 
     # Convert the age back to integer
-    df_migration["age_int"] = df_migration["age"].apply(lambda x: int(x))
-    df_migration = df_migration.groupby(
-        ["province", "projection_scenario", "timepoint", "sex", "age_int"],
-        as_index=False
-    ).agg({
-        "delta_n": "sum",
-        "prop_migrants_birth": "mean",
-        "prop_immigrants_timepoint": "mean",
-        "prop_emigrants_timepoint": "mean",
-        "prob_emigration": "mean",
-        "n_immigrants": "sum",
-        "n_emigrants": "sum"
-    })
-    df_migration.rename(columns={"age_int": "age"}, inplace=True)
+    df_migration = convert_age_to_int(
+        df_migration.copy(),
+        agg={
+            "delta_n": "sum",
+            "prop_migrants_birth": "mean",
+            "prop_immigrants_timepoint": "mean",
+            "prop_emigrants_timepoint": "mean",
+            "prob_emigration": "mean",
+            "n_immigrants": "sum",
+            "n_emigrants": "sum"
+        },
+        groupby_cols=["province", "projection_scenario", "timepoint", "sex"]
+    )
+
     df_migration.sort_values(["province", "sex", "timepoint", "age"], inplace=True)
 
     # Create validation plots for the migration data
