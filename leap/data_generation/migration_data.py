@@ -85,10 +85,29 @@ def load_population_data(time_delta: TimeDelta) -> pd.DataFrame:
     return df
 
 
-def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
+def load_migration_data(
+    df_population: pd.DataFrame,
+    life_table: pd.DataFrame,
+    time_delta: TimeDelta
+) -> pd.DataFrame:
     """Generate migration data for the given provinces and years.
 
     Args:
+        df_population: A dataframe containing the population data. Must have columns:
+            * ``timepoint (dt.datetime)``: The given timepoint.
+            * ``province (str)``: The 2-letter province ID, e.g. ``BC``.
+            * ``age (int)``: The integer age.
+            * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+            * ``projection_scenario (str)``: The projection scenario abbreviation.
+            * ``n (float)``: The number of people living in Canada for a single age, sex, timepoint,
+              province, and projection scenario.
+        life_table: A dataframe containing the life table data. Must have columns:
+            * ``timepoint (dt.datetime)``: The given timepoint.
+            * ``province (str)``: The 2-letter province ID, e.g. ``BC``.
+            * ``age (int)``: The integer age.
+            * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+            * ``prob_death (float)``: The probability that a person with a given age and sex at a
+              given timepoint will die between the previous timepoint and this timepoint.
         time_delta: The duration of time between subsequent data points.
 
     Returns:
@@ -117,24 +136,12 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
 
     """
 
-    logger.info("Loading mortality data from CSV file...")
-    time_delta_tag = get_time_delta_tag(time_delta)
-    life_table = pd.read_csv(
-        get_data_path(f"processed_data/{time_delta_tag}/life_table.csv"),
-        parse_dates=["timepoint"]
-    )
     if time_delta < TimeDelta(years=1):
         life_table = split_ages(life_table, time_delta, TimeDelta(years=1), [])
 
-    # Load the population data from the CSV file
-    df_population = load_population_data(time_delta)
-
-    # Select only the data for the given province
-    df = df_population.copy()
-
-    # join to the life table to get death probabilities
-    df = df.merge(
-        life_table, on=["timepoint", "age", "province", "sex"], how="left"
+    # Join the mortality data to the population data
+    df = pd.merge(
+        df_population, life_table, on=["timepoint", "age", "province", "sex"], how="left"
     )
 
     # get the number of births in each year
@@ -202,8 +209,19 @@ def load_migration_data(time_delta: TimeDelta) -> pd.DataFrame:
 
 
 def generate_migration_data(time_delta: TimeDelta):
-    df_migration = load_migration_data(time_delta)
+
+    # Load the mortality data from the CSV file
+    logger.info("Loading mortality data from CSV file...")
     time_delta_tag = get_time_delta_tag(time_delta)
+    life_table = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/life_table.csv"),
+        parse_dates=["timepoint"]
+    )
+
+    # Load the population data from the CSV file
+    df_population = load_population_data(time_delta)
+
+    df_migration = load_migration_data(df_population, life_table, time_delta)
 
     # Convert the age back to integer
     df_migration["age_int"] = df_migration["age"].apply(lambda x: int(x))
