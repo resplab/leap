@@ -332,8 +332,8 @@ where:
 The derivation of this formula from the Kannisto-Thatcher hazard model is given in the
 :doc:`Technical Appendix <model-death-technical>`.
 
-Calibrating :math:`\beta_{\text{sex}}`
-*****************************************
+Calibrating β_sex
+********************
 
 The slope :math:`\beta_{\text{sex}}` is not observed directly. We calibrate it separately
 for each sex and province by finding the value that makes our projected life expectancy
