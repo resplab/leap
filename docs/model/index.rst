@@ -17,6 +17,7 @@ outcomes over a lifetime.
   model-migration
   model-antibiotics
   model-occurrence
+  model-reassessment
   model-control
   model-exacerbation
   model-cost
