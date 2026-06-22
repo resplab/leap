@@ -70,6 +70,38 @@ def convert_age_to_int(
     return df
 
 
+def load_mortality_data(time_delta: TimeDelta) -> pd.DataFrame:
+    """Load the mortality data for the given time delta.
+
+    Args:
+        time_delta: The duration of time between subsequent data points.
+    
+    Returns:
+        A dataframe with the following columns:
+
+        * ``timepoint``: The timepoint which the data applies to.
+        * ``province``: A string indicating the 2-letter province abbreviation, e.g. ``"BC"``.
+          For all of Canada, set province to ``"CA"``.
+        * ``age``: The integer age.
+        * ``sex``: One of ``M`` = male, ``F`` = female.
+        * ``prob_death``: The probability that a person with a given age and sex at a
+          given timepoint will die between the previous timepoint and this timepoint.
+    """
+    logger.info("Loading mortality data from CSV file...")
+    time_delta_tag = get_time_delta_tag(time_delta)
+    df = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/life_table.csv"),
+        parse_dates=["timepoint"]
+    )
+
+    df = df[["timepoint", "age", "province", "sex", "prob_death"]]
+
+    if time_delta < TimeDelta(years=1):
+        df = split_ages(df, time_delta, TimeDelta(years=1), ["prob_death"])
+
+    return df
+
+
 def load_population_data(time_delta: TimeDelta) -> pd.DataFrame:
     """Load the population data for the given time delta.
 
@@ -169,9 +201,6 @@ def load_migration_data(
 
     """
 
-    if time_delta < TimeDelta(years=1):
-        life_table = split_ages(life_table, time_delta, TimeDelta(years=1), [])
-
     # Join the mortality data to the population data
     df = pd.merge(
         df_population, life_table, on=["timepoint", "age", "province", "sex"], how="left"
@@ -244,12 +273,7 @@ def load_migration_data(
 def generate_migration_data(time_delta: TimeDelta):
 
     # Load the mortality data from the CSV file
-    logger.info("Loading mortality data from CSV file...")
-    time_delta_tag = get_time_delta_tag(time_delta)
-    life_table = pd.read_csv(
-        get_data_path(f"processed_data/{time_delta_tag}/life_table.csv"),
-        parse_dates=["timepoint"]
-    )
+    life_table = load_mortality_data(time_delta)
 
     # Load the population data from the CSV file
     df_population = load_population_data(time_delta)
