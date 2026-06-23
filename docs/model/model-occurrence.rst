@@ -560,9 +560,10 @@ The predicted prevalence for an individual agent is:
      - Output
      - predicted asthma prevalence for an individual agent
 
-:math:`\alpha` is solved offline using the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)``
-algorithm to find the value that minimises the difference between the population-weighted
-average and the :ref:`Model 1 <occurrence-model-1>` target:
+The correction term :math:`\alpha` is solved once, prior to runtime, using the
+``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to find the value that minimises the
+difference between the population-weighted average asthma prevalence and the
+:ref:`Model 1 <occurrence-model-1>` target asthma prevalence:
 
 .. math::
 
