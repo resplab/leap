@@ -707,8 +707,8 @@ asthma-free agents are included because incidence counts new diagnoses only.
 
 .. _optimizing-beta-parameters:
 
-Calibrating Age-Dependent Odds Ratios for Incidence
-------------------------------------------------------------------
+Calibrating Age-Dependent Odds Ratios
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Unlike prevalence, there are no published studies that directly estimate the age-dependent
 slopes of :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
@@ -773,7 +773,7 @@ The four tables below build this up step by step, and the diagram summarises the
 
 
 Baseline Contingency Table (t=0)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. raw:: html
 
@@ -840,7 +840,7 @@ totals and the odds ratio — we use the method from Di Pietrantonj (2006)
 marginal totals.
 
 Existing Diagnoses: Reassessment at t=1
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In our model, an asthma diagnosis is not permanent — a person may be reassessed and lose
 their diagnosis from one timepoint to the next. This table tracks what happens at :math:`t=1` to
@@ -886,7 +886,7 @@ next, applied equally regardless of risk factor status.
 
 
 New Diagnoses at t=1
-^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 This table tracks what happens at :math:`t=1` to the :math:`b_0 + d_0` people who were
 asthma-free at :math:`t=0`. Each person may receive a new diagnosis based on their
@@ -928,7 +928,7 @@ incidence probability: :math:`p_{\text{inc},\lambda}` for those with risk factor
 
 
 Combined Contingency Table: Existing and New Diagnoses (t=1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The combined table at :math:`t=1` sums the reassessment and new diagnosis components for
 each cell, giving the full joint distribution of risk factor status and asthma diagnosis
@@ -977,7 +977,7 @@ From these values, we can compute the odds ratio:
 
 
 Optimization
-^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~
 
 We want to find the age-dependent slope values (:math:`\beta_{\lambda, \text{age}}`) 
 that minimize the mean absolute difference between :math:`\log(\hat{\omega})`
