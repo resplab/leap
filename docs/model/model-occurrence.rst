@@ -566,7 +566,7 @@ average and the :ref:`Model 1 <occurrence-model-1>` target:
 
 .. math::
 
-  \sum_{\lambda} \text{prop}(\lambda) \cdot p_{\text{prev},\lambda} = \bar{p}_{\text{prev}}
+  \bar{p}_{\text{prev}} = \sum_{\lambda} \text{prop}(\lambda) \cdot p_{\text{prev},\lambda}
 
 where :math:`\text{prop}(\lambda)` is the proportion of the population with risk factor combination
 :math:`\lambda`.
