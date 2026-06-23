@@ -584,6 +584,36 @@ The predicted prevalence for an individual agent is:
 
   \text{logit}(p_{\text{prev}}) = \text{logit}(\bar{p}_{\text{prev}}) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha
 
+
+.. list-table::
+   :widths: 20 18 12 50
+   :header-rows: 1
+
+   * - Variable
+     - Domain
+     - Role
+     - Description
+   * - :math:`\bar{p}_{\text{prev}}`
+     - probability :math:`\in [0, 1]`
+     - Input
+     - predicted prevalence from :ref:`Model 1 <occurrence-model-1>` for this (age, sex, timepoint) stratum
+   * - :math:`\log(\omega_{\text{fhx}})`
+     - log-odds :math:`\in \mathbb{R}`
+     - Input
+     - log-OR for family history of asthma; from Patrick et al. :cite:`patrick2020`
+   * - :math:`\log(\omega_{\text{abx}})`
+     - log-odds :math:`\in \mathbb{R}`
+     - Input
+     - log-OR for antibiotic exposure in infancy; from Lee et al. :cite:`lee2024`
+   * - :math:`\alpha`
+     - log-odds :math:`\in \mathbb{R}`
+     - Intermediate
+     - per-stratum calibration term; looked up from ``asthma_occurrence_correction.csv`` at runtime
+   * - :math:`p_{\text{prev}}`
+     - probability :math:`\in [0, 1]`
+     - Output
+     - predicted asthma prevalence for an individual agent
+
 .. info:: Math: Prevalence Probability
   :collapsible:
 
@@ -617,35 +647,6 @@ The predicted prevalence for an individual agent is:
         indexed by :math:`\lambda`
     * - :math:`p(\lambda)`
       - the probability of the risk factor combination indexed by :math:`\lambda`
-
-.. list-table::
-   :widths: 20 18 12 50
-   :header-rows: 1
-
-   * - Variable
-     - Domain
-     - Role
-     - Description
-   * - :math:`\bar{p}_{\text{prev}}`
-     - probability :math:`\in [0, 1]`
-     - Input
-     - predicted prevalence from :ref:`Model 1 <occurrence-model-1>` for this (age, sex, timepoint) stratum
-   * - :math:`\log(\omega_{\text{fhx}})`
-     - log-odds :math:`\in \mathbb{R}`
-     - Input
-     - log-OR for family history of asthma; from Patrick et al. :cite:`patrick2020`
-   * - :math:`\log(\omega_{\text{abx}})`
-     - log-odds :math:`\in \mathbb{R}`
-     - Input
-     - log-OR for antibiotic exposure in infancy; from Lee et al. :cite:`lee2024`
-   * - :math:`\alpha`
-     - log-odds :math:`\in \mathbb{R}`
-     - Intermediate
-     - per-stratum calibration term; looked up from ``asthma_occurrence_correction.csv`` at runtime
-   * - :math:`p_{\text{prev}}`
-     - probability :math:`\in [0, 1]`
-     - Output
-     - predicted asthma prevalence for an individual agent
 
 Solving for the Correction Term
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
