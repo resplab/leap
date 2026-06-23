@@ -4,6 +4,12 @@
 Mortality Model
 ===========================
 
+.. toctree::
+  :maxdepth: 2
+  :hidden:
+
+  model-death-technical
+
 Data
 ====
 
