@@ -300,19 +300,20 @@ prevalence at 1-year age intervals, for each timepoint and sex. The variables ar
 Occurrence Model 2: Risk Factors
 =================================
 
-Model 1 produces age-, sex-, and timepoint-specific rates for the general population, but it treats
-everyone in a stratum identically. In reality, individuals differ in ways that affect their
-asthma risk — most notably whether a parent has asthma, and whether they received antibiotics
-in early life. Model 2 builds on Model 1 by incorporating these risk factors, so that
-the simulation can assign each agent an individualised probability of asthma incidence or
-prevalence rather than a population average.
+:ref:`Model 1 <occurrence-model-1>` produces age-, sex-, and timepoint-specific rates for the general
+population, but it treats everyone in a stratum identically. In reality, individuals differ in ways
+that affect their asthma risk — most notably whether a parent has asthma, and whether they received
+antibiotics in early life. Model 2 builds on :ref:`Model 1 <occurrence-model-1>` by incorporating
+these risk factors, so that the simulation can assign each agent an individualised probability of
+asthma incidence or prevalence rather than a population average.
 
 This is done in two phases:
 
 * **Data generation** (run once, before simulation): for every combination of age,
   sex, and timepoint, a calibration term :math:`\alpha` is computed that ensures the
   population-weighted average of the risk-factor-adjusted probabilities still matches the
-  target rates :math:`\bar{p}_{\text{prev}}` and :math:`\bar{p}_{\text{inc}}` from Model 1.
+  target rates :math:`\bar{p}_{\text{prev}}` and :math:`\bar{p}_{\text{inc}}` from
+  :ref:`Model 1 <occurrence-model-1>`.
   The results are saved to
   ``asthma_occurrence_correction.csv``.
 
@@ -324,7 +325,7 @@ Within the data generation phase, there is a fixed order of operations across th
 Computing :math:`\alpha` requires knowing :math:`\log(\omega_{\text{fhx}})` and
 :math:`\log(\omega_{\text{abx}})` for each risk factor combination :math:`\lambda` at each
 (age, sex, timepoint) stratum, since these determine the individual-level probabilities that must be
-population-weighted to match the Model 1 targets :math:`\bar{p}_{\text{prev}}` and
+population-weighted to match the :ref:`Model 1 <occurrence-model-1>` targets :math:`\bar{p}_{\text{prev}}` and
 :math:`\bar{p}_{\text{inc}}`. The log-ORs depend on age-dependent slope parameters
 :math:`\beta_{\lambda,\text{age}}`, which are known from the literature for prevalence but
 must be estimated for incidence — which creates the following sequence:
@@ -517,7 +518,7 @@ log-odds contributions. Because independent ORs are multiplicative, their logari
 
   \log(\omega_{\lambda}) = \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}})
 
-Applying individual risk factor ORs directly to the Model 1 log-odds would shift the
+Applying individual risk factor ORs directly to the :ref:`Model 1 <occurrence-model-1>` log-odds would shift the
 population-weighted average probability away from the target :math:`\bar{p}_{\text{prev}}`. The calibration
 term :math:`\alpha` corrects for this: it is a single scalar per (age, sex, timepoint) stratum that
 shifts the baseline log-odds so that the population-weighted average of :math:`p_{\text{prev}}`
@@ -541,7 +542,7 @@ The predicted prevalence for an individual agent is:
    * - :math:`\bar{p}_{\text{prev}}`
      - probability :math:`\in [0, 1]`
      - Input
-     - predicted prevalence from Model 1 for this (age, sex, timepoint) stratum
+     - predicted prevalence from :ref:`Model 1 <occurrence-model-1>` for this (age, sex, timepoint) stratum
    * - :math:`\log(\omega_{\text{fhx}})`
      - log-odds :math:`\in \mathbb{R}`
      - Input
@@ -561,7 +562,7 @@ The predicted prevalence for an individual agent is:
 
 :math:`\alpha` is solved offline using the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)``
 algorithm to find the value that minimises the difference between the population-weighted
-average and the Model 1 target:
+average and the :ref:`Model 1 <occurrence-model-1>` target:
 
 .. math::
 
@@ -595,7 +596,7 @@ individual agent is:
    * - :math:`\bar{p}_{\text{inc}}`
      - probability :math:`\in [0, 1]`
      - Input
-     - predicted incidence from Model 1 for this (age, sex, timepoint) stratum
+     - predicted incidence from :ref:`Model 1 <occurrence-model-1>` for this (age, sex, timepoint) stratum
    * - :math:`\log(\omega_{\text{fhx}})`
      - log-odds :math:`\in \mathbb{R}`
      - Input
@@ -615,7 +616,7 @@ individual agent is:
 
 :math:`\alpha` is solved offline using the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)``
 algorithm to find the value that minimises the difference between the population-weighted
-average and the Model 1 target:
+average and the :ref:`Model 1 <occurrence-model-1>` target:
 
 .. math::
 
@@ -684,7 +685,7 @@ For ages above 5, the OR is held constant at the age-5 value.
 For prevalence, all OR coefficients — including the age-dependent slopes — are fully
 determined by the literature before calibration runs. The only quantity calibrated for
 prevalence is the scalar correction term :math:`\alpha`, which shifts the population-weighted
-average onto the Model 1 target :math:`\bar{p}_{\text{prev}}`.
+average onto the :ref:`Model 1 <occurrence-model-1>` target :math:`\bar{p}_{\text{prev}}`.
 
 .. _optimizing-beta-parameters:
 
@@ -707,7 +708,7 @@ simultaneously satisfy two conditions:
 
 1. The average incidence across risk factor combinations :math:`\lambda`, weighted by their
    population proportions :math:`\text{prop}(\lambda)` within each (age, sex, timepoint) stratum, matches
-   the Model 1 target :math:`\bar{p}_{\text{inc}}`.
+   the :ref:`Model 1 <occurrence-model-1>` target :math:`\bar{p}_{\text{inc}}`.
 2. The ORs implied by the contingency tables — simulated forward one timepoint from the calibrated
    prevalence distribution at age :math:`t-1` — match the literature-derived prevalence ORs
    across age groups.
@@ -978,7 +979,7 @@ as described in the :ref:`occurrence-model-2-processed-data` section below.
 Processed Data
 --------------
 
-The calibration terms produced by Model 2 are stored in
+The calibration terms produced by :ref:`Model 2 <occurrence-model-2>` are stored in
 `asthma_occurrence_correction.csv <https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/asthma_occurrence_correction.csv>`_
 (under the ``time_delta_<days>`` directory matching the simulation's time step). Each row gives
 the value of :math:`\alpha` for a specific age, sex, timepoint, and outcome type
@@ -1020,7 +1021,7 @@ correction for each agent at each timepoint of life.
         <td>
           The calibration term \(\alpha\) for this stratum. Subtracted from the log-odds
           in the simulation to ensure the population-weighted average probability matches
-          \(\bar{p}_{\text{prev}}\) or \(\bar{p}_{\text{inc}}\) from Model 1.
+          \(\bar{p}_{\text{prev}}\) or \(\bar{p}_{\text{inc}}\) from <a href=#occurrence-model-1>Model 1</a>.
         </td>
       </tr>
       <tr>
