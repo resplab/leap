@@ -581,6 +581,69 @@ where :math:`\text{prop}(\lambda)` is the proportion of the population with risk
 :math:`\lambda`.
 
 
+
+Age-dependent Odds Ratios for Prevalence
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The log-ORs for each risk factor are age-dependent — their functional forms and fixed
+coefficients are derived from external published studies.
+
+Antibiotic Exposure
+~~~~~~~~~~~~~~~~~~~~
+
+The antibiotic log-OR was derived by Lee et al. :cite:`lee2024` using a random effects
+meta-regression model. It applies only to children aged 7 or under who received antibiotics
+in infancy, and is zero otherwise:
+
+.. math::
+
+  \log(\omega_{\text{abx}}) =
+    \begin{cases}
+      \beta_{\text{abx}_0} +
+      \beta_{\text{abx}_\text{age}} \cdot \min(a_i, 7) +
+      \beta_{\text{abx}_\text{dose}} \cdot \min(d_i, 3)
+      & d_i > 0 \text{ and } a_i \leq 7 \\[6pt]
+      0 & \text{otherwise}
+    \end{cases}
+
+where :math:`a_i` is the agent's age and :math:`d_i` is the number of courses of antibiotics
+taken during the first year of life (capped at 3). All three coefficients are sourced directly
+from the Lee et al. meta-regression, which estimated age as an explicit covariate:
+
+* :math:`\beta_{\text{abx}_0} = 1.826`
+* :math:`\beta_{\text{abx}_\text{age}} = 0.225`
+* :math:`\beta_{\text{abx}_\text{dose}} = 0.053`
+
+Family History
+~~~~~~~~~~~~~~~~
+
+The family history log-OR was derived from the ``CHILD Study`` by Patrick et al.
+:cite:`patrick2020` using logistic regression. It applies to all ages but the age-dependent
+component plateaus at age 5:
+
+.. math::
+
+  \log(\omega_{\text{fhx}}) =
+    \beta_{\text{fhx}_0} \cdot f_i +
+    \beta_{\text{fhx}_\text{age}} \cdot (\min(a_i, 5) - 3) \cdot f_i
+
+where :math:`f_i = 1` if at least one parent has asthma, 0 otherwise. Both coefficients
+are derived from the two empirical ORs reported by Patrick et al. at ages 3 and 5 —
+OR = 1.13 at age 3 and OR = 2.40 at age 5. The age-dependent slope is the linear
+interpolation between those two points on the log-OR scale:
+
+* :math:`\beta_{\text{fhx}_0} = \log(1.13) = 0.122`
+* :math:`\beta_{\text{fhx}_\text{age}} = \dfrac{\log(2.40) - \log(1.13)}{2} = 0.377`
+
+For ages above 5, the OR is held constant at the age-5 value.
+
+
+For prevalence, all OR coefficients — including the age-dependent slopes — are fully
+determined by the literature before calibration runs. The only quantity calibrated for
+prevalence is the scalar correction term :math:`\alpha`, which shifts the population-weighted
+average onto the :ref:`Model 1 <occurrence-model-1>` target :math:`\bar{p}_{\text{prev}}`.
+
+
 .. _occurrence-model-2-incidence:
 
 Incidence
@@ -623,6 +686,7 @@ individual agent is:
      - Output
      - predicted asthma incidence for an individual agent
 
+
 :math:`\alpha` is solved offline using the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)``
 algorithm to find the value that minimises the difference between the population-weighted
 average and the :ref:`Model 1 <occurrence-model-1>` target:
@@ -635,66 +699,7 @@ where :math:`\text{prop}_{\text{no asthma},\lambda}(t-1)` is the proportion of t
 are asthma-free at :math:`t-1` and have risk factor combination :math:`\lambda`. Only
 asthma-free agents are included because incidence counts new diagnoses only.
 
-Age-dependent Odds Ratios for Prevalence
-------------------------------------------------------------------
 
-The log-ORs for each risk factor are age-dependent — their functional forms and fixed
-coefficients are derived from external published studies.
-
-Antibiotic Exposure
-^^^^^^^^^^^^^^^^^^^
-
-The antibiotic log-OR was derived by Lee et al. :cite:`lee2024` using a random effects
-meta-regression model. It applies only to children aged 7 or under who received antibiotics
-in infancy, and is zero otherwise:
-
-.. math::
-
-  \log(\omega_{\text{abx}}) =
-    \begin{cases}
-      \beta_{\text{abx}_0} +
-      \beta_{\text{abx}_\text{age}} \cdot \min(a_i, 7) +
-      \beta_{\text{abx}_\text{dose}} \cdot \min(d_i, 3)
-      & d_i > 0 \text{ and } a_i \leq 7 \\[6pt]
-      0 & \text{otherwise}
-    \end{cases}
-
-where :math:`a_i` is the agent's age and :math:`d_i` is the number of courses of antibiotics
-taken during the first year of life (capped at 3). All three coefficients are sourced directly
-from the Lee et al. meta-regression, which estimated age as an explicit covariate:
-
-* :math:`\beta_{\text{abx}_0} = 1.826`
-* :math:`\beta_{\text{abx}_\text{age}} = 0.225`
-* :math:`\beta_{\text{abx}_\text{dose}} = 0.053`
-
-Family History
-^^^^^^^^^^^^^^
-
-The family history log-OR was derived from the ``CHILD Study`` by Patrick et al.
-:cite:`patrick2020` using logistic regression. It applies to all ages but the age-dependent
-component plateaus at age 5:
-
-.. math::
-
-  \log(\omega_{\text{fhx}}) =
-    \beta_{\text{fhx}_0} \cdot f_i +
-    \beta_{\text{fhx}_\text{age}} \cdot (\min(a_i, 5) - 3) \cdot f_i
-
-where :math:`f_i = 1` if at least one parent has asthma, 0 otherwise. Both coefficients
-are derived from the two empirical ORs reported by Patrick et al. at ages 3 and 5 —
-OR = 1.13 at age 3 and OR = 2.40 at age 5. The age-dependent slope is the linear
-interpolation between those two points on the log-OR scale:
-
-* :math:`\beta_{\text{fhx}_0} = \log(1.13) = 0.122`
-* :math:`\beta_{\text{fhx}_\text{age}} = \dfrac{\log(2.40) - \log(1.13)}{2} = 0.377`
-
-For ages above 5, the OR is held constant at the age-5 value.
-
-
-For prevalence, all OR coefficients — including the age-dependent slopes — are fully
-determined by the literature before calibration runs. The only quantity calibrated for
-prevalence is the scalar correction term :math:`\alpha`, which shifts the population-weighted
-average onto the :ref:`Model 1 <occurrence-model-1>` target :math:`\bar{p}_{\text{prev}}`.
 
 .. _optimizing-beta-parameters:
 
