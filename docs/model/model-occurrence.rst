@@ -161,6 +161,25 @@ And :math:`a_i` is the age, :math:`t_i` is the timepoint, :math:`s_i` is the sex
 
 There are :math:`4 + 5 + 5 = 14` coefficients in the incidence model.
 
+.. info:: Math: Incidence Formula
+  :collapsible:
+
+  .. math::
+
+      \eta^{(i)} = 
+          \sum_{m=0}^1 \beta_{01m} t^{(i)} \cdot (s^{(i)})^m +
+          \sum_{k=0}^{5} \sum_{m=0}^{1} \beta_{k0m} \cdot (a^{(i)})^k \cdot (s^{(i)})^m
+
+
+  where:
+
+  * :math:`\beta_{k\ell m}` is the coefficient for the feature :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
+  * :math:`a^{(i)}` is the age
+  * :math:`t^{(i)}` is the timepoint
+  * :math:`s^{(i)}` is the sex
+
+  There are :math:`2 + 6 * 2 = 14` coefficients in the incidence model.
+
 
 Next we have the ``prevalence``. We again want a formula using ``age``, ``sex``, and ``timepoint``.
 Since asthma prevalence depends on the number of people who have asthma, and this number changes
@@ -217,6 +236,23 @@ where:
 And :math:`a_i` is the age, :math:`t_i` is the timepoint, :math:`s_i` is the sex of individual :math:`i`.
 
 There are :math:`(1 + 1 + 5 + 5) + (2 + 2 + 10 + 10) = 36` coefficients in the prevalence model.
+
+.. info:: Math: Prevalence Formula
+  :collapsible:
+
+  .. math::
+
+      \eta^{(i)} = \sum_{k=0}^{5} \sum_{\ell=0}^2 \sum_{m=0}^1 \beta_{k \ell m} 
+          \cdot (a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m
+
+  where:
+
+  * :math:`\beta_{k\ell m}` is the coefficient for the feature :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
+  * :math:`a^{(i)}` is the age
+  * :math:`t^{(i)}` is the timepoint
+  * :math:`s^{(i)}` is the sex
+
+  There are :math:`6 * 3 * 2 = 36` coefficients in the prevalence model.
 
 
 Assumptions
