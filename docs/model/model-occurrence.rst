@@ -614,7 +614,7 @@ The predicted prevalence for an individual agent is:
      - Output
      - predicted asthma prevalence for an individual agent
 
-.. info:: Math: Prevalence Probability
+.. info:: Math: Prevalence Formula
   :collapsible:
 
   We can now define our formula for the calibration model:
