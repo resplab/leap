@@ -687,9 +687,13 @@ individual agent is:
      - predicted asthma incidence for an individual agent
 
 
-:math:`\alpha` is solved offline using the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)``
-algorithm to find the value that minimises the difference between the population-weighted
-average and the :ref:`Model 1 <occurrence-model-1>` target:
+Solving for the Correction Term
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The correction term :math:`\alpha` is solved once, prior to runtime, using the
+``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to find the value that minimises the
+difference between the population-weighted average asthma incidence and the
+:ref:`Model 1 <occurrence-model-1>` target asthma incidence:
 
 .. math::
 
