@@ -13,8 +13,7 @@ outcomes over a lifetime.
   model-simulation
   model-glm
   model-birth
-  model-death
-  model-death-technical
+  death/model-death
   model-migration
   model-antibiotics
   model-occurrence
