@@ -132,28 +132,35 @@ in asthma incidence, so we should include sex in our formula.
 where:
 
 .. list-table::
-   :widths: 50 20 30
+   :widths: 20 20 20 40
    :header-rows: 1
 
    * - Coefficient
+     - Indices
      - Term
      - Description
    * - :math:`\beta_0`
+     - 
      - :math:`1`
      - intercept
    * - :math:`\beta_{\text{sex}}`
+     -  
      - :math:`s_i`
      - sex main effect
    * - :math:`\beta_{\text{time}}`
+     -
      - :math:`t_i`
      - timepoint main effect
    * - :math:`\beta_{\text{time,sex}}`
+     -  
      - :math:`t_i \cdot s_i`
      - timepoint × sex interaction
-   * - :math:`\beta_{\text{age},k}` (:math:`k = 1, \ldots, 5`)
+   * - :math:`\beta_{\text{age},k}`
+     - :math:`k \in \{1, \ldots, 5\}`
      - :math:`a_i^k`
      - age polynomial terms
-   * - :math:`\beta_{\text{age,sex},k}` (:math:`k = 1, \ldots, 5`)
+   * - :math:`\beta_{\text{age,sex},k}`
+     - :math:`k \in \{1, \ldots, 5\}`
      - :math:`a_i^k \cdot s_i`
      - age × sex interaction terms
 
@@ -202,38 +209,47 @@ in asthma incidence and hence prevalence, so we should include sex in our formul
 where:
 
 .. list-table::
-   :widths: 30 30 40
+   :widths: 20 20 20 40
    :header-rows: 1
 
    * - Coefficient
+     - Indices
      - Term
      - Description
    * - :math:`\beta_0`
+     - 
      - :math:`1`
      - intercept
    * - :math:`\beta_{\text{sex}}`
+     - 
      - :math:`s_i`
      - sex main effect
-   * - :math:`\beta_{\text{age},k}` (:math:`k = 1, \ldots, 5`)
+   * - :math:`\beta_{\text{age},k}`
+     - :math:`k \in \{1, \ldots, 5\}`
      - :math:`a_i^k`
      - age polynomial terms
-   * - :math:`\beta_{\text{age,sex},k}` (:math:`k = 1, \ldots, 5`)
+   * - :math:`\beta_{\text{age,sex},k}`
+     - :math:`k \in \{1, \ldots, 5\}`
      - :math:`a_i^k \cdot s_i`
      - age × sex interactions
-   * - :math:`\beta_{\text{time},\ell}` (:math:`\ell = 1, 2`)
+   * - :math:`\beta_{\text{time},\ell}`
+     - :math:`\ell \in \{1, 2\}`
      - :math:`(t_i)^\ell`
      - timepoint polynomial terms
-   * - :math:`\beta_{\text{time,sex},\ell}` (:math:`\ell = 1, 2`)
+   * - :math:`\beta_{\text{time,sex},\ell}`
+     - :math:`\ell \in \{1, 2\}`
      - :math:`(t_i)^\ell \cdot s_i`
      - timepoint × sex interactions
-   * - :math:`\beta_{\text{age,time},k,\ell}` (:math:`k = 1, \ldots, 5`,  :math:`\ell = 1, 2`)
+   * - :math:`\beta_{\text{age,time},k,\ell}`
+     - :math:`k \in \{1, \ldots, 5\}`, :math:`\ell \in \{1, 2\}`
      - :math:`a_i^k \cdot (t_i)^\ell`
      - age × timepoint interactions
-   * - :math:`\beta_{\text{age,time,sex},k,\ell}` (:math:`k = 1, \ldots, 5`, :math:`\ell = 1, 2`)
+   * - :math:`\beta_{\text{age,time,sex},k,\ell}`
+     - :math:`k \in \{1, \ldots, 5\}`, :math:`\ell \in \{1, 2\}`
      - :math:`a_i^k \cdot (t_i)^\ell \cdot s_i`
      - age × timepoint × sex interactions
 
-And :math:`a_i` is the age, :math:`t_i` is the timepoint, :math:`s_i` is the sex of individual :math:`i`.
+and :math:`a_i` is the age, :math:`t_i` is the timepoint, :math:`s_i` is the sex of individual :math:`i`.
 
 There are :math:`(1 + 1 + 5 + 5) + (2 + 2 + 10 + 10) = 36` coefficients in the prevalence model.
 
