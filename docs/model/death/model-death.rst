@@ -8,7 +8,8 @@ Mortality Model
   :maxdepth: 2
   :hidden:
 
-  model-death-technical
+  model-death-kannisto
+  model-death-life-expectancy
 
 Data
 ====
@@ -336,7 +337,7 @@ where:
   means mortality is declining over time
 
 The derivation of this formula from the Kannisto-Thatcher hazard model is given in the
-:doc:`Technical Appendix <model-death-technical>`.
+:doc:`Technical Appendix <model-death-kannisto>`.
 
 Calibrating β_sex
 ********************
@@ -347,7 +348,7 @@ match Statistics Canada's published life expectancy targets at the calibration t
 
 To evaluate a candidate :math:`\beta_{\text{sex}}`, we apply the projection formula above to
 construct a full life table of death probabilities across all ages at a given calibration
-timepoint, then compute life expectancy from that table (see :ref:`life-expectancy-appendix`).
+timepoint, then compute life expectancy from that table (see :doc:`model-death-life-expectancy`).
 The calibration minimises the discrepancy between this computed life expectancy and the
 Statistics Canada target across all available calibration timepoints using
 ``scipy.optimize.leastsq``. Once :math:`\beta_{\text{sex}}` is fixed, the projection formula
