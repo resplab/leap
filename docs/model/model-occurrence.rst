@@ -386,7 +386,7 @@ must be estimated for incidence — which creates the following sequence:
    the age slopes that simultaneously satisfy two conditions: (i) the average incidence
    across risk factor combinations :math:`\lambda`, weighted by their population proportions
    :math:`\text{prop}(\lambda)` within each (age, sex, timepoint) stratum, matches :math:`\bar{p}_{\text{inc}}`
-   from Model 1; and (ii) the ORs implied by
+   from :ref:`Model 1 <occurrence-model-1>`; and (ii) the ORs implied by
    the :ref:`contingency tables <optimizing-beta-parameters>` simulated forward one timepoint
    from the calibrated prevalence distribution at age :math:`t-1` match the
    literature-derived prevalence ORs across age groups. The converged slopes are saved to
@@ -396,10 +396,10 @@ must be estimated for incidence — which creates the following sequence:
    from step 2, :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
    incidence are fully determined. BFGS then solves for :math:`\alpha_{\text{inc}}` per
    stratum: the value that makes the population-weighted average of the at-risk incidence
-   probabilities match the Model 1 target :math:`\bar{p}_{\text{inc}}`.
+   probabilities match the :ref:`Model 1 <occurrence-model-1>` target :math:`\bar{p}_{\text{inc}}`.
 
-The diagram below summarises how the components relate, from the Model 1 targets through the
-offline calibration steps to the personalised probabilities used at runtime.
+The diagram below summarises how the components relate, from the :ref:`Model 1 <occurrence-model-1>`
+targets through the offline calibration steps to the personalised probabilities used at runtime.
 
 .. md-mermaid::
 
