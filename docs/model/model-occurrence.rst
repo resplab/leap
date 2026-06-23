@@ -518,6 +518,11 @@ log-odds contributions. Because independent ORs are multiplicative, their logari
 
   \log(\omega_{\lambda}) = \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}})
 
+.. _occurrence-model-2-prevalence:
+
+Prevalence
+--------------------------------------------
+
 Applying individual risk factor ORs directly to the :ref:`Model 1 <occurrence-model-1>` log-odds would shift the
 population-weighted average probability away from the target :math:`\bar{p}_{\text{prev}}`. The calibration
 term :math:`\alpha` corrects for this: it is a single scalar per (age, sex, timepoint) stratum that
