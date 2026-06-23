@@ -250,8 +250,8 @@ incidence equation in :ref:`occurrence-model-2`. See the
 Python Examples
 ================
 
-For a hands-on walkthrough of GLMs using ``statsmodels`` and ``plotly`` — including runnable
-code you can execute locally — see the notebook below.
+For a hands-on walkthrough of GLMs using ``statsmodels`` and ``plotly`` — including
+code you can run locally — see the notebook below.
 
 .. toctree::
    :maxdepth: 1
