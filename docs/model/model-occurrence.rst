@@ -785,6 +785,41 @@ individual agent is:
      - predicted asthma incidence for an individual agent
 
 
+.. info:: Math: Incidence Formula
+  :collapsible:
+
+  We can now define our formula for the calibration model:
+
+  .. math::
+
+    \zeta_{\lambda}^{(i)} = \sigma\left(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) + \alpha\right)
+
+  where:
+
+  .. list-table::
+    :widths: 25 75
+    :header-rows: 1
+
+    * - Variable
+      - Description
+    * - :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)})`
+      - determined by the output of the first model
+    * - :math:`\eta^{(i)}`
+      - the predicted incidence or prevalence from the first model
+    * - :math:`\sigma(x)`
+      - the logistic function
+    * - :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda}`
+      - the correction / calibration term for either the incidence or prevalence
+    * - :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda}^{(i)}`
+      - predicted asthma prevalence / incidence for the model. We want this to be as close as
+        possible to :math:`\eta^{(i)}`.
+    * - :math:`\zeta_{\lambda}^{(i)}`
+      - the predicted asthma incidence or prevalence from the model for the risk factor combination
+        indexed by :math:`\lambda`
+    * - :math:`p(\lambda)`
+      - the probability of the risk factor combination indexed by :math:`\lambda`
+
+
 Solving for the Correction Term
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
