@@ -1629,7 +1629,7 @@ correction for each agent at each timepoint of life.
         <td>
           The calibration term \(\alpha\) for this stratum. Subtracted from the log-odds
           in the simulation to ensure the population-weighted average probability matches
-          \(\bar{p}_{\text{prev}}\) or \(\bar{p}_{\text{inc}}\) from <a href=#occurrence-model-1>Model 1</a>.
+          \(\bar{p}_{\text{prev}}\) or \(\bar{p}_{\text{inc}}\) from <a href="#occurrence-model-1">Model 1</a>.
         </td>
       </tr>
       <tr>
