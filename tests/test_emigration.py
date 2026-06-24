@@ -16,6 +16,15 @@ from leap.utils import round_number
             "LG",
             0.02836
         ),
+        (
+            dt.datetime(2000, 1, 1),
+            dt.datetime(2001, 1, 1),
+            5,
+            "M",
+            "BC",
+            "past",
+            0.001127
+        ),
     ]
 )
 def test_emigration_constructor(

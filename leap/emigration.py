@@ -97,7 +97,7 @@ class Emigration:
         df = df[
             (df["timepoint"] >= min_timepoint) &
             (df["province"] == province) &
-            (df["projection_scenario"] == population_growth_type)
+            (df["projection_scenario"].isin(["past", population_growth_type]))
         ]
 
         df.drop(columns=["province", "projection_scenario"], inplace=True)

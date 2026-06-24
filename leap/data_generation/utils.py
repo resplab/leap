@@ -1,28 +1,12 @@
 import pandas as pd
 import numpy as np
 import argparse
+import itertools
+from leap.utils import TimeDelta, date_range, PROVINCE_MAP
 from leap.logger import get_logger
-from typing import Tuple
+from typing import Tuple, List
 
 logger = get_logger(__name__)
-
-
-PROVINCE_MAP = {
-    "Canada": "CA",
-    "British Columbia": "BC",
-    "Alberta": "AB",
-    "Saskatchewan": "SK",
-    "Manitoba": "MB",
-    "Ontario": "ON",
-    "Quebec": "QC",
-    "Newfoundland and Labrador": "NL",
-    "Nova Scotia": "NS",
-    "New Brunswick": "NB",
-    "Prince Edward Island": "PE",
-    "Yukon": "YT",
-    "Northwest Territories": "NT",
-    "Nunavut": "NU"
-}
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -357,3 +341,100 @@ def conv_2x2(
         c=df.loc[var_names[2]].values[0],
         d=df.loc[var_names[3]].values[0]
     )
+
+
+def interpolate(
+    data: pd.DataFrame,
+    col_pred: str,
+    time_delta: TimeDelta,
+    time_delta_od: TimeDelta,
+    columns_group: List[str]
+) -> pd.DataFrame:
+    """Interpolate the values of a column for missing timepoints.
+    
+    Args:
+        data: The data to interpolate. Must contain a ``"timepoint"`` column.
+        col_pred: The name of the column to predict.
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
+        time_delta_od: The original time delta of the data, i.e. the time delta that the data was
+            originally collected at.
+
+    Returns:
+        A dataframe with the same columns as the input data, but with the values of the column to
+        predict interpolated for the missing timepoints. The dataframe will contain rows for all
+        timepoints between the minimum and maximum timepoints in the input data, with a step size of
+        ``time_delta``.
+    """
+    
+    if time_delta == time_delta_od:
+        return data
+
+    # Get the fixed values for non-province columns
+    fixed_cols = [col for col in columns_group if col != "province"]
+    fixed_values = [data[col].unique() for col in fixed_cols]
+
+    # Build per-province timepoint ranges, then product with fixed cols
+    chunks = []
+    for province, df_group in data.groupby("province"):
+        initial_timepoint = df_group["timepoint"].min()
+        final_timepoint = df_group["timepoint"].max()
+
+        timepoints = list(date_range(
+            start=initial_timepoint,
+            stop=final_timepoint + time_delta_od,
+            step=time_delta
+        ))
+
+        iter_values = [timepoints, [province]] + fixed_values
+        col_order = ["timepoint", "province"] + fixed_cols
+
+        chunks.append(pd.DataFrame(
+            data=list(itertools.product(*iter_values)),
+            columns=col_order
+        ))
+
+    df_pred = pd.concat(chunks, ignore_index=True)
+
+    data[col_pred] = data[col_pred].apply(
+        lambda x: x * time_delta.total_seconds() / time_delta_od.total_seconds()
+    )
+    df = pd.merge(
+        df_pred, data,
+        on=["timepoint"] + columns_group,
+        how="left"
+    ).sort_values(columns_group + ["timepoint"])
+    df.set_index("timepoint", inplace=True)
+    grouped_df = df[[col_pred] + columns_group].groupby(columns_group)
+    df[col_pred] = grouped_df.transform(lambda x: x.interpolate(method="time"))
+    df.reset_index(drop=False, inplace=True)
+    df.sort_values(columns_group + ["timepoint"], inplace=True)
+    df.ffill(inplace=True)
+
+    return df
+
+
+def split_ages(
+    df: pd.DataFrame, time_delta: TimeDelta, time_delta_od: TimeDelta, cols_divide: List[str]
+) -> pd.DataFrame:
+    """Split the age groups in the ``age`` column into finer age groups based on the time delta.
+    
+    Args:
+        df: A Pandas dataframe containing an ``age`` column.
+        time_delta: The time delta to split the age groups by, e.g. 1 year, 5 years, etc.
+        time_delta_od: The original time delta of the data, i.e. the time delta that the data was
+            originally collected at.
+        cols_divide: A list of column names whose values should be divided proportionally to the
+            age groups.
+    
+    Returns:
+        A Pandas dataframe with the age groups in the ``age`` column split into finer age groups.
+    """
+
+    n_intervals = time_delta_od // time_delta
+    df = df.loc[
+        df.index.repeat(n_intervals)
+    ].reset_index(drop=True)
+    df["age"] = df["age"] + np.arange(len(df)) % n_intervals / n_intervals
+    for col in cols_divide:
+        df[col] = df[col] / n_intervals
+    return df

@@ -2,12 +2,11 @@ import pandas as pd
 import os
 import pathlib
 import datetime as dt
-import itertools
 import plotly.express as px
-from leap.utils import get_data_path, get_time_delta_tag, date_range, TimeDelta
-from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group, get_parser
+from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
+from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group, get_parser, \
+    interpolate
 from leap.logger import get_logger
-from typing import List
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
@@ -49,73 +48,6 @@ def filter_age_group(age_group: str) -> bool:
         return True
     else:
         return not any(word in age_group for word in FILTER_WORDS)
-
-
-def interpolate(
-    data: pd.DataFrame,
-    col_pred: str,
-    time_delta: TimeDelta,
-    columns_group: List[str]
-) -> pd.DataFrame:
-    """Interpolate the values of a column for missing timepoints.
-    
-    Args:
-        data: The data to interpolate. Must contain a ``"timepoint"`` column.
-        col_pred: The name of the column to predict.
-        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
-
-    Returns:
-        A dataframe with the same columns as the input data, but with the values of the column to
-        predict interpolated for the missing timepoints. The dataframe will contain rows for all
-        timepoints between the minimum and maximum timepoints in the input data, with a step size of
-        ``time_delta``.
-    """
-    
-    if time_delta == TIME_DELTA_OD:
-        return data
-
-    # Get the fixed values for non-province columns
-    fixed_cols = [col for col in columns_group if col != "province"]
-    fixed_values = [data[col].unique() for col in fixed_cols]
-
-    # Build per-province timepoint ranges, then product with fixed cols
-    chunks = []
-    for province, df_group in data.groupby("province"):
-        initial_timepoint = df_group["timepoint"].min()
-        final_timepoint = df_group["timepoint"].max()
-
-        timepoints = list(date_range(
-            start=initial_timepoint,
-            stop=final_timepoint + TIME_DELTA_OD,
-            step=time_delta
-        ))
-
-        iter_values = [timepoints, [province]] + fixed_values
-        col_order = ["timepoint", "province"] + fixed_cols
-
-        chunks.append(pd.DataFrame(
-            data=list(itertools.product(*iter_values)),
-            columns=col_order
-        ))
-
-    df_pred = pd.concat(chunks, ignore_index=True)
-
-    data[col_pred] = data[col_pred].apply(
-        lambda x: x * time_delta.total_seconds() / TIME_DELTA_OD.total_seconds()
-    )
-    df = pd.merge(
-        df_pred, data,
-        on=["timepoint"] + columns_group,
-        how="left"
-    ).sort_values(columns_group + ["timepoint"])
-    df.set_index("timepoint", inplace=True)
-    grouped_df = df[[col_pred] + columns_group].groupby(columns_group)
-    df[col_pred] = grouped_df.transform(lambda x: x.interpolate(method="time"))
-    df.reset_index(drop=False, inplace=True)
-    df.sort_values(columns_group + ["timepoint"], inplace=True)
-    df.ffill(inplace=True)
-
-    return df
 
 
 def load_past_births_population_data(
@@ -185,6 +117,7 @@ def load_past_births_population_data(
         data=df.copy().reset_index(drop=True),
         col_pred="N",
         time_delta=time_delta,
+        time_delta_od=TIME_DELTA_OD,
         columns_group=["province", "projection_scenario"]
     ).reset_index(drop=True)
     df.sort_values(["province", "projection_scenario", "timepoint"], inplace=True)
@@ -295,6 +228,7 @@ def load_projected_births_population_data(
         data=df.copy().reset_index(drop=True),
         col_pred="N",
         time_delta=time_delta,
+        time_delta_od=TIME_DELTA_OD,
         columns_group=["province", "projection_scenario"]
     ).reset_index(drop=True)
     df.sort_values(["province", "projection_scenario", "timepoint"], inplace=True)
@@ -409,6 +343,7 @@ def load_past_initial_population_data(
         data=df.copy(),
         col_pred="n_age",
         time_delta=time_delta,
+        time_delta_od=TIME_DELTA_OD,
         columns_group=["province", "age"]
     ).reset_index(drop=True)
 
@@ -533,6 +468,7 @@ def load_projected_initial_population_data(
         data=df.copy(),
         col_pred="n_age",
         time_delta=time_delta,
+        time_delta_od=TIME_DELTA_OD,
         columns_group=["province", "projection_scenario", "age"]
     ).reset_index(drop=True)
 

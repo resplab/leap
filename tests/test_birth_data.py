@@ -4,11 +4,9 @@ from leap.data_generation.birth_data import get_projection_scenario_id, MIN_TIME
     CENSUS_TIMEPOINT, load_past_births_population_data, load_projected_births_population_data, \
     load_past_initial_population_data, load_projected_initial_population_data, TIME_DELTA_OD
 from leap.logger import get_logger
-from leap.utils import TimeDelta
+from leap.utils import TimeDelta, PROJECTION_SCENARIOS
 
 logger = get_logger(__name__)
-
-PROJECTION_SCENARIOS = ["M1", "M2", "M3", "M4", "M5", "M6", "LG", "HG", "FA", "SA"]
 
 
 @pytest.mark.parametrize(

@@ -25,6 +25,31 @@ logger = get_logger(__name__)
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
 
+DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
+
+PROJECTION_SCENARIOS = (
+    "past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", "FA", "SA"
+)
+
+PROVINCE_MAP = {
+    "Canada": "CA",
+    "British Columbia": "BC",
+    "Alberta": "AB",
+    "Saskatchewan": "SK",
+    "Manitoba": "MB",
+    "Ontario": "ON",
+    "Quebec": "QC",
+    "Newfoundland and Labrador": "NL",
+    "Nova Scotia": "NS",
+    "New Brunswick": "NB",
+    "Prince Edward Island": "PE",
+    "Yukon": "YT",
+    "Northwest Territories": "NT",
+    "Nunavut": "NU"
+}
+
+MORTALITY_SCENARIOS = ("HM", "MM", "LM")
+
 
 
 def get_chunk_indices(
@@ -206,8 +231,8 @@ def get_data_path(data_path: str | pathlib.Path, mkdirs: bool = False) -> pathli
         data_folder = "leap.processed_data"
         data_path = data_path.relative_to("processed_data")
     elif data_path.parts[0] == "data_generation":
-        data_folder = "leap.data_generation" + "." + ".".join(data_path.parts[1:-1])
-        data_path = data_path.parts[-1]
+        data_folder = "leap.data_generation"
+        data_path = data_path.relative_to("data_generation")
     elif data_path.parts[0] == "original_data":
         data_path = data_path.relative_to("original_data")
         data_folder = "leap.original_data"
@@ -288,11 +313,8 @@ def check_province(province: str):
         ValueError: If the province is not valid.
     """
 
-    PROVINCES = [
-        "CA", "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"
-    ]
-    if province not in PROVINCES:
-        raise ValueError(f"province must be one of {PROVINCES}, received {province}")
+    if province not in PROVINCE_MAP.values():
+        raise ValueError(f"province must be one of {PROVINCE_MAP.values()}, received {province}")
 
 
 def check_projection_scenario(projection_scenario: str):
@@ -305,9 +327,6 @@ def check_projection_scenario(projection_scenario: str):
         ValueError: If the projection scenario is not valid.
     """
 
-    PROJECTION_SCENARIOS = [
-        "past", "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", "FA", "SA"
-    ]
     if projection_scenario not in PROJECTION_SCENARIOS:
         raise ValueError(
             f"projection_scenario must be one of {PROJECTION_SCENARIOS}, "
