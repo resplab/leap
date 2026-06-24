@@ -50,7 +50,7 @@ a time interval is defined as:
 
 .. math::
 
-    \text{time_interval} := [\text{timepoint}, \text{timepoint} + \text{time_delta})
+    \text{time interval} = [\text{timepoint}, \text{timepoint} + \text{time delta})
 
 
 For example, if the ``min_timepoint`` is January 1, 2020, and the ``time_delta`` is 1 year, then the
@@ -59,8 +59,7 @@ first time interval would be ``[2020-01-01, 2021-01-01)``, i.e., the year ``2020
 Unlike at subsequent timepoints, at the initial timepoint the simulation does not introduce only
 newborns — instead, it creates a cross-sectional population spanning all ages from ``0`` to
 ``max_age``, representing the full age distribution of the province at the initial timepoint, drawn
-from Statistics Canada population data
-(``./leap/processed_data/{time_delta_tag}birth/initial_population.csv``).
+from Statistics Canada population data (see the :ref:`birth-model`).
 
 The ``num_births_initial`` parameter sets the number of agents at age 0. The number of agents at
 every other age is determined by multiplying ``num_births_initial`` by that age group's ``prop``
@@ -265,9 +264,17 @@ To initialize an agent, we set the following initial attributes:
        * probability of fully-controlled asthma: 0.33
        * probability of partially-controlled asthma: 0.33
        * probability of uncontrolled asthma: 0.33
+   * - family history of asthma
+     - Assigned via a Bernoulli draw using the population prevalence of parental asthma.
+       1 = at least one parent has asthma, 0 = neither parent has asthma.
+       See :ref:`occurrence-model-2` for how this enters the asthma probability.
+   * - antibiotic exposure in infancy
+     - The number of courses of antibiotics taken during the first year of life, drawn from a
+       negative binomial distribution. Values are capped at 3 for the purposes of odds ratio
+       calculation. See :ref:`occurrence-model-2` for how this enters the asthma probability.
    * - has asthma?
      - If the agent is less than 3 years old, they do not have asthma. Otherwise, they are assigned
-       an asthma status based on the asthma prevalence model.
+       an asthma status based on the asthma prevalence model (see Step 2 below).
    * - exacerbation history
      - Initial exacerbation history is set to:
 
@@ -283,7 +290,22 @@ If the agent is over 3 years old, go to Step 2. If not, skip to Step 3.
 Step 2: Check if the agent has asthma
 ---------------------------------------
 
-We use the asthma prevalence model to determine if the agent has asthma.
+We use the asthma prevalence model (:ref:`occurrence-model-2`) to assign a probability of
+asthma at the agent's current age, sex, and timepoint, adjusted for their individual risk factors:
+
+.. math::
+
+    \text{logit}(p_{\text{prev}}) = \text{logit}(\bar{p}_{\text{prev}}) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha
+
+where :math:`\bar{p}_{\text{prev}}` is the Model 1 prevalence target for the agent's stratum,
+:math:`\omega_{\text{fhx}}` and :math:`\omega_{\text{abx}}` are the odds ratios for the agent's
+family history and antibiotic exposure, and :math:`\alpha` is the per-stratum calibration term
+looked up from ``asthma_occurrence_correction.csv``. The agent is then assigned an asthma status
+via a Bernoulli draw:
+
+.. math::
+
+    \text{has asthma} \sim \text{Bernoulli}(p_{\text{prev}})
 
 Step 3: Determine the age of asthma diagnosis
 ---------------------------------------------
@@ -442,9 +464,26 @@ If the agent has asthma, go to Step 7. If not continue to Step 2.
 Step 2: Check if agent gets a new asthma diagnosis
 ---------------------------------------------------
 
-We use the asthma incidence model to determine if the agent gets a new asthma diagnosis
-in the current time interval of their lifetime. If they do not, skip to Step 4. If they do, we
-set the age of diagnosis to the current age of the agent and go to Step 3.
+We use the asthma incidence model (:ref:`occurrence-model-2`) to compute the probability that
+the agent receives a new asthma diagnosis in the current time interval, adjusted for their
+individual risk factors:
+
+.. math::
+
+    \text{logit}(p_{\text{inc}}) = \text{logit}(\bar{p}_{\text{inc}}) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha
+
+where :math:`\bar{p}_{\text{inc}}` is the Model 1 incidence target for the agent's stratum,
+:math:`\omega_{\text{fhx}}` and :math:`\omega_{\text{abx}}` are the odds ratios for the agent's
+family history and antibiotic exposure (both age-dependent and zero once the agent ages out of
+the relevant windows), and :math:`\alpha` is the per-stratum calibration term looked up from
+``asthma_occurrence_correction.csv``.
+
+.. math::
+
+    \text{new diagnosis} \sim \text{Bernoulli}(p_{\text{inc}})
+
+If they do not receive a diagnosis, skip to Step 4. If they do, we set the age of diagnosis
+to the current age of the agent and go to Step 3.
 
 Step 3: Compute the control levels
 ---------------------------------------------------

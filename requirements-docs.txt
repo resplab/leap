@@ -4,7 +4,7 @@ pybtex
 sphinxcontrib-bibtex
 sphinx-rtd-theme
 myst-parser
-sphinx-immaterial
+sphinx-immaterial>=0.13.9
 nbsphinx
 myst-nb
 ipython

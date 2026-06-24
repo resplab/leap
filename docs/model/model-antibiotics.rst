@@ -106,7 +106,7 @@ Model: Generalized Linear Model - Negative Binomial
 Since our model projects into the future, we would like to be able to extend this data beyond
 ``2018``. To obtain these projections, we use a ``Generalized Linear Model (GLM)``. A ``GLM`` is a
 type of regression analysis which is a generalized form of linear regression.
-See :doc:`model-glm` for more information on ``GLMs``.
+See :doc:`model-statistical-background` for more information on ``GLMs``.
 
 
 Probability Distribution
