@@ -565,6 +565,15 @@ def get_projected_death_data(
         * ``se``: The standard error of the probability of death.
     """
 
+    # Compute the beta parameters for each province, sex, and projection scenario
+    beta_parameters = compute_beta_parameters(
+        past_life_table=past_life_table,
+        df_calibration=df_calibration,
+        time_delta_od=time_delta_od,
+        x0=x0,
+        xtol=xtol
+    )
+
     projected_life_table = pd.DataFrame({
         "timepoint": np.array([], dtype=dt.datetime),
         "province": [],
@@ -573,13 +582,6 @@ def get_projected_death_data(
         "prob_death": [],
         "se": []
     })
-    beta_parameters = compute_beta_parameters(
-        past_life_table=past_life_table,
-        df_calibration=df_calibration,
-        time_delta_od=time_delta_od,
-        x0=x0,
-        xtol=xtol
-    )
 
     for province in past_life_table["province"].unique():
 
