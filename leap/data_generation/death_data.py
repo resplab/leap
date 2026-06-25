@@ -276,8 +276,9 @@ def load_past_death_data(time_delta: TimeDelta) -> pd.DataFrame:
         time_delta: The duration of time between data points.
     
     Returns:
-        A dataframe containing the probability of death and the standard error
-        for each timepoint, province, age, and sex.
+        A dataframe containing the probability of death and the standard error for each timepoint,
+        province, age, and sex. The time delta of the data is that of the original data, which is
+        1 year.
         Columns:
 
         * ``timepoint``: The starting timepoint of the interval during which the data was collected.
@@ -341,21 +342,8 @@ def load_past_death_data(time_delta: TimeDelta) -> pd.DataFrame:
     # join the two tables
     df = pd.merge(df_prob, df_se, on=["timepoint", "province", "sex", "age"], how="left")
 
-    # Interpolate the mortality estimates for the missing timepoints in the past data
-    df = interpolate(
-        data=df.copy().reset_index(drop=True),
-        col_pred="prob_death",
-        time_delta=time_delta,
-        time_delta_od=TIME_DELTA_OD,
-        columns_group=["province", "age", "sex"]
-    ).reset_index(drop=True)
     df.sort_values(["province", "age", "sex", "timepoint"], inplace=True)
     df = df[["province", "age", "sex", "timepoint", "prob_death", "se"]]
-
-    if time_delta < TimeDelta(years=1):
-        n_intervals = TimeDelta(years=1) // time_delta
-        df = df.loc[df.index.repeat(n_intervals)].reset_index(drop=True)
-        df["age"] = df["age"] + np.arange(len(df)) % n_intervals / n_intervals
 
     return df
 

@@ -95,7 +95,7 @@ def test_get_projected_life_table_single_timepoint(life_table, sex, province, ti
             TimeDelta(months=1),
             [(
                 dt.datetime(2019, 1, 1), "BC", 2, "F",
-                0.00015 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds()
+               0.00015
             )],
         ),
     ]
