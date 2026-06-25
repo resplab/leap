@@ -430,6 +430,7 @@ def get_projected_death_data(
     past_life_table: pd.DataFrame,
     df_calibration: pd.DataFrame,
     time_delta: TimeDelta,
+    time_delta_od: TimeDelta = TIME_DELTA_OD,
     projection_scenario: str = "M3",
     x0: float = -0.02,
     xtol: float = 0.00001
@@ -464,6 +465,7 @@ def get_projected_death_data(
               sex, projection scenario, and mortality scenario.
 
         time_delta: The duration of time between data points.
+        time_delta_od: The original duration of time between data points in the past data.
         x0: The initial guess for the beta parameter.
         xtol: The tolerance for the beta parameter.
     
@@ -493,7 +495,7 @@ def get_projected_death_data(
     for province in past_life_table["province"].unique():
         life_table = past_life_table[past_life_table["province"] == province]
         max_timepoint_past = life_table["timepoint"].max()
-        starting_timepoint = max_timepoint_past + time_delta
+        starting_timepoint = max_timepoint_past + time_delta_od
         life_table = life_table[life_table["timepoint"] == max_timepoint_past]
 
         beta_time_female = optimize.leastsq(
@@ -506,7 +508,7 @@ def get_projected_death_data(
                 province,
                 max_timepoint_past,
                 projection_scenario,
-                time_delta
+                time_delta_od
             ),
             xtol=xtol,
         )[0][0]
@@ -521,7 +523,7 @@ def get_projected_death_data(
                 province,
                 max_timepoint_past,
                 projection_scenario,
-                time_delta
+                time_delta_od
             ),
             xtol=xtol
         )[0][0]
