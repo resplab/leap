@@ -1,4 +1,5 @@
 import pathlib
+import itertools
 import pandas as pd
 import numpy as np
 import datetime as dt
@@ -9,7 +10,7 @@ from leap.logger import get_logger
 from leap.data_generation.utils import format_age_group, get_province_id, get_sex_id, get_parser, \
     interpolate
 from leap.utils import TimeDelta, date_range, get_time_delta_tag
-from typing import Tuple
+from typing import Tuple, Dict
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
@@ -430,12 +431,10 @@ def load_projected_death_data(min_timepoint: dt.datetime) -> pd.DataFrame:
 def compute_beta_parameters(
     past_life_table: pd.DataFrame,
     df_calibration: pd.DataFrame,
-    province: str,
-    projection_scenario: str = "M3",
     time_delta_od: TimeDelta = TIME_DELTA_OD,
     x0: float = -0.02,
     xtol: float = 0.00001   
-) -> Tuple[float, float]:
+) -> Dict[Tuple[str, str, str], float]:
     """Load the projected death data from ``StatCan`` CSV file.
     
     Args:
@@ -465,51 +464,47 @@ def compute_beta_parameters(
             * ``life_expectancy``: The life expectancy in years for the given year, province,
               sex, projection scenario, and mortality scenario.
 
-        province: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
-        projection_scenario: The projection scenario, e.g. ``"M3"``.
         time_delta_od: The original duration of time between data points in the past data.
         x0: The initial guess for the beta parameter.
         xtol: The tolerance for the beta parameter.
     
     Returns:
-        A tuple containing the beta parameters.
+        A dictionary containing the beta parameters for each province, sex, and projection scenario.
     """
+    keys = list(itertools.product(
+        past_life_table["province"].unique(),
+        past_life_table["sex"].unique(), 
+        past_life_table["projection_scenario"].unique())
+    )
+    beta_parameters = {key: 0.0 for key in keys}
 
-    life_table = past_life_table[past_life_table["province"] == province]
-    max_timepoint_past = life_table["timepoint"].max()
-    life_table = life_table[life_table["timepoint"] == max_timepoint_past]
+    for key in keys:
+        province = key[0]
+        sex = key[1]
+        projection_scenario = key[2]
 
-    beta_time_female = optimize.leastsq(
-        compute_life_expectancy_diff,
-        x0=[x0],
-        args=(
-            life_table,
-            df_calibration,
-            "F",
-            province,
-            max_timepoint_past,
-            projection_scenario,
-            time_delta_od
-        ),
-        xtol=xtol,
-    )[0][0]
+        life_table = past_life_table[past_life_table["province"] == province]
+        max_timepoint_past = life_table["timepoint"].max()
+        life_table = life_table[life_table["timepoint"] == max_timepoint_past]
 
-    beta_time_male = optimize.leastsq(
-        compute_life_expectancy_diff,
-        x0=[x0],
-        args=(
-            life_table,
-            df_calibration,
-            "M",
-            province,
-            max_timepoint_past,
-            projection_scenario,
-            time_delta_od
-        ),
-        xtol=xtol
-    )[0][0]
+        beta_time = optimize.leastsq(
+            compute_life_expectancy_diff,
+            x0=[x0],
+            args=(
+                life_table,
+                df_calibration,
+                sex,
+                province,
+                max_timepoint_past,
+                projection_scenario,
+                time_delta_od
+            ),
+            xtol=xtol,
+        )[0][0]
 
-    return beta_time_female, beta_time_male
+        beta_parameters[key] = beta_time
+
+    return beta_parameters
 
 
 def get_projected_death_data(
@@ -578,16 +573,15 @@ def get_projected_death_data(
         "prob_death": [],
         "se": []
     })
+    beta_parameters = compute_beta_parameters(
+        past_life_table=past_life_table,
+        df_calibration=df_calibration,
+        time_delta_od=time_delta_od,
+        x0=x0,
+        xtol=xtol
+    )
+
     for province in past_life_table["province"].unique():
-        beta_time_female, beta_time_male = compute_beta_parameters(
-            past_life_table=past_life_table,
-            df_calibration=df_calibration,
-            province=province,
-            time_delta_od=time_delta_od,
-            projection_scenario=projection_scenario,
-            x0=x0,
-            xtol=xtol
-        )
 
         life_table = past_life_table[past_life_table["province"] == province]
         max_timepoint_past = life_table["timepoint"].max()
@@ -605,10 +599,12 @@ def get_projected_death_data(
         for timepoint in date_range(starting_timepoint, MAX_TIMEPOINT + time_delta, time_delta):
             # get the prob_death projections for the year and add to dataframe
             df_female = get_projected_life_table_single_timepoint(
-                beta_time_female, life_table, starting_timepoint - time_delta, timepoint, "F", province
+                beta_parameters[(province, "F", projection_scenario)], life_table,
+                starting_timepoint - time_delta, timepoint, "F", province
             )
             df_male = get_projected_life_table_single_timepoint(
-                beta_time_male, life_table, starting_timepoint - time_delta, timepoint, "M", province
+                beta_parameters[(province, "M", projection_scenario)], life_table,
+                starting_timepoint - time_delta, timepoint, "M", province
             )
             # combine the dataframes
             projected_life_table_single_timepoint = pd.concat([df_female, df_male], axis=0)
