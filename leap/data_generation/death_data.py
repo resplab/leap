@@ -9,6 +9,7 @@ from leap.logger import get_logger
 from leap.data_generation.utils import format_age_group, get_province_id, get_sex_id, get_parser, \
     interpolate
 from leap.utils import TimeDelta, date_range, get_time_delta_tag
+from typing import Tuple
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
@@ -426,6 +427,91 @@ def load_projected_death_data(min_timepoint: dt.datetime) -> pd.DataFrame:
     return df
 
 
+def compute_beta_parameters(
+    past_life_table: pd.DataFrame,
+    df_calibration: pd.DataFrame,
+    province: str,
+    projection_scenario: str = "M3",
+    time_delta_od: TimeDelta = TIME_DELTA_OD,
+    x0: float = -0.02,
+    xtol: float = 0.00001   
+) -> Tuple[float, float]:
+    """Load the projected death data from ``StatCan`` CSV file.
+    
+    Args:
+        past_life_table: A dataframe containing the probability of death and the standard error
+            for each timepoint, province, age, and sex. Columns:
+            
+            * ``timepoint``: the starting timepoint of the interval during which the data was collected.
+            * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+              For all of Canada, set province to ``"CA"``.
+            * ``sex``: One of ``M`` = male, ``F`` = female.
+            * ``age``: the integer age.
+            * ``prob_death``: the probability of death.
+            * ``se``: the standard error of the probability of death.
+
+        df_calibration: A dataframe containing the life expectancy projections for the calibration
+            years. Columns:
+
+            * ``timepoint``: The calendar year. Range ``[1988, 2073]``.
+            * ``province``: A 2-letter string indicating the province abbreviation, e.g.
+              ``"BC"``. For all of Canada, set province to ``"CA"``.
+            * ``sex``: One of ``F`` = female, ``M`` = male.
+            * ``projection_scenario``: The projection scenario, e.g. ``"M3"``.
+            * ``mortality_scenario``: The mortality scenario. One of:
+                - ``LM``: Low mortality
+                - ``MM``: Medium mortality
+                - ``HM``: High mortality
+            * ``life_expectancy``: The life expectancy in years for the given year, province,
+              sex, projection scenario, and mortality scenario.
+
+        province: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+        projection_scenario: The projection scenario, e.g. ``"M3"``.
+        time_delta_od: The original duration of time between data points in the past data.
+        x0: The initial guess for the beta parameter.
+        xtol: The tolerance for the beta parameter.
+    
+    Returns:
+        A tuple containing the beta parameters.
+    """
+
+    life_table = past_life_table[past_life_table["province"] == province]
+    max_timepoint_past = life_table["timepoint"].max()
+    life_table = life_table[life_table["timepoint"] == max_timepoint_past]
+
+    beta_time_female = optimize.leastsq(
+        compute_life_expectancy_diff,
+        x0=[x0],
+        args=(
+            life_table,
+            df_calibration,
+            "F",
+            province,
+            max_timepoint_past,
+            projection_scenario,
+            time_delta_od
+        ),
+        xtol=xtol,
+    )[0][0]
+
+    beta_time_male = optimize.leastsq(
+        compute_life_expectancy_diff,
+        x0=[x0],
+        args=(
+            life_table,
+            df_calibration,
+            "M",
+            province,
+            max_timepoint_past,
+            projection_scenario,
+            time_delta_od
+        ),
+        xtol=xtol
+    )[0][0]
+
+    return beta_time_female, beta_time_male
+
+
 def get_projected_death_data(
     past_life_table: pd.DataFrame,
     df_calibration: pd.DataFrame,
@@ -493,40 +579,20 @@ def get_projected_death_data(
         "se": []
     })
     for province in past_life_table["province"].unique():
+        beta_time_female, beta_time_male = compute_beta_parameters(
+            past_life_table=past_life_table,
+            df_calibration=df_calibration,
+            province=province,
+            time_delta_od=time_delta_od,
+            projection_scenario=projection_scenario,
+            x0=x0,
+            xtol=xtol
+        )
+
         life_table = past_life_table[past_life_table["province"] == province]
         max_timepoint_past = life_table["timepoint"].max()
         starting_timepoint = max_timepoint_past + time_delta_od
         life_table = life_table[life_table["timepoint"] == max_timepoint_past]
-
-        beta_time_female = optimize.leastsq(
-            compute_life_expectancy_diff,
-            x0=[x0],
-            args=(
-                life_table,
-                df_calibration,
-                "F",
-                province,
-                max_timepoint_past,
-                projection_scenario,
-                time_delta_od
-            ),
-            xtol=xtol,
-        )[0][0]
-
-        beta_time_male = optimize.leastsq(
-            compute_life_expectancy_diff,
-            x0=[x0],
-            args=(
-                life_table,
-                df_calibration,
-                "M",
-                province,
-                max_timepoint_past,
-                projection_scenario,
-                time_delta_od
-            ),
-            xtol=xtol
-        )[0][0]
 
         projected_life_table_province = pd.DataFrame({
             "timepoint": np.array([], dtype=dt.datetime),
