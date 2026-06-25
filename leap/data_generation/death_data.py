@@ -508,17 +508,16 @@ def compute_beta_parameters(
 
 
 def get_projected_death_data(
+    beta_parameters: Dict[Tuple[str, str, str], float],
     past_life_table: pd.DataFrame,
-    df_calibration: pd.DataFrame,
     time_delta: TimeDelta,
-    time_delta_od: TimeDelta = TIME_DELTA_OD,
-    projection_scenario: str = "M3",
-    x0: float = -0.02,
-    xtol: float = 0.00001
+    time_delta_od: TimeDelta = TIME_DELTA_OD
 ) -> pd.DataFrame:
     """Load the projected death data from ``StatCan`` CSV file.
     
     Args:
+        beta_parameters: A dictionary containing the beta parameters for each province, sex, and
+            projection scenario.
         past_life_table: A dataframe containing the probability of death and the standard error
             for each timepoint, province, age, and sex. Columns:
             
@@ -530,25 +529,8 @@ def get_projected_death_data(
             * ``prob_death``: the probability of death.
             * ``se``: the standard error of the probability of death.
 
-        df_calibration: A dataframe containing the life expectancy projections for the calibration
-            years. Columns:
-
-            * ``timepoint``: The calendar year. Range ``[1988, 2073]``.
-            * ``province``: A 2-letter string indicating the province abbreviation, e.g.
-              ``"BC"``. For all of Canada, set province to ``"CA"``.
-            * ``sex``: One of ``F`` = female, ``M`` = male.
-            * ``projection_scenario``: The projection scenario, e.g. ``"M3"``.
-            * ``mortality_scenario``: The mortality scenario. One of:
-                - ``LM``: Low mortality
-                - ``MM``: Medium mortality
-                - ``HM``: High mortality
-            * ``life_expectancy``: The life expectancy in years for the given year, province,
-              sex, projection scenario, and mortality scenario.
-
         time_delta: The duration of time between data points.
         time_delta_od: The original duration of time between data points in the past data.
-        x0: The initial guess for the beta parameter.
-        xtol: The tolerance for the beta parameter.
     
     Returns:
         A dataframe containing the predicted probability of death and the standard error
@@ -564,15 +546,6 @@ def get_projected_death_data(
           will die in the given year.
         * ``se``: The standard error of the probability of death.
     """
-
-    # Compute the beta parameters for each province, sex, and projection scenario
-    beta_parameters = compute_beta_parameters(
-        past_life_table=past_life_table,
-        df_calibration=df_calibration,
-        time_delta_od=time_delta_od,
-        x0=x0,
-        xtol=xtol
-    )
 
     projected_life_table = pd.DataFrame({
         "timepoint": np.array([], dtype=dt.datetime),
@@ -613,7 +586,11 @@ def get_projected_death_data(
 
 
 def generate_death_data(
-    time_delta: TimeDelta, to_csv: bool = True, draw_plot: bool = False
+    time_delta: TimeDelta,
+    to_csv: bool = True,
+    draw_plot: bool = False,
+    x0: float = -0.02,
+    xtol: float = 0.00001
 ) -> None | pd.DataFrame:
     """Generate the mortality data CSV.
     
@@ -622,6 +599,8 @@ def generate_death_data(
         to_csv: Whether to save the data to a CSV file. If False, the dataframe will be returned
             instead.
         draw_plot: Whether to draw a plot of the mortality data for validation.
+        x0: The initial guess for the beta parameter.
+        xtol: The tolerance for the beta parameter.
 
     Returns:
         If ``to_csv`` is False, a dataframe containing the probability of death and the standard
@@ -629,7 +608,19 @@ def generate_death_data(
     """
     past_life_table = load_past_death_data(time_delta)
     df_calibration = load_projected_death_data(min_timepoint=past_life_table["timepoint"].max() + time_delta)
-    projected_life_table = get_projected_death_data(past_life_table, df_calibration, time_delta)
+
+    # Compute the beta parameters for each province, sex, and projection scenario
+    beta_parameters = compute_beta_parameters(
+        past_life_table=past_life_table,
+        df_calibration=df_calibration,
+        time_delta_od=TIME_DELTA_OD,
+        x0=x0,
+        xtol=xtol
+    )
+
+    projected_life_table = get_projected_death_data(
+        beta_parameters, past_life_table, time_delta
+    )
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
     life_table["age_int"] = life_table["age"].apply(lambda x: int(x))
     grouped_df = life_table.groupby(["age_int", "province", "sex", "timepoint"], as_index=False).agg({
