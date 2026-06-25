@@ -594,30 +594,14 @@ def get_projected_death_data(
         starting_timepoint = max_timepoint_past + time_delta_od
         life_table = life_table[life_table["timepoint"] == max_timepoint_past]
 
-        projected_life_table_province_sex_scenario = pd.DataFrame({
-            "timepoint": np.array([], dtype=dt.datetime),
-            "province": [],
-            "age": np.array([], dtype=int),
-            "sex": [],
-            "prob_death": [],
-            "se": []
-        })
         for timepoint in date_range(starting_timepoint, MAX_TIMEPOINT + time_delta, time_delta):
             # get the prob_death projections for the year and add to dataframe
             df = get_projected_life_table_single_timepoint(
                 beta_parameters[(province, sex, projection_scenario)], life_table,
                 starting_timepoint - time_delta, timepoint, "F", province
             )
-            # combine the dataframes
-            projected_life_table_province_sex_scenario = pd.concat(
-                [projected_life_table_province_sex_scenario, df],
-                axis=0
-            )
-
-        projected_life_table = pd.concat(
-            [projected_life_table, projected_life_table_province_sex_scenario],
-            axis=0
-        )
+            # add to the dataframe
+            projected_life_table = pd.concat([projected_life_table, df], axis=0)
 
     projected_life_table.sort_values(["province", "age", "sex", "timepoint"], inplace=True)
     projected_life_table = projected_life_table[
