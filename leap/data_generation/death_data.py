@@ -583,14 +583,18 @@ def get_projected_death_data(
         "se": []
     })
 
-    for province in past_life_table["province"].unique():
+    for province, sex, projection_scenario in beta_parameters.keys():
 
-        life_table = past_life_table[past_life_table["province"] == province]
+        life_table = past_life_table[
+            (past_life_table["province"] == province) &
+            (past_life_table["sex"] == sex) &
+            (past_life_table["projection_scenario"] == projection_scenario)
+        ]
         max_timepoint_past = life_table["timepoint"].max()
         starting_timepoint = max_timepoint_past + time_delta_od
         life_table = life_table[life_table["timepoint"] == max_timepoint_past]
 
-        projected_life_table_province = pd.DataFrame({
+        projected_life_table_province_sex_scenario = pd.DataFrame({
             "timepoint": np.array([], dtype=dt.datetime),
             "province": [],
             "age": np.array([], dtype=int),
@@ -600,23 +604,18 @@ def get_projected_death_data(
         })
         for timepoint in date_range(starting_timepoint, MAX_TIMEPOINT + time_delta, time_delta):
             # get the prob_death projections for the year and add to dataframe
-            df_female = get_projected_life_table_single_timepoint(
-                beta_parameters[(province, "F", projection_scenario)], life_table,
+            df = get_projected_life_table_single_timepoint(
+                beta_parameters[(province, sex, projection_scenario)], life_table,
                 starting_timepoint - time_delta, timepoint, "F", province
             )
-            df_male = get_projected_life_table_single_timepoint(
-                beta_parameters[(province, "M", projection_scenario)], life_table,
-                starting_timepoint - time_delta, timepoint, "M", province
-            )
             # combine the dataframes
-            projected_life_table_single_timepoint = pd.concat([df_female, df_male], axis=0)
-            projected_life_table_province = pd.concat(
-                [projected_life_table_province, projected_life_table_single_timepoint],
+            projected_life_table_province_sex_scenario = pd.concat(
+                [projected_life_table_province_sex_scenario, df],
                 axis=0
             )
 
         projected_life_table = pd.concat(
-            [projected_life_table, projected_life_table_province],
+            [projected_life_table, projected_life_table_province_sex_scenario],
             axis=0
         )
 
