@@ -598,7 +598,7 @@ def get_projected_death_data(
             # get the prob_death projections for the year and add to dataframe
             df = get_projected_life_table_single_timepoint(
                 beta_parameters[(province, sex, projection_scenario)], life_table,
-                starting_timepoint - time_delta, timepoint, "F", province
+                starting_timepoint - time_delta, timepoint, sex, province
             )
             # add to the dataframe
             projected_life_table = pd.concat([projected_life_table, df], axis=0)
