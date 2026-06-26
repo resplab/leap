@@ -768,8 +768,9 @@ Family History
 ~~~~~~~~~~~~~~~~
 
 The family history log-OR was derived from the ``CHILD Study`` by Patrick et al.
-:cite:`patrick2020` using logistic regression. It applies to all ages but the age-dependent
-component plateaus at age 5:
+:cite:`patrick2020` using logistic regression. See :ref:`family-history-model` for how the
+family history risk factor is assigned to agents and how :math:`p = 0.2927` is estimated from
+the same study. The log-OR applies to all ages but the age-dependent component plateaus at age 5:
 
 .. math::
 

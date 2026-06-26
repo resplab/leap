@@ -15,6 +15,7 @@ outcomes over a lifetime.
   model-death
   model-migration
   model-antibiotics
+  model-family-history
   model-occurrence
   model-reassessment
   model-control

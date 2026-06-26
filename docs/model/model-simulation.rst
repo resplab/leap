@@ -267,11 +267,13 @@ To initialize an agent, we set the following initial attributes:
    * - family history of asthma
      - Assigned via a Bernoulli draw using the population prevalence of parental asthma.
        1 = at least one parent has asthma, 0 = neither parent has asthma.
-       See :ref:`occurrence-model-2` for how this enters the asthma probability.
+       See :ref:`family-history-model` for details on the assignment process, and
+       :ref:`occurrence-model-2` for how this affects the asthma probability.
    * - antibiotic exposure in infancy
-     - The number of courses of antibiotics taken during the first year of life, drawn from a
-       negative binomial distribution. Values are capped at 3 for the purposes of odds ratio
-       calculation. See :ref:`occurrence-model-2` for how this enters the asthma probability.
+     - Assigned via a Negative Binomial draw using the fitted GLM parameters for the agent's
+       sex and birth year. This gives the number of antibiotic courses taken during the first
+       year of life and can be 0, 1, 2, or 3. See :ref:`antibiotic_exposure_model` for details on the assignment process,
+       and :ref:`occurrence-model-2` for how this affects the asthma probability.
    * - has asthma?
      - If the agent is less than 3 years old, they do not have asthma. Otherwise, they are assigned
        an asthma status based on the asthma prevalence model (see Step 2 below).
