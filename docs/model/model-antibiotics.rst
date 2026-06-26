@@ -7,8 +7,8 @@ In this section, we will describe the model used to predict the number of antibi
 to infants in their first year of life. This model will be incorporated into the risk factors
 for developing asthma later in life.
 
-Datasets
-*********
+Input Datasets
+**************
 
 We obtained data from the ``BC Ministry of Health`` on the number of antibiotics prescribed to
 infants in their first year of life. The data is available for the years ``2000`` to ``2018``. The
@@ -56,8 +56,10 @@ data is formatted as follows:
     </table>
 
 Since the ``n_abx`` column gives us the *total* number of antibiotics prescribed, we need to use
-population data to convert this to a *per infant* value. We obtained population data from the
-``StatCan`` census data (the same that is used in the ``Birth`` module):
+population data to convert this to a *per infant* value. We obtained population data from
+`Table 17-10-00005-01 from Statistics Canada
+<https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=1710000501>`_,
+the same past-data source used in the :ref:`birth-model`:
 
 .. raw:: html
 
@@ -100,177 +102,169 @@ population data to convert this to a *per infant* value. We obtained population 
     </table>
 
 
+Merged Dataset: InfantAbxBC.csv
+*********************************
+
+The two input datasets are merged on ``year`` and ``sex`` to produce
+`InfantAbxBC.csv <https://github.com/resplab/leap/blob/main/leap/processed_data/InfantAbxBC.csv>`_,
+saved in the ``processed_data`` directory. This combined dataset is what the GLM is fitted on:
+
+.. raw:: html
+
+  <table class="table">
+    <thead>
+      <tr>
+          <th>Column</th>
+          <th>Type</th>
+          <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code class="notranslate">year</code></td>
+        <td><code class="notranslate">int</code></td>
+        <td>
+          Calendar year, range <code>[2000, 2018]</code>
+        </td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">sex</code></td>
+        <td><code class="notranslate">str</code></td>
+        <td>
+          <code>"Female"</code> or <code>"Male"</code>
+        </td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">N</code></td>
+        <td><code class="notranslate">int</code></td>
+        <td>
+          Total number of births in BC for the given year and sex.
+        </td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">N_abx</code></td>
+        <td><code class="notranslate">int</code></td>
+        <td>
+          Total number of antibiotic courses dispensed to infants in BC for the given year and sex.
+        </td>
+      </tr>
+      <tr>
+        <td><code class="notranslate">rate</code></td>
+        <td><code class="notranslate">float</code></td>
+        <td>
+          Antibiotic prescription rate per 1,000 births (<code>N_abx / N * 1000</code>).
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+
 Model: Generalized Linear Model - Negative Binomial
 ****************************************************
 
 Since our model projects into the future, we would like to be able to extend this data beyond
 ``2018``. To obtain these projections, we use a ``Generalized Linear Model (GLM)``. A ``GLM`` is a
 type of regression analysis which is a generalized form of linear regression.
-See :doc:`model-statistical-background` for more information on ``GLMs``.
 
+The response variable — number of antibiotic courses prescribed during the first year of life —
+is overdispersed count data, so we use the ``Negative Binomial`` distribution with a ``log``
+link function. See :ref:`negative-binomial-glm` in :doc:`model-statistical-background` for the
+full distributional derivation and motivation.
 
-Probability Distribution
----------------------------------------
-
-When fitting a ``GLM``, first you must choose a distribution for the ``response variable``. In our
-case, the response variable is the number of antibiotics prescribed during the first year of life.
-The number of antibiotics prescribed is a count variable, in a given time interval. Since it is
-count data, we need a discrete probability distribution.
-The ``Poisson distribution`` is a good choice for our data, but it has some limitations. The
-``Poisson distribution`` assumes that the mean and variance are equal, i.e:
-
-.. math::
-  
-  \mu = \sigma^2
-  
-However, in our data, the variance is greater than the mean. This is a common problem in count data,
-and it is called ``overdispersion``. The ``Negative Binomial`` distribution is a generalization of
-the ``Poisson`` distribution that allows for overdispersion. The ``Negative Binomial`` distribution
-has an extra parameter, :math:`\theta`, which controls the amount of overdispersion. Typically,
-the distribution is written as:
+The mean parameter has a lower bound to prevent unrealistically small extrapolations into future
+years:
 
 .. math::
 
-    P(Y = k; r, p) := \binom{k+r-1}{k}(1-p)^k p^r
+    \mu_i = \max\!\left(\mu_i,\; 0.05\right)
 
-where:
-
-* :math:`k` is the number of failures before :math:`r` successes occur
-* :math:`p` is the probability of a success
-* :math:`r` is the number of successes
-
-We can reparametrize this with :math:`\mu` and :math:`\theta` using the following equations:
-
-.. math::
-
-    p &= \dfrac{\mu}{\sigma^2} \\
-    r &= \dfrac{\mu^2}{\sigma^2 - \mu} \\
-    \sigma^2 &= \mu + \dfrac{\mu^2}{\theta}
-
-where :math:`\mu` is the mean, :math:`\sigma^2` is the variance, and :math:`\theta` is the
-overdispersion parameter. 
-
-Doing some algebra, we have:
-
-.. math::
-
-    p &= \dfrac{\mu}{\sigma^2} = \dfrac{\mu}{\mu + \dfrac{\mu^2}{\theta}} = \dfrac{\theta}{\theta + \mu} \\
-    r &= \dfrac{\mu^2}{\sigma^2 - \mu} = \dfrac{\mu^2}{\mu + \dfrac{\mu^2}{\theta} - \mu} 
-    = \dfrac{\mu^2}{\dfrac{\mu^2}{\theta}} 
-    = \theta
-
-Letting :math:`y = k`, we have:
-
-.. math::
-
-    P(Y = y; \mu, \theta) &= \binom{y + \theta - 1}{y}
-        \left(1-\dfrac{\theta}{\theta + \mu}\right)^y 
-        \left(\dfrac{\theta}{\theta + \mu}\right)^{\theta} \\
-    &= \binom{y + \theta - 1}{y}
-        \left(\dfrac{\theta + \mu - \theta}{\theta + \mu}\right)^y 
-        \left(\dfrac{\theta}{\theta + \mu}\right)^{\theta} \\
-    &= \binom{y + \theta - 1}{y}
-        \dfrac{\mu^y \theta^{\theta}}{(\theta + \mu)^{y+\theta}}
-
-
-We added an upper bound on the mean parameter to prevent unrealistic extrapolation:
-
-.. math::
-
-    \mu^{(i)} = E(Y | X = x^{(i)}) \leq 0.05
-
-In other words, we are saying that the mean number of antibiotics prescribed to an infant in their
-first year of life is less than or equal to ``0.05``.
-
-So we have:
-
-.. math::
-
-    P(Y = y; \mu, \theta) &= p(y; \mu^{(i)}, \theta^{(i)}) = 
-        \binom{y + \theta^{(i)} - 1}{y}
-        \dfrac{(\mu^{(i)})^y (\theta^{(i)})^{\theta^{(i)}}}{(\theta^{(i)} + \mu^{(i)})^{y + \theta^{(i)}}} \\
-    \mu^{(i)} &= \text{max}(0.05, \mu^{(i)})
-
-
-
-Link Function
------------------
-
-We also need to choose a ``link function``. Recall that the link function :math:`g(\mu^{(i)})`
-is used to relate the mean to the predicted value :math:`\eta^{(i)}`:
-
-.. math::
-
-    g(\mu^{(i)}) &= \eta^{(i)} \\
-    \mu^{(i)} &= E(Y | X = x^{(i)})
-
-How do we choose a link function? Well, we are free to choose any link function we like, but there
-are some constraints. For example, in the Negative Binomial distribution, the mean is always
-``>= 0``. However, :math:`\eta^{(i)}` can be any real number. Therefore, we need a link function
-that maps real numbers to non-negative numbers. The ``log link function`` is a good choice for this:
-
-.. math::
-
-    g(\mu^{(i)}) = \log(\mu^{(i)}) = \eta^{(i)}
+In other words, the predicted mean number of antibiotic courses per infant is at least ``0.05``.
 
 
 Formula
------------------
+-------
 
-Now that we have our distribution and link function, we need to decide on a formula for
-:math:`\eta^{(i)}`. We are permitted to use linear combinations of functions of the features
-in our dataset.
+The birth data enters the model as a log offset on ``n_birth``, so the GLM predicts a
+per-capita rate directly rather than a raw count.
 
-For our dataset, we want a formula using ``sex`` and ``timepoint``. Since prescribing practices change
-over time, and since infections requiring antibiotic prescriptions also change over time,
-we should include the timepoint in our formula. We also want to include sex, since there are sex
-differences in antibiotic prescriptions.
+Since prescribing practices change over time, and since infections requiring antibiotic
+prescriptions also change over time, birth year is included in the formula. Sex is also
+included, since there are known sex differences in antibiotic prescriptions.
 
 There is an additional factor specific to BC regulations. In 2005, the BC government introduced
 an antibiotic conservation program, which reduced the number of antibiotics prescribed
-:cite:`mamun2019`. It stands to reason that the formula may change before and after 2005. To
-account for this, we will introduce a ``Heaviside step function``, which returns ``0`` for values
-below a given threshold, and ``1`` for values above the threshold. In our case, the threshold
-is ``2005``.
-
+:cite:`mamun2019`. To account for this structural break, the formula includes a
+``Heaviside step function`` :math:`H`, which is ``0`` for years before ``2005`` and ``1``
+for years from ``2005`` onward.
 
 .. math::
 
-    \eta^{(i)} = \beta_0 + \beta_s \cdot s^{(i)} + \beta_t \cdot t^{(i)} +
-        \beta_h \cdot H(t^{(i)} - 2005) + 
-        \beta_{th} \cdot t \cdot H(t^{(i)} - 2005)
+    \log(\mu_i) = \beta_0
+        + \beta_{\text{sex}} \cdot s_i
+        + \beta_{\text{year}} \cdot t_i
+        + \beta_{\text{2005}} \cdot H(t_i - 2005)
+        + \beta_{\text{year,2005}} \cdot t_i \cdot H(t_i - 2005)
 
 where:
 
 .. list-table::
-   :widths: 25 50
+   :widths: 20 20 20 40
    :header-rows: 1
 
-   * - Variable
+   * - Coefficient
+     - Indices
+     - Term
      - Description
-   * - :math:`\eta^{(i)}`
-     - the predicted number of antibiotics per capita prescribed for an infant.
    * - :math:`\beta_0`
-     - an intercept constant
-   * - :math:`s^{(i)}`
-     - sex
-   * - :math:`\beta_{s}`
-     - sex constant
-   * - :math:`t^{(i)}`
-     - timepoint of birth of the infant
-   * - :math:`\beta_t`
-     - timepoint constant
-   * - :math:`H(t^{(i)} - 2005)`
-     - Heaviside step function, which is ``0`` for timepoints before ``2005`` and ``1`` for
-       timepoints after ``2005``
-   * - :math:`\beta_h`
-     - Heaviside step function constant
-   * - :math:`\beta_{th}`
-     - timepoint and Heaviside step function constant
+     -
+     - :math:`1`
+     - intercept
+   * - :math:`\beta_{\text{sex}}`
+     -
+     - :math:`s_i`
+     - sex main effect
+   * - :math:`\beta_{\text{year}}`
+     -
+     - :math:`t_i`
+     - birth year main effect
+   * - :math:`\beta_{\text{2005}}`
+     -
+     - :math:`H(t_i - 2005)`
+     - Heaviside step at 2005
+   * - :math:`\beta_{\text{year,2005}}`
+     -
+     - :math:`t_i \cdot H(t_i - 2005)`
+     - birth year × Heaviside interaction
 
+And :math:`s_i` is the sex, :math:`t_i` is the birth year, and :math:`H` is the Heaviside
+step function for individual :math:`i`.
+
+
+Usage in Simulation
+********************
+
+Once fitted, the β coefficients and θ (the Negative Binomial overdispersion parameter;
+see :ref:`negative-binomial-glm`) are stored in ``config.json`` and used at runtime. When
+an agent is initialised at birth, the simulation draws their antibiotic exposure count directly
+from the Negative Binomial distribution. For an agent with sex :math:`s_i` and birth year
+:math:`t_i`:
+
+1. Compute the linear predictor :math:`\eta_i` using the formula above.
+2. Convert to the mean: :math:`\mu_i = \max(\exp(\eta_i),\; 0.05)`.
+3. Convert to the Negative Binomial success probability: :math:`p_i = \theta / (\theta + \mu_i)`.
+4. Draw the exposure count: :math:`n_{\text{abx},i} \sim \text{NegBin}(\theta,\, p_i)`.
+
+This count is fixed for the agent's lifetime and is capped at 3 courses when computing the
+antibiotic exposure odds ratio :math:`\omega_{\text{abx}}` in the
+:ref:`Asthma Occurrence Model <occurrence-model-2>`. See :doc:`model-simulation` for how
+antibiotic exposure is assigned during agent initialisation.
+
+The worked example below demonstrates steps 1–4 for a specific agent (sex = male,
+birth year = 2008), and then visualises the resulting distribution across multiple birth
+years and sexes.
 
 Example
-*********
+*******
 
 .. include:: model-antibiotics.ipynb
     :parser: myst_nb.docutils_
