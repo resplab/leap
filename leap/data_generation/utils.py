@@ -4,7 +4,7 @@ import argparse
 import itertools
 from leap.utils import TimeDelta, date_range, PROVINCE_MAP
 from leap.logger import get_logger
-from typing import Tuple, List
+from typing import Tuple, List, Callable, Dict, Any
 
 logger = get_logger(__name__)
 
@@ -343,9 +343,9 @@ def conv_2x2(
     )
 
 
-def interpolate(
+
+def add_empty_rows_interpolation(
     data: pd.DataFrame,
-    col_pred: str,
     time_delta: TimeDelta,
     time_delta_od: TimeDelta,
     columns_group: List[str]
@@ -354,10 +354,10 @@ def interpolate(
     
     Args:
         data: The data to interpolate. Must contain a ``"timepoint"`` column.
-        col_pred: The name of the column to predict.
         time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
         time_delta_od: The original time delta of the data, i.e. the time delta that the data was
             originally collected at.
+        columns_group: The columns to group by when interpolating.
 
     Returns:
         A dataframe with the same columns as the input data, but with the values of the column to
@@ -365,9 +365,6 @@ def interpolate(
         timepoints between the minimum and maximum timepoints in the input data, with a step size of
         ``time_delta``.
     """
-    
-    if time_delta == time_delta_od:
-        return data
 
     # Get the fixed values for non-province columns
     fixed_cols = [col for col in columns_group if col != "province"]
@@ -395,14 +392,48 @@ def interpolate(
 
     df_pred = pd.concat(chunks, ignore_index=True)
 
-    data[col_pred] = data[col_pred].apply(
-        lambda x: x * time_delta.total_seconds() / time_delta_od.total_seconds()
-    )
     df = pd.merge(
         df_pred, data,
         on=["timepoint"] + columns_group,
         how="left"
     ).sort_values(columns_group + ["timepoint"])
+    
+    return df
+
+
+def interpolate(
+    data: pd.DataFrame,
+    col_pred: str,
+    time_delta: TimeDelta,
+    time_delta_od: TimeDelta,
+    columns_group: List[str]
+) -> pd.DataFrame:
+    """Interpolate the values of a column for missing timepoints.
+    
+    Args:
+        data: The data to interpolate. Must contain a ``"timepoint"`` column.
+        col_pred: The name of the column to predict.
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
+        time_delta_od: The original time delta of the data, i.e. the time delta that the data was
+            originally collected at.
+
+    Returns:
+        A dataframe with the same columns as the input data, but with the values of the column to
+        predict interpolated for the missing timepoints. The dataframe will contain rows for all
+        timepoints between the minimum and maximum timepoints in the input data, with a step size of
+        ``time_delta``.
+    """
+    
+    if time_delta == time_delta_od:
+        return data
+    
+    df = add_empty_rows_interpolation(
+        data=data.copy().reset_index(drop=True),
+        time_delta=time_delta,
+        time_delta_od=time_delta_od,
+        columns_group=columns_group
+    ).reset_index(drop=True)
+
     df.set_index("timepoint", inplace=True)
     grouped_df = df[[col_pred] + columns_group].groupby(columns_group)
     df[col_pred] = grouped_df.transform(lambda x: x.interpolate(method="time"))
@@ -411,3 +442,6 @@ def interpolate(
     df.ffill(inplace=True)
 
     return df
+
+    
+
