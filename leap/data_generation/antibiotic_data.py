@@ -75,7 +75,7 @@ def load_birth_data(
         * ``n_birth (int)``: The number of births in the given year, province, and sex.
 
     """
-    df = pd.read_csv(get_data_path("original_data/17100005.csv"))
+    df = pd.read_csv(get_data_path("original_data/17100005.csv"), low_memory=False)
 
     # rename columns
     df.rename(
