@@ -567,7 +567,7 @@ def get_projected_death_data(
         starting_timepoint = max_timepoint_past + time_delta_od
         life_table = life_table[life_table["timepoint"] == max_timepoint_past]
 
-        for timepoint in date_range(starting_timepoint, MAX_TIMEPOINT + time_delta, time_delta):
+        for timepoint in date_range(starting_timepoint, MAX_TIMEPOINT, time_delta):
             # get the prob_death projections for the year and add to dataframe
             df = get_projected_life_table_single_timepoint(
                 beta_parameters[(province, sex, projection_scenario)], life_table,
