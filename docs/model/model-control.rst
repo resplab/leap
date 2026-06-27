@@ -7,32 +7,27 @@ Asthma Control Model
 Data
 ====
 
-Raw Data
+Economic Burden of Asthma (EBA) Study
 ***********
 
-``EBA``	was	a	prospective representative observational study of 618 participants aged 1-85
-years (74% were >= 18 years old) with self-reported, physician-diagnosed asthma from BC.
-The measurements were taken every 3 months for a year. Among 613 patients, only 6% were lost
-during the one-year follow-up. There were at least 500 cases for each asthma control level.
-More females were in the cohort as expected (adult asthma is more prevalent among females).
-Asthma control level changed during the follow-up for 79% of the patients.
+``EBA`` was a prospective observational study of 618 participants (aged 1–85; 74% adults)
+with self-reported, physician-diagnosed asthma from BC, with measurements taken every 3 months
+for a year. Only 6% of the 613 patients were lost to follow-up, and asthma control level
+changed during follow-up for 79% of patients.
 
 We followed the 
 `2020 GINA guidelines <https://ginasthma.org/wp-content/uploads/2020/04/GINA-2020-full-report_-final-_wms.pdf>`_
 to define asthma control level by using the sum of the
-four indicator variables (0 if no and 1 if yes) in the last 3 months before each measurement:
+four indicator variables (0 if no and 1 if yes) in the last 4 weeks before each measurement:
 
-1. daily symptoms
-2. nocturnal symptoms
-3. inhaler use
-4. limited activities
+1. Daytime symptoms more than twice per week?
+2. Any night waking due to asthma symptoms?
+3. Reliever medication needed more than twice per week?
+4. Any activity limitation due to asthma?
 
-If the sum is zero, then the asthma control level is controlled. If it is less than 3, then it is
-partially-controlled. Otherwise, it is uncontrolled. For responses with *do not know* to the
-indicator variables, we treated them as a *no*. In this analysis, we did not consider treatment
-nor whether a patient experienced an exacerbation in the last 3 months before the visit.
-We excluded two patients whose asthma diagnosis dates were earlier than they were born and three
-patients who had no asthma diagnosis dates, for a final count of 613 patients.
+Responses of *do not know* were treated as *no*. Five patients were excluded due to missing or
+implausible asthma diagnosis dates (two with diagnosis dates predating birth, three with no
+diagnosis date), for a final count of 613 patients.
 
 .. raw:: html
 
@@ -164,12 +159,8 @@ patients who had no asthma diagnosis dates, for a final count of 613 patients.
 Processed Data
 ***************
 
-In keeping with ``Python`` conventions, the columns were converted to snake case. In addition,
-``studyId`` was renamed to ``patient_id``, as ``studyId`` indicates that the ID is for a given
-study, when in fact the ID was for an individual patient.
-
-The variables ``daytimeSymptoms``, ``nocturnalSymptoms``, ``inhalerUse``, and ``limitedActivities``
-were converted to binary variables, where ``1 = True`` and ``0 = False``.
+Columns were converted to snake case and ``studyId`` was renamed to ``patient_id``. The four
+GINA indicator variables were binarized (``1 = True``, ``0 = False``).
 
 We also needed to compute the asthma control level from the four indicator variables. We first
 computed the ``control_score``, defined as:
@@ -345,105 +336,90 @@ Then we defined the asthma control level as follows:
     </tbody>
   </table>
 
-Model
-=====
+Model: Ordinal Regression with Random Effects
+=============================================
 
-Our goal is to fit a model for generating the proportion of time that an individual labelled as
-``asthmatic`` spends in each control level.
+We use an ``ordinal regression`` model with a patient-specific ``random effect`` to predict
+asthma control level from age and sex. See :doc:`model-statistical-background` for background
+on ordinal regression and random effects.
 
-Ordinal Regression
-******************
-
-``Ordinal regression`` is a type of regression analysis that is used when the response variable
-(in our case, the control level) is ordered, but the intervals between the levels are
-arbitrary. In our case, the order of the control levels matters
-(``controlled`` < ``partially-controlled`` < ``uncontrolled``), but the numbers assigned to them
-and the distance between those numbers are arbitrary.
-
-To begin, we define our variables:
-
-* :math:`i`: the patient index
-* :math:`k`: the asthma control level, where :math:`k \in \{1,2,3\}`
-* :math:`y^{(i)}`: the asthma control level for patient :math:`i`, where :math:`y^{(i)} \in \{1,2,3\}`
-* :math:`\theta_k`: the threshold parameter for the :math:`k^{th}` control level
-* :math:`x_n^{(i)}`: the :math:`n^{th}` covariate for patient :math:`i`
-* :math:`\beta_n`: the coefficient for the :math:`n^{th}` covariate
-
-Then the model is:
+The model is:
 
 .. math::
 
-  \begin{align}
-    P(y^{(i)} \leq k) = \sigma(\theta_k + \sum_{n=1}^{N} \beta_n x_n^{(i)})
-  \end{align}
+  \text{logit}(P(y^{(i)} \leq k)) = \theta_k
+    + \beta_{\text{age}} \cdot a_i
+    + \beta_{\text{sex}} \cdot s_i
+    + \beta_{\text{age}^2} \cdot a_i^2
+    + \beta_{\text{age,sex}} \cdot a_i \cdot s_i
+    + \beta_{\text{age}^2\text{,sex}} \cdot a_i^2 \cdot s_i
+    + \beta_0^{(i)}
 
-where :math:`\sigma` is the logistic function:
+where:
+
+.. list-table::
+   :widths: 20 20 20 40
+   :header-rows: 1
+
+   * - Coefficient
+     - Indices
+     - Term
+     - Description
+   * - :math:`\theta_k`
+     - :math:`k \in \{1, 2\}`
+     -
+     - level-specific threshold (2 thresholds for 3 control levels)
+   * - :math:`\beta_{\text{age}}`
+     -
+     - :math:`a_i`
+     - age main effect
+   * - :math:`\beta_{\text{sex}}`
+     -
+     - :math:`s_i`
+     - sex main effect
+   * - :math:`\beta_{\text{age}^2}`
+     -
+     - :math:`a_i^2`
+     - age quadratic term
+   * - :math:`\beta_{\text{age,sex}}`
+     -
+     - :math:`a_i \cdot s_i`
+     - age × sex interaction
+   * - :math:`\beta_{\text{age}^2\text{,sex}}`
+     -
+     - :math:`a_i^2 \cdot s_i`
+     - age² × sex interaction
+   * - :math:`\beta_0^{(i)}`
+     -
+     -
+     - patient-specific random effect; :math:`\beta_0^{(i)} \sim \mathcal{N}(0, \sigma^2)`
+
+and :math:`y^{(i)}` is the observed control level, :math:`k \in \{1, 2, 3\}` is the control level index, :math:`a_i` is the age, and :math:`s_i` is the sex of patient :math:`i`.
+
+The probability of being in a specific control level is:
 
 .. math::
 
-  \begin{align}
-    \sigma(x) = \dfrac{1}{1 + e^{-x}}
-  \end{align}
-
-and the covariates are:
-
-.. math::
-
-  \sum_{n=1}^{N} \beta_n x_n := 
-    \beta_{\text{age}} \cdot \text{age} +
-    \beta_{\text{sex}} \cdot \text{sex} +
-    \beta_{\text{age2}} \cdot \text{age}^2 +
-    \beta_{\text{sexage}} \cdot \text{sex} \cdot \text{age} +
-    \beta_{\text{sexage2}} \cdot \text{sex} \cdot \text{age}^2
-
-To obtain the probability that a patient is in a specific control level, we use the following:
-
-.. math::
-
-  \begin{align}
-    P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)
-  \end{align}
-
-
-Random Effects
-*****************
-
-In our model, we also include a random effect to account for the correlation between
-measurements from the same patient. This is important because the measurements are taken
-repeatedly over time, and we expect that the measurements from the same patient will be more
-similar to each other than to measurements from different patients. The random effect is
-assumed to be normally distributed with mean zero and variance :math:`\sigma^2`.
-The model with random effects is:
-
-.. math::
-
-  \begin{align}
-    P(y^{(i)} \leq k) = \sigma(\theta_k + \sum_{n=1}^{N} \beta_n x_n^{(i)} + \beta_0^{(i)})
-  \end{align}
-
-where :math:`\beta_0^{(i)}` is the random effect for patient :math:`i`.
+  P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)
 
 Fitting the Model with EBA Data
 *******************************
 
-The predictions from this model are the probabilities of being in each of the
-control levels during the 3-month period, but we make the following assumptions to allow us to
-apply these predictions to our simulation:
+The model was fit on 3-month measurement intervals. We make the following assumptions to
+apply its predictions to the simulation:
 
-1. We assume that the probability of being in each of the control levels is equivalent to the
-   proportion of time spent in each of the control levels.
-2. We assume that we may extend these predictions from a 3-month period to a 1-year period
-   (this is the time cycle of the simulation).
-3. We assume that the probability of being in a control level does not depend on time.
-4. We assume that the probability of being in a control level does not depend on the past history
-   of asthma control.
-5. We assume that the probability of being in a control level does not depend on the past history
-   of exacerbations.
+1. The probability of being in a control level is equivalent to the proportion of time
+   spent in that control level.
+2. Predictions generalise from the 3-month EBA measurement period to the simulation's
+   time interval (1 month or 1 year).
+3. Control level probabilities do not vary with calendar year.
+4. Control level probabilities do not depend on past control history.
+5. Control level probabilities do not depend on past exacerbation history.
 
-In short, for each virtual individual (agent) labelled as asthmatic, we sampled an
-individual-specific intercept from the estimated distribution of the random effects, and with that
-intercept in the asthma control prediction model, we simulated the proportion of time spent in each
-of the control levels in each time cycle.
+For each agent with asthma, an individual-specific intercept is sampled from the estimated
+random-effects distribution and held fixed for their simulated lifetime. At each time interval,
+this intercept is used with the fitted model to generate the proportion of time spent in each
+control level.
 
 
 Predictions
@@ -452,14 +428,4 @@ Predictions
 Once the ordinal regression model has been fit on the ``EBA`` dataset, the coefficients are
 saved to the ``leap/processed_data/config.json`` file. During the simulation, these coefficients
 are used to determine the probability of being in each of the control levels for each agent
-labelled as ``asthmatic``. 
-
-.. math::
-
-  \begin{align}
-    P(y^{(i)} \leq k) = \sigma(\theta_k + \sum_{n=1}^{N} \beta_n x_n^{(i)} + \beta_0^{(i)})
-  \end{align}
-
-where :math:`\beta_0^{(i)}` is assigned to each agent at the beginning of the simulation,
-sampled randomly from a normal distribution with :math:`\mu = 0` and :math:`\sigma` as
-calculated when the model was fit.
+labelled as having asthma.
