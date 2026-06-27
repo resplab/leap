@@ -185,6 +185,38 @@ predictor :math:`\eta_i` can be any real number:
 This is the distribution family used in LEAP's :ref:`antibiotic_exposure_model` to predict
 per-capita antibiotic exposure rates.
 
+.. _ordinal-regression:
+
+Example 4: Ordinal Regression with Logit Link
+-----------------------------------------------
+
+Ordinal regression is used when the response variable is ordered but the intervals between
+levels are arbitrary. Rather than modelling a single mean, the model predicts the
+**cumulative probability** of being at or below each level :math:`k` using the logistic
+(sigmoid) function as the link:
+
+.. math::
+
+  P(y \leq k) = \sigma(\theta_k + \eta)
+
+where :math:`\theta_k` is the threshold parameter for level :math:`k`, :math:`\eta` is the
+linear predictor, and :math:`\sigma(x) = \dfrac{1}{1 + e^{-x}}` is the logistic function.
+The probability of being in exactly level :math:`k` follows from the cumulative probabilities:
+
+.. math::
+
+  P(y = k) = P(y \leq k) - P(y \leq k - 1)
+
+A patient-specific random effect :math:`\beta_0^{(i)} \sim \mathcal{N}(0, \sigma^2)` can be
+added to the linear predictor to account for within-subject correlation across repeated
+measurements, giving:
+
+.. math::
+
+  P(y^{(i)} \leq k) = \sigma\!\left(\theta_k + \eta^{(i)} + \beta_0^{(i)}\right)
+
+This is the model used in LEAP's :ref:`control-model` to predict asthma control level.
+
 .. _contingency-tables:
 
 Contingency Tables
