@@ -125,6 +125,98 @@ The random component is the Poisson distribution:
 This is the distribution family used in LEAP's :ref:`occurrence Model 1 <occurrence-model-1>`
 to predict population-level asthma incidence and prevalence rates.
 
+.. _negative-binomial-glm:
+
+Example 3: Negative Binomial Distribution with Log Link
+----------------------------------------------------------
+
+The Poisson distribution assumes that the mean and variance are equal:
+
+.. math::
+
+    \mu = \sigma^2
+
+When the variance exceeds the mean — a common problem in count data known as
+**overdispersion** — the ``Negative Binomial`` distribution is a better choice. It
+introduces an extra parameter :math:`\theta` that controls the degree of overdispersion:
+
+.. math::
+
+    \sigma^2 = \mu + \frac{\mu^2}{\theta}
+
+As :math:`\theta \to \infty`, the Negative Binomial converges to the Poisson.
+
+The standard form of the Negative Binomial PMF is:
+
+.. math::
+
+    P(Y = k;\, r, p) := \binom{k+r-1}{k}(1-p)^k p^r
+
+where :math:`k` is the number of failures before :math:`r` successes, and :math:`p` is the
+probability of success. We reparametrize using :math:`\mu` and :math:`\theta` via:
+
+.. math::
+
+    p &= \frac{\mu}{\sigma^2} \\
+    r &= \frac{\mu^2}{\sigma^2 - \mu} \\
+    \sigma^2 &= \mu + \frac{\mu^2}{\theta}
+
+Substituting :math:`\sigma^2` and simplifying:
+
+.. math::
+
+    p &= \frac{\mu}{\mu + \dfrac{\mu^2}{\theta}} = \frac{\theta}{\theta + \mu} \\
+    r &= \frac{\mu^2}{\dfrac{\mu^2}{\theta}} = \theta
+
+Letting :math:`y = k`, the PMF in terms of :math:`\mu` and :math:`\theta` is:
+
+.. math::
+
+    P(Y = y;\, \mu, \theta) = \binom{y + \theta - 1}{y}
+        \frac{\mu^y\, \theta^{\theta}}{(\theta + \mu)^{y+\theta}}
+
+The **log link** is the natural choice, since the mean is always positive but the linear
+predictor :math:`\eta_i` can be any real number:
+
+.. math::
+
+    g(\mu_i) = \log(\mu_i) = \eta_i
+
+This is the distribution family used in LEAP's :ref:`antibiotic_exposure_model` to predict
+per-capita antibiotic exposure rates.
+
+.. _ordinal-regression:
+
+Example 4: Ordinal Regression with Logit Link
+-----------------------------------------------
+
+Ordinal regression is used when the response variable is ordered but the intervals between
+levels are arbitrary. Rather than modelling a single mean, the model predicts the
+**cumulative probability** of being at or below each level :math:`k` using the logistic
+(sigmoid) function as the link:
+
+.. math::
+
+  P(y \leq k) = \sigma(\theta_k + \eta)
+
+where :math:`\theta_k` is the threshold parameter for level :math:`k`, :math:`\eta` is the
+linear predictor, and :math:`\sigma(x) = \dfrac{1}{1 + e^{-x}}` is the logistic function.
+The probability of being in exactly level :math:`k` follows from the cumulative probabilities:
+
+.. math::
+
+  P(y = k) = P(y \leq k) - P(y \leq k - 1)
+
+A patient-specific random effect :math:`\beta_0^{(i)} \sim \mathcal{N}(0, \sigma^2)` can be
+added to the linear predictor to account for within-subject correlation across repeated
+measurements, giving:
+
+.. math::
+
+  P(y^{(i)} \leq k) = \sigma\!\left(\theta_k + \eta^{(i)} + \beta_0^{(i)}\right)
+
+This is the model used in LEAP's :ref:`control-model` to predict asthma control level.
+
 .. _contingency-tables:
 
 Contingency Tables

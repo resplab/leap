@@ -267,11 +267,13 @@ To initialize an agent, we set the following initial attributes:
    * - family history of asthma
      - Assigned via a Bernoulli draw using the population prevalence of parental asthma.
        1 = at least one parent has asthma, 0 = neither parent has asthma.
-       See :ref:`occurrence-model-2` for how this enters the asthma probability.
+       See :ref:`family-history-model` for details on the assignment process, and
+       :ref:`occurrence-model-2` for how this affects the asthma probability.
    * - antibiotic exposure in infancy
-     - The number of courses of antibiotics taken during the first year of life, drawn from a
-       negative binomial distribution. Values are capped at 3 for the purposes of odds ratio
-       calculation. See :ref:`occurrence-model-2` for how this enters the asthma probability.
+     - Assigned via a Negative Binomial draw using the fitted GLM parameters for the agent's
+       sex and birth year. This gives the number of antibiotic courses taken during the first
+       year of life and can be 0, 1, 2, or 3. See :ref:`antibiotic_exposure_model` for details on the assignment process,
+       and :ref:`occurrence-model-2` for how this affects the asthma probability.
    * - has asthma?
      - If the agent is less than 3 years old, they do not have asthma. Otherwise, they are assigned
        an asthma status based on the asthma prevalence model (see Step 2 below).
@@ -327,34 +329,22 @@ Step 5: Determine asthma control levels
 -----------------------------------------
 
 We next determine the asthma control levels for the agent. The asthma control levels give the
-probability of the agent having fully-controlled, partially-controlled, or uncontrolled asthma:
+probability of the agent having fully-controlled, partially-controlled, or uncontrolled asthma
+(:math:`k = 1, 2, 3` respectively). The probabilities are given by the :ref:`control-model`:
 
 .. math::
 
-    k &= 0: \text{fully-controlled asthma} \\
-    k &= 1: \text{partially-controlled asthma} \\
-    k &= 2: \text{uncontrolled asthma}
-
-
-The probabilities of each control level are given by ordinal regression, where y = control level:
-
-.. math::
-
-    P(y \leq k) &= \sigma(\theta_k - \eta) \\
-    P(y = k) &= P(y \leq k) - P(y < k + 1) \\
-              &= \sigma(\theta_k - \eta) - \sigma(\theta_{k+1} - \eta)
-
-
-where:
+    \text{logit}(P(y^{(i)} \leq k)) = \theta_k
+        + \beta_{\text{age}} \cdot a_i
+        + \beta_{\text{sex}} \cdot s_i
+        + \beta_{\text{age}^2} \cdot a_i^2
+        + \beta_{\text{age,sex}} \cdot a_i \cdot s_i
+        + \beta_{\text{age}^2\text{,sex}} \cdot a_i^2 \cdot s_i
+        + \beta_0^{(i)}
 
 .. math::
 
-    \eta = \beta_0 + 
-        \text{age} \cdot \beta_{\text{age}} + 
-        \text{sex} \cdot \beta_{\text{sex}} +
-        \text{age} \cdot \text{sex} \cdot \beta_{\text{sexage}} + 
-        \text{age}^2 \cdot \text{sex} \cdot \beta_{\text{sexage}^2} + 
-        \text{age}^2 \cdot \beta_{\text{age}^2}
+    P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)
 
 
 Step 6: Compute the number of asthma exacerbations in the current timepoint
@@ -490,34 +480,22 @@ Step 3: Compute the control levels
 
 We next determine the asthma control levels for the agent using the :ref:`control-model`.
 The asthma control levels give the probability of the agent having fully-controlled,
-partially-controlled, or uncontrolled asthma:
+partially-controlled, or uncontrolled asthma
+(:math:`k = 1, 2, 3` respectively). The probabilities are given by the :ref:`control-model`:
 
 .. math::
 
-    k &= 0: \text{fully-controlled asthma} \\
-    k &= 1: \text{partially-controlled asthma} \\
-    k &= 2: \text{uncontrolled asthma}
-
-
-The probabilities of each control level are given by ordinal regression, where y = control level:
-
-.. math::
-
-    P(y \leq k) &= \sigma(\theta_k - \eta) \\
-    P(y = k) &= P(y \leq k) - P(y < k + 1) \\
-              &= \sigma(\theta_k - \eta) - \sigma(\theta_{k+1} - \eta)
-
-
-where:
+    \text{logit}(P(y^{(i)} \leq k)) = \theta_k
+        + \beta_{\text{age}} \cdot a_i
+        + \beta_{\text{sex}} \cdot s_i
+        + \beta_{\text{age}^2} \cdot a_i^2
+        + \beta_{\text{age,sex}} \cdot a_i \cdot s_i
+        + \beta_{\text{age}^2\text{,sex}} \cdot a_i^2 \cdot s_i
+        + \beta_0^{(i)}
 
 .. math::
 
-    \eta = \beta_0 + 
-        \text{age} \cdot \beta_{\text{age}} + 
-        \text{sex} \cdot \beta_{\text{sex}} +
-        \text{age} \cdot \text{sex} \cdot \beta_{\text{sexage}} + 
-        \text{age}^2 \cdot \text{sex} \cdot \beta_{\text{sexage}^2} + 
-        \text{age}^2 \cdot \beta_{\text{age}^2}
+    P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)
 
 
 Step 4: Compute the number of asthma exacerbations in the current timepoint
