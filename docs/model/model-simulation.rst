@@ -320,10 +320,56 @@ If the agent is 3 years old, the age of asthma diagnosis is 3.
 If the agent is older than 3, we use the asthma incidence model to determine the age of asthma
 diagnosis.
 
+.. _step-4-check-hospitalizations:
+
 Step 4: Check hospitalizations
 --------------------------------
 
-Next, we check how many times agent has been hospitalized due to asthma in their lifetime.
+Next, we determine whether the agent has previously had a very severe (i.e. hospitalized)
+exacerbation at some point since their asthma diagnosis (Step 3). This flag feeds into the
+:ref:`exacerbation_severity_model`, which increases the probability of a very severe exacerbation
+for agents with a prior hospitalization.
+
+Since this agent's asthma history was not directly simulated cycle-by-cycle (it was assigned all
+at once in Steps 2 and 3), we cannot just look up whether a hospitalization occurred. In
+principle we could reconstruct the exact sequence of asthma/no-asthma cycles since diagnosis —
+but because asthma is reversible (an agent can lose and regain their asthma label via
+reassessment), the number of possible state sequences explodes combinatorially, making an exact
+calculation computationally infeasible.
+
+To simplify, we assume the agent's asthma was **not reversible** between their diagnosis age and
+two years before their current age: that is, we treat the agent as having had asthma
+continuously over that span. Under this assumption, we run a mini-simulation that sums the
+expected exacerbation rate :math:`\lambda` (using the Step 6 formula below, with that year's age,
+sex, timepoint, and control levels) over every year from the asthma diagnosis age up to two years
+before the agent's current age:
+
+.. math::
+
+    \text{total\_rate} = \sum_{y} \lambda_y
+
+We then compute the probability that *none* of the agent's exacerbations over this span were very
+severe. Since each agent's probability of a very severe exacerbation, :math:`\pi`, is itself drawn
+from a Dirichlet distribution (see :ref:`exacerbation_severity_model`), this probability is the
+marginal (Dirichlet-multinomial) probability of zero very severe exacerbations out of
+``total_rate`` expected exacerbations:
+
+.. math::
+
+    P(\text{no very severe exacerbations}) = \dfrac{1}{\Gamma(\text{total\_rate} + 1)} \cdot
+        \dfrac{\Gamma(\text{total\_rate} + 1 - \pi)}{\Gamma(1 - \pi)}
+
+Finally, we toss a coin — a Bernoulli draw — to decide whether the agent had at least one very
+severe exacerbation over this span:
+
+.. math::
+
+    \text{prev\_hosp} \sim \text{Bernoulli}\left(1 - P(\text{no very severe exacerbations})\right)
+
+This non-reversibility assumption means we overestimate the number of years the agent was
+labelled as having asthma prior to the current timepoint, and therefore overestimate their
+chances of a prior hospitalization. However, since asthma reassessment (loss of the asthma label)
+is relatively rare in our data, we expect this bias to be small.
 
 Step 5: Determine asthma control levels
 -----------------------------------------
