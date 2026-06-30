@@ -11,8 +11,8 @@ Population Data
 *****************
 
 We use the Statistics Canada population data that was generated and saved as:
-`processed_data/birth/initial_population.csv 
-<https://github.com/resplab/leap/blob/main/leap/processed_data/birth/initial_population.csv>`_.
+`processed_data/{time_delta_tag}/birth/initial_population.csv
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/birth/initial_population.csv>`_.
 
 
 .. list-table::
@@ -56,8 +56,8 @@ Occurrence Data
 ******************
 
 We use the occurrence data that was generated and saved as:
-`processed_data/asthma_occurrence_predictions.csv 
-<https://github.com/resplab/leap/blob/main/leap/data_generation/processed_data/asthma_occurrence_predictions.csv>`_
+`processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/asthma_occurrence_predictions.csv>`_
 
 See :ref:`occurrence-model-1` for more details about this dataset.
 
@@ -90,18 +90,59 @@ Hospitalization Data
 ***********************
 
 The data is from the ``Hospital Morbidity Database (HMDB)`` from the
-`Canadian Institute for Health Information (CIHI) 
+`Canadian Institute for Health Information (CIHI)
 <https://www.cihi.ca/en/hospital-morbidity-database-hmdb-metadata>`_.
 
 The hospitalization data was collected from patients presenting to a hospital in Canada
 due to an asthma exacerbation. We will use this data to calibrate the exacerbation model.
 
+Per-province Structure
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The raw data is saved under
+`original_data/asthma_hosp/{province}/
+<https://github.com/resplab/leap/tree/main/leap/original_data/asthma_hosp>`_,
+with one subfolder per province/territory: ``AB``, ``BC``, ``MB``, ``NB``, ``NL``, ``NS``,
+``ON``, ``PE``, ``QC``, ``SK``. In addition there are two combined regions:
+
+* ``CA``: all of Canada combined.
+* ``TR``: Nunavut, Northwest Territories, and Yukon combined into a single category, since
+  each of these territories individually has too few cases to report reliably.
+
+Each province subfolder contains 5 files that share the same columns and shape, differing
+only in what value is reported:
+
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
+
+   * - File
+     - Description
+   * - ``tab1_rate.csv``
+     - the hospitalization rate per 100 000 people. This is the file used to calibrate the
+       exacerbation model (see below).
+   * - ``tab1_count.csv``
+     - the number of people hospitalized with asthma.
+   * - ``tab1_N.csv``
+     - the total number of people in the category (the denominator used to compute the rate).
+   * - ``tab1_lower.csv``
+     - the lower error bar for the hospitalization rate.
+   * - ``tab1_upper.csv``
+     - the upper error bar for the hospitalization rate.
+
+Each province subfolder also contains a ``los.csv`` file with length-of-stay statistics
+(``avg``, ``med``, ``q1``, ``q3``) by ``fiscal_year``, ``age_group``, and ``sex``. This dataset
+is not currently used by the exacerbation model.
+
+``tab1_rate.csv`` Columns
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 The hospitalization rate in this table is the hospitalization rate per 100 000 people.
-For example, in the category ``F_90+``, the value would be the number of people hospitalized who
+For example, in the category ``F_90+``, the value would be the rate for people hospitalized who
 are female and over 90 during the given year. This can be calculated:
 
 .. math::
-        
+
     \text{rate} = \dfrac{\text{count}}{N} \times 100000
 
 
@@ -112,7 +153,7 @@ are female and over 90 during the given year. This can be calculated:
    * - Column
      - Type
      - Description
-   * - ``fiscalYear``
+   * - ``fiscal_year``
      - :code:`int`
      - the year the data was collected
    * - ``N``
@@ -158,6 +199,20 @@ are female and over 90 during the given year. This can be calculated:
      - :code:`float`
      - the rate for all males aged over 90 in that year.
 
+The calibration step only uses the per-sex, per-age columns (``F_0`` ... ``F_90+`` and
+``M_0`` ... ``M_90+``); the sex- and age-aggregated columns (``N``, ``M``, ``F``, ``0`` ... ``90+``)
+are not used.
+
+Province Coverage
+^^^^^^^^^^^^^^^^^^
+
+Although hospitalization data is available for every province/territory listed above,
+calibration is currently only implemented for ``BC`` and ``CA`` (see
+`leap/data_generation/exacerbation_data.py
+<https://github.com/resplab/leap/blob/main/leap/data_generation/exacerbation_data.py>`_).
+The resulting ``exacerbation_calibration.csv`` used at runtime therefore only contains
+calibration multipliers for these two regions.
+
 
 
 Model
@@ -171,9 +226,11 @@ The formula is:
     N_{\text{exacerbations}} \sim \text{Poisson}(\lambda) = \dfrac{\lambda^k e^{-\lambda}}{k!}
 
 
-Here :math:`\lambda` is the expected number of exacerbations per time interval. To obtain
-:math:`\lambda`, we must perform a Poisson regression. The Poisson regression assumes that the value
-we are interested in can be approximated using the following formula:
+Here :math:`\lambda` is the expected number of exacerbations per time interval, and :math:`k` is
+the number of exacerbations (a non-negative integer) for which we are computing the
+probability. To obtain :math:`\lambda`, we must perform a Poisson regression. The Poisson
+regression assumes that the value we are interested in can be approximated using the following
+formula:
 
 .. math::
 
@@ -197,9 +254,10 @@ where:
    * - :math:`\beta_i`
      - control level constant calculated from the :ref:`Control Model <control-model>`
 
-To calculate the :math:`\beta_i` values, we consider the discrete random variable :math:`S`, which
-is the severity of an asthma exacerbation, and the continuous random variable :math:`R`, which is
-the rate of exacerbations per time interval.
+This gives us the rate :math:`\lambda` of exacerbations of *any* severity. Once an individual's
+total number of exacerbations for a time interval is drawn from this Poisson model, each
+exacerbation is further assigned a severity level (mild, moderate, severe, or very severe) — see
+:ref:`exacerbation_severity_model` below.
 
 Calibration
 ******************
@@ -224,18 +282,57 @@ Poisson regression, with the following formula:
 * :math:`c_i`: relative time spent in control level :math:`i`
 * :math:`\beta_i`: control level constant
 
-Here, the :math:`\beta_i` values were calculated from the
-`Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
-and are given by:
+The :math:`\beta_i` values are derived by combining two literature sources, as described in
+:cite:`leap2024`:
+
+* the `Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
+  (Chen et al. 2013) — a prospective, representative observational study of 618 participants aged
+  1-85 years (74% aged 18 or older) with self-reported, physician-diagnosed asthma from BC, in
+  which asthma control and the number of exacerbations were measured every 3 months over a year.
+  EBA gives us the overall mean annual exacerbation rate for a person with asthma,
+  :math:`r = 0.347`, and the proportion of time patients spend in each control level:
+  well-controlled = 0.340, partially-controlled = 0.474, uncontrolled = 0.186.
+* the `GOAL Study <https://www.atsjournals.org/doi/full/10.1164/rccm.200401-033OC>`_
+  (Bateman et al. 2004) — a one-year, randomized, double-blind clinical trial of 3,421
+  participants aged 12-80 years with uncontrolled asthma at study entry, with asthma
+  exacerbations as the primary outcome. An analysis of the GOAL data gives rounded annual
+  exacerbation rates for each control level: well-controlled = 0.1, partially-controlled = 0.2,
+  uncontrolled = 0.3 — i.e. the partially-controlled rate is twice the well-controlled rate, and
+  the uncontrolled rate is three times the well-controlled rate.
+
+Combining these two sources was necessary because the EBA cohort, while representative, did not
+have enough exacerbation events on its own to robustly estimate a rate for each control level.
+Instead, we take only the *relative* rates from GOAL, and solve for an absolute well-controlled
+rate :math:`r_{\text{wc}}` such that the population-weighted average across the three control
+levels — using the EBA time-in-control proportions together with the GOAL rate ratios — equals
+the EBA overall rate :math:`r`:
 
 .. math::
 
-    \beta_1 &:= \ln(0.1880058) \\
-    \beta_2 &:= \ln(0.3760116) \\
-    \beta_3 &:= \ln(0.5640174) 
+    r = \text{prop}_{\text{wc}} \cdot r_{\text{wc}} + \text{prop}_{\text{pc}} \cdot (2 r_{\text{wc}})
+        + \text{prop}_{\text{uc}} \cdot (3 r_{\text{wc}})
+    \quad \Longrightarrow \quad
+    r_{\text{wc}} = \dfrac{r}{\text{prop}_{\text{wc}} + 2 \cdot \text{prop}_{\text{pc}}
+        + 3 \cdot \text{prop}_{\text{uc}}}
+
+The partially-controlled and uncontrolled rates follow directly from the GOAL ratios:
+:math:`r_{\text{pc}} = 2 r_{\text{wc}}` and :math:`r_{\text{uc}} = 3 r_{\text{wc}}`. Taking the
+natural log of each rate gives the :math:`\beta_i` values:
+
+.. math::
+
+    \beta_1 &:= \ln(r_{\text{wc}}) = \ln(0.1880058) \\
+    \beta_2 &:= \ln(r_{\text{pc}}) = \ln(0.3760116) \\
+    \beta_3 &:= \ln(r_{\text{uc}}) = \ln(0.5640174)
 
 
-The number of exacerbations predicted by the model is then:
+This part of the calibration is computed entirely from input data and closed-form formulas — it
+does not require running the agent-based simulation. :math:`N` and :math:`\eta_{\text{prev}}`
+below are read directly from the Population Data and Occurrence Data datasets described above,
+and :math:`\lambda_C` is evaluated directly from the :ref:`Control Model <control-model>` formula
+using the fixed, literature-derived control-level proportions :math:`c_i` from the EBA study,
+rather than from simulated individual control-level trajectories. The number of exacerbations
+predicted by the model is then:
 
 .. math::
 
@@ -243,7 +340,8 @@ The number of exacerbations predicted by the model is then:
     N_{\text{asthma}} &= N \cdot \eta_{\text{prev}}
 
 * :math:`N_{\text{asthma}}`: the number of people in a given time interval, age, sex with asthma
-* :math:`N`: the number of people in a given time interval, age, and sex
+* :math:`N`: the number of people in a given time interval, age, and sex, from the Population Data
+  described above
 * :math:`\eta_{\text{prev}}`: the prevalence of asthma in a given time interval, age, and sex, from
   :ref:`occurrence-model-1`
 
@@ -259,8 +357,112 @@ and number of hospitalizations is:
 * :math:`P(\text{hosp})`: the probability of hospitalization due to asthma given the patient has an
   asthma exacerbation
 
-Finally, :math:`\alpha` can be computed:
+As described in :ref:`exacerbation_severity_model` below, exacerbations are classified into four
+severity levels, where **very severe** is defined as requiring hospital admission. We treat
+:math:`P(\text{hosp})` as the proportion of all exacerbations that are very severe, taken from the
+`Symbicort Given as Needed in Mild Asthma II (SYGMA II) study
+<https://www.nejm.org/doi/10.1056/NEJMoa1715275>`_ (Bateman et al. 2018), a double-blind,
+multi-centre clinical trial of 4,176 individuals with mild asthma. SYGMA II reports the
+distribution of exacerbation severity as 49.5% mild, 19.5% moderate, 28.3% severe, and 2.6% very
+severe, giving :math:`P(\text{hosp}) = 0.026` :cite:`leap2024`.
+
+Finally, :math:`\alpha` can be computed as the ratio of the **observed** to the **predicted**
+number of hospitalizations, for a given age :math:`a`, sex :math:`s`, and year :math:`y`:
 
 .. math::
 
     \alpha(a, s, y) = \dfrac{N_{\text{hosp}}(a, s, y)}{N_{\text{hosp}}^{\text{(pred)}}(a, s, y)}
+
+where :math:`N_{\text{hosp}}(a, s, y)` is the **observed** number of hospitalizations, computed
+from the observed hospitalization rate in the Hospitalization Data described above:
+
+.. math::
+
+    N_{\text{hosp}}(a, s, y) = \dfrac{\text{hospitalization rate}(a, s, y)}{100\,000} \cdot N(a, s, y)
+
+:math:`\alpha` is computed once per province, age, sex, and year as part of data generation, and is
+looked up at simulation runtime — by province, timepoint, sex, and age — to calibrate each agent's
+:math:`\lambda`.
+
+.. _exacerbation_severity_model:
+
+Severity
+******************
+
+Each asthma exacerbation is assigned one of four severity levels, classified retrospectively by
+the level of healthcare utilization required to treat it, following the framework described by
+the Global Initiative for Asthma (GINA) :cite:`gina2023`:
+
+.. list-table::
+   :widths: 10 20 70
+   :header-rows: 1
+
+   * - Level
+     - Name
+     - Healthcare utilization
+   * - 1
+     - Mild
+     - managed with reliever medication alone
+   * - 2
+     - Moderate
+     - requires a physician visit and a prescription of oral corticosteroids (OCS)
+   * - 3
+     - Severe
+     - requires an emergency department (ED) visit
+   * - 4
+     - Very severe
+     - requires hospital admission
+
+The ``very severe`` level is the one used to compute :math:`P(\text{hosp})` and calibrate
+:math:`\alpha` in the Calibration section above, and is what the Hospitalization Data described
+earlier measures.
+
+Dirichlet-Multinomial Model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Given the total number of exacerbations :math:`N_{\text{exacerbations}}` an individual experiences
+in a time interval (drawn from the Poisson model above), the number at each severity level is
+generated using a Dirichlet-Multinomial distribution. A preliminary probability vector across the
+four levels is first drawn from a Dirichlet distribution:
+
+.. math::
+
+    \mathbf{w}^{\text{pre}} \sim \text{Dirichlet}(\boldsymbol{\delta})
+
+where :math:`\boldsymbol{\delta} = \kappa \cdot \mathbf{p}` is the Dirichlet concentration vector,
+:math:`\mathbf{p} = (p_{\text{mild}}, p_{\text{moderate}}, p_{\text{severe}}, p_{\text{very\_severe}})
+= (0.495, 0.195, 0.283, 0.026)` are the same SYGMA II severity proportions used for
+:math:`P(\text{hosp})` above :cite:`leap2024`, and :math:`\kappa = 100` is a concentration
+multiplier controlling how tightly an individual's drawn probabilities cluster around the
+population proportions :math:`\mathbf{p}`.
+
+Adjustment for Previous Hospitalization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If the individual has previously been hospitalized for an asthma exacerbation, their probability
+of a very severe exacerbation is increased, and the remaining probability mass is redistributed
+proportionally across the other three levels:
+
+.. math::
+
+    w_{\text{very\_severe}} &= w^{\text{pre}}_{\text{very\_severe}} \cdot \beta_{\text{prev\_hosp}} \\
+    w_j &= \dfrac{w^{\text{pre}}_j}{\sum_{l \,\in\, \{\text{mild, moderate, severe}\}} w^{\text{pre}}_l}
+        \cdot (1 - w_{\text{very\_severe}}), \quad j \in \{\text{mild, moderate, severe}\}
+
+where :math:`\beta_{\text{prev\_hosp}}` is :math:`\beta_{\text{prev\_hosp,ped}} = 1.79` for
+individuals under 14 years of age, or :math:`\beta_{\text{prev\_hosp,adult}} = 2.88` for
+individuals 14 years of age or older. If the individual has no prior hospitalization,
+:math:`\mathbf{w} = \mathbf{w}^{\text{pre}}`.
+
+This raises the question of how "previously hospitalized" is determined for an agent whose
+asthma history was not directly simulated cycle-by-cycle — for example, an agent assigned an
+asthma label and a diagnosis age all at once when they enter the simulation. See
+:ref:`step-4-check-hospitalizations` for how this is initialized in that case.
+
+Finally, the number of exacerbations at each severity level is drawn from a Multinomial
+distribution, using :math:`N_{\text{exacerbations}}` as the number of trials:
+
+.. math::
+
+    (n_{\text{mild}}, n_{\text{moderate}}, n_{\text{severe}}, n_{\text{very\_severe}})
+        \sim \text{Multinomial}(N_{\text{exacerbations}}, \mathbf{w})
