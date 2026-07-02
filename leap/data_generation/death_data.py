@@ -523,6 +523,7 @@ def get_projected_death_data(
             * ``timepoint``: the starting timepoint of the interval during which the data was collected.
             * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
+            * ``projection_scenario``: The projection scenario, i.e. ``"past"``.
             * ``sex``: One of ``M`` = male, ``F`` = female.
             * ``age``: the integer age.
             * ``prob_death``: the probability of death.
@@ -539,6 +540,7 @@ def get_projected_death_data(
         * ``timepoint``: The starting timepoint of the interval the data applies to.
         * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
           For all of Canada, set province to ``"CA"``.
+        * ``projection_scenario``: The projection scenario, e.g. ``"M3"``.
         * ``sex``: One of ``M`` = male, ``F`` = female.
         * ``age``: The integer age.
         * ``prob_death``: The probability that a person of the given age, sex, and province
@@ -575,9 +577,9 @@ def get_projected_death_data(
             # add to the dataframe
             projected_life_table = pd.concat([projected_life_table, df], axis=0)
 
-    projected_life_table.sort_values(["province", "age", "sex", "timepoint"], inplace=True)
+    projected_life_table.sort_values(["province", "projection_scenario", "age", "sex", "timepoint"], inplace=True)
     projected_life_table = projected_life_table[
-        ["province", "age", "sex", "timepoint", "prob_death", "se"]
+        ["province", "projection_scenario", "age", "sex", "timepoint", "prob_death", "se"]
     ]
 
     return projected_life_table
