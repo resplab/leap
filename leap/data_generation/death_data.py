@@ -511,7 +511,25 @@ def compute_beta_parameters(
     x0: float = -0.02,
     xtol: float = 0.00001   
 ) -> Dict[Tuple[str, str, str], float]:
-    """Load the projected death data from ``StatCan`` CSV file.
+    r"""Compute the beta parameters for each province, sex, and projection scenario.
+
+    The beta parameters are used to project the probability of death for future timepoints, given
+    the probability of death for past timepoints. We use the following formula to project the
+    probability of death:
+
+    .. math::
+        \sigma^{-1}(q(x, \Delta x, t; \theta, \text{age})) =
+            \sigma^{-1}(q(x, \Delta x, t_0; \theta, \text{age})) -
+            \beta_{\theta} (t - t_0)
+
+    where :math:`\theta` is given by:
+    
+    .. math::
+    
+        \theta := \{\text{province}, \text{sex}, \text{projection scenario}\}
+
+    In this function, we optimize the :math:`\beta_{\theta}` parameter for each :math:`\theta` such
+    that the projected life expectancy matches the desired life expectancy from the calibration data.
     
     Args:
         past_life_table: A dataframe containing the probability of death and the standard error
@@ -561,6 +579,15 @@ def compute_beta_parameters(
     
     Returns:
         A dictionary containing the beta parameters for each province, sex, and projection scenario.
+
+    Examples:
+
+        >>> past_life_table = load_past_death_data()
+        >>> df_calibration = load_projected_death_data(min_timepoint=dt.datetime(1996, 1, 1))
+        >>> df_calibration = df_calibration.loc[df_calibration["projection_scenario"].isin(["LG", "M3"])]
+        >>> beta_parameters = compute_beta_parameters(past_life_table, df_calibration)
+        >>> beta_parameters[("CA", "M", "LG")] # doctest: +NUMBER
+        np.float64(-0.01)
     """
     keys = list(itertools.product(
         past_life_table["province"].unique(),
