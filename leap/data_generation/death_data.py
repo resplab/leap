@@ -271,11 +271,8 @@ def compute_life_expectancy_diff(
     return np.array(diff)
 
 
-def load_past_death_data(time_delta: TimeDelta) -> pd.DataFrame:
+def load_past_death_data() -> pd.DataFrame:
     """Load the past death data from the ``StatCan`` CSV file.
-
-    Args:
-        time_delta: The duration of time between data points.
     
     Returns:
         A dataframe containing the probability of death and the standard error for each timepoint,
@@ -608,7 +605,7 @@ def generate_death_data(
         If ``to_csv`` is False, a dataframe containing the probability of death and the standard
         error for each timepoint, province, age, and sex.
     """
-    past_life_table = load_past_death_data(time_delta)
+    past_life_table = load_past_death_data()
     df_calibration = load_projected_death_data(min_timepoint=past_life_table["timepoint"].max() + time_delta)
 
     # Compute the beta parameters for each province, sex, and projection scenario
