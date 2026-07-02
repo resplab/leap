@@ -22,6 +22,37 @@ MAX_TIMEPOINT = dt.datetime(2068, 12, 31)
 TIME_DELTA_OD = TimeDelta(years=1) # original time delta of the data
 
 
+def convert_prob_death(
+    prob_death: float,
+    time_delta_od: TimeDelta,
+    time_delta: TimeDelta
+) -> float:
+    r"""Convert the probability of death from the original time delta to the new time delta.
+
+    The probability of death, :math:`q(x, \Delta x)`, depends on the choice of :math:`\Delta x`,
+    i.e. ``time_delta``. The original data is collected with :math:`\Delta x = 1` year, but we may
+    want to convert it to a different :math:`\Delta x`, e.g. 1 month.
+
+    Assuming the hazard ratio is constant over the time interval:
+
+    .. math::
+
+        q(x, \Delta x_b, t) = 1 - (1 - q(x, \Delta x_a, t))^{\frac{\Delta x_b}{\Delta x_a}}
+
+    Args:
+        prob_death: The probability of death for the original time delta, :math:`q(x, \Delta x_a)`.
+        time_delta_od: The original time delta, :math:`\Delta x_a`.
+        time_delta: The new time delta, :math:`\Delta x_b`.
+
+    Returns:
+        The probability of death for the new time delta, :math:`q(x, \Delta x_b)`.
+    """
+
+    if time_delta_od == time_delta:
+        return prob_death
+
+    return 1 - (1 - prob_death)**(time_delta.total_years() / time_delta_od.total_years())
+
 
 def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -> float:
     """Determine the life expectancy for a person born in a given time interval.
