@@ -125,6 +125,16 @@ class Exacerbation:
     @calibration_table.setter
     def calibration_table(self, calibration_table: DataFrameGroupBy):
         self._calibration_table = calibration_table
+        # Build a fast (timepoint, sex, age) -> calibrator_multiplier lookup once, so that
+        # ``compute_num_exacerbations`` avoids a groupby ``get_group`` + boolean mask on every
+        # call (each of which costs ~1 ms and is invoked in a per-year history loop).
+        df = calibration_table.obj
+        self._calibrator_multipliers = {
+            (pd.Timestamp(timepoint), int(sex), int(age)): float(multiplier)
+            for timepoint, sex, age, multiplier in zip(
+                df["timepoint"], df["sex"], df["age"], df["calibrator_multiplier"]
+            )
+        }
 
     def assign_random_β0(self):
         """Assign the parameter β0 a random value from a normal distribution."""
@@ -211,8 +221,9 @@ class Exacerbation:
             timepoint = max(self.parameters["min_timepoint"], timepoint)
             age = min(age, 90)
 
-        df = self.calibration_table.get_group((timepoint, int(sex)))
-        calibrator_multiplier = df[df["age"] == age]["calibrator_multiplier"]
+        calibrator_multiplier = self._calibrator_multipliers[
+            (pd.Timestamp(timepoint), int(sex), int(age))
+        ]
 
         μ = (
             self.parameters["β0"] +
@@ -222,4 +233,4 @@ class Exacerbation:
             np.log(calibrator_multiplier)
         )
         λ = np.exp(μ)
-        return np.random.poisson(λ)[0]
+        return int(np.random.poisson(λ))

@@ -925,9 +925,15 @@ class Simulation:
                     pbar.close()
 
             time_bar.update()
-            logger.message("Combining OutcomeMatrix list...", tqdm=True)
-            outcome_matrix = combine_outcome_matrices(outcome_matrices)
         time_bar.close()
+
+        # Combine the per-agent outcome matrices once, after all timepoints have been simulated.
+        # Previously this was called inside the timepoint loop over the ever-growing
+        # ``outcome_matrices`` list, re-combining every agent from every prior timepoint on each
+        # iteration (O(timepoints x cumulative agents)) while discarding all intermediate results.
+        logger.message("Combining OutcomeMatrix list...", tqdm=True)
+        if outcome_matrices:
+            outcome_matrix = combine_outcome_matrices(outcome_matrices)
         sys.stdout.write('\033[F')    # Move cursor up one line
         sys.stdout.write('\033[2K') 
         sys.stdout.flush()
