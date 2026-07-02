@@ -48,7 +48,7 @@ EXACERBATION_RATE = 0.347
 # rate(exacerbation | partially controlled) = 2 * rate(exacerbation | fully controlled)
 # rate(exacerbation | uncontrolled) = 3 * rate(exacerbation | fully controlled)
 # Source: GOAL Study (Bateman et al., 2004)
-# https://www.atsjournals.org/doi/full/10.1164/rccm.200401-033OC
+# https://doi.org/10.1164/rccm.200401-033OC
 EXACERBATION_RATE_RATIO = {
     "well_controlled": 1.0,
     "partially_controlled": 2.0,
@@ -106,7 +106,7 @@ def exacerbation_prediction(
 
     Here the :math:`\beta_i` values were calculated from the
     `Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
-    and the `GOAL Study <https://www.atsjournals.org/doi/full/10.1164/rccm.200401-033OC>`_.
+    and the `GOAL Study <https://doi.org/10.1164/rccm.200401-033OC>`_.
 
     Args:
         sex: One of "M" or "F".
