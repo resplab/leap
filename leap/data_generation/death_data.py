@@ -666,6 +666,17 @@ def generate_death_data(
         ) if x is not np.nan else x,
         axis=1
     )
+
+    # Interpolate the missing q_x points for the new time delta
+    life_table = interpolate(
+        data=life_table.copy().reset_index(drop=True),
+        time_delta=time_delta,
+        time_delta_od=TIME_DELTA_OD,
+        columns_group=["province", "age", "sex", "projection_scenario"],
+        col_pred="prob_death",
+        func="constant"
+    )
+
     life_table.sort_values(["province", "sex", "timepoint", "age"], inplace=True)
 
     time_delta_tag = get_time_delta_tag(time_delta)
