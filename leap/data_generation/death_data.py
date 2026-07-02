@@ -347,6 +347,8 @@ def load_past_death_data(time_delta: TimeDelta) -> pd.DataFrame:
     df.sort_values(["province", "age", "sex", "timepoint"], inplace=True)
     df = df[["province", "age", "sex", "timepoint", "prob_death", "se"]]
 
+    df["projection_scenario"] = ["past"] * df.shape[0]
+
     return df
 
 
