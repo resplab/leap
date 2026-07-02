@@ -590,9 +590,9 @@ def compute_beta_parameters(
         np.float64(-0.01)
     """
     keys = list(itertools.product(
-        past_life_table["province"].unique(),
-        past_life_table["sex"].unique(), 
-        past_life_table["projection_scenario"].unique())
+        df_calibration["province"].unique(),
+        df_calibration["sex"].unique(), 
+        df_calibration["projection_scenario"].unique())
     )
     beta_parameters = {key: 0.0 for key in keys}
 
