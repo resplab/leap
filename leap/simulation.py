@@ -124,6 +124,8 @@ class Simulation:
         # An empty template matrix that each agent copies (cheaply) instead of reconstructing
         # a full-size OutcomeMatrix per agent. Built lazily / at the start of ``run``.
         self._outcome_matrix_template = None
+        # The run seed, stored so multiprocessing workers can derive reproducible per-worker seeds.
+        self._seed = None
 
     def __repr__(self):
         return (
@@ -559,6 +561,16 @@ class Simulation:
             queue: A queue for returning the results and updating the
                 progress bar.
         """
+        # Deterministically seed this worker so multiprocessing runs are reproducible. Workers are
+        # spawned via a ``forkserver`` context and do NOT inherit the parent's seeded RNG state, so
+        # without this each worker would draw from OS entropy and results would vary run to run.
+        # Each (timepoint, process) gets its own independent stream derived from the run seed.
+        if self._seed is not None:
+            worker_seed = np.random.SeedSequence(
+                [int(self._seed), int(timepoint_index), int(process_id)]
+            ).generate_state(1)[0]
+            np.random.seed(worker_seed)
+
         for index in indices:
             agent_id, outcome_matrix = self.simulate_agent(
                 sex=new_agents_df["sex"].iloc[index],
@@ -796,6 +808,7 @@ class Simulation:
             The outcome matrix.
         """
 
+        self._seed = seed
         if seed is not None:
             np.random.seed(seed)
 
