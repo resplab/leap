@@ -13,6 +13,8 @@ Population Data
 We use the Statistics Canada population data that was generated and saved as:
 `processed_data/{time_delta_tag}/birth/initial_population.csv
 <https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/birth/initial_population.csv>`_.
+This file is produced by the same data-generation script as ``birth_estimate.csv`` — see
+:ref:`birth-model` for details on how it is generated from Statistics Canada population data.
 
 
 .. list-table::
@@ -207,7 +209,8 @@ Province Coverage
 ^^^^^^^^^^^^^^^^^^
 
 Although hospitalization data is available for every province/territory listed above,
-calibration is currently only implemented for ``BC`` and ``CA`` (see
+calibration is currently only implemented for ``BC`` and ``CA``using the corresponding
+``tab1_rate.csv``file (see
 `leap/data_generation/exacerbation_data.py
 <https://github.com/resplab/leap/blob/main/leap/data_generation/exacerbation_data.py>`_).
 The resulting ``exacerbation_calibration.csv`` used at runtime therefore only contains
@@ -234,7 +237,7 @@ formula:
 
 .. math::
 
-    \ln(\lambda) = \ln(\alpha) + \beta_0 + \sum_{i=1}^3 \beta_i c_i 
+    \ln(\lambda) = \ln(\alpha) + \beta_0^{(i)} + \sum_{i=1}^3 \beta_i c_i
 
 
 where:
@@ -247,12 +250,21 @@ where:
      - Description
    * - :math:`\alpha`
      - the calibration multiplier that adjusts the model to match the hospitalization data
-   * - :math:`\beta_0`
-     - a constant randomly chosen from the normal distribution :math:`\mathcal{N}(0, 1)`
+   * - :math:`\beta_0^{(i)}`
+     - patient-specific random effect; :math:`\beta_0^{(i)} \sim \mathcal{N}(\beta_{0,\mu}, \beta_{0,\sigma}^2)`
+       (see :ref:`control-model` for the same random-effect construction used there)
    * - :math:`c_i`
      - relative time spent in control level :math:`i`
    * - :math:`\beta_i`
      - control level constant calculated from the :ref:`Control Model <control-model>`
+
+For each agent with asthma, :math:`\beta_0^{(i)}` is sampled once from
+:math:`\mathcal{N}(\beta_{0,\mu}, \beta_{0,\sigma}^2)` and held fixed for their simulated
+lifetime, representing individual heterogeneity in exacerbation risk beyond what is explained by
+age, sex, control level, and the population-level calibration :math:`\alpha`. The hyperparameters
+:math:`\beta_{0,\mu}` and :math:`\beta_{0,\sigma}` are configuration-dependent; in the current
+default configuration they are set to approximately :math:`\mathcal{N}(0, 0)`, effectively
+disabling this source of individual variation.
 
 This gives us the rate :math:`\lambda` of exacerbations of *any* severity. Once an individual's
 total number of exacerbations for a time interval is drawn from this Poisson model, each
@@ -267,7 +279,7 @@ We are interested in calculating :math:`\alpha`. If we rewrite the equation, the
 
 .. math::
 
-    \lambda = \alpha \cdot e^{\beta_0} \prod_{i=1}^3 e^{\beta_i c_i} 
+    \lambda = \alpha \cdot e^{\beta_0^{(i)}} \prod_{i=1}^3 e^{\beta_i c_i}
 
 
 How do we obtain :math:`\alpha`? We again assume that the mean value has the same form as in a
