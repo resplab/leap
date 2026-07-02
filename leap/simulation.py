@@ -121,6 +121,9 @@ class Simulation:
         self.pollution_table = PollutionTable()
         self.SSP = config["pollution"]["SSP"]
         self.outcome_matrix = None
+        # An empty template matrix that each agent copies (cheaply) instead of reconstructing
+        # a full-size OutcomeMatrix per agent. Built lazily / at the start of ``run``.
+        self._outcome_matrix_template = None
 
     def __repr__(self):
         return (
@@ -591,9 +594,15 @@ class Simulation:
             timepoint_index: The index of the current timepoint in the simulation. For example, if the
                 simulation starts in 2010, then the timepoint index for 2010 is 0, for 2011 is 1, etc.
         """
-        outcome_matrix = OutcomeMatrix(
-            self.until_all_die, self.min_timepoint, self.max_timepoint, self.max_age, self.time_delta
-        )
+        # Copy the shared empty template instead of rebuilding all tables per agent. Falls back
+        # to constructing one if ``simulate_agent`` is called directly (e.g. in tests) without
+        # ``run`` having built the template.
+        if self._outcome_matrix_template is None:
+            self._outcome_matrix_template = OutcomeMatrix(
+                self.until_all_die, self.min_timepoint, self.max_timepoint, self.max_age,
+                self.time_delta
+            )
+        outcome_matrix = self._outcome_matrix_template.copy()
         self.control.assign_random_β0()
         self.exacerbation.assign_random_β0()
         self.exacerbation_severity.assign_random_p()
@@ -796,6 +805,13 @@ class Simulation:
 
         if until_all_die is not None:
             self.until_all_die = until_all_die
+
+        # Build the empty outcome-matrix template once (now that ``until_all_die`` is finalized).
+        # Each agent copies this instead of reconstructing a full-size matrix.
+        self._outcome_matrix_template = OutcomeMatrix(
+            self.until_all_die, self.min_timepoint, self.max_timepoint, self.max_age,
+            self.time_delta
+        )
 
         timepoints = date_range(
             start=self.min_timepoint,
