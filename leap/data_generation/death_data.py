@@ -259,7 +259,22 @@ def compute_life_expectancy_diff(
             * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
             * ``sex``: One of ``F`` = female, ``M`` = male.
-            * ``projection_scenario``: The projection scenario, e.g. ``"M3"``.
+            * ``projection_scenario (str)``: Population growth type, one of:
+
+              * ``past``: historical data
+              * ``LG``: low-growth projection
+              * ``HG``: high-growth projection
+              * ``M1``: medium-growth 1 projection
+              * ``M2``: medium-growth 2 projection
+              * ``M3``: medium-growth 3 projection
+              * ``M4``: medium-growth 4 projection
+              * ``M5``: medium-growth 5 projection
+              * ``M6``: medium-growth 6 projection
+              * ``FA``: fast-aging projection
+              * ``SA``: slow-aging projection
+
+              See: `StatCan Projection Scenarios
+              <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
             * ``mortality_scenario``: The mortality scenario. One of:
                 - ``LM``: Low mortality
                 - ``MM``: Medium mortality
@@ -272,7 +287,22 @@ def compute_life_expectancy_diff(
             For all of Canada, set province to ``"CA"``.
         timepoint_initial: The initial timepoint with a known probability of death. This is the last
             timepoint that the past data was collected.
-        projection_scenario: The projection scenario, e.g. ``"M3"``.
+        projection_scenario: Population growth type, one of:
+
+            * ``past``: historical data
+            * ``LG``: low-growth projection
+            * ``HG``: high-growth projection
+            * ``M1``: medium-growth 1 projection
+            * ``M2``: medium-growth 2 projection
+            * ``M3``: medium-growth 3 projection
+            * ``M4``: medium-growth 4 projection
+            * ``M5``: medium-growth 5 projection
+            * ``M6``: medium-growth 6 projection
+            * ``FA``: fast-aging projection
+            * ``SA``: slow-aging projection
+
+            See: `StatCan Projection Scenarios
+            <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
         time_delta: The duration of time between data points.
     
     Returns:
@@ -314,6 +344,7 @@ def load_past_death_data() -> pd.DataFrame:
         * ``timepoint``: The starting timepoint of the interval during which the data was collected.
         * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
           For all of Canada, set province to ``"CA"``.
+        * ``projection_scenario``: The projection scenario, i.e. ``"past"``.
         * ``sex``: One of ``M`` = male, ``F`` = female.
         * ``age``: The integer age.
         * ``prob_death``: The probability that a person of the given age, sex, and province
@@ -398,7 +429,22 @@ def load_projected_death_data(min_timepoint: dt.datetime) -> pd.DataFrame:
         * ``province (str)``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
           For all of Canada, set province to ``"CA"``.
         * ``sex (str)``: One of ``F`` = female, ``M`` = male.
-        * ``projection_scenario (str)``: The projection scenario, e.g. ``"M3"``.
+        * ``projection_scenario (str)``: Population growth type, one of:
+
+          * ``past``: historical data
+          * ``LG``: low-growth projection
+          * ``HG``: high-growth projection
+          * ``M1``: medium-growth 1 projection
+          * ``M2``: medium-growth 2 projection
+          * ``M3``: medium-growth 3 projection
+          * ``M4``: medium-growth 4 projection
+          * ``M5``: medium-growth 5 projection
+          * ``M6``: medium-growth 6 projection
+          * ``FA``: fast-aging projection
+          * ``SA``: slow-aging projection
+
+          See: `StatCan Projection Scenarios
+          <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
         * ``mortality_scenario (str)``: The mortality scenario. One of:
             - ``LM``: Low mortality
             - ``MM``: Medium mortality
@@ -486,7 +532,22 @@ def compute_beta_parameters(
             * ``province``: A 2-letter string indicating the province abbreviation, e.g.
               ``"BC"``. For all of Canada, set province to ``"CA"``.
             * ``sex``: One of ``F`` = female, ``M`` = male.
-            * ``projection_scenario``: The projection scenario, e.g. ``"M3"``.
+            * ``projection_scenario (str)``: Population growth type, one of:
+
+              * ``past``: historical data
+              * ``LG``: low-growth projection
+              * ``HG``: high-growth projection
+              * ``M1``: medium-growth 1 projection
+              * ``M2``: medium-growth 2 projection
+              * ``M3``: medium-growth 3 projection
+              * ``M4``: medium-growth 4 projection
+              * ``M5``: medium-growth 5 projection
+              * ``M6``: medium-growth 6 projection
+              * ``FA``: fast-aging projection
+              * ``SA``: slow-aging projection
+
+              See: `StatCan Projection Scenarios
+              <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
             * ``mortality_scenario``: The mortality scenario. One of:
                 - ``LM``: Low mortality
                 - ``MM``: Medium mortality
@@ -552,7 +613,7 @@ def get_projected_death_data(
             * ``timepoint``: the starting timepoint of the interval during which the data was collected.
             * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
-            * ``projection_scenario``: The projection scenario, i.e. ``"past"``.
+            * ``projection_scenario``: The population growth type, i.e. ``"past"``.
             * ``sex``: One of ``M`` = male, ``F`` = female.
             * ``age``: the integer age.
             * ``prob_death``: the probability of death.
@@ -566,7 +627,22 @@ def get_projected_death_data(
         * ``timepoint``: The starting timepoint of the interval the data applies to.
         * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
           For all of Canada, set province to ``"CA"``.
-        * ``projection_scenario``: The projection scenario, e.g. ``"M3"``.
+        * ``projection_scenario (str)``: Population growth type, one of:
+
+          * ``past``: historical data
+          * ``LG``: low-growth projection
+          * ``HG``: high-growth projection
+          * ``M1``: medium-growth 1 projection
+          * ``M2``: medium-growth 2 projection
+          * ``M3``: medium-growth 3 projection
+          * ``M4``: medium-growth 4 projection
+          * ``M5``: medium-growth 5 projection
+          * ``M6``: medium-growth 6 projection
+          * ``FA``: fast-aging projection
+          * ``SA``: slow-aging projection
+
+          See: `StatCan Projection Scenarios
+          <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
         * ``sex``: One of ``M`` = male, ``F`` = female.
         * ``age``: The integer age.
         * ``prob_death``: The probability that a person of the given age, sex, and province
