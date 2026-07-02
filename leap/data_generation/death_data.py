@@ -501,6 +501,8 @@ def load_projected_death_data(min_timepoint: dt.datetime) -> pd.DataFrame:
 
     df = df.loc[df["timepoint"] >= min_timepoint].reset_index(drop=True)
 
+    df = df.loc[df["province"].isin(["CA", "BC"])]
+
     return df
 
 
