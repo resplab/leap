@@ -4,7 +4,7 @@ import argparse
 import itertools
 from leap.utils import TimeDelta, date_range, PROVINCE_MAP
 from leap.logger import get_logger
-from typing import Tuple, List, Callable, Dict, Any
+from typing import Tuple, List, Callable, Dict, Any, Literal
 
 logger = get_logger(__name__)
 
@@ -406,7 +406,9 @@ def interpolate(
     col_pred: str,
     time_delta: TimeDelta,
     time_delta_od: TimeDelta,
-    columns_group: List[str]
+    columns_group: List[str],
+    func: Callable | Literal["constant", "time"] = "time",
+    func_args: Dict[str, Any] = {}
 ) -> pd.DataFrame:
     """Interpolate the values of a column for missing timepoints.
     
@@ -416,6 +418,15 @@ def interpolate(
         time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
         time_delta_od: The original time delta of the data, i.e. the time delta that the data was
             originally collected at.
+        columns_group: The columns to group by when interpolating.
+        func: A callable function or the name of one of the default functions, either
+            ``"constant"`` or ``"time"``, to be used for interpolation. If a callable function is
+            provided, the first argument must be a Pandas dataframe containing at minimum
+            the columns specified in ``columns_group`` and the column to predict, and it must return
+            a Pandas dataframe with the same columns as the input dataframe, but with the values of
+            the column to predict interpolated for the missing timepoints.
+        func_args: A dictionary of additional arguments to pass to the function specified in
+            ``func``.
 
     Returns:
         A dataframe with the same columns as the input data, but with the values of the column to
@@ -426,7 +437,7 @@ def interpolate(
     
     if time_delta == time_delta_od:
         return data
-    
+
     df = add_empty_rows_interpolation(
         data=data.copy().reset_index(drop=True),
         time_delta=time_delta,
@@ -434,9 +445,18 @@ def interpolate(
         columns_group=columns_group
     ).reset_index(drop=True)
 
+    df.sort_values(by=columns_group + ["timepoint"], inplace=True)
     df.set_index("timepoint", inplace=True)
+
     grouped_df = df[[col_pred] + columns_group].groupby(columns_group)
-    df[col_pred] = grouped_df.transform(lambda x: x.interpolate(method="time"))
+
+    if func == "time":
+        df[col_pred] = grouped_df.transform(lambda x: x.interpolate(method="time"))
+    elif func == "constant":
+        df[col_pred] = grouped_df[col_pred].ffill()
+    else:
+        df[col_pred] = grouped_df.transform(lambda x: func(x, **func_args))
+
     df.reset_index(drop=False, inplace=True)
     df.sort_values(columns_group + ["timepoint"], inplace=True)
     df.ffill(inplace=True)
