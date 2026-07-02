@@ -653,14 +653,19 @@ def generate_death_data(
     projected_life_table = get_projected_death_data(
         beta_parameters, past_life_table
     )
+
+    # Combine the past and projected annual data
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
-    life_table["age_int"] = life_table["age"].apply(lambda x: int(x))
-    grouped_df = life_table.groupby(["age_int", "province", "sex", "timepoint"], as_index=False).agg({
-        "prob_death": "mean",
-        "se": lambda x: np.sqrt(np.sum(x**2)) / len(x)
-    })
-    life_table = grouped_df[["province", "age_int", "sex", "timepoint", "prob_death", "se"]]
-    life_table.rename(columns={"age_int": "age"}, inplace=True)
+
+    # Convert the existing q_x points from original time delta to new time delta
+    life_table["prob_death"] = life_table.apply(
+        lambda x: convert_prob_death(
+            prob_death=x["prob_death"],
+            time_delta=time_delta,
+            time_delta_od=TIME_DELTA_OD
+        ) if x is not np.nan else x,
+        axis=1
+    )
     life_table.sort_values(["province", "sex", "timepoint", "age"], inplace=True)
 
     time_delta_tag = get_time_delta_tag(time_delta)
