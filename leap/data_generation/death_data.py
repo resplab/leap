@@ -686,7 +686,7 @@ def plot(
     """
 
     fig = px.line(
-        df.loc[df["province"].isin(["BC", "CA"])].dropna(),
+        df.loc[df["province"].isin(["BC", "CA"])],
         x="timepoint",
         y=y,
         render_mode="svg",
