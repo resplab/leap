@@ -508,9 +508,7 @@ def compute_beta_parameters(
 
 def get_projected_death_data(
     beta_parameters: Dict[Tuple[str, str, str], float],
-    past_life_table: pd.DataFrame,
-    time_delta: TimeDelta,
-    time_delta_od: TimeDelta = TIME_DELTA_OD
+    past_life_table: pd.DataFrame
 ) -> pd.DataFrame:
     """Load the projected death data from ``StatCan`` CSV file.
     
@@ -528,13 +526,10 @@ def get_projected_death_data(
             * ``age``: the integer age.
             * ``prob_death``: the probability of death.
             * ``se``: the standard error of the probability of death.
-
-        time_delta: The duration of time between data points.
-        time_delta_od: The original duration of time between data points in the past data.
     
     Returns:
         A dataframe containing the predicted probability of death and the standard error
-        for each timepoint, province, age, and sex.
+        for each annual timepoint, province, age, and sex.
         Columns:
 
         * ``timepoint``: The starting timepoint of the interval the data applies to.
@@ -548,34 +543,38 @@ def get_projected_death_data(
         * ``se``: The standard error of the probability of death.
     """
 
-    projected_life_table = pd.DataFrame({
-        "timepoint": np.array([], dtype=dt.datetime),
-        "province": [],
-        "age": np.array([], dtype=int),
-        "sex": [],
-        "prob_death": [],
-        "se": []
-    })
+    max_timepoint_past = past_life_table["timepoint"].max()
+    starting_timepoint = max_timepoint_past + TIME_DELTA_OD
 
-    for province, sex, projection_scenario in beta_parameters.keys():
+    projected_life_table = pd.DataFrame(
+        data=list(itertools.product(
+            set([key[0] for key in beta_parameters.keys()]),
+            set([key[1] for key in beta_parameters.keys()]),
+            set([key[2] for key in beta_parameters.keys()]),
+            list(date_range(starting_timepoint, MAX_TIMEPOINT, TIME_DELTA_OD)),
+            past_life_table["age"].unique(),
+            [0.0]
+        )),
+        columns=["province", "sex", "projection_scenario", "timepoint", "age", "prob_death"]
+    )
 
-        life_table = past_life_table[
-            (past_life_table["province"] == province) &
-            (past_life_table["sex"] == sex) &
-            (past_life_table["projection_scenario"] == projection_scenario)
-        ]
-        max_timepoint_past = life_table["timepoint"].max()
-        starting_timepoint = max_timepoint_past + time_delta_od
-        life_table = life_table[life_table["timepoint"] == max_timepoint_past]
+    projected_life_table = pd.merge(
+        projected_life_table,
+        past_life_table.loc[past_life_table["timepoint"] == max_timepoint_past],
+        how="left",
+        on=["province", "sex", "age", "projection_scenario"],
+        suffixes=("", "_initial")
+    )
 
-        for timepoint in date_range(starting_timepoint, MAX_TIMEPOINT, time_delta):
-            # get the prob_death projections for the year and add to dataframe
-            df = get_projected_life_table_single_timepoint(
-                beta_parameters[(province, sex, projection_scenario)], life_table,
-                starting_timepoint - time_delta, timepoint, sex, province
-            )
-            # add to the dataframe
-            projected_life_table = pd.concat([projected_life_table, df], axis=0)
+    projected_life_table["prob_death"] = projected_life_table.apply(
+        lambda x: get_prob_death_projected(
+            prob_death=x["prob_death_initial"],
+            timepoint_initial=starting_timepoint,
+            timepoint=x["timepoint"],
+            beta_time=beta_parameters[(x["province"], x["sex"], x["projection_scenario"])]
+        ),
+        axis=1
+    )
 
     projected_life_table.sort_values(["province", "projection_scenario", "age", "sex", "timepoint"], inplace=True)
     projected_life_table = projected_life_table[
@@ -619,8 +618,9 @@ def generate_death_data(
         xtol=xtol
     )
 
+    # Get the projected death data for each province, sex, projection scenario, and year
     projected_life_table = get_projected_death_data(
-        beta_parameters, past_life_table, time_delta
+        beta_parameters, past_life_table
     )
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
     life_table["age_int"] = life_table["age"].apply(lambda x: int(x))
