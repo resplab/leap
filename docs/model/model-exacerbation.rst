@@ -294,6 +294,8 @@ total number of exacerbations for a time interval is drawn from this Poisson mod
 exacerbation is further assigned a severity level (mild, moderate, severe, or very severe) — see
 :ref:`exacerbation_severity_model` below.
 
+.. _exacerbation-calibration:
+
 Calibration
 ******************
 
@@ -317,8 +319,10 @@ Poisson regression, with the following formula:
   :math:`a` and sex :math:`s` — note this has no timepoint argument, since the
   :ref:`Control Model <control-model>` assumes control level probabilities do not vary by
   calendar year
-* :math:`c_i`: the age- and sex-specific control level probability predicted by the
-  :ref:`Control Model <control-model>`'s ordinal regression
+* :math:`c_i`: the age- and sex-specific probability of control level :math:`i`,
+  :math:`P(y^{(i)} = k)`, from the :ref:`Control Model <control-model>`'s ordinal regression —
+  obtained by differencing consecutive cumulative probabilities,
+  :math:`P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)`
 * :math:`\beta_i`: control level constant, derived below from the EBA and GOAL studies
 
 The :math:`\beta_i` values are derived by combining two literature sources, as described in
@@ -415,6 +419,25 @@ number of hospitalizations, for a given age :math:`a`, sex :math:`s`, and timepo
 where :math:`N_{\text{hosp}}(a, s, t)` is the **observed** number of hospitalizations, determined
 from the observed hospitalization rate as described in :ref:`tab1-rate-columns` above.
 
+Although :math:`\alpha` is computed from hospitalizations alone, it is applied to :math:`\lambda`,
+the rate of exacerbations of *any* severity — this is valid because :math:`P(\text{hosp})` is
+treated as a fixed constant, independent of age, sex, province, and timepoint. Substituting
+:math:`N_{\text{hosp}}^{\text{(pred)}} = N_{\text{exac}}^{\text{(pred)}} \cdot P(\text{hosp})`, and
+writing the *observed* hospitalizations as the *true* total number of exacerbations times that
+same constant, :math:`N_{\text{hosp}} = N_{\text{exac}}^{\text{(true)}} \cdot P(\text{hosp})`, the
+:math:`P(\text{hosp})` terms cancel:
+
+.. math::
+
+    \alpha = \dfrac{N_{\text{hosp}}}{N_{\text{hosp}}^{\text{(pred)}}}
+        = \dfrac{N_{\text{exac}}^{\text{(true)}} \cdot P(\text{hosp})}
+            {N_{\text{exac}}^{\text{(pred)}} \cdot P(\text{hosp})}
+        = \dfrac{N_{\text{exac}}^{\text{(true)}}}{N_{\text{exac}}^{\text{(pred)}}}
+
+So :math:`\alpha` computed from the hospitalization ratio is algebraically identical to the ratio
+of true to predicted *total* exacerbations, provided :math:`P(\text{hosp})` is indeed constant by age, sex, province, and timepoint (otherwise variation in :math:`P(\text{hosp})` would be attributed to :math:`\alpha`). Hospitalizations are used to compute it — rather than
+total exacerbations directly — because they are captured completely in CIHI's national data, stratified by age/sex/province/year.
+
 :math:`\alpha` is computed once per province, age, sex, and timepoint as part of data generation,
 and saved as:
 `processed_data/{time_delta_tag}/exacerbation_calibration.csv
@@ -495,11 +518,22 @@ four levels is first drawn from a Dirichlet distribution:
 
     \mathbf{w}^{\text{pre}} \sim \text{Dirichlet}(\boldsymbol{\delta})
 
-where :math:`\boldsymbol{\delta} = \kappa \cdot \mathbf{p}` is the Dirichlet concentration vector,
-:math:`\mathbf{p} = (p_{\text{mild}}, p_{\text{moderate}}, p_{\text{severe}}, p_{\text{very\_severe}})
+:math:`\mathbf{w}^{\text{pre}} = (w^{\text{pre}}_{\text{mild}}, w^{\text{pre}}_{\text{moderate}},
+w^{\text{pre}}_{\text{severe}}, w^{\text{pre}}_{\text{very severe}})` is a length-4 vector of
+*probabilities* (summing to 1) giving this individual's personal probability of each severity
+level. For each agent with asthma, :math:`\mathbf{w}^{\text{pre}}` is sampled once, independently
+per agent, and held fixed for their simulated lifetime — representing individual heterogeneity in
+exacerbation severity, distinct from (and prior to) the adjustment for previous hospitalization
+described below. The actual exacerbation counts are determined later using
+:math:`N_{\text{exacerbations}}` (the total count, from the Poisson model above) together with
+this probability vector.
+
+:math:`\boldsymbol{\delta} = \kappa \cdot \mathbf{p}` is the Dirichlet concentration vector,
+:math:`\mathbf{p} = (p_{\text{mild}}, p_{\text{moderate}}, p_{\text{severe}}, p_{\text{very severe}})
 = (0.495, 0.195, 0.283, 0.026)` are the same SYGMA II severity proportions used for
-:math:`P(\text{hosp})` above :cite:`leap2024`, and :math:`\kappa = 100` is a concentration
-multiplier controlling how tightly an individual's drawn probabilities cluster around the
+:math:`P(\text{hosp})` in the :ref:`Calibration <exacerbation-calibration>` section above
+:cite:`leap2024`, and :math:`\kappa = 100` is an assumed concentration
+multiplier controlling how tightly an individual's probabilities cluster around the
 population proportions :math:`\mathbf{p}`.
 
 Adjustment for Previous Hospitalization
@@ -511,14 +545,34 @@ proportionally across the other three levels:
 
 .. math::
 
-    w_{\text{very\_severe}} &= w^{\text{pre}}_{\text{very\_severe}} \cdot \beta_{\text{prev\_hosp}} \\
+    w_{\text{very severe}} &= w^{\text{pre}}_{\text{very severe}} \cdot \beta_{\text{prev hosp}} \\
     w_j &= \dfrac{w^{\text{pre}}_j}{\sum_{l \,\in\, \{\text{mild, moderate, severe}\}} w^{\text{pre}}_l}
-        \cdot (1 - w_{\text{very\_severe}}), \quad j \in \{\text{mild, moderate, severe}\}
+        \cdot (1 - w_{\text{very severe}}), \quad j \in \{\text{mild, moderate, severe}\}
 
-where :math:`\beta_{\text{prev\_hosp}}` is :math:`\beta_{\text{prev\_hosp,ped}} = 1.79` for
-individuals under 14 years of age, or :math:`\beta_{\text{prev\_hosp,adult}} = 2.88` for
-individuals 14 years of age or older. If the individual has no prior hospitalization,
-:math:`\mathbf{w} = \mathbf{w}^{\text{pre}}`.
+where:
+
+* :math:`j \in \{\text{mild, moderate, severe}\}`: this equation applies separately to each of
+  these three levels
+* :math:`l \in \{\text{mild, moderate, severe}\}`: a dummy index used only for the summation in
+  the denominator
+* :math:`\beta_{\text{prev hosp}}`: :math:`\beta_{\text{prev hosp,pediatric}} = 1.79` for
+  individuals under 14 years of age, or :math:`\beta_{\text{prev hosp,adult}} = 2.88` for
+  individuals 14 years of age or older.
+
+These rate multipliers are taken from a Canadian cohort study of the long-term natural history of
+severe asthma exacerbations :cite:`lee2022natural`, which found that a first follow-up severe
+exacerbation was associated with a 79% increase (rate multiplier 1.79, 95% CI 1.11–2.89) in the
+rate of subsequent exacerbations for pediatric patients, and a 188% increase (rate multiplier
+2.88, 95% CI 1.35–5.15) for adult patients.
+
+If the individual has no prior hospitalization, :math:`\mathbf{w} = \mathbf{w}^{\text{pre}}`.
+
+Since :math:`\mathbf{w}^{\text{pre}}` already sums to 1, inflating :math:`w_{\text{very severe}}`
+by :math:`\beta_{\text{prev hosp}}` alone would push the total above 1. The :math:`w_j` formula
+corrects this: it proportionally shrinks the mild/moderate/severe probabilities so the full
+vector :math:`\mathbf{w}` sums back to 1, while keeping their relative proportions to each other
+unchanged from :math:`\mathbf{w}^{\text{pre}}`.
+
 
 This raises the question of how "previously hospitalized" is determined for an agent whose
 asthma history was not directly simulated cycle-by-cycle — for example, an agent assigned an
@@ -530,5 +584,5 @@ distribution, using :math:`N_{\text{exacerbations}}` as the number of trials:
 
 .. math::
 
-    (n_{\text{mild}}, n_{\text{moderate}}, n_{\text{severe}}, n_{\text{very\_severe}})
+    (n_{\text{mild}}, n_{\text{moderate}}, n_{\text{severe}}, n_{\text{very severe}})
         \sim \text{Multinomial}(N_{\text{exacerbations}}, \mathbf{w})
