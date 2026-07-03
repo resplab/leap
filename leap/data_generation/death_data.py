@@ -1,7 +1,9 @@
 import pathlib
 import itertools
+import sys
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
 import datetime as dt
 import plotly.express as px
 from scipy import optimize
@@ -598,11 +600,19 @@ def compute_beta_parameters(
     )
     beta_parameters = {key: 0.0 for key in keys}
 
-    for key in keys:
-        province = key[0]
-        sex = key[1]
-        projection_scenario = key[2]
+    tqdm_bar = tqdm(
+        total=len(keys),
+        desc=f"Timepoint",
+        leave=True,
+        bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
+        file=sys.stdout
+    )
+    for province, sex, projection_scenario in keys:
 
+        tqdm_bar.update(1)
+        tqdm_bar.set_description(
+            f"Province: {province} | Sex: {sex} | Projection Scenario: {projection_scenario}"
+        )
         life_table = past_life_table[past_life_table["province"] == province]
         max_timepoint_past = life_table["timepoint"].max()
         life_table = life_table[life_table["timepoint"] == max_timepoint_past]
@@ -622,8 +632,9 @@ def compute_beta_parameters(
             xtol=xtol,
         )[0][0]
 
-        beta_parameters[key] = beta_time
+        beta_parameters[(province, sex, projection_scenario)] = beta_time
 
+    tqdm_bar.close()
     return beta_parameters
 
 
