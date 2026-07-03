@@ -282,6 +282,11 @@ To initialize an agent, we set the following initial attributes:
 
        * number of exacerbations previous timepoint: 0
        * number of exacerbations current timepoint: 0
+   * - total hospitalizations
+     - The agent's cumulative count of very severe (hospitalized) exacerbations. For an agent with
+       asthma, this is initialized via the mini-simulation described in
+       :ref:`step-4-check-hospitalizations` below; otherwise it starts at 0. It is incremented
+       each subsequent time interval — see Step 8.
 
 
 Step 1: Check if the agent is over 3 years old
@@ -326,50 +331,46 @@ Step 4: Check hospitalizations
 --------------------------------
 
 Next, we determine whether the agent has previously had a very severe (i.e. hospitalized)
-exacerbation at some point since their asthma diagnosis (Step 3). This flag feeds into the
-:ref:`exacerbation_severity_model`, which increases the probability of a very severe exacerbation
+exacerbation at some point since their asthma diagnosis (Step 3). This is used in the :ref:`exacerbation_severity_model` to increase the probability of a very severe exacerbation
 for agents with a prior hospitalization.
 
 Since this agent's asthma history was not directly simulated cycle-by-cycle (it was assigned all
-at once in Steps 2 and 3), we cannot just look up whether a hospitalization occurred. In
-principle we could reconstruct the exact sequence of asthma/no-asthma cycles since diagnosis —
-but because asthma is reversible (an agent can lose and regain their asthma label via
-reassessment), the number of possible state sequences explodes combinatorially, making an exact
-calculation computationally infeasible.
-
-To simplify, we assume the agent's asthma was **not reversible** between their diagnosis age and
+at once in Steps 2 and 3), we cannot just look up whether a hospitalization occurred. Instead, we assume the agent's asthma was **not reversible** between their diagnosis age and
 two years before their current age: that is, we treat the agent as having had asthma
 continuously over that span. Under this assumption, we run a mini-simulation that sums the
 expected exacerbation rate :math:`\lambda` (using the Step 6 formula below, with that year's age,
-sex, timepoint, and control levels) over every year from the asthma diagnosis age up to two years
+sex, and control levels) over every year from the asthma diagnosis age up to two years
 before the agent's current age:
 
 .. math::
 
-    \text{total\_rate} = \sum_{y} \lambda_y
+    \text{total rate} = \sum_{y} \lambda_y
+
+where :math:`y` ranges over each year (not the simulation's own timepoint, but a calendar
+year) from the asthma diagnosis age up to two years before the agent's current age, and
+:math:`\lambda_y` is :math:`\lambda` evaluated at that year (Step 6 below).
 
 We then compute the probability that *none* of the agent's exacerbations over this span were very
-severe. Since each agent's probability of a very severe exacerbation, :math:`\pi`, is itself drawn
-from a Dirichlet distribution (see :ref:`exacerbation_severity_model`), this probability is the
-marginal (Dirichlet-multinomial) probability of zero very severe exacerbations out of
-``total_rate`` expected exacerbations:
+severe. Each agent's probability of a very severe exacerbation is
+:math:`w^{\text{pre}}_{\text{very severe}}` — the same pre-adjustment Dirichlet-drawn quantity
+described in the :ref:`exacerbation_severity_model` section of the Exacerbations Model page. This
+probability of zero very severe exacerbations out of ``total rate`` expected exacerbations is the
+marginal (Dirichlet-multinomial) probability, expressed using the Gamma function :math:`\Gamma`
+(the continuous extension of the factorial, :math:`\Gamma(n+1) = n!`):
 
 .. math::
 
-    P(\text{no very severe exacerbations}) = \dfrac{1}{\Gamma(\text{total\_rate} + 1)} \cdot
-        \dfrac{\Gamma(\text{total\_rate} + 1 - \pi)}{\Gamma(1 - \pi)}
+    P(\text{no very severe exacerbations}) = \dfrac{1}{\Gamma(\text{total rate} + 1)} \cdot
+        \dfrac{\Gamma(\text{total rate} + 1 - w^{\text{pre}}_{\text{very severe}})}
+            {\Gamma(1 - w^{\text{pre}}_{\text{very severe}})}
 
 Finally, we toss a coin — a Bernoulli draw — to decide whether the agent had at least one very
 severe exacerbation over this span:
 
 .. math::
 
-    \text{prev\_hosp} \sim \text{Bernoulli}\left(1 - P(\text{no very severe exacerbations})\right)
+    \text{prev hosp} \sim \text{Bernoulli}\left(1 - P(\text{no very severe exacerbations})\right)
 
-This non-reversibility assumption means we overestimate the number of years the agent was
-labelled as having asthma prior to the current timepoint, and therefore overestimate their
-chances of a prior hospitalization. However, since asthma reassessment (loss of the asthma label)
-is relatively rare in our data, we expect this bias to be small.
 
 Step 5: Determine asthma control levels
 -----------------------------------------
@@ -396,27 +397,10 @@ probability of the agent having fully-controlled, partially-controlled, or uncon
 Step 6: Compute the number of asthma exacerbations in the current timepoint
 ----------------------------------------------------------------------------
 
-To compute the number of asthma exacerbations in the current timepoint, we use the
-exacerbation model, which takes into account the agent's asthma control level, age, and sex,
-as well as the current timepoint. The probability of having :math:`n` exacerbations is given by a
-Poisson distribution:
-
-.. math::
-
-    P(n = k) = \dfrac{\lambda^{k}e^{-\lambda}}{k!}
-
-We determine the expected number of exacerbations, :math:`\lambda`, using the following formula:
-
-.. math::
-
-    \lambda &= e^{\mu} \\
-    \mu &= \beta_0 +
-        \beta_{\text{age}} \cdot \text{age} +
-        \beta_{\text{sex}} \cdot \text{sex} \\
-        &+\beta_{uc} \cdot P(\text{uncontrolled}) +
-        \beta_{pc} \cdot P(\text{partially controlled}) +
-        \beta_{c} \cdot P(\text{fully controlled}) \\
-        &+\log(\alpha(\text{timepoint}, \text{sex}, \text{age}))
+To compute the number of asthma exacerbations in the current timepoint, we use the exacerbation
+model, which draws a count from a Poisson distribution parameterized by the agent's control
+levels, patient-specific random effect, and the calibration multiplier :math:`\alpha` for their
+age, sex, province, and timepoint. See :ref:`exacerbation-model` for the full derivation.
 
 If the number of exacerbations is ``0``, skip to the end. Otherwise, go to Step 7.
 
@@ -424,50 +408,22 @@ If the number of exacerbations is ``0``, skip to the end. Otherwise, go to Step 
 Step 7: Compute the severity of the asthma exacerbations in the current timepoint
 ----------------------------------------------------------------------------------
 
-There are four levels of severity for asthma exacerbations:
-
-.. math::
-
-    k &= 1: \text{mild} \\
-    k &= 2: \text{moderate} \\
-    k &= 3: \text{severe} \\
-    k &= 4: \text{very severe / hospitalization}
-
-We assign the initial probability of each severity level using a Dirichlet distribution.
-
-If the agent has been previously hospitalized due to asthma:
-
-.. math::
-
-    P(k = 4 \mid t) &= \begin{cases}
-        P(k = 4 \mid t_0) \cdot \beta_{\text{prevhospped}} & \text{if age} < 14 \\
-        P(k = 4 \mid t_0) \cdot \beta_{\text{prevhospadult}} & \text{if age} \geq 14
-    \end{cases} \\
-    P(k = 1 \mid t) &= P(k = 1 \mid t_0) \cdot (1 - P(k = 4 \mid t)) \\
-    P(k = 2 \mid t) &= P(k = 2 \mid t_0) \cdot (1 - P(k = 4 \mid t)) \\
-    P(k = 3 \mid t) &= P(k = 3 \mid t_0) \cdot (1 - P(k = 4 \mid t))
-
-
-Otherwise, we use the initial probabilities of each severity level. Then, to determine the
-number of exacerbations of each severity level, we use a multinomial distribution:
-
-.. math::
-
-    p(x_1, x_2, x_3, x_4; n, p) = 
-        \dfrac{n!}{x_1! x_2! x_3! x_4!} \prod_{i=1}^4 P(k = i)^{x_i}, \quad \text{where} \quad \sum_{i=1}^4 x_i = n
+Each of the :math:`n` exacerbations from Step 6 is assigned a severity level (mild, moderate,
+severe, or very severe) via the Dirichlet-Multinomial model described in
+:ref:`exacerbation_severity_model`, including the adjustment applied if the agent has a history
+of very severe exacerbations (hospitalization).
 
 
 Step 8: Update the number of hospitalizations
 -----------------------------------------------------------------------------
 
-We add the total previous hospitalizations to the current timepoint's number of exacerbations at
-severity level 4:
+We add the current timepoint's number of very severe exacerbations to ``total_hosp``, the
+agent's cumulative hospitalization count first set during :ref:`step-4-check-hospitalizations`
+of Agent Initialization above:
 
 .. math::
 
-    \text{hospitalizations} = \text{previous hospitalizations} + x_4
-
-where :math:`x_4` is the number of exacerbations at severity level 4.
+    \text{total hosp} = \text{total hosp} + n_{\text{very severe}}
 
 
 Iterating Over Lifetime
@@ -548,26 +504,9 @@ Step 4: Compute the number of asthma exacerbations in the current timepoint
 ----------------------------------------------------------------------------
 
 To compute the number of asthma exacerbations in the current timepoint, we use the
-:ref:`exacerbation-model`, which takes into account the agent's asthma control level, age, and sex,
-as well as the current timepoint. The probability of having :math:`n` exacerbations is given by a
-Poisson distribution:
-
-.. math::
-
-    P(n = k) = \dfrac{\lambda^{k}e^{-\lambda}}{k!}
-
-We determine the expected number of exacerbations, :math:`\lambda`, using the following formula:
-
-.. math::
-
-    \lambda &= e^{\mu} \\
-    \mu &= \beta_0 +
-        \beta_{\text{age}} \cdot \text{age} +
-        \beta_{\text{sex}} \cdot \text{sex} \\
-        &+\beta_{uc} \cdot P(\text{uncontrolled}) +
-        \beta_{pc} \cdot P(\text{partially controlled}) +
-        \beta_{c} \cdot P(\text{fully controlled}) \\
-        &+\log(\alpha(\text{timepoint}, \text{sex}, \text{age}))
+:ref:`exacerbation-model`, which draws a count from a Poisson distribution parameterized by the
+agent's control levels, patient-specific random effect, and the calibration multiplier
+:math:`\alpha` for their age, sex, province, and timepoint.
 
 If the number of exacerbations is ``0``, skip to Step 8. Otherwise, go to Step 5.
 
@@ -575,48 +514,23 @@ If the number of exacerbations is ``0``, skip to Step 8. Otherwise, go to Step 5
 Step 5: Compute the severity of the asthma exacerbations in the current timepoint
 ----------------------------------------------------------------------------------
 
-There are four levels of severity for asthma exacerbations:
-
-.. math::
-
-    k &= 1: \text{mild} \\
-    k &= 2: \text{moderate} \\
-    k &= 3: \text{severe} \\
-    k &= 4: \text{very severe / hospitalization}
-
-If the agent has been previously hospitalized due to asthma:
-
-.. math::
-
-    P(k = 4 \mid t) &= \begin{cases}
-        P(k = 4 \mid t - 1) \cdot \beta_{\text{prevhospped}} & \text{if age} < 14 \\
-        P(k = 4 \mid t - 1) \cdot \beta_{\text{prevhospadult}} & \text{if age} \geq 14
-    \end{cases} \\
-    P(k = 1 \mid t) &= P(k = 1 \mid t - 1) \cdot (1 - P(k = 4 \mid t)) \\
-    P(k = 2 \mid t) &= P(k = 2 \mid t - 1) \cdot (1 - P(k = 4 \mid t)) \\
-    P(k = 3 \mid t) &= P(k = 3 \mid t - 1) \cdot (1 - P(k = 4 \mid t))
-
-
-Otherwise, we use the initial probabilities of each severity level. Then, to determine the
-number of exacerbations of each severity level, we use a multinomial distribution:
-
-.. math::
-
-    p(x_1, x_2, x_3, x_4; n, p) = 
-        \dfrac{n!}{x_1! x_2! x_3! x_4!} \prod_{i=1}^4 P(k = i)^{x_i}, \quad \text{where} \quad \sum_{i=1}^4 x_i = n
+Each of the :math:`n` exacerbations from Step 4 is assigned a severity level (mild, moderate,
+severe, or very severe) via the Dirichlet-Multinomial model described in
+:ref:`exacerbation_severity_model`, including the adjustment applied if the agent has a history
+of very severe exacerbations (hospitalization).
 
 
 Step 6: Update the number of hospitalizations
 -----------------------------------------------------------------------------
 
-We add the total previous hospitalizations to the current timepoint's number of exacerbations at
-severity level 4:
+We add the current timepoint's number of very severe exacerbations to ``total_hosp``, the
+agent's cumulative hospitalization count first set during :ref:`step-4-check-hospitalizations`
+of Agent Initialization above:
 
 .. math::
 
-    \text{hospitalizations} = \text{previous hospitalizations} + x_4
+    \text{total hosp} = \text{total hosp} + n_{\text{very severe}}
 
-where :math:`x_4` is the number of exacerbations at severity level 4.
 Continue to Step 8.
 
 Step 7: Reassess asthma diagnosis
