@@ -208,11 +208,7 @@ is not currently used by the exacerbation model.
 
 The hospitalization rate in this table is the hospitalization rate per 100 000 people.
 For example, in the category ``F_90+``, the value would be the rate for people hospitalized who
-are female and over 90 during the given year. This can be calculated:
-
-.. math::
-
-    \text{hospitalization rate} = \dfrac{\text{count}}{N} \times 100000
+are female and over 90 during the given year.
 
 Therefore, the observed number of hospitalizations for a given age :math:`a`, sex :math:`s`, and
 timepoint :math:`t` can be recovered from the rate:
@@ -220,6 +216,8 @@ timepoint :math:`t` can be recovered from the rate:
 .. math::
 
     N_{\text{hosp}}(a, s, t) = \dfrac{\text{hospitalization rate}(a, s, t)}{100\,000} \cdot N(a, s, t)
+
+Here, :math:`N(a, s, t)` is the population count from the Population Data described above.
 
 This is used to calibrate :math:`\alpha` below.
 
@@ -336,9 +334,7 @@ The :math:`\beta_i` values are derived by combining two literature sources, as d
   :math:`r = 0.347`, and the overall proportion of time the EBA cohort as a whole spent in each
   control level over the study period: :math:`\text{prop}_{\text{wc}} = 0.340` (well-controlled),
   :math:`\text{prop}_{\text{pc}} = 0.474` (partially-controlled), and
-  :math:`\text{prop}_{\text{uc}} = 0.186` (uncontrolled). These are fixed, EBA-cohort-wide
-  averages used only to derive the :math:`\beta_i` values below — a different quantity from the
-  per-agent, age- and sex-specific :math:`c_i` used elsewhere in this model.
+  :math:`\text{prop}_{\text{uc}} = 0.186` (uncontrolled).
 * the `GOAL Study <https://doi.org/10.1164/rccm.200401-033OC>`_
   (Bateman et al. 2004) — a one-year, randomized, double-blind clinical trial of 3,421
   participants aged 12-80 years with uncontrolled asthma at study entry, with asthma
@@ -417,26 +413,33 @@ number of hospitalizations, for a given age :math:`a`, sex :math:`s`, and timepo
     \alpha(a, s, t) = \dfrac{N_{\text{hosp}}(a, s, t)}{N_{\text{hosp}}^{\text{(pred)}}(a, s, t)}
 
 where :math:`N_{\text{hosp}}(a, s, t)` is the **observed** number of hospitalizations, determined
-from the observed hospitalization rate as described in :ref:`tab1-rate-columns` above.
+from the observed hospitalization rate in CIHI as described in :ref:`tab1-rate-columns` above.
 
-Although :math:`\alpha` is computed from hospitalizations alone, it is applied to :math:`\lambda`,
-the rate of exacerbations of *any* severity — this is valid because :math:`P(\text{hosp})` is
-treated as a fixed constant, independent of age, sex, province, and timepoint. Substituting
-:math:`N_{\text{hosp}}^{\text{(pred)}} = N_{\text{exac}}^{\text{(pred)}} \cdot P(\text{hosp})`, and
-writing the *observed* hospitalizations as the *true* total number of exacerbations times that
-same constant, :math:`N_{\text{hosp}} = N_{\text{exac}}^{\text{(true)}} \cdot P(\text{hosp})`, the
-:math:`P(\text{hosp})` terms cancel:
+.. info:: Math: Why α (from Hospitalizations) Applies to λ (All Severities)
+  :collapsible:
 
-.. math::
+  Although :math:`\alpha` is computed from hospitalizations alone, it is applied to
+  :math:`\lambda`, the rate of exacerbations of *any* severity — this is valid because
+  :math:`P(\text{hosp})` is treated as a fixed constant, independent of age, sex, province, and
+  timepoint. Substituting
+  :math:`N_{\text{hosp}}^{\text{(pred)}} = N_{\text{exac}}^{\text{(pred)}} \cdot P(\text{hosp})`,
+  and writing the *observed* hospitalizations as the *true* total number of exacerbations times
+  that same constant, :math:`N_{\text{hosp}} = N_{\text{exac}}^{\text{(true)}} \cdot P(\text{hosp})`,
+  the :math:`P(\text{hosp})` terms cancel:
 
-    \alpha = \dfrac{N_{\text{hosp}}}{N_{\text{hosp}}^{\text{(pred)}}}
-        = \dfrac{N_{\text{exac}}^{\text{(true)}} \cdot P(\text{hosp})}
-            {N_{\text{exac}}^{\text{(pred)}} \cdot P(\text{hosp})}
-        = \dfrac{N_{\text{exac}}^{\text{(true)}}}{N_{\text{exac}}^{\text{(pred)}}}
+  .. math::
 
-So :math:`\alpha` computed from the hospitalization ratio is algebraically identical to the ratio
-of true to predicted *total* exacerbations, provided :math:`P(\text{hosp})` is indeed constant by age, sex, province, and timepoint (otherwise variation in :math:`P(\text{hosp})` would be attributed to :math:`\alpha`). Hospitalizations are used to compute it — rather than
-total exacerbations directly — because they are captured completely in CIHI's national data, stratified by age/sex/province/year.
+      \alpha = \dfrac{N_{\text{hosp}}}{N_{\text{hosp}}^{\text{(pred)}}}
+          = \dfrac{N_{\text{exac}}^{\text{(true)}} \cdot P(\text{hosp})}
+              {N_{\text{exac}}^{\text{(pred)}} \cdot P(\text{hosp})}
+          = \dfrac{N_{\text{exac}}^{\text{(true)}}}{N_{\text{exac}}^{\text{(pred)}}}
+
+  So :math:`\alpha` computed from the hospitalization ratio is algebraically identical to the
+  ratio of true to predicted *total* exacerbations, provided :math:`P(\text{hosp})` is indeed
+  constant by age, sex, province, and timepoint (otherwise variation in :math:`P(\text{hosp})`
+  would be attributed to :math:`\alpha`). Hospitalizations are used to compute it — rather than
+  total exacerbations directly — because they are captured completely in CIHI's national data,
+  stratified by age/sex/province/year.
 
 :math:`\alpha` is computed once per province, age, sex, and timepoint as part of data generation,
 and saved as:
