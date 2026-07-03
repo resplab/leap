@@ -802,16 +802,20 @@ def generate_death_data(
     time_delta_tag = get_time_delta_tag(time_delta)
 
     if draw_plot:
-        plot(
-            life_table.loc[life_table["age"].isin([0, 10, 20, 40, 60, 80, 100])].copy(),
-            y="prob_death",
-            color="age",
-            title="Mortality Data",
-            file_path=get_data_path(
-                f"data_generation/figures/{time_delta_tag}/life_expectancy.png",
-                mkdirs=True
+        for projection_scenario in life_table["projection_scenario"].unique():
+            plot(
+                life_table.loc[
+                    (life_table["age"].isin([0, 10, 20, 40, 60, 80, 100])) &
+                    (life_table["projection_scenario"] == projection_scenario)
+                ].copy(),
+                y="prob_death",
+                color="age",
+                title="Mortality Data",
+                file_path=get_data_path(
+                    f"data_generation/figures/{time_delta_tag}/mortality/life_expectancy_{projection_scenario}.png",
+                    mkdirs=True
+                )
             )
-        )
 
     # save the data
     if to_csv:
