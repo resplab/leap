@@ -99,7 +99,7 @@ def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -
                 n_alive_by_age_prev * (1 - prob_death_prev)
             )
         n_alive_by_age_prev = n_alive_by_age[-1]
-        prob_death_prev = df.loc[age, "prob_death"]
+        prob_death_prev = df.loc[age]["prob_death"]
 
     df["n_alive_by_age"] = n_alive_by_age
 
@@ -117,7 +117,7 @@ def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -
     # L(x_f): calculate the number of person-years lived between ages [x_f, infinity)
     max_age = df.index.max()
     factor = 1.4 * TIME_DELTA_OD.total_years() / time_delta.total_years()
-    df.loc[max_age, "n_person_years_interval"] = df.loc[max_age, "n_alive_by_age"] * factor
+    df.loc[max_age, "n_person_years_interval"] = df.loc[max_age]["n_alive_by_age"] * factor
 
     # T(x): calculate the total number of person-years lived after age x
     # T(x) = sum(L(x) for x in [x, 110])
@@ -132,7 +132,7 @@ def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -
     )
 
     # E(0): calculate the number of years left to live at age 0, aka life expectancy
-    life_expectancy = df.loc[0, "n_years_left_at_age"]
+    life_expectancy = df.loc[0]["n_years_left_at_age"]
 
     return life_expectancy
 
@@ -326,8 +326,8 @@ def compute_life_expectancy_diff(
 
         life_expectancy = calculate_life_expectancy(projected_life_table, time_delta)
         desired_life_expectancy = desired_life_expectancies.loc[
-            desired_life_expectancies["timepoint"] == timepoint, "life_expectancy"
-        ].values[0]
+            desired_life_expectancies["timepoint"] == timepoint
+        ]["life_expectancy"].values[0]
         diff.append(np.abs(life_expectancy - desired_life_expectancy))
     
     return np.array(diff)
