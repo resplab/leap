@@ -176,7 +176,7 @@ years:
 
 .. math::
 
-    \mu_i = \max\!\left(\mu_i,\; 0.05\right)
+    \mu^{(i)} = \max\!\left(\mu^{(i)},\; 0.05\right)
 
 In other words, the predicted mean number of antibiotic courses per infant is at least ``0.05``.
 
@@ -199,11 +199,11 @@ for years from ``2005`` onward.
 
 .. math::
 
-    \log(\mu_i) = \beta_0
-        + \beta_{\text{sex}} \cdot s_i
-        + \beta_{\text{year}} \cdot t_i
-        + \beta_{\text{2005}} \cdot H(t_i - 2005)
-        + \beta_{\text{year,2005}} \cdot t_i \cdot H(t_i - 2005)
+    \log(\mu^{(i)}) = \beta_0
+        + \beta_{\text{sex}} \cdot s^{(i)}
+        + \beta_{\text{year}} \cdot t^{(i)}
+        + \beta_{\text{2005}} \cdot H(t^{(i)} - 2005)
+        + \beta_{\text{year,2005}} \cdot t^{(i)} \cdot H(t^{(i)} - 2005)
 
 where:
 
@@ -218,19 +218,19 @@ where:
      - :math:`1`
      - intercept
    * - :math:`\beta_{\text{sex}}`
-     - :math:`s_i`
+     - :math:`s^{(i)}`
      - sex main effect
    * - :math:`\beta_{\text{year}}`
-     - :math:`t_i`
+     - :math:`t^{(i)}`
      - birth year main effect
    * - :math:`\beta_{\text{2005}}`
-     - :math:`H(t_i - 2005)`
+     - :math:`H(t^{(i)} - 2005)`
      - Heaviside step at 2005
    * - :math:`\beta_{\text{year,2005}}`
-     - :math:`t_i \cdot H(t_i - 2005)`
+     - :math:`t^{(i)} \cdot H(t^{(i)} - 2005)`
      - birth year × Heaviside interaction
 
-And :math:`s_i` is the sex, :math:`t_i` is the birth year, and :math:`H` is the Heaviside
+And :math:`s^{(i)}` is the sex, :math:`t^{(i)}` is the birth year, and :math:`H` is the Heaviside
 step function.
 
 
@@ -240,13 +240,13 @@ Usage in Simulation
 Once fitted, the :math:`\beta` coefficients and :math:`\theta` (the Negative Binomial overdispersion parameter;
 see :ref:`negative-binomial-glm`) are stored in ``config.json`` and used at runtime. When
 an agent is initialised at birth, the simulation draws their antibiotic exposure count directly
-from the Negative Binomial distribution. For an agent with sex :math:`s_i` and birth year
-:math:`t_i`:
+from the Negative Binomial distribution. For an agent with sex :math:`s^{(i)}` and birth year
+:math:`t^{(i)}`:
 
-1. Compute the linear predictor :math:`\eta_i` using the formula above.
-2. Convert to the mean: :math:`\mu_i = \max(\exp(\eta_i),\; 0.05)`.
-3. Convert to the Negative Binomial success probability: :math:`p_i = \theta / (\theta + \mu_i)`.
-4. Draw the exposure count: :math:`n_{\text{abx},i} \sim \text{NegBin}(\theta,\, p_i)`.
+1. Compute the linear predictor :math:`\eta^{(i)}` using the formula above.
+2. Convert to the mean: :math:`\mu^{(i)} = \max(\exp(\eta^{(i)}),\; 0.05)`.
+3. Convert to the Negative Binomial success probability: :math:`p^{(i)} = \theta / (\theta + \mu^{(i)})`.
+4. Draw the exposure count: :math:`n_{\text{abx}}^{(i)} \sim \text{NegBin}(\theta,\, p^{(i)})`.
 
 This count is fixed for the agent's lifetime and is capped at 3 courses when computing the
 antibiotic exposure odds ratio :math:`\omega_{\text{abx}}` in the
