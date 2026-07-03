@@ -20,10 +20,10 @@ We followed the
 to define asthma control level by using the sum of the
 four indicator variables (0 if no and 1 if yes) in the last 4 weeks before each measurement:
 
-1. Daytime symptoms more than twice per week?
-2. Any night waking due to asthma symptoms?
-3. Reliever medication needed more than twice per week?
-4. Any activity limitation due to asthma?
+1. **daytime symptoms**: Daytime symptoms more than twice per week?
+2. **nocturnal symptoms**: Any night waking due to asthma symptoms?
+3. **inhaler use**: Reliever medication needed more than twice per week?
+4. **limited activities**: Any activity limitation due to asthma?
 
 Responses of *do not know* were treated as *no*. Five patients were excluded due to missing or
 implausible asthma diagnosis dates (two with diagnosis dates predating birth, three with no
