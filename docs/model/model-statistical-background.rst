@@ -167,8 +167,19 @@ Substituting :math:`\sigma^2` and simplifying:
 
 .. math::
 
-    p &= \frac{\mu}{\mu + \dfrac{\mu^2}{\theta}} = \frac{\theta}{\theta + \mu} \\
-    r &= \frac{\mu^2}{\dfrac{\mu^2}{\theta}} = \theta
+    p &= \frac{\theta}{\theta + \mu} \\
+    r &= \theta
+
+.. info:: Math: :math:`p` and :math:`r`
+    :collapsible:
+
+    .. math::
+
+        p &= \dfrac{\mu}{\sigma^2} = \dfrac{\mu}{\mu + \dfrac{\mu^2}{\theta}} = \dfrac{\theta}{\theta + \mu} \\
+        r &= \dfrac{\mu^2}{\sigma^2 - \mu} = \dfrac{\mu^2}{\mu + \dfrac{\mu^2}{\theta} - \mu} 
+        = \dfrac{\mu^2}{\dfrac{\mu^2}{\theta}} 
+        = \theta
+
 
 Letting :math:`y = k`, the PMF in terms of :math:`\mu` and :math:`\theta` is:
 
@@ -176,6 +187,21 @@ Letting :math:`y = k`, the PMF in terms of :math:`\mu` and :math:`\theta` is:
 
     P(Y = y;\, \mu, \theta) = \binom{y + \theta - 1}{y}
         \frac{\mu^y\, \theta^{\theta}}{(\theta + \mu)^{y+\theta}}
+
+.. info:: Math: :math:`P(Y = y;\, \mu, \theta)`
+    :collapsible:
+
+    .. math::
+
+        P(Y = y; \mu, \theta) &= \binom{y + \theta - 1}{y}
+            \left(1-\dfrac{\theta}{\theta + \mu}\right)^y 
+            \left(\dfrac{\theta}{\theta + \mu}\right)^{\theta} \\
+        &= \binom{y + \theta - 1}{y}
+            \left(\dfrac{\theta + \mu - \theta}{\theta + \mu}\right)^y 
+            \left(\dfrac{\theta}{\theta + \mu}\right)^{\theta} \\
+        &= \binom{y + \theta - 1}{y}
+            \dfrac{\mu^y \theta^{\theta}}{(\theta + \mu)^{y+\theta}}
+
 
 The **log link** is the natural choice, since the mean is always positive but the linear
 predictor :math:`\eta_i` can be any real number:
