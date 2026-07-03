@@ -208,31 +208,25 @@ for years from ``2005`` onward.
 where:
 
 .. list-table::
-   :widths: 20 20 20 40
+   :widths: 20 20 60
    :header-rows: 1
 
    * - Coefficient
-     - Indices
      - Term
      - Description
    * - :math:`\beta_0`
-     -
      - :math:`1`
      - intercept
    * - :math:`\beta_{\text{sex}}`
-     -
      - :math:`s_i`
      - sex main effect
    * - :math:`\beta_{\text{year}}`
-     -
      - :math:`t_i`
      - birth year main effect
    * - :math:`\beta_{\text{2005}}`
-     -
      - :math:`H(t_i - 2005)`
      - Heaviside step at 2005
    * - :math:`\beta_{\text{year,2005}}`
-     -
      - :math:`t_i \cdot H(t_i - 2005)`
      - birth year × Heaviside interaction
 
