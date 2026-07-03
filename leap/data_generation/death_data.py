@@ -587,6 +587,10 @@ def compute_beta_parameters(
     
     Returns:
         A dictionary containing the beta parameters for each province, sex, and projection scenario.
+        Format:
+
+        * **key**: ``(province, sex, projection_scenario)``
+        * **value**:  beta parameter for the given province, sex, and projection scenario.
 
     Examples:
 
@@ -594,6 +598,8 @@ def compute_beta_parameters(
         >>> df_calibration = load_projected_death_data(min_timepoint=dt.datetime(1996, 1, 1))
         >>> df_calibration = df_calibration.loc[df_calibration["projection_scenario"].isin(["LG", "M3"])]
         >>> beta_parameters = compute_beta_parameters(past_life_table, df_calibration)
+        >>> list(beta_parameters.keys())
+        [('CA', 'M', 'LG'), ('CA', 'M', 'M3'), ('CA', 'F', 'LG'), ('CA', 'F', 'M3'), ('BC', 'M', 'LG'), ('BC', 'M', 'M3'), ('BC', 'F', 'LG'), ('BC', 'F', 'M3')]
         >>> beta_parameters[("CA", "M", "LG")] # doctest: +NUMBER
         np.float64(-0.01)
     """
@@ -650,7 +656,10 @@ def get_projected_death_data(
     
     Args:
         beta_parameters: A dictionary containing the beta parameters for each province, sex, and
-            projection scenario.
+            projection scenario. Format:
+
+            * **key**: ``(province, sex, projection_scenario)``
+            * **value**:  beta parameter for the given province, sex, and projection scenario. 
         past_life_table: A dataframe containing the probability of death and the standard error
             for each timepoint, province, age, and sex. Columns:
             
