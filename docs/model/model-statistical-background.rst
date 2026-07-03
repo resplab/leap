@@ -146,9 +146,10 @@ introduces an extra parameter :math:`\theta` that controls the degree of overdis
 
     \sigma^2 = \mu + \frac{\mu^2}{\theta}
 
-As :math:`\theta \to \infty`, the Negative Binomial converges to the Poisson.
+As :math:`\theta \to \infty`, the ``Negative Binomial`` distribution converges to the ``Poisson``
+distribution.
 
-The standard form of the Negative Binomial PMF is:
+The standard form of the ``Negative Binomial`` probability mass function is:
 
 .. math::
 
@@ -181,7 +182,7 @@ Substituting :math:`\sigma^2` and simplifying:
         = \theta
 
 
-Letting :math:`y = k`, the PMF in terms of :math:`\mu` and :math:`\theta` is:
+Letting :math:`y = k`, the probability mass function in terms of :math:`\mu` and :math:`\theta` is:
 
 .. math::
 
