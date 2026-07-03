@@ -1,5 +1,8 @@
 # Lifetime Exposures and Asthma outcomes Projection (LEAP)
 
+[![Tests](https://github.com/resplab/leap/actions/workflows/tests_workflow.yml/badge.svg)](https://github.com/resplab/leap/actions/workflows/tests_workflow.yml)
+[![Docs](https://github.com/resplab/leap/actions/workflows/docs_pages_workflow.yml/badge.svg)](https://github.com/resplab/leap/actions/workflows/docs_pages_workflow.yml)
+
 For a full guide on how to use this package, please see the documentation at
 https://resplab.github.io/leap/.
 
