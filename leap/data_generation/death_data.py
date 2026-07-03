@@ -323,7 +323,6 @@ def compute_life_expectancy_diff(
         projected_life_table = get_projected_life_table_single_timepoint(
             beta_time[0], life_table, timepoint_initial, timepoint, sex, province
         )
-        logger.info(f"Calculating life expectancy for {timepoint}, {sex}, {province}, beta_time={beta_time}")
 
         life_expectancy = calculate_life_expectancy(projected_life_table, time_delta)
         desired_life_expectancy = desired_life_expectancies.loc[
