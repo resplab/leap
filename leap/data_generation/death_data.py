@@ -79,8 +79,10 @@ def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -
         The life expectancy for a person born in the given time interval, in a given province,
         for a given sex.
     """
-    assert life_table["sex"].nunique() == 1, "Dataframe should only contain one sex."
-    assert life_table["province"].nunique() == 1, "Dataframe should only contain one province."
+    if life_table["sex"].nunique() > 1:
+        raise ValueError("Dataframe should only contain one sex.")
+    if life_table["province"].nunique() > 1:
+        raise ValueError("Dataframe should only contain one province.")
 
     df = life_table.sort_values("age").copy()
     df.set_index("age", inplace=True)
