@@ -292,6 +292,47 @@ total number of exacerbations for a time interval is drawn from this Poisson mod
 exacerbation is further assigned a severity level (mild, moderate, severe, or very severe) — see
 :ref:`exacerbation_severity_model` below.
 
+The diagram below summarises how these pieces fit together conceptually, for a given age
+:math:`a` and sex :math:`s`, from calibration through to the final severity-level counts.
+
+.. md-mermaid::
+
+    flowchart TD
+        ALPHA["<b>Calibration multiplier</b>&nbsp;<span style='font-size:1.3em'>$$\alpha$$</span><br/>predicted vs. observed<br/>hospitalizations in CIHI data"]
+        BI["<b>Control-level rate constants</b>&nbsp;<span style='font-size:1.3em'>$$\beta_i$$</span><br/>derived from EBA + GOAL studies"]
+        CI["<b>Control-level probabilities</b>&nbsp;<span style='font-size:1.3em'>$$c_i$$</span><br/>predicted by the Control Model"]
+
+        RATE["<b>Rate of exacerbations</b>&nbsp;<span style='font-size:1.3em'>$$\lambda$$</span><br/>(any severity)"]
+
+        ALPHA --> RATE
+        BI --> RATE
+        CI --> RATE
+
+        COUNT["<b>Total exacerbations</b>&nbsp;<span style='font-size:1.3em'>$$N_{\text{exacerbations}}$$</span><br/>this time interval"]
+        RATE --> COUNT
+
+        SEV["<b>Severity probabilities</b>&nbsp;<span style='font-size:1.3em'>$$\mathbf{w}$$</span><br/>based on SYGMA II<br/>severity/hospitalization proportions"]
+        HIST["<b>History of very severe</b><br/><b>exacerbations</b>&nbsp;<span style='font-size:1.3em'>$$\beta_{\text{prev hosp}}$$</span><br/>(hospitalization)"]
+        HIST -->|"increases probability<br/>of very severe"| SEV
+
+        OUTPUT["<b>Exacerbations by</b><br/><b>severity level</b>&nbsp;<span style='font-size:1.3em'>$$(n_{\text{mild}}, \ldots, n_{\text{very severe}})$$</span>"]
+        COUNT --> OUTPUT
+        SEV --> OUTPUT
+
+        classDef input fill:#fff3e0,stroke:#e65100,color:#3a2400;
+        classDef stage fill:#e3f2fd,stroke:#1565c0,color:#0d2b45;
+        classDef output fill:#e8f5e9,stroke:#2e7d32,color:#10300f;
+        class ALPHA,BI,CI,HIST input;
+        class RATE,COUNT,SEV stage;
+        class OUTPUT output;
+
+        classDef input fill:#fff3e0,stroke:#e65100,color:#3a2400;
+        classDef formula fill:#e3f2fd,stroke:#1565c0,color:#0d2b45;
+        classDef sim fill:#e8f5e9,stroke:#2e7d32,color:#10300f;
+        class ALPHA,B0,BI,CI input;
+        class FORMULA,POISSON formula;
+        class W,HIST,MULTI sim;
+
 .. _exacerbation-calibration:
 
 Calibration
