@@ -85,6 +85,9 @@ def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -
     df = life_table.sort_values("age").copy()
     df.set_index("age", inplace=True)
 
+    if not df.index.is_unique:
+        raise ValueError("Duplicate age values in index")
+
     # l(x): calculate the number of people alive up to age x
     n_alive_by_age_0 = 100000 # l(0): initial number of people at age 0
     n_alive_by_age = [] # l(x)
