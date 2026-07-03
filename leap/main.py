@@ -6,7 +6,7 @@ import socket
 import numpy as np
 from datetime import datetime
 from leap.simulation import Simulation
-from leap.utils import check_file, get_data_path
+from leap.utils import check_file, get_data_path, TimeDelta
 from leap.logger import get_logger, set_logging_level
 from leap.utils import convert_non_serializable
 import warnings
@@ -37,7 +37,7 @@ def get_parser() -> argparse.ArgumentParser:
         dest="config",
         required=False,
         type=str,
-        default=get_data_path("processed_data/config.json"),
+        default=get_data_path("processed_data/time_delta_365/config.json"),
         help="Path to configuration file.",
     )
     args.add_argument(
@@ -314,8 +314,12 @@ def run_main():
         config=config,
         province=args.province,
         max_age=args.max_age,
-        min_year=args.min_year,
-        time_horizon=args.time_horizon,
+        min_timepoint=(
+            datetime(args.min_year, 1, 1) if args.min_year is not None else None
+        ),
+        time_horizon=(
+            TimeDelta(years=args.time_horizon) if args.time_horizon is not None else None
+        ),
         population_growth_type=args.population_growth_type,
         num_births_initial=args.num_births_initial,
         ignore_pollution_flag=args.ignore_pollution,
@@ -325,7 +329,7 @@ def run_main():
     # Check if path_output argument is supplied or not
     if args.path_output is None or args.path_output == "":
         # Default dir name based on simulation arguments
-        dir_name = f"{simulation.province}-{simulation.max_age}-{simulation.min_year}-{simulation.time_horizon}-{simulation.population_growth_type}-{simulation.num_births_initial}"
+        dir_name = f"{simulation.province}-{simulation.max_age}-{simulation.min_timepoint.year}-{simulation.time_horizon.years}-{simulation.population_growth_type}-{simulation.num_births_initial}"
     else:
         # Get the name of the dir to store outputs in
         dir_name = args.path_output
@@ -382,12 +386,12 @@ def run_main():
     parameters = {
         "province": simulation.province,
         "max_age": simulation.max_age,
-        "min_year": simulation.min_year,
-        "time_horizon": simulation.time_horizon,
+        "min_year": simulation.min_timepoint.year,
+        "time_horizon": simulation.time_horizon.years,
         "population_growth_type": simulation.population_growth_type,
         "num_births_initial": simulation.num_births_initial,
         "pollution ignored": args.ignore_pollution,
-        "max_year": simulation.max_year,
+        "max_year": simulation.max_timepoint.year,
     }
 
     # Combine metadata and parameters into the log message
