@@ -237,7 +237,7 @@ step function.
 Usage in Simulation
 ********************
 
-Once fitted, the β coefficients and θ (the Negative Binomial overdispersion parameter;
+Once fitted, the :math:`\beta` coefficients and :math:`\theta` (the Negative Binomial overdispersion parameter;
 see :ref:`negative-binomial-glm`) are stored in ``config.json`` and used at runtime. When
 an agent is initialised at birth, the simulation draws their antibiotic exposure count directly
 from the Negative Binomial distribution. For an agent with sex :math:`s_i` and birth year
