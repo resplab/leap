@@ -57,7 +57,7 @@ To run the data generation for the mortality data:
 .. code-block:: bash
 
    cd LEAP
-   python3 leap/data_generation/death_data.py --time_delta P1Y
+   python3 leap/data_generation/death_data.py --time-delta P1Y
 
 
 This will update the following data file: 
