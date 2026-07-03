@@ -168,8 +168,8 @@ type of regression analysis which is a generalized form of linear regression.
 
 The response variable — number of antibiotic courses prescribed during the first year of life —
 is overdispersed count data, so we use the ``Negative Binomial`` distribution with a ``log``
-link function. See :ref:`negative-binomial-glm` in :doc:`model-statistical-background` for the
-full distributional derivation and motivation.
+:ref:`link function <glm-link-function>`. See :ref:`negative-binomial-glm` in
+:doc:`model-statistical-background` for the full distributional derivation and motivation.
 
 The mean parameter has a lower bound to prevent unrealistically small extrapolations into future
 years:

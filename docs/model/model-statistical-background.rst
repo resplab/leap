@@ -72,6 +72,8 @@ family of distributions — such as Gaussian, Poisson, binomial, or gamma:
 where :math:`\theta_i` is a function of the explanatory variables and :math:`Q(\theta)` is
 the natural parameter.
 
+.. _glm-link-function:
+
 GLM: Link Function
 --------------------
 
