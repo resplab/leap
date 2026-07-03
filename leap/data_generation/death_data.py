@@ -311,7 +311,7 @@ def compute_life_expectancy_diff(
         The difference between the projected life expectancy of the calibration year
         and the desired life expectancy, for each of the calibration years.
     """
-    beta_time = beta_time[0]
+
     desired_life_expectancies = df_calibration.loc[
         (df_calibration["sex"] == sex) &
         (df_calibration["province"] == province) &
@@ -321,7 +321,7 @@ def compute_life_expectancy_diff(
     diff = []
     for timepoint in desired_life_expectancies["timepoint"]:
         projected_life_table = get_projected_life_table_single_timepoint(
-            beta_time, life_table, timepoint_initial, timepoint, sex, province
+            beta_time[0], life_table, timepoint_initial, timepoint, sex, province
         )
         logger.info(f"Calculating life expectancy for {timepoint}, {sex}, {province}, beta_time={beta_time}")
 
