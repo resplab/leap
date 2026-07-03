@@ -205,11 +205,11 @@ Letting :math:`y = k`, the probability mass function in terms of :math:`\mu` and
 
 
 The **log link** is the natural choice, since the mean is always positive but the linear
-predictor :math:`\eta_i` can be any real number:
+predictor :math:`\eta^{(i)}` can be any real number:
 
 .. math::
 
-    g(\mu_i) = \log(\mu_i) = \eta_i
+    g(\mu^{(i)}) = \log(\mu^{(i)}) = \eta^{(i)}
 
 This is the distribution family used in LEAP's :ref:`antibiotic_exposure_model` to predict
 per-capita antibiotic exposure rates.
