@@ -72,6 +72,8 @@ family of distributions — such as Gaussian, Poisson, binomial, or gamma:
 where :math:`\theta_i` is a function of the explanatory variables and :math:`Q(\theta)` is
 the natural parameter.
 
+.. _glm-link-function:
+
 GLM: Link Function
 --------------------
 
@@ -124,6 +126,93 @@ The random component is the Poisson distribution:
 
 This is the distribution family used in LEAP's :ref:`occurrence Model 1 <occurrence-model-1>`
 to predict population-level asthma incidence and prevalence rates.
+
+.. _negative-binomial-glm:
+
+Example 3: Negative Binomial Distribution with Log Link
+----------------------------------------------------------
+
+The Poisson distribution assumes that the mean and variance are equal:
+
+.. math::
+
+    \mu = \sigma^2
+
+When the variance exceeds the mean — a common problem in count data known as
+**overdispersion** — the ``Negative Binomial`` distribution is a better choice. It
+introduces an extra parameter :math:`\theta` that controls the degree of overdispersion:
+
+.. math::
+
+    \sigma^2 = \mu + \frac{\mu^2}{\theta}
+
+As :math:`\theta \to \infty`, the ``Negative Binomial`` distribution converges to the ``Poisson``
+distribution.
+
+The standard form of the ``Negative Binomial`` probability mass function is:
+
+.. math::
+
+    P(Y = k;\, r, p) := \binom{k+r-1}{k}(1-p)^k p^r
+
+where :math:`k` is the number of failures before :math:`r` successes, and :math:`p` is the
+probability of success. We reparametrize using :math:`\mu` and :math:`\theta` via:
+
+.. math::
+
+    p &= \frac{\mu}{\sigma^2} \\
+    r &= \frac{\mu^2}{\sigma^2 - \mu} \\
+    \sigma^2 &= \mu + \frac{\mu^2}{\theta}
+
+Substituting :math:`\sigma^2` and simplifying:
+
+.. math::
+
+    p &= \frac{\theta}{\theta + \mu} \\
+    r &= \theta
+
+.. info:: Math: :math:`p` and :math:`r`
+    :collapsible:
+
+    .. math::
+
+        p &= \dfrac{\mu}{\sigma^2} = \dfrac{\mu}{\mu + \dfrac{\mu^2}{\theta}} = \dfrac{\theta}{\theta + \mu} \\
+        r &= \dfrac{\mu^2}{\sigma^2 - \mu} = \dfrac{\mu^2}{\mu + \dfrac{\mu^2}{\theta} - \mu} 
+        = \dfrac{\mu^2}{\dfrac{\mu^2}{\theta}} 
+        = \theta
+
+
+Letting :math:`y = k`, the probability mass function in terms of :math:`\mu` and :math:`\theta` is:
+
+.. math::
+
+    P(Y = y;\, \mu, \theta) = \binom{y + \theta - 1}{y}
+        \frac{\mu^y\, \theta^{\theta}}{(\theta + \mu)^{y+\theta}}
+
+.. info:: Math: :math:`P(Y = y;\, \mu, \theta)`
+    :collapsible:
+
+    .. math::
+
+        P(Y = y; \mu, \theta) &= \binom{y + \theta - 1}{y}
+            \left(1-\dfrac{\theta}{\theta + \mu}\right)^y 
+            \left(\dfrac{\theta}{\theta + \mu}\right)^{\theta} \\
+        &= \binom{y + \theta - 1}{y}
+            \left(\dfrac{\theta + \mu - \theta}{\theta + \mu}\right)^y 
+            \left(\dfrac{\theta}{\theta + \mu}\right)^{\theta} \\
+        &= \binom{y + \theta - 1}{y}
+            \dfrac{\mu^y \theta^{\theta}}{(\theta + \mu)^{y+\theta}}
+
+
+The **log link** is the natural choice, since the mean is always positive but the linear
+predictor :math:`\eta^{(i)}` can be any real number:
+
+.. math::
+
+    g(\mu^{(i)}) = \log(\mu^{(i)}) = \eta^{(i)}
+
+This is the distribution family used in LEAP's :ref:`antibiotic_exposure_model` to predict
+per-capita antibiotic exposure rates.
 
 .. _contingency-tables:
 
