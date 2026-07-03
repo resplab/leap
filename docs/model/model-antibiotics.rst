@@ -231,7 +231,7 @@ where:
      - birth year × Heaviside interaction
 
 And :math:`s_i` is the sex, :math:`t_i` is the birth year, and :math:`H` is the Heaviside
-step function for individual :math:`i`.
+step function.
 
 
 Usage in Simulation
