@@ -30,7 +30,7 @@ Doctests are examples within the function and class docstrings. To run these exa
 .. code:: bash
 
   cd leap
-  pytest leap/ --doctest-modules
+  TQDM_DISABLE=1 pytest leap/ --doctest-modules
 
 
 Test Data
