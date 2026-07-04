@@ -722,7 +722,7 @@ def get_projected_death_data(
         projected_life_table,
         past_life_table.loc[past_life_table["timepoint"] == max_timepoint_past],
         how="left",
-        on=["province", "sex", "age", "projection_scenario"],
+        on=["province", "sex", "age"],
         suffixes=("", "_initial")
     )
 
