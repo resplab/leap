@@ -248,10 +248,10 @@ The formula is:
 
 .. math::
 
-    N_{\text{exacerbations}} \sim \text{Poisson}(\lambda) = \dfrac{\lambda^k e^{-\lambda}}{k!}
+    N_{\text{exacerbations}} \sim \text{Poisson}(\lambda) = \dfrac{\lambda^{\kappa} e^{-\lambda}}{\kappa!}
 
 
-Here :math:`\lambda` is the expected number of exacerbations per time interval, and :math:`k` is
+Here :math:`\lambda` is the expected number of exacerbations per time interval, and :math:`\kappa` is
 the number of exacerbations (a non-negative integer) for which we are computing the
 probability. To obtain :math:`\lambda`, we must perform a Poisson regression. The Poisson
 regression assumes that the value we are interested in can be approximated using the following
@@ -259,7 +259,7 @@ formula:
 
 .. math::
 
-    \ln(\lambda) = \ln(\alpha) + \beta_0^{(i)} + \sum_{i=1}^3 \beta_i c_i
+    \ln(\lambda) = \ln(\alpha) + \beta_0^{(i)} + \sum_{k=1}^3 \beta_k c_k
 
 
 where:
@@ -274,10 +274,10 @@ where:
      - the calibration multiplier that adjusts the model to match the hospitalization data
    * - :math:`\beta_0^{(i)}`
      - patient-specific random effect; :math:`\beta_0^{(i)} \sim \mathcal{N}(0, \sigma^2)`
-   * - :math:`c_i`
-     - relative time spent in control level :math:`i`, given by the probability of control level
-       :math:`i` from the :ref:`Control Model <control-model>`
-   * - :math:`\beta_i`
+   * - :math:`c_k`
+     - relative time spent in control level :math:`k`, given by the probability of control level
+       :math:`k` from the :ref:`Control Model <control-model>`
+   * - :math:`\beta_k`
      - control level constant, derived from the EBA and GOAL studies (see Calibration below)
 
 For each agent with asthma, :math:`\beta_0^{(i)}` is sampled once and held fixed for their
@@ -343,7 +343,7 @@ We are interested in calculating :math:`\alpha`. If we rewrite the equation, the
 
 .. math::
 
-    \lambda = \alpha \cdot e^{\beta_0^{(i)}} \prod_{i=1}^3 e^{\beta_i c_i}
+    \lambda = \alpha \cdot e^{\beta_0^{(i)}} \prod_{k=1}^3 e^{\beta_k c_k}
 
 
 How do we obtain :math:`\alpha`? We again assume that the mean value has the same form as in a
@@ -351,20 +351,20 @@ Poisson regression, with the following formula:
 
 .. math::
 
-    \ln(\lambda_{C}(a, s)) = \sum_{i=1}^3 \beta_i c_i
+    \ln(\lambda_{C}(a, s)) = \sum_{k=1}^3 \beta_k c_k
 
 
 * :math:`\lambda_C(a, s)`: the predicted mean number of exacerbations per year for a given age
   :math:`a` and sex :math:`s` — note this has no timepoint argument, since the
   :ref:`Control Model <control-model>` assumes control level probabilities do not vary by
   calendar year
-* :math:`c_i`: the age- and sex-specific probability of control level :math:`i`,
+* :math:`c_k`: the age- and sex-specific probability of control level :math:`k`,
   :math:`P(y^{(i)} = k)`, from the :ref:`Control Model <control-model>`'s ordinal regression —
   obtained by differencing consecutive cumulative probabilities,
   :math:`P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)`
-* :math:`\beta_i`: control level constant, derived below from the EBA and GOAL studies
+* :math:`\beta_k`: control level constant, derived below from the EBA and GOAL studies
 
-The :math:`\beta_i` values are derived by combining two literature sources, as described in
+The :math:`\beta_k` values are derived by combining two literature sources, as described in
 :cite:`leap2024`:
 
 * the `Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
@@ -401,7 +401,7 @@ the EBA overall rate :math:`r`:
 
 The partially-controlled and uncontrolled rates follow directly from the GOAL ratios:
 :math:`r_{\text{pc}} = 2 r_{\text{wc}}` and :math:`r_{\text{uc}} = 3 r_{\text{wc}}`. Taking the
-natural log of each rate gives the :math:`\beta_i` values:
+natural log of each rate gives the :math:`\beta_k` values:
 
 .. math::
 
