@@ -900,7 +900,6 @@ def plot(
         facet_col_spacing=0.01,   # Shrink horizontal gap to 1%
         title=title
     )
-    fig.update_yaxes(matches=None)
     
     fig.update_layout(
         font=dict(size=30),
