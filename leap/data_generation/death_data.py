@@ -809,7 +809,10 @@ def generate_death_data(
         func="constant"
     )
 
-    life_table.sort_values(["province", "sex", "timepoint", "age"], inplace=True)
+    life_table.sort_values(
+        ["province", "projection_scenario", "sex", "timepoint", "age"],
+        inplace=True
+    )
 
     time_delta_tag = get_time_delta_tag(time_delta)
 
