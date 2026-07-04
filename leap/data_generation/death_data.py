@@ -772,7 +772,7 @@ def generate_death_data(
     past_life_table = load_past_death_data()
     df_calibration = load_projected_death_data(min_timepoint=past_life_table["timepoint"].max() + time_delta)
 
-    # Compute the beta parameters for each province, sex, and projection scenario
+    logger.info("Computing the beta parameters for each province, sex, and projection scenario...")
     beta_parameters = compute_beta_parameters(
         past_life_table=past_life_table,
         df_calibration=df_calibration,
@@ -781,7 +781,9 @@ def generate_death_data(
         xtol=xtol
     )
 
-    # Get the projected death data for each province, sex, projection scenario, and year
+    logger.info(
+        "Getting the projected death data for each province, sex, projection scenario, and year..."
+    )
     projected_life_table = get_projected_death_data(
         beta_parameters, past_life_table
     )
@@ -817,6 +819,14 @@ def generate_death_data(
     time_delta_tag = get_time_delta_tag(time_delta)
 
     if draw_plot:
+        logger.info("Creating validation plots for the mortality data...")
+        tqdm_bar = tqdm(
+            total=len(life_table["projection_scenario"].unique()),
+            desc=f"Projection Scenario",
+            leave=True,
+            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
+            file=sys.stdout
+        )
         for projection_scenario in life_table["projection_scenario"].unique():
             plot(
                 life_table.loc[
@@ -830,6 +840,10 @@ def generate_death_data(
                     f"data_generation/figures/{time_delta_tag}/mortality/life_expectancy_{projection_scenario}.png",
                     mkdirs=True
                 )
+            )
+            tqdm_bar.update(1)
+            tqdm_bar.set_description(
+                f"Projection Scenario: {projection_scenario}"
             )
 
     # save the data
