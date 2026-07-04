@@ -394,7 +394,8 @@ where:
      -
      - patient-specific random effect; :math:`\beta_0^{(i)} \sim \mathcal{N}(0, \sigma^2)`
 
-and :math:`y^{(i)}` is the observed control level, :math:`k \in \{1, 2, 3\}` is the control level index, :math:`a^{(i)}` is the age, and :math:`s^{(i)}` is the sex of patient :math:`i`.
+and :math:`y^{(i)}` is the observed control level, :math:`k \in \{1, 2, 3\}` is the control level
+index, :math:`a^{(i)}` is the age, and :math:`s^{(i)}` is the sex of patient :math:`i`.
 
 The probability of being in a specific control level is:
 
