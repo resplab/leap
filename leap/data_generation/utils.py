@@ -4,7 +4,7 @@ import argparse
 import itertools
 from leap.utils import TimeDelta, date_range, PROVINCE_MAP
 from leap.logger import get_logger
-from typing import Tuple, List, Callable, Dict, Any, Literal
+from typing import Optional, Tuple, List, Callable, Dict, Any, Literal
 
 logger = get_logger(__name__)
 
@@ -348,7 +348,8 @@ def add_empty_rows_interpolation(
     data: pd.DataFrame,
     time_delta: TimeDelta,
     time_delta_od: TimeDelta,
-    columns_group: List[str]
+    columns_group: List[str],
+    columns_variable: Optional[List[str]] = None
 ) -> pd.DataFrame:
     """Interpolate the values of a column for missing timepoints.
     
@@ -358,6 +359,9 @@ def add_empty_rows_interpolation(
         time_delta_od: The original time delta of the data, i.e. the time delta that the data was
             originally collected at.
         columns_group: The columns to group by when interpolating.
+        columns_variable: A list of columns which have variable timepoint values; for example,
+            it is often the case that the start and end timepoints in the ``province`` column
+            are different between provinces.
 
     Returns:
         A dataframe with the same columns as the input data, but with the values of the column to
@@ -366,13 +370,16 @@ def add_empty_rows_interpolation(
         ``time_delta``.
     """
 
+    if columns_variable is None:
+        columns_variable = ["province"]
+
     # Get the fixed values for non-province columns
-    fixed_cols = [col for col in columns_group if col != "province"]
+    fixed_cols = [col for col in columns_group if col not in columns_variable]
     fixed_values = [data[col].unique() for col in fixed_cols]
 
     # Build per-province timepoint ranges, then product with fixed cols
     chunks = []
-    for province, df_group in data.groupby("province"):
+    for group_key, df_group in data.groupby(columns_variable):
         initial_timepoint = df_group["timepoint"].min()
         final_timepoint = df_group["timepoint"].max()
 
@@ -382,8 +389,8 @@ def add_empty_rows_interpolation(
             step=time_delta
         ))
 
-        iter_values = [timepoints, [province]] + fixed_values
-        col_order = ["timepoint", "province"] + fixed_cols
+        iter_values = [timepoints] + [[key] for key in group_key] + fixed_values
+        col_order = ["timepoint"] + columns_variable + fixed_cols
 
         chunks.append(pd.DataFrame(
             data=list(itertools.product(*iter_values)),
@@ -407,6 +414,7 @@ def interpolate(
     time_delta: TimeDelta,
     time_delta_od: TimeDelta,
     columns_group: List[str],
+    columns_variable: Optional[List[str]] = None,
     func: Callable | Literal["constant", "time"] = "time",
     func_args: Dict[str, Any] = {}
 ) -> pd.DataFrame:
@@ -419,6 +427,9 @@ def interpolate(
         time_delta_od: The original time delta of the data, i.e. the time delta that the data was
             originally collected at.
         columns_group: The columns to group by when interpolating.
+        columns_variable: A list of columns which have variable timepoint values; for example,
+            it is often the case that the start and end timepoints in the ``province`` column
+            are different between provinces.
         func: A callable function or the name of one of the default functions, either
             ``"constant"`` or ``"time"``, to be used for interpolation. If a callable function is
             provided, the first argument must be a Pandas dataframe containing at minimum
@@ -442,7 +453,8 @@ def interpolate(
         data=data.copy().reset_index(drop=True),
         time_delta=time_delta,
         time_delta_od=time_delta_od,
-        columns_group=columns_group
+        columns_group=columns_group,
+        columns_variable=columns_variable
     ).reset_index(drop=True)
 
     df.sort_values(by=columns_group + ["timepoint"], inplace=True)

@@ -807,6 +807,7 @@ def generate_death_data(
         time_delta=time_delta,
         time_delta_od=TIME_DELTA_OD,
         columns_group=["province", "age", "sex", "projection_scenario"],
+        columns_variable=["province", "projection_scenario"],
         col_pred="prob_death",
         func="constant"
     )
