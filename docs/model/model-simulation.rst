@@ -335,11 +335,11 @@ probability of the agent having fully-controlled, partially-controlled, or uncon
 .. math::
 
     \text{logit}(P(y^{(i)} \leq k)) = \theta_k
-        + \beta_{\text{age}} \cdot a_i
-        + \beta_{\text{sex}} \cdot s_i
-        + \beta_{\text{age}^2} \cdot a_i^2
-        + \beta_{\text{age,sex}} \cdot a_i \cdot s_i
-        + \beta_{\text{age}^2\text{,sex}} \cdot a_i^2 \cdot s_i
+        + \beta_{\text{age}} \cdot a^{(i)}
+        + \beta_{\text{sex}} \cdot s^{(i)}
+        + \beta_{\text{age}^2} \cdot {a^{(i)}}^2
+        + \beta_{\text{age,sex}} \cdot a^{(i)} \cdot s^{(i)}
+        + \beta_{\text{age}^2\text{,sex}} \cdot {a^{(i)}}^2 \cdot s^{(i)}
         + \beta_0^{(i)}
 
 .. math::
@@ -486,11 +486,11 @@ partially-controlled, or uncontrolled asthma
 .. math::
 
     \text{logit}(P(y^{(i)} \leq k)) = \theta_k
-        + \beta_{\text{age}} \cdot a_i
-        + \beta_{\text{sex}} \cdot s_i
-        + \beta_{\text{age}^2} \cdot a_i^2
-        + \beta_{\text{age,sex}} \cdot a_i \cdot s_i
-        + \beta_{\text{age}^2\text{,sex}} \cdot a_i^2 \cdot s_i
+        + \beta_{\text{age}} \cdot a^{(i)}
+        + \beta_{\text{sex}} \cdot s^{(i)}
+        + \beta_{\text{age}^2} \cdot {a^{(i)}}^2
+        + \beta_{\text{age,sex}} \cdot a^{(i)} \cdot s^{(i)}
+        + \beta_{\text{age}^2\text{,sex}} \cdot {a^{(i)}}^2 \cdot s^{(i)}
         + \beta_0^{(i)}
 
 .. math::

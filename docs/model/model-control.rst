@@ -348,11 +348,11 @@ The model is:
 .. math::
 
   \text{logit}(P(y^{(i)} \leq k)) = \theta_k
-    + \beta_{\text{age}} \cdot a_i
-    + \beta_{\text{sex}} \cdot s_i
-    + \beta_{\text{age}^2} \cdot a_i^2
-    + \beta_{\text{age,sex}} \cdot a_i \cdot s_i
-    + \beta_{\text{age}^2\text{,sex}} \cdot a_i^2 \cdot s_i
+    + \beta_{\text{age}} \cdot a^{(i)}
+    + \beta_{\text{sex}} \cdot s^{(i)}
+    + \beta_{\text{age}^2} \cdot {a^{(i)}}^2
+    + \beta_{\text{age,sex}} \cdot a^{(i)} \cdot s^{(i)}
+    + \beta_{\text{age}^2\text{,sex}} \cdot {a^{(i)}}^2 \cdot s^{(i)}
     + \beta_0^{(i)}
 
 where:
@@ -371,30 +371,30 @@ where:
      - level-specific threshold (2 thresholds for 3 control levels)
    * - :math:`\beta_{\text{age}}`
      -
-     - :math:`a_i`
+     - :math:`a^{(i)}`
      - age main effect
    * - :math:`\beta_{\text{sex}}`
      -
-     - :math:`s_i`
+     - :math:`s^{(i)}`
      - sex main effect
    * - :math:`\beta_{\text{age}^2}`
      -
-     - :math:`a_i^2`
+     - :math:`{a^{(i)}}^2`
      - age quadratic term
    * - :math:`\beta_{\text{age,sex}}`
      -
-     - :math:`a_i \cdot s_i`
+     - :math:`a^{(i)} \cdot s^{(i)}`
      - age × sex interaction
    * - :math:`\beta_{\text{age}^2\text{,sex}}`
      -
-     - :math:`a_i^2 \cdot s_i`
+     - :math:`{a^{(i)}}^2 \cdot s^{(i)}`
      - age² × sex interaction
    * - :math:`\beta_0^{(i)}`
      -
      -
      - patient-specific random effect; :math:`\beta_0^{(i)} \sim \mathcal{N}(0, \sigma^2)`
 
-and :math:`y^{(i)}` is the observed control level, :math:`k \in \{1, 2, 3\}` is the control level index, :math:`a_i` is the age, and :math:`s_i` is the sex of patient :math:`i`.
+and :math:`y^{(i)}` is the observed control level, :math:`k \in \{1, 2, 3\}` is the control level index, :math:`a^{(i)}` is the age, and :math:`s^{(i)}` is the sex of patient :math:`i`.
 
 The probability of being in a specific control level is:
 
