@@ -736,7 +736,10 @@ def get_projected_death_data(
         axis=1
     )
 
-    projected_life_table.sort_values(["province", "projection_scenario", "age", "sex", "timepoint"], inplace=True)
+    projected_life_table.sort_values(
+        ["province", "projection_scenario", "age", "sex", "timepoint"],
+        inplace=True
+    )
     projected_life_table = projected_life_table[
         ["province", "projection_scenario", "age", "sex", "timepoint", "prob_death", "se"]
     ]
