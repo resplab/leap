@@ -7,6 +7,8 @@ Asthma Exacerbations Model
 Data
 ====
 
+.. _exacerbation-model-population-data:
+
 Population Data
 *****************
 
@@ -217,7 +219,8 @@ timepoint :math:`t` can be recovered from the rate:
 
     N_{\text{hosp}}(a, s, t) = \dfrac{\text{hospitalization rate}(a, s, t)}{100\,000} \cdot N(a, s, t)
 
-Here, :math:`N(a, s, t)` is the population count from the Population Data described above.
+Here, :math:`N(a, s, t)` is the population count from the :ref:`exacerbation-model-population-data`
+described above.
 
 This is used to calibrate :math:`\alpha` below.
 
@@ -420,7 +423,7 @@ The number of exacerbations predicted by the model is then:
 * :math:`N_{\text{asthma}}(a, s, t)`: the number of people of age :math:`a`, sex :math:`s`, at
   timepoint :math:`t` with asthma
 * :math:`N(a, s, t)`: the number of people of age :math:`a`, sex :math:`s`, at timepoint :math:`t`,
-  from the Population Data described above
+  from the :ref:`exacerbation-model-population-data` described above
 * :math:`\eta_{\text{prev}}(a, s, t)`: the prevalence of asthma for age :math:`a`, sex :math:`s`,
   at timepoint :math:`t`, from :ref:`occurrence-model-1`
 * :math:`\lambda_C(a, s)`: as defined above
