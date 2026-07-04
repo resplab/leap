@@ -360,14 +360,14 @@ Poisson regression, with the following formula:
   calendar year
 * :math:`c_k`: the age- and sex-specific probability of control level :math:`k`,
   :math:`P(y^{(i)} = k)`, from the :ref:`Control Model <control-model>`'s ordinal regression —
-  obtained by differencing consecutive cumulative probabilities,
+  obtained by subtracting consecutive cumulative probabilities,
   :math:`P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)`
 * :math:`\beta_k`: control level constant, derived below from the EBA and GOAL studies
 
 The :math:`\beta_k` values are derived by combining two literature sources, as described in
 :cite:`leap2024`:
 
-* the `Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
+* `Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
   (Chen et al. 2013) — a prospective, representative observational study of 618 participants aged
   1-85 years (74% aged 18 or older) with self-reported, physician-diagnosed asthma from BC, in
   which asthma control and the number of exacerbations were measured every 3 months over a year.
@@ -376,8 +376,8 @@ The :math:`\beta_k` values are derived by combining two literature sources, as d
   control level over the study period: :math:`\text{prop}_{\text{wc}} = 0.340` (well-controlled),
   :math:`\text{prop}_{\text{pc}} = 0.474` (partially-controlled), and
   :math:`\text{prop}_{\text{uc}} = 0.186` (uncontrolled).
-* the `GOAL Study <https://doi.org/10.1164/rccm.200401-033OC>`_
-  (Bateman et al. 2004) — a one-year, randomized, double-blind clinical trial of 3,421
+* `GOAL Study <https://doi.org/10.1164/rccm.200401-033OC>`_
+  (Bateman et al. 2004) — a one-year, randomized, double-blind clinical trial of 3421
   participants aged 12-80 years with uncontrolled asthma at study entry, with asthma
   exacerbations as the primary outcome. An analysis of the GOAL data gives rounded annual
   exacerbation rates for each control level: well-controlled = 0.1, partially-controlled = 0.2,
@@ -442,7 +442,7 @@ severity levels, where **very severe** is defined as requiring hospital admissio
 :math:`P(\text{hosp})` as the proportion of all exacerbations that are very severe, taken from the
 `Symbicort Given as Needed in Mild Asthma II (SYGMA II) study
 <https://www.nejm.org/doi/10.1056/NEJMoa1715275>`_ (Bateman et al. 2018), a double-blind,
-multi-centre clinical trial of 4,176 individuals with mild asthma. SYGMA II reports the
+multi-centre clinical trial of 4176 individuals with mild asthma. SYGMA II reports the
 distribution of exacerbation severity as 49.5% mild, 19.5% moderate, 28.3% severe, and 2.6% very
 severe, giving :math:`P(\text{hosp}) = 0.026` :cite:`leap2024`.
 
