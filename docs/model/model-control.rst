@@ -177,9 +177,9 @@ Then we defined the asthma control level as follows:
 .. math::
 
   \text{control_level} = \begin{cases}
-    1 & \text{control_score} = 0 \\
-    2 &  0 ~ < \text{control_score} < 3 \\
-    3 & \text{control_score} \geq 3
+    1 & \quad \text{control_score} = 0 \\
+    2 &  \quad 0 ~ < \text{control_score} < 3 \\
+    3 & \quad \text{control_score} \geq 3
   \end{cases}
 
 
@@ -384,11 +384,11 @@ where:
    * - :math:`\beta_{\text{age,sex}}`
      -
      - :math:`a^{(i)} \cdot s^{(i)}`
-     - age × sex interaction
+     - :math:`\text{age} \times \text{sex}` interaction
    * - :math:`\beta_{\text{age}^2\text{,sex}}`
      -
      - :math:`{a^{(i)}}^2 \cdot s^{(i)}`
-     - age² × sex interaction
+     - :math:`\text{age}^2 \times \text{sex}` interaction
    * - :math:`\beta_0^{(i)}`
      -
      -
