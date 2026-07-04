@@ -340,7 +340,7 @@ Model: Ordinal Regression with Random Effects
 =============================================
 
 We use an ``ordinal regression`` model with a patient-specific ``random effect`` to predict
-asthma control level from age and sex. See :doc:`model-statistical-background` for background
+asthma control level from age and sex. See :ref:`ordinal-regression` for background
 on ordinal regression and random effects.
 
 The model is:
