@@ -16,6 +16,8 @@ Data
 
 To obtain the mortality data for each year, we used one table from ``Statistics Canada``:
 
+.. _death-model-data-past:
+
 Past Data: 1996 - 2021
 *************************
 
@@ -56,6 +58,8 @@ The relevant columns are:
      - :code:`int`
      - the probability of death between age ``x`` and ``x+1`` in that year, province, sex, and age group
 
+
+.. _death-model-data-calibration:
 
 Projected Data: 2021 - 2068
 ****************************
@@ -310,10 +314,11 @@ This data can be found in the ``Statistics Canada Population Projections Technic
 Model
 ========
 
-Statistics Canada provides observed death probabilities for past years (1996-2021) and
-life expectancy projections at a handful of future calibration years (2028, 2048, 2073). To
-run the simulation, we need death probabilities for every time interval across the full
-range — so we project forward from the last observed year.
+Statistics Canada provides observed death probabilities for past years
+(:ref:`1996-2021 <death-model-data-past>`) and life expectancy projections at a handful of future
+calibration years (:ref:`2028, 2048, 2073 <death-model-data-calibration>`). To run the simulation,
+we need death probabilities for every time interval across the full range — so we project forward
+from the last observed year (2021).
 
 The projection follows the approach used by Statistics Canada, based on the
 `Kannisto-Thatcher model
