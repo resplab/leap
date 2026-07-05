@@ -382,23 +382,42 @@ fitted for each sex and province.
 .. list-table::
    :widths: 25 25 50
    :header-rows: 1
+   :class: long-table
 
    * - Column
      - Type
      - Description
+   * - ``province``
+     - :code:`str`
+     - the 2-letter province or territory ID
+       (e.g., ``BC`` = British Columbia, ``CA`` = Canada)
+   * - ``projection_scenario``
+     - :code:`str`
+     - The two-letter projection scenario ID. One of:
+
+       * ``past``: past data (1996-2021)
+       * ``LG``: low-growth projection
+       * ``HG``: high-growth projection
+       * ``M1``: medium-growth 1 projection
+       * ``M2``: medium-growth 2 projection
+       * ``M3``: medium-growth 3 projection
+       * ``M4``: medium-growth 4 projection
+       * ``M5``: medium-growth 5 projection
+       * ``M6``: medium-growth 6 projection
+       * ``FA``: fast-aging projection
+       * ``SA``: slow-aging projection
+
+       See: `StatCan Projection Scenarios
+       <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
    * - ``age``
      - :code:`int`
      - the age of the person in years
-   * - ``prob_death``
-     - :code:`float`
-     - the probability of death between age ``x`` and ``x+1`` for the given year,
-       province, sex, and age
    * - ``sex``
      - :code:`str`
      - one of ``M`` = male, ``F`` = female
    * - ``timepoint``
-     - :code:`int`
-     - the starting date / time of the time interval that the data applies to
+     - :code:`datetime`
+     - the starting date / time of the time interval that the data applies to, e.g. ``2021-04-01``.
    * - ``province``
      - :code:`str`
      - the 2-letter province or territory ID
@@ -407,8 +426,16 @@ fitted for each sex and province.
      - :code:`str`
      - the population growth / mortality projection scenario, e.g. ``"FA"``, ``"M3"``;
        historical rows use ``"past"``
+   * - ``prob_death``
+     - :code:`float`
+     - the probability of death between age ``[age, age + time_delta)`` for the given timepoint,
+       province, projection scenario, and sex
 
 .. toctree::
    :hidden:
 
    model-death-technical
+
+
+
+
