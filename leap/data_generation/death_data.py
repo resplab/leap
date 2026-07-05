@@ -186,36 +186,42 @@ def get_projected_life_table_single_timepoint(
     beta_time: float,
     life_table: pd.DataFrame,
     timepoint_initial: dt.datetime,
-    timepoint: dt.datetime,
-    sex: str,
-    province: str
+    timepoint: dt.datetime
 ) -> pd.DataFrame:
     """Get the life table for a single timepoint.
 
     Args:
         beta_time: The beta parameter for the given timepoint.
         life_table: A dataframe containing the projected probability of death
-            for the starting timepoint, for a given sex and province. Columns:
+            for the starting timepoint, for a single sex, province, and projection scenario.
+            Columns:
 
             * ``age``: the integer age.
             * ``sex``: One of ``M`` = male, ``F`` = female.
             * ``timepoint``: the starting calendar year.
             * ``province``: a string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
-            * ``prob_death``: the probability of death for a given age, province, sex, and year.
+            * ``prob_death``: the probability of death for a given age, province,
+              projection scenario, sex, and timepoint.
 
         timepoint_initial: The initial year with a known probability of death. This is the last year
             that the past data was collected.
         timepoint: The current timepoint.
-        sex: One of ``M`` = male, ``F`` = female.
-        province: a string indicating the province abbreviation, e.g. ``"BC"``.
-            For all of Canada, set province to ``"CA"``.
+
 
     Returns:
         A dataframe containing the projected probability of death for the given timepoint,
-        sex, and province.
+        sex, province, and projection scenario. 
     """
-    df = life_table.loc[(life_table["sex"] == sex) & (life_table["province"] == province)].copy()
+    df = life_table.copy()
+
+    if df["sex"].nunique() > 1:
+        raise ValueError("Dataframe should only contain one sex.")
+    if df["province"].nunique() > 1:
+        raise ValueError("Dataframe should only contain one province.")
+    if df["projection_scenario"].nunique() > 1:
+        raise ValueError("Dataframe should only contain one projection scenario.")
+
     df["prob_death_proj"] = df["prob_death"].apply(
         lambda x: get_prob_death_projected(x, timepoint_initial, timepoint, beta_time)
     )
@@ -305,8 +311,7 @@ def compute_life_expectancy_diff(
     diff = []
     for timepoint in df_calibration["timepoint"]:
         projected_life_table = get_projected_life_table_single_timepoint(
-            beta_time[0], life_table, timepoint_initial, timepoint,
-            life_table["sex"].values[0], life_table["province"].values[0]
+            beta_time[0], life_table, timepoint_initial, timepoint
         )
 
         life_expectancy = calculate_life_expectancy(projected_life_table, time_delta)
