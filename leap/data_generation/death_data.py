@@ -235,10 +235,7 @@ def compute_life_expectancy_diff(
     beta_time: np.ndarray,
     life_table: pd.DataFrame,
     df_calibration: pd.DataFrame,
-    sex: str,
-    province: str, 
     timepoint_initial: dt.datetime,
-    projection_scenario: str,
     time_delta: TimeDelta
 ) -> np.ndarray:
     """Calculate the difference between the projected life expectancy and desired life expectancy.
@@ -250,7 +247,7 @@ def compute_life_expectancy_diff(
         beta_time: The beta parameter for the given timepoint. The ``scipy.optimize.leastsq``
             function requires that this be a 1D array, but we only have a single parameter.
         life_table: A dataframe containing the projected probability of death
-            for the calibration year, for a given sex and province. Columns:
+            for the initial year, for a single sex and province. Columns:
 
             * ``age``: the integer age.
             * ``sex``: one of ``M`` = male, ``F`` = female.
@@ -260,7 +257,7 @@ def compute_life_expectancy_diff(
             * ``prob_death``: the probability of death for a given age, province, sex, and year.
 
         df_calibration: A dataframe containing the life expectancy projections for the calibration
-            years. Columns:
+            years, for a single sex, province, and projection scenario. Columns:
 
             * ``year``: The calendar year. Range ``[1988, 2073]``.
             * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
@@ -289,27 +286,8 @@ def compute_life_expectancy_diff(
             * ``life_expectancy``: The life expectancy in years for the given year, province,
               sex, projection scenario, and mortality scenario.
 
-        sex: one of ``M`` = male, ``F`` = female.
-        province: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
-            For all of Canada, set province to ``"CA"``.
         timepoint_initial: The initial timepoint with a known probability of death. This is the last
             timepoint that the past data was collected.
-        projection_scenario: Population growth type, one of:
-
-            * ``past``: historical data
-            * ``LG``: low-growth projection
-            * ``HG``: high-growth projection
-            * ``M1``: medium-growth 1 projection
-            * ``M2``: medium-growth 2 projection
-            * ``M3``: medium-growth 3 projection
-            * ``M4``: medium-growth 4 projection
-            * ``M5``: medium-growth 5 projection
-            * ``M6``: medium-growth 6 projection
-            * ``FA``: fast-aging projection
-            * ``SA``: slow-aging projection
-
-            See: `StatCan Projection Scenarios
-            <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
         time_delta: The duration of time between data points.
     
     Returns:
@@ -317,21 +295,23 @@ def compute_life_expectancy_diff(
         and the desired life expectancy, for each of the calibration years.
     """
 
-    desired_life_expectancies = df_calibration.loc[
-        (df_calibration["sex"] == sex) &
-        (df_calibration["province"] == province) &
-        (df_calibration["projection_scenario"] == projection_scenario)
-    ]
+    if life_table["sex"].nunique() > 1:
+        raise ValueError("Life table should only contain one sex.")
+    if life_table["province"].nunique() > 1:
+        raise ValueError("Life table should only contain one province.")
+    if life_table["timepoint"].nunique() > 1:
+        raise ValueError("Life table should only contain one timepoint.")
 
     diff = []
-    for timepoint in desired_life_expectancies["timepoint"]:
+    for timepoint in df_calibration["timepoint"]:
         projected_life_table = get_projected_life_table_single_timepoint(
-            beta_time[0], life_table, timepoint_initial, timepoint, sex, province
+            beta_time[0], life_table, timepoint_initial, timepoint,
+            life_table["sex"].values[0], life_table["province"].values[0]
         )
 
         life_expectancy = calculate_life_expectancy(projected_life_table, time_delta)
-        desired_life_expectancy = desired_life_expectancies.loc[
-            desired_life_expectancies["timepoint"] == timepoint
+        desired_life_expectancy = df_calibration.loc[
+            df_calibration["timepoint"] == timepoint
         ]["life_expectancy"].values[0]
         diff.append(np.abs(life_expectancy - desired_life_expectancy))
     
@@ -623,20 +603,26 @@ def compute_beta_parameters(
         tqdm_bar.set_description(
             f"Province: {province} | Sex: {sex} | Projection Scenario: {projection_scenario}"
         )
-        life_table = past_life_table[past_life_table["province"] == province]
+        life_table = past_life_table.loc[
+            (past_life_table["province"] == province) &
+            (past_life_table["sex"] == sex)
+        ].copy()
         max_timepoint_past = life_table["timepoint"].max()
         life_table = life_table[life_table["timepoint"] == max_timepoint_past]
+
+        df_calibration_filtered = df_calibration.loc[
+            (df_calibration["province"] == province) &
+            (df_calibration["sex"] == sex) &
+            (df_calibration["projection_scenario"] == projection_scenario)
+        ].copy()
 
         beta_time = optimize.leastsq(
             compute_life_expectancy_diff,
             x0=[x0],
             args=(
                 life_table,
-                df_calibration,
-                sex,
-                province,
+                df_calibration_filtered,
                 max_timepoint_past,
-                projection_scenario,
                 time_delta_od
             ),
             xtol=xtol,
