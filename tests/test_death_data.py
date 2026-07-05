@@ -17,12 +17,19 @@ def life_table():
     life_table = pd.DataFrame(
         list(itertools.product(
             list(PROVINCE_MAP.values())[0:2],
+            PROJECTION_SCENARIOS[0:2],
             np.arange(0, 4, 0.25),
             ["F", "M"],
-            [MIN_TIMEPOINT]
+            [MIN_TIMEPOINT, MIN_TIMEPOINT + TIME_DELTA_OD]
         )),
-        columns=["province", "age", "sex", "timepoint"]
+        columns=["province", "projection_scenario", "age", "sex", "timepoint"]
     )
+    mask = (
+        ((life_table["projection_scenario"] == "past") & (life_table["timepoint"] > MIN_TIMEPOINT))
+        |
+        ((life_table["projection_scenario"] != "past") & (life_table["timepoint"] == MIN_TIMEPOINT))
+    )
+    life_table = life_table.loc[~mask].copy()
     life_table["prob_death"] = np.random.sample(life_table.shape[0]) / 1000.0
     life_table["se"] = np.random.sample(life_table.shape[0]) / 10000.0
     return life_table
@@ -59,13 +66,16 @@ def test_get_prob_death_projected(
     ]
 )
 def test_get_projected_life_table_single_timepoint(life_table, sex, province, timepoint):
+    life_table_filtered = life_table.loc[
+        (life_table["sex"] == sex) &
+        (life_table["province"] == province) &
+        (life_table["projection_scenario"] == "past")
+    ].copy()
     projected_life_table = get_projected_life_table_single_timepoint(
         beta_time=0.1,
-        life_table=life_table,
-        timepoint_initial=life_table["timepoint"].iloc[0],
-        timepoint=timepoint,
-        sex=sex,
-        province=province
+        life_table=life_table_filtered,
+        timepoint_initial=life_table_filtered["timepoint"].iloc[0],
+        timepoint=timepoint
     )
     assert projected_life_table["timepoint"].nunique() == 1
     assert projected_life_table["timepoint"].iloc[0] == timepoint
@@ -74,37 +84,54 @@ def test_get_projected_life_table_single_timepoint(life_table, sex, province, ti
     assert projected_life_table["province"].nunique() == 1
     assert projected_life_table["province"].iloc[0] == province
     assert set(projected_life_table.columns) == set(
-        ["province", "age", "sex", "timepoint", "prob_death", "se"]
+        ["province","projection_scenario", "age", "sex", "timepoint", "prob_death", "se"]
     )
-    assert set(projected_life_table["age"].unique()) == set(life_table["age"].unique())
+    assert set(projected_life_table["age"].unique()) == set(life_table_filtered["age"].unique())
     assert projected_life_table["prob_death"].between(0.0, 1.0).all()
     assert projected_life_table["se"].between(0.0, 1.0).all()
 
 
+
 @pytest.mark.parametrize(
-    "time_delta, expected_rows",
+    "sex, province, timepoint",
+    [
+        ("F", "BC", dt.datetime(2026, 1, 1))
+    ]
+)
+def test_get_projected_life_table_single_timepoint_error(life_table, sex, province, timepoint):
+    life_table_filtered = life_table.loc[
+        (life_table["sex"] == sex) &
+        (life_table["province"] == province)
+    ].copy()
+
+    with pytest.raises(ValueError, match="Initial life table should only contain one projection scenario."):
+        projected_life_table = get_projected_life_table_single_timepoint(
+            beta_time=0.1,
+            life_table=life_table_filtered,
+            timepoint_initial=life_table_filtered["timepoint"].iloc[0],
+            timepoint=timepoint
+        )
+
+
+@pytest.mark.parametrize(
+    "expected_rows",
     [
         (
-            TimeDelta(years=1),
             [(
                 dt.datetime(2019, 1, 1), "BC", 2, "F",
                 0.00015
-            )],
-        ),
-        (
-            TimeDelta(months=1),
-            [(
-                dt.datetime(2019, 1, 1), "BC", 2, "F",
-               0.00015
-            )],
-        ),
+            )]
+        )
     ]
 )
-def test_load_past_death_data(time_delta, expected_rows):
-    df = load_past_death_data(time_delta)
+def test_load_past_death_data(expected_rows):
+    df = load_past_death_data()
     assert df["timepoint"].min() >= MIN_TIMEPOINT
     assert df["sex"].isin(["M", "F"]).all()
-    assert set(df.columns) == set(["province", "age", "sex", "prob_death", "timepoint", "se"])
+    assert set(df.columns) == set([
+        "province", "projection_scenario", "age", "sex", "prob_death", "timepoint", "se"
+    ])
+    assert df["projection_scenario"].isin(["past"]).all()
     assert df["province"].isin(PROVINCE_MAP.values()).all()
     for row in expected_rows:
         assert df.loc[
@@ -148,39 +175,42 @@ def test_load_projected_death_data(expected_rows):
 
 
 @pytest.mark.parametrize(
-    "time_delta, expected_rows",
+    "beta_parameters, expected_rows",
     [
         (
-            TimeDelta(years=1),
+            {
+                ('CA', 'M', 'LG'): -0.014654675868609225,
+                ('CA', 'M', 'M3'): -0.014654675868609225,
+                ('CA', 'M', 'HG'): -0.014654675868609225,
+                ('CA', 'F', 'LG'): -0.014654675868609225,
+                ('CA', 'F', 'M3'): -0.014654675868609225,
+                ('CA', 'F', 'HG'): -0.014654675868609225,
+                ('BC', 'M', 'LG'): -0.014654675868609225,
+                ('BC', 'M', 'M3'): -0.014654675868609225,
+                ('BC', 'M', 'HG'): -0.014654675868609225,
+                ('BC', 'F', 'LG'): -0.014654675868609225,
+                ('BC', 'F', 'M3'): -0.014654675868609225,
+                ('BC', 'F', 'HG'): -0.014654675868609225
+
+            },
             [
                 (dt.datetime(2057, 1, 1), "CA", 60, "F", 0.0027035098555941027),
                 (dt.datetime(2042, 1, 1), "BC", 22, "M", 0.0007291262068477189)
             ],
         ),
-        (
-            TimeDelta(months=1),
-            [
-                (
-                    dt.datetime(2057, 1, 1), "CA", 60, "F",
-                    0.0027035098555941027 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds()
-                )
-            ],
-        ),
     ]
 )
-def test_get_projected_death_data(time_delta, expected_rows):
-    past_life_table = load_past_death_data(time_delta)
-    df_calibration = load_projected_death_data(
-        min_timepoint=past_life_table["timepoint"].max() + time_delta
-    )
+def test_get_projected_death_data(beta_parameters, expected_rows):
+    past_life_table = load_past_death_data()
     df = get_projected_death_data(
-        past_life_table=past_life_table.loc[past_life_table["province"].isin(["BC", "CA"])],
-        df_calibration=df_calibration.loc[df_calibration["province"].isin(["BC", "CA"])],
-        time_delta=time_delta
+        beta_parameters=beta_parameters,
+        past_life_table=past_life_table.loc[past_life_table["province"].isin(["BC", "CA"])]
     )
     assert df["timepoint"].min() >= MIN_TIMEPOINT
     assert df["sex"].isin(["M", "F"]).all()
-    assert set(df.columns) == set(["province", "age", "sex", "prob_death", "timepoint", "se"])
+    assert set(df.columns) == set([
+        "province", "projection_scenario", "age", "sex", "prob_death", "timepoint", "se"
+    ])
     assert df["province"].isin(PROVINCE_MAP.values()).all()
     for row in expected_rows:
         assert df.loc[
