@@ -43,6 +43,8 @@ def convert_prob_death(
 
     Args:
         prob_death: The probability of death for the original time delta, :math:`q(x, \Delta x_a)`.
+            This is the probability that a person of age :math:`x` will die between the ages of
+            :math:`[x, x + \Delta x_a)`.
         time_delta_od: The original time delta, :math:`\Delta x_a`.
         time_delta: The new time delta, :math:`\Delta x_b`.
 
@@ -72,6 +74,7 @@ def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -
             * ``timepoint``: the timepoint of the data in the row.
             * ``province``: A string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
+            * ``projection_scenario``: A string indicating the projection scenario, e.g. ``"FA"``.
             * ``prob_death``: the probability of death for a given age, province, sex, and timepoint.
         time_delta: The duration of time between data points.
 
@@ -191,7 +194,7 @@ def get_projected_life_table_single_timepoint(
     """Get the life table for a single timepoint.
 
     Args:
-        beta_time: The beta parameter for the given timepoint.
+        beta_time: The beta parameter for the given sex, province, and projection scenario.
         life_table: A dataframe containing the projected probability of death
             for the starting timepoint, for a single sex, province, and projection scenario.
             Columns:
@@ -211,7 +214,20 @@ def get_projected_life_table_single_timepoint(
 
     Returns:
         A dataframe containing the projected probability of death for the given timepoint,
-        sex, province, and projection scenario. 
+        sex, province, and projection scenario. Columns:
+
+        * ``age``: the integer age.
+        * ``sex``: One of ``M`` = male, ``F`` = female. This should match the sex in the
+          original ``life_table`` dataframe.
+        * ``timepoint``: The timepoint for which the projected probability of death was calculated.
+          This should match the ``timepoint`` argument.
+        * ``province``: a string indicating the province abbreviation, e.g. ``"BC"``. This should
+          match the province in the original ``life_table`` dataframe.
+        * ``projection_scenario``: a string indicating the projection scenario, e.g. ``"FA"``. This
+          should match the projection scenario in the original ``life_table`` dataframe.
+        * ``prob_death``: the projected probability of death for a given age, province,
+          projection scenario, sex, and timepoint.
+
     """
     df = life_table.copy()
 
@@ -256,8 +272,9 @@ def compute_life_expectancy_diff(
             for the initial year, for a single sex and province. Columns:
 
             * ``age``: the integer age.
-            * ``sex``: one of ``M`` = male, ``F`` = female.
-            * ``timepoint``: the calibration timepoint.
+            * ``sex``: one of ``"M"`` = male, ``"F"`` = female.
+            * ``timepoint``: the year used as :math:`t_0`; this is the last year that the past data
+              was collected.
             * ``province``: a 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
             * ``prob_death``: the probability of death for a given age, province, sex, and year.
@@ -265,13 +282,12 @@ def compute_life_expectancy_diff(
         df_calibration: A dataframe containing the life expectancy projections for the calibration
             years, for a single sex, province, and projection scenario. Columns:
 
-            * ``year``: The calendar year. Range ``[1988, 2073]``.
+            * ``timepoint (dt.datetime)``: The year the projection is for. Range ``[1988, 2073]``.
             * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
             * ``sex``: One of ``F`` = female, ``M`` = male.
             * ``projection_scenario (str)``: Population growth type, one of:
 
-              * ``past``: historical data
               * ``LG``: low-growth projection
               * ``HG``: high-growth projection
               * ``M1``: medium-growth 1 projection
@@ -299,6 +315,26 @@ def compute_life_expectancy_diff(
     Returns:
         The difference between the projected life expectancy of the calibration year
         and the desired life expectancy, for each of the calibration years.
+
+    Examples:
+
+        >>> past_life_table = load_past_death_data()
+        >>> df_calibration = load_projected_death_data(min_timepoint=dt.datetime(1996, 1, 1))
+        >>> df_calibration = df_calibration.loc[
+        ...     (df_calibration["projection_scenario"] == "LG") &
+        ...     (df_calibration["province"] == "CA") &
+        ...     (df_calibration["sex"] == "F")
+        ... ]
+        >>> life_table = past_life_table.loc[
+        ...     (past_life_table["province"] == "CA") &
+        ...     (past_life_table["sex"] == "F") &
+        ...     (past_life_table["timepoint"] == dt.datetime(2022, 1, 1))
+        ... ]
+        >>> beta_time = np.array([-0.02])
+        >>> compute_life_expectancy_diff(
+        ...     beta_time, life_table, df_calibration, dt.datetime(1996, 1, 1), TIME_DELTA_OD
+        ... )
+        array([4.90291552, 5.98995694, 7.75593427])
     """
 
     if life_table["sex"].nunique() > 1:
@@ -336,7 +372,7 @@ def load_past_death_data() -> pd.DataFrame:
         * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
           For all of Canada, set province to ``"CA"``.
         * ``projection_scenario``: The projection scenario, i.e. ``"past"``.
-        * ``sex``: One of ``M`` = male, ``F`` = female.
+        * ``sex``: One of ``"M"`` = male, ``"F"`` = female.
         * ``age``: The integer age.
         * ``prob_death``: The probability that a person of the given age, sex, and province
           will die in the given year.
@@ -545,7 +581,6 @@ def compute_beta_parameters(
             * ``sex``: One of ``F`` = female, ``M`` = male.
             * ``projection_scenario (str)``: Population growth type, one of:
 
-              * ``past``: historical data
               * ``LG``: low-growth projection
               * ``HG``: high-growth projection
               * ``M1``: medium-growth 1 projection
@@ -865,7 +900,7 @@ def plot(
         df: A dataframe containing the life table data. Must have columns:
 
             * ``timepoint (dt.datetime)``: The given timepoint.
-            * ``province (str)``: The 2-letter province ID, e.g. ``BC``.
+            * ``province (str)``: The 2-letter province ID, e.g. ``"BC"``.
             * ``age (int)``: The integer age.
             * ``sex (str)``: One of ``M`` = male, ``F`` = female.
             * ``prob_death (float)``: The probability of death for the given timepoint, province,
