@@ -310,7 +310,7 @@ This data can be found in the ``Statistics Canada Population Projections Technic
 Model
 ========
 
-Statistics Canada provides observed death probabilities for past years (1996–2021) and
+Statistics Canada provides observed death probabilities for past years (1996-2021) and
 life expectancy projections at a handful of future calibration years (2028, 2048, 2073). To
 run the simulation, we need death probabilities for every time interval across the full
 range — so we project forward from the last observed year.
@@ -323,13 +323,13 @@ This gives the projection formula:
 
 .. math::
 
-    \text{logit}(p(\text{sex}, \text{age}, t)) =
-        \text{logit}(p(\text{sex}, \text{age}, t_0)) -
+    \text{logit}(q(\text{sex}, \text{age}, t)) =
+        \text{logit}(q(\text{sex}, \text{age}, t_0)) -
         \beta_{\text{sex}} \cdot (t - t_0)
 
 where:
 
-- :math:`p(\text{sex}, \text{age}, t)` is the probability of death for a person of a given
+- :math:`q(\text{sex}, \text{age}, t)` is the probability of death for a person of a given
   sex and age during time interval :math:`t`
 - :math:`\text{logit}(p) = \ln\!\left(\tfrac{p}{1-p}\right)`
 - :math:`t_0` is the last observed timepoint (2021)
