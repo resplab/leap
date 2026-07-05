@@ -78,6 +78,10 @@
     width: auto;
 }
 
+.md-typeset table.data:not(.plain).long-table {
+    max-height: 1000px;
+}
+
 /* Bootstrap Tables */
 
 .table {
