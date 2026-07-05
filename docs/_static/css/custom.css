@@ -74,6 +74,10 @@
     display: block;
 }
 
+.md-typeset table.data:not(.plain).max-width-table {
+    width: auto;
+}
+
 /* Bootstrap Tables */
 
 .table {
