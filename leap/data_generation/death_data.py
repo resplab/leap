@@ -234,11 +234,13 @@ def get_projected_life_table_single_timepoint(
     df = life_table.copy()
 
     if df["sex"].nunique() > 1:
-        raise ValueError("Dataframe should only contain one sex.")
+        raise ValueError("Initial life table should only contain one sex.")
     if df["province"].nunique() > 1:
-        raise ValueError("Dataframe should only contain one province.")
+        raise ValueError("Initial life table should only contain one province.")
     if df["projection_scenario"].nunique() > 1:
-        raise ValueError("Dataframe should only contain one projection scenario.")
+        raise ValueError("Initial life table should only contain one projection scenario.")
+    if df["timepoint"].nunique() > 1:
+        raise ValueError("Initial life table should only contain one timepoint.")
 
     df["prob_death_proj"] = df["prob_death"].apply(
         lambda x: get_prob_death_projected(x, timepoint_initial, timepoint, beta_time)
