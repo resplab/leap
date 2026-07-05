@@ -86,6 +86,8 @@ def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -
         raise ValueError("Dataframe should only contain one sex.")
     if life_table["province"].nunique() > 1:
         raise ValueError("Dataframe should only contain one province.")
+    if life_table["projection_scenario"].nunique() > 1:
+        raise ValueError("Dataframe should only contain one projection scenario.")
 
     df = life_table.sort_values("age").copy()
     df.set_index("age", inplace=True)
