@@ -800,7 +800,9 @@ def generate_death_data(
         error for each timepoint, province, age, and sex.
     """
     past_life_table = load_past_death_data()
-    df_calibration = load_projected_death_data(min_timepoint=past_life_table["timepoint"].max() + time_delta)
+    df_calibration = load_projected_death_data(
+        min_timepoint=past_life_table["timepoint"].max() + time_delta
+    )
 
     logger.info("Computing the beta parameters for each province, sex, and projection scenario...")
     beta_parameters = compute_beta_parameters(
