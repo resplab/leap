@@ -126,29 +126,11 @@ with one subfolder per province/territory: ``AB``, ``BC``, ``MB``, ``NB``, ``NL`
   each of these territories individually has too few cases to report reliably.
 
 Each province subfolder contains 5 files that share the same columns and shape, differing
-only in what value is reported:
-
-.. list-table::
-   :widths: 25 75
-   :header-rows: 1
-
-   * - File
-     - Description
-   * - ``tab1_rate.csv``
-     - the hospitalization rate per 100 000 people. This is the file used to calibrate the
-       exacerbation model (see below).
-   * - ``tab1_count.csv``
-     - the number of people hospitalized with asthma.
-   * - ``tab1_N.csv``
-     - the total number of people in the category (the denominator used to compute the rate).
-   * - ``tab1_lower.csv``
-     - the lower error bar for the hospitalization rate.
-   * - ``tab1_upper.csv``
-     - the upper error bar for the hospitalization rate.
-
-Each province subfolder also contains a ``los.csv`` file with length-of-stay statistics
-(``avg``, ``med``, ``q1``, ``q3``) by ``fiscal_year``, ``age_group``, and ``sex``. This dataset
-is not currently used by the exacerbation model.
+only in what value is reported. Of these, only ``tab1_rate.csv`` (the hospitalization rate per
+100 000 people) is used to calibrate the exacerbation model (see below); the remaining 4 files
+(``tab1_count.csv``, ``tab1_N.csv``, ``tab1_lower.csv``, ``tab1_upper.csv``) and the
+per-province ``los.csv`` file are documented in :ref:`exacerbation-raw-data-files` in the
+Developers section.
 
 .. _tab1-rate-columns:
 

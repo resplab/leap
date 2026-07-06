@@ -1,6 +1,40 @@
 Exacerbation Calibration Data
 =============================
 
+.. _exacerbation-raw-data-files:
+
+Raw Data Files
+**************
+
+Each province subfolder under
+`original_data/asthma_hosp/{province}/
+<https://github.com/resplab/leap/tree/main/leap/original_data/asthma_hosp>`_
+contains 5 files that share the same columns and shape, differing only in what value is
+reported. See :ref:`tab1-rate-columns` for a description of ``tab1_rate.csv``, the only one of
+these 5 files used to calibrate the exacerbation model.
+
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
+
+   * - File
+     - Description
+   * - ``tab1_count.csv``
+     - the number of people hospitalized with asthma.
+   * - ``tab1_N.csv``
+     - the total number of people in the category (the denominator used to compute the rate).
+   * - ``tab1_lower.csv``
+     - the lower error bar for the hospitalization rate.
+   * - ``tab1_upper.csv``
+     - the upper error bar for the hospitalization rate.
+
+Each province subfolder also contains a ``los.csv`` file with length-of-stay statistics
+(``avg``, ``med``, ``q1``, ``q3``) by ``fiscal_year``, ``age_group``, and ``sex``. This dataset
+is not currently used by the exacerbation model.
+
+Calibration Multiplier
+***********************
+
 The number of exacerbations in a given year is modelled using a Poisson distribution.
 The formula is:
 
