@@ -20,6 +20,7 @@ outcomes over a lifetime.
   model-reassessment
   model-control
   model-exacerbation
+  model-exacerbation-severity
   model-cost
   model-utility
   model-pollution

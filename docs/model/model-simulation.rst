@@ -353,7 +353,7 @@ year) from the asthma diagnosis age up to two years before the agent's current a
 We then compute the probability that *none* of the agent's exacerbations over this span were very
 severe. Each agent's probability of a very severe exacerbation is
 :math:`w^{\text{pre}}_{\text{very severe}}` — the same pre-adjustment Dirichlet-drawn quantity
-described in the :ref:`exacerbation_severity_model` section of the Exacerbations Model page. This
+described in the :ref:`exacerbation_severity_model`. This
 probability of zero very severe exacerbations out of ``total rate`` expected exacerbations is the
 marginal (Dirichlet-multinomial) probability, expressed using the Gamma function :math:`\Gamma`
 (the continuous extension of the factorial, :math:`\Gamma(n+1) = n!`):
