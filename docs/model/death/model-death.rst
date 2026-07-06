@@ -14,8 +14,6 @@ Mortality Model
 Data
 ====
 
-To obtain the mortality data for each year, we used one table from ``Statistics Canada``:
-
 .. _death-model-data-past:
 
 Past Data: 1996 - 2021
