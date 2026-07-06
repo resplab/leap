@@ -35,23 +35,24 @@ The ``very severe`` level is the one used to compute :math:`P(\text{hosp})` and 
 Dirichlet-Multinomial Model
 =============================
 
-Given the total number of exacerbations :math:`N_{\text{exacerbations}}` an individual experiences
-in a time interval (drawn from the Poisson model described in the :ref:`exacerbation-model`), the
-number at each severity level is generated using a Dirichlet-Multinomial distribution. A preliminary
-probability vector across the four levels is first drawn from a Dirichlet distribution:
+Given the total number of exacerbations :math:`N_{\text{exacerbations}}^{(i)}` that agent
+:math:`i` experiences in a time interval (drawn from the Poisson model described in the
+:ref:`exacerbation-model`), the number at each severity level is generated using a
+Dirichlet-Multinomial distribution. A preliminary probability vector across the four levels is
+first drawn from a Dirichlet distribution:
 
 .. math::
 
-    \mathbf{w}^{\text{pre}} \sim \text{Dirichlet}(\boldsymbol{\delta})
+    \mathbf{w}^{\text{pre},(i)} \sim \text{Dirichlet}(\boldsymbol{\delta})
 
-:math:`\mathbf{w}^{\text{pre}} = (w^{\text{pre}}_{\text{mild}}, w^{\text{pre}}_{\text{moderate}},
-w^{\text{pre}}_{\text{severe}}, w^{\text{pre}}_{\text{very severe}})` is a length-4 vector of
+:math:`\mathbf{w}^{\text{pre},(i)} = (w^{\text{pre},(i)}_{\text{mild}}, w^{\text{pre},(i)}_{\text{moderate}},
+w^{\text{pre},(i)}_{\text{severe}}, w^{\text{pre},(i)}_{\text{very severe}})` is a length-4 vector of
 *probabilities* (summing to 1) giving this individual's personal probability of each severity
-level. For each agent with asthma, :math:`\mathbf{w}^{\text{pre}}` is sampled once, independently
+level. For each agent with asthma, :math:`\mathbf{w}^{\text{pre},(i)}` is sampled once, independently
 per agent, and held fixed for their simulated lifetime — representing individual heterogeneity in
 exacerbation severity, distinct from (and prior to) the adjustment for previous hospitalization
 described below. The actual exacerbation counts are determined later using
-:math:`N_{\text{exacerbations}}` (the total count, from the Poisson model above) together with
+:math:`N_{\text{exacerbations}}^{(i)}` (the total count, from the Poisson model above) together with
 this probability vector.
 
 :math:`\boldsymbol{\delta} = \kappa \cdot \mathbf{p}` is the Dirichlet concentration vector,
@@ -71,9 +72,9 @@ proportionally across the other three levels:
 
 .. math::
 
-    w_{\text{very severe}} &= w^{\text{pre}}_{\text{very severe}} \cdot \beta_{\text{prev hosp}} \\
-    w_j &= \dfrac{w^{\text{pre}}_j}{\sum_{l \,\in\, \{\text{mild, moderate, severe}\}} w^{\text{pre}}_l}
-        \cdot (1 - w_{\text{very severe}}), \quad j \in \{\text{mild, moderate, severe}\}
+    w_{\text{very severe}}^{(i)} &= w^{\text{pre},(i)}_{\text{very severe}} \cdot \beta_{\text{prev hosp}}^{(i)} \\
+    w_j^{(i)} &= \dfrac{w^{\text{pre},(i)}_j}{\sum_{l \,\in\, \{\text{mild, moderate, severe}\}} w^{\text{pre},(i)}_l}
+        \cdot (1 - w_{\text{very severe}}^{(i)}), \quad j \in \{\text{mild, moderate, severe}\}
 
 where:
 
@@ -81,7 +82,7 @@ where:
   these three levels
 * :math:`l \in \{\text{mild, moderate, severe}\}`: a dummy index used only for the summation in
   the denominator
-* :math:`\beta_{\text{prev hosp}}`: :math:`\beta_{\text{prev hosp,pediatric}} = 1.79` for
+* :math:`\beta_{\text{prev hosp}}^{(i)}`: :math:`\beta_{\text{prev hosp,pediatric}} = 1.79` for
   individuals under 14 years of age, or :math:`\beta_{\text{prev hosp,adult}} = 2.88` for
   individuals 14 years of age or older.
 
@@ -91,13 +92,13 @@ exacerbation was associated with a 79% increase (rate multiplier 1.79, 95% CI 1.
 rate of subsequent exacerbations for pediatric patients, and a 188% increase (rate multiplier
 2.88, 95% CI 1.35–5.15) for adult patients.
 
-If the individual has no prior hospitalization, :math:`\mathbf{w} = \mathbf{w}^{\text{pre}}`.
+If the individual has no prior hospitalization, :math:`\mathbf{w}^{(i)} = \mathbf{w}^{\text{pre},(i)}`.
 
-Since :math:`\mathbf{w}^{\text{pre}}` already sums to 1, inflating :math:`w_{\text{very severe}}`
-by :math:`\beta_{\text{prev hosp}}` alone would push the total above 1. The :math:`w_j` formula
+Since :math:`\mathbf{w}^{\text{pre},(i)}` already sums to 1, inflating :math:`w_{\text{very severe}}^{(i)}`
+by :math:`\beta_{\text{prev hosp}}^{(i)}` alone would push the total above 1. The :math:`w_j^{(i)}` formula
 corrects this: it proportionally shrinks the mild/moderate/severe probabilities so the full
-vector :math:`\mathbf{w}` sums back to 1, while keeping their relative proportions to each other
-unchanged from :math:`\mathbf{w}^{\text{pre}}`.
+vector :math:`\mathbf{w}^{(i)}` sums back to 1, while keeping their relative proportions to each other
+unchanged from :math:`\mathbf{w}^{\text{pre},(i)}`.
 
 
 This raises the question of how "previously hospitalized" is determined for an agent whose
@@ -106,9 +107,9 @@ asthma label and a diagnosis age all at once when they enter the simulation. See
 :ref:`step-4-check-hospitalizations` for how this is initialized in that case.
 
 Finally, the number of exacerbations at each severity level is drawn from a Multinomial
-distribution, using :math:`N_{\text{exacerbations}}` as the number of trials:
+distribution, using :math:`N_{\text{exacerbations}}^{(i)}` as the number of trials:
 
 .. math::
 
-    (n_{\text{mild}}, n_{\text{moderate}}, n_{\text{severe}}, n_{\text{very severe}})
-        \sim \text{Multinomial}(N_{\text{exacerbations}}, \mathbf{w})
+    (n_{\text{mild}}^{(i)}, n_{\text{moderate}}^{(i)}, n_{\text{severe}}^{(i)}, n_{\text{very severe}}^{(i)})
+        \sim \text{Multinomial}(N_{\text{exacerbations}}^{(i)}, \mathbf{w}^{(i)})

@@ -233,18 +233,18 @@ The formula is:
 
 .. math::
 
-    N_{\text{exacerbations}} \sim \text{Poisson}(\lambda) = \dfrac{\lambda^{\kappa} e^{-\lambda}}{\kappa!}
+    N_{\text{exacerbations}}^{(i)} \sim \text{Poisson}(\lambda^{(i)}) = \dfrac{{\lambda^{(i)}}^{\kappa} e^{-\lambda^{(i)}}}{\kappa!}
 
 
-Here :math:`\lambda` is the expected number of exacerbations per time interval, and :math:`\kappa` is
-the number of exacerbations (a non-negative integer) for which we are computing the
-probability. To obtain :math:`\lambda`, we must perform a Poisson regression. The Poisson
-regression assumes that the value we are interested in can be approximated using the following
-formula:
+Here :math:`\lambda^{(i)}` is the expected number of exacerbations per time interval for agent
+:math:`i`, and :math:`\kappa` is the number of exacerbations (a non-negative integer) for which we
+are computing the probability. To obtain :math:`\lambda^{(i)}`, we must perform a Poisson
+regression. The Poisson regression assumes that the value we are interested in can be
+approximated using the following formula:
 
 .. math::
 
-    \ln(\lambda) = \ln(\alpha) + \beta_0^{(i)} + \sum_{k=1}^3 \beta_k c_k
+    \ln(\lambda^{(i)}) = \ln(\alpha) + \beta_0^{(i)} + \sum_{k=1}^3 \beta_k c_k^{(i)}
 
 
 where:
@@ -259,7 +259,7 @@ where:
      - the calibration multiplier that adjusts the model to match the hospitalization data
    * - :math:`\beta_0^{(i)}`
      - patient-specific random effect; :math:`\beta_0^{(i)} \sim \mathcal{N}(0, \sigma^2)`
-   * - :math:`c_k`
+   * - :math:`c_k^{(i)}`
      - relative time spent in control level :math:`k`, given by the probability of control level
        :math:`k` from the :ref:`Control Model <control-model>`
    * - :math:`\beta_k`
@@ -272,35 +272,36 @@ mean and variance of this distribution are configuration-dependent; in the curre
 configuration they are set to approximately :math:`\mathcal{N}(0, 0)`, effectively disabling this
 source of individual variation.
 
-This gives us the rate :math:`\lambda` of exacerbations of *any* severity. Once an individual's
+This gives us the rate :math:`\lambda^{(i)}` of exacerbations of *any* severity. Once an individual's
 total number of exacerbations for a time interval is drawn from this Poisson model, each
 exacerbation is further assigned a severity level (mild, moderate, severe, or very severe) — see
 the :ref:`exacerbation_severity_model`.
 
-The diagram below summarises how these pieces fit together conceptually, for a given age
-:math:`a` and sex :math:`s`, from calibration through to the final severity-level counts.
+The diagram below summarises how these pieces fit together conceptually, for agent :math:`i` with
+a given age :math:`a` and sex :math:`s`, from calibration through to the final severity-level
+counts.
 
 .. md-mermaid::
 
     flowchart TD
         ALPHA["<b>Calibration multiplier</b>&nbsp;<span style='font-size:1.3em'>$$\alpha$$</span><br/>predicted vs. observed<br/>hospitalizations in CIHI data"]
-        BI["<b>Control-level rate constants</b>&nbsp;<span style='font-size:1.3em'>$$\beta_i$$</span><br/>derived from EBA + GOAL studies"]
-        CI["<b>Control-level probabilities</b>&nbsp;<span style='font-size:1.3em'>$$c_i$$</span><br/>predicted by the Control Model"]
+        BI["<b>Control-level rate constants</b>&nbsp;<span style='font-size:1.3em'>$$\beta_k$$</span><br/>derived from EBA + GOAL studies"]
+        CI["<b>Control-level probabilities</b>&nbsp;<span style='font-size:1.3em'>$$c_k^{(i)}$$</span><br/>predicted by the Control Model"]
 
-        RATE["<b>Rate of exacerbations</b>&nbsp;<span style='font-size:1.3em'>$$\lambda$$</span><br/>(any severity)"]
+        RATE["<b>Rate of exacerbations</b>&nbsp;<span style='font-size:1.3em'>$$\lambda^{(i)}$$</span><br/>(any severity)"]
 
         ALPHA --> RATE
         BI --> RATE
         CI --> RATE
 
-        COUNT["<b>Total exacerbations</b>&nbsp;<span style='font-size:1.3em'>$$N_{\text{exacerbations}}$$</span><br/>this time interval"]
+        COUNT["<b>Total exacerbations</b>&nbsp;<span style='font-size:1.3em'>$$N_{\text{exacerbations}}^{(i)}$$</span><br/>this time interval"]
         RATE --> COUNT
 
-        SEV["<b>Severity probabilities</b>&nbsp;<span style='font-size:1.3em'>$$\mathbf{w}$$</span><br/>based on SYGMA II<br/>severity/hospitalization proportions"]
-        HIST["<b>History of very severe</b><br/><b>exacerbations</b>&nbsp;<span style='font-size:1.3em'>$$\beta_{\text{prev hosp}}$$</span><br/>(hospitalization)"]
+        SEV["<b>Severity probabilities</b>&nbsp;<span style='font-size:1.3em'>$$\mathbf{w}^{(i)}$$</span><br/>based on SYGMA II<br/>severity/hospitalization proportions"]
+        HIST["<b>History of very severe</b><br/><b>exacerbations</b>&nbsp;<span style='font-size:1.3em'>$$\beta_{\text{prev hosp}}^{(i)}$$</span><br/>(hospitalization)"]
         HIST -->|"increases probability<br/>of very severe"| SEV
 
-        OUTPUT["<b>Exacerbations by</b><br/><b>severity level</b>&nbsp;<span style='font-size:1.3em'>$$(n_{\text{mild}}, \ldots, n_{\text{very severe}})$$</span>"]
+        OUTPUT["<b>Exacerbations by</b><br/><b>severity level</b>&nbsp;<span style='font-size:1.3em'>$$(n_{\text{mild}}^{(i)}, \ldots, n_{\text{very severe}}^{(i)})$$</span>"]
         COUNT --> OUTPUT
         SEV --> OUTPUT
 
@@ -328,7 +329,7 @@ We are interested in calculating :math:`\alpha`. If we rewrite the equation, the
 
 .. math::
 
-    \lambda = \alpha \cdot e^{\beta_0^{(i)}} \prod_{k=1}^3 e^{\beta_k c_k}
+    \lambda^{(i)} = \alpha \cdot e^{\beta_0^{(i)}} \prod_{k=1}^3 e^{\beta_k c_k^{(i)}}
 
 
 How do we obtain :math:`\alpha`? We again assume that the mean value has the same form as in a
@@ -445,7 +446,7 @@ from the observed hospitalization rate in CIHI as described in :ref:`tab1-rate-c
   :collapsible:
 
   Although :math:`\alpha` is computed from hospitalizations alone, it is applied to
-  :math:`\lambda`, the rate of exacerbations of *any* severity — this is valid because
+  :math:`\lambda^{(i)}`, the rate of exacerbations of *any* severity — this is valid because
   :math:`P(\text{hosp})` is treated as a fixed constant, independent of age, sex, province, and
   timepoint. Substituting
   :math:`N_{\text{hosp}}^{\text{(pred)}} = N_{\text{exac}}^{\text{(pred)}} \cdot P(\text{hosp})`,
@@ -472,7 +473,7 @@ and saved as:
 `processed_data/{time_delta_tag}/exacerbation_calibration.csv
 <https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/exacerbation_calibration.csv>`_.
 This file is looked up at simulation runtime — by province, timepoint, sex, and age — to
-calibrate each agent's :math:`\lambda`.
+calibrate each agent's :math:`\lambda^{(i)}`.
 
 Processed Data
 ^^^^^^^^^^^^^^^^

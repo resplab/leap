@@ -286,7 +286,7 @@ To initialize an agent, we set the following initial attributes:
      - The agent's cumulative count of very severe (hospitalized) exacerbations. For an agent with
        asthma, this is initialized via the mini-simulation described in
        :ref:`step-4-check-hospitalizations` below; otherwise it starts at 0. It is incremented
-       each subsequent time interval — see Step 8.
+       each subsequent time interval — see Step 8 and Step 6.
 
 
 Step 1: Check if the agent is over 3 years old
@@ -338,21 +338,21 @@ Since this agent's asthma history was not directly simulated cycle-by-cycle (it 
 at once in Steps 2 and 3), we cannot just look up whether a hospitalization occurred. Instead, we assume the agent's asthma was **not reversible** between their diagnosis age and
 two years before their current age: that is, we treat the agent as having had asthma
 continuously over that span. Under this assumption, we run a mini-simulation that sums the
-expected exacerbation rate :math:`\lambda` (using the Step 6 formula below, with that year's age,
-sex, and control levels) over every year from the asthma diagnosis age up to two years
-before the agent's current age:
+expected exacerbation rate :math:`\lambda^{(i)}` for this agent :math:`i` (using the Step 6
+formula below, with that year's age, sex, and control levels) over every year from the asthma
+diagnosis age up to two years before the agent's current age:
 
 .. math::
 
-    \text{total rate} = \sum_{y} \lambda_y
+    \text{total rate}^{(i)} = \sum_{y} \lambda_y^{(i)}
 
 where :math:`y` ranges over each year (not the simulation's own timepoint, but a calendar
 year) from the asthma diagnosis age up to two years before the agent's current age, and
-:math:`\lambda_y` is :math:`\lambda` evaluated at that year (Step 6 below).
+:math:`\lambda_y^{(i)}` is :math:`\lambda^{(i)}` evaluated at that year (Step 6 below).
 
 We then compute the probability that *none* of the agent's exacerbations over this span were very
 severe. Each agent's probability of a very severe exacerbation is
-:math:`w^{\text{pre}}_{\text{very severe}}` — the same pre-adjustment Dirichlet-drawn quantity
+:math:`w^{\text{pre},(i)}_{\text{very severe}}` — the same pre-adjustment Dirichlet-drawn quantity
 described in the :ref:`exacerbation_severity_model`. This
 probability of zero very severe exacerbations out of ``total rate`` expected exacerbations is the
 marginal (Dirichlet-multinomial) probability, expressed using the Gamma function :math:`\Gamma`
@@ -360,9 +360,9 @@ marginal (Dirichlet-multinomial) probability, expressed using the Gamma function
 
 .. math::
 
-    P(\text{no very severe exacerbations}) = \dfrac{1}{\Gamma(\text{total rate} + 1)} \cdot
-        \dfrac{\Gamma(\text{total rate} + 1 - w^{\text{pre}}_{\text{very severe}})}
-            {\Gamma(1 - w^{\text{pre}}_{\text{very severe}})}
+    P(\text{no very severe exacerbations}) = \dfrac{1}{\Gamma(\text{total rate}^{(i)} + 1)} \cdot
+        \dfrac{\Gamma(\text{total rate}^{(i)} + 1 - w^{\text{pre},(i)}_{\text{very severe}})}
+            {\Gamma(1 - w^{\text{pre},(i)}_{\text{very severe}})}
 
 Finally, we toss a coin — a Bernoulli draw — to decide whether the agent had at least one very
 severe exacerbation over this span:
@@ -423,7 +423,7 @@ of Agent Initialization above:
 
 .. math::
 
-    \text{total hosp} = \text{total hosp} + n_{\text{very severe}}
+    \text{total hosp}^{(i)} = \text{total hosp}^{(i)} + n_{\text{very severe}}^{(i)}
 
 
 Iterating Over Lifetime
@@ -529,7 +529,7 @@ of Agent Initialization above:
 
 .. math::
 
-    \text{total hosp} = \text{total hosp} + n_{\text{very severe}}
+    \text{total hosp}^{(i)} = \text{total hosp}^{(i)} + n_{\text{very severe}}^{(i)}
 
 Continue to Step 8.
 
