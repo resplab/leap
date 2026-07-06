@@ -329,34 +329,22 @@ Step 5: Determine asthma control levels
 -----------------------------------------
 
 We next determine the asthma control levels for the agent. The asthma control levels give the
-probability of the agent having fully-controlled, partially-controlled, or uncontrolled asthma:
+probability of the agent having fully-controlled, partially-controlled, or uncontrolled asthma
+(:math:`k = 1, 2, 3` respectively). The probabilities are given by the :ref:`control-model`:
 
 .. math::
 
-    k &= 0: \text{fully-controlled asthma} \\
-    k &= 1: \text{partially-controlled asthma} \\
-    k &= 2: \text{uncontrolled asthma}
-
-
-The probabilities of each control level are given by ordinal regression, where y = control level:
-
-.. math::
-
-    P(y \leq k) &= \sigma(\theta_k - \eta) \\
-    P(y = k) &= P(y \leq k) - P(y < k + 1) \\
-              &= \sigma(\theta_k - \eta) - \sigma(\theta_{k+1} - \eta)
-
-
-where:
+    \text{logit}(P(y^{(i)} \leq k)) = \theta_k
+        + \beta_{\text{age}} \cdot a^{(i)}
+        + \beta_{\text{sex}} \cdot s^{(i)}
+        + \beta_{\text{age}^2} \cdot {a^{(i)}}^2
+        + \beta_{\text{age,sex}} \cdot a^{(i)} \cdot s^{(i)}
+        + \beta_{\text{age}^2\text{,sex}} \cdot {a^{(i)}}^2 \cdot s^{(i)}
+        + \beta_0^{(i)}
 
 .. math::
 
-    \eta = \beta_0 + 
-        \text{age} \cdot \beta_{\text{age}} + 
-        \text{sex} \cdot \beta_{\text{sex}} +
-        \text{age} \cdot \text{sex} \cdot \beta_{\text{sexage}} + 
-        \text{age}^2 \cdot \text{sex} \cdot \beta_{\text{sexage}^2} + 
-        \text{age}^2 \cdot \beta_{\text{age}^2}
+    P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)
 
 
 Step 6: Compute the number of asthma exacerbations in the current timepoint
@@ -492,34 +480,22 @@ Step 3: Compute the control levels
 
 We next determine the asthma control levels for the agent using the :ref:`control-model`.
 The asthma control levels give the probability of the agent having fully-controlled,
-partially-controlled, or uncontrolled asthma:
+partially-controlled, or uncontrolled asthma
+(:math:`k = 1, 2, 3` respectively). The probabilities are given by the :ref:`control-model`:
 
 .. math::
 
-    k &= 0: \text{fully-controlled asthma} \\
-    k &= 1: \text{partially-controlled asthma} \\
-    k &= 2: \text{uncontrolled asthma}
-
-
-The probabilities of each control level are given by ordinal regression, where y = control level:
-
-.. math::
-
-    P(y \leq k) &= \sigma(\theta_k - \eta) \\
-    P(y = k) &= P(y \leq k) - P(y < k + 1) \\
-              &= \sigma(\theta_k - \eta) - \sigma(\theta_{k+1} - \eta)
-
-
-where:
+    \text{logit}(P(y^{(i)} \leq k)) = \theta_k
+        + \beta_{\text{age}} \cdot a^{(i)}
+        + \beta_{\text{sex}} \cdot s^{(i)}
+        + \beta_{\text{age}^2} \cdot {a^{(i)}}^2
+        + \beta_{\text{age,sex}} \cdot a^{(i)} \cdot s^{(i)}
+        + \beta_{\text{age}^2\text{,sex}} \cdot {a^{(i)}}^2 \cdot s^{(i)}
+        + \beta_0^{(i)}
 
 .. math::
 
-    \eta = \beta_0 + 
-        \text{age} \cdot \beta_{\text{age}} + 
-        \text{sex} \cdot \beta_{\text{sex}} +
-        \text{age} \cdot \text{sex} \cdot \beta_{\text{sexage}} + 
-        \text{age}^2 \cdot \text{sex} \cdot \beta_{\text{sexage}^2} + 
-        \text{age}^2 \cdot \beta_{\text{age}^2}
+    P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)
 
 
 Step 4: Compute the number of asthma exacerbations in the current timepoint
