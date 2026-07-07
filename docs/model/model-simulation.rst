@@ -334,6 +334,7 @@ probability of the agent having fully-controlled, partially-controlled, or uncon
 
 .. math::
 
+    \small
     \text{logit}(P(y^{(i)} \leq k)) = \theta_k
         + \beta_{\text{age}} \cdot a^{(i)}
         + \beta_{\text{sex}} \cdot s^{(i)}
@@ -485,6 +486,7 @@ partially-controlled, or uncontrolled asthma
 
 .. math::
 
+    \small
     \text{logit}(P(y^{(i)} \leq k)) = \theta_k
         + \beta_{\text{age}} \cdot a^{(i)}
         + \beta_{\text{sex}} \cdot s^{(i)}

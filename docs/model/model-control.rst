@@ -347,6 +347,7 @@ The model is:
 
 .. math::
 
+  \small
   \text{logit}(P(y^{(i)} \leq k)) = \theta_k
     + \beta_{\text{age}} \cdot a^{(i)}
     + \beta_{\text{sex}} \cdot s^{(i)}
