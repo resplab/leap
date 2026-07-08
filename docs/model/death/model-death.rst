@@ -308,6 +308,8 @@ provide a projection for specific years (which we call calibration years):
 This data can be found in the ``Statistics Canada Population Projections Technical Report``:
 `Table 3.1, Table 3.2, Table 5.2.1, Table 5.2.2, Table 5.2.3
 <https://www150.statcan.gc.ca/n1/pub/91-620-x/91-620-x2025001-eng.htm>`_.
+Statistics Canada assumes that the age distribution follows the Kannisto-Thatcher hazard model;
+see :doc:`Kannisto-Thatcher Model <model-death-kannisto>` for details.
 
 
 Model
@@ -323,9 +325,7 @@ calibration years (:ref:`2028, 2048, 2073 <death-model-data-calibration>`). To r
 we need death probabilities for every time interval across the full range — so we project forward
 from the last observed year (2021).
 
-The projection follows the approach used by Statistics Canada, based on the
-`Kannisto-Thatcher model
-<https://ipc2025.popconf.org/uploads/252146>`_. The key result is that, under this model,
+We propose that 
 the logit of the probability of death changes linearly over time at a sex-specific rate.
 This gives the projection formula:
 
@@ -337,22 +337,32 @@ This gives the projection formula:
 
 where:
 
-- :math:`q(\text{sex}, \text{age}, t)` is the probability of death for a person of a given
-  sex and age during time interval :math:`t`
-- :math:`\text{logit}(p) = \ln\!\left(\tfrac{p}{1-p}\right)`
-- :math:`t_0` is the last observed timepoint (2021)
-- :math:`\beta_{\text{sex}}` is the sex-specific rate of mortality improvement — a negative value
-  means mortality is declining over time
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
 
-The derivation of this formula from the Kannisto-Thatcher hazard model is given in the
-:doc:`Technical Appendix <model-death-kannisto>`.
+   * - Variable
+     - Definition
+   * - :math:`q(\text{sex}, \text{age}, t)`
+     - the probability that a person aged ``age`` and of sex ``sex`` dies during between the age
+       ``[age, age + \Delta x)``
+   * - :math:`t_0`
+     - the last timepoint for which we have observed death probabilities (2021)
+   * - :math:`t`
+     - the last timepoint for which we want to project death probabilities (up to 2068)
+   * - :math:`\beta_{\text{sex}}`
+     - the rate of mortality improvement — a negative value
+       means mortality is declining over time. This parameter is calibrated separately for each
+       sex, province, and projection scenario.
+   * - :math:`\text{logit}(p)`
+     - :math:`\ln\!\left(\tfrac{p}{1-p}\right)`
 
-Calibrating β_sex
-********************
+Calibrating the Beta Parameters
+***************************************
 
-The slope :math:`\beta_{\text{sex}}` is not observed directly. We calibrate it separately
-for each sex and province by finding the value that makes our projected life expectancy
-match Statistics Canada's published life expectancy targets at the calibration timepoints.
+The :math:`\beta_{\text{sex}}` parameter is not observed directly. We calibrate it separately
+for each sex, province, and projection scenario by finding the value that makes our projected life
+expectancy match Statistics Canada's published life expectancy targets at the calibration timepoints.
 
 To evaluate a candidate :math:`\beta_{\text{sex}}`, we apply the projection formula above to
 construct a full life table of death probabilities across all ages at a given calibration
@@ -379,8 +389,8 @@ death probabilities directly from Statistics Canada.
 
 For projected timepoints (up to 2068), death probabilities for every time interval are filled in
 by fitting a linear trend (in logit space) that connects the last historical timepoint to
-Statistics Canada's life expectancy targets at the calibration timepoints. A separate slope is
-fitted for each sex and province.
+Statistics Canada's life expectancy targets at the calibration timepoints. A separate :math:`beta`
+is fitted for each sex, province, and projection scenario.
 
 .. list-table::
    :widths: 25 25 50
