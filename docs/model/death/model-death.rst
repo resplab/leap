@@ -65,8 +65,9 @@ Projected Data: 2021 - 2068
 ``Statistics Canada`` doesn't provide annual projections for death probabilities, but does
 provide a projection for specific years (which we call calibration years):
 
+
 .. list-table::
-   :widths: 25 25 25 25
+   :widths: 25 20 30 25
    :header-rows: 1
 
    * - Region
