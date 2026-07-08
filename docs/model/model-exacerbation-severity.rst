@@ -45,19 +45,52 @@ first drawn from a Dirichlet distribution:
 
     \mathbf{w}^{\text{pre},(i)} \sim \text{Dirichlet}(\boldsymbol{\delta})
 
-:math:`\mathbf{w}^{\text{pre},(i)} = (w^{\text{pre},(i)}_{\text{mild}}, w^{\text{pre},(i)}_{\text{moderate}},
-w^{\text{pre},(i)}_{\text{severe}}, w^{\text{pre},(i)}_{\text{very severe}})` is a length-4 vector of
+The vector :math:`\mathbf{w}^{\text{pre},(i)}` is defined as a length-4 vector of
 *probabilities* (summing to 1) giving this individual's personal probability of each severity
-level. For each agent with asthma, :math:`\mathbf{w}^{\text{pre},(i)}` is sampled once, independently
+level:
+
+.. math::
+
+  \mathbf{w}^{\text{pre},(i)} := \begin{bmatrix}
+    w^{\text{pre},(i)}_{\text{mild}} &
+    w^{\text{pre},(i)}_{\text{moderate}} &
+    w^{\text{pre},(i)}_{\text{severe}} &
+    w^{\text{pre},(i)}_{\text{very severe}}
+  \end{bmatrix}
+  
+For each agent with asthma, :math:`\mathbf{w}^{\text{pre},(i)}` is sampled once, independently
 per agent, and held fixed for their simulated lifetime — representing individual heterogeneity in
 exacerbation severity, distinct from (and prior to) the adjustment for previous hospitalization
 described below. The actual exacerbation counts are determined later using
 :math:`N_{\text{exacerbations}}^{(i)}` (the total count, from the Poisson model above) together with
 this probability vector.
 
-:math:`\boldsymbol{\delta} = \kappa \cdot \mathbf{p}` is the Dirichlet concentration vector,
-:math:`\mathbf{p} = (p_{\text{mild}}, p_{\text{moderate}}, p_{\text{severe}}, p_{\text{very severe}})
-= (0.495, 0.195, 0.283, 0.026)` are the same SYGMA II severity proportions used for
+The vector :math:`\boldsymbol{\delta}` is the ``Dirichlet concentration vector``:
+
+.. math::
+
+  \boldsymbol{\delta} = \kappa \cdot \mathbf{p}
+
+
+where:
+
+.. math::
+
+  \mathbf{p} &= \begin{bmatrix}
+    p_{\text{mild}} &
+    p_{\text{moderate}} &
+    p_{\text{severe}} &
+    p_{\text{very severe}}
+  \end{bmatrix} \\
+  &= \begin{bmatrix}
+    0.495 &
+    0.195 &
+    0.283 &
+    0.026
+  \end{bmatrix}
+
+
+are the same SYGMA II severity proportions used for
 :math:`P(\text{hosp})` in the :ref:`Calibration <exacerbation-calibration>` section of the
 :ref:`exacerbation-model` :cite:`leap2024`, and :math:`\kappa = 100` is an assumed concentration
 multiplier controlling how tightly an individual's probabilities cluster around the
@@ -72,16 +105,16 @@ proportionally across the other three levels:
 
 .. math::
 
-    w_{\text{very severe}}^{(i)} &= w^{\text{pre},(i)}_{\text{very severe}} \cdot \beta_{\text{prev hosp}}^{(i)} \\
-    w_j^{(i)} &= \dfrac{w^{\text{pre},(i)}_j}{\sum_{l \,\in\, \{\text{mild, moderate, severe}\}} w^{\text{pre},(i)}_l}
-        \cdot (1 - w_{\text{very severe}}^{(i)}), \quad j \in \{\text{mild, moderate, severe}\}
+  w_j^{(i)} &:= \begin{cases}
+    w^{\text{pre},(i)}_{j} \cdot \beta_{\text{prev hosp}}^{(i)}
+      & \quad j = \text{very severe} \\
+    \dfrac{w^{\text{pre},(i)}_j}{\sum_{\ell \,\in\, \{\text{mild, moderate, severe}\}} w^{\text{pre},(i)}_{\ell}} 
+        \cdot (1 - w_{\text{very severe}}^{(i)})
+        & \quad j \in \{\text{mild, moderate, severe}\}
+  \end{cases}
 
 where:
 
-* :math:`j \in \{\text{mild, moderate, severe}\}`: this equation applies separately to each of
-  these three levels
-* :math:`l \in \{\text{mild, moderate, severe}\}`: a dummy index used only for the summation in
-  the denominator
 * :math:`\beta_{\text{prev hosp}}^{(i)}`: :math:`\beta_{\text{prev hosp,pediatric}} = 1.79` for
   individuals under 14 years of age, or :math:`\beta_{\text{prev hosp,adult}} = 2.88` for
   individuals 14 years of age or older.
