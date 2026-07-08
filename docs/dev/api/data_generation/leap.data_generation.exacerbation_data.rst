@@ -1,13 +1,47 @@
 Exacerbation Calibration Data
 =============================
 
+.. _exacerbation-raw-data-files:
+
+Raw Data Files
+**************
+
+Each province subfolder under
+`original_data/asthma_hosp/{province}/
+<https://github.com/resplab/leap/tree/main/leap/original_data/asthma_hosp>`_
+contains 5 files that share the same columns and shape, differing only in what value is
+reported. See :ref:`tab1-rate-columns` for a description of ``tab1_rate.csv``, the only one of
+these 5 files used to calibrate the exacerbation model.
+
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
+
+   * - File
+     - Description
+   * - ``tab1_count.csv``
+     - the number of people hospitalized with asthma.
+   * - ``tab1_N.csv``
+     - the total number of people in the category (the denominator used to compute the rate).
+   * - ``tab1_lower.csv``
+     - the lower error bar for the hospitalization rate.
+   * - ``tab1_upper.csv``
+     - the upper error bar for the hospitalization rate.
+
+Each province subfolder also contains a ``los.csv`` file with length-of-stay statistics
+(``avg``, ``med``, ``q1``, ``q3``) by ``fiscal_year``, ``age_group``, and ``sex``. This dataset
+is not currently used by the exacerbation model.
+
+Calibration Multiplier
+***********************
+
 The number of exacerbations in a given year is modelled using a Poisson distribution.
 The formula is:
 
 .. math::
 
    \begin{align}
-   N_{\text{exacerbations}} &\sim \text{Poisson}(\lambda) = \dfrac{\lambda^k e^{-\lambda}}{k!}
+   N_{\text{exacerbations}} &\sim \text{Poisson}(\lambda) = \dfrac{\lambda^{\kappa} e^{-\lambda}}{\kappa!}
    \end{align}
 
 Here :math:`\lambda` is the expected number of exacerbations per year. To obtain :math:`\lambda`,
@@ -17,7 +51,7 @@ interested in can be approximated using the following formula:
 .. math::
 
    \begin{align}
-   \ln(\lambda) &= \ln(\alpha) + \beta_0 + \beta_{a} a + \beta_{s} s + \sum_{i=1}^3 \beta_i c_i 
+   \ln(\lambda) &= \ln(\alpha) + \beta_0 + \beta_{a} a + \beta_{s} s + \sum_{k=1}^3 \beta_k c_k
    \end{align}
 
 where:
@@ -27,8 +61,8 @@ where:
 * :math:`\beta_a`: age constant
 * :math:`s`: sex
 * :math:`\beta_s`: sex constant
-* :math:`c_i`: relative time spent in control level :math:`i`
-* :math:`\beta_i`: control level constant
+* :math:`c_k`: relative time spent in control level :math:`k`
+* :math:`\beta_k`: control level constant
 
 In the ``exacerbation_data.py`` file, we are interested in calculating :math:`\alpha`. If we
 rewrite the equation, the meaning of :math:`\alpha` becomes more apparent:
@@ -36,7 +70,7 @@ rewrite the equation, the meaning of :math:`\alpha` becomes more apparent:
 .. math::
 
    \begin{align}
-   \lambda &= \alpha \cdot e^{\beta_0} e^{\beta_{a} a} e^{\beta_{s} s} \prod_{i=1}^3 e^{\beta_i c_i} 
+   \lambda &= \alpha \cdot e^{\beta_0} e^{\beta_{a} a} e^{\beta_{s} s} \prod_{k=1}^3 e^{\beta_k c_k}
    \end{align}
 
 
@@ -46,14 +80,14 @@ Poisson regression, with the following formula:
 .. math::
 
    \begin{align}
-   \ln(\lambda_{C}) &= \sum_{i=1}^3 \gamma_i c_i 
+   \ln(\lambda_{C}) &= \sum_{k=1}^3 \gamma_k c_k
    \end{align}
 
 * :math:`\lambda_C`: the average number of exacerbations in a given year
-* :math:`c_i`: relative time spent in control level :math:`i`
-* :math:`\gamma_i`: control level constant (different from :math:`\beta_i` above)
+* :math:`c_k`: relative time spent in control level :math:`k`
+* :math:`\gamma_k`: control level constant (different from :math:`\beta_k` above)
 
-Here, the :math:`\gamma_i` values were calculated from the
+Here, the :math:`\gamma_k` values were calculated from the
 `Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
 and are given by:
 

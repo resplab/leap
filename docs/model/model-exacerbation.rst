@@ -7,12 +7,16 @@ Asthma Exacerbations Model
 Data
 ====
 
+.. _exacerbation-model-population-data:
+
 Population Data
 *****************
 
 We use the Statistics Canada population data that was generated and saved as:
-`processed_data/birth/initial_population.csv 
-<https://github.com/resplab/leap/blob/main/leap/processed_data/birth/initial_population.csv>`_.
+`processed_data/{time_delta_tag}/birth/initial_population.csv
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/birth/initial_population.csv>`_.
+This file is produced by the same data-generation script as ``birth_estimate.csv`` — see
+:ref:`birth-model` for details on how it is generated from Statistics Canada population data.
 
 
 .. list-table::
@@ -23,7 +27,7 @@ We use the Statistics Canada population data that was generated and saved as:
      - Type
      - Description
    * - ``timepoint``
-     - :code:`int`
+     - :code:`datetime`
      - the starting date / time of the time interval that the data applies to
    * - ``age``
      - :code:`int`
@@ -51,13 +55,25 @@ We use the Statistics Canada population data that was generated and saved as:
      - :code:`str`
      - the projection scenario used to generate the data
 
+This dataset has no ``sex`` column, so wherever a sex-specific population count
+:math:`N(a, s, t)` is needed elsewhere in this document, it is derived from age :math:`a` and
+timepoint :math:`t`'s ``n_age`` and ``prop_male`` values:
+
+.. math::
+
+    N(a, \text{M}, t) &= n_{\text{age}} \cdot p_{\text{male}} \\
+    N(a, \text{F}, t) &= n_{\text{age}} \cdot (1 - p_{\text{male}})
+
+where :math:`n_{\text{age}}` and :math:`p_{\text{male}}` are the ``n_age`` and ``prop_male``
+columns respectively.
+
 
 Occurrence Data
 ******************
 
 We use the occurrence data that was generated and saved as:
-`processed_data/asthma_occurrence_predictions.csv 
-<https://github.com/resplab/leap/blob/main/leap/data_generation/processed_data/asthma_occurrence_predictions.csv>`_
+`processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/asthma_occurrence_predictions.csv>`_
 
 See :ref:`occurrence-model-1` for more details about this dataset.
 
@@ -70,8 +86,8 @@ See :ref:`occurrence-model-1` for more details about this dataset.
      - Type
      - Description
    * - ``timepoint``
-     - :code:`int`
-     - the starting date / time of the time interval that the data applies to
+     - :code:`datetime`
+     - The start of the time interval, e.g. 2024-01-01
    * - ``sex``
      - :code:`str`
      - ``F`` = female, ``M`` = male
@@ -90,20 +106,36 @@ Hospitalization Data
 ***********************
 
 The data is from the ``Hospital Morbidity Database (HMDB)`` from the
-`Canadian Institute for Health Information (CIHI) 
+`Canadian Institute for Health Information (CIHI)
 <https://www.cihi.ca/en/hospital-morbidity-database-hmdb-metadata>`_.
 
 The hospitalization data was collected from patients presenting to a hospital in Canada
 due to an asthma exacerbation. We will use this data to calibrate the exacerbation model.
 
-The hospitalization rate in this table is the hospitalization rate per 100 000 people.
-For example, in the category ``F_90+``, the value would be the number of people hospitalized who
-are female and over 90 during the given year. This can be calculated:
+Per-province Structure
+^^^^^^^^^^^^^^^^^^^^^^^
 
-.. math::
-        
-    \text{rate} = \dfrac{\text{count}}{N} \times 100000
+The raw data is saved under
+`original_data/asthma_hosp/{province}/
+<https://github.com/resplab/leap/tree/main/leap/original_data/asthma_hosp>`_,
+with one subfolder per province/territory: ``AB``, ``BC``, ``MB``, ``NB``, ``NL``, ``NS``,
+``ON``, ``PE``, ``QC``, ``SK``. In addition there are two combined regions:
 
+* ``CA``: all of Canada combined.
+* ``TR``: Nunavut, Northwest Territories, and Yukon combined into a single category, since
+  each of these territories individually has too few cases to report reliably.
+
+Each province subfolder contains 5 files that share the same columns and shape, differing
+only in what value is reported. Of these, only ``tab1_rate.csv`` (the hospitalization rate per
+100 000 people) is used to calibrate the exacerbation model (see below); the remaining 4 files
+(``tab1_count.csv``, ``tab1_N.csv``, ``tab1_lower.csv``, ``tab1_upper.csv``) and the
+per-province ``los.csv`` file are documented in :ref:`exacerbation-raw-data-files` in the
+Developers section.
+
+.. _tab1-rate-columns:
+
+``tab1_rate.csv`` Columns
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. list-table::
    :widths: 25 25 50
@@ -112,7 +144,7 @@ are female and over 90 during the given year. This can be calculated:
    * - Column
      - Type
      - Description
-   * - ``fiscalYear``
+   * - ``fiscal_year``
      - :code:`int`
      - the year the data was collected
    * - ``N``
@@ -158,6 +190,39 @@ are female and over 90 during the given year. This can be calculated:
      - :code:`float`
      - the rate for all males aged over 90 in that year.
 
+The hospitalization rate in this table is the hospitalization rate per 100 000 people.
+For example, in the category ``F_90+``, the value would be the rate for people hospitalized who
+are female and over 90 during the given year.
+
+Therefore, the observed number of hospitalizations for a given age :math:`a`, sex :math:`s`, and
+timepoint :math:`t` can be recovered from the rate:
+
+.. math::
+
+    N_{\text{hosp}}(a, s, t) = \dfrac{\text{hospitalization rate}(a, s, t)}{100\,000} \cdot N(a, s, t)
+
+Here, :math:`N(a, s, t)` is the population count from the :ref:`exacerbation-model-population-data`
+described above.
+
+This is used to calibrate :math:`\alpha` below.
+
+The calibration step only uses the per-sex, per-age columns (``F_0`` ... ``F_90+`` and
+``M_0`` ... ``M_90+``); the sex- and age-aggregated columns (``N``, ``M``, ``F``, ``0`` ... ``90+``)
+are not used.
+
+.. _province-coverage:
+
+Province Coverage
+^^^^^^^^^^^^^^^^^^
+
+Although hospitalization data is available for every province/territory listed above,
+calibration is currently only implemented for ``BC`` and ``CA`` using the corresponding
+``tab1_rate.csv`` file (see
+`leap/data_generation/exacerbation_data.py
+<https://github.com/resplab/leap/blob/main/leap/data_generation/exacerbation_data.py>`_).
+The resulting ``exacerbation_calibration.csv`` used at runtime therefore only contains
+calibration multipliers for these two regions.
+
 
 
 Model
@@ -168,16 +233,18 @@ The formula is:
 
 .. math::
 
-    N_{\text{exacerbations}} \sim \text{Poisson}(\lambda) = \dfrac{\lambda^k e^{-\lambda}}{k!}
+    N_{\text{exacerbations}}^{(i)} \sim \text{Poisson}(\lambda^{(i)}) = \dfrac{{\lambda^{(i)}}^{\kappa} e^{-\lambda^{(i)}}}{\kappa!}
 
 
-Here :math:`\lambda` is the expected number of exacerbations per time interval. To obtain
-:math:`\lambda`, we must perform a Poisson regression. The Poisson regression assumes that the value
-we are interested in can be approximated using the following formula:
+Here :math:`\lambda^{(i)}` is the expected number of exacerbations per time interval for agent
+:math:`i`, and :math:`\kappa` is the number of exacerbations (a non-negative integer) for which we
+are computing the probability. To obtain :math:`\lambda^{(i)}`, we must perform a Poisson
+regression. The Poisson regression assumes that the value we are interested in can be
+approximated using the following formula:
 
 .. math::
 
-    \ln(\lambda) = \ln(\alpha) + \beta_0 + \sum_{i=1}^3 \beta_i c_i 
+    \ln(\lambda^{(i)}) = \ln(\alpha) + \beta_0^{(i)} + \sum_{k=1}^3 \beta_k c_k^{(i)}
 
 
 where:
@@ -190,16 +257,69 @@ where:
      - Description
    * - :math:`\alpha`
      - the calibration multiplier that adjusts the model to match the hospitalization data
-   * - :math:`\beta_0`
-     - a constant randomly chosen from the normal distribution :math:`\mathcal{N}(0, 1)`
-   * - :math:`c_i`
-     - relative time spent in control level :math:`i`
-   * - :math:`\beta_i`
-     - control level constant calculated from the :ref:`Control Model <control-model>`
+   * - :math:`\beta_0^{(i)}`
+     - patient-specific random effect; :math:`\beta_0^{(i)} \sim \mathcal{N}(0, \sigma^2)`
+   * - :math:`c_k^{(i)}`
+     - relative time spent in control level :math:`k`, given by the probability of control level
+       :math:`k` from the :ref:`Control Model <control-model>`
+   * - :math:`\beta_k`
+     - control level constant, derived from the EBA and GOAL studies (see Calibration below)
 
-To calculate the :math:`\beta_i` values, we consider the discrete random variable :math:`S`, which
-is the severity of an asthma exacerbation, and the continuous random variable :math:`R`, which is
-the rate of exacerbations per time interval.
+For each agent with asthma, :math:`\beta_0^{(i)}` is sampled once and held fixed for their
+simulated lifetime, representing individual heterogeneity in exacerbation risk beyond what is
+explained by age, sex, control level, and the population-level calibration :math:`\alpha`. The
+mean and variance of this distribution are configuration-dependent; in the current default
+configuration they are set to approximately :math:`\mathcal{N}(0, 0)`, effectively disabling this
+source of individual variation.
+
+This gives us the rate :math:`\lambda^{(i)}` of exacerbations of *any* severity. Once an individual's
+total number of exacerbations for a time interval is drawn from this Poisson model, each
+exacerbation is further assigned a severity level (mild, moderate, severe, or very severe) — see
+the :ref:`exacerbation_severity_model`.
+
+The diagram below summarises how these pieces fit together conceptually, for agent :math:`i` with
+a given age :math:`a` and sex :math:`s`, from calibration through to the final severity-level
+counts.
+
+.. md-mermaid::
+
+    flowchart TD
+        ALPHA["<b>Calibration multiplier</b>&nbsp;<span style='font-size:1.3em'>$$\alpha$$</span><br/>predicted vs. observed<br/>hospitalizations in CIHI data"]
+        BI["<b>Control-level rate constants</b>&nbsp;<span style='font-size:1.3em'>$$\beta_k$$</span><br/>derived from EBA + GOAL studies"]
+        CI["<b>Control-level probabilities</b>&nbsp;<span style='font-size:1.3em'>$$c_k^{(i)}$$</span><br/>predicted by the Control Model"]
+
+        RATE["<b>Rate of exacerbations</b>&nbsp;<span style='font-size:1.3em'>$$\lambda^{(i)}$$</span><br/>(any severity)"]
+
+        ALPHA --> RATE
+        BI --> RATE
+        CI --> RATE
+
+        COUNT["<b>Total exacerbations</b>&nbsp;<span style='font-size:1.3em'>$$N_{\text{exacerbations}}^{(i)}$$</span><br/>this time interval"]
+        RATE --> COUNT
+
+        SEV["<b>Severity probabilities</b>&nbsp;<span style='font-size:1.3em'>$$\mathbf{w}^{(i)}$$</span><br/>based on SYGMA II<br/>severity/hospitalization proportions"]
+        HIST["<b>History of very severe</b><br/><b>exacerbations</b>&nbsp;<span style='font-size:1.3em'>$$\beta_{\text{prev hosp}}^{(i)}$$</span><br/>(hospitalization)"]
+        HIST -->|"increases probability<br/>of very severe"| SEV
+
+        OUTPUT["<b>Exacerbations by</b><br/><b>severity level</b>&nbsp;<span style='font-size:1.3em'>$$(n_{\text{mild}}^{(i)}, \ldots, n_{\text{very severe}}^{(i)})$$</span>"]
+        COUNT --> OUTPUT
+        SEV --> OUTPUT
+
+        classDef input fill:#fff3e0,stroke:#e65100,color:#3a2400;
+        classDef stage fill:#e3f2fd,stroke:#1565c0,color:#0d2b45;
+        classDef output fill:#e8f5e9,stroke:#2e7d32,color:#10300f;
+        class ALPHA,BI,CI,HIST input;
+        class RATE,COUNT,SEV stage;
+        class OUTPUT output;
+
+        classDef input fill:#fff3e0,stroke:#e65100,color:#3a2400;
+        classDef formula fill:#e3f2fd,stroke:#1565c0,color:#0d2b45;
+        classDef sim fill:#e8f5e9,stroke:#2e7d32,color:#10300f;
+        class ALPHA,B0,BI,CI input;
+        class FORMULA,POISSON formula;
+        class W,HIST,MULTI sim;
+
+.. _exacerbation-calibration:
 
 Calibration
 ******************
@@ -209,7 +329,7 @@ We are interested in calculating :math:`\alpha`. If we rewrite the equation, the
 
 .. math::
 
-    \lambda = \alpha \cdot e^{\beta_0} \prod_{i=1}^3 e^{\beta_i c_i} 
+    \lambda^{(i)} = \alpha \cdot e^{\beta_0^{(i)}} \prod_{k=1}^3 e^{\beta_k c_k^{(i)}}
 
 
 How do we obtain :math:`\alpha`? We again assume that the mean value has the same form as in a
@@ -217,50 +337,170 @@ Poisson regression, with the following formula:
 
 .. math::
 
-    \ln(\lambda_{C}) = \sum_{i=1}^3 \beta_i c_i 
+    \ln(\lambda_{C}(a, s)) = \sum_{k=1}^3 \beta_k c_k
 
 
-* :math:`\lambda_C`: the average number of exacerbations in a given time interval
-* :math:`c_i`: relative time spent in control level :math:`i`
-* :math:`\beta_i`: control level constant
+* :math:`\lambda_C(a, s)`: the predicted mean number of exacerbations per year for a given age
+  :math:`a` and sex :math:`s` — note this has no timepoint argument, since the
+  :ref:`Control Model <control-model>` assumes control level probabilities do not vary by
+  calendar year
+* :math:`c_k`: the age- and sex-specific probability of control level :math:`k`,
+  :math:`P(y^{(i)} = k)`, from the :ref:`Control Model <control-model>`'s ordinal regression —
+  obtained by subtracting consecutive cumulative probabilities,
+  :math:`P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)`
+* :math:`\beta_k`: control level constant, derived below from the EBA and GOAL studies
 
-Here, the :math:`\beta_i` values were calculated from the
-`Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
-and are given by:
+The :math:`\beta_k` values are derived by combining two literature sources, as described in
+:cite:`leap2024`:
+
+* `Economic Burden of Asthma (EBA) study <https://bmjopen.bmj.com/content/3/9/e003360.long>`_
+  (Chen et al. 2013) — a prospective, representative observational study of 618 participants aged
+  1-85 years (74% aged 18 or older) with self-reported, physician-diagnosed asthma from BC, in
+  which asthma control and the number of exacerbations were measured every 3 months over a year.
+  EBA gives us the overall mean annual exacerbation rate for a person with asthma,
+  :math:`r = 0.347`, and the overall proportion of time the EBA cohort as a whole spent in each
+  control level over the study period: :math:`\text{prop}_{\text{wc}} = 0.340` (well-controlled),
+  :math:`\text{prop}_{\text{pc}} = 0.474` (partially-controlled), and
+  :math:`\text{prop}_{\text{uc}} = 0.186` (uncontrolled).
+* `GOAL Study <https://doi.org/10.1164/rccm.200401-033OC>`_
+  (Bateman et al. 2004) — a one-year, randomized, double-blind clinical trial of 3421
+  participants aged 12-80 years with uncontrolled asthma at study entry, with asthma
+  exacerbations as the primary outcome. An analysis of the GOAL data gives rounded annual
+  exacerbation rates for each control level: well-controlled = 0.1, partially-controlled = 0.2,
+  uncontrolled = 0.3 — i.e. the partially-controlled rate is twice the well-controlled rate, and
+  the uncontrolled rate is three times the well-controlled rate.
+
+Combining these two sources was necessary because the EBA cohort, while representative, did not
+have enough exacerbation events on its own to robustly estimate a rate for each control level.
+Instead, we take only the *relative* rates from GOAL, and solve for an absolute well-controlled
+rate :math:`r_{\text{wc}}` such that the population-weighted average across the three control
+levels — using the EBA time-in-control proportions together with the GOAL rate ratios — equals
+the EBA overall rate :math:`r`:
 
 .. math::
 
-    \beta_1 &:= \ln(0.1880058) \\
-    \beta_2 &:= \ln(0.3760116) \\
-    \beta_3 &:= \ln(0.5640174) 
+    r = \text{prop}_{\text{wc}} \cdot r_{\text{wc}} + \text{prop}_{\text{pc}} \cdot (2 r_{\text{wc}})
+        + \text{prop}_{\text{uc}} \cdot (3 r_{\text{wc}})
+    \quad \Longrightarrow \quad
+    r_{\text{wc}} = \dfrac{r}{\text{prop}_{\text{wc}} + 2 \cdot \text{prop}_{\text{pc}}
+        + 3 \cdot \text{prop}_{\text{uc}}}
+
+The partially-controlled and uncontrolled rates follow directly from the GOAL ratios:
+:math:`r_{\text{pc}} = 2 r_{\text{wc}}` and :math:`r_{\text{uc}} = 3 r_{\text{wc}}`. Taking the
+natural log of each rate gives the :math:`\beta_k` values:
+
+.. math::
+
+    \beta_1 &:= \ln(r_{\text{wc}}) = \ln(0.1880058) \\
+    \beta_2 &:= \ln(r_{\text{pc}}) = \ln(0.3760116) \\
+    \beta_3 &:= \ln(r_{\text{uc}}) = \ln(0.5640174)
 
 
 The number of exacerbations predicted by the model is then:
 
 .. math::
 
-    N_{\text{exac}}^{\text{(pred)}} &= \lambda_C \cdot N_{\text{asthma}} \\
-    N_{\text{asthma}} &= N \cdot \eta_{\text{prev}}
+    N_{\text{asthma}}(a, s, t) &= N(a, s, t) \cdot \eta_{\text{prev}}(a, s, t) \\
+    N_{\text{exac}}^{\text{(pred)}}(a, s, t) &= \lambda_C(a, s) \cdot N_{\text{asthma}}(a, s, t) \\
 
-* :math:`N_{\text{asthma}}`: the number of people in a given time interval, age, sex with asthma
-* :math:`N`: the number of people in a given time interval, age, and sex
-* :math:`\eta_{\text{prev}}`: the prevalence of asthma in a given time interval, age, and sex, from
-  :ref:`occurrence-model-1`
+* :math:`N_{\text{asthma}}(a, s, t)`: the number of people of age :math:`a`, sex :math:`s`, at
+  timepoint :math:`t` with asthma
+* :math:`N(a, s, t)`: the number of people of age :math:`a`, sex :math:`s`, at timepoint :math:`t`,
+  from the :ref:`exacerbation-model-population-data` described above
+* :math:`\eta_{\text{prev}}(a, s, t)`: the prevalence of asthma for age :math:`a`, sex :math:`s`,
+  at timepoint :math:`t`, from :ref:`occurrence-model-1`
+* :math:`\lambda_C(a, s)`: as defined above
 
 and number of hospitalizations is:
 
 .. math::
 
-    N_{\text{hosp}}^{\text{(pred)}} = N_{\text{exac}}^{\text{(pred)}} \cdot P(\text{hosp})
+    N_{\text{hosp}}^{\text{(pred)}}(a, s, t) = N_{\text{exac}}^{\text{(pred)}}(a, s, t) \cdot P(\text{hosp})
 
 
-* :math:`N_{\text{exac}}^{\text{(pred)}}`: the predicted number of exacerbations (of any severity)
-  for a given time interval, age, and sex
+* :math:`N_{\text{exac}}^{\text{(pred)}}(a, s, t)`: the predicted number of exacerbations (of any
+  severity) for age :math:`a`, sex :math:`s`, at timepoint :math:`t`
 * :math:`P(\text{hosp})`: the probability of hospitalization due to asthma given the patient has an
-  asthma exacerbation
+  asthma exacerbation (a single constant, not stratified by :math:`a`, :math:`s`, or :math:`t`)
 
-Finally, :math:`\alpha` can be computed:
+As described in the :ref:`exacerbation_severity_model`, exacerbations are classified into four
+severity levels, where **very severe** is defined as requiring hospital admission. We treat
+:math:`P(\text{hosp})` as the proportion of all exacerbations that are very severe, taken from the
+`Symbicort Given as Needed in Mild Asthma II (SYGMA II) study
+<https://www.nejm.org/doi/10.1056/NEJMoa1715275>`_ (Bateman et al. 2018), a double-blind,
+multi-centre clinical trial of 4176 individuals with mild asthma. SYGMA II reports the
+distribution of exacerbation severity as 49.5% mild, 19.5% moderate, 28.3% severe, and 2.6% very
+severe, giving :math:`P(\text{hosp}) = 0.026` :cite:`leap2024`.
+
+Finally, :math:`\alpha` can be computed as the ratio of the **observed** to the **predicted**
+number of hospitalizations, for a given age :math:`a`, sex :math:`s`, and timepoint :math:`t`:
 
 .. math::
 
-    \alpha(a, s, y) = \dfrac{N_{\text{hosp}}(a, s, y)}{N_{\text{hosp}}^{\text{(pred)}}(a, s, y)}
+    \alpha(a, s, t) = \dfrac{N_{\text{hosp}}(a, s, t)}{N_{\text{hosp}}^{\text{(pred)}}(a, s, t)}
+
+where :math:`N_{\text{hosp}}(a, s, t)` is the **observed** number of hospitalizations, determined
+from the observed hospitalization rate in CIHI as described in :ref:`tab1-rate-columns` above.
+
+.. info:: Math: Why α (from Hospitalizations) Applies to λ (All Severities)
+  :collapsible:
+
+  Although :math:`\alpha` is computed from hospitalizations alone, it is applied to
+  :math:`\lambda^{(i)}`, the rate of exacerbations of *any* severity — this is valid because
+  :math:`P(\text{hosp})` is treated as a fixed constant, independent of age, sex, province, and
+  timepoint. Substituting
+  :math:`N_{\text{hosp}}^{\text{(pred)}} = N_{\text{exac}}^{\text{(pred)}} \cdot P(\text{hosp})`,
+  and writing the *observed* hospitalizations as the *true* total number of exacerbations times
+  that same constant, :math:`N_{\text{hosp}} = N_{\text{exac}}^{\text{(true)}} \cdot P(\text{hosp})`,
+  the :math:`P(\text{hosp})` terms cancel:
+
+  .. math::
+
+      \alpha = \dfrac{N_{\text{hosp}}}{N_{\text{hosp}}^{\text{(pred)}}}
+          = \dfrac{N_{\text{exac}}^{\text{(true)}} \cdot P(\text{hosp})}
+              {N_{\text{exac}}^{\text{(pred)}} \cdot P(\text{hosp})}
+          = \dfrac{N_{\text{exac}}^{\text{(true)}}}{N_{\text{exac}}^{\text{(pred)}}}
+
+  So :math:`\alpha` computed from the hospitalization ratio is algebraically identical to the
+  ratio of true to predicted *total* exacerbations, provided :math:`P(\text{hosp})` is indeed
+  constant by age, sex, province, and timepoint (otherwise variation in :math:`P(\text{hosp})`
+  would be attributed to :math:`\alpha`). Hospitalizations are used to compute it — rather than
+  total exacerbations directly — because they are captured completely in CIHI's national data,
+  stratified by age/sex/province/year.
+
+:math:`\alpha` is computed once per province, age, sex, and timepoint as part of data generation,
+and saved as:
+`processed_data/{time_delta_tag}/exacerbation_calibration.csv
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/exacerbation_calibration.csv>`_.
+This file is looked up at simulation runtime — by province, timepoint, sex, and age — to
+calibrate each agent's :math:`\lambda^{(i)}`.
+
+Processed Data
+^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :widths: 25 25 50
+   :header-rows: 1
+
+   * - Column
+     - Type
+     - Description
+   * - ``timepoint``
+     - :code:`datetime`
+     - The start of the time interval, e.g. 2024-01-01
+   * - ``sex``
+     - :code:`str`
+     - ``F`` = female, ``M`` = male
+   * - ``age``
+     - :code:`int`
+     - the age of the patient in years
+   * - ``province``
+     - :code:`str`
+     - the 2-letter province abbreviation (currently only ``BC`` and ``CA``, see
+       :ref:`province-coverage` above)
+   * - ``calibrator_multiplier``
+     - :code:`float`
+     - the calibration multiplier :math:`\alpha(a, s, t)` for the given age, sex, timepoint, and
+       province
+
+

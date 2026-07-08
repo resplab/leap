@@ -124,6 +124,14 @@ For both sources, only the ``AGE_GROUP = 0`` (newborns) rows are used. The ``N``
 represents the total number of births (both sexes combined), and ``prop_male`` is derived as
 the number of male births divided by the total.
 
+The same two source tables, using all ``AGE_GROUP`` rows rather than just newborns, are also used
+by ``birth_data.py`` to produce a second processed file:
+`leap/processed_data/{time_delta_tag}/birth/initial_population.csv
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/birth/initial_population.csv>`_.
+This file gives the population count by age (rather than just births), and is used by the
+migration and exacerbation models — see the Population Data section in :doc:`model-migration` for
+its schema.
+
 .. list-table::
    :widths: 25 25 50
    :header-rows: 1
