@@ -13,7 +13,8 @@ PM2.5 Data
 The baseline projections are obtained from the ``ECCC`` using their ``GEM-MACH`` model, which
 gives us a prediction for background PM2.5 levels for the years 2026, 2031, and 2036. All other timepoints are calculated using linear interpolation:
 
-Wildfire PM2.5 is based on a separate model, ``RAQDPS``, which predicts
+Wildfire PM2.5 is based on a separate model,
+`RAQDPS <https://eccc-msc.github.io/open-data/msc-data/nwp_raqdps/readme_raqdps_en/>`_, which predicts
 PM2.5 from anthropogenic and non-wildfire natural sources, and ``RAQDPS-FW``, which predicts PM2.5
 from those same sources plus wildfires. The wildfire contribution for each month and census division
 is the difference between the two models' predictions (``RAQDPS-FW`` minus ``RAQDPS``), averaged over
@@ -30,6 +31,9 @@ change across the three models as the total wildfire PM2.5 increase by 2100 for 
 (``SSP1_2.6`` ~45%, ``SSP2_4.5`` ~85%, ``SSP3_7.0`` ~124%, ``SSP5_8.5`` ~136%), and linearly
 interpolate the scaling factor between 1 (present day) and this value at 2100 for intermediate
 timepoints.
+
+The data currently extends to December 2036, the last timepoint for which ``GEM-MACH`` background
+PM2.5 projections are available.
 
 The resulting data is stored as a separate dataset (one ``.csv`` file per SSP scenario), each
 containing the columns below, including an ``SSP`` column identifying which scenario that
@@ -94,16 +98,28 @@ dataset corresponds to:
 Census Division Data
 *********************
 
-The pollution data is given with regards to ``CDUID`` regions. In our model, we assign each
-agent to an arbitrary location within the selected province. Crudely, one could just randomly
-assign each agent to a ``CDUID`` within the province. However, this would ignore the
-population distribution within the province, and the fact that air quality depends quite a bit on
-location. For example, background PM2.5 levels in Vancouver are typically much worse than any other
-regions in British Columbia, but wildfire PM2.5 levels are typically much worse in the interior of
-the province. To account for this, we used data on the census divisions from the
-``Statistics Canada`` website:
+The pollution data is only available at the ``CDUID`` level, but agents in the model are only
+assigned a province. So, each agent is additionally assigned a census division within their
+province, sampled with probability proportional to that census division's population in 2021 (see
+``CensusDivision`` in
+`census_division.py <https://github.com/resplab/leap/blob/main/leap/census_division.py>`_). For a
+given province with census divisions :math:`\{1, \dots, n\}`, an agent is assigned to census
+division :math:`c` with probability:
 
-https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=9810000701
+.. math::
+
+   P(\text{CDUID} = c) = \frac{\text{population}_c}{\sum_{c'=1}^n \text{population}_{c'}}
+
+where :math:`c'` ranges over all census divisions in the same province, so the denominator is
+the province's total population.
+
+This is preferable to a uniform random assignment, since population is unevenly distributed across census divisions
+within a province.
+
+Census division population data comes from Statistics Canada's
+`Table 98-10-0007-01, Population and dwelling counts: Canada and census divisions
+<https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=9810000701>`_, saved as
+`master_census_data_2021.csv <https://github.com/resplab/leap/blob/main/leap/processed_data/census_divisions/master_census_data_2021.csv>`_:
 
 .. list-table::
    :widths: 25 25 50
