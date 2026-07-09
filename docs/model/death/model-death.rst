@@ -373,6 +373,175 @@ Statistics Canada target across all available calibration timepoints using
 ``scipy.optimize.leastsq``. Once :math:`\beta_{\text{sex}}` is fixed, the projection formula
 is applied to fill in death probabilities for every time interval in the simulation.
 
+
+Converting the Time Delta for Death Probabilities
+**************************************************
+
+The original data from Statistics Canada is collected annually, so :math:`\Delta x_a = 1`.
+However, the user may want to run the simulation with a different time delta, e.g.
+:math:`\Delta x_b = 1/12` for monthly intervals. Let :math:`\Delta x_a` be the original time
+interval, and :math:`\Delta x_b` be the new (desired) time interval. We will make the assumption
+that the ``hazard rate`` :math:`\mu(x, t)` is constant over the time interval
+:math:`[x, x + \Delta x_a)`. The hazard rate is given by:
+
+.. math::
+  
+    \mu(x, t) = \dfrac{F'_X(x, t)}{1 - F_X(x, t)} = - \dfrac{dS_X(x, t)}{dx} \dfrac{1}{S_X(x, t)}
+
+where :math:`S_X(x, t)` is the survival function for age at death, :math:`X`, at time :math:`t`.
+Solving this first order separable linear differential equation, we have:
+
+.. math::
+    S_X(x, t) = k e^{-\int \mu(x, t) dx}
+
+.. info:: Math: Solving for :math:`S_X(x, t)`
+  :collapsible:
+
+  .. math::
+
+      \int \dfrac{dS}{S_X} &= -\int \mu(x, t) dx \\
+      \ln(S_X(x, t)) &= -\int \mu(x, t) dx + C \\
+      S_X(x, t) &= k e^{-\int \mu(x, t) dx}
+
+Assuming that :math:`\mu(x, t) = \lambda`, for some constant :math:`\lambda`, we have:
+
+.. math::
+
+    S_X(x, t) = k e^{- \lambda x} \implies F_X(x) = 1 - k e^{- \lambda x}
+
+Now, we can substitute this into the equation for :math:`q(x, \Delta x, t)`:
+
+.. math::
+
+    q(x, \Delta x, t) = \dfrac{F_X(x + \Delta x) - F_X(x)}{1 - F_X(x)} = 1 - e^{- \lambda \Delta x}
+
+.. info:: Math: :math:`q(x, \Delta x, t)`
+  :collapsible:
+
+  .. math::
+
+      q(x, \Delta x, t) &= \dfrac{F_X(x + \Delta x) - F_X(x)}{1 - F_X(x)} \\
+      &= \dfrac{
+          1 - k e^{- \lambda (x + \Delta x)} - 
+          1 + k e^{- \lambda x}
+      }{k e^{- \lambda x}} \\
+      &= \dfrac{
+          - k e^{- \lambda (x + \Delta x)}
+          + k e^{- \lambda x}
+      }{k e^{- \lambda x}} \\
+      &= 1 - e^{- \lambda \Delta x}
+
+We can write this in terms of the original time interval :math:`\Delta x_a`:
+
+.. math::
+
+    q(x, \Delta x_b, t) = 1 - (1 - q(x, \Delta x_a, t))^{\Delta x_b / \Delta x_a}
+
+  
+.. info:: Math: :math:`q(x, \Delta x_b, t)`
+  :collapsible:
+
+  We have the original probability of death for the time interval :math:`\Delta x_a`:
+
+  .. math::
+
+      q(x, \Delta x_a, t) &= 1 - e^{- \lambda \Delta x_a} \\
+      e^{- \lambda \Delta x_a} &= 1 - q(x, \Delta x_a, t)
+
+  and we want to find the probability of death for the time interval :math:`\Delta x_b`:
+
+  .. math::
+
+      q(x, \Delta x_b, t) &= 1 - e^{- \lambda \Delta x_b} \\
+      &= 1 - e^{- \lambda \Delta x_a \cdot \Delta x_b / \Delta x_a} \\
+      &= 1 - (e^{- \lambda \Delta x_a})^{\Delta x_b / \Delta x_a} \\
+      &= 1 - (1 - q(x, \Delta x_a, t))^{\Delta x_b / \Delta x_a}
+
+
+This will give us the probability of death for the new time interval :math:`\Delta x_b`, but only
+at the timepoints for which we have data. To get the probability of death for all timepoints, we
+note that since :math:`\mu(x, t)` is constant over the time interval :math:`[x, x + \Delta x_a)`:
+
+.. math::
+
+  q(x, \Delta x_b, t + n \Delta x_b) = q(x, \Delta x_b, t) \quad \forall ~ t \in [t, t + \Delta x_a)
+
+
+.. info:: Math: :math:`q(x, \Delta x_b, t + n \Delta x_b)`
+  :collapsible:
+
+  .. math::
+
+    q(x, \Delta x_b, t + n \Delta x_b) &= 1 - e^{- \lambda \Delta x_b} \\
+    q(x, \Delta x_b, t) &= 1 - e^{- \lambda \Delta x_b} \\
+    q(x, \Delta x_b, t + n \Delta x_b) &= q(x, \Delta x_b, t)
+
+
+.. info:: Example: Projected Death Probabilities (Monthly Time Delta)
+  :collapsible:
+
+  .. list-table::
+    :class: max-width-table
+    :widths: 8 18 8 10 25 15 10
+    :header-rows: 1
+
+    * - ``province``
+      - ``projection_scenario``
+      - ``age``
+      - ``sex``
+      - ``timepoint``
+      - ``prob_death``
+      - ``se``
+    * - BC
+      - FA
+      - 0
+      - F
+      - 2023-01-01
+      - 0.000919
+      - 0.000023
+    * - BC
+      - FA
+      - 0
+      - F
+      - 2023-02-01
+      - 0.000945
+      - 0.000092
+    * - BC
+      - FA
+      - 0
+      - F
+      - 2023-03-01
+      - 0.000294
+      - 0.000092
+    * - BC
+      - FA
+      - 0
+      - F
+      - ...
+      - ...
+      - ...
+    * - BC
+      - FA
+      - 0
+      - F
+      - 2023-12-01
+      - 0.000545
+      - 0.000082
+    * - BC
+      - FA
+      - 0
+      - F
+      - ...
+      - ...
+      - ...
+    * - BC
+      - FA
+      - 0
+      - F
+      - 2068-01-01
+      - 0.003409
+      - 0.000912
+
 Processed Data
 =================
 
