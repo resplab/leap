@@ -16,7 +16,7 @@ The data used in the cost model comes from the study :cite:`yaghoubi`, in
 `Table I <https://www.sciencedirect.com/science/article/pii/S0091674919316343#tbl1>`_.
 
 .. list-table::
-   :widths: 25 75
+   :widths: 70 30
    :header-rows: 1
 
    * - Variable
