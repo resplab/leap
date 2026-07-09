@@ -362,7 +362,8 @@ Calibrating the Beta Parameters
 
 The :math:`\beta_{\text{sex}}` parameter is not observed directly. We calibrate it separately
 for each sex, province, and projection scenario by finding the value that makes our projected life
-expectancy match Statistics Canada's published life expectancy targets at the calibration timepoints.
+expectancy match Statistics Canada's published life expectancy targets at the calibration timepoints
+(:ref:`2028, 2048, 2073 <death-model-data-calibration>`).
 
 To evaluate a candidate :math:`\beta_{\text{sex}}`, we apply the projection formula above to
 construct a full life table of death probabilities across all ages at a given calibration
