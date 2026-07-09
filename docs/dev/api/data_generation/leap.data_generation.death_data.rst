@@ -100,7 +100,8 @@ to ``2021``. The output is a dataframe with the following columns:
   :collapsible:
 
   .. list-table::
-    :widths: 10 10 10 30 30
+    :class: max-width-table
+    :widths: 10 15 15 20 30
     :header-rows: 1
 
     * - ``province``
