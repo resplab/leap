@@ -345,7 +345,7 @@ where:
      - Definition
    * - :math:`q(x, \Delta x, t; \text{sex})`
      - the probability that a person aged :math:`x` of sex ``sex`` at timepoint :math:`t` dies 
-       between the ages ``[x, x + \Delta x)``
+       between the ages :math:`[x, x + \Delta x)`
    * - :math:`t_0`
      - the last timepoint for which we have observed death probabilities (2021)
    * - :math:`t`
