@@ -57,7 +57,7 @@ The data used for background cost by asthma control level also comes from the sa
 `Table I <https://www.sciencedirect.com/science/article/pii/S0091674919316343#tbl1>`_:
 
 .. list-table::
-   :widths: 25 75
+   :widths: 75 25
    :header-rows: 1
 
    * - Variable
@@ -105,7 +105,7 @@ The conversion rate is applied to obtain the 2023 CAD
 costs used in the model:
 
 .. list-table:: Direct costs (2023 CAD)
-   :widths: 25 75
+   :widths: 70 30
    :header-rows: 1
 
    * - Variable
