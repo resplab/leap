@@ -331,8 +331,8 @@ This gives the projection formula:
 
 .. math::
 
-    \text{logit}(q(\text{sex}, \text{age}, t)) =
-        \text{logit}(q(\text{sex}, \text{age}, t_0)) -
+    \text{logit}(q(x, \Delta x, t; \text{sex})) =
+        \text{logit}(q(x, \Delta x, t_0; \text{sex})) -
         \beta_{\text{sex}} \cdot (t - t_0)
 
 where:
@@ -343,9 +343,9 @@ where:
 
    * - Variable
      - Definition
-   * - :math:`q(\text{sex}, \text{age}, t)`
-     - the probability that a person aged ``age`` and of sex ``sex`` dies during between the age
-       ``[age, age + \Delta x)``
+   * - :math:`q(x, \Delta x, t; \text{sex})`
+     - the probability that a person aged :math:`x` of sex ``sex`` at timepoint :math:`t` dies 
+       between the ages ``[x, x + \Delta x)``
    * - :math:`t_0`
      - the last timepoint for which we have observed death probabilities (2021)
    * - :math:`t`
