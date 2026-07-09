@@ -349,7 +349,7 @@ where:
    * - :math:`t_0`
      - the last timepoint for which we have observed death probabilities (2021)
    * - :math:`t`
-     - the last timepoint for which we want to project death probabilities (up to 2068)
+     - the timepoint for which we want to project death probabilities (up to 2068)
    * - :math:`\beta_{\text{sex}}`
      - the rate of mortality improvement — a negative value
        means mortality is declining over time. This parameter is calibrated separately for each
