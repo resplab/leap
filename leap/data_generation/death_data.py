@@ -247,10 +247,6 @@ def get_projected_life_table_single_timepoint(
     )
 
     df["timepoint"] = [timepoint] * df.shape[0]
-
-    df["se"] = df.apply(
-        lambda x: (x["prob_death_proj"] * x["se"]) / x["prob_death"], axis=1
-    )
     df.drop(columns=["prob_death"], inplace=True)
     df.rename(columns={"prob_death_proj": "prob_death"}, inplace=True)
 
@@ -380,7 +376,6 @@ def load_past_death_data() -> pd.DataFrame:
         * ``age``: The integer age.
         * ``prob_death``: The probability that a person of the given age, sex, and province
           will die in the given year.
-        * ``se``: The standard error of the probability of death.
     """ 
     logger.info("Loading mortality data from CSV file...")
     df = pd.read_csv(get_data_path("original_data/13100837.csv"), parse_dates=["REF_DATE"])
@@ -422,20 +417,12 @@ def load_past_death_data() -> pd.DataFrame:
     df = df.loc[df["ELEMENT"].str.contains("qx")]
 
     # create a df with the probability of death
-    df_prob = df.loc[df["ELEMENT"].str.contains("Death probability between age")]
-    df_prob = df_prob.drop(columns=["ELEMENT"])
-    df_prob.rename(columns={"VALUE": "prob_death"}, inplace=True)
-
-    # create a df with the standard error of the probability of death
-    df_se = df.loc[df["ELEMENT"].str.contains("Margin of error")]
-    df_se = df_se.drop(columns=["ELEMENT"])
-    df_se.rename(columns={"VALUE": "se"}, inplace=True)
-
-    # join the two tables
-    df = pd.merge(df_prob, df_se, on=["timepoint", "province", "sex", "age"], how="left")
+    df = df.loc[df["ELEMENT"].str.contains("Death probability between age")]
+    df = df.drop(columns=["ELEMENT"])
+    df.rename(columns={"VALUE": "prob_death"}, inplace=True)
 
     df.sort_values(["province", "age", "sex", "timepoint"], inplace=True)
-    df = df[["province", "age", "sex", "timepoint", "prob_death", "se"]]
+    df = df[["province", "age", "sex", "timepoint", "prob_death"]]
 
     df["projection_scenario"] = ["past"] * df.shape[0]
 
@@ -574,7 +561,6 @@ def compute_beta_parameters(
             * ``sex``: One of ``M`` = male, ``F`` = female.
             * ``age``: the integer age.
             * ``prob_death``: the probability of death.
-            * ``se``: the standard error of the probability of death.
 
         df_calibration: A dataframe containing the life expectancy projections for the calibration
             years. Columns:
@@ -700,7 +686,6 @@ def get_projected_death_data(
             * ``sex``: One of ``M`` = male, ``F`` = female.
             * ``age``: the integer age.
             * ``prob_death``: the probability of death.
-            * ``se``: the standard error of the probability of death.
     
     Returns:
         A dataframe containing the predicted probability of death and the standard error
@@ -730,7 +715,6 @@ def get_projected_death_data(
         * ``age``: The integer age.
         * ``prob_death``: The probability that a person of the given age, sex, and province
           will die in the given year.
-        * ``se``: The standard error of the probability of death.
     """
 
     max_timepoint_past = past_life_table["timepoint"].max()
@@ -771,7 +755,7 @@ def get_projected_death_data(
         inplace=True
     )
     projected_life_table = projected_life_table[
-        ["province", "projection_scenario", "age", "sex", "timepoint", "prob_death", "se"]
+        ["province", "projection_scenario", "age", "sex", "timepoint", "prob_death"]
     ]
 
     return projected_life_table

@@ -79,7 +79,7 @@ class Death:
             (df["timepoint"] >= min_timepoint) &
             (df["province"] == province)
         ]
-        df.drop(columns=["se", "province"], inplace=True)
+        df.drop(columns=["province"], inplace=True)
         df = df.pivot(index=["age", "timepoint"], columns=["sex"], values="prob_death").reset_index()
         df.columns.name = ""
         grouped_df = df.groupby("timepoint")

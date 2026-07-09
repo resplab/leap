@@ -95,16 +95,12 @@ to ``2021``. The output is a dataframe with the following columns:
      - ``float``
      - The probability that a person of the given age and sex, living in the given province, will
        die in the time interval ``[timepoint, timepoint + time_delta)``.
-   * - ``se``
-     - ``float``
-     - The standard error of the probability of death for a person of that age/sex in the given
-       province, during the time interval ``[timepoint, timepoint + time_delta)``.
 
 .. info:: Example: Past Life Table
   :collapsible:
 
   .. list-table::
-    :widths: 10 10 10 30 15 15
+    :widths: 10 10 10 30 30
     :header-rows: 1
 
     * - ``province``
@@ -112,35 +108,29 @@ to ``2021``. The output is a dataframe with the following columns:
       - ``sex``
       - ``timepoint``
       - ``prob_death``
-      - ``se``
     * - BC
       - 0
       - M      
       - 1996-01-01
       - 0.005
-      - 0.0001
     * - BC
       - ...
       - M      
       - 1996-01-01
-      - ...
       - ...
     * - BC
       - 110
       - M      
       - 1996-01-01
       - 0.0023
-      - 0.00097
     * - BC
       - 0
       - M      
       - 1997-01-01
       - 0.0043
-      - 0.00092
     * - BC
       - ...
       - M      
-      - ...
       - ...
       - ...
     * - BC
@@ -148,13 +138,11 @@ to ``2021``. The output is a dataframe with the following columns:
       - M      
       - 2022-01-01
       - 0.0044
-      - 0.00098
     * - BC
       - 0
       - F
       - 1996-01-01
       - 0.0054
-      - 0.000123
 
 
 2. Calibration Data
@@ -297,7 +285,7 @@ probabilities.
 
   .. list-table::
     :class: max-width-table
-    :widths: 8 18 8 10 25 15 10
+    :widths: 8 18 8 10 25 25
     :header-rows: 1
 
     * - ``province``
@@ -306,26 +294,22 @@ probabilities.
       - ``sex``
       - ``timepoint``
       - ``prob_death``
-      - ``se``
     * - BC
       - FA
       - 0
       - F
       - 2023-01-01
       - 0.004919
-      - 0.000123
     * - BC
       - FA
       - 0
       - F
       - 2024-01-01
       - 0.003945
-      - 0.000192
     * - BC
       - FA
       - 0
       - F
-      - ...
       - ...
       - ...
     * - BC
@@ -334,7 +318,6 @@ probabilities.
       - F
       - 2068-01-01
       - 0.003409
-      - 0.000912
 
 
 4. Converting the Time Delta for Death Probabilities
@@ -444,7 +427,7 @@ note that since :math:`\mu(x, t)` is constant over the time interval :math:`[x, 
 
   .. list-table::
     :class: max-width-table
-    :widths: 8 18 8 10 25 15 10
+    :widths: 8 18 8 10 25 25
     :header-rows: 1
 
     * - ``province``
@@ -453,33 +436,28 @@ note that since :math:`\mu(x, t)` is constant over the time interval :math:`[x, 
       - ``sex``
       - ``timepoint``
       - ``prob_death``
-      - ``se``
     * - BC
       - FA
       - 0
       - F
       - 2023-01-01
       - 0.000919
-      - 0.000023
     * - BC
       - FA
       - 0
       - F
       - 2023-02-01
       - 0.000945
-      - 0.000092
     * - BC
       - FA
       - 0
       - F
       - 2023-03-01
       - 0.000294
-      - 0.000092
     * - BC
       - FA
       - 0
       - F
-      - ...
       - ...
       - ...
     * - BC
@@ -488,12 +466,10 @@ note that since :math:`\mu(x, t)` is constant over the time interval :math:`[x, 
       - F
       - 2023-12-01
       - 0.000545
-      - 0.000082
     * - BC
       - FA
       - 0
       - F
-      - ...
       - ...
       - ...
     * - BC
@@ -502,7 +478,6 @@ note that since :math:`\mu(x, t)` is constant over the time interval :math:`[x, 
       - F
       - 2068-01-01
       - 0.003409
-      - 0.000912
 
 
 leap.data\_generation.death\_data module

@@ -31,7 +31,6 @@ def life_table():
     )
     life_table = life_table.loc[~mask].copy()
     life_table["prob_death"] = np.random.sample(life_table.shape[0]) / 1000.0
-    life_table["se"] = np.random.sample(life_table.shape[0]) / 10000.0
     return life_table
 
 
@@ -84,11 +83,10 @@ def test_get_projected_life_table_single_timepoint(life_table, sex, province, ti
     assert projected_life_table["province"].nunique() == 1
     assert projected_life_table["province"].iloc[0] == province
     assert set(projected_life_table.columns) == set(
-        ["province","projection_scenario", "age", "sex", "timepoint", "prob_death", "se"]
+        ["province","projection_scenario", "age", "sex", "timepoint", "prob_death"]
     )
     assert set(projected_life_table["age"].unique()) == set(life_table_filtered["age"].unique())
     assert projected_life_table["prob_death"].between(0.0, 1.0).all()
-    assert projected_life_table["se"].between(0.0, 1.0).all()
 
 
 
@@ -129,7 +127,7 @@ def test_load_past_death_data(expected_rows):
     assert df["timepoint"].min() >= MIN_TIMEPOINT
     assert df["sex"].isin(["M", "F"]).all()
     assert set(df.columns) == set([
-        "province", "projection_scenario", "age", "sex", "prob_death", "timepoint", "se"
+        "province", "projection_scenario", "age", "sex", "prob_death", "timepoint"
     ])
     assert df["projection_scenario"].isin(["past"]).all()
     assert df["province"].isin(PROVINCE_MAP.values()).all()
@@ -209,7 +207,7 @@ def test_get_projected_death_data(beta_parameters, expected_rows):
     assert df["timepoint"].min() >= MIN_TIMEPOINT
     assert df["sex"].isin(["M", "F"]).all()
     assert set(df.columns) == set([
-        "province", "projection_scenario", "age", "sex", "prob_death", "timepoint", "se"
+        "province", "projection_scenario", "age", "sex", "prob_death", "timepoint"
     ])
     assert df["province"].isin(PROVINCE_MAP.values()).all()
     for row in expected_rows:
