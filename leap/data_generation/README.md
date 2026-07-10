@@ -137,9 +137,9 @@ cd LEAP
 python3 leap/data_generation/death_data.py --time-delta P1Y
 ```
 
-This will update the following data file: 
+This will update the following data files: 
 
-1. `leap/processed_data/{time_delta_tag}/life_table.csv`
+1. `leap/processed_data/{time_delta_tag}/death/life_table_{province}.csv`
 
 
 The `--time-delta` argument must be in **ISO 8601** format:

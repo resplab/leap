@@ -108,7 +108,17 @@ def load_migration_data() -> pd.DataFrame:
         get_data_path("processed_data/birth/initial_population.csv")
     )
     logger.info("Loading mortality data from CSV file...")
-    life_table = pd.read_csv(get_data_path("processed_data/life_table.csv"))
+    life_table = pd.DataFrame({
+        "province": [],
+        "projection_scenario": [],
+        "timepoint": [],
+        "age": np.array([], dtype=int),
+        "sex": [],
+        "prob_death": np.array([], dtype=float)
+    })
+    for file_path in get_data_path("processed_data/death").glob("life_table_*.csv"):
+        df = pd.read_csv(get_data_path(file_path), parse_dates=["timepoint"])
+        life_table = pd.concat([life_table, df], axis=0)
 
     df_migration = pd.DataFrame({
         "year": np.array([], dtype=int),

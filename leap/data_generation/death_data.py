@@ -863,17 +863,20 @@ def generate_death_data(
                 f"Projection Scenario: {projection_scenario}"
             )
 
-    # save the data
+    # Save the data to CSV files, one for each province
     if to_csv:
-        file_path = get_data_path(f"processed_data/{time_delta_tag}/life_table.csv", mkdirs=True)
-        logger.info(f"Saving data to {file_path}")
-        life_table.to_csv(file_path, index=False)
+        grouped_df = life_table.groupby(["province"])
+        for group_name, df in grouped_df:
+            province = group_name[0]
+            file_path = get_data_path(
+                f"processed_data/{time_delta_tag}/death/life_table_{province}.csv",
+                mkdirs=True
+            )
+            logger.info(f"Saving data to {file_path}")
+            df.to_csv(file_path, index=False)
     else:
         return life_table
     
-
-
-
 
 def plot(
     df: pd.DataFrame,

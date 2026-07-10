@@ -87,12 +87,13 @@ class Death:
             * ``M (float)``: the probability of death for a male of a given age in a given timepoint.
         """
         time_delta_tag = get_time_delta_tag(time_delta)
+        check_province(province)
+
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_delta_tag}/life_table.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/death/life_table_{province}.csv"),
             parse_dates=["timepoint"]
         )
         check_timepoint(min_timepoint, df)
-        check_province(province)
 
         df = df[
             (df["timepoint"] >= min_timepoint) &
