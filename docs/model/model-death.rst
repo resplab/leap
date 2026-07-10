@@ -733,8 +733,8 @@ Processed Data
 The past and projected death probabilities are combined by `leap/data_generation/death_data.py
 <https://github.com/resplab/leap/blob/main/leap/data_generation/death_data.py>`_
 into a single processed file saved as:
-`leap/processed_data/{time_delta_tag}/life_table.csv
-<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/life_table.csv>`_.
+`leap/processed_data/{time_delta_tag}/death/life_table_{province}.csv
+<https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/death/life_table_CA.csv>`_.
 
 Past data (from ``13100837.csv``) covers years 1996 to the last available year using
 death probabilities directly from Statistics Canada.
