@@ -76,7 +76,7 @@ is formatted as follows:
     </table>
 
 Since the EQ-5D-5L data described above only covers individuals aged 18 and older, the utility
-values for ages 0 to 17 are interpolated. We assume that utility increases linearly from a value
+values for ages 0 to 17 are interpolated. We assume that utility decreases linearly from a value
 of 1 (perfect health) at age 0 to the observed EQ-5D value at age 18, :math:`u_{18}`, separately
 for each sex:
 
@@ -85,7 +85,7 @@ for each sex:
     u_{\text{age}} = 1 - \dfrac{1 - u_{18}}{18} \times \text{age}, \quad \text{age} \in [0, 17]
 
 Since these values are derived rather than directly observed, the standard deviation ``sd`` for
-ages :math:`< 18` is set to ``0``, as noted in the table above.
+ages :math:`< 18` is set to ``0``.
 
 .. _utility-data-exacerbations:
 
@@ -117,9 +117,7 @@ sourced from :cite:`lloyd2007` and :cite:`campbell2010`:
 .. note::
 
     In :cite:`yaghoubi`, ``severe`` exacerbations are equivalent to our definition of ``very severe``
-    exacerbations. Thus, we are missing the utility of ``severe`` exacerbations. To account for
-    this, we defined the utility of a ``severe`` exacerbation as the arithmetic mean of the
-    utilities of ``moderate`` and ``very severe`` exacerbations:
+    exacerbations. Thus, we are missing the utility of ``severe`` exacerbations. We defined the utility of a ``severe`` exacerbation as the arithmetic mean of the utilities of ``moderate`` and ``very severe`` exacerbations:
 
     .. math::
 
@@ -163,10 +161,10 @@ where:
      - 0.33
      - 0.56
 
-Now, the values listed in this table are the disutility for having an asthma exacerbation of a given
+The values listed in this table are the disutility for having an asthma exacerbation of a given
 severity for an entire year. We assume that a mild asthma exacerbation lasts for 7 days, while
 all the other severity levels last for 14 days :cite:`aldington2007`. To convert these values we
-have the weekly disutility:
+need the weekly disutility:
 
 .. math::
 
@@ -275,31 +273,34 @@ where:
 Model: Calculating Utility
 ===========================
 
-Exacerbation disutility is applied per exacerbation event, i.e. it is incurred each time there is
-an exacerbation of the corresponding severity. Control level disutility is weighted by
-:math:`P(y = k)`, which per the :ref:`control-model` represents the proportion of the time interval
-spent at control level :math:`k`. The net utility is given by the formula:
+Exacerbation disutility is applied per exacerbation event, i.e. it is incurred each time agent
+:math:`i` has an exacerbation of the corresponding severity. Control level disutility is weighted
+by :math:`P(y^{(i)} = k)`, which per the :ref:`control-model` represents the proportion of the time
+interval agent :math:`i` spends at control level :math:`k`. The net utility is given by the
+formula:
 
 .. math::
 
-    u =
+    \small
+    u^{(i)} =
     \begin{cases}
-        u_{\text{age}, \text{sex}} & \text{if the person does not have asthma} \\[6pt]
-        \max\left(0,\ u_{\text{age}, \text{sex}} - \left(
-          \sum_{S=1}^{4} n_{\text{Exac}}(S) \cdot d_E(S) + \sum_{k=1}^{3} P(y = k) \cdot d_C(k)
-        \right)\right) & \text{if the person has asthma}
+        u_{\text{age}, \text{sex}}^{(i)} & \text{if agent } i \text{ does not have asthma} \\[6pt]
+        \max\left(0,\ u_{\text{age}, \text{sex}}^{(i)} - \left(
+          \sum_{S=1}^{4} n_{\text{Exac}}^{(i)}(S) \cdot d_E(S) + \sum_{k=1}^{3} P(y^{(i)} = k) \cdot d_C(k)
+        \right)\right) & \text{if agent } i \text{ has asthma}
     \end{cases}
 
 where:
 
-* :math:`u_{\text{age}, \text{sex}}` is the baseline utility for a person of the given age and
-  sex (without asthma)
-* :math:`n_{\text{Exac}}(S)` is the number of exacerbations at severity level :math:`S` in a
-  time interval
+* :math:`u_{\text{age}, \text{sex}}^{(i)}` is the baseline utility for agent :math:`i`, of the
+  given age and sex (without asthma)
+* :math:`n_{\text{Exac}}^{(i)}(S)` is the number of exacerbations at severity level :math:`S` in a
+  time interval, for agent :math:`i`
 * :math:`d_E(S)` is the disutility due to an asthma exacerbation of severity level :math:`S`
 * :math:`S \in \{\text{mild}, \text{moderate}, \text{severe}, \text{very severe}\}` is the asthma
   exacerbation severity level
-* :math:`P(y = k)` is the probability of being at asthma control level :math:`k`
+* :math:`P(y^{(i)} = k)` is the probability of agent :math:`i` being at asthma control level
+  :math:`k`
 * :math:`d_C(k)` is the disutility due to being at asthma control level :math:`k`
 * :math:`k \in \{\text{well-controlled}, \text{partially-controlled}, \text{uncontrolled}\}` is
   the asthma control level

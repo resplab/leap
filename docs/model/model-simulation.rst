@@ -550,30 +550,31 @@ they lose their diagnosis. For this we use a Bernoulli distribution:
 Step 8: Compute utility
 ---------------------------
 
-Utility is a measure of the agent's quality of life, which can be affected by asthma control,
-exacerbations, and hospitalizations. We compute the utility for the agent in the current timepoint
+We compute the health state utility for the agent in the current timepoint
 using the :ref:`utility-model`:
 
 .. math::
 
-    u =
+    \small
+    u^{(i)} =
     \begin{cases}
-        u_{\text{age}, \text{sex}} & \text{if the person does not have asthma} \\[6pt]
-        \max\left(0,\ u_{\text{age}, \text{sex}} - \left(
-          \sum_{S=1}^{4} n_{\text{Exac}}(S) \cdot d_E(S) + \sum_{k=1}^{3} P(y = k) \cdot d_C(k)
-        \right)\right) & \text{if the person has asthma}
+        u_{\text{age}, \text{sex}}^{(i)} & \text{if agent } i \text{ does not have asthma} \\[6pt]
+        \max\left(0,\ u_{\text{age}, \text{sex}}^{(i)} - \left(
+          \sum_{S=1}^{4} n_{\text{Exac}}^{(i)}(S) \cdot d_E(S) + \sum_{k=1}^{3} P(y^{(i)} = k) \cdot d_C(k)
+        \right)\right) & \text{if agent } i \text{ has asthma}
     \end{cases}
 
 where:
 
-* :math:`u_{\text{age}, \text{sex}}` is the baseline utility for a person of the given age and
-  sex (without asthma)
-* :math:`n_{\text{Exac}}(S)` is the number of exacerbations at severity level :math:`S` in a
-  time interval
+* :math:`u_{\text{age}, \text{sex}}^{(i)}` is the baseline utility for agent :math:`i`, of the
+  given age and sex (without asthma)
+* :math:`n_{\text{Exac}}^{(i)}(S)` is the number of exacerbations at severity level :math:`S` in a
+  time interval, for agent :math:`i`
 * :math:`d_E(S)` is the disutility due to an asthma exacerbation of severity level :math:`S`
 * :math:`S \in \{\text{mild}, \text{moderate}, \text{severe}, \text{very severe}\}` is the asthma
   exacerbation severity level
-* :math:`P(y = k)` is the probability of being at asthma control level :math:`k`
+* :math:`P(y^{(i)} = k)` is the probability of agent :math:`i` being at asthma control level
+  :math:`k`
 * :math:`d_C(k)` is the disutility due to being at asthma control level :math:`k`
 * :math:`k \in \{\text{well-controlled}, \text{partially-controlled}, \text{uncontrolled}\}` is
   the asthma control level
