@@ -397,8 +397,9 @@ def load_past_initial_population_data(
 
     # get the total population for a given time interval, province, and age
     grouped_df = df.groupby(["timepoint", "age", "province"])
-    df["n_age"] = grouped_df["N"].transform(lambda x: x.sum())
-    df["prop_male"] = df.apply(lambda x: x["N"] / x["n_age"] if x["n_age"] != 0 else 0, axis=1)
+    df["n_age"] = grouped_df["N"].transform("sum")
+    df["prop_male"] = df["N"] / df["n_age"]
+    df["prop_male"] =  df["prop_male"].fillna(0)
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
@@ -521,8 +522,8 @@ def load_projected_initial_population_data(
 
     # get the total population for a given timepoint, province, age, and projection scenario
     grouped_df = df.groupby(["timepoint", "age", "province", "projection_scenario"])
-    df["prop_male"] = grouped_df["N"].transform(lambda x: x / x.sum())
-    df["n_age"] = grouped_df["N"].transform(lambda x: x.sum())
+    df["n_age"] = grouped_df["N"].transform("sum")
+    df["prop_male"] = df["N"] / df["n_age"]
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
