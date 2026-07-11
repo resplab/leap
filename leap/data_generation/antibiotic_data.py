@@ -55,55 +55,57 @@ def estimate_alpha(
 
 
 def load_birth_data(
-    province: str = "BC", min_year: int = 2000, max_year: int = 2018
+    time_delta_od: TimeDelta = TimeDelta(years=1),
+    province: str = "BC",
+    min_timepoint: dt.datetime = dt.datetime(2000, 1, 1),
+    max_timepoint: dt.datetime = dt.datetime(2018, 12, 31)
 ) -> pd.DataFrame:
     """Load the StatCan birth data.
     
     Args:
+        time_delta_od: The duration of the time intervals in the original antibiotic data.
         province: The province to load the data for.
-        min_year: The minimum year to load the data for. Must be an integer in the range
-            ``[1999, 2021]``.
-        max_year: The maximum year to load the data for. Must be an integer in the range
-            ``[1999, 2021]``, and ```max_year >= min_year``.
+        min_timepoint: The minimum timepoint to load the data for. Must be a ``datetime`` object in
+            the range ``[1999, 2021]``.
+        max_timepoint: The maximum timepoint to load the data for. Must be a ``datetime`` object in
+            the range ``[1999, 2021]``, and ``max_timepoint >= min_timepoint``.
 
     Returns:
-        A pandas dataframe with the number of births in a province, stratified by year and sex.
+        A pandas dataframe with the number of births in a province, stratified by timepoint and sex.
         Columns:
         
-        * ``year (int)``: The calendar year.
+        * ``timepoint (dt.datetime)``: The date and time.
         * ``province (str)``: The province name.
         * ``sex (str)``: One of ``M`` = male, ``F`` = female
         * ``n_birth (int)``: The number of births in the given year, province, and sex.
 
     """
-    df = pd.read_csv(get_data_path("original_data/17100005.csv"), low_memory=False)
 
-    # rename columns
-    df.rename(
-        columns={"REF_DATE": "year", "GEO": "province", "SEX": "sex", "VALUE": "n_birth"},
-        inplace=True
+    time_delta_tag = get_time_delta_tag(time_delta_od)
+    df = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/birth/birth_estimate.csv"),
+        parse_dates=["timepoint"]
     )
 
-    # select only the age = 0 age group and the years where min_year <= year <= max_year
+    # select only the province and the timepoints where min_timepoint <= timepoint <= max_timepoint
     df = df.loc[
-        (df["year"] >= min_year) & 
-        (df["year"] <= max_year) & 
-        (df["AGE_GROUP"] == "0 years")
+        (df["timepoint"] >= min_timepoint) & 
+        (df["timepoint"] <= max_timepoint) & 
+        (df["province"] == province)
     ]
 
-    # select only the columns we need
-    df = df[["year", "province", "sex", "n_birth"]]
-
-    # convert province names to 2-letter province IDs and select the province
-    df["province"] = df["province"].apply(get_province_id)
-    df = df.loc[df["province"] == province]
-
-    # convert sex to 1-letter ID ("F", "M", "B") and remove the "B" (both) rows
-    df["sex"] = df["sex"].apply(get_sex_id)
-    df = df.loc[df["sex"] != "B"]
+    # pivot table to have separate rows for M and F
+    df["F"] = df["N"] * (1 - df["prop_male"])
+    df["M"] = df["N"] * df["prop_male"]
+    df = df.melt(
+        id_vars=["timepoint", "province"],
+        value_vars=["F", "M"],
+        var_name="sex",
+        value_name="n_birth"
+    )
 
     # convert N to integer
-    df["n_birth"] = df["n_birth"].apply(lambda x: int(x))
+    df["n_birth"] = df["n_birth"].astype("int")
 
     df.reset_index(drop=True, inplace=True)
 
