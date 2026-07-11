@@ -165,8 +165,8 @@ def load_past_births_population_data(
 
     # get the proportion male / female
     grouped_df = df.groupby(["timepoint", "province"])
-    df["prop"] = grouped_df["N"].transform(lambda x: x / x.max())
-    df["max_N"] = grouped_df["N"].transform(lambda x: x.max())
+    df["max_N"] = grouped_df["N"].transform("max")
+    df["prop"] = df["N"] / df["max_N"]
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
@@ -280,8 +280,8 @@ def load_projected_births_population_data(
 
     # get the proportion male / female
     grouped_df = df.groupby(["timepoint", "province", "projection_scenario"])
-    df["prop"] = grouped_df["N"].transform(lambda x: x / x.max())
-    df["max_N"] = grouped_df["N"].transform(lambda x: x.max())
+    df["max_N"] = grouped_df["N"].transform("max")
+    df["prop"] = df["N"] / df["max_N"]
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
