@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import datetime as dt
 import json
 import itertools
 import statsmodels.api as sm
@@ -13,8 +14,8 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-MIN_YEAR = 2000
-MAX_YEAR = 2019
+MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
+MAX_TIMEPOINT = dt.datetime(2019, 12, 31)
 MAX_AGE = 65
 
 
@@ -203,8 +204,8 @@ def generate_antibiotic_model(
 def get_predicted_abx_data(
     model: GLMResultsWrapper,
     df: pd.DataFrame | None = None,
-    min_year: int = MIN_YEAR,
-    max_year: int = MAX_YEAR
+    min_year: dt.datetime = MIN_TIMEPOINT,
+    max_year: dt.datetime = MAX_TIMEPOINT
 ) -> pd.DataFrame:
     """Get predicted data from a GLM model.
 
