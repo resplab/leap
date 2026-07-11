@@ -550,29 +550,35 @@ they lose their diagnosis. For this we use a Bernoulli distribution:
 Step 8: Compute utility
 ---------------------------
 
-Utility is a measure of the agent's quality of life, which can be affected by asthma control,
-exacerbations, and hospitalizations. We compute the utility for the agent in the current timepoint
-using the :ref:`utility-model`:
+Health state utility is a measure of the agent's quality of life, which can be affected by
+asthma control and exacerbations. We compute the health state utility for the agent in the
+current timepoint using the :ref:`utility-model`:
 
 .. math::
 
-    u := u_{\text{baseline}} - A \cdot \left(
-      \sum_{S=1}^{4} d_E(S) \cdot n_E(S) + \sum_{L=1}^{3} d_C(L) \cdot C(L)
-    \right)
+    \small
+    u^{(i)} =
+    \begin{cases}
+        u_{\text{age}, \text{sex}}^{(i)} & \text{if agent } i \text{ does not have asthma} \\[6pt]
+        \max\left(0,\ u_{\text{age}, \text{sex}}^{(i)} - \left(
+          \sum_{S=1}^{4} n_E^{(i)}(S) \cdot d_E(S) + \sum_{k=1}^{3} P(y^{(i)} = k) \cdot d_C(k)
+        \right)\right) & \text{if agent } i \text{ has asthma}
+    \end{cases}
 
 where:
 
-* :math:`u_{\text{baseline}}` is the baseline utility for a person of a given age and sex
-  (without asthma)
-* :math:`d_{E}(S)` is the disutility due to an asthma exacerbation of severity level :math:`S`
-* :math:`n_E(S)` is the number of asthma exacerbations of severity level :math:`S` in a time interval
-* :math:`S \in \{1, 2, 3, 4\}` is the asthma exacerbation severity level (1 = mild, 2 =
-  moderate, 3 = severe, 4 = very severe)
-* :math:`d_{C}` is the disutility due to having asthma at control level :math:`L`
-* :math:`C(L)` is the proportion of the time interval spent at asthma control level :math:`L`
-* :math:`L \in \{1, 2, 3\}` is the asthma control level (1 = well-controlled, 2 =
-  partially-controlled, 3 = uncontrolled)
-* :math:`A` is a boolean indicating whether the person has asthma
+* :math:`u_{\text{age}, \text{sex}}^{(i)}` is the baseline utility for agent :math:`i`, of the
+  given age and sex (without asthma)
+* :math:`n_E^{(i)}(S)` is the number of exacerbations at severity level :math:`S` in a
+  time interval, for agent :math:`i`
+* :math:`d_E(S)` is the disutility due to an asthma exacerbation of severity level :math:`S`
+* :math:`S \in \{\text{mild}, \text{moderate}, \text{severe}, \text{very severe}\}` is the asthma
+  exacerbation severity level
+* :math:`P(y^{(i)} = k)` is the probability of agent :math:`i` being at asthma control level
+  :math:`k`
+* :math:`d_C(k)` is the disutility due to being at asthma control level :math:`k`
+* :math:`k \in \{\text{well-controlled}, \text{partially-controlled}, \text{uncontrolled}\}` is
+  the asthma control level
 
 
 Step 9: Compute cost
@@ -583,13 +589,13 @@ Next, we compute the cost for the agent using the
 
 .. math::
 
-  \text{cost} = \sum_{S=1}^4 n_{\text{Exac}}^{(i)}(S) \cdot \text{cost}_E(S) +
+  \text{cost}^{(i)} = \sum_{S=1}^4 n_E^{(i)}(S) \cdot \text{cost}_E(S) +
     \sum_{k=1}^3 P(y^{(i)} = k) \cdot \text{cost}_C(k)
 
 
 where:
 
-* :math:`n_{\text{Exac}}^{(i)}(S)` is the number of exacerbations at severity level :math:`S`
+* :math:`n_E^{(i)}(S)` is the number of exacerbations at severity level :math:`S`
 * :math:`\text{cost}_E(S)` is the cost of an exacerbation at severity level :math:`S`
 * :math:`P(y^{(i)} = k)` is the probability of agent :math:`i` being at asthma control level
   :math:`k`

@@ -135,13 +135,13 @@ the proportion of the time interval agent :math:`i` spends at control level :mat
 
 .. math::
 
-  \text{cost} = \sum_{S=1}^4 n_{\text{Exac}}^{(i)}(S) \cdot \text{cost}_E(S) +
+  \text{cost}^{(i)} = \sum_{S=1}^4 n_E^{(i)}(S) \cdot \text{cost}_E(S) +
     \sum_{k=1}^3 P(y^{(i)} = k) \cdot \text{cost}_C(k)
 
 
 where:
 
-* :math:`n_{\text{Exac}}^{(i)}(S)` is the number of exacerbations at severity level :math:`S`
+* :math:`n_E^{(i)}(S)` is the number of exacerbations at severity level :math:`S`
 * :math:`\text{cost}_E(S)` is the cost of an exacerbation at severity level :math:`S`
 * :math:`P(y^{(i)} = k)` is the probability of agent :math:`i` being at asthma control level
   :math:`k`
