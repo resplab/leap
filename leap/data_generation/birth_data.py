@@ -165,8 +165,8 @@ def load_past_births_population_data(
 
     # get the proportion male / female
     grouped_df = df.groupby(["timepoint", "province"])
-    df["prop"] = grouped_df["N"].transform(lambda x: x / x.max())
-    df["max_N"] = grouped_df["N"].transform(lambda x: x.max())
+    df["max_N"] = grouped_df["N"].transform("max")
+    df["prop"] = df["N"] / df["max_N"]
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
@@ -280,8 +280,8 @@ def load_projected_births_population_data(
 
     # get the proportion male / female
     grouped_df = df.groupby(["timepoint", "province", "projection_scenario"])
-    df["prop"] = grouped_df["N"].transform(lambda x: x / x.max())
-    df["max_N"] = grouped_df["N"].transform(lambda x: x.max())
+    df["max_N"] = grouped_df["N"].transform("max")
+    df["prop"] = df["N"] / df["max_N"]
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
@@ -393,12 +393,13 @@ def load_past_initial_population_data(
     df = df.dropna(subset=["N"])
 
     # convert N to integer
-    df["N"] = df["N"].apply(lambda x: int(x))
+    df["N"] = df["N"].astype(int)
 
     # get the total population for a given time interval, province, and age
     grouped_df = df.groupby(["timepoint", "age", "province"])
-    df["n_age"] = grouped_df["N"].transform(lambda x: x.sum())
-    df["prop_male"] = df.apply(lambda x: x["N"] / x["n_age"] if x["n_age"] != 0 else 0, axis=1)
+    df["n_age"] = grouped_df["N"].transform("sum")
+    df["prop_male"] = df["N"] / df["n_age"]
+    df["prop_male"] =  df["prop_male"].fillna(0)
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
@@ -521,8 +522,8 @@ def load_projected_initial_population_data(
 
     # get the total population for a given timepoint, province, age, and projection scenario
     grouped_df = df.groupby(["timepoint", "age", "province", "projection_scenario"])
-    df["prop_male"] = grouped_df["N"].transform(lambda x: x / x.sum())
-    df["n_age"] = grouped_df["N"].transform(lambda x: x.sum())
+    df["n_age"] = grouped_df["N"].transform("sum")
+    df["prop_male"] = df["N"] / df["n_age"]
 
     # keep only male entries
     df = df.loc[df["sex"] == "M"]
@@ -543,7 +544,7 @@ def load_projected_initial_population_data(
 
     # add the births column to the main df
     df = pd.merge(df, df_birth, on=["province", "timepoint", "projection_scenario"], how="left")
-    df["prop"] = df.apply(lambda x: x["n_age"] / x["n_birth"], axis=1)
+    df["prop"] = df["n_age"] / df["n_birth"]
 
     df = df.sort_values(["province", "projection_scenario", "age", "timepoint"]).reset_index(drop=True)
     df = df[
@@ -567,11 +568,10 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
     birth_estimate = birth_estimate.loc[birth_estimate["province"].isin(["BC", "CA"])]
 
     # Save the birth estimate data to a CSV file
-    data_path = get_data_path(f"processed_data")
     time_delta_tag = get_time_delta_tag(time_delta)
-    file_path = pathlib.Path(data_path, f"{time_delta_tag}/birth/birth_estimate.csv")
-    if not os.path.exists(os.path.dirname(file_path)):
-        os.makedirs(os.path.dirname(file_path))
+    file_path = get_data_path(
+        f"processed_data/{time_delta_tag}/birth/birth_estimate.csv", mkdirs=True
+    )
     logger.info(f"Saving data to {file_path}")
     birth_estimate.to_csv(file_path, index=False, date_format="%Y-%m-%dT%H:%M:%S")
 
@@ -603,11 +603,12 @@ def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = Tr
     initial_population = initial_population.loc[initial_population["province"].isin(["BC", "CA"])]
 
     # Save the initial population distribution data to a CSV file
-    data_path = get_data_path(f"processed_data")
+
     time_delta_tag = get_time_delta_tag(time_delta)
-    file_path = pathlib.Path(data_path, f"{time_delta_tag}/birth/initial_population.csv")
-    if not os.path.exists(os.path.dirname(file_path)):
-        os.makedirs(os.path.dirname(file_path))
+    file_path = get_data_path(
+        f"processed_data/{time_delta_tag}/birth/initial_population.csv",
+        mkdirs=True
+    )
     logger.info(f"Saving data to {file_path}")
     initial_population.to_csv(file_path, index=False, date_format="%Y-%m-%dT%H:%M:%S")
 
