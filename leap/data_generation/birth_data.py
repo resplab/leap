@@ -568,11 +568,10 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
     birth_estimate = birth_estimate.loc[birth_estimate["province"].isin(["BC", "CA"])]
 
     # Save the birth estimate data to a CSV file
-    data_path = get_data_path(f"processed_data")
     time_delta_tag = get_time_delta_tag(time_delta)
-    file_path = pathlib.Path(data_path, f"{time_delta_tag}/birth/birth_estimate.csv")
-    if not os.path.exists(os.path.dirname(file_path)):
-        os.makedirs(os.path.dirname(file_path))
+    file_path = get_data_path(
+        f"processed_data/{time_delta_tag}/birth/birth_estimate.csv", mkdirs=True
+    )
     logger.info(f"Saving data to {file_path}")
     birth_estimate.to_csv(file_path, index=False, date_format="%Y-%m-%dT%H:%M:%S")
 
@@ -604,11 +603,12 @@ def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = Tr
     initial_population = initial_population.loc[initial_population["province"].isin(["BC", "CA"])]
 
     # Save the initial population distribution data to a CSV file
-    data_path = get_data_path(f"processed_data")
+
     time_delta_tag = get_time_delta_tag(time_delta)
-    file_path = pathlib.Path(data_path, f"{time_delta_tag}/birth/initial_population.csv")
-    if not os.path.exists(os.path.dirname(file_path)):
-        os.makedirs(os.path.dirname(file_path))
+    file_path = get_data_path(
+        f"processed_data/{time_delta_tag}/birth/initial_population.csv",
+        mkdirs=True
+    )
     logger.info(f"Saving data to {file_path}")
     initial_population.to_csv(file_path, index=False, date_format="%Y-%m-%dT%H:%M:%S")
 
