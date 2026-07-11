@@ -90,17 +90,25 @@ def load_mortality_data(time_delta: TimeDelta) -> pd.DataFrame:
     """
     logger.info("Loading mortality data from CSV file...")
     time_delta_tag = get_time_delta_tag(time_delta)
-    df = pd.read_csv(
-        get_data_path(f"processed_data/{time_delta_tag}/life_table.csv"),
-        parse_dates=["timepoint"]
-    )
 
-    df = df[["timepoint", "age", "province", "sex", "prob_death"]]
+    life_table = pd.DataFrame({
+        "province": [],
+        "projection_scenario": [],
+        "timepoint": [],
+        "age": np.array([], dtype=int),
+        "sex": [],
+        "prob_death": np.array([], dtype=float)
+    })
+    for file_path in get_data_path(f"processed_data/{time_delta_tag}/death").glob("life_table_*.csv"):
+        df = pd.read_csv(get_data_path(file_path), parse_dates=["timepoint"])
+        life_table = pd.concat([life_table, df], axis=0)
+
+    life_table = life_table[["province", "timepoint", "age", "sex", "prob_death"]]
 
     if time_delta < TimeDelta(years=1):
-        df = split_ages(df, time_delta, TimeDelta(years=1), ["prob_death"])
+        life_table = split_ages(life_table, time_delta, TimeDelta(years=1), ["prob_death"])
 
-    return df
+    return life_table
 
 
 def load_population_data(time_delta: TimeDelta) -> pd.DataFrame:
