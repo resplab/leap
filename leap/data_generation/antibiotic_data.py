@@ -261,11 +261,13 @@ def get_predicted_abx_data(
 
 
 def generate_antibiotic_data(
+    time_delta: TimeDelta,
     return_type: str = "csv"
 ) -> GLMResultsWrapper | None:
     """Fit a ``GLM`` for antibiotic prescriptions in the first year of life and generate data.
 
     Args:
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
         return_type: The type of data to return. If ``csv``, the function will save a CSV file
             with the predicted data. If ``model``, the function will return the fitted GLM model.
     
@@ -309,3 +311,4 @@ if __name__ == "__main__":
     parser = get_parser()
     args = parser.parse_args()
     time_delta = TimeDelta(iso_string=args.time_delta)
+    generate_antibiotic_data(time_delta)
