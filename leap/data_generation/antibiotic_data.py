@@ -110,7 +110,7 @@ def load_birth_data(
     return df
 
 
-def load_antibiotic_data() -> pd.DataFrame:
+def load_antibiotic_data(time_delta: TimeDelta) -> pd.DataFrame:
     """Load the antibiotic dose data.
 
     The antibiotic prescription data is from the BC Ministry of Health and contains the total
@@ -118,12 +118,15 @@ def load_antibiotic_data() -> pd.DataFrame:
     2000 to 2018.
 
     The birth data is from StatCan census data and contains the number of births in BC,
-    stratified by year and sex.
+    stratified by timepoint and sex.
+
+    Args:
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
     
     Returns:
         A Pandas dataframe. Columns:
         
-        * ``year (int)``: The calendar year.
+        * ``timepoint (dt.datetime)``: The date and time.
         * ``sex (str)``: One of ``M`` = male, ``F`` = female.
         * ``n_abx (int)``: The number total number of courses of antibiotics dispensed to
             infants in BC for the given year and sex.
@@ -131,14 +134,19 @@ def load_antibiotic_data() -> pd.DataFrame:
 
     """
 
-    df_abx = pd.read_csv(get_data_path("original_data/private/bc_abx_dose_data.csv"))
+    df_abx = pd.read_csv(
+        get_data_path("original_data/private/bc_abx_dose_data.csv"),
+        parse_dates=["year"]
+    )
+    df_abx.rename(columns={"year": "timepoint"}, inplace=True)
+
     df_birth = load_birth_data()
 
     df_abx = pd.merge(
         df_abx,
         df_birth,
         how="left",
-        on=["year", "sex"]
+        on=["timepoint", "sex"]
     )
 
     return df_abx
@@ -278,7 +286,7 @@ def generate_antibiotic_data(
 
     """
     formula = "n_abx ~ year + sex + heaviside(year, 2005) * year"
-    df_abx = load_antibiotic_data()
+    df_abx = load_antibiotic_data(time_delta)
     alpha = estimate_alpha(df_abx, formula, offset=np.log(df_abx["n_birth"]))
     model_abx = generate_antibiotic_model(df_abx, formula, alpha)
     if return_type == "csv":
