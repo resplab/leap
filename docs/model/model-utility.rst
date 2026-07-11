@@ -4,6 +4,10 @@
 Utility Model
 =================
 
+In ``LEAP``, we quantify the health-related quality of life of individuals with asthma using
+**health state utilities**, which range from 0 to 1, where 1 represents perfect health and 0
+represents death.
+
 Datasets
 =================
 
@@ -286,7 +290,7 @@ formula:
     \begin{cases}
         u_{\text{age}, \text{sex}}^{(i)} & \text{if agent } i \text{ does not have asthma} \\[6pt]
         \max\left(0,\ u_{\text{age}, \text{sex}}^{(i)} - \left(
-          \sum_{S=1}^{4} n_{\text{Exac}}^{(i)}(S) \cdot d_E(S) + \sum_{k=1}^{3} P(y^{(i)} = k) \cdot d_C(k)
+          \sum_{S=1}^{4} n_E^{(i)}(S) \cdot d_E(S) + \sum_{k=1}^{3} P(y^{(i)} = k) \cdot d_C(k)
         \right)\right) & \text{if agent } i \text{ has asthma}
     \end{cases}
 
@@ -294,7 +298,7 @@ where:
 
 * :math:`u_{\text{age}, \text{sex}}^{(i)}` is the baseline utility for agent :math:`i`, of the
   given age and sex (without asthma)
-* :math:`n_{\text{Exac}}^{(i)}(S)` is the number of exacerbations at severity level :math:`S` in a
+* :math:`n_E^{(i)}(S)` is the number of exacerbations at severity level :math:`S` in a
   time interval, for agent :math:`i`
 * :math:`d_E(S)` is the disutility due to an asthma exacerbation of severity level :math:`S`
 * :math:`S \in \{\text{mild}, \text{moderate}, \text{severe}, \text{very severe}\}` is the asthma
