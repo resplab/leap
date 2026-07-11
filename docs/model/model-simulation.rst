@@ -578,21 +578,22 @@ where:
 Step 9: Compute cost
 ---------------------------
 
-Next, we compute the cost due to asthma for the agent in Canadian dollars using the
+Next, we compute the cost for the agent using the
 :ref:`cost-model`:
 
 .. math::
 
-  \text{cost} = \sum_{S=1}^4 n_E(S) \cdot \text{cost}_E(S) + 
-    \sum_{L=1}^3 P(L) \cdot \text{cost}_C(L)
+  \text{cost} = \sum_{S=1}^4 n_{\text{Exac}}^{(i)}(S) \cdot \text{cost}_E(S) +
+    \sum_{k=1}^3 P(y^{(i)} = k) \cdot \text{cost}_C(k)
 
 
 where:
 
-* :math:`n_E(S)` is the number of exacerbations at severity level :math:`S`
+* :math:`n_{\text{Exac}}^{(i)}(S)` is the number of exacerbations at severity level :math:`S`
 * :math:`\text{cost}_E(S)` is the cost of an exacerbation at severity level :math:`S`
-* :math:`P(L)` is the probability of being at asthma control level :math:`L`
-* :math:`\text{cost}_C(L)` is the cost of being at asthma control level :math:`L`
+* :math:`P(y^{(i)} = k)` is the probability of agent :math:`i` being at asthma control level
+  :math:`k`
+* :math:`\text{cost}_C(k)` is the cost of being at asthma control level :math:`k`
 
 Step 10: Check if agent dies
 -------------------------------
