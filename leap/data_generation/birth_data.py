@@ -393,7 +393,7 @@ def load_past_initial_population_data(
     df = df.dropna(subset=["N"])
 
     # convert N to integer
-    df["N"] = df["N"].apply(lambda x: int(x))
+    df["N"] = df["N"].astype(int)
 
     # get the total population for a given time interval, province, and age
     grouped_df = df.groupby(["timepoint", "age", "province"])
