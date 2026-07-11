@@ -281,14 +281,17 @@ def generate_antibiotic_data(
     alpha = estimate_alpha(df_abx, formula, offset=np.log(df_abx["n_birth"]))
     model_abx = generate_antibiotic_model(df_abx, formula, alpha)
     if return_type == "csv":
-        df_abx_pred = get_predicted_abx_data(model_abx)
+        time_delta_tag = get_time_delta_tag(time_delta)
         df_abx_pred.to_csv(
-            get_data_path("processed_data/antibiotic_predictions.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/antibiotic_predictions.csv"),
             index=False
         )
 
         # Update the config file with the beta coefficients and thresholds
-        config_path = get_data_path("processed_data/config.json")
+        config_path = get_data_path(
+            f"processed_data/{time_delta_tag}/config.json",
+            mkdirs=True
+        )
         with open(config_path) as f:
             config = json.load(f)
 
