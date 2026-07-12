@@ -155,7 +155,7 @@ def convert_numeric_to_timepoint(timepoint: float) -> Timepoint:
 
 
 def convert_sex_to_numeric(sex: str) -> int:
-    """Convert a sex string to a numeric value for use in a GLM model.
+    """Convert a sex string to a numeric value.
 
     Args:
         sex: One of ``M`` = male, ``F`` = female.
@@ -189,7 +189,7 @@ def convert_numeric_to_sex(sex: int) -> str:
 
 
 def convert_timepoint_to_numeric(timepoint: dt.datetime) -> float:
-    """Convert a datetime object to a numeric value for use in a GLM model.
+    """Convert a datetime object to a numeric value.
 
     Args:
         timepoint: A datetime object.
