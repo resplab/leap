@@ -23,11 +23,11 @@ The ``config.json`` file contains the parameters used in the simulation.
         "antibiotic_exposure": {
             "parameters": {
                 "β0": 110.000442,
-                "βyear": -0.055100,
+                "βtime": -0.055100,
                 "β2005": 55.033675,
                 "βsex": 0.249033,
                 "θ": 727.383,
-                "β2005_year": -0.027437,
+                "β2005_time": -0.027437,
                 "fixyear": null,
                 "βfloor": 0.05
             }
@@ -166,8 +166,8 @@ The ``config.json`` file contains the parameters used in the simulation.
       - Fitted using a GLM
       - :ref:`antibiotic_exposure_model`
     * - Antibiotic Exposure
-      - ``βyear``
-      - Effect of year on antibiotic exposure model
+      - ``βtime``
+      - Effect of time on antibiotic exposure model
       - Fitted using a GLM
       - :ref:`antibiotic_exposure_model`
     * - Antibiotic Exposure
@@ -186,8 +186,8 @@ The ``config.json`` file contains the parameters used in the simulation.
       - Fitted using a GLM
       - :ref:`antibiotic_exposure_model`
     * - Antibiotic Exposure
-      - ``β2005_year``
-      - Interaction effect of year and year 2005 on antibiotic exposure model
+      - ``β2005_time``
+      - Interaction effect of time and year 2005 on antibiotic exposure model
       - Fitted using a GLM
       - :ref:`antibiotic_exposure_model`
     * - Antibiotic Exposure
