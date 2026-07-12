@@ -32,6 +32,24 @@ def convert_timepoint_to_numeric(timepoint: dt.datetime) -> float:
     time_delta += TimeDelta(years=1)  # Add 1 year to account for the fact that the first year is 1
     return time_delta.total_years()
 
+
+def convert_sex_to_numeric(sex: str) -> int:
+    """Convert a sex string to a numeric value for use in a GLM model.
+
+    Args:
+        sex: One of ``M`` = male, ``F`` = female.
+
+    Returns:
+        1 for female, 2 for male.
+    """
+    if sex == "F":
+        return 1
+    elif sex == "M":
+        return 2
+    else:
+        raise ValueError(f"Invalid sex: {sex}")
+
+
 def estimate_alpha(
     df: pd.DataFrame,
     formula: str,
