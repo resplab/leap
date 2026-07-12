@@ -147,7 +147,7 @@ def load_birth_data(
     return df
 
 
-def load_antibiotic_data(time_delta: TimeDelta) -> pd.DataFrame:
+def load_antibiotic_data() -> pd.DataFrame:
     """Load the antibiotic dose data.
 
     The antibiotic prescription data is from the BC Ministry of Health and contains the total
@@ -156,9 +156,6 @@ def load_antibiotic_data(time_delta: TimeDelta) -> pd.DataFrame:
 
     The birth data is from StatCan census data and contains the number of births in BC,
     stratified by timepoint and sex.
-
-    Args:
-        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
     
     Returns:
         A Pandas dataframe. Columns:
@@ -323,7 +320,7 @@ def generate_antibiotic_data(
 
     """
     formula = "n_abx ~ timepoint + sex + heaviside(timepoint, 2005.0) * timepoint"
-    df_abx = load_antibiotic_data(time_delta)
+    df_abx = load_antibiotic_data()
     alpha = estimate_alpha(df_abx, formula, offset=np.log(df_abx["n_birth"]))
     model_abx = generate_antibiotic_model(df_abx, formula, alpha)
     if return_type == "csv":
