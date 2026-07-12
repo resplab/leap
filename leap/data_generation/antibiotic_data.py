@@ -287,12 +287,13 @@ def get_predicted_abx_data(
         df = pd.DataFrame(
             data=list(itertools.product(
                 list(date_range(start=min_timepoint, stop=max_timepoint + time_delta, step=time_delta)),
-                [1, 2]
+                ["F", "M"]
             )),
             columns=["timepoint", "sex"]
         )
-    else:
-        df["sex"] = df["sex"].apply(convert_sex_to_numeric)
+
+    df["sex"] = df["sex"].apply(convert_sex_to_numeric)
+    df["timepoint"] = df["timepoint"].apply(convert_timepoint_to_numeric)
 
 
     df["n_abx_μ"] = np.exp(model.predict(df, which="linear"))
