@@ -404,8 +404,8 @@ def generate_occurrence_data(time_delta: TimeDelta):
         {
             "β0": [0],
             "βsex": [1],
-            "βyear": [2],
-            "βsexyear": [3],
+            "βtime": [2],
+            "βsextime": [3],
             "βage": list(range(4, 9)),
             "βsexage": list(range(9, 14))
         },
@@ -415,12 +415,12 @@ def generate_occurrence_data(time_delta: TimeDelta):
         prevalence_model, {
             "β0": [0],
             "βsex": [1],
-            "βyear": [2, 3],
-            "βsexyear": [4, 5],
+            "βtime": [2, 3],
+            "βsextime": [4, 5],
             "βage": list(range(6, 11)),
             "βsexage": list(range(11, 16)),
-            "βyearage": list(range(16, 26)),
-            "βsexyearage": list(range(26, 36))
+            "βtimeage": list(range(16, 26)),
+            "βsextimeage": list(range(26, 36))
         },
         config["prevalence"]["parameters"]
     )
