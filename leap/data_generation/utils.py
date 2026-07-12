@@ -130,6 +130,40 @@ def format_age_group(age_group: str, upper_age_group: str = "100 years and over"
     return age
 
 
+def convert_sex_to_numeric(sex: str) -> int:
+    """Convert a sex string to a numeric value for use in a GLM model.
+
+    Args:
+        sex: One of ``M`` = male, ``F`` = female.
+
+    Returns:
+        1 for female, 2 for male.
+    """
+    if sex == "F":
+        return 1
+    elif sex == "M":
+        return 2
+    else:
+        raise ValueError(f"Invalid sex: {sex}")
+
+
+def convert_numeric_to_sex(sex: int) -> str:
+    """Convert a numeric sex value to a string.
+
+    Args:
+        sex: One of ``1`` = female, ``2`` = male.
+
+    Returns:
+        ``F`` for female, ``M`` for male.
+    """
+    if sex == 1:
+        return "F"
+    elif sex == 2:
+        return "M"
+    else:
+        raise ValueError(f"Invalid sex: {sex}")
+
+
 def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float) -> int | list[int]:
     """Heaviside step function.
     
