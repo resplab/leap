@@ -207,6 +207,7 @@ def generate_prevalence_model(
 def get_predicted_data(
     model: GLMResultsWrapper,
     pred_col: str,
+    time_delta: TimeDelta,
     min_age: int = 3,
     max_age: int = 100,
     min_timepoint: dt.datetime = STARTING_TIMEPOINT,
@@ -223,6 +224,8 @@ def get_predicted_data(
     Args:
         model: The fitted GLM model.
         pred_col: The name of the column to store the predicted data.
+        time_delta: The duration of time between subsequent timepoints in the data, e.g. 1 month,
+            1 year, etc.
         min_age: The minimum age to predict.
         max_age: The maximum age to predict.
         min_timepoint: The minimum timepoint to predict.
@@ -240,7 +243,7 @@ def get_predicted_data(
 
     df = pd.DataFrame(
         data=list(itertools.product(
-            list(date_range(min_timepoint, max_timepoint, TimeDelta(years=1))),
+            list(date_range(min_timepoint, max_timepoint, time_delta)),
             [1, 2],
             list(range(min_age, max_age))
         )),
@@ -375,6 +378,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
     df_incidence = get_predicted_data(
         incidence_model,
         "incidence",
+        time_delta,
         max_age=110,
         min_timepoint=dt.datetime(1999, 1, 1),
         max_timepoint=dt.datetime(2066, 12, 31)
@@ -382,6 +386,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
     df_prevalence = get_predicted_data(
         prevalence_model,
         "prevalence",
+        time_delta,
         max_age=110,
         min_timepoint=dt.datetime(1999, 1, 1),
         max_timepoint=dt.datetime(2066, 12, 31)
