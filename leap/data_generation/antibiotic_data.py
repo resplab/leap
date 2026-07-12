@@ -51,7 +51,7 @@ def convert_sex_to_numeric(sex: str) -> int:
 
 
 def estimate_alpha(
-    df: pd.DataFrame,
+    df_abx: pd.DataFrame,
     formula: str,
     offset: np.ndarray | None = None,
     maxiter: int = 5000
@@ -65,7 +65,7 @@ def estimate_alpha(
         \alpha := \dfrac{1}{\theta} = \dfrac{\sigma^2 - \mu}{\mu^2}
     
     Args:
-        df: A Pandas dataframe with data to be fitted.
+        df_abx: A Pandas dataframe with data to be fitted.
         formula: The formula for the GLM model. See the `statsmodels documentation
             <https://www.statsmodels.org/stable/examples/notebooks/generated/glm_formula.html>`_
             for more information.
@@ -75,6 +75,8 @@ def estimate_alpha(
     Returns:
         The estimated alpha parameter for the negative binomial model.
     """
+    df = df_abx.copy()
+
     df["sex"] = df["sex"].apply(convert_sex_to_numeric)
     df["timepoint"] = df["timepoint"].apply(convert_timepoint_to_numeric)
 
