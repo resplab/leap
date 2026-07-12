@@ -191,14 +191,14 @@ def generate_prevalence_model(
     """
 
     _, alpha_age, norm2_age = poly(df_asthma["age"].to_list(), degree=5, orthogonal=True)
-    _, alpha_year, norm2_year = poly(df_asthma["year"].to_list(), degree=2, orthogonal=True)
+    _, alpha_time, norm2_time = poly(df_asthma["year"].to_list(), degree=2, orthogonal=True)
     formula = "prevalence ~ " + \
-        f"sex*poly(year, degree=2, alpha={list(alpha_year)}, norm2={list(norm2_year)})" + \
+        f"sex*poly(year, degree=2, alpha={list(alpha_time)}, norm2={list(norm2_time)})" + \
         f"*poly(age, degree=5, alpha={list(alpha_age)}, norm2={list(norm2_age)})"
     results = generate_occurrence_model(
         df_asthma, formula=formula, occ_type="prevalence", maxiter=maxiter
     )
-    return results, alpha_age, norm2_age, alpha_year, norm2_year
+    return results, alpha_age, norm2_age, alpha_time, norm2_time
 
 def get_predicted_data(
     model: GLMResultsWrapper,
@@ -365,7 +365,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
     """
     df_asthma = load_asthma_df()
     incidence_model = generate_incidence_model(df_asthma)
-    prevalence_model, alpha_age, norm2_age, alpha_year, norm2_year = generate_prevalence_model(df_asthma)
+    prevalence_model, alpha_age, norm2_age, alpha_time, norm2_time = generate_prevalence_model(df_asthma)
     df_incidence = get_predicted_data(
         incidence_model, "incidence", max_age=110, min_year=1999, max_year=2066
     )
@@ -428,8 +428,8 @@ def generate_occurrence_data(time_delta: TimeDelta):
     config["prevalence"]["poly_parameters"] = {
         "alpha_age": list(alpha_age),
         "norm2_age": list(norm2_age),
-        "alpha_year": list(alpha_year),
-        "norm2_year": list(norm2_year)
+        "alpha_time": list(alpha_time),
+        "norm2_time": list(norm2_time)
     }
     config["incidence"]["poly_parameters"] = {
         "alpha_age": list(alpha_age),
