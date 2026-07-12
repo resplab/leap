@@ -1,12 +1,13 @@
 import pathlib
 import pandas as pd
 import numpy as np
+import datetime as dt
 import itertools
 import json
 import plotly.express as px
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-from leap.utils import get_data_path, poly, TimeDelta
+from leap.utils import get_data_path, poly, date_range, TimeDelta
 from leap.data_generation.utils import parse_age_group, get_parser
 from leap.logger import get_logger
 from typing import Tuple, Dict, Any
@@ -16,23 +17,23 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-STARTING_YEAR = 2000
-MAX_YEAR = 2019
+STARTING_TIMEPOINT = dt.datetime(2000, 1, 1)
+MAX_TIMEPOINT = dt.datetime(2019, 12, 31)
 MAX_AGE = 65
 
 
-def load_asthma_df(starting_year: int = STARTING_YEAR) -> pd.DataFrame:
+def load_asthma_df(starting_timepoint: dt.datetime = STARTING_TIMEPOINT) -> pd.DataFrame:
     """Load the asthma incidence and prevalence data.
 
     Args:
-        starting_year: The starting year for the data. Data before this year will be excluded
-            from the analysis.
+        starting_timepoint: The starting date / time for the data. Data before this timepoint will
+            be excluded from the analysis.
     
     Returns:
         The asthma incidence and prevalence data.
         Columns:
         
-        * ``year (int)``: The calendar year.
+        * ``timepoint (dt.datetime)``: The date and time.
         * ``age_group (str)``: The age group.
         * ``age (int)``: The average age of the age group.
         * ``sex (str)``: One of ``F`` = female, ``M`` = male.
@@ -40,18 +41,21 @@ def load_asthma_df(starting_year: int = STARTING_YEAR) -> pd.DataFrame:
         * ``prevalence (float)``: The prevalence of asthma.
     """
 
-    df = pd.read_csv(get_data_path("original_data/private/asthma_inc_prev.csv"))
+    df = pd.read_csv(
+        get_data_path("original_data/private/asthma_inc_prev.csv"),
+        parse_dates=["fiscal_year"]
+    )
 
     # Rename columns
     df.rename(
         columns={
-            "fiscal_year": "year", "age_group_desc": "age_group", "gender": "sex"
+            "fiscal_year": "timepoint", "age_group_desc": "age_group", "gender": "sex"
         },
         inplace=True
     )
 
-    # Filter for year >= starting_year
-    df = df.loc[df["year"] >= starting_year]
+    # Filter for timepoint >= starting_timepoint
+    df = df.loc[df["timepoint"] >= starting_timepoint]
 
     # Age groups are in the format "X-Y" or "80+"
     # Set the age to the average of the age group
@@ -78,7 +82,7 @@ def generate_occurrence_model(
     Args:
         df_asthma: The asthma dataframe. Must have columns:
 
-            * ``year (int)``: The calendar year.
+            * ``timepoint (dt.datetime)``: The date and time.
             * ``sex (str)``: One of ``M`` = male, ``F`` = female.
             * ``age (int)``: The age in years.
             * ``incidence (float)``: The incidence of asthma.
@@ -96,7 +100,7 @@ def generate_occurrence_model(
     """
 
     # Create occurrence dataframe
-    df = df_asthma[["year", "sex", "age", occ_type]].copy()
+    df = df_asthma[["timepoint", "sex", "age", occ_type]].copy()
 
     # Convert sex string to 1 or 2
     df["sex"] = df.apply(
@@ -113,13 +117,13 @@ def generate_occurrence_model(
     # Create prediction dataframe
     df_pred = pd.DataFrame(
         data=list(itertools.product(list(range(2000, 2066)), [1, 2], list(range(3, 65)))),
-        columns=["year", "sex", "age"]
+        columns=["timepoint", "sex", "age"]
     )
 
     occurrence_pred = results.predict(df_pred, which="mean", transform=True)
     df_pred[f"{occ_type}_pred"] = occurrence_pred
 
-    df = pd.merge(df, df_pred, on=["year", "sex", "age"], how="outer")
+    df = pd.merge(df, df_pred, on=["timepoint", "sex", "age"], how="outer")
     df["sex"] = df.apply(
         lambda x: "F" if x["sex"] == 1 else "M",
         axis=1
@@ -142,7 +146,7 @@ def generate_incidence_model(
     
         df_asthma: The asthma dataframe. Must have columns:
 
-            * ``year (int)``: The calendar year.
+            * ``timepoint (dt.datetime)``: The date and time.
             * ``sex (str)``: One of ``M`` = male, ``F`` = female.
             * ``age (int)``: The age in years.
             * ``incidence (float)``: The incidence of asthma.
@@ -156,7 +160,7 @@ def generate_incidence_model(
 
     _, alpha, norm2 = poly(df_asthma["age"].to_list(), degree=5, orthogonal=True)
 
-    formula = "incidence ~ sex*year + " + \
+    formula = "incidence ~ sex*timepoint + " + \
         f"sex*poly(age, degree=5, alpha={list(alpha)}, norm2={list(norm2)})"
     results = generate_occurrence_model(
         df_asthma, formula=formula, occ_type="incidence", maxiter=maxiter
@@ -173,7 +177,7 @@ def generate_prevalence_model(
     
         df_asthma: The asthma dataframe. Must have columns:
 
-            * ``year (int)``: The calendar year.
+            * ``timepoint (dt.datetime)``: The date and time.
             * ``sex (str)``: One of ``M`` = male, ``F`` = female.
             * ``age (int)``: The age in years.
             * ``incidence (float)``: The incidence of asthma.
@@ -186,14 +190,14 @@ def generate_prevalence_model(
         1. The fitted ``GLM`` model.
         2. The alpha parameters for the age polynomial.
         3. The norm2 parameters for the age polynomial.
-        4. The alpha parameters for the year polynomial.
-        5. The norm2 parameters for the year polynomial.
+        4. The alpha parameters for the timepoint polynomial.
+        5. The norm2 parameters for the timepoint polynomial.
     """
 
     _, alpha_age, norm2_age = poly(df_asthma["age"].to_list(), degree=5, orthogonal=True)
-    _, alpha_time, norm2_time = poly(df_asthma["year"].to_list(), degree=2, orthogonal=True)
+    _, alpha_time, norm2_time = poly(df_asthma["timepoint"].to_list(), degree=2, orthogonal=True)
     formula = "prevalence ~ " + \
-        f"sex*poly(year, degree=2, alpha={list(alpha_time)}, norm2={list(norm2_time)})" + \
+        f"sex*poly(timepoint, degree=2, alpha={list(alpha_time)}, norm2={list(norm2_time)})" + \
         f"*poly(age, degree=5, alpha={list(alpha_age)}, norm2={list(norm2_age)})"
     results = generate_occurrence_model(
         df_asthma, formula=formula, occ_type="prevalence", maxiter=maxiter
@@ -205,14 +209,14 @@ def get_predicted_data(
     pred_col: str,
     min_age: int = 3,
     max_age: int = 100,
-    min_year: int = STARTING_YEAR,
-    max_year: int = MAX_YEAR
+    min_timepoint: dt.datetime = STARTING_TIMEPOINT,
+    max_timepoint: dt.datetime = MAX_TIMEPOINT
 ) -> pd.DataFrame:
     """Get predicted data from a GLM model.
 
     The GLM model must be fitted on the following columns:
 
-    * ``year (int)``: The calendar year.
+    * ``timepoint (dt.datetime)``: The date and time.
     * ``sex (int)``: One of ``0`` = female, ``1`` = male.
     * ``age (int)``: The age in years.
     
@@ -221,14 +225,14 @@ def get_predicted_data(
         pred_col: The name of the column to store the predicted data.
         min_age: The minimum age to predict.
         max_age: The maximum age to predict.
-        min_year: The minimum year to predict.
-        max_year: The maximum year to predict.
+        min_timepoint: The minimum timepoint to predict.
+        max_timepoint: The maximum timepoint to predict.
         
     Returns:
         A dataframe containing the predicted data.
         Columns:
         
-        * ``year (int)``: The calendar year.
+        * ``timepoint (dt.datetime)``: The date and time.
         * ``sex (str)``: One of ``M`` = male, ``F`` = female.
         * ``age (int)``: The age in years.
         * ``pred_col (float)``: The predicted data.
@@ -236,9 +240,11 @@ def get_predicted_data(
 
     df = pd.DataFrame(
         data=list(itertools.product(
-            list(range(min_year, max_year)), [1, 2], list(range(min_age, max_age))
+            list(date_range(min_timepoint, max_timepoint, TimeDelta(years=1))),
+            [1, 2],
+            list(range(min_age, max_age))
         )),
-        columns=["year", "sex", "age"]
+        columns=["timepoint", "sex", "age"]
     )
 
     df[pred_col] = np.exp(model.predict(df, which="linear"))
@@ -254,9 +260,9 @@ def plot_occurrence(
     y: str,
     title: str = "",
     file_path: pathlib.Path | None = None,
-    min_year: int = STARTING_YEAR,
-    max_year: int = MAX_YEAR,
-    year_interval: int = 2,
+    min_timepoint: dt.datetime = STARTING_TIMEPOINT,
+    max_timepoint: dt.datetime = MAX_TIMEPOINT,
+    time_interval: int = 2,
     max_age: int = 110,
     width: int = 1000,
     height: int = 800
@@ -266,7 +272,7 @@ def plot_occurrence(
     Args:
         df: A dataframe containing either incidence or prevalence data. Must have columns:
 
-            * ``year (int)``: The calendar year.
+            * ``timepoint (dt.datetime)``: The date and time.
             * ``sex (str)``: One of ``F`` = female, ``M`` = male.
             * ``age (int)``: The age in years.
             * ``y (float)``: Specified by the ``y`` argument, this will be the y data.
@@ -278,9 +284,9 @@ def plot_occurrence(
         y: The name of the column in the dataframe which will be plotted as the ``y`` data.
         title: The title of the plot.
         file_path: The path to save the plot to. If ``None``, the plot will be displayed.
-        min_year: The minimum year to plot.
-        max_year: The maximum year to plot.
-        year_interval: The interval between years. This is used if you don't want to plot every year.
+        min_timepoint: The minimum timepoint to plot.
+        max_timepoint: The maximum timepoint to plot.
+        time_interval: The interval between years. This is used if you don't want to plot every year.
         max_age: The maximum age to plot.
         width: The width of the plot.
         height: The height of the plot.
@@ -290,12 +296,12 @@ def plot_occurrence(
         to the specified path.
     """
 
-    years = np.arange(min_year, max_year + 1, step=year_interval)
+    timepoints = list(date_range(min_timepoint, max_timepoint + 1, step=time_interval))
     fig = px.line(
-        df.loc[(df["year"].isin(years)) & (df["age"] <= max_age)].dropna(),
+        df.loc[(df["timepoint"].isin(timepoints)) & (df["age"] <= max_age)].dropna(),
         x="age",
         y=y,
-        color="year",
+        color="timepoint",
         markers=True,
         facet_col="sex",
         title=title
@@ -303,10 +309,10 @@ def plot_occurrence(
     if f"{y}_pred" in df.columns:
         fig.add_traces(
             px.line(
-                df.loc[(df["year"].isin(years)) & (df["age"] <= max_age)],
+                df.loc[(df["timepoint"].isin(timepoints)) & (df["age"] <= max_age)],
                 x="age",
                 y=f"{y}_pred",
-                color="year",
+                color="timepoint",
                 markers=True,
                 facet_col="sex",
                 title=title
@@ -326,8 +332,8 @@ def add_beta_parameters(
         model: The fitted GLM model.
         parameter_map: A dictionary mapping the parameter names to their indices in the model
             parameters field, ``model.params``. The keys are the parameter names and the
-            values are lists of indices. For example, if ``βyear`` is the second parameter in the
-            list, then the mapping would be ``{"βyear": [1]}``, and it would be accessed by
+            values are lists of indices. For example, if ``βtime`` is the second parameter in the
+            list, then the mapping would be ``{"βtime": [1]}``, and it would be accessed by
             ``model.params.iloc[1]``.
         config: The config dictionary to add the parameters to.
         
@@ -367,19 +373,27 @@ def generate_occurrence_data(time_delta: TimeDelta):
     incidence_model = generate_incidence_model(df_asthma)
     prevalence_model, alpha_age, norm2_age, alpha_time, norm2_time = generate_prevalence_model(df_asthma)
     df_incidence = get_predicted_data(
-        incidence_model, "incidence", max_age=110, min_year=1999, max_year=2066
+        incidence_model,
+        "incidence",
+        max_age=110,
+        min_timepoint=dt.datetime(1999, 1, 1),
+        max_timepoint=dt.datetime(2066, 12, 31)
     )
     df_prevalence = get_predicted_data(
-        prevalence_model, "prevalence", max_age=110, min_year=1999, max_year=2066
+        prevalence_model,
+        "prevalence",
+        max_age=110,
+        min_timepoint=dt.datetime(1999, 1, 1),
+        max_timepoint=dt.datetime(2066, 12, 31)
     )
-    df = pd.merge(df_incidence, df_prevalence, on=["year", "sex", "age"], how="left")
+    df = pd.merge(df_incidence, df_prevalence, on=["timepoint", "sex", "age"], how="left")
     plot_occurrence(
         df,
         y="incidence",
         title="Predicted Asthma Incidence per 100 in BC",
-        min_year=2000,
-        max_year=2025,
-        year_interval=5,
+        min_timepoint=dt.datetime(2000, 1, 1),
+        max_timepoint=dt.datetime(2025, 12, 31),
+        time_interval=5,
         max_age=63,
         file_path=get_data_path("data_generation/figures/asthma_incidence_predicted.png")
     )
@@ -387,9 +401,9 @@ def generate_occurrence_data(time_delta: TimeDelta):
         df,
         y="prevalence",
         title="Predicted Asthma Prevalence per 100 in BC",
-        min_year=2000,
-        max_year=2025,
-        year_interval=5,
+        min_timepoint=dt.datetime(2000, 1, 1),
+        max_timepoint=dt.datetime(2025, 12, 31),
+        time_interval=5,
         max_age=63,
         file_path=get_data_path("data_generation/figures/asthma_prevalence_predicted.png")
     )
