@@ -331,7 +331,10 @@ def generate_antibiotic_data(
         time_delta_tag = get_time_delta_tag(time_delta)
         df_abx_pred = get_predicted_abx_data(model_abx, TIME_DELTA_OD)
         df_abx_pred.to_csv(
-            get_data_path(f"processed_data/{time_delta_tag}/antibiotic_predictions.csv"),
+            get_data_path(
+                f"processed_data/{time_delta_tag}/antibiotic_predictions.csv",
+                mkdirs=True
+            ),
             index=False
         )
 
