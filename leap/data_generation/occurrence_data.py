@@ -6,7 +6,7 @@ import json
 import plotly.express as px
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-from leap.utils import get_data_path, poly
+from leap.utils import get_data_path, poly, TimeDelta
 from leap.data_generation.utils import parse_age_group, get_parser
 from leap.logger import get_logger
 from typing import Tuple, Dict, Any
@@ -346,7 +346,7 @@ def add_beta_parameters(
     return config
 
 
-def generate_occurrence_data():
+def generate_occurrence_data(time_delta: TimeDelta):
     """Generate the asthma incidence and prevalence data.
     
     Saves the data to a CSV file: ``processed_data/asthma_occurrence_predictions.csv``.
@@ -357,6 +357,10 @@ def generate_occurrence_data():
       incidence per 100 in BC.
     * ``data_generation/figures/asthma_prevalence_predicted.png``: The predicted asthma
       prevalence per 100 in BC.
+
+    Args:
+        time_delta: The duration of time between subsequent timepoints in the data, e.g. 1 month,
+            1 year, etc.
 
     """
     df_asthma = load_asthma_df()
@@ -440,4 +444,4 @@ if __name__ == "__main__":
     parser = get_parser()
     args = parser.parse_args()
     time_delta = TimeDelta(iso_string=args.time_delta)
-    generate_occurrence_data()
+    generate_occurrence_data(time_delta)
