@@ -51,6 +51,23 @@ def convert_sex_to_numeric(sex: str) -> int:
         raise ValueError(f"Invalid sex: {sex}")
 
 
+def convert_numeric_to_sex(sex: int) -> str:
+    """Convert a numeric sex value to a string.
+
+    Args:
+        sex: One of ``1`` = female, ``2`` = male.
+
+    Returns:
+        ``F`` for female, ``M`` for male.
+    """
+    if sex == 1:
+        return "F"
+    elif sex == 2:
+        return "M"
+    else:
+        raise ValueError(f"Invalid sex: {sex}")
+
+
 def estimate_alpha(
     df_abx: pd.DataFrame,
     formula: str,
@@ -300,10 +317,7 @@ def get_predicted_abx_data(
 
 
     df["n_abx_μ"] = np.exp(model.predict(df, which="linear"))
-    df["sex"] = df.apply(
-        lambda x: "F" if x["sex"] == 1 else "M",
-        axis=1
-    )
+    df["sex"] = df["sex"].apply(convert_numeric_to_sex)
     return df
 
 
