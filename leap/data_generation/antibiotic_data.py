@@ -17,6 +17,7 @@ logger = get_logger(__name__, 20)
 MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
 MAX_TIMEPOINT = dt.datetime(2019, 12, 31)
 MAX_AGE = 65
+TIME_DELTA_OD = TimeDelta(years=1)
 
 
 def convert_timepoint_to_numeric(timepoint: dt.datetime) -> float:
@@ -261,6 +262,8 @@ def get_predicted_abx_data(
         model: The fitted GLM model for predicting the number of courses of antibiotics during
             the first year of life, given year and sex.
         time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
+            Note that this must match the time intervals used to fit the model; in our case, we
+            used 1-year intervals.
         df: (optional) If provided, the function will use this dataframe to predict the data. The
             dataframe must contain the following columns:
 
@@ -326,7 +329,7 @@ def generate_antibiotic_data(
     model_abx = generate_antibiotic_model(df_abx, formula, alpha)
     if return_type == "csv":
         time_delta_tag = get_time_delta_tag(time_delta)
-        df_abx_pred = get_predicted_abx_data(model_abx, time_delta)
+        df_abx_pred = get_predicted_abx_data(model_abx, TIME_DELTA_OD)
         df_abx_pred.to_csv(
             get_data_path(f"processed_data/{time_delta_tag}/antibiotic_predictions.csv"),
             index=False
