@@ -157,7 +157,7 @@ def load_antibiotic_data(time_delta: TimeDelta) -> pd.DataFrame:
 
 def generate_antibiotic_model(
     df_abx: pd.DataFrame,
-    formula: str = "n_abx ~ year + sex + heaviside(year, 2005) * year",
+    formula: str = "n_abx ~ timepoint + sex + heaviside(timepoint, 2005) * timepoint",
     alpha: float = 1.0,
     maxiter: int = 1000
 ) -> GLMResultsWrapper:
@@ -172,7 +172,7 @@ def generate_antibiotic_model(
     Args:
         df_abx: The antibiotic prescription data. Contains the following columns:
 
-            * ``year (int)``: The calendar year.
+            * ``timepoint (dt.datetime)``: The date and time.
             * ``sex (str)``: One of ``M`` = male, ``F`` = female.
             * ``n_abx (int)``: The number total number of courses of antibiotics dispensed to
               infants in BC for the given year and sex.
@@ -290,7 +290,7 @@ def generate_antibiotic_data(
         the number of antibiotic prescriptions during the first year of life.
 
     """
-    formula = "n_abx ~ year + sex + heaviside(year, 2005) * year"
+    formula = "n_abx ~ timepoint + sex + heaviside(timepoint, 2005) * timepoint"
     df_abx = load_antibiotic_data(time_delta)
     alpha = estimate_alpha(df_abx, formula, offset=np.log(df_abx["n_birth"]))
     model_abx = generate_antibiotic_model(df_abx, formula, alpha)
