@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
+import datetime as dt
 import argparse
 from leap.logger import get_logger
+from leap.utils import TimeDelta
 from typing import Tuple
 
 logger = get_logger(__name__)
@@ -162,6 +164,20 @@ def convert_numeric_to_sex(sex: int) -> str:
         return "M"
     else:
         raise ValueError(f"Invalid sex: {sex}")
+
+
+def convert_timepoint_to_numeric(timepoint: dt.datetime) -> float:
+    """Convert a datetime object to a numeric value for use in a GLM model.
+
+    Args:
+        timepoint: A datetime object.
+
+    Returns:
+        A number representing the year of the timepoint.
+    """
+    time_delta = TimeDelta(dt1=timepoint, dt2=dt.datetime(1, 1, 1))
+    time_delta += TimeDelta(years=1)  # Add 1 year to account for the fact that the first year is 1
+    return time_delta.total_years()
 
 
 def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float) -> int | list[int]:
