@@ -207,7 +207,7 @@ def load_antibiotic_data() -> pd.DataFrame:
 
 def generate_antibiotic_model(
     df_abx: pd.DataFrame,
-    formula: str = "n_abx ~ timepoint + sex + heaviside(timepoint, 2005) * timepoint",
+    formula: str = "n_abx ~ timepoint + sex + heaviside(timepoint, 2005.0) * timepoint",
     alpha: float = 1.0,
     maxiter: int = 1000
 ) -> GLMResultsWrapper:
