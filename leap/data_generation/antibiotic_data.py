@@ -311,10 +311,10 @@ def generate_antibiotic_data(
             config = json.load(f)
 
         config["antibiotic_exposure"]["parameters"]["β0"] = model_abx.params["Intercept"]
-        config["antibiotic_exposure"]["parameters"]["βyear"] = model_abx.params["timepoint"]
+        config["antibiotic_exposure"]["parameters"]["βtime"] = model_abx.params["timepoint"]
         config["antibiotic_exposure"]["parameters"]["βsex"] = model_abx.params["sex"]
         config["antibiotic_exposure"]["parameters"]["β2005"] = model_abx.params["heaviside(timepoint, 2005)"]
-        config["antibiotic_exposure"]["parameters"]["β2005_year"] = model_abx.params["heaviside(timepoint, 2005):timepoint"]
+        config["antibiotic_exposure"]["parameters"]["β2005_time"] = model_abx.params["heaviside(timepoint, 2005):timepoint"]
         config["antibiotic_exposure"]["parameters"]["θ"] = 1 / alpha
 
         with open(config_path, "w", encoding="utf-8") as f:
