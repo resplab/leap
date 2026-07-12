@@ -20,18 +20,6 @@ MAX_AGE = 65
 TIME_DELTA_OD = TimeDelta(years=1)
 
 
-def convert_timepoint_to_numeric(timepoint: dt.datetime) -> float:
-    """Convert a datetime object to a numeric value for use in a GLM model.
-
-    Args:
-        timepoint: A datetime object.
-
-    Returns:
-        A number representing the year of the timepoint.
-    """
-    time_delta = TimeDelta(dt1=timepoint, dt2=dt.datetime(1, 1, 1))
-    time_delta += TimeDelta(years=1)  # Add 1 year to account for the fact that the first year is 1
-    return time_delta.total_years()
 
 
 def estimate_alpha(
