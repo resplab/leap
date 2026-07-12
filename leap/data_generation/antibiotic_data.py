@@ -91,7 +91,7 @@ def estimate_alpha(
 
 
 def load_birth_data(
-    time_delta_od: TimeDelta = TimeDelta(years=1),
+    time_delta_od: TimeDelta = TIME_DELTA_OD,
     province: str = "BC",
     min_timepoint: dt.datetime = dt.datetime(2000, 1, 1),
     max_timepoint: dt.datetime = dt.datetime(2018, 12, 31)
