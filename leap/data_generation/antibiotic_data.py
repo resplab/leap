@@ -198,7 +198,7 @@ def generate_antibiotic_model(
 
     In this function, we fit a generalized linear model (GLM) to the antibiotic prescription data
     using the negative binomial family. The model predicts the number of courses of antibiotics
-    dispensed to infants in BC, given the year and sex.
+    dispensed to infants in BC, given the timepoint and sex.
 
     For more details, see :ref:`antibiotic_exposure_model`.
     
