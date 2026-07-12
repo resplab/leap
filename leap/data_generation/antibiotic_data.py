@@ -75,6 +75,8 @@ def estimate_alpha(
     Returns:
         The estimated alpha parameter for the negative binomial model.
     """
+    df["sex"] = df["sex"].apply(convert_sex_to_numeric)
+    df["timepoint"] = df["timepoint"].apply(convert_timepoint_to_numeric)
 
     model = smf.negativebinomial(
         formula=formula, data=df, offset=offset
@@ -223,10 +225,10 @@ def generate_antibiotic_model(
     df = df_abx.copy()
 
     # Convert sex string to 1 or 2
-    df["sex"] = df.apply(
-        lambda x: 1 if x["sex"] == "F" else 2,
-        axis=1
-    )
+    df["sex"] = df["sex"].apply(convert_sex_to_numeric)
+
+    # Convert timepoint to numeric for the GLM model
+    df["timepoint"] = df["timepoint"].apply(convert_timepoint_to_numeric)
 
     # Fit the GLM model
     model = smf.glm(
@@ -291,10 +293,7 @@ def get_predicted_abx_data(
             columns=["timepoint", "sex"]
         )
     else:
-        df["sex"] = df.apply(
-            lambda x: 1 if x["sex"] == "F" else 2,
-            axis=1
-        )
+        df["sex"] = df["sex"].apply(convert_sex_to_numeric)
 
 
     df["n_abx_μ"] = np.exp(model.predict(df, which="linear"))
@@ -321,7 +320,7 @@ def generate_antibiotic_data(
         the number of antibiotic prescriptions during the first year of life.
 
     """
-    formula = "n_abx ~ timepoint + sex + heaviside(timepoint, 2005) * timepoint"
+    formula = "n_abx ~ timepoint + sex + heaviside(timepoint, 2005.0) * timepoint"
     df_abx = load_antibiotic_data(time_delta)
     alpha = estimate_alpha(df_abx, formula, offset=np.log(df_abx["n_birth"]))
     model_abx = generate_antibiotic_model(df_abx, formula, alpha)
