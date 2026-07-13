@@ -491,33 +491,28 @@ note that since :math:`\mu(x, t)` is constant over the time interval :math:`[x, 
       - ``sex``
       - ``timepoint``
       - ``prob_death``
-      - ``se``
     * - BC
       - FA
       - 0
       - F
       - 2023-01-01
       - 0.000919
-      - 0.000023
     * - BC
       - FA
       - 0
       - F
       - 2023-02-01
       - 0.000945
-      - 0.000092
     * - BC
       - FA
       - 0
       - F
       - 2023-03-01
       - 0.000294
-      - 0.000092
     * - BC
       - FA
       - 0
       - F
-      - ...
       - ...
       - ...
     * - BC
@@ -526,12 +521,10 @@ note that since :math:`\mu(x, t)` is constant over the time interval :math:`[x, 
       - F
       - 2023-12-01
       - 0.000545
-      - 0.000082
     * - BC
       - FA
       - 0
       - F
-      - ...
       - ...
       - ...
     * - BC
@@ -540,7 +533,6 @@ note that since :math:`\mu(x, t)` is constant over the time interval :math:`[x, 
       - F
       - 2068-01-01
       - 0.003409
-      - 0.000912
 
 Processed Data
 =================
