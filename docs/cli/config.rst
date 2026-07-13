@@ -23,11 +23,11 @@ The ``config.json`` file contains the parameters used in the simulation.
         "antibiotic_exposure": {
             "parameters": {
                 "β0": 110.000442,
-                "βyear": -0.055100,
+                "βtime": -0.055100,
                 "β2005": 55.033675,
                 "βsex": 0.249033,
                 "θ": 727.383,
-                "β2005_year": -0.027437,
+                "β2005_time": -0.027437,
                 "fixyear": null,
                 "βfloor": 0.05
             }
@@ -96,9 +96,9 @@ The ``config.json`` file contains the parameters used in the simulation.
                 "β0": 34.63398846,
                 "βsex": -9.52017810,
                 "βage": [-6.64423331, 7.73720625, -5.63121394, 3.90920803, -1.39497027],
-                "βyear": -0.01967344,
+                "βtime": -0.01967344,
                 "βsexage": [-4.45607619, 4.70483885, -2.61760564, 0.79555703, 0.95476291],
-                "βsexyear": 0.00461397,
+                "βsextime": 0.00461397,
                 "βfam_hist": [0.12221763272424911, 0.3619942],
                 "βabx_exp": [1.826, -0.2920745, 0.053]
             },
@@ -119,18 +119,18 @@ The ``config.json`` file contains the parameters used in the simulation.
                     1.79932480805632, -2.17989374225804, 3.64152189395539,
                     -2.91796538427475, 1.43423653685647
                 ],
-                "βyear": [2.83586405, -1.18097542],
+                "βtime": [2.83586405, -1.18097542],
                 "βsexage": [
                     -7.69209530818354, 2.68306716462003, 0.865308192929771,
                     -0.656000992252807, -0.0270826201453694
                 ],
-                "βsexyear": [1.29279956487906, 0.036861276364171],
-                "βyearage": [
+                "βsextime": [1.29279956487906, 0.036861276364171],
+                "βtimeage": [
                     50.610032709273, 6.51236955045884, -39.4569160874519,
                     3.69176099747937, 15.9637932343298, -4.79271775804693,
                     -7.14281869955998, 4.18656498490802, -4.88274672641455, -3.3603262281752
                 ],
-                "βsexyearage": [
+                "βsextimeage": [
                     -3.19896302105009, 7.24422362459046, -25.7979736592919, 0.253623898303176,
                     11.3848773603672, -2.57625491419054, 7.61284030050534, 4.17111534541718,
                     -15.2128066205219, 3.70514542334455
@@ -166,8 +166,8 @@ The ``config.json`` file contains the parameters used in the simulation.
       - Fitted using a GLM
       - :ref:`antibiotic_exposure_model`
     * - Antibiotic Exposure
-      - ``βyear``
-      - Effect of year on antibiotic exposure model
+      - ``βtime``
+      - Effect of time on antibiotic exposure model
       - Fitted using a GLM
       - :ref:`antibiotic_exposure_model`
     * - Antibiotic Exposure
@@ -186,8 +186,8 @@ The ``config.json`` file contains the parameters used in the simulation.
       - Fitted using a GLM
       - :ref:`antibiotic_exposure_model`
     * - Antibiotic Exposure
-      - ``β2005_year``
-      - Interaction effect of year and year 2005 on antibiotic exposure model
+      - ``β2005_time``
+      - Interaction effect of time and year 2005 on antibiotic exposure model
       - Fitted using a GLM
       - :ref:`antibiotic_exposure_model`
     * - Antibiotic Exposure
