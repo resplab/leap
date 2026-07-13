@@ -40,7 +40,7 @@ class AntibioticExposure:
         """A dictionary containing the following keys:
 
             * ``β0``: (float); the constant parameter when computing μ.
-            * ``βyear``: (float); the parameter to be multiplied by the agent's birth year for
+            * ``βtime``: (float); the parameter to be multiplied by the agent's birth timepoint for
               computing ``μ``.
             * ``β2005``: (float); an added constant parameter if the agent's birth year > 2005 for
               computing ``μ``. This is to factor in the antibiotic stewardship program that was
@@ -48,7 +48,7 @@ class AntibioticExposure:
             * ``βsex``: (float); the parameter to be multiplied by the agent's sex when computing μ.
             * ``θ``: int, the number of successes (the r parameter) in the negative binomial
               distribution.
-            * ``β2005_year``: (float); If the agent's birth year is ``> 2005``, ``β2005_year``
+            * ``β2005_time``: (float); If the agent's birth year is ``> 2005``, ``β2005_time``
               will be multiplied by the birth year when computing ``μ``. This is to factor in the
               antibiotic stewardship program that was introduced in BC in 2005.
             * ``fixyear``: (int | None); If present, replaces the ``year`` parameter when
@@ -60,7 +60,7 @@ class AntibioticExposure:
     
     @parameters.setter
     def parameters(self, parameters: dict):
-        KEYS = ["β0", "βyear", "β2005", "βsex", "θ", "β2005_year", "fixyear", "βfloor"]
+        KEYS = ["β0", "βtime", "β2005", "βsex", "θ", "β2005_time", "fixyear", "βfloor"]
         for key in KEYS:
             if key not in parameters:
                 raise ValueError(f"Key {key} not found in parameters.")
@@ -182,13 +182,13 @@ class AntibioticExposure:
             >>> from leap.antibiotic_exposure import AntibioticExposure
             >>> parameters = {
             ...     "β0": -100000,
-            ...     "βyear": -0.01,
+            ...     "βtime": -0.01,
             ...     "βsex": -1,
             ...     "θ": 500,
             ...     "fixyear": None,
             ...     "βfloor": 0.0,
             ...     "β2005": 1,
-            ...     "β2005_year": 1
+            ...     "β2005_time": 1
             ... }
             >>> antibiotic_exposure = AntibioticExposure(
             ...     parameters=parameters
@@ -199,9 +199,9 @@ class AntibioticExposure:
         η = (
             self.parameters["β0"] +
             self.parameters["βsex"] * int(sex) +
-            self.parameters["βyear"] * timepoint.year +
+            self.parameters["βtime"] * timepoint.year +
             self.parameters["β2005"] * (timepoint.year > 2005) +
-            self.parameters["β2005_year"] * (timepoint.year > 2005) * timepoint.year
+            self.parameters["β2005_time"] * (timepoint.year > 2005) * timepoint.year
         )
 
         μ = max(np.exp(η), self.parameters["βfloor"] / 1000)

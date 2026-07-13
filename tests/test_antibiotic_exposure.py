@@ -28,13 +28,13 @@ def test_antibiotic_exposure_constructor(config):
         (
             {
                 "β0": 1,
-                "βyear": 0.01,
+                "βtime": 0.01,
                 "βsex": 1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.05,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             dt.datetime(2001, 1, 1),
             False,
@@ -54,13 +54,13 @@ def test_antibiotic_exposure_compute_probability(parameters, timepoint, sex, exp
         (
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             2001,
             False,

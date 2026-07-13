@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
+import datetime as dt
 import argparse
 from leap.logger import get_logger
+from leap.utils import TimeDelta
 from typing import Tuple
 
 logger = get_logger(__name__)
@@ -128,6 +130,70 @@ def format_age_group(age_group: str, upper_age_group: str = "100 years and over"
         age = age.replace(" year", "")
         age = int(age)
     return age
+
+
+def convert_sex_to_numeric(sex: str) -> int:
+    """Convert a sex string to a numeric value.
+
+    Args:
+        sex: One of ``M`` = male, ``F`` = female.
+
+    Returns:
+        1 for female, 2 for male.
+    """
+    if sex == "F":
+        return 1
+    elif sex == "M":
+        return 2
+    else:
+        raise ValueError(f"Invalid sex: {sex}")
+
+
+def convert_numeric_to_sex(sex: int) -> str:
+    """Convert a numeric sex value to a string.
+
+    Args:
+        sex: One of ``1`` = female, ``2`` = male.
+
+    Returns:
+        ``F`` for female, ``M`` for male.
+    """
+    if sex == 1:
+        return "F"
+    elif sex == 2:
+        return "M"
+    else:
+        raise ValueError(f"Invalid sex: {sex}")
+
+
+def convert_timepoint_to_numeric(timepoint: dt.datetime) -> float:
+    """Convert a datetime object to a numeric value.
+
+    Args:
+        timepoint: A datetime object.
+
+    Returns:
+        A number representing the year of the timepoint.
+    """
+    time_delta = timepoint - dt.datetime(1, 1, 1)
+    time_delta += dt.timedelta(days=366)  # Add 1 year to account for the fact that the first year is 1
+    total_days = time_delta.total_seconds() / (24 * 3600)
+    return total_days / 365.25
+
+
+def convert_numeric_to_timepoint(timepoint: float) -> dt.datetime:
+    """Convert a numeric value to a datetime object.
+
+    Args:
+        timepoint: The number of years since the year 0.0 AD/BC.
+
+    Returns:
+        A datetime object representing the timepoint.
+    """
+    total_seconds = timepoint * 365.25 * 24 * 3600
+    time_delta = dt.timedelta(seconds=total_seconds)
+
+    return dt.datetime(year=1, month=1, day=1) + time_delta - dt.timedelta(days=366)  # Subtract 1 year to account for the fact that the first year is 1
 
 
 def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float) -> int | list[int]:
