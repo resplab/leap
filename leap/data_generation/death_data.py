@@ -114,13 +114,13 @@ def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -
     df["n_alive_by_age"] = n_alive_by_age
 
     # L(x): calculate the number of person-years lived between ages [x, x+dx)
-    # L(x) = (l(x) - a(x) * d(x)) * dx
+    # L(x) = (l(x) - (1 - a(x)) * d(x)) * dx
     # d(x) = l(x) * q(x)
     df["a_x"] = [0.5] * df.shape[0]
     if time_delta > TimeDelta(days=7):
         df.loc[0, "a_x"] = 0.1
     df["n_person_years_interval"] = df.apply(
-        lambda x: (x["n_alive_by_age"] - x["a_x"] * x["prob_death"] * x["n_alive_by_age"]) * time_delta.total_years(),
+        lambda x: (x["n_alive_by_age"] - (1 - x["a_x"]) * x["prob_death"] * x["n_alive_by_age"]) * time_delta.total_years(),
         axis=1
     )
 
