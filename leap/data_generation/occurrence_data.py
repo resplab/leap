@@ -7,7 +7,7 @@ import json
 import plotly.express as px
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-from leap.utils import get_data_path, poly, date_range, TimeDelta
+from leap.utils import get_data_path, poly, date_range, get_time_delta_tag, TimeDelta
 from leap.data_generation.utils import parse_age_group, get_parser, convert_numeric_to_sex, \
     convert_sex_to_numeric
 from leap.logger import get_logger
@@ -367,6 +367,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
             1 year, etc.
 
     """
+    time_delta_tag = get_time_delta_tag(time_delta)
     df_asthma = load_asthma_df()
     incidence_model = generate_incidence_model(df_asthma)
     prevalence_model, alpha_age, norm2_age, alpha_time, norm2_time = generate_prevalence_model(df_asthma)
@@ -395,7 +396,10 @@ def generate_occurrence_data(time_delta: TimeDelta):
         max_timepoint=dt.datetime(2025, 12, 31),
         time_interval=5,
         max_age=63,
-        file_path=get_data_path("data_generation/figures/asthma_incidence_predicted.png")
+        file_path=get_data_path(
+            f"data_generation/figures/{time_delta_tag}/asthma_incidence_predicted.png",
+            mkdirs=True
+        )
     )
     plot_occurrence(
         df,
@@ -405,12 +409,20 @@ def generate_occurrence_data(time_delta: TimeDelta):
         max_timepoint=dt.datetime(2025, 12, 31),
         time_interval=5,
         max_age=63,
-        file_path=get_data_path("data_generation/figures/asthma_prevalence_predicted.png")
+        file_path=get_data_path(
+            f"data_generation/figures/{time_delta_tag}/asthma_prevalence_predicted.png",
+            mkdirs=True
+        )
     )
-    df.to_csv(get_data_path("processed_data/asthma_occurrence_predictions.csv"), index=False)
+    df.to_csv(
+        get_data_path(
+            f"processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv", mkdirs=True
+        ),
+        index=False
+    )
 
 
-    with open(get_data_path("processed_data/config.json"), "r") as f:
+    with open(get_data_path(f"processed_data/{time_delta_tag}/config.json"), "r") as f:
         config = json.load(f)
 
     config["incidence"]["parameters"] = add_beta_parameters(
@@ -450,7 +462,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
         "norm2_age": list(norm2_age)
     }
 
-    with open(get_data_path("processed_data/config.json"), "w", encoding="utf-8") as f:
+    with open(get_data_path(f"processed_data/{time_delta_tag}/config.json"), "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4, ensure_ascii=False)
 
 
