@@ -277,9 +277,14 @@ def get_predicted_data(
         )),
         columns=["timepoint", "sex", "age"]
     )
+    df["timepoint"] = df["timepoint"].apply(convert_timepoint_to_numeric)
 
+    # Get prediction from the model
     df[pred_col] = np.exp(model.predict(df, which="linear"))
+
+    # Convert sex and timepoint back to original format
     df["sex"] = df["sex"].apply(convert_numeric_to_sex)
+    df["timepoint"] = df["timepoint"].apply(convert_numeric_to_timepoint)
     return df
 
 
