@@ -175,9 +175,11 @@ def convert_timepoint_to_numeric(timepoint: dt.datetime) -> float:
     Returns:
         A number representing the year of the timepoint.
     """
-    time_delta = TimeDelta(dt1=timepoint, dt2=dt.datetime(1, 1, 1))
-    time_delta += TimeDelta(years=1)  # Add 1 year to account for the fact that the first year is 1
-    return time_delta.total_years()
+    time_delta = timepoint - dt.datetime(1, 1, 1)
+    time_delta += dt.timedelta(days=366)  # Add 1 year to account for the fact that the first year is 1
+    total_days = time_delta.total_seconds() / (24 * 3600)
+    return total_days / 365.25
+
 
 
 def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float) -> int | list[int]:
