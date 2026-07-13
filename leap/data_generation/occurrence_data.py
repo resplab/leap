@@ -260,7 +260,7 @@ def plot_occurrence(
     file_path: pathlib.Path | None = None,
     min_timepoint: dt.datetime = STARTING_TIMEPOINT,
     max_timepoint: dt.datetime = MAX_TIMEPOINT,
-    time_interval: int = 2,
+    time_interval: TimeDelta = TimeDelta(years=2),
     max_age: int = 110,
     width: int = 1000,
     height: int = 800
@@ -294,7 +294,7 @@ def plot_occurrence(
         to the specified path.
     """
 
-    timepoints = list(date_range(min_timepoint, max_timepoint + 1, step=time_interval))
+    timepoints = list(date_range(min_timepoint, max_timepoint + time_interval, step=time_interval))
     fig = px.line(
         df.loc[(df["timepoint"].isin(timepoints)) & (df["age"] <= max_age)].dropna(),
         x="age",
@@ -320,6 +320,7 @@ def plot_occurrence(
         fig.show()
     else:
         fig.write_image(str(file_path), width=width, height=height, scale=2)
+
 
 def add_beta_parameters(
     model: GLMResultsWrapper, parameter_map: Dict[str, list[int]], config: Dict[str, Any]
@@ -394,7 +395,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
         title="Predicted Asthma Incidence per 100 in BC",
         min_timepoint=dt.datetime(2000, 1, 1),
         max_timepoint=dt.datetime(2025, 12, 31),
-        time_interval=5,
+        time_interval=TimeDelta(years=5),
         max_age=63,
         file_path=get_data_path(
             f"data_generation/figures/{time_delta_tag}/asthma_incidence_predicted.png",
@@ -407,7 +408,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
         title="Predicted Asthma Prevalence per 100 in BC",
         min_timepoint=dt.datetime(2000, 1, 1),
         max_timepoint=dt.datetime(2025, 12, 31),
-        time_interval=5,
+        time_interval=TimeDelta(years=5),
         max_age=63,
         file_path=get_data_path(
             f"data_generation/figures/{time_delta_tag}/asthma_prevalence_predicted.png",
