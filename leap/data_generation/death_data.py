@@ -125,8 +125,10 @@ def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -
     )
 
     # L(x_f): calculate the number of person-years lived between ages [x_f, infinity)
+    # 1.4 years is a fixed exposure estimate for the open-ended final age group, independent
+    # of the life table's time_delta.
     max_age = df.index.max()
-    factor = 1.4 * TIME_DELTA_OD.total_years() / time_delta.total_years()
+    factor = 1.4 * TIME_DELTA_OD.total_years()
     df.loc[max_age, "n_person_years_interval"] = df.loc[max_age]["n_alive_by_age"] * factor
 
     # T(x): calculate the total number of person-years lived after age x
