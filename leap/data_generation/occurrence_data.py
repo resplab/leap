@@ -9,7 +9,7 @@ import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from leap.utils import get_data_path, poly, date_range, get_time_delta_tag, TimeDelta
 from leap.data_generation.utils import parse_age_group, get_parser, convert_numeric_to_sex, \
-    convert_sex_to_numeric
+    convert_sex_to_numeric, convert_timepoint_to_numeric, convert_numeric_to_timepoint
 from leap.logger import get_logger
 from typing import Tuple, Dict, Any
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
@@ -76,7 +76,7 @@ def load_asthma_df(starting_timepoint: dt.datetime = STARTING_TIMEPOINT) -> pd.D
 
 
 def generate_occurrence_model(
-    df_asthma: pd.DataFrame, formula: str, occ_type: str, maxiter: int = 1000
+    df_asthma: pd.DataFrame, formula: str, occ_type: str, time_delta: TimeDelta, maxiter: int = 1000
 ) -> GLMResultsWrapper:
     """Generate a ``GLM`` model for asthma incidence or prevalence.
     
@@ -94,6 +94,8 @@ def generate_occurrence_model(
             for more information.
         occ_type: The type of occurrence data to model. Must be one of ``"incidence"`` or
             ``"prevalence"``.
+        time_delta: The duration of time between subsequent timepoints in the data, e.g. 1 month,
+            1 year, etc.
         maxiter: The maximum number of iterations to perform while fitting the model.
     
     Returns:
@@ -106,37 +108,56 @@ def generate_occurrence_model(
     # Convert sex string to 1 or 2
     df["sex"] = df["sex"].apply(convert_sex_to_numeric)
 
+    # Convert timepoint to numeric
+    df["timepoint"] = df["timepoint"].apply(convert_timepoint_to_numeric)
+
     # Fit the GLM model
     model = smf.glm(formula=formula, data=df, family=sm.families.Poisson())
     results = model.fit(maxiter=maxiter)
 
     print(results.summary())
 
+    # Convert sex and timepoint back to original format
+    df["sex"] = df["sex"].apply(convert_numeric_to_sex)
+    df["timepoint"] = df["timepoint"].apply(convert_numeric_to_timepoint)
+
     # Create prediction dataframe
     df_pred = pd.DataFrame(
-        data=list(itertools.product(list(range(2000, 2066)), [1, 2], list(range(3, 65)))),
+        data=list(itertools.product(
+            list(date_range(dt.datetime(2000, 1, 1), dt.datetime(2066, 1, 1) + time_delta, step=time_delta)),
+            [1, 2],
+            list(range(3, 65))
+        )),
         columns=["timepoint", "sex", "age"]
     )
 
+    # Convert timepoint to float for prediction
+    df_pred["timepoint"] = df_pred["timepoint"].apply(convert_timepoint_to_numeric)
+
+    # Get prediction from the model
     occurrence_pred = results.predict(df_pred, which="mean", transform=True)
     df_pred[f"{occ_type}_pred"] = occurrence_pred
 
-    df = pd.merge(df, df_pred, on=["timepoint", "sex", "age"], how="outer")
-    df["sex"] = df.apply(
-        lambda x: "F" if x["sex"] == 1 else "M",
-        axis=1
-    )
+    # Convert sex and timepoint back to original format
+    df_pred["sex"] = df_pred["sex"].apply(convert_numeric_to_sex)
+    df_pred["timepoint"] = df_pred["timepoint"].apply(convert_numeric_to_timepoint)
 
+    df = pd.merge(df, df_pred, on=["timepoint", "sex", "age"], how="outer")
+
+    time_delta_tag = get_time_delta_tag(time_delta)
     plot_occurrence(
         df, y=occ_type, title=f"Asthma {occ_type.capitalize()} per 100 in BC",
-        file_path=get_data_path(f"data_generation/figures/asthma_{occ_type}_comparison.png")
+        file_path=get_data_path(
+            f"data_generation/figures/{time_delta_tag}/asthma_{occ_type}_comparison.png",
+            mkdirs=True
+        )
     )
 
     return results
 
 
 def generate_incidence_model(
-    df_asthma: pd.DataFrame, maxiter: int = 1000
+    df_asthma: pd.DataFrame, time_delta: TimeDelta, maxiter: int = 1000
 ) -> GLMResultsWrapper:
     """Generate a ``GLM`` model for asthma incidence.
     
@@ -150,6 +171,8 @@ def generate_incidence_model(
             * ``incidence (float)``: The incidence of asthma.
             * ``prevalence (float)``: The prevalence of asthma.
 
+        time_delta: The duration of time between subsequent timepoints in the data, e.g. 1 month,
+            1 year, etc.
         maxiter: The maximum number of iterations to perform while fitting the model.
     
     Returns:
@@ -161,13 +184,13 @@ def generate_incidence_model(
     formula = "incidence ~ sex*timepoint + " + \
         f"sex*poly(age, degree=5, alpha={list(alpha)}, norm2={list(norm2)})"
     results = generate_occurrence_model(
-        df_asthma, formula=formula, occ_type="incidence", maxiter=maxiter
+        df_asthma, formula=formula, occ_type="incidence", time_delta=time_delta, maxiter=maxiter
     )
     return results
 
 
 def generate_prevalence_model(
-    df_asthma: pd.DataFrame, maxiter: int = 1000
+    df_asthma: pd.DataFrame, time_delta: TimeDelta, maxiter: int = 1000
 ) -> Tuple[GLMResultsWrapper, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Generate a ``GLM`` model for asthma prevalence.
     
@@ -180,7 +203,9 @@ def generate_prevalence_model(
             * ``age (int)``: The age in years.
             * ``incidence (float)``: The incidence of asthma.
             * ``prevalence (float)``: The prevalence of asthma.
-        
+
+        time_delta: The duration of time between subsequent timepoints in the data, e.g. 1 month,
+            1 year, etc.
         maxiter: The maximum number of iterations to perform while fitting the model.
     
     Returns:
@@ -193,14 +218,19 @@ def generate_prevalence_model(
     """
 
     _, alpha_age, norm2_age = poly(df_asthma["age"].to_list(), degree=5, orthogonal=True)
-    _, alpha_time, norm2_time = poly(df_asthma["timepoint"].to_list(), degree=2, orthogonal=True)
+    _, alpha_time, norm2_time = poly(
+        df_asthma["timepoint"].apply(convert_timepoint_to_numeric).to_list(),
+        degree=2,
+        orthogonal=True
+    )
     formula = "prevalence ~ " + \
         f"sex*poly(timepoint, degree=2, alpha={list(alpha_time)}, norm2={list(norm2_time)})" + \
         f"*poly(age, degree=5, alpha={list(alpha_age)}, norm2={list(norm2_age)})"
     results = generate_occurrence_model(
-        df_asthma, formula=formula, occ_type="prevalence", maxiter=maxiter
+        df_asthma, formula=formula, occ_type="prevalence", time_delta=time_delta, maxiter=maxiter
     )
     return results, alpha_age, norm2_age, alpha_time, norm2_time
+
 
 def get_predicted_data(
     model: GLMResultsWrapper,
@@ -370,8 +400,10 @@ def generate_occurrence_data(time_delta: TimeDelta):
     """
     time_delta_tag = get_time_delta_tag(time_delta)
     df_asthma = load_asthma_df()
-    incidence_model = generate_incidence_model(df_asthma)
-    prevalence_model, alpha_age, norm2_age, alpha_time, norm2_time = generate_prevalence_model(df_asthma)
+    incidence_model = generate_incidence_model(df_asthma, time_delta)
+    prevalence_model, alpha_age, norm2_age, alpha_time, norm2_time = generate_prevalence_model(
+        df_asthma, time_delta
+    )
     df_incidence = get_predicted_data(
         incidence_model,
         "incidence",
