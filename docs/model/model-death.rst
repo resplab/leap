@@ -683,7 +683,7 @@ Assuming that deaths are uniform across the interval :math:`[x, x + \Delta x)`, 
   &= (l(x) - 0.5 \cdot d(x))\Delta x 
   \end{align}
 
-Because infant mortality is highest in the first few days of life, if :math:`\Delta x < 7 \text{days}`,
+Because infant mortality is highest in the first few days of life, if :math:`\Delta x > 7 \text{days}`,
 we set :math:`a(x_0) = 0.1`.
 
 For the final age group, since everyone dies, :math:`l(x_f + \Delta x) = 0`, and :math:`q(x_f) = 1`.
