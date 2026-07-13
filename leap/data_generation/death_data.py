@@ -365,8 +365,8 @@ def load_past_death_data() -> pd.DataFrame:
     """Load the past death data from the ``StatCan`` CSV file.
     
     Returns:
-        A dataframe containing the probability of death and the standard error for each timepoint,
-        province, age, and sex. The time delta of the data is that of the original data, which is
+        A dataframe containing the probability of death for each timepoint, province, age, and sex.
+        The time delta of the data is that of the original data, which is
         1 year.
         Columns:
 
@@ -415,7 +415,7 @@ def load_past_death_data() -> pd.DataFrame:
     # remove sex category "Both"
     df = df.loc[df["sex"] != "B"]
 
-    # select only the "qx" elements, which relate to the probability of death and the SE
+    # select only the "qx" elements, which relate to the probability of death
     df = df.loc[df["ELEMENT"].str.contains("qx")]
 
     # create a df with the probability of death
@@ -554,8 +554,8 @@ def compute_beta_parameters(
     that the projected life expectancy matches the desired life expectancy from the calibration data.
     
     Args:
-        past_life_table: A dataframe containing the probability of death and the standard error
-            for each timepoint, province, age, and sex. Columns:
+        past_life_table: A dataframe containing the probability of death for each timepoint,
+            province, age, and sex. Columns:
             
             * ``timepoint``: the starting timepoint of the interval during which the data was collected.
             * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
@@ -678,8 +678,8 @@ def get_projected_death_data(
 
             * **key**: ``(province, sex, projection_scenario)``
             * **value**:  beta parameter for the given province, sex, and projection scenario. 
-        past_life_table: A dataframe containing the probability of death and the standard error
-            for each timepoint, province, age, and sex. Columns:
+        past_life_table: A dataframe containing the probability of death for each timepoint,
+            province, age, and sex. Columns:
             
             * ``timepoint``: the starting timepoint of the interval during which the data was collected.
             * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
@@ -690,8 +690,8 @@ def get_projected_death_data(
             * ``prob_death``: the probability of death.
     
     Returns:
-        A dataframe containing the predicted probability of death and the standard error
-        for each annual timepoint, province, age, and sex.
+        A dataframe containing the predicted probability of death for each annual timepoint,
+        province, age, and sex.
         Columns:
 
         * ``timepoint``: The starting timepoint of the interval the data applies to.
