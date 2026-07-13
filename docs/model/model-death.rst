@@ -758,10 +758,6 @@ fitted for each sex and province.
      - :code:`float`
      - the probability of death between age ``x`` and ``x+1`` for the given year,
        province, sex, and age
-   * - ``se``
-     - :code:`float`
-     - the standard error of the probability of death; for projected years, this is
-       scaled proportionally from the base year's standard error
    * - ``sex``
      - :code:`str`
      - one of ``M`` = male, ``F`` = female
