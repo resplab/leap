@@ -8,7 +8,8 @@ import plotly.express as px
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from leap.utils import get_data_path, poly, date_range, TimeDelta
-from leap.data_generation.utils import parse_age_group, get_parser
+from leap.data_generation.utils import parse_age_group, get_parser, convert_numeric_to_sex, \
+    convert_sex_to_numeric
 from leap.logger import get_logger
 from typing import Tuple, Dict, Any
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
@@ -103,10 +104,7 @@ def generate_occurrence_model(
     df = df_asthma[["timepoint", "sex", "age", occ_type]].copy()
 
     # Convert sex string to 1 or 2
-    df["sex"] = df.apply(
-        lambda x: 1 if x["sex"] == "F" else 2,
-        axis=1
-    )
+    df["sex"] = df["sex"].apply(convert_sex_to_numeric)
 
     # Fit the GLM model
     model = smf.glm(formula=formula, data=df, family=sm.families.Poisson())
@@ -251,10 +249,7 @@ def get_predicted_data(
     )
 
     df[pred_col] = np.exp(model.predict(df, which="linear"))
-    df["sex"] = df.apply(
-        lambda x: "F" if x["sex"] == 1 else "M",
-        axis=1
-    )
+    df["sex"] = df["sex"].apply(convert_numeric_to_sex)
     return df
 
 
