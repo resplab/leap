@@ -7,7 +7,7 @@ import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from leap.utils import get_data_path, get_time_delta_tag, date_range, TimeDelta
 from leap.data_generation.utils import get_parser, convert_numeric_to_sex, convert_sex_to_numeric, \
-    convert_timepoint_to_numeric, heaviside
+    convert_timepoint_to_numeric, convert_numeric_to_timepoint, heaviside
 from leap.logger import get_logger
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 
@@ -273,6 +273,7 @@ def get_predicted_abx_data(
 
     df["n_abx_μ"] = np.exp(model.predict(df, which="linear"))
     df["sex"] = df["sex"].apply(convert_numeric_to_sex)
+    df["timepoint"] = df["timepoint"].apply(convert_numeric_to_timepoint)
     return df
 
 
