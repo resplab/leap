@@ -4,7 +4,7 @@ from leap.data_generation.birth_data import get_projection_scenario_id, MIN_TIME
     CENSUS_TIMEPOINT, load_past_births_population_data, load_projected_births_population_data, \
     load_past_initial_population_data, load_projected_initial_population_data, TIME_DELTA_OD
 from leap.logger import get_logger
-from leap.utils import TimeDelta, PROJECTION_SCENARIOS
+from leap.utils import TimeDelta, PROJECTION_SCENARIOS_FUTURE
 
 logger = get_logger(__name__)
 
@@ -111,12 +111,12 @@ def test_load_projected_births_population_data(time_delta, min_timepoint, expect
     assert df["timepoint"].min() >= min_timepoint
 
     # check that all projection scenarios are in PROJECTION_SCENARIOS
-    assert df["projection_scenario"].isin(PROJECTION_SCENARIOS).all()
+    assert df["projection_scenario"].isin(PROJECTION_SCENARIOS_FUTURE).all()
 
     # check that every projection scenario has the same amount of data and that it's greater than 0
     counts = [
         df.loc[df["projection_scenario"]==projection_scenario].shape[0] 
-        for projection_scenario in PROJECTION_SCENARIOS
+        for projection_scenario in PROJECTION_SCENARIOS_FUTURE
     ]
     assert len(set(counts)) == 1
     assert counts[0] > 0
@@ -251,12 +251,12 @@ def test_load_projected_initial_population_data(
     assert df["timepoint"].min() >= min_timepoint
 
     # check that all projection scenarios are in PROJECTION_SCENARIOS
-    assert df["projection_scenario"].isin(PROJECTION_SCENARIOS).all()
+    assert df["projection_scenario"].isin(PROJECTION_SCENARIOS_FUTURE).all()
 
     # check that every projection scenario has the same amount of data and that it's greater than 0
     counts = [
         df.loc[df["projection_scenario"]==projection_scenario].shape[0] 
-        for projection_scenario in PROJECTION_SCENARIOS
+        for projection_scenario in PROJECTION_SCENARIOS_FUTURE
     ]
     assert len(set(counts)) == 1
     assert counts[0] > 0
