@@ -768,3 +768,7 @@ fitted for each sex and province.
      - :code:`str`
      - the 2-letter province or territory ID
        (e.g., ``BC`` = British Columbia, ``CA`` = Canada)
+   * - ``projection_scenario``
+     - :code:`str`
+     - the population growth / mortality projection scenario, e.g. ``"FA"``, ``"M3"``;
+       historical rows use ``"past"``
