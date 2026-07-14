@@ -19,7 +19,7 @@ logger = get_logger(__name__, 20)
 
 
 MIN_TIMEPOINT = dt.datetime(1996, 1, 1)
-MAX_TIMEPOINT = dt.datetime(2068, 12, 31)
+MAX_TIMEPOINT_OD = dt.datetime(2068, 1, 1)
 
 TIME_DELTA_OD = TimeDelta(years=1) # original time delta of the data
 
@@ -727,7 +727,7 @@ def get_projected_death_data(
             set([key[0] for key in beta_parameters.keys()]),
             set([key[1] for key in beta_parameters.keys()]),
             set([key[2] for key in beta_parameters.keys()]),
-            list(date_range(starting_timepoint, MAX_TIMEPOINT, TIME_DELTA_OD)),
+            list(date_range(starting_timepoint, MAX_TIMEPOINT_OD + TIME_DELTA_OD, TIME_DELTA_OD)),
             past_life_table["age"].unique(),
             [0.0]
         )),
