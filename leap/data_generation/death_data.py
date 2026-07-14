@@ -694,8 +694,8 @@ def get_projected_death_data(
         province, age, and sex.
         Columns:
 
-        * ``timepoint``: The starting timepoint of the interval the data applies to.
-        * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+        * ``timepoint (dt.datetime)``: The starting timepoint of the interval the data applies to.
+        * ``province (str)``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
           For all of Canada, set province to ``"CA"``.
         * ``projection_scenario (str)``: Population growth type, one of:
 
@@ -713,9 +713,9 @@ def get_projected_death_data(
 
           See: `StatCan Projection Scenarios
           <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
-        * ``sex``: One of ``M`` = male, ``F`` = female.
-        * ``age``: The integer age.
-        * ``prob_death``: The probability that a person of the given age, sex, and province
+        * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+        * ``age (int)``: The integer age.
+        * ``prob_death (float)``: The probability that a person of the given age, sex, and province
           will die in the given year.
     """
 
