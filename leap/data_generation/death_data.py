@@ -1,75 +1,135 @@
+import pathlib
+import itertools
+import sys
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
+import datetime as dt
+import plotly.express as px
 from scipy import optimize
 from leap.utils import get_data_path
 from leap.logger import get_logger
-from leap.data_generation.utils import format_age_group, get_province_id, get_sex_id
+from leap.data_generation.utils import format_age_group, get_province_id, get_sex_id, get_parser, \
+    interpolate
+from leap.utils import TimeDelta, date_range, get_time_delta_tag
+from typing import Tuple, Dict
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
 
-STARTING_YEAR = 1996
-FINAL_YEAR = 2068
+MIN_TIMEPOINT = dt.datetime(1996, 1, 1)
+MAX_TIMEPOINT_OD = dt.datetime(2068, 1, 1)
+
+TIME_DELTA_OD = TimeDelta(years=1) # original time delta of the data
 
 
+def convert_prob_death(
+    prob_death: float,
+    time_delta_od: TimeDelta,
+    time_delta: TimeDelta
+) -> float:
+    r"""Convert the probability of death from the original time delta to the new time delta.
 
-def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
-    """Determine the life expectancy for a person born in a given year.
+    The probability of death, :math:`q(x, \Delta x)`, depends on the choice of :math:`\Delta x`,
+    i.e. ``time_delta``. The original data is collected with :math:`\Delta x = 1` year, but we may
+    want to convert it to a different :math:`\Delta x`, e.g. 1 month.
+
+    Assuming the hazard ratio is constant over the time interval:
+
+    .. math::
+
+        q(x, \Delta x_b, t) = 1 - (1 - q(x, \Delta x_a, t))^{\frac{\Delta x_b}{\Delta x_a}}
+
+    Args:
+        prob_death: The probability of death for the original time delta, :math:`q(x, \Delta x_a)`.
+            This is the probability that a person of age :math:`x` will die between the ages of
+            :math:`[x, x + \Delta x_a)`.
+        time_delta_od: The original time delta, :math:`\Delta x_a`.
+        time_delta: The new time delta, :math:`\Delta x_b`.
+
+    Returns:
+        The probability of death for the new time delta, :math:`q(x, \Delta x_b)`.
+    """
+
+    if time_delta_od == time_delta:
+        return prob_death
+
+    return 1 - (1 - prob_death)**(time_delta.total_years() / time_delta_od.total_years())
+
+
+def calculate_life_expectancy(life_table: pd.DataFrame, time_delta: TimeDelta) -> float:
+    """Determine the life expectancy for a person born in a given time interval.
 
     The life expectancy can be calculated from the death probability using the formulae
     delineated here:
     `Life Table Definitions <https://www.ssa.gov/oact/HistEst/CohLifeTables/LifeTableDefinitions.pdf>`_
     
     Args:
-        life_table: A dataframe containing the probability of death for a single year,
+        life_table: A dataframe containing the probability of death for a single timepoint,
             province and sex, for each age. Columns:
 
             * ``age``: the integer age.
             * ``sex``: One of ``M`` = male, ``F`` = female.
-            * ``year``: the integer calendar year.
+            * ``timepoint``: the timepoint of the data in the row.
             * ``province``: A string indicating the province abbreviation, e.g. ``"BC"``.
-                For all of Canada, set province to ``"CA"``.
-            * ``prob_death``: the probability of death for a given age, province, sex, and year.
+              For all of Canada, set province to ``"CA"``.
+            * ``projection_scenario``: A string indicating the projection scenario, e.g. ``"FA"``.
+            * ``prob_death``: the probability of death for a given age, province, sex, and timepoint.
+        time_delta: The duration of time between data points.
 
     Returns:
-        The life expectancy for a person born in the given year, in a given province,
+        The life expectancy for a person born in the given time interval, in a given province,
         for a given sex.
     """
+    if life_table["sex"].nunique() > 1:
+        raise ValueError("Dataframe should only contain one sex.")
+    if life_table["province"].nunique() > 1:
+        raise ValueError("Dataframe should only contain one province.")
+    if life_table["projection_scenario"].nunique() > 1:
+        raise ValueError("Dataframe should only contain one projection scenario.")
 
     df = life_table.sort_values("age").copy()
     df.set_index("age", inplace=True)
 
+    if not df.index.is_unique:
+        raise ValueError("Duplicate age values in index")
+
     # l(x): calculate the number of people alive up to age x
     n_alive_by_age_0 = 100000 # l(0): initial number of people at age 0
     n_alive_by_age = [] # l(x)
+    n_alive_by_age_prev = n_alive_by_age_0
+    prob_death_prev = 0
     for age in df.index:
         if age == 0:
             n_alive_by_age.append(n_alive_by_age_0)
         else:
-            # l(x) = l(x-1) * (1 - q(x)-1); q(x) = prob_death at age x
+            # l(x) = l(x-dx) * (1 - q(x-dx)); q(x) = prob_death at age [x, x+dx)
             n_alive_by_age.append(
-                n_alive_by_age[age - 1] * (1 - df.loc[age - 1, "prob_death"])
+                n_alive_by_age_prev * (1 - prob_death_prev)
             )
+        n_alive_by_age_prev = n_alive_by_age[-1]
+        prob_death_prev = df.loc[age]["prob_death"]
+
     df["n_alive_by_age"] = n_alive_by_age
 
-    # L(x): calculate the number of person-years lived between ages [x, x+1)
-    # L(x) = l(x) - 0.5 * d(x)
+    # L(x): calculate the number of person-years lived between ages [x, x+dx)
+    # L(x) = (l(x) - (1 - a(x)) * d(x)) * dx
     # d(x) = l(x) * q(x)
+    df["a_x"] = [0.5] * df.shape[0]
+    if time_delta > TimeDelta(days=7):
+        df.loc[0, "a_x"] = 0.1
     df["n_person_years_interval"] = df.apply(
-        lambda x: x["n_alive_by_age"] - 0.5 * x["prob_death"] * x["n_alive_by_age"], axis=1
+        lambda x: (x["n_alive_by_age"] - (1 - x["a_x"]) * x["prob_death"] * x["n_alive_by_age"]) * time_delta.total_years(),
+        axis=1
     )
 
-    # L(0): calculate the number of person-years lived between ages [0, 1)
-    # L(0) = L(1) - f(0) * d(0)
-    # d(0) = l(0) * q(0)
-    df.loc[0, "n_person_years_interval"] = (
-        df.loc[1, "n_person_years_interval"] +
-        0.1 * df.loc[0, "prob_death"] * n_alive_by_age_0
-    )
-
-    # L(110): calculate the number of person-years lived between ages [110, 111)
-    df.loc[110, "n_person_years_interval"] = df.loc[110, "n_alive_by_age"] * 1.4
+    # L(x_f): calculate the number of person-years lived between ages [x_f, infinity)
+    # 1.4 years is a fixed exposure estimate for the open-ended final age group, independent
+    # of the life table's time_delta.
+    max_age = df.index.max()
+    factor = 1.4 * TIME_DELTA_OD.total_years()
+    df.loc[max_age, "n_person_years_interval"] = df.loc[max_age]["n_alive_by_age"] * factor
 
     # T(x): calculate the total number of person-years lived after age x
     # T(x) = sum(L(x) for x in [x, 110])
@@ -84,79 +144,111 @@ def calculate_life_expectancy(life_table: pd.DataFrame) -> float:
     )
 
     # E(0): calculate the number of years left to live at age 0, aka life expectancy
-    life_expectancy = df.loc[0, "n_years_left_at_age"]
+    life_expectancy = df.loc[0]["n_years_left_at_age"]
 
     return life_expectancy
 
 
 def get_prob_death_projected(
-    prob_death: float, year_initial: int, year: int, beta_year: float
+    prob_death: float,
+    timepoint_initial: dt.datetime,
+    timepoint: dt.datetime,
+    beta_time: float
 ) -> float:
-    r"""Given the (known) prob death for a past year, calculate the prob death in a future year.
+    r"""Given the (known) prob death for a past timepoint, calculate the prob death at a future timepoint.
 
     .. math::
 
-        \sigma^{-1}(p(\text{sex}, \text{age}, \text{year})) =
-            \sigma^{-1}(p(\text{sex}, \text{age}, \text{year}_0)) - 
-            \beta(\text{sex})(\text{year} - \text{year}_0)
+        \sigma^{-1}(p(\text{sex}, \text{age}, \text{timepoint})) =
+            \sigma^{-1}(p(\text{sex}, \text{age}, \text{timepoint}_0)) - 
+            \beta(\text{sex})(\text{timepoint} - \text{timepoint}_0)
 
     Args:
-        prob_death: The probability of death for ``year_initial``, the last year that past data was
-            collected, for a given age, sex, province, and projection scenario.
-        year_initial: The initial year with a known probability of death. This is the last year
-            that the past data was collected.
-        year: The current year.
-        beta_year: The beta parameter for the given sex, province, and projection scenario.
+        prob_death: The probability of death for ``timepoint_initial``, the last timepoint that past
+            data was collected, for a given age, sex, province, and projection scenario.
+        timepoint_initial: The initial timepoint with a known probability of death. This is the last
+            timepoint that the past data was collected.
+        timepoint: The current timepoint.
+        beta_time: The beta parameter for the given sex, province, and projection scenario.
 
     Returns:
-        The projected probability of death for the current year.
+        The projected probability of death for the current timepoint.
+
+    Examples:
+
+        >>> timepoint_initial = dt.datetime(1996, 1, 1)
+        >>> timepoint = dt.datetime(2026, 1, 1)
+        >>> get_prob_death_projected(0.01, timepoint_initial, timepoint, -0.02)
+        np.float64(0.005512990331820702)
     """
+    time_diff = TimeDelta(dt1=timepoint, dt2=timepoint_initial).total_years()
     prob_death = min(prob_death, 0.9999999999)
-    odds = (prob_death / (1 - prob_death)) * np.exp((year - year_initial) * beta_year)
+    odds = (prob_death / (1 - prob_death)) * np.exp(time_diff * beta_time)
     prob_death_projected = max(min(odds / (1 + odds), 1), 0)
     return prob_death_projected
 
 
 
-def get_projected_life_table_single_year(
-    beta_year: float, life_table: pd.DataFrame, year_initial: int, year: int,
-    sex: str, province: str
+def get_projected_life_table_single_timepoint(
+    beta_time: float,
+    life_table: pd.DataFrame,
+    timepoint_initial: dt.datetime,
+    timepoint: dt.datetime
 ) -> pd.DataFrame:
-    """Get the life table for a single year.
+    """Get the life table for a single timepoint.
 
     Args:
-        beta_year: The beta parameter for the given year.
+        beta_time: The beta parameter for the given sex, province, and projection scenario.
         life_table: A dataframe containing the projected probability of death
-            for the starting year, for a given sex and province. Columns:
+            for the starting timepoint, for a single sex, province, and projection scenario.
+            Columns:
 
             * ``age``: the integer age.
             * ``sex``: One of ``M`` = male, ``F`` = female.
-            * ``year``: the starting calendar year.
+            * ``timepoint``: the starting calendar year.
             * ``province``: a string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
-            * ``prob_death``: the probability of death for a given age, province, sex, and year.
+            * ``prob_death``: the probability of death for a given age, province,
+              projection scenario, sex, and timepoint.
 
-        year_initial: The initial year with a known probability of death. This is the last year
+        timepoint_initial: The initial year with a known probability of death. This is the last year
             that the past data was collected.
-        year: The current year.
-        sex: One of ``M`` = male, ``F`` = female.
-        province: a string indicating the province abbreviation, e.g. ``"BC"``.
-            For all of Canada, set province to ``"CA"``.
+        timepoint: The current timepoint.
+
 
     Returns:
-        A dataframe containing the projected probability of death for the given year,
-        sex, and province.
+        A dataframe containing the projected probability of death for the given timepoint,
+        sex, province, and projection scenario. Columns:
+
+        * ``age``: the integer age.
+        * ``sex``: One of ``M`` = male, ``F`` = female. This should match the sex in the
+          original ``life_table`` dataframe.
+        * ``timepoint``: The timepoint for which the projected probability of death was calculated.
+          This should match the ``timepoint`` argument.
+        * ``province``: a string indicating the province abbreviation, e.g. ``"BC"``. This should
+          match the province in the original ``life_table`` dataframe.
+        * ``projection_scenario``: a string indicating the projection scenario, e.g. ``"FA"``. This
+          should match the projection scenario in the original ``life_table`` dataframe.
+        * ``prob_death``: the projected probability of death for a given age, province,
+          projection scenario, sex, and timepoint.
+
     """
-    df = life_table.loc[(life_table["sex"] == sex) & (life_table["province"] == province)].copy()
+    df = life_table.copy()
+
+    if df["sex"].nunique() > 1:
+        raise ValueError("Initial life table should only contain one sex.")
+    if df["province"].nunique() > 1:
+        raise ValueError("Initial life table should only contain one province.")
+    if df["projection_scenario"].nunique() > 1:
+        raise ValueError("Initial life table should only contain one projection scenario.")
+    if df["timepoint"].nunique() > 1:
+        raise ValueError("Initial life table should only contain one timepoint.")
+
     df["prob_death_proj"] = df["prob_death"].apply(
-        lambda x: get_prob_death_projected(x, year_initial, year, beta_year)
+        lambda x: get_prob_death_projected(x, timepoint_initial, timepoint, beta_time)
     )
 
-    df["year"] = [year] * df.shape[0]
-
-    df["se"] = df.apply(
-        lambda x: (x["prob_death_proj"] * x["se"]) / x["prob_death"], axis=1
-    )
+    df["timepoint"] = [timepoint] * df.shape[0]
     df.drop(columns=["prob_death"], inplace=True)
     df.rename(columns={"prob_death_proj": "prob_death"}, inplace=True)
 
@@ -164,40 +256,53 @@ def get_projected_life_table_single_year(
 
 
 def compute_life_expectancy_diff(
-    beta_year: np.ndarray,
+    beta_time: np.ndarray,
     life_table: pd.DataFrame,
     df_calibration: pd.DataFrame,
-    sex: str,
-    province: str, 
-    year_initial: int,
-    projection_scenario: str
+    timepoint_initial: dt.datetime,
+    time_delta: TimeDelta
 ) -> np.ndarray:
     """Calculate the difference between the projected life expectancy and desired life expectancy.
 
-    This function is passed to the ``scipy.optimize.brentq`` function. We want to find ``beta_year``
+    This function is passed to the ``scipy.optimize.leastsq`` function. We want to find ``beta_time``
     such that the projected life expectancy is as close as possible to the desired life expectancy.
     
     Args:
-        beta_year: The beta parameter for the given year. The ``scipy.optimize.leastsq`` function
-            requires that this be a 1D array, but we only have a single parameter.
+        beta_time: The beta parameter for the given timepoint. The ``scipy.optimize.leastsq``
+            function requires that this be a 1D array, but we only have a single parameter.
         life_table: A dataframe containing the projected probability of death
-            for the calibration year, for a given sex and province. Columns:
+            for the initial year, for a single sex and province. Columns:
 
             * ``age``: the integer age.
-            * ``sex``: one of ``M`` = male, ``F`` = female.
-            * ``year``: the calibration calendar year.
+            * ``sex``: one of ``"M"`` = male, ``"F"`` = female.
+            * ``timepoint``: the year used as :math:`t_0`; this is the last year that the past data
+              was collected.
             * ``province``: a 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
             * ``prob_death``: the probability of death for a given age, province, sex, and year.
 
         df_calibration: A dataframe containing the life expectancy projections for the calibration
-            years. Columns:
+            years, for a single sex, province, and projection scenario. Columns:
 
-            * ``year``: The calendar year. Range ``[1988, 2073]``.
+            * ``timepoint (dt.datetime)``: The year the projection is for. Range ``[1988, 2073]``.
             * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
             * ``sex``: One of ``F`` = female, ``M`` = male.
-            * ``projection_scenario``: The projection scenario, e.g. ``"M3"``.
+            * ``projection_scenario (str)``: Population growth type, one of:
+
+              * ``LG``: low-growth projection
+              * ``HG``: high-growth projection
+              * ``M1``: medium-growth 1 projection
+              * ``M2``: medium-growth 2 projection
+              * ``M3``: medium-growth 3 projection
+              * ``M4``: medium-growth 4 projection
+              * ``M5``: medium-growth 5 projection
+              * ``M6``: medium-growth 6 projection
+              * ``FA``: fast-aging projection
+              * ``SA``: slow-aging projection
+
+              See: `StatCan Projection Scenarios
+              <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
             * ``mortality_scenario``: The mortality scenario. One of:
                 - ``LM``: Low mortality
                 - ``MM``: Medium mortality
@@ -205,35 +310,52 @@ def compute_life_expectancy_diff(
             * ``life_expectancy``: The life expectancy in years for the given year, province,
               sex, projection scenario, and mortality scenario.
 
-        sex: one of ``M`` = male, ``F`` = female.
-        province: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
-            For all of Canada, set province to ``"CA"``.
-        year_initial: The initial year with a known probability of death. This is the last year
-            that the past data was collected.
-        projection_scenario: The projection scenario, e.g. ``"M3"``.
+        timepoint_initial: The initial timepoint with a known probability of death. This is the last
+            timepoint that the past data was collected.
+        time_delta: The duration of time between data points.
     
     Returns:
         The difference between the projected life expectancy of the calibration year
         and the desired life expectancy, for each of the calibration years.
+
+    Examples:
+
+        >>> past_life_table = load_past_death_data()
+        >>> df_calibration = load_projected_death_data(min_timepoint=dt.datetime(1996, 1, 1))
+        >>> df_calibration = df_calibration.loc[
+        ...     (df_calibration["projection_scenario"] == "LG") &
+        ...     (df_calibration["province"] == "CA") &
+        ...     (df_calibration["sex"] == "F")
+        ... ]
+        >>> life_table = past_life_table.loc[
+        ...     (past_life_table["province"] == "CA") &
+        ...     (past_life_table["sex"] == "F") &
+        ...     (past_life_table["timepoint"] == dt.datetime(2022, 1, 1))
+        ... ]
+        >>> beta_time = np.array([-0.02])
+        >>> compute_life_expectancy_diff(
+        ...     beta_time, life_table, df_calibration, dt.datetime(1996, 1, 1), TIME_DELTA_OD
+        ... )
+        array([4.90291552, 5.98995694, 7.75593427])
     """
-    beta_year = beta_year[0]
-    desired_life_expectancies = df_calibration.loc[
-        (df_calibration["sex"] == sex) &
-        (df_calibration["province"] == province) &
-        (df_calibration["projection_scenario"] == projection_scenario)
-    ]
+
+    if life_table["sex"].nunique() > 1:
+        raise ValueError("Life table should only contain one sex.")
+    if life_table["province"].nunique() > 1:
+        raise ValueError("Life table should only contain one province.")
+    if life_table["timepoint"].nunique() > 1:
+        raise ValueError("Life table should only contain one timepoint.")
 
     diff = []
-    for year in desired_life_expectancies["year"]:
-        projected_life_table = get_projected_life_table_single_year(
-            beta_year, life_table, year_initial, year, sex, province
+    for timepoint in df_calibration["timepoint"]:
+        projected_life_table = get_projected_life_table_single_timepoint(
+            beta_time[0], life_table, timepoint_initial, timepoint
         )
-        logger.info(f"Calculating life expectancy for {year}, {sex}, {province}, beta_year={beta_year}")
 
-        life_expectancy = calculate_life_expectancy(projected_life_table)
-        desired_life_expectancy = desired_life_expectancies.loc[
-            desired_life_expectancies["year"] == year, "life_expectancy"
-        ].values[0]
+        life_expectancy = calculate_life_expectancy(projected_life_table, time_delta)
+        desired_life_expectancy = df_calibration.loc[
+            df_calibration["timepoint"] == timepoint
+        ]["life_expectancy"].values[0]
         diff.append(np.abs(life_expectancy - desired_life_expectancy))
     
     return np.array(diff)
@@ -243,21 +365,22 @@ def load_past_death_data() -> pd.DataFrame:
     """Load the past death data from the ``StatCan`` CSV file.
     
     Returns:
-        A dataframe containing the probability of death and the standard error
-        for each year, province, age, and sex.
+        A dataframe containing the probability of death for each timepoint, province, age, and sex.
+        The time delta of the data is that of the original data, which is
+        1 year.
         Columns:
 
-        * ``year``: The integer calendar year.
-        * ``province``: a 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+        * ``timepoint``: The starting timepoint of the interval during which the data was collected.
+        * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
           For all of Canada, set province to ``"CA"``.
-        * ``sex``: One of ``M`` = male, ``F`` = female.
+        * ``projection_scenario``: The projection scenario, i.e. ``"past"``.
+        * ``sex``: One of ``"M"`` = male, ``"F"`` = female.
         * ``age``: The integer age.
         * ``prob_death``: The probability that a person of the given age, sex, and province
           will die in the given year.
-        * ``se``: The standard error of the probability of death.
     """ 
     logger.info("Loading mortality data from CSV file...")
-    df = pd.read_csv(get_data_path("original_data/13100837.csv"))
+    df = pd.read_csv(get_data_path("original_data/13100837.csv"), parse_dates=["REF_DATE"])
 
     # remove spaces from column names and make uppercase
     column_names = {}
@@ -267,12 +390,15 @@ def load_past_death_data() -> pd.DataFrame:
 
     # rename the columns
     df.rename(
-        columns={"REF_DATE": "year", "GEO": "province", "SEX": "sex", "AGE_GROUP": "age"},
+        columns={"REF_DATE": "timepoint", "GEO": "province", "SEX": "sex", "AGE_GROUP": "age"},
         inplace=True
     )
 
     # select the required columns
-    df = df.loc[df["year"] >= STARTING_YEAR, ["year", "province", "sex", "age", "ELEMENT", "VALUE"]]
+    df = df.loc[
+        df["timepoint"] >= MIN_TIMEPOINT,
+        ["timepoint", "province", "sex", "age", "ELEMENT", "VALUE"]
+    ]
 
     # format the age group into an integer age
     df["age"] = df["age"].apply(lambda x: format_age_group(x, "110 years and over"))
@@ -289,25 +415,23 @@ def load_past_death_data() -> pd.DataFrame:
     # remove sex category "Both"
     df = df.loc[df["sex"] != "B"]
 
-    # select only the "qx" elements, which relate to the probability of death and the SE
+    # select only the "qx" elements, which relate to the probability of death
     df = df.loc[df["ELEMENT"].str.contains("qx")]
 
     # create a df with the probability of death
-    df_prob = df.loc[df["ELEMENT"].str.contains("Death probability between age")]
-    df_prob = df_prob.drop(columns=["ELEMENT"])
-    df_prob.rename(columns={"VALUE": "prob_death"}, inplace=True)
+    df = df.loc[df["ELEMENT"].str.contains("Death probability between age")]
+    df = df.drop(columns=["ELEMENT"])
+    df.rename(columns={"VALUE": "prob_death"}, inplace=True)
 
-    # create a df with the standard error of the probability of death
-    df_se = df.loc[df["ELEMENT"].str.contains("Margin of error")]
-    df_se = df_se.drop(columns=["ELEMENT"])
-    df_se.rename(columns={"VALUE": "se"}, inplace=True)
+    df.sort_values(["province", "age", "sex", "timepoint"], inplace=True)
+    df = df[["province", "age", "sex", "timepoint", "prob_death"]]
 
-    # join the two tables
-    df = pd.merge(df_prob, df_se, on=["year", "province", "sex", "age"], how="left")
+    df["projection_scenario"] = ["past"] * df.shape[0]
 
     return df
 
-def load_projected_death_data() -> pd.DataFrame:
+
+def load_projected_death_data(min_timepoint: dt.datetime) -> pd.DataFrame:
     """Load the projected death data from the ``StatCan`` CSV files.
 
     ``Statistics Canada`` provides two tables with life expectancy projections:
@@ -321,11 +445,26 @@ def load_projected_death_data() -> pd.DataFrame:
         A dataframe containing the life expectancy from selected calibration years from
         ``Statistics Canada``:
 
-        * ``year (int)``: The calendar year. Range ``[1988, 2073]``.
+        * ``timepoint (dt.datetime)``: Range ``[1988, 2073]``.
         * ``province (str)``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
           For all of Canada, set province to ``"CA"``.
         * ``sex (str)``: One of ``F`` = female, ``M`` = male.
-        * ``projection_scenario (str)``: The projection scenario, e.g. ``"M3"``.
+        * ``projection_scenario (str)``: Population growth type, one of:
+
+          * ``past``: historical data
+          * ``LG``: low-growth projection
+          * ``HG``: high-growth projection
+          * ``M1``: medium-growth 1 projection
+          * ``M2``: medium-growth 2 projection
+          * ``M3``: medium-growth 3 projection
+          * ``M4``: medium-growth 4 projection
+          * ``M5``: medium-growth 5 projection
+          * ``M6``: medium-growth 6 projection
+          * ``FA``: fast-aging projection
+          * ``SA``: slow-aging projection
+
+          See: `StatCan Projection Scenarios
+          <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
         * ``mortality_scenario (str)``: The mortality scenario. One of:
             - ``LM``: Low mortality
             - ``MM``: Medium mortality
@@ -375,38 +514,78 @@ def load_projected_death_data() -> pd.DataFrame:
 
     # Remove NA columns
     df = df.dropna(subset=["life_expectancy"])
+
+    # Convert year to timepoint
+    df["timepoint"] = df["year"].apply(lambda x: dt.datetime(x, 1, 1))
+    df = df.drop(columns=["year"])
+
+    df = df.loc[df["timepoint"] >= min_timepoint].reset_index(drop=True)
+
+    df = df.loc[df["province"].isin(["CA", "BC"])]
+
     return df
 
 
-def get_projected_death_data(
+def compute_beta_parameters(
     past_life_table: pd.DataFrame,
     df_calibration: pd.DataFrame,
-    projection_scenario: str = "M3",
+    time_delta_od: TimeDelta = TIME_DELTA_OD,
     x0: float = -0.02,
-    xtol: float = 0.00001
-) -> pd.DataFrame:
-    """Load the projected death data from ``StatCan`` CSV file.
+    xtol: float = 0.00001   
+) -> Dict[Tuple[str, str, str], float]:
+    r"""Compute the beta parameters for each province, sex, and projection scenario.
+
+    The beta parameters are used to project the probability of death for future timepoints, given
+    the probability of death for past timepoints. We use the following formula to project the
+    probability of death:
+
+    .. math::
+        \sigma^{-1}(q(x, \Delta x, t; \theta, \text{age})) =
+            \sigma^{-1}(q(x, \Delta x, t_0; \theta, \text{age})) -
+            \beta_{\theta} (t - t_0)
+
+    where :math:`\theta` is given by:
+    
+    .. math::
+    
+        \theta := \{\text{province}, \text{sex}, \text{projection scenario}\}
+
+    In this function, we optimize the :math:`\beta_{\theta}` parameter for each :math:`\theta` such
+    that the projected life expectancy matches the desired life expectancy from the calibration data.
     
     Args:
-        past_life_table: A dataframe containing the probability of death and the standard error
-            for each year, province, age, and sex. Columns:
+        past_life_table: A dataframe containing the probability of death for each timepoint,
+            province, age, and sex. Columns:
             
-            * ``year``: the integer calendar year.
+            * ``timepoint``: the starting timepoint of the interval during which the data was collected.
             * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
               For all of Canada, set province to ``"CA"``.
             * ``sex``: One of ``M`` = male, ``F`` = female.
             * ``age``: the integer age.
             * ``prob_death``: the probability of death.
-            * ``se``: the standard error of the probability of death.
 
         df_calibration: A dataframe containing the life expectancy projections for the calibration
             years. Columns:
 
-            * ``year``: The calendar year. Range ``[1988, 2073]``.
+            * ``timepoint``: The calendar year. Range ``[1988, 2073]``.
             * ``province``: A 2-letter string indicating the province abbreviation, e.g.
               ``"BC"``. For all of Canada, set province to ``"CA"``.
             * ``sex``: One of ``F`` = female, ``M`` = male.
-            * ``projection_scenario``: The projection scenario, e.g. ``"M3"``.
+            * ``projection_scenario (str)``: Population growth type, one of:
+
+              * ``LG``: low-growth projection
+              * ``HG``: high-growth projection
+              * ``M1``: medium-growth 1 projection
+              * ``M2``: medium-growth 2 projection
+              * ``M3``: medium-growth 3 projection
+              * ``M4``: medium-growth 4 projection
+              * ``M5``: medium-growth 5 projection
+              * ``M6``: medium-growth 6 projection
+              * ``FA``: fast-aging projection
+              * ``SA``: slow-aging projection
+
+              See: `StatCan Projection Scenarios
+              <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
             * ``mortality_scenario``: The mortality scenario. One of:
                 - ``LM``: Low mortality
                 - ``MM``: Medium mortality
@@ -414,113 +593,359 @@ def get_projected_death_data(
             * ``life_expectancy``: The life expectancy in years for the given year, province,
               sex, projection scenario, and mortality scenario.
 
+        time_delta_od: The original duration of time between data points in the past data.
         x0: The initial guess for the beta parameter.
         xtol: The tolerance for the beta parameter.
     
     Returns:
-        A dataframe containing the predicted probability of death and the standard error
-        for each year, province, age, and sex.
-        Columns:
+        A dictionary containing the beta parameters for each province, sex, and projection scenario.
+        Format:
 
-        * ``year``: The integer calendar year.
-        * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
-          For all of Canada, set province to ``"CA"``.
-        * ``sex``: One of ``M`` = male, ``F`` = female.
-        * ``age``: The integer age.
-        * ``prob_death``: The probability that a person of the given age, sex, and province
-          will die in the given year.
-        * ``se``: The standard error of the probability of death.
+        * **key**: ``(province, sex, projection_scenario)``
+        * **value**:  beta parameter for the given province, sex, and projection scenario.
+
+    Examples:
+
+        >>> past_life_table = load_past_death_data()
+        >>> df_calibration = load_projected_death_data(min_timepoint=dt.datetime(1996, 1, 1))
+        >>> df_calibration = df_calibration.loc[df_calibration["projection_scenario"].isin(["LG", "M3"])]
+        >>> beta_parameters = compute_beta_parameters(past_life_table, df_calibration)
+        >>> list(beta_parameters.keys())
+        [('CA', 'M', 'LG'), ('CA', 'M', 'M3'), ('CA', 'F', 'LG'), ('CA', 'F', 'M3'), ('BC', 'M', 'LG'), ('BC', 'M', 'M3'), ('BC', 'F', 'LG'), ('BC', 'F', 'M3')]
+        >>> beta_parameters[("CA", "M", "LG")] # doctest: +NUMBER
+        np.float64(-0.01)
     """
+    keys = list(itertools.product(
+        df_calibration["province"].unique(),
+        df_calibration["sex"].unique(), 
+        df_calibration["projection_scenario"].unique())
+    )
+    beta_parameters = {key: 0.0 for key in keys}
 
-    projected_life_table = pd.DataFrame({
-        "year": np.array([], dtype=int),
-        "province": [],
-        "age": np.array([], dtype=int),
-        "sex": [],
-        "prob_death": [],
-        "se": []
-    })
-    for province in past_life_table["province"].unique():
-        life_table = past_life_table[past_life_table["province"] == province]
-        starting_year = life_table["year"].max() + 1
-        life_table = life_table[life_table["year"] == starting_year - 1]
+    tqdm_bar = tqdm(
+        total=len(keys),
+        desc=f"Timepoint",
+        leave=True,
+        bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
+        file=sys.stdout
+    )
+    for province, sex, projection_scenario in keys:
 
-        beta_year_female = optimize.leastsq(
+        tqdm_bar.update(1)
+        tqdm_bar.set_description(
+            f"Province: {province} | Sex: {sex} | Projection Scenario: {projection_scenario}"
+        )
+        life_table = past_life_table.loc[
+            (past_life_table["province"] == province) &
+            (past_life_table["sex"] == sex)
+        ].copy()
+        max_timepoint_past = life_table["timepoint"].max()
+        life_table = life_table[life_table["timepoint"] == max_timepoint_past]
+
+        df_calibration_filtered = df_calibration.loc[
+            (df_calibration["province"] == province) &
+            (df_calibration["sex"] == sex) &
+            (df_calibration["projection_scenario"] == projection_scenario)
+        ].copy()
+
+        beta_time = optimize.leastsq(
             compute_life_expectancy_diff,
             x0=[x0],
             args=(
                 life_table,
-                df_calibration,
-                "F",
-                province,
-                starting_year - 1,
-                projection_scenario
+                df_calibration_filtered,
+                max_timepoint_past,
+                time_delta_od
             ),
             xtol=xtol,
         )[0][0]
 
-        beta_year_male = optimize.leastsq(
-            compute_life_expectancy_diff,
-            x0=[x0],
-            args=(
-                life_table,
-                df_calibration,
-                "M",
-                province,
-                starting_year - 1,
-                projection_scenario
-            ),
-            xtol=xtol
-        )[0][0]
+        beta_parameters[(province, sex, projection_scenario)] = beta_time
 
-        projected_life_table_province = pd.DataFrame({
-            "year": np.array([], dtype=int),
-            "province": [],
-            "age": np.array([], dtype=int),
-            "sex": [],
-            "prob_death": [],
-            "se": []
-        })
-        for year in range(starting_year, FINAL_YEAR + 1):
-            # get the prob_death projections for the year and add to dataframe
-            df_female = get_projected_life_table_single_year(
-                beta_year_female, life_table, starting_year - 1, year, "F", province
-            )
-            df_male = get_projected_life_table_single_year(
-                beta_year_male, life_table, starting_year - 1, year, "M", province
-            )
-            # combine the dataframes
-            projected_life_table_single_year = pd.concat([df_female, df_male], axis=0)
-            projected_life_table_province = pd.concat(
-                [projected_life_table_province, projected_life_table_single_year],
-                axis=0
-            )
+    tqdm_bar.close()
+    return beta_parameters
 
-        projected_life_table = pd.concat(
-            [projected_life_table, projected_life_table_province],
-            axis=0
-        )
+
+def get_projected_death_data(
+    beta_parameters: Dict[Tuple[str, str, str], float],
+    past_life_table: pd.DataFrame
+) -> pd.DataFrame:
+    """Load the projected death data from ``StatCan`` CSV file.
+    
+    Args:
+        beta_parameters: A dictionary containing the beta parameters for each province, sex, and
+            projection scenario. Format:
+
+            * **key**: ``(province, sex, projection_scenario)``
+            * **value**:  beta parameter for the given province, sex, and projection scenario. 
+        past_life_table: A dataframe containing the probability of death for each timepoint,
+            province, age, and sex. Columns:
+            
+            * ``timepoint``: the starting timepoint of the interval during which the data was collected.
+            * ``province``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+              For all of Canada, set province to ``"CA"``.
+            * ``projection_scenario``: The population growth type, i.e. ``"past"``.
+            * ``sex``: One of ``M`` = male, ``F`` = female.
+            * ``age``: the integer age.
+            * ``prob_death``: the probability of death.
+    
+    Returns:
+        A dataframe containing the predicted probability of death for each annual timepoint,
+        province, age, and sex.
+        Columns:
+
+        * ``timepoint (dt.datetime)``: The starting timepoint of the interval the data applies to.
+        * ``province (str)``: A 2-letter string indicating the province abbreviation, e.g. ``"BC"``.
+          For all of Canada, set province to ``"CA"``.
+        * ``projection_scenario (str)``: Population growth type, one of:
+
+          * ``past``: historical data
+          * ``LG``: low-growth projection
+          * ``HG``: high-growth projection
+          * ``M1``: medium-growth 1 projection
+          * ``M2``: medium-growth 2 projection
+          * ``M3``: medium-growth 3 projection
+          * ``M4``: medium-growth 4 projection
+          * ``M5``: medium-growth 5 projection
+          * ``M6``: medium-growth 6 projection
+          * ``FA``: fast-aging projection
+          * ``SA``: slow-aging projection
+
+          See: `StatCan Projection Scenarios
+          <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
+        * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+        * ``age (int)``: The integer age.
+        * ``prob_death (float)``: The probability that a person of the given age, sex, and province
+          will die in the given year.
+    """
+
+    max_timepoint_past = past_life_table["timepoint"].max()
+    starting_timepoint = max_timepoint_past + TIME_DELTA_OD
+
+    projected_life_table = pd.DataFrame(
+        data=list(itertools.product(
+            set([key[0] for key in beta_parameters.keys()]),
+            set([key[1] for key in beta_parameters.keys()]),
+            set([key[2] for key in beta_parameters.keys()]),
+            list(date_range(starting_timepoint, MAX_TIMEPOINT_OD + TIME_DELTA_OD, TIME_DELTA_OD)),
+            past_life_table["age"].unique(),
+            [0.0]
+        )),
+        columns=["province", "sex", "projection_scenario", "timepoint", "age", "prob_death"]
+    )
+
+    projected_life_table = pd.merge(
+        projected_life_table,
+        past_life_table.loc[past_life_table["timepoint"] == max_timepoint_past],
+        how="left",
+        on=["province", "sex", "age"],
+        suffixes=("", "_initial")
+    )
+
+    projected_life_table["prob_death"] = projected_life_table.apply(
+        lambda x: get_prob_death_projected(
+            prob_death=x["prob_death_initial"],
+            timepoint_initial=starting_timepoint,
+            timepoint=x["timepoint"],
+            beta_time=beta_parameters[(x["province"], x["sex"], x["projection_scenario"])]
+        ),
+        axis=1
+    )
+
+    projected_life_table.sort_values(
+        ["province", "projection_scenario", "age", "sex", "timepoint"],
+        inplace=True
+    )
+    projected_life_table = projected_life_table[
+        ["province", "projection_scenario", "age", "sex", "timepoint", "prob_death"]
+    ]
 
     return projected_life_table
 
 
 
-def generate_death_data(to_csv: bool = True) -> None | pd.DataFrame:
-    """Generate the mortality data CSV."""
+def generate_death_data(
+    time_delta: TimeDelta,
+    to_csv: bool = True,
+    draw_plot: bool = False,
+    x0: float = -0.02,
+    xtol: float = 0.00001
+) -> None | pd.DataFrame:
+    """Generate the mortality data CSV.
+    
+    Args:
+        time_delta: The duration of time between data points.
+        to_csv: Whether to save the data to a CSV file. If False, the dataframe will be returned
+            instead.
+        draw_plot: Whether to draw a plot of the mortality data for validation.
+        x0: The initial guess for the beta parameter.
+        xtol: The tolerance for the beta parameter.
+
+    Returns:
+        If ``to_csv`` is False, a dataframe containing the probability of death and the standard
+        error for each timepoint, province, age, and sex.
+    """
     past_life_table = load_past_death_data()
-    df_calibration = load_projected_death_data()
-    projected_life_table = get_projected_death_data(past_life_table, df_calibration)
-    # projected_life_table_2 = get_projected_death_data(past_life_table, df_calibration)
+    df_calibration = load_projected_death_data(
+        min_timepoint=past_life_table["timepoint"].max() + time_delta
+    )
+
+    logger.info("Computing the beta parameters for each province, sex, and projection scenario...")
+    beta_parameters = compute_beta_parameters(
+        past_life_table=past_life_table,
+        df_calibration=df_calibration,
+        time_delta_od=TIME_DELTA_OD,
+        x0=x0,
+        xtol=xtol
+    )
+
+    logger.info(
+        "Getting the projected death data for each province, sex, projection scenario, and year..."
+    )
+    projected_life_table = get_projected_death_data(
+        beta_parameters, past_life_table
+    )
+
+    # Combine the past and projected annual data
     life_table = pd.concat([past_life_table, projected_life_table], axis=0)
 
-    # save the data
+    # Convert the existing q_x points from original time delta to new time delta
+    life_table["prob_death"] = life_table.apply(
+        lambda x: convert_prob_death(
+            prob_death=x["prob_death"],
+            time_delta=time_delta,
+            time_delta_od=TIME_DELTA_OD
+        ) if x is not np.nan else x,
+        axis=1
+    )
+
+    # Interpolate the missing q_x points for the new time delta
+    life_table = interpolate(
+        data=life_table.copy().reset_index(drop=True),
+        time_delta=time_delta,
+        time_delta_od=TIME_DELTA_OD,
+        columns_group=["province", "age", "sex", "projection_scenario"],
+        columns_variable=["province", "projection_scenario"],
+        col_pred="prob_death",
+        func="constant"
+    )
+
+    life_table.sort_values(
+        ["province", "projection_scenario", "sex", "timepoint", "age"],
+        inplace=True
+    )
+
+    time_delta_tag = get_time_delta_tag(time_delta)
+
+    if draw_plot:
+        logger.info("Creating validation plots for the mortality data...")
+        tqdm_bar = tqdm(
+            total=len(life_table["projection_scenario"].unique()),
+            desc=f"Projection Scenario",
+            leave=True,
+            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt}",
+            file=sys.stdout
+        )
+        for projection_scenario in life_table["projection_scenario"].unique():
+            plot(
+                life_table.loc[
+                    (life_table["age"].isin([0, 10, 20, 40, 60, 80, 100])) &
+                    (life_table["projection_scenario"] == projection_scenario)
+                ].copy(),
+                y="prob_death",
+                color="age",
+                title="Mortality Data",
+                file_path=get_data_path(
+                    f"data_generation/figures/{time_delta_tag}/mortality/life_expectancy_{projection_scenario}.png",
+                    mkdirs=True
+                )
+            )
+            tqdm_bar.update(1)
+            tqdm_bar.set_description(
+                f"Projection Scenario: {projection_scenario}"
+            )
+
+    # Save the data to CSV files, one for each province
     if to_csv:
-        file_path = get_data_path("processed_data/life_table.csv")
-        logger.info(f"Saving data to {file_path}")
-        life_table.to_csv(file_path, index=False)
+        grouped_df = life_table.groupby(["province"])
+        for group_name, df in grouped_df:
+            province = group_name[0]
+            file_path = get_data_path(
+                f"processed_data/{time_delta_tag}/death/life_table_{province}.csv",
+                mkdirs=True
+            )
+            logger.info(f"Saving data to {file_path}")
+            df.to_csv(file_path, index=False)
     else:
         return life_table
+    
+
+def plot(
+    df: pd.DataFrame,
+    y: str,
+    color: str,
+    title: str = "",
+    file_path: pathlib.Path | None = None,
+    width: int = 2000,
+    height: int = 1500
+):
+    """Plot the mortality data for validation.
+    
+    Args:
+        df: A dataframe containing the life table data. Must have columns:
+
+            * ``timepoint (dt.datetime)``: The given timepoint.
+            * ``province (str)``: The 2-letter province ID, e.g. ``"BC"``.
+            * ``age (int)``: The integer age.
+            * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+            * ``prob_death (float)``: The probability of death for the given timepoint, province,
+              age, and sex.
+
+        y: The name of the column in the dataframe which will be plotted as the ``y`` data.
+        color: The name of the column in the dataframe which will be used to color the data.
+        title: The title of the plot.
+        file_path: The path to save the plot to.
+        width: The width of the plot.
+        height: The height of the plot.
+    """
+
+    fig = px.line(
+        df.loc[df["province"].isin(["BC", "CA"])],
+        x="timepoint",
+        y=y,
+        render_mode="svg",
+        color=color,
+        markers=True,
+        facet_col="province",
+        facet_row="sex",
+        facet_row_spacing=0.01,  # Shrink vertical gap to 1%
+        facet_col_spacing=0.01,   # Shrink horizontal gap to 1%
+        title=title
+    )
+    
+    fig.update_layout(
+        font=dict(size=30),
+        title=dict(font=dict(size=50)),
+        showlegend=True,
+        width=width,
+        height=height,
+        autosize=False,
+        margin=dict(l=120, r=220, t=120, b=120)
+    )
+
+    fig.for_each_annotation(
+        lambda annotation: annotation.update(
+            text=annotation.text.split("=")[-1],
+            font=dict(size=30),
+            textangle=0,
+        )
+    )
+
+    fig.write_image(str(file_path), scale=2, width=width, height=height)
 
 
 if __name__ == "__main__":
-    generate_death_data(to_csv=True)
+    parser = get_parser()
+    args = parser.parse_args()
+    time_delta = TimeDelta(iso_string=args.time_delta)
+    generate_death_data(time_delta=time_delta, to_csv=True, draw_plot=True)

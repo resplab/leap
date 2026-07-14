@@ -19,12 +19,15 @@ class Death:
     def __init__(
         self,
         province: str = "CA",
+        projection_scenario: str = "M3",
         min_timepoint: dt.datetime = dt.datetime(2000, 1, 1),
         life_table: DataFrameGroupBy | None = None,
         time_delta: dt.timedelta | relativedelta = relativedelta(years=1)
     ):
         if life_table is None:
-            self.life_table = self.load_life_table(min_timepoint, province, time_delta)
+            self.life_table = self.load_life_table(
+                min_timepoint, province, projection_scenario, time_delta
+            )
 
     @property
     def life_table(self) -> DataFrameGroupBy:
@@ -46,6 +49,7 @@ class Death:
         self,
         min_timepoint: dt.datetime,
         province: str,
+        projection_scenario: str,
         time_delta: dt.timedelta | relativedelta
     ) -> DataFrameGroupBy:
         """Load the life table data.
@@ -54,6 +58,21 @@ class Death:
             min_timepoint: The timepoint to start the data at.
             province: A string indicating the province abbreviation, e.g. ``"BC"``.
                 For all of Canada, set province to ``"CA"``.
+            projection_scenario: The projection scenario for the population data. One of:
+
+                * ``LG``: low-growth projection
+                * ``HG``: high-growth projection
+                * ``M1``: medium-growth 1 projection
+                * ``M2``: medium-growth 2 projection
+                * ``M3``: medium-growth 3 projection
+                * ``M4``: medium-growth 4 projection
+                * ``M5``: medium-growth 5 projection
+                * ``M6``: medium-growth 6 projection
+                * ``FA``: fast-aging projection
+                * ``SA``: slow-aging projection
+
+                See: `StatCan Projection Scenarios
+                <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
             time_delta: The time interval to use for the life table, e.g. 1 year, 5 years, etc.
         
         Returns:
@@ -68,18 +87,20 @@ class Death:
             * ``M (float)``: the probability of death for a male of a given age in a given timepoint.
         """
         time_delta_tag = get_time_delta_tag(time_delta)
+        check_province(province)
+
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_delta_tag}/life_table.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/death/life_table_{province}.csv"),
             parse_dates=["timepoint"]
         )
         check_timepoint(min_timepoint, df)
-        check_province(province)
 
         df = df[
             (df["timepoint"] >= min_timepoint) &
-            (df["province"] == province)
+            (df["province"] == province) &
+            (df["projection_scenario"].isin(["past", projection_scenario]))
         ]
-        df.drop(columns=["se", "province"], inplace=True)
+        df.drop(columns=["province", "projection_scenario"], inplace=True)
         df = df.pivot(index=["age", "timepoint"], columns=["sex"], values="prob_death").reset_index()
         df.columns.name = ""
         grouped_df = df.groupby("timepoint")

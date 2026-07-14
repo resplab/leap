@@ -101,7 +101,7 @@ and is saved as:
 2. 2021 - 2068
 
 `StatCan` doesn't provide annual projections for death probabilities, but does provide a projection
-for specific years (which we call calibration years). We use the ``M3`` projection scenario only.
+for specific years (which we call calibration years). We use the `M3` projection scenario only.
 
 We obtained this data from
 the [Statistics Canada Population Projections Technical Report](https://www150.statcan.gc.ca/n1/pub/91-620-x/91-620-x2025001-eng.htm),
@@ -111,15 +111,17 @@ and saved it as three tables:
 - `LEAP/leap/original_data/mortality_projections_table_3-2.csv`: national projections
 - `LEAP/leap/original_data/mortality_projections_table_5-2.csv`: provincial projections
 
-The following equation can be used to obtain the probability of death in future years:
+The following equation can be used to obtain the probability of death in future time intervals:
 
 ```math
-\sigma^{-1}(p(sex, age, year)) = \sigma^{-1}(p(sex, age, year_0)) - e^{\beta(sex)(year - year_0) }
+\sigma^{-1}(p(\text{sex}, \text{age}, \text{timepoint})) 
+= \sigma^{-1}(p(\text{sex}, \text{age}, \text{timepoint}_0)) - e^{\beta(sex)(\text{timepoint} - \text{timepoint}_0) }
 ```
 
-where $p(sex, age, year_0)$ is the probability of death for a person of that age/sex in the year
-the collected data ends (in our case, 2020), and $p(sex, age, year)$ is the probability of death
-for a person of that age/sex in a future year.
+where $p(\text{sex}, \text{age}, \text{timepoint}_0)$ is the probability that a person of the
+given sex and age will die in the final time interval of the collected (past) data (in our case, `2020`),
+and $p(\text{sex}, \text{age}, \text{timepoint})$ is the probability of death
+for a person of that age/sex in the time interval `[timepoint, timepoint + time_delta]`. 
 
 The parameter $\beta(sex)$ is unknown, and so we first need to calculate it.
 To do so, we set $year = \text{calibration\\_year}$, and use the `Brent` root-finding algorithm to
@@ -132,12 +134,25 @@ To run the data generation for the mortality data:
 
 ```sh
 cd LEAP
-python3 leap/data_generation/death_data.py
+python3 leap/data_generation/death_data.py --time-delta P1Y
 ```
 
-This will update the following data file: 
+This will update the following data files: 
 
-1. `leap/processed_data/{time_delta_tag}/life_table.csv`
+1. `leap/processed_data/{time_delta_tag}/death/life_table_{province}.csv`
+
+
+The `--time-delta` argument must be in **ISO 8601** format:
+
+ISO 8601 |	Meaning
+-------- | -------
+P1Y1M1DT1H1M1.1S	| 1 year, 1 month, 1 day, 1 hour, 1 minute, 1 second, and 100 milliseconds
+P40D	| 40 days
+P1Y1D	| 1 year and 1 day
+P3DT4H59M	| 3 days, 4 hours, and 59 minutes
+PT2H30M	| 2 hours and 30 minutes
+P1M	| 1 month
+PT1M |	1 minute
 
 ## Migration Data
 

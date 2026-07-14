@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from leap.utils import get_data_path
+from leap.utils import get_data_path, TimeDelta, get_time_delta_tag
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
@@ -10,6 +10,7 @@ STARTING_YEAR = 2000
 STARTING_YEAR_PROJ = 2021
 MAX_YEAR = 2065
 PROVINCES = ["CA", "BC"]
+TIME_DELTA_OD = TimeDelta(years=1) # migration data is generated at annual resolution
 
 
 def get_prev_year_population(
@@ -108,7 +109,18 @@ def load_migration_data() -> pd.DataFrame:
         get_data_path("processed_data/birth/initial_population.csv")
     )
     logger.info("Loading mortality data from CSV file...")
-    life_table = pd.read_csv(get_data_path("processed_data/life_table.csv"))
+    life_table = pd.DataFrame({
+        "province": [],
+        "projection_scenario": [],
+        "timepoint": [],
+        "age": np.array([], dtype=int),
+        "sex": [],
+        "prob_death": np.array([], dtype=float)
+    })
+    time_delta_tag = get_time_delta_tag(TIME_DELTA_OD)
+    for file_path in get_data_path(f"processed_data/{time_delta_tag}/death").glob("life_table_*.csv"):
+        df = pd.read_csv(file_path, parse_dates=["timepoint"])
+        life_table = pd.concat([life_table, df], axis=0)
 
     df_migration = pd.DataFrame({
         "year": np.array([], dtype=int),

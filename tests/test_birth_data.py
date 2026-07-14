@@ -4,11 +4,9 @@ from leap.data_generation.birth_data import get_projection_scenario_id, MIN_TIME
     CENSUS_TIMEPOINT, load_past_births_population_data, load_projected_births_population_data, \
     load_past_initial_population_data, load_projected_initial_population_data, TIME_DELTA_OD
 from leap.logger import get_logger
-from leap.utils import TimeDelta
+from leap.utils import TimeDelta, PROJECTION_SCENARIOS_FUTURE
 
 logger = get_logger(__name__)
-
-PROJECTION_SCENARIOS = ["M1", "M2", "M3", "M4", "M5", "M6", "LG", "HG", "FA", "SA"]
 
 
 @pytest.mark.parametrize(
@@ -31,7 +29,7 @@ def test_get_projection_scenario_id(projection_scenario, expected_id):
             [
                 (
                     dt.datetime(2000, 1, 1), "BC",
-                    41433 * TimeDelta(years=5, months=6).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    41433,
                     0.514420872251587
                 )
             ]
@@ -41,12 +39,12 @@ def test_get_projection_scenario_id(projection_scenario, expected_id):
             [
                 (
                     dt.datetime(2000, 1, 1), "BC",
-                    41433 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    41433,
                     0.514420872251587
                 ),
                 (
                     dt.datetime(2006, 1, 1), "CA",
-                    344791 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    344791,
                     0.5128556139806434
                 )
             ]
@@ -88,7 +86,7 @@ def test_load_past_births_population_data(time_delta, expected_rows):
             [
                 (
                     dt.datetime(2025, 1, 1), "CA", "FA", 
-                    346300 * TimeDelta(years=5, months=6).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    346300,
                     0.5119838290499567
                 )
             ]
@@ -99,7 +97,7 @@ def test_load_past_births_population_data(time_delta, expected_rows):
             [
                 (
                     dt.datetime(2022, 1, 1), "BC", "LG", 
-                    42300 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    42300,
                     0.5130023640661938
                 )
             ]
@@ -113,12 +111,12 @@ def test_load_projected_births_population_data(time_delta, min_timepoint, expect
     assert df["timepoint"].min() >= min_timepoint
 
     # check that all projection scenarios are in PROJECTION_SCENARIOS
-    assert df["projection_scenario"].isin(PROJECTION_SCENARIOS).all()
+    assert df["projection_scenario"].isin(PROJECTION_SCENARIOS_FUTURE).all()
 
     # check that every projection scenario has the same amount of data and that it's greater than 0
     counts = [
         df.loc[df["projection_scenario"]==projection_scenario].shape[0] 
-        for projection_scenario in PROJECTION_SCENARIOS
+        for projection_scenario in PROJECTION_SCENARIOS_FUTURE
     ]
     assert len(set(counts)) == 1
     assert counts[0] > 0
@@ -152,8 +150,8 @@ def test_load_projected_births_population_data(time_delta, min_timepoint, expect
             MIN_TIMEPOINT,
             [(
                 dt.datetime(2000, 1, 1), "CA", 0,
-                338738 * TimeDelta(years=5, months=6).total_seconds() / TIME_DELTA_OD.total_seconds(),
-                338738 * TimeDelta(years=5, months=6).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                338738,
+                338738,
                 0.5124137238809936
             )]
         ),
@@ -162,8 +160,8 @@ def test_load_projected_births_population_data(time_delta, min_timepoint, expect
             MIN_TIMEPOINT,
             [(
                 dt.datetime(2006, 1, 1), "CA", 0,
-                344791 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
-                344791 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                344791,
+                344791,
                 0.5128556139806434
             )]
         )
@@ -221,8 +219,8 @@ def test_load_past_initial_population_data(time_delta, min_timepoint, expected_r
             [
                 (
                     dt.datetime(2025, 1, 1), "CA", "FA", 0,
-                    346300 * TimeDelta(years=5, months=6).total_seconds() / TIME_DELTA_OD.total_seconds(),
-                    346300 * TimeDelta(years=5, months=6).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    346300,
+                    346300,
                     0.5119838290499567
                 )
             ]
@@ -234,8 +232,8 @@ def test_load_past_initial_population_data(time_delta, min_timepoint, expected_r
             [
                 (
                     dt.datetime(2022, 1, 1), "BC", "LG", 0,
-                    42300 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
-                    42300 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    42300,
+                    42300,
                     0.5130023640661938
                 )
             ]
@@ -253,12 +251,12 @@ def test_load_projected_initial_population_data(
     assert df["timepoint"].min() >= min_timepoint
 
     # check that all projection scenarios are in PROJECTION_SCENARIOS
-    assert df["projection_scenario"].isin(PROJECTION_SCENARIOS).all()
+    assert df["projection_scenario"].isin(PROJECTION_SCENARIOS_FUTURE).all()
 
     # check that every projection scenario has the same amount of data and that it's greater than 0
     counts = [
         df.loc[df["projection_scenario"]==projection_scenario].shape[0] 
-        for projection_scenario in PROJECTION_SCENARIOS
+        for projection_scenario in PROJECTION_SCENARIOS_FUTURE
     ]
     assert len(set(counts)) == 1
     assert counts[0] > 0
