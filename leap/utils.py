@@ -312,7 +312,9 @@ def check_province(province: str):
     """
 
     if province not in PROVINCE_MAP.values():
-        raise ValueError(f"province must be one of {PROVINCE_MAP.values()}, received {province}")
+        raise ValueError(
+            f"province must be one of {list(PROVINCE_MAP.values())}, received {province}"
+        ) 
 
 
 def check_projection_scenario(projection_scenario: str):
