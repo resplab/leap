@@ -93,8 +93,7 @@ However, we can approximate this using the midpoint formula for numerical integr
 
 .. math::
 
-  L(x, \Delta x, t) \approx 
-    \Delta x \cdot \ell(x + \Delta x, \Delta x, t) 
+  L(x, \Delta x, t) \approx \ell(x + \Delta x, \Delta x, t) \cdot \Delta x
     + a(x, \Delta x, t) \cdot d(x, \Delta x, t) \cdot \Delta x
 
 We can simplify the above equation to:
@@ -102,14 +101,24 @@ We can simplify the above equation to:
 .. math::
 
   \begin{align}
-  L(x, \Delta x, t)
-  &= (\ell(x + \Delta x, \Delta x, t) + a(x, \Delta x, t) \cdot d(x, \Delta x, t)) \Delta x \\
-  &= (\ell(x, \Delta x, t) \cdot (1 - q(x, \Delta x, t)) + a(x, \Delta x, t) \cdot d(x, \Delta x, t))\Delta x  \\
-  &= (\ell(x, \Delta x, t) - \textcolor{magenta}{\ell(x, \Delta x, t) \cdot q(x, \Delta x, t)} 
-    + a(x, \Delta x, t) \cdot d(x, \Delta x, t))\Delta x  \\
-  &= (\ell(x, \Delta x, t) - \textcolor{magenta}{d(x, \Delta x, t)} + a(x, \Delta x, t) \cdot d(x, \Delta x, t)) \Delta x \\
-  &= (\ell(x, \Delta x, t) -  (1 - a(x, \Delta x, t)) \cdot d(x, \Delta x, t))\Delta x
+  L(x, \Delta x, t) &= (\ell(x, \Delta x, t) -  (1 - a(x, \Delta x, t)) \cdot d(x, \Delta x, t))\Delta x
   \end{align}
+
+.. info:: Math: :math:`L(x, \Delta x, t)`
+  :collapsible:
+
+  .. math::
+
+    \begin{align}
+    L(x, \Delta x, t)
+    &= (\ell(x + \Delta x, \Delta x, t) + a(x, \Delta x, t) \cdot d(x, \Delta x, t)) \Delta x \\
+    &= (\ell(x, \Delta x, t) \cdot (1 - q(x, \Delta x, t)) + a(x, \Delta x, t) \cdot d(x, \Delta x, t))\Delta x  \\
+    &= (\ell(x, \Delta x, t) - \textcolor{magenta}{\ell(x, \Delta x, t) \cdot q(x, \Delta x, t)} 
+      + a(x, \Delta x, t) \cdot d(x, \Delta x, t))\Delta x  \\
+    &= (\ell(x, \Delta x, t) - \textcolor{magenta}{d(x, \Delta x, t)} + a(x, \Delta x, t) \cdot d(x, \Delta x, t)) \Delta x \\
+    &= (\ell(x, \Delta x, t) -  (1 - a(x, \Delta x, t)) \cdot d(x, \Delta x, t))\Delta x
+    \end{align}
+
 
 Assuming that deaths are uniform across the interval :math:`[x, x + \Delta x)`, we have
 :math:`a(x) = 0.5` for all :math:`x`. Thus, we have:
