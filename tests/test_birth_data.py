@@ -29,7 +29,7 @@ def test_get_projection_scenario_id(projection_scenario, expected_id):
             [
                 (
                     dt.datetime(2000, 1, 1), "BC",
-                    41433 * TimeDelta(years=5, months=6).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    41433,
                     0.514420872251587
                 )
             ]
@@ -39,12 +39,12 @@ def test_get_projection_scenario_id(projection_scenario, expected_id):
             [
                 (
                     dt.datetime(2000, 1, 1), "BC",
-                    41433 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    41433,
                     0.514420872251587
                 ),
                 (
                     dt.datetime(2006, 1, 1), "CA",
-                    344791 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    344791,
                     0.5128556139806434
                 )
             ]
@@ -86,7 +86,7 @@ def test_load_past_births_population_data(time_delta, expected_rows):
             [
                 (
                     dt.datetime(2025, 1, 1), "CA", "FA", 
-                    346300 * TimeDelta(years=5, months=6).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    346300,
                     0.5119838290499567
                 )
             ]
@@ -97,7 +97,7 @@ def test_load_past_births_population_data(time_delta, expected_rows):
             [
                 (
                     dt.datetime(2022, 1, 1), "BC", "LG", 
-                    42300 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    42300,
                     0.5130023640661938
                 )
             ]
@@ -150,8 +150,8 @@ def test_load_projected_births_population_data(time_delta, min_timepoint, expect
             MIN_TIMEPOINT,
             [(
                 dt.datetime(2000, 1, 1), "CA", 0,
-                338738 * TimeDelta(years=5, months=6).total_seconds() / TIME_DELTA_OD.total_seconds(),
-                338738 * TimeDelta(years=5, months=6).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                338738,
+                338738,
                 0.5124137238809936
             )]
         ),
@@ -160,8 +160,8 @@ def test_load_projected_births_population_data(time_delta, min_timepoint, expect
             MIN_TIMEPOINT,
             [(
                 dt.datetime(2006, 1, 1), "CA", 0,
-                344791 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
-                344791 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                344791,
+                344791,
                 0.5128556139806434
             )]
         )
@@ -219,8 +219,8 @@ def test_load_past_initial_population_data(time_delta, min_timepoint, expected_r
             [
                 (
                     dt.datetime(2025, 1, 1), "CA", "FA", 0,
-                    346300 * TimeDelta(years=5, months=6).total_seconds() / TIME_DELTA_OD.total_seconds(),
-                    346300 * TimeDelta(years=5, months=6).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    346300,
+                    346300,
                     0.5119838290499567
                 )
             ]
@@ -232,8 +232,8 @@ def test_load_past_initial_population_data(time_delta, min_timepoint, expected_r
             [
                 (
                     dt.datetime(2022, 1, 1), "BC", "LG", 0,
-                    42300 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
-                    42300 * TimeDelta(months=1).total_seconds() / TIME_DELTA_OD.total_seconds(),
+                    42300,
+                    42300,
                     0.5130023640661938
                 )
             ]
