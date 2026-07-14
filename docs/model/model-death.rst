@@ -636,7 +636,7 @@ First, we set the number of people alive at age :math:`0`:
 
 .. math::
 
-  l(0) := 10000
+  l(0) := 100000
 
 Next, we calculate the number of people alive up to age :math:`x`:
 
