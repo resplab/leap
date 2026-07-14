@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 def life_table():
     life_table = pd.DataFrame(
         list(itertools.product(
-            list(PROVINCE_MAP.values())[0:2],
+            ["CA", "BC"],
             PROJECTION_SCENARIOS[0:2],
             np.arange(0, 4, 0.25),
             ["F", "M"],
