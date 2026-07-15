@@ -56,8 +56,7 @@ data is formatted as follows:
     </table>
 
 Since the ``n_abx`` column gives us the *total* number of antibiotics prescribed, we need to use
-population data to convert this to a *per infant* value. Rather than reading the raw Statistics
-Canada tables directly, we use the processed birth estimate data described in :ref:`birth-model`
+population data to convert this to a *per infant* value. We use the processed birth estimate data described in :ref:`birth-model`
 (``birth_estimate.csv``). That file provides ``N`` (total births, both sexes combined) and
 ``prop_male`` (proportion of births that are male) per timepoint and province; we derive the
 per-sex counts shown below as ``N * prop_male`` (male) and ``N * (1 - prop_male)`` (female):
