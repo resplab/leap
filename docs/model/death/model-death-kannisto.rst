@@ -180,3 +180,6 @@ Now, based on fitting the model to empirical data, typically we have
 1. :math:`\beta \approx \mathcal{O}(10^{-1})`
 2. :math:`\alpha \approx \mathcal{O}(10^{-5})`
 
+
+
+
