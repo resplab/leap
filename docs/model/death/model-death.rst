@@ -598,6 +598,3 @@ is fitted for each sex, province, and projection scenario.
      - the probability of death between age ``[age, age + time_delta)`` for the given timepoint,
        province, projection scenario, and sex
 
-
-
-
