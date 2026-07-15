@@ -299,6 +299,9 @@ def generate_antibiotic_data(
     model_abx = generate_antibiotic_model(df_abx, formula, alpha)
     if return_type == "csv":
         time_delta_tag = get_time_delta_tag(time_delta)
+        # Predictions are always generated at 1-year granularity: antibiotic exposure in the
+        # first year of life depends only on birth year, not on the simulation's time_delta.
+        # `time_delta` here only selects which processed_data/{tag}/ directory to write to.
         df_abx_pred = get_predicted_abx_data(model_abx, TIME_DELTA_OD)
         df_abx_pred.to_csv(
             get_data_path(
