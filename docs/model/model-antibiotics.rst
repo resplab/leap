@@ -201,9 +201,9 @@ for years from ``2005`` onward.
 
     \log(\mu^{(i)}) = \beta_0
         + \beta_{\text{sex}} \cdot s^{(i)}
-        + \beta_{\text{year}} \cdot t^{(i)}
+        + \beta_{\text{time}} \cdot t^{(i)}
         + \beta_{\text{2005}} \cdot H(t^{(i)} - 2005)
-        + \beta_{\text{year,2005}} \cdot t^{(i)} \cdot H(t^{(i)} - 2005)
+        + \beta_{\text{time,2005}} \cdot t^{(i)} \cdot H(t^{(i)} - 2005)
 
 where:
 
@@ -220,13 +220,13 @@ where:
    * - :math:`\beta_{\text{sex}}`
      - :math:`s^{(i)}`
      - sex main effect
-   * - :math:`\beta_{\text{year}}`
+   * - :math:`\beta_{\text{time}}`
      - :math:`t^{(i)}`
      - birth year main effect
    * - :math:`\beta_{\text{2005}}`
      - :math:`H(t^{(i)} - 2005)`
      - Heaviside step at 2005
-   * - :math:`\beta_{\text{year,2005}}`
+   * - :math:`\beta_{\text{time,2005}}`
      - :math:`t^{(i)} \cdot H(t^{(i)} - 2005)`
      - birth year × Heaviside interaction
 
