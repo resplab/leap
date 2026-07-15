@@ -593,14 +593,6 @@ is fitted for each sex, province, and projection scenario.
    * - ``timepoint``
      - :code:`datetime`
      - the starting date / time of the time interval that the data applies to, e.g. ``2021-04-01``.
-   * - ``province``
-     - :code:`str`
-     - the 2-letter province or territory ID
-       (e.g., ``BC`` = British Columbia, ``CA`` = Canada)
-   * - ``projection_scenario``
-     - :code:`str`
-     - the population growth / mortality projection scenario, e.g. ``"FA"``, ``"M3"``;
-       historical rows use ``"past"``
    * - ``prob_death``
      - :code:`float`
      - the probability of death between age ``[age, age + time_delta)`` for the given timepoint,
