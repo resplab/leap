@@ -482,7 +482,7 @@ note that since :math:`\mu(x, t)` is constant over the time interval :math:`[x, 
 
   .. list-table::
     :class: max-width-table
-    :widths: 8 18 8 10 25 15 10
+    :widths: 8 18 8 10 25 25
     :header-rows: 1
 
     * - ``province``
