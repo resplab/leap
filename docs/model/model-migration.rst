@@ -24,6 +24,7 @@ of people, factoring in death, immigration, and emigration.
 
 
 .. list-table::
+   :class: long-table
    :widths: 25 20 55
    :header-rows: 1
 
@@ -118,6 +119,7 @@ separately, it is possible for one sex to have net immigration while the other h
 for the same age and timepoint.
 
 .. list-table::
+   :class: long-table
    :widths: 25 15 60
    :header-rows: 1
 
@@ -168,29 +170,33 @@ Model
 The following variables will be used in the equations below:
 
 .. list-table::
+   :class: long-table
    :widths: 25 75
    :header-rows: 1
 
    * - Column
      - Description
-   * - :math:`a`
+   * - :math:`x`
      - age in years
    * - :math:`s`
      - sex, one of ``M`` or ``F``
    * - :math:`t`
      - timepoint, in years
-   * - :math:`n(a, s, t)`
-     - number of people in the population of age :math:`a`, sex :math:`s`, at timepoint :math:`t`
-   * - :math:`n(a, t)`
-     - number of people in the population of age :math:`a` at timepoint :math:`t`, both sexes
-   * - :math:`\Delta n(a, s, t)`
-     - net migration at timepoint :math:`t` for people of age :math:`a` and sex :math:`s`
-   * - :math:`n(\text{age}-\Delta t,\ \text{timepoint}-\Delta t)`
-     - number of people one timestep younger at the previous timepoint
-   * - :math:`n_{\text{birth}}(t)`
-     - number of births during the time interval starting at timepoint :math:`t`
-   * - :math:`q_x(\text{age}-\Delta t,\ \text{timepoint}-\Delta t)`
-     - probability that a person of age :math:`\text{age}-\Delta t` at the previous timepoint will
+   * - :math:`\ell(x, t; s)`
+     - number of people in the population of age :math:`x`, sex :math:`s`, at timepoint :math:`t`
+   * - :math:`\ell(x, t)`
+     - number of people in the population of age :math:`x` at timepoint :math:`t`, both sexes
+   * - :math:`\ell(x = 0, t)`
+     - number of births during the time interval starting at timepoint :math:`t`, both sexes
+   * - :math:`\Delta n_{\text{migration}}(x, t; s)`
+     - net migration at timepoint :math:`t` for people of age :math:`x` and sex :math:`s`
+   * - :math:`\Delta n_{\text{total}}(x, t; s)`
+     - total change in population at timepoint :math:`t` for people of age :math:`x` and sex :math:`s`
+   * - :math:`\Delta n_{\text{deaths}}(x, t; s)`
+     - total change in population due to deaths at timepoint :math:`t` for people of age :math:`x`
+       and sex :math:`s`
+   * - :math:`q(x-\Delta t,\ t-\Delta t)`
+     - probability that a person of age :math:`x-\Delta t` at the previous timepoint will
        die during the time interval between the previous timepoint and the current timepoint
 
 Net Migration
@@ -204,20 +210,38 @@ and projection scenario. Age 0 is excluded because newborns are handled separate
 
 .. math::
 
-    \Delta n(a,\ s,\ t) = n(a,\ s,\ t) - 
-      n(a-\Delta t,\ s,\ t-\Delta t) \cdot \left(1 - q_{x}(a-\Delta t,\ s,\ t-\Delta t)\right)
+    \Delta n_{\text{total}} (x,\ t; s)
+      = \Delta n_{\text{migration}}(x,\ t; s) + \Delta n_{\text{deaths}}(x,\ t; s)
 
-If :math:`\Delta n > 0`, the surplus is attributed to immigration. If :math:`\Delta n < 0`,
-the deficit is attributed to emigration.
+Solving for :math:`\Delta n_{\text{migration}}` gives us the net migration during that time interval:
+
+.. math::
+
+    \Delta n_{\text{migration}}(x,\ t; s) &= \textcolor{magenta}{\Delta n(x,\ t; s)_{\text{total}}}
+      - \textcolor{orange}{\Delta n(x,\ t; s)_{\text{deaths}}} \\
+    &= \textcolor{magenta}{
+      \underbrace{\ell(x,\ t; s)}_{\text{no. people alive age $x$ at time } t} - 
+      \underbrace{\ell(x-\Delta t,\ t-\Delta t; s)}_{
+        \text{no. people alive age $x-\Delta t$ at previous time } t - \Delta t
+      }} \\ 
+    &+ \textcolor{orange}{
+       \underbrace{
+        \left(\ell(x-\Delta t,\ t-\Delta t; s) \cdot q(x-\Delta t,\ t-\Delta t; s)\right)
+      }_{\text{no. deaths age $x - \Delta t$ between $[t - \Delta t, t]$}}
+    }
+
+If :math:`\Delta n_{\text{migration}} > 0`, the surplus is attributed to immigration.
+If :math:`\Delta n_{\text{migration}} < 0`, the deficit is attributed to emigration.
 
 .. note::
 
-    Of course, this assumption is not in general true - for example, if :math:`\Delta n = 50`, it
-    could be the case that :math:`100` people immigrated and :math:`50` people emigrated, as opposed
-    to our assumption that :math:`50` people immigrated and :math:`0` people emigrated. However, for
-    the purposes of our model, it doesn't matter how many people immigrated or emigrated, just the
-    net effect on the population, so we make the simplifying assumption that all of the net change
-    is due to either immigration or emigration, but not both.
+    Of course, this assumption is not in general true - for example, if
+    :math:`\Delta n_{\text{migration}} = 50`, it could be the case that :math:`100` people
+    immigrated and :math:`50` people emigrated, as opposed to our assumption that :math:`50` people
+    immigrated and :math:`0` people emigrated. However, for the purposes of our model, it doesn't
+    matter how many people immigrated or emigrated, just the net effect on the population, so we
+    make the simplifying assumption that all of the net change is due to either immigration or
+    emigration, but not both.
 
 
 Number of Immigrants
@@ -230,18 +254,18 @@ at a given timepoint of a given age and sex is given by:
 
 .. math::
 
-    i(a, s, t) = i(t) \cdot \text{prop immigrants timepoint}(a,\ s,\ t)
+    i(x, t; s) = i(t) \cdot \text{prop immigrants timepoint}(x,t; s)
 
 The total number of immigrant agents created in a given time interval :math:`i(t)` is:
 
 .. math::
 
     i(t) = \left\lceil 
-      n_{\text{birth}}(t) \cdot \sum_{\substack{a,\ s \\ \Delta n > 0}}\ 
-      \text{prop migrants birth}(a,\ s,\ t)
+      \ell(x=0, t) \cdot \sum_{\substack{x,\ s \\ \Delta n > 0}}\ 
+      \text{prop migrants birth}(x, t; s)
     \right\rceil
 
-where :math:`n_{\text{birth}}(t)` is the number of simulated births in that time interval.
+where :math:`\ell(x=0, t)` is the number of simulated births in that time interval.
 
 
 ``prop_migrants_birth`` is computed as:
@@ -249,9 +273,9 @@ where :math:`n_{\text{birth}}(t)` is the number of simulated births in that time
 
 .. math::
 
-    \text{prop migrants birth}(a,\ s,\ t)
+    \text{prop migrants birth}(x, t; s)
     = \dfrac{\text{no. migrants}}{\text{no. births at timepoint } t}
-    = \dfrac{\Delta n(a,\ s,\ t)}{n_{\text{birth}}(t)}
+    = \dfrac{\Delta n_{\text{migration}}(x, t; s)}{\ell(x=0, t)}
 
 
 ``prop_immigrants_timepoint`` is computed as:
@@ -259,11 +283,11 @@ where :math:`n_{\text{birth}}(t)` is the number of simulated births in that time
 .. math::
 
   \begin{align}
-    \text{prop immigrants timepoint}(a,\ s,\ t)
-    &= \dfrac{\text{no. immigrants of age $a$, sex $s$ at timepoint } t}{\text{no. immigrants at timepoint } t} \\
+    \text{prop immigrants timepoint}(x, t; s)
+    &= \dfrac{\text{no. immigrants of age $x$, sex $s$ at timepoint } t}{\text{no. immigrants at timepoint } t} \\
     &= \begin{cases}
-      \dfrac{\Delta n(a,\ s,\ t)}{\sum_{a, s}\ \Delta n(a,\ s,\ t)}
-      & \quad \text{if } \Delta n > 0 \\
+      \dfrac{\Delta n_{\text{migration}}(x, t; s)}{\sum_{x, s}\ \Delta n_{\text{migration}}(x, t; s)}
+      & \quad \text{if } \Delta n_{\text{migration}} > 0 \\
       0 & \quad \text{ otherwise}
     \end{cases}
   \end{align}
@@ -284,9 +308,9 @@ to determine whether an agent emigrates:
 
 .. math::
 
-    \text{prob emigration}(a,\ s,\ t) 
+    \text{prob emigration}(x, t; s) 
     = \begin{cases}
-      \dfrac{|\Delta n(a,\ s,\ t)|}{n(a,\ s,\ t)} & \text{if } \Delta n < 0 \\
+      \dfrac{|\Delta n_{\text{migration}}(x, t; s)|}{\ell(x, t; s)} & \text{if } \Delta n_{\text{migration}} < 0 \\
       0 & \text{ otherwise}
     \end{cases}
 
