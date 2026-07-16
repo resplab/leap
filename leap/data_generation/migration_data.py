@@ -100,7 +100,7 @@ def load_mortality_data(time_delta: TimeDelta) -> pd.DataFrame:
         "prob_death": np.array([], dtype=float)
     })
     for file_path in get_data_path(f"processed_data/{time_delta_tag}/death").glob("life_table_*.csv"):
-        df = pd.read_csv(get_data_path(file_path), parse_dates=["timepoint"])
+        df = pd.read_csv(file_path, parse_dates=["timepoint"])
         life_table = pd.concat([life_table, df], axis=0)
 
     life_table = life_table[["province", "timepoint", "age", "sex", "prob_death"]]
