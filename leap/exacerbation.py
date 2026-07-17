@@ -222,7 +222,7 @@ class Exacerbation:
             age = min(age, 90)
 
         calibrator_multiplier = self._calibrator_multipliers[
-            (pd.Timestamp(timepoint), int(sex), int(age))
+            (timepoint, int(sex), int(age))
         ]
 
         μ = (
