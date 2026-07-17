@@ -26,7 +26,7 @@ def df_projection():
             "province", "projection_scenario", "timepoint", "age", "sex"
         ]
     )
-    df_projection["N"] = np.random.randint(1000, 10000, df_projection.shape[0])
+    df_projection["n"] = np.random.randint(1000, 10000, df_projection.shape[0])
     df_projection["prob_death"] = np.random.uniform(0.0001, 0.01, df_projection.shape[0])
     return df_projection
 
