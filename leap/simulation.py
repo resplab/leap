@@ -963,6 +963,10 @@ class Simulation:
         logger.message("Combining OutcomeMatrix list...", tqdm=True)
         if outcome_matrices:
             outcome_matrix = combine_outcome_matrices(outcome_matrices)
+        else:
+            logger.warning(
+                "No agents were simulated across the entire run; returning an empty OutcomeMatrix."
+            )
         sys.stdout.write('\033[F')    # Move cursor up one line
         sys.stdout.write('\033[2K') 
         sys.stdout.flush()
