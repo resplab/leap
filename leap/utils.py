@@ -533,6 +533,90 @@ class Sex:
             return self._value_int == value
         elif isinstance(value, bool):
             return self._value_bool == value
+        
+
+
+class Age:
+    """A class to handle the age variable."""
+    __slots__ = ("value", "years", "months")
+
+    def __init__(
+        self,
+        value: int | float | None = None,
+        years: int | None = None,
+        months: int | None = None
+    ):
+        """Initialize the ``Age`` class.
+
+        Args:
+            value: The total number of years lived by a person.
+            years: The whole number of years lived by a person.
+            months: The whole number of months lived by a person.
+
+        Examples:
+
+            >>> age = Age(10)
+            >>> age.value
+            10
+
+            >>> age = Age(5, years=2, months=6)
+            >>> age.value
+            7.5
+        """
+        if value is not None:
+            self.value = value
+            self.years = int(value)
+            self.months = int(round((value - self.years) * 12))
+        elif years is not None or months is not None:
+            self.years = years if years is not None else 0
+            self.months = months if months is not None else 0
+            self.value = self.years + self.months / 12
+        else:
+            raise ValueError("Either 'value' or 'years' and/or 'months' must be provided.")
+        
+    def __hash__(self):
+        return hash((self.years, self.months))
+
+    def __eq__(self, age: int | float | Age) -> bool:
+        if isinstance(age, Age):
+            return math.isclose(self.value, age.value, abs_tol=0.083)
+        elif isinstance(age, (int, float)):
+            return math.isclose(self.value, age, abs_tol=0.083)
+        else:
+            return False
+        
+    def __str__(self) -> str:
+        return f"{self.value:.5f} years"
+    
+    def __repr__(self) -> str:
+        return f"Age(value={self.value:.5f}, years={self.years}, months={self.months})"
+    
+    def __add__(self, other: int | float | Age) -> Age:
+        if isinstance(other, Age):
+            return Age(value=self.value + other.value)
+        elif isinstance(other, (int, float)):
+            return Age(value=self.value + other)
+        else:
+            raise TypeError(f"Unsupported type for addition: {type(other)}")
+        
+    def __radd__(self, other: int | float | Age) -> Age:
+        return self.__add__(other)
+    
+    def __sub__(self, other: int | float | Age) -> Age:
+        if isinstance(other, Age):
+            return Age(value=self.value - other.value)
+        elif isinstance(other, (int, float)):
+            return Age(value=self.value - other)
+        else:
+            raise TypeError(f"Unsupported type for subtraction: {type(other)}")
+        
+    def __rsub__(self, other: int | float | Age) -> Age:
+        if isinstance(other, Age):
+            return Age(value=other.value - self.value)
+        elif isinstance(other, (int, float)):
+            return Age(value=other - self.value)
+        else:
+            raise TypeError(f"Unsupported type for subtraction: {type(other)}")
 
 
 def date_range(
