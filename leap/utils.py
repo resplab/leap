@@ -238,14 +238,21 @@ def get_data_path(data_path: str | pathlib.Path, mkdirs: bool = False) -> pathli
     else:
         raise FileNotFoundError(f"Path {data_path} not found.")
   
-    package_path = str(pkg_resources.files(data_folder).joinpath(str(data_path)))
+    if str(data_path) == ".":
+        package_path = pkg_resources.files(data_folder)
+    else:
+        package_path = pkg_resources.files(data_folder).joinpath(str(data_path))
 
-    if os.path.isfile(package_path) or os.path.isdir(package_path):
-        return pathlib.Path(package_path)
+    if package_path.is_file() or package_path.is_dir():
+        with pkg_resources.as_file(package_path) as f:
+            path = pathlib.Path(f)
+        return path
     else:
         if mkdirs:
-            os.makedirs(os.path.dirname(package_path), exist_ok=True)
-            return pathlib.Path(package_path)
+            with pkg_resources.as_file(package_path) as f:
+                path = pathlib.Path(f)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            return path
         else:
             raise FileNotFoundError(f"Path {data_path} not found.")
 
