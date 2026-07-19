@@ -217,6 +217,12 @@ def load_migration_data(
         how="left"
     )
 
+    if df_population.shape[0] != df.shape[0]:
+        raise ValueError(
+            f"Population data and life table data do not have the same number of rows after merging. "
+            f"Population data has {df_population.shape[0]} rows; life table has {life_table.shape[0]} rows; "
+            f"merged data has {df.shape[0]} rows."
+        )
 
     # get the number of births in each year
     df_birth = df.loc[df["age"] == 0]
