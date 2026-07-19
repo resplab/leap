@@ -98,6 +98,9 @@ def load_mortality_data(time_delta: TimeDelta) -> pd.DataFrame:
 
     life_table = pd.concat(dfs, ignore_index=True)
 
+    life_table = life_table.loc[life_table["timepoint"] >= MIN_TIMEPOINT]
+    life_table = life_table[["province", "projection_scenario", "timepoint", "sex", "age", "prob_death"]]
+    life_table.sort_values(["province","projection_scenario", "timepoint", "sex", "age"], inplace=True)
 
     if time_delta < TimeDelta(years=1):
         life_table = split_ages(life_table, time_delta, TimeDelta(years=1), ["prob_death"])
