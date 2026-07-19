@@ -504,6 +504,7 @@ def split_ages(
         df.index.repeat(n_intervals)
     ].reset_index(drop=True)
     df["age"] = df["age"] + np.arange(len(df)) % n_intervals / n_intervals
+    df["age"] = [Age(value=x) for x in df["age"]]
     for col in cols_divide:
         df[col] = df[col] / n_intervals
     return df
