@@ -88,22 +88,16 @@ def load_mortality_data(time_delta: TimeDelta) -> pd.DataFrame:
         * ``prob_death``: The probability that a person with a given age and sex at a
           given timepoint will die between the previous timepoint and this timepoint.
     """
-    logger.info("Loading mortality data from CSV file...")
     time_delta_tag = get_time_delta_tag(time_delta)
 
-    life_table = pd.DataFrame({
-        "province": [],
-        "projection_scenario": [],
-        "timepoint": [],
-        "age": np.array([], dtype=int),
-        "sex": [],
-        "prob_death": np.array([], dtype=float)
-    })
+    dfs = []
     for file_path in get_data_path(f"processed_data/{time_delta_tag}/death").glob("life_table_*.csv"):
+        logger.info(f"Loading mortality data from {file_path}")
         df = pd.read_csv(file_path, parse_dates=["timepoint"])
-        life_table = pd.concat([life_table, df], axis=0)
+        dfs.append(df)
 
-    life_table = life_table[["province", "timepoint", "age", "sex", "prob_death"]]
+    life_table = pd.concat(dfs, ignore_index=True)
+
 
     if time_delta < TimeDelta(years=1):
         life_table = split_ages(life_table, time_delta, TimeDelta(years=1), ["prob_death"])
