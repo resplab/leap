@@ -103,7 +103,7 @@ def load_mortality_data(time_delta: TimeDelta) -> pd.DataFrame:
     life_table.sort_values(["province","projection_scenario", "timepoint", "sex", "age"], inplace=True)
 
     if time_delta < TimeDelta(years=1):
-        life_table = split_ages(life_table, time_delta, TimeDelta(years=1), ["prob_death"])
+        life_table = split_ages(life_table, time_delta, TimeDelta(years=1), [])
 
     return life_table
 
