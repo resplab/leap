@@ -10,7 +10,7 @@ from scipy import optimize
 from leap.utils import get_data_path
 from leap.logger import get_logger
 from leap.data_generation.utils import format_age_group, get_province_id, get_sex_id, get_parser, \
-    interpolate
+    interpolate, CENSUS_TIMEPOINT
 from leap.utils import TimeDelta, date_range, get_time_delta_tag
 from typing import Tuple, Dict
 pd.options.mode.copy_on_write = True
@@ -396,7 +396,7 @@ def load_past_death_data() -> pd.DataFrame:
 
     # select the required columns
     df = df.loc[
-        df["timepoint"] >= MIN_TIMEPOINT,
+        (df["timepoint"] >= MIN_TIMEPOINT) & (df["timepoint"] <= CENSUS_TIMEPOINT),
         ["timepoint", "province", "sex", "age", "ELEMENT", "VALUE"]
     ]
 
@@ -766,6 +766,7 @@ def get_projected_death_data(
 
 def generate_death_data(
     time_delta: TimeDelta,
+    time_delta_od: TimeDelta = TIME_DELTA_OD,
     to_csv: bool = True,
     draw_plot: bool = False,
     x0: float = -0.02,
@@ -775,6 +776,7 @@ def generate_death_data(
     
     Args:
         time_delta: The duration of time between data points.
+        time_delta_od: The original duration of time between data points.
         to_csv: Whether to save the data to a CSV file. If False, the dataframe will be returned
             instead.
         draw_plot: Whether to draw a plot of the mortality data for validation.
@@ -787,7 +789,7 @@ def generate_death_data(
     """
     past_life_table = load_past_death_data()
     df_calibration = load_projected_death_data(
-        min_timepoint=past_life_table["timepoint"].max() + time_delta
+        min_timepoint=past_life_table["timepoint"].max() + time_delta_od
     )
 
     logger.info("Computing the beta parameters for each province, sex, and projection scenario...")
