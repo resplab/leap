@@ -136,7 +136,7 @@ def load_population_data(time_delta: TimeDelta) -> pd.DataFrame:
     # Select only the data for timepoints after the min timepoint
     df = df.loc[df["timepoint"] >= MIN_TIMEPOINT]
 
-    df = df[["timepoint", "age", "province", "n_age", "prop_male", "projection_scenario"]]
+    df = df[["province", "projection_scenario", "timepoint", "age",  "n_age", "prop_male"]]
 
     # Get the total number of M / F for each year, age, and projection scenario
     df["prop_female"] = 1 - df["prop_male"]
@@ -149,6 +149,8 @@ def load_population_data(time_delta: TimeDelta) -> pd.DataFrame:
     )
     df["n"] = (df["n_age"] * df["prop"])
     df.drop(columns=["n_age", "prop"], inplace=True)
+
+    df.sort_values(["province", "projection_scenario", "timepoint", "sex", "age"], inplace=True)
 
     if time_delta < TimeDelta(years=1):
         df = split_ages(df, time_delta, TimeDelta(years=1), ["n"])
