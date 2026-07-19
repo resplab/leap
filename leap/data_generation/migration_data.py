@@ -62,7 +62,7 @@ def convert_age_to_int(
         specified aggregation methods when grouping by integer age.
     """
     # Convert the age back to integer
-    df["age_int"] = df["age"].apply(lambda x: int(x))
+    df["age_int"] = df["age"].apply(lambda x: x.years)
     df = df.groupby(
         groupby_cols + ["age_int"],
         as_index=False
