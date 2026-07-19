@@ -211,8 +211,12 @@ def load_migration_data(
 
     # Join the mortality data to the population data
     df = pd.merge(
-        df_population, life_table, on=["timepoint", "age", "province", "sex"], how="left"
+        df_population,
+        life_table,
+        on=["province", "projection_scenario", "timepoint", "sex", "age"],
+        how="left"
     )
+
 
     # get the number of births in each year
     df_birth = df.loc[df["age"] == 0]
