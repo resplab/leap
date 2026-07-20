@@ -10,7 +10,7 @@ from scipy import optimize
 from leap.utils import get_data_path, PROJECTION_SCENARIOS
 from leap.logger import get_logger
 from leap.data_generation.utils import format_age_group, get_province_id, get_sex_id, get_parser, \
-    interpolate, CENSUS_TIMEPOINT
+    interpolate, CENSUS_TIMEPOINT, DATE_FORMAT
 from leap.utils import TimeDelta, date_range, get_time_delta_tag
 from typing import Tuple, Dict
 pd.options.mode.copy_on_write = True
@@ -903,7 +903,7 @@ def generate_death_data(
                 mkdirs=True
             )
             logger.info(f"Saving data to {file_path}")
-            df.to_csv(file_path, index=False)
+            df.to_csv(file_path, index=False, date_format=DATE_FORMAT)
     else:
         return life_table
     

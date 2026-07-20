@@ -5,7 +5,7 @@ import datetime as dt
 import plotly.express as px
 from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group, get_parser, \
-    interpolate, CENSUS_TIMEPOINT
+    interpolate, CENSUS_TIMEPOINT, DATE_FORMAT
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
@@ -535,7 +535,7 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
         f"processed_data/{time_delta_tag}/birth/birth_estimate.csv", mkdirs=True
     )
     logger.info(f"Saving data to {file_path}")
-    birth_estimate.to_csv(file_path, index=False, date_format="%Y-%m-%dT%H:%M:%S")
+    birth_estimate.to_csv(file_path, index=False, date_format=DATE_FORMAT)
 
     if draw_plot:
         plot(
@@ -588,7 +588,7 @@ def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = Tr
         mkdirs=True
     )
     logger.info(f"Saving data to {file_path}")
-    initial_population.to_csv(file_path, index=False, date_format="%Y-%m-%dT%H:%M:%S")
+    initial_population.to_csv(file_path, index=False, date_format=DATE_FORMAT)
 
     if draw_plot:
         plot(

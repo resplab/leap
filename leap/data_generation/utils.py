@@ -8,6 +8,9 @@ from leap.logger import get_logger
 from typing import Optional, Tuple, List, Callable, Dict, Any, Literal
 
 logger = get_logger(__name__)
+
+DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
+
 # Most recent census date from StatCan; data switches from past to projected at this timepoint
 CENSUS_TIMEPOINT = dt.datetime(2021, 1, 1)
 
