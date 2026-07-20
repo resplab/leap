@@ -6,13 +6,12 @@ import pathlib
 from typing import Dict
 from leap.utils import get_data_path, get_time_delta_tag, TimeDelta, DATE_FORMAT
 from leap.logger import get_logger
-from leap.data_generation.utils import get_parser, split_ages
+from leap.data_generation.utils import get_parser, split_ages, CENSUS_TIMEPOINT
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
 MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
-MIN_TIMEPOINT_PROJ = dt.datetime(2021, 1, 1)
 MAX_TIMEPOINT = dt.datetime(2065, 1, 1)
 PROVINCES = ["CA", "BC"]
 TIME_DELTA_OD = TimeDelta(years=1) # migration data is generated at annual resolution
@@ -326,7 +325,7 @@ def generate_migration_data(time_delta: TimeDelta):
     df_migration.sort_values(["province", "sex", "timepoint", "age"], inplace=True)
 
     # Create validation plots for the migration data
-    timepoints = df_migration.loc[df_migration["timepoint"] > MIN_TIMEPOINT_PROJ, "timepoint"].unique()
+    timepoints = df_migration.loc[df_migration["timepoint"] > CENSUS_TIMEPOINT, "timepoint"].unique()
     indices = np.arange(0, stop=len(timepoints), step=max(1, len(timepoints) // 4))
     timepoints = timepoints[indices]
 
