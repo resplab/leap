@@ -209,6 +209,7 @@ def load_migration_data(
     """
 
     # Join the mortality data to the population data
+    logger.info("Joining mortality data to population data...")
     df = pd.merge(
         df_population,
         life_table,
@@ -296,7 +297,7 @@ def generate_migration_data(time_delta: TimeDelta):
 
     time_delta_tag = get_time_delta_tag(time_delta)
 
-    # Load the mortality data from the CSV file
+    # Load the mortality data from the CSV files
     life_table = load_mortality_data(time_delta)
 
     # Load the population data from the CSV file
