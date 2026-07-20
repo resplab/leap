@@ -298,6 +298,8 @@ def generate_migration_data(time_delta: TimeDelta):
         time_delta: The duration of time between subsequent data points.
     """
 
+    time_delta_tag = get_time_delta_tag(time_delta)
+
     # Load the mortality data from the CSV file
     life_table = load_mortality_data(time_delta)
 
