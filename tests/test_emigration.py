@@ -5,7 +5,7 @@ from leap.utils import round_number
 
 
 @pytest.mark.parametrize(
-    "min_timepoint, timepoint, age, sex, province, population_growth_type, value",
+    "min_timepoint, timepoint, age, sex, province, projection_scenario, value",
     [
         (
             dt.datetime(2024, 1, 1),
@@ -19,12 +19,12 @@ from leap.utils import round_number
     ]
 )
 def test_emigration_constructor(
-    min_timepoint, timepoint, age, sex, province, population_growth_type, value
+    min_timepoint, timepoint, age, sex, province, projection_scenario, value
 ):
     emigration = Emigration(
         min_timepoint=min_timepoint,
         province=province,
-        population_growth_type=population_growth_type
+        projection_scenario=projection_scenario
     )
 
     df = emigration.table.get_group((timepoint))
@@ -36,7 +36,7 @@ def test_emigration_constructor(
 
 
 @pytest.mark.parametrize(
-    "min_timepoint, timepoint, age, sex, province, population_growth_type, lower_bound, upper_bound",
+    "min_timepoint, timepoint, age, sex, province, projection_scenario, lower_bound, upper_bound",
     [
         (
             dt.datetime(2020, 1, 1),
@@ -61,7 +61,7 @@ def test_emigration_constructor(
     ]
 )
 def test_emigration_compute_probability(
-    min_timepoint, timepoint, age, sex, province, population_growth_type, lower_bound, upper_bound
+    min_timepoint, timepoint, age, sex, province, projection_scenario, lower_bound, upper_bound
 ):
     """Test the ``compute_probability`` method of the ``Emigration`` class.
     
@@ -75,7 +75,7 @@ def test_emigration_compute_probability(
     emigration = Emigration(
         min_timepoint=min_timepoint,
         province=province,
-        population_growth_type=population_growth_type
+        projection_scenario=projection_scenario
     )
 
     count = 0

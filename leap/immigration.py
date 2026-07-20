@@ -20,14 +20,14 @@ class Immigration:
         self,
         min_timepoint: dt.datetime = dt.datetime(2000, 1, 1),
         province: str = "CA",
-        population_growth_type: str = "LG",
+        projection_scenario: str = "LG",
         max_age: int = 111,
         table: DataFrameGroupBy | None = None,
         time_delta: relativedelta | dt.timedelta | TimeDelta = TimeDelta(years=1)
     ):
         if table is None:
             self.table = self.load_immigration_table(
-                min_timepoint, province, population_growth_type, max_age, time_delta
+                min_timepoint, province, projection_scenario, max_age, time_delta
             )
         else:
             self.table = table
@@ -58,7 +58,7 @@ class Immigration:
         self,
         min_timepoint: dt.datetime,
         province: str,
-        population_growth_type: str,
+        projection_scenario: str,
         max_age: int,
         time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
@@ -69,7 +69,7 @@ class Immigration:
                 (CA) or ``2001-2043`` (BC).
             province: A string indicating the province abbreviation, e.g. ``"BC"``.
                 For all of Canada, set province to ``"CA"``.
-            population_growth_type: Population growth type, one of:
+            projection_scenario: Population growth type, one of:
 
                 * ``past``: historical data
                 * ``LG``: low-growth projection
@@ -98,7 +98,7 @@ class Immigration:
             parse_dates=["timepoint"]
         )
         check_province(province)
-        check_projection_scenario(population_growth_type)
+        check_projection_scenario(projection_scenario)
         check_timepoint(min_timepoint + time_delta, df[df["province"] == province])
 
         df = df[
@@ -106,7 +106,7 @@ class Immigration:
             (df["age"] <= max_age) &
             (df["timepoint"] >= min_timepoint) &
             (df["province"] == province) &
-            (df["projection_scenario"] == population_growth_type)
+            (df["projection_scenario"] == projection_scenario)
         ]
         df = df.drop(
             columns=[
@@ -139,7 +139,7 @@ class Immigration:
             >>> from leap.immigration import Immigration
             >>> import datetime as dt
             >>> immigration = Immigration(
-            ...     min_timepoint=dt.datetime(2000, 1, 1), province="BC", population_growth_type="LG"
+            ...     min_timepoint=dt.datetime(2000, 1, 1), province="BC", projection_scenario="LG"
             ... )
             >>> n_immigrants = immigration.get_num_new_immigrants(
             ...     num_new_born=1000, timepoint=dt.datetime(2022, 1, 1)

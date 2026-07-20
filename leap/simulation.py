@@ -51,7 +51,7 @@ class Simulation:
         max_age: int | None = None,
         min_timepoint: dt.datetime | None = None,
         time_horizon: dt.timedelta | None = None,
-        population_growth_type: str | None = None,
+        projection_scenario: str | None = None,
         num_births_initial: int | None = None,
         until_all_die: bool | None = None,
         ignore_pollution_flag: bool = False,
@@ -87,10 +87,10 @@ class Simulation:
             self.time_horizon = time_horizon
         else:
             self.time_horizon = TimeDelta(iso_string=config["simulation"]["time_horizon"])
-        if population_growth_type is not None:
-            self.population_growth_type = population_growth_type
+        if projection_scenario is not None:
+            self.projection_scenario = projection_scenario
         else:
-            self.population_growth_type = config["simulation"]["population_growth_type"]
+            self.projection_scenario = config["simulation"]["projection_scenario"]
         if num_births_initial is not None:
             self.num_births_initial = num_births_initial
         else:
@@ -100,12 +100,12 @@ class Simulation:
         else:
             self.until_all_die = config["simulation"]["until_all_die"]
         self.agent = None
-        self.birth = Birth(self.min_timepoint, self.province, self.population_growth_type, self.max_age)
-        self.emigration = Emigration(self.min_timepoint, self.province, self.population_growth_type)
+        self.birth = Birth(self.min_timepoint, self.province, self.projection_scenario, self.max_age)
+        self.emigration = Emigration(self.min_timepoint, self.province, self.projection_scenario)
         self.immigration = Immigration(
-            self.min_timepoint, self.province, self.population_growth_type, self.max_age
+            self.min_timepoint, self.province, self.projection_scenario, self.max_age
         )
-        self.death = Death(self.province, self.population_growth_type, self.min_timepoint)
+        self.death = Death(self.province, self.projection_scenario, self.min_timepoint)
         self.incidence = Incidence(config["incidence"])
         self.prevalence = Prevalence(config["prevalence"])
         self.reassessment = Reassessment(self.min_timepoint, self.province)
@@ -129,7 +129,7 @@ class Simulation:
             f"max_age={self.max_age}, "
             f"min_timepoint={self.min_timepoint}, "
             f"time_horizon={self.time_horizon}, "
-            f"population_growth_type='{self.population_growth_type}')"
+            f"projection_scenario='{self.projection_scenario}')"
             f"num_births_initial={self.num_births_initial}, "
         )
 
@@ -233,7 +233,7 @@ class Simulation:
             self.max_time_horizon = self.time_horizon
 
     @property
-    def population_growth_type(self) -> str:
+    def projection_scenario(self) -> str:
         """Population growth type to be used in the simulation.
 
         One of:
@@ -252,11 +252,11 @@ class Simulation:
 
         See `StatCan <https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm>`_.
         """
-        return self._population_growth_type
+        return self._projection_scenario
 
-    @population_growth_type.setter
-    def population_growth_type(self, population_growth_type: str):
-        self._population_growth_type = population_growth_type
+    @projection_scenario.setter
+    def projection_scenario(self, projection_scenario: str):
+        self._projection_scenario = projection_scenario
 
     @property
     def num_births_initial(self) -> int:

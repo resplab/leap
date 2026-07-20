@@ -20,31 +20,31 @@ class Birth:
         self,
         min_timepoint: dt.datetime | None = None,
         province: str | None = None,
-        population_growth_type: str | None = None,
+        projection_scenario: str | None = None,
         max_age: int = 111,
         estimate: DataFrameGroupBy | None = None,
         initial_population: pd.DataFrame | None = None,
         time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if estimate is None:
-            if min_timepoint is None or province is None or population_growth_type is None:
+            if min_timepoint is None or province is None or projection_scenario is None:
                 raise ValueError(
-                    "Either min_timepoint, province, and population_growth_type or "
+                    "Either min_timepoint, province, and projection_scenario or "
                     "estimate must be provided."
                 )
             self.estimate = self.load_birth_estimate(
-                min_timepoint, province, population_growth_type, time_delta
+                min_timepoint, province, projection_scenario, time_delta
             )
         else:
             self.estimate = estimate
         if initial_population is None:
-            if min_timepoint is None or province is None or population_growth_type is None:
+            if min_timepoint is None or province is None or projection_scenario is None:
                 raise ValueError(
-                    "Either min_timepoint, province, and population_growth_type or "
+                    "Either min_timepoint, province, and projection_scenario or "
                     "initial_population must be provided."
                 )
             self.initial_population = self.load_population_initial_distribution(
-                min_timepoint, province, population_growth_type, max_age, time_delta
+                min_timepoint, province, projection_scenario, max_age, time_delta
             )
         else:
             self.initial_population = initial_population
@@ -127,7 +127,7 @@ class Birth:
         self,
         min_timepoint: dt.datetime,
         province: str,
-        population_growth_type: str,
+        projection_scenario: str,
         time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
         """Load the data from ``birth_estimate.csv``.
@@ -136,7 +136,7 @@ class Birth:
             min_timepoint: The year for the data to start at. Must be between ``2000-2065``.
             province: A string indicating the province abbreviation, e.g. ``"BC"``.
                 For all of Canada, set province to ``"CA"``.
-            population_growth_type: Population growth type, one of:
+            projection_scenario: Population growth type, one of:
 
                 * ``past``: historical data
                 * ``LG``: low-growth projection
@@ -187,12 +187,12 @@ class Birth:
         )
         check_timepoint(min_timepoint, df)
         check_province(province)
-        check_projection_scenario(population_growth_type)
+        check_projection_scenario(projection_scenario)
 
         df = df[
             (df["timepoint"] >= min_timepoint) &
             (df["province"] == province) &
-            ((df["projection_scenario"] == population_growth_type) |
+            ((df["projection_scenario"] == projection_scenario) |
              (df["projection_scenario"] == "past"))
         ]
         df["N_relative"] = df["N"] / df.loc[df["timepoint"] == min_timepoint]["N"].values[0]
@@ -203,7 +203,7 @@ class Birth:
         self,
         min_timepoint: dt.datetime,
         province: str,
-        population_growth_type: str,
+        projection_scenario: str,
         max_age: int,
         time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> pd.DataFrame:
@@ -213,7 +213,7 @@ class Birth:
             min_timepoint: The year for the data to start at. Must be between ``2000-2065``.
             province: A string indicating the province abbreviation, e.g. ``"BC"``.
                 For all of Canada, set province to ``"CA"``.
-            population_growth_type: Population growth type, one of:
+            projection_scenario: Population growth type, one of:
 
                 * ``past``: historical data
                 * ``LG``: low-growth projection
@@ -242,13 +242,13 @@ class Birth:
 
         check_timepoint(min_timepoint, df)
         check_province(province)
-        check_projection_scenario(population_growth_type)
+        check_projection_scenario(projection_scenario)
 
         df = df[
             (df["age"] <= max_age) &
             (df["timepoint"] == min_timepoint) &
             (df["province"] == province) &
-            ((df["projection_scenario"] == population_growth_type) |
+            ((df["projection_scenario"] == projection_scenario) |
              (df["projection_scenario"] == "past"))
         ]
         return df
@@ -275,7 +275,7 @@ class Birth:
             >>> birth = Birth(
             ...     min_timepoint=dt.datetime(2000, 1, 1),
             ...     province="CA",
-            ...     population_growth_type="LG",
+            ...     projection_scenario="LG",
             ...     initial_population=initial_population
             ... )
             >>> birth.get_initial_population_indices(num_births=2)
@@ -308,7 +308,7 @@ class Birth:
             >>> birth = Birth(
             ...     min_timepoint=dt.datetime(2000, 1, 1),
             ...     province="CA",
-            ...     population_growth_type="LG"
+            ...     projection_scenario="LG"
             ... )
             >>> birth.get_num_newborn(num_births_initial=100, timepoint=dt.datetime(2000, 1, 1))
             100

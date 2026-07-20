@@ -16,7 +16,7 @@ First, let us take a look at the different input parameters:
    * - ``province``
      - The province in Canada to run the simulation. Currently only ``BC`` and ``CA`` are
        supported.
-   * - ``population_growth_type``
+   * - ``projection_scenario``
      - Statistics Canada uses different population growth types to model different population
        growth possibilities.
    * - ``num_births_initial``

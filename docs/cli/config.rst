@@ -16,7 +16,7 @@ The ``config.json`` file contains the parameters used in the simulation.
             "min_year": 2024,
             "time_horizon": 2,
             "province": "BC",
-            "population_growth_type": "LG",
+            "projection_scenario": "LG",
             "num_births_initial": 100,
             "max_age": 111
         },

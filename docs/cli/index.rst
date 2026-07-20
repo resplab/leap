@@ -137,7 +137,7 @@ Simulation Arguments
       </tr>
 
       <tr>
-        <td><code class="notranslate">--population-growth-type</code></td>
+        <td><code class="notranslate">--projection-scenario</code></td>
         <td><code class="notranslate">"LG"</code></td>
         <td>The population growth scenario to use. One of:
           <ul>
@@ -159,7 +159,7 @@ Simulation Arguments
         See
         <a href="https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm">StatCan</a>.
         For example:
-        <code>--population-growth-type "M3"</code>
+        <code>--projection-scenario "M3"</code>
         </td>
       </tr>
 
@@ -185,7 +185,7 @@ Simulation Arguments
           <code class="notranslate">MAX_AGE-</code><br>
           <code class="notranslate">MIN_YEAR-</code><br>
           <code class="notranslate">TIME_HORIZON-</code><br>
-          <code class="notranslate">POPULATION_GROWTH_TYPE-</code><br>
+          <code class="notranslate">PROJECTION_SCENARIO-</code><br>
           <code class="notranslate">NUM_BIRTHS_INITIAL</code><br>
         </td>
         <td>The name of the output directory where the results will be saved. For example:
@@ -248,7 +248,7 @@ To specify the province and population growth scenario:
 
 .. code-block:: bash
 
-  leap --run-simulation --time-horizon 1 --num-births-initial 10 --max-age 4 --province "CA" --min-year 2024 --population-growth-type "M3" --path-output PATH/TO/OUTPUT
+  leap --run-simulation --time-horizon 1 --num-births-initial 10 --max-age 4 --province "CA" --min-year 2024 --projection-scenario "M3" --path-output PATH/TO/OUTPUT
 
 
 If you would like to use your own ``config.json`` file instead of the default one:

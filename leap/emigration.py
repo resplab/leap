@@ -20,13 +20,13 @@ class Emigration:
         self,
         min_timepoint: dt.datetime = dt.datetime(2000, 1, 1),
         province: str = "CA",
-        population_growth_type: str = "LG",
+        projection_scenario: str = "LG",
         table: DataFrameGroupBy | None = None,
         time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if table is None:
             self.table = self.load_emigration_table(
-                min_timepoint, province, population_growth_type, time_delta
+                min_timepoint, province, projection_scenario, time_delta
             )
         else:
             self.table = table
@@ -54,7 +54,7 @@ class Emigration:
         self,
         min_timepoint: dt.datetime,
         province: str,
-        population_growth_type: str,
+        projection_scenario: str,
         time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
         """Load the data from ``processed_data/{time_delta_tag}/migration/migration_table.csv``.
@@ -64,7 +64,7 @@ class Emigration:
                 or 2001-2043 (BC).
             province: a string indicating the province abbreviation, e.g. "BC".
                 For all of Canada, set province to "CA".
-            population_growth_type: Population growth type, one of:
+            projection_scenario: Population growth type, one of:
 
                 * ``past``: historical data
                 * ``LG``: low-growth projection
@@ -91,13 +91,13 @@ class Emigration:
             parse_dates=["timepoint"]
         )
         check_province(province)
-        check_projection_scenario(population_growth_type)
+        check_projection_scenario(projection_scenario)
         check_timepoint(min_timepoint + time_delta, df[df["province"] == province])
 
         df = df[
             (df["timepoint"] >= min_timepoint) &
             (df["province"] == province) &
-            (df["projection_scenario"] == population_growth_type)
+            (df["projection_scenario"] == projection_scenario)
         ]
 
         df.drop(columns=["province", "projection_scenario"], inplace=True)
