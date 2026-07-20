@@ -19,9 +19,9 @@ the mathematical description.
 
 ## Migration Table
 
-Both immigration and emigration data are stored in a single file:
+Both immigration and emigration data are stored in the files:
 
-`migration_table.csv`
+`migration_table_{province}_{projection_scenario}.csv`
 
 Each row corresponds to a unique combination of `timepoint`, `province`, `age`, `sex`, and
 `projection_scenario`. The columns are:
