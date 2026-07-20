@@ -11,6 +11,78 @@ from leap.utils import TimeDelta, date_range, PROJECTION_SCENARIOS, PROVINCE_MAP
 logger = get_logger(__name__)
 
 
+@pytest.fixture
+def df_populations():
+    time_deltas = [TimeDelta(years=1), TimeDelta(months=1)]
+    min_timepoint = dt.datetime(2025, 1, 1)
+    max_timepoint = dt.datetime(2026, 1, 1)
+    population_dict = {}
+    for time_delta in time_deltas:
+        n_intervals = TimeDelta(years=1) // time_delta
+        df = pd.DataFrame(
+            list(itertools.product(
+                ["BC", "CA"],
+                PROJECTION_SCENARIOS,
+                list(date_range(min_timepoint, max_timepoint + time_delta, time_delta)),
+                np.arange(0, 4, 1/n_intervals),
+                ["F", "M"]
+            )),
+            columns=[
+                "province", "projection_scenario", "timepoint", "age", "sex"
+            ]
+        )
+        df["n"] = np.random.randint(1000, 10000, df.shape[0])
+        df["age"] = df["age"].round(6)
+        df.loc[
+            (df["timepoint"] == max_timepoint) &
+            (df["sex"] == "F") &
+            (df["age"] == 2.0) &
+            (df["province"] == "BC") &
+            (df["projection_scenario"] == "LG"), "n"
+        ] = 1000
+        df.loc[
+            (df["timepoint"] == max_timepoint - time_delta) &
+            (df["sex"] == "F") &
+            (df["age"] == round(2.0 - time_delta.total_years(), 6)) &
+            (df["province"] == "BC") &
+            (df["projection_scenario"] == "LG"), "n"
+        ] = 1500
+        key = time_delta.to_isoformat()
+        population_dict[key] = df.copy()
+    return population_dict
+
+
+@pytest.fixture
+def life_tables():
+    time_deltas = [TimeDelta(years=1), TimeDelta(months=1)]
+    min_timepoint = dt.datetime(2025, 1, 1)
+    max_timepoint = dt.datetime(2026, 1, 1)
+    life_table_dict = {}
+    for time_delta in time_deltas:
+        n_intervals = TimeDelta(years=1) // time_delta
+        life_table = pd.DataFrame(
+            list(itertools.product(
+                ["BC", "CA"],
+                ["past", "LG"],
+                np.arange(0, 4, 1/n_intervals),
+                ["F", "M"],
+                list(date_range(min_timepoint, max_timepoint + time_delta, time_delta))
+            )),
+            columns=["province", "projection_scenario", "age", "sex", "timepoint"]
+        )
+        life_table["age"] = life_table["age"].round(6)
+        life_table["prob_death"] = np.random.sample(life_table.shape[0]) / 1000.0
+        life_table.loc[
+            (life_table["timepoint"] == max_timepoint - time_delta) &
+            (life_table["sex"] == "F") &
+            (life_table["age"] == round(2.0 - time_delta.total_years(), 6)) &
+            (life_table["province"] == "BC") &
+            (life_table["projection_scenario"] == "LG"), "prob_death"
+        ] = 0.5
+        key = time_delta.to_isoformat()
+        life_table_dict[key] = life_table
+    return life_table_dict
+
 
 @pytest.fixture
 def df_projection():
@@ -67,12 +139,26 @@ def test_load_population_data(time_delta):
         (TimeDelta(months=1))
     ]
 )
-def test_load_migration_data(time_delta):
-    df = load_migration_data(time_delta)
-    assert set(df.columns) == set(
-        ["province", "projection_scenario", "timepoint", "age", "sex", "n_prev", "prob_death_prev"]
-    )
+def test_load_migration_data(df_populations, life_tables, time_delta):
+    df_population = df_populations[time_delta.to_isoformat()]
+    life_table = life_tables[time_delta.to_isoformat()]
+    print(df_population)
+    df = load_migration_data(df_population, life_table, time_delta)
+    assert set(df.columns) == set([
+        "province", "projection_scenario", "timepoint", "age", "sex",
+        "n_emigrants", "n", "prob_emigration", "n_birth",
+        "delta_n", "prop_migrants_birth", "prop_immigrants_timepoint", "prop_emigrants_timepoint",
+        "prob_death", "n_immigrants", "n_immigrants_timepoint", "n_emigrants_timepoint"
+    ])
     assert df["province"].isin(list(PROVINCE_MAP.values())).all()
     assert df["projection_scenario"].isin(PROJECTION_SCENARIOS).all()
     assert df["sex"].isin(["F", "M"]).all()
+    row = df.loc[
+        (df["timepoint"] == dt.datetime(2026, 1, 1)) &
+        (df["sex"] == "F") &
+        (df["age"] == 2.0) &
+        (df["province"] == "BC") &
+        (df["projection_scenario"] == "LG")
+    ]
+    assert row["n"].iloc[0] == 1000
 
