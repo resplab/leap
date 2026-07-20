@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import datetime as dt
 import argparse
 import itertools
 from leap.utils import TimeDelta, date_range, PROVINCE_MAP
@@ -7,6 +8,8 @@ from leap.logger import get_logger
 from typing import Optional, Tuple, List, Callable, Dict, Any, Literal
 
 logger = get_logger(__name__)
+# Most recent census date from StatCan; data switches from past to projected at this timepoint
+CENSUS_TIMEPOINT = dt.datetime(2021, 1, 1)
 
 
 def get_parser() -> argparse.ArgumentParser:

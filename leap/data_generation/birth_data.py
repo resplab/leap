@@ -5,7 +5,7 @@ import datetime as dt
 import plotly.express as px
 from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from leap.data_generation.utils import get_province_id, get_sex_id, format_age_group, get_parser, \
-    interpolate
+    interpolate, CENSUS_TIMEPOINT
 from leap.logger import get_logger
 pd.options.mode.copy_on_write = True
 
@@ -13,9 +13,6 @@ logger = get_logger(__name__, 20)
 
 MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
 MAX_TIMEPOINT = dt.datetime(2070, 1, 1)
-
-# Most recent census date from StatCan; data switches from past to projected at this timepoint
-CENSUS_TIMEPOINT = dt.datetime(2021, 1, 1)
 
 # Time duration between data points in the original data from StatCan
 TIME_DELTA_OD = TimeDelta(years=1)
@@ -52,13 +49,15 @@ def filter_age_group(age_group: str) -> bool:
 
 def load_past_births_population_data(
     time_delta: TimeDelta,
-    min_timepoint: dt.datetime = MIN_TIMEPOINT
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
+    max_timepoint: dt.datetime = CENSUS_TIMEPOINT
 ) -> pd.DataFrame:
     """Load the past birth data from the CSV file.
     
     Args:
         time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
         min_timepoint: The minimum timepoint to include in the data.
+        max_timepoint: The maximum timepoint to include in the data.
 
     Returns:
         The past birth data.
@@ -78,8 +77,12 @@ def load_past_births_population_data(
         low_memory=False
     )
 
-    # select only the age = 0 age group and the timepoints >= min_timepoint
-    df = df.loc[(df["REF_DATE"] >= min_timepoint) & (df["AGE_GROUP"] == "0 years")]
+    # select only the age = 0 age group and the min_timepoint <= timepoints <= max_timepoint
+    df = df.loc[
+        (df["REF_DATE"] >= min_timepoint) & 
+        (df["REF_DATE"] <= max_timepoint) &
+        (df["AGE_GROUP"] == "0 years")
+    ]
     df = df[["REF_DATE", "GEO", "SEX", "VALUE"]]
     df.rename(
         columns={"REF_DATE": "timepoint", "GEO": "province", "SEX": "sex", "VALUE": "N"},
@@ -239,7 +242,9 @@ def load_projected_births_population_data(
 
 
 def load_past_initial_population_data(
-    time_delta: TimeDelta, min_timepoint: dt.datetime = MIN_TIMEPOINT
+    time_delta: TimeDelta,
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
+    max_timepoint: dt.datetime = CENSUS_TIMEPOINT
 ) -> pd.DataFrame:
     """Load the past initial population data from the CSV file.
 
@@ -247,6 +252,8 @@ def load_past_initial_population_data(
         time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years,
             1 month, etc.
         min_timepoint: The starting timepoint for the past data; only timepoints >= this value will
+            be included in the returned data.
+        max_timepoint: The ending timepoint for the past data; only timepoints <= this value will
             be included in the returned data.
     
     Returns:
@@ -287,7 +294,10 @@ def load_past_initial_population_data(
     )
 
     # select the required columns
-    df = df.loc[(df["timepoint"] >= min_timepoint)][["timepoint", "province", "sex", "age", "N"]]
+    df = df.loc[
+        (df["timepoint"] >= min_timepoint) &
+        (df["timepoint"] <= max_timepoint)
+    ][["timepoint", "province", "sex", "age", "N"]]
 
     # remove grouped categories such as "Median", "Average", "All" and format age as integer
     df = df.loc[df["age"].apply(filter_age_group)]
@@ -498,10 +508,26 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
         draw_plot: If ``True``, generate a plot for validation.
     """
     past_population_data = load_past_births_population_data(time_delta)
-    min_timepoint = past_population_data["timepoint"].max() + time_delta
+    min_timepoint = past_population_data["timepoint"].max() + TIME_DELTA_OD
     projected_population_data = load_projected_births_population_data(time_delta, min_timepoint)
     birth_estimate = pd.concat([past_population_data, projected_population_data], axis=0)
     birth_estimate = birth_estimate.loc[birth_estimate["province"].isin(["BC", "CA"])]
+
+    # Quality check: CENSUS_TIMEPOINT
+    mask = (birth_estimate["projection_scenario"] == "past")
+    max_timepoint_past = birth_estimate.loc[mask, "timepoint"].max()
+    if max_timepoint_past >= CENSUS_TIMEPOINT + TIME_DELTA_OD:
+        raise ValueError(
+            f"Past birth data has timepoint {max_timepoint_past}"
+            f" >= census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
+        )
+    
+    min_timepoint_projected = birth_estimate.loc[~mask, "timepoint"].min()
+    if min_timepoint_projected < CENSUS_TIMEPOINT + TIME_DELTA_OD:
+        raise ValueError(
+            f"Projected birth data has timepoint {min_timepoint_projected}"
+            f" < census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
+        )
 
     # Save the birth estimate data to a CSV file
     time_delta_tag = get_time_delta_tag(time_delta)
@@ -531,12 +557,28 @@ def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = Tr
          draw_plot: If ``True``, generate a plot for validation.
     """
     past_population_data = load_past_initial_population_data(time_delta=time_delta)
-    min_timepoint = past_population_data["timepoint"].max()
+    min_timepoint = past_population_data["timepoint"].max() + TIME_DELTA_OD
     projected_population_data = load_projected_initial_population_data(
         time_delta=time_delta, min_timepoint=min_timepoint
     )
     initial_population = pd.concat([past_population_data, projected_population_data], axis=0)
     initial_population = initial_population.loc[initial_population["province"].isin(["BC", "CA"])]
+
+    # Quality check: CENSUS_TIMEPOINT
+    mask = (initial_population["projection_scenario"] == "past")
+    max_timepoint_past = initial_population.loc[mask, "timepoint"].max()
+    if max_timepoint_past >= CENSUS_TIMEPOINT + TIME_DELTA_OD:
+        raise ValueError(
+            f"Past initial population data has timepoint {max_timepoint_past}"
+            f" >= census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
+        )
+
+    min_timepoint_projected = initial_population.loc[~mask, "timepoint"].min()
+    if min_timepoint_projected < CENSUS_TIMEPOINT + TIME_DELTA_OD:
+        raise ValueError(
+            f"Projected initial population data has timepoint {min_timepoint_projected}"
+            f" < census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
+        )
 
     # Save the initial population distribution data to a CSV file
 

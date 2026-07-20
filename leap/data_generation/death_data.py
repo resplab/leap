@@ -7,10 +7,10 @@ from tqdm import tqdm
 import datetime as dt
 import plotly.express as px
 from scipy import optimize
-from leap.utils import get_data_path
+from leap.utils import get_data_path, PROJECTION_SCENARIOS
 from leap.logger import get_logger
 from leap.data_generation.utils import format_age_group, get_province_id, get_sex_id, get_parser, \
-    interpolate
+    interpolate, CENSUS_TIMEPOINT
 from leap.utils import TimeDelta, date_range, get_time_delta_tag
 from typing import Tuple, Dict
 pd.options.mode.copy_on_write = True
@@ -396,7 +396,7 @@ def load_past_death_data() -> pd.DataFrame:
 
     # select the required columns
     df = df.loc[
-        df["timepoint"] >= MIN_TIMEPOINT,
+        (df["timepoint"] >= MIN_TIMEPOINT) & (df["timepoint"] <= CENSUS_TIMEPOINT),
         ["timepoint", "province", "sex", "age", "ELEMENT", "VALUE"]
     ]
 
@@ -423,10 +423,10 @@ def load_past_death_data() -> pd.DataFrame:
     df = df.drop(columns=["ELEMENT"])
     df.rename(columns={"VALUE": "prob_death"}, inplace=True)
 
-    df.sort_values(["province", "age", "sex", "timepoint"], inplace=True)
-    df = df[["province", "age", "sex", "timepoint", "prob_death"]]
-
     df["projection_scenario"] = ["past"] * df.shape[0]
+
+    df.sort_values(["province", "timepoint", "sex", "age"], inplace=True)
+    df = df[["province", "projection_scenario", "timepoint", "sex", "age", "prob_death"]]
 
     return df
 
@@ -522,6 +522,8 @@ def load_projected_death_data(min_timepoint: dt.datetime) -> pd.DataFrame:
     df = df.loc[df["timepoint"] >= min_timepoint].reset_index(drop=True)
 
     df = df.loc[df["province"].isin(["CA", "BC"])]
+
+    df = df[["province", "projection_scenario", "mortality_scenario", "timepoint", "sex", "life_expectancy"]]
 
     return df
 
@@ -753,11 +755,11 @@ def get_projected_death_data(
     )
 
     projected_life_table.sort_values(
-        ["province", "projection_scenario", "age", "sex", "timepoint"],
+        ["province", "projection_scenario", "timepoint", "sex", "age"],
         inplace=True
     )
     projected_life_table = projected_life_table[
-        ["province", "projection_scenario", "age", "sex", "timepoint", "prob_death"]
+        ["province", "projection_scenario", "timepoint", "sex", "age", "prob_death"]
     ]
 
     return projected_life_table
@@ -766,6 +768,7 @@ def get_projected_death_data(
 
 def generate_death_data(
     time_delta: TimeDelta,
+    time_delta_od: TimeDelta = TIME_DELTA_OD,
     to_csv: bool = True,
     draw_plot: bool = False,
     x0: float = -0.02,
@@ -775,6 +778,7 @@ def generate_death_data(
     
     Args:
         time_delta: The duration of time between data points.
+        time_delta_od: The original duration of time between data points.
         to_csv: Whether to save the data to a CSV file. If False, the dataframe will be returned
             instead.
         draw_plot: Whether to draw a plot of the mortality data for validation.
@@ -787,7 +791,7 @@ def generate_death_data(
     """
     past_life_table = load_past_death_data()
     df_calibration = load_projected_death_data(
-        min_timepoint=past_life_table["timepoint"].max() + time_delta
+        min_timepoint=past_life_table["timepoint"].max() + time_delta_od
     )
 
     logger.info("Computing the beta parameters for each province, sex, and projection scenario...")
@@ -831,9 +835,33 @@ def generate_death_data(
     )
 
     life_table.sort_values(
-        ["province", "projection_scenario", "sex", "timepoint", "age"],
+        ["province", "projection_scenario", "timepoint", "sex", "age"],
+        key=lambda col: col.map(
+            {projection_scenario: index for index, projection_scenario in enumerate(PROJECTION_SCENARIOS)} 
+            if col.name == "projection_scenario" else col
+        ),
         inplace=True
     )
+
+    life_table = life_table[
+        ["province", "projection_scenario", "timepoint", "sex", "age", "prob_death"]
+    ]
+
+    # Quality check: CENSUS_TIMEPOINT
+    mask = (life_table["projection_scenario"] == "past")
+    max_timepoint_past = life_table.loc[mask, "timepoint"].max()
+    if max_timepoint_past >= CENSUS_TIMEPOINT + TIME_DELTA_OD:
+        raise ValueError(
+            f"Past life table has timepoint {max_timepoint_past}"
+            f" >= census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
+        )
+    
+    min_timepoint_projected = life_table.loc[~mask, "timepoint"].min()
+    if min_timepoint_projected < CENSUS_TIMEPOINT + TIME_DELTA_OD:
+        raise ValueError(
+            f"Projected life table has timepoint {min_timepoint_projected}"
+            f" < census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
+        )
 
     time_delta_tag = get_time_delta_tag(time_delta)
 
