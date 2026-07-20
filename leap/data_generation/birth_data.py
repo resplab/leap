@@ -513,6 +513,22 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
     birth_estimate = pd.concat([past_population_data, projected_population_data], axis=0)
     birth_estimate = birth_estimate.loc[birth_estimate["province"].isin(["BC", "CA"])]
 
+    # Quality check: CENSUS_TIMEPOINT
+    mask = (birth_estimate["projection_scenario"] == "past")
+    max_timepoint_past = birth_estimate.loc[mask, "timepoint"].max()
+    if max_timepoint_past >= CENSUS_TIMEPOINT + TIME_DELTA_OD:
+        raise ValueError(
+            f"Past birth data has timepoint {max_timepoint_past}"
+            f" >= census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
+        )
+    
+    min_timepoint_projected = birth_estimate.loc[~mask, "timepoint"].min()
+    if min_timepoint_projected < CENSUS_TIMEPOINT + TIME_DELTA_OD:
+        raise ValueError(
+            f"Projected birth data has timepoint {min_timepoint_projected}"
+            f" < census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
+        )
+
     # Save the birth estimate data to a CSV file
     time_delta_tag = get_time_delta_tag(time_delta)
     file_path = get_data_path(
@@ -547,6 +563,22 @@ def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = Tr
     )
     initial_population = pd.concat([past_population_data, projected_population_data], axis=0)
     initial_population = initial_population.loc[initial_population["province"].isin(["BC", "CA"])]
+
+    # Quality check: CENSUS_TIMEPOINT
+    mask = (initial_population["projection_scenario"] == "past")
+    max_timepoint_past = initial_population.loc[mask, "timepoint"].max()
+    if max_timepoint_past >= CENSUS_TIMEPOINT + TIME_DELTA_OD:
+        raise ValueError(
+            f"Past initial population data has timepoint {max_timepoint_past}"
+            f" >= census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
+        )
+
+    min_timepoint_projected = initial_population.loc[~mask, "timepoint"].min()
+    if min_timepoint_projected < CENSUS_TIMEPOINT + TIME_DELTA_OD:
+        raise ValueError(
+            f"Projected initial population data has timepoint {min_timepoint_projected}"
+            f" < census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
+        )
 
     # Save the initial population distribution data to a CSV file
 

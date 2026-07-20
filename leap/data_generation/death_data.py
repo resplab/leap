@@ -847,6 +847,22 @@ def generate_death_data(
         ["province", "projection_scenario", "timepoint", "sex", "age", "prob_death"]
     ]
 
+    # Quality check: CENSUS_TIMEPOINT
+    mask = (life_table["projection_scenario"] == "past")
+    max_timepoint_past = life_table.loc[mask, "timepoint"].max()
+    if max_timepoint_past >= CENSUS_TIMEPOINT + TIME_DELTA_OD:
+        raise ValueError(
+            f"Past life table has timepoint {max_timepoint_past}"
+            f" >= census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
+        )
+    
+    min_timepoint_projected = life_table.loc[~mask, "timepoint"].min()
+    if min_timepoint_projected < CENSUS_TIMEPOINT + TIME_DELTA_OD:
+        raise ValueError(
+            f"Projected life table has timepoint {min_timepoint_projected}"
+            f" < census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
+        )
+
     time_delta_tag = get_time_delta_tag(time_delta)
 
     if draw_plot:
