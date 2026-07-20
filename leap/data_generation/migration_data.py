@@ -292,6 +292,11 @@ def load_migration_data(
 
 
 def generate_migration_data(time_delta: TimeDelta):
+    """Generate immigration/emigration data.
+    
+    Args:
+        time_delta: The duration of time between subsequent data points.
+    """
 
     # Load the mortality data from the CSV file
     life_table = load_mortality_data(time_delta)
