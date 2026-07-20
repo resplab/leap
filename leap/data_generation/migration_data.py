@@ -101,7 +101,7 @@ def load_mortality_data(time_delta: TimeDelta) -> pd.DataFrame:
     life_table = life_table[["province", "projection_scenario", "timepoint", "sex", "age", "prob_death"]]
     life_table.sort_values(["province","projection_scenario", "timepoint", "sex", "age"], inplace=True)
 
-    if time_delta < TimeDelta(years=1):
+    if time_delta <= TimeDelta(years=1):
         life_table = split_ages(life_table, time_delta, TimeDelta(years=1), [])
 
     return life_table
@@ -151,7 +151,7 @@ def load_population_data(time_delta: TimeDelta) -> pd.DataFrame:
 
     df.sort_values(["province", "projection_scenario", "timepoint", "sex", "age"], inplace=True)
 
-    if time_delta < TimeDelta(years=1):
+    if time_delta <= TimeDelta(years=1):
         df = split_ages(df, time_delta, TimeDelta(years=1), ["n"])
 
     return df
