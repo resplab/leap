@@ -42,7 +42,7 @@ class Emigration:
         * ``prob_emigration``: the per-person probability of emigrating. Zero for cells where
           the net population change was non-negative (i.e. no net emigration).
 
-        See ``processed_data/{time_delta_tag}/migration/migration_table.csv``.
+        See ``processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv``.
         """
         return self._table
 
@@ -57,7 +57,7 @@ class Emigration:
         projection_scenario: str,
         time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
-        """Load the data from ``processed_data/{time_delta_tag}/migration/migration_table.csv``.
+        """Load the data from ``processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv``.
 
         Args:
             min_timepoint: the timepoint for the data to start at. Must be between 2001-2068 (CA)
