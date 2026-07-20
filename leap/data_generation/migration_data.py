@@ -233,28 +233,25 @@ def load_migration_data(
     ]
 
     # get the previous timepoint's cohort for each entry
-    df["age_key"] = df["age"] - time_delta.total_years()
-    df["timepoint_key"] = df["timepoint"].apply(
+    df["age_prev"] = df["age"] - time_delta.total_years()
+    df["timepoint_prev"] = df["timepoint"].apply(
         lambda x: x - time_delta
     )
 
     df_prev = df[
         ["province", "projection_scenario", "sex", "age", "timepoint", "n", "prob_death"]
     ].rename(columns={
-        "age": "age_key",
-        "timepoint": "timepoint_key",
+        "age": "age_prev",
+        "timepoint": "timepoint_prev",
         "n": "n_prev",
         "prob_death": "prob_death_prev"
     })
 
     df = df.merge(
         df_prev,
-        on=["province", "projection_scenario", "sex", "age_key", "timepoint_key"],
+        on=["province", "projection_scenario", "sex", "age_prev", "timepoint_prev"],
         how="left"
     )
-    df["age_prev"] = df["age_key"]
-    df["timepoint_prev"] = df["timepoint_key"]
-    df = df.drop(columns=["age_key", "timepoint_key"])
 
     # remove the missing data
     df = df.dropna(subset=["n_prev"])
