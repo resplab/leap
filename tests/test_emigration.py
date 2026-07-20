@@ -78,7 +78,8 @@ def test_emigration_compute_probability(
     whether the agent emigrates in a given timepoint. This is computed using the binomial distribution.
     For the purposes of testing, we will run the method 100,000 times and check that the number of
     emigrants falls within a certain range. Please see
-    ``processed_data/migration/migration_table.csv`` for the corresponding values.
+    ``processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv``
+    for the corresponding values.
     """
 
     emigration = Emigration(
