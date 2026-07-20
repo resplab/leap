@@ -86,19 +86,24 @@ class Emigration:
             age, province, sex, and growth scenario.
         """
         time_delta_tag = get_time_delta_tag(time_delta)
-        df = pd.read_csv(
-            get_data_path(f"processed_data/{time_delta_tag}/migration/migration_table.csv"),
-            parse_dates=["timepoint"]
-        )
+
         check_province(province)
         check_projection_scenario(projection_scenario)
+
+        df = pd.read_csv(
+            get_data_path(f"processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv"),
+            parse_dates=["timepoint"]
+        )
+        df_past = pd.read_csv(
+            get_data_path(f"processed_data/{time_delta_tag}/migration/migration_table_{province}_past.csv"),
+            parse_dates=["timepoint"]
+        )
+
+        df = pd.concat([df, df_past], ignore_index=True)
+
         check_timepoint(min_timepoint + time_delta, df[df["province"] == province])
 
-        df = df[
-            (df["timepoint"] >= min_timepoint) &
-            (df["province"] == province) &
-            (df["projection_scenario"] == projection_scenario)
-        ]
+        df = df[(df["timepoint"] >= min_timepoint)]
 
         df.drop(columns=["province", "projection_scenario"], inplace=True)
         grouped_df = df.groupby("timepoint")
