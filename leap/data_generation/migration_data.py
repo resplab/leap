@@ -319,7 +319,9 @@ def generate_migration_data(time_delta: TimeDelta):
         groupby_cols=["province", "projection_scenario", "timepoint", "sex"]
     )
 
-    df_migration.sort_values(["province", "sex", "timepoint", "age"], inplace=True)
+    df_migration.sort_values(
+        ["province", "projection_scenario","timepoint", "sex",  "age"], inplace=True
+    )
 
     # Create validation plots for the migration data
     timepoints = df_migration.loc[df_migration["timepoint"] > CENSUS_TIMEPOINT, "timepoint"].unique()
