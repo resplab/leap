@@ -288,7 +288,7 @@ def load_migration_data(
     return df
 
 
-def generate_migration_data(time_delta: TimeDelta):
+def generate_migration_data(time_delta: TimeDelta, to_csv: bool = True) -> pd.DataFrame | None:
     """Generate immigration/emigration data.
     
     Args:
@@ -381,20 +381,25 @@ def generate_migration_data(time_delta: TimeDelta):
                 height=5000,
                 width=3000
             )
-
-    # Save the migration data to a CSV file
-    file_path = get_data_path(
-        f"processed_data/{time_delta_tag}/migration/migration_table.csv",
-        mkdirs=True
-    )
-    logger.info(f"Saving data to {file_path}")
+    
     df_migration.drop(
-        columns=[
-            "n_immigrants", "n_emigrants"
-        ],
+        columns=["n_immigrants", "n_emigrants"],
         inplace=True
     )
-    df_migration.to_csv(file_path, index=False, date_format=DATE_FORMAT)
+
+    # Save the migration data to CSV files, one for each province
+    if to_csv:
+        grouped_df = df_migration.groupby(["province", "projection_scenario"])
+        for group_name, df in grouped_df:
+            province, projection_scenario = group_name
+            file_path = get_data_path(
+                f"processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv",
+                mkdirs=True
+            )
+            logger.info(f"Saving data to {file_path}")
+            df.to_csv(file_path, index=False, date_format=DATE_FORMAT)
+    else:
+        return df_migration
 
 
 def plot(
