@@ -24,7 +24,7 @@ def config():
 
 @pytest.mark.parametrize(
     (
-        "min_timepoint, time_horizon, province, population_growth_type, num_births_initial, max_age,"
+        "min_timepoint, time_horizon, province, projection_scenario, num_births_initial, max_age,"
         "antibiotic_exposure_parameters, prevalence_parameters, incidence_parameter_β_fam_hist,"
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
         "sex, age, timepoint_index,"
@@ -130,7 +130,7 @@ def config():
     ]
 )
 def test_simulation_generate_initial_asthma(
-    config, min_timepoint, time_horizon, province, population_growth_type, num_births_initial, max_age,
+    config, min_timepoint, time_horizon, province, projection_scenario, num_births_initial, max_age,
     antibiotic_exposure_parameters, prevalence_parameters, incidence_parameter_β_fam_hist,
     family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,
     sex, age, timepoint_index, expected_has_asthma, expected_asthma_age, expected_asthma_status,
@@ -164,7 +164,7 @@ def test_simulation_generate_initial_asthma(
         "min_timepoint": min_timepoint,
         "time_horizon": str(time_horizon),
         "province": province,
-        "population_growth_type": population_growth_type,
+        "projection_scenario": projection_scenario,
         "num_births_initial": num_births_initial,
         "max_age": max_age,
         "until_all_die": False,
@@ -199,7 +199,7 @@ def test_simulation_generate_initial_asthma(
 
 @pytest.mark.parametrize(
     (
-        "min_timepoint, time_horizon, time_delta, province, population_growth_type, num_births_initial, max_age,"
+        "min_timepoint, time_horizon, time_delta, province, projection_scenario, num_births_initial, max_age,"
         "antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,"
         "incidence_parameter_βabx_exp, family_history_parameters, sex, age, timepoint_index,"
         "expected_agent_has_asthma, expected_asthma_age, expected_asthma_status,"
@@ -281,7 +281,7 @@ def test_simulation_generate_initial_asthma(
     ]
 )
 def test_check_if_agent_gets_new_asthma_diagnosis(
-    config, min_timepoint, time_horizon, time_delta, province, population_growth_type,
+    config, min_timepoint, time_horizon, time_delta, province, projection_scenario,
     num_births_initial, max_age, antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,
     incidence_parameter_βabx_exp, family_history_parameters, sex, age, timepoint_index,
     expected_agent_has_asthma, expected_asthma_age, expected_asthma_status, expected_asthma_incidence
@@ -311,7 +311,7 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
         "min_timepoint": min_timepoint,
         "time_horizon": str(time_horizon),
         "province": province,
-        "population_growth_type": population_growth_type,
+        "projection_scenario": projection_scenario,
         "num_births_initial": num_births_initial,
         "max_age": max_age,
         "until_all_die": False,
@@ -357,7 +357,7 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
 
 @pytest.mark.parametrize(
     (
-        "min_timepoint, time_horizon, time_delta, province, population_growth_type, num_births_initial, max_age,"
+        "min_timepoint, time_horizon, time_delta, province, projection_scenario, num_births_initial, max_age,"
         "antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,"
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
         "sex, age, has_asthma, asthma_age, asthma_status, expected_control_levels,"
@@ -415,7 +415,7 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
     ]
 )              
 def test_simulation_update_asthma_effects(
-    config, min_timepoint, time_horizon, time_delta, province, population_growth_type,
+    config, min_timepoint, time_horizon, time_delta, province, projection_scenario,
     num_births_initial, max_age,
     antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, family_history_parameters,
     control_parameter_θ, exacerbation_hyperparameter_β0_μ, sex, age, has_asthma, asthma_age,
@@ -450,7 +450,7 @@ def test_simulation_update_asthma_effects(
         "min_timepoint": min_timepoint,
         "time_horizon": str(time_horizon),
         "province": province,
-        "population_growth_type": population_growth_type,
+        "projection_scenario": projection_scenario,
         "num_births_initial": num_births_initial,
         "max_age": max_age,
         "until_all_die": False,
@@ -501,7 +501,7 @@ def test_simulation_update_asthma_effects(
 
 @pytest.mark.parametrize(
     (
-        "min_timepoint, time_horizon, time_delta, province, population_growth_type, num_births_initial, max_age,"
+        "min_timepoint, time_horizon, time_delta, province, projection_scenario, num_births_initial, max_age,"
         "antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,"
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
         "sex, age, has_asthma, asthma_age, asthma_status, exacerbation_history, timepoint_index,"
@@ -543,7 +543,7 @@ def test_simulation_update_asthma_effects(
     ]
 )
 def test_reassess_asthma_diagnosis(
-    config, min_timepoint, time_horizon, time_delta, province, population_growth_type,
+    config, min_timepoint, time_horizon, time_delta, province, projection_scenario,
     num_births_initial, max_age,
     antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, family_history_parameters,
     exacerbation_hyperparameter_β0_μ, control_parameter_θ, sex, age, has_asthma, asthma_age,
@@ -578,7 +578,7 @@ def test_reassess_asthma_diagnosis(
         "min_timepoint": min_timepoint,
         "time_horizon": str(time_horizon),
         "province": province,
-        "population_growth_type": population_growth_type,
+        "projection_scenario": projection_scenario,
         "num_births_initial": num_births_initial,
         "max_age": max_age,
         "until_all_die": False,
@@ -638,7 +638,7 @@ def test_reassess_asthma_diagnosis(
 
 @pytest.mark.parametrize(
     (
-        "min_timepoint, time_horizon, time_delta, province, population_growth_type,"
+        "min_timepoint, time_horizon, time_delta, province, projection_scenario,"
         "num_births_initial, max_age, timepoint, n_new_agents, expected_immigrants"
     ),
     [
@@ -669,7 +669,7 @@ def test_reassess_asthma_diagnosis(
     ]
 )
 def test_simulation_get_new_agents(
-    config, min_timepoint, time_horizon, time_delta, province, population_growth_type,
+    config, min_timepoint, time_horizon, time_delta, province, projection_scenario,
     num_births_initial, max_age, timepoint, n_new_agents, expected_immigrants
 ):
 
@@ -677,7 +677,7 @@ def test_simulation_get_new_agents(
         "min_timepoint": min_timepoint,
         "time_horizon": str(time_horizon),
         "province": province,
-        "population_growth_type": population_growth_type,
+        "projection_scenario": projection_scenario,
         "num_births_initial": num_births_initial,
         "max_age": max_age,
         "until_all_die": False,
@@ -697,7 +697,7 @@ def test_simulation_get_new_agents(
 
 @pytest.mark.parametrize(
     (
-        "min_timepoint, time_horizon, time_delta, province, population_growth_type, num_births_initial, max_age,"
+        "min_timepoint, time_horizon, time_delta, province, projection_scenario, num_births_initial, max_age,"
         "antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,"
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
         "prevalence_parameters, utility_parameters, cost_parameters,"
@@ -820,7 +820,7 @@ def test_simulation_get_new_agents(
     [0, MIN_AGENTS_MP]
 )
 def test_run_simulation_one_year(
-    config, min_agents_mp, min_timepoint, time_horizon, time_delta, province, population_growth_type,
+    config, min_agents_mp, min_timepoint, time_horizon, time_delta, province, projection_scenario,
     num_births_initial, max_age, antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,
     family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,
     prevalence_parameters, utility_parameters, cost_parameters, timepoint_index,
@@ -881,7 +881,7 @@ def test_run_simulation_one_year(
         "min_timepoint": min_timepoint,
         "time_horizon": str(time_horizon),
         "province": province,
-        "population_growth_type": population_growth_type,
+        "projection_scenario": projection_scenario,
         "num_births_initial": num_births_initial,
         "max_age": max_age,
         "until_all_die": False,
@@ -953,7 +953,7 @@ def test_run_simulation_one_year(
 
 @pytest.mark.parametrize(
     (
-        "min_timepoint, time_horizon, time_delta, province, population_growth_type, num_births_initial, max_age,"
+        "min_timepoint, time_horizon, time_delta, province, projection_scenario, num_births_initial, max_age,"
         "antibiotic_exposure_parameters, incidence_parameter_β_fam_hist,"
         "family_history_parameters, exacerbation_hyperparameter_β0_μ, control_parameter_θ,"
         "prevalence_parameters, cost_parameters,"
@@ -1070,7 +1070,7 @@ def test_run_simulation_one_year(
 )
 def test_run_simulation_two_years(
     config, min_agents_mp, min_timepoint, time_horizon, time_delta, 
-    province, population_growth_type, num_births_initial, max_age,
+    province, projection_scenario, num_births_initial, max_age,
     antibiotic_exposure_parameters, incidence_parameter_β_fam_hist, family_history_parameters,
     exacerbation_hyperparameter_β0_μ, control_parameter_θ, prevalence_parameters,
     cost_parameters, expected_alive, expected_antibiotic_exposure, expected_asthma_cost,
@@ -1108,7 +1108,7 @@ def test_run_simulation_two_years(
         "min_timepoint": min_timepoint,
         "time_horizon": str(time_horizon),
         "province": province,
-        "population_growth_type": population_growth_type,
+        "projection_scenario": projection_scenario,
         "num_births_initial": num_births_initial,
         "max_age": max_age,
         "until_all_die": False,
@@ -1214,7 +1214,7 @@ def test_run_simulation_two_years(
 
 @pytest.mark.parametrize(
     (
-        "min_timepoint, time_horizon, time_delta, province, population_growth_type, num_births_initial, max_age,"
+        "min_timepoint, time_horizon, time_delta, province, projection_scenario, num_births_initial, max_age,"
     ),
     [
         (
@@ -1233,7 +1233,7 @@ def test_run_simulation_two_years(
     [0, MIN_AGENTS_MP]
 )
 def test_run_simulation_full(
-    config, min_agents_mp, min_timepoint, time_horizon, time_delta, province, population_growth_type,
+    config, min_agents_mp, min_timepoint, time_horizon, time_delta, province, projection_scenario,
     num_births_initial, max_age
 ):
 
@@ -1241,7 +1241,7 @@ def test_run_simulation_full(
         "min_timepoint": min_timepoint,
         "time_horizon": str(time_horizon),
         "province": province,
-        "population_growth_type": population_growth_type,
+        "projection_scenario": projection_scenario,
         "num_births_initial": num_births_initial,
         "max_age": max_age,
         "until_all_die": False,

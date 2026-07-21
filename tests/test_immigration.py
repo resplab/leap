@@ -6,7 +6,7 @@ from leap.utils import round_number
 
 @pytest.mark.parametrize(
     (
-        "min_timepoint, timepoint, age, max_age, sex, province, population_growth_type,"
+        "min_timepoint, timepoint, age, max_age, sex, province, projection_scenario,"
         "prop_immigrants_birth, prop_immigrants_timepoint"
     ),
     [
@@ -35,13 +35,13 @@ from leap.utils import round_number
     ]
 )
 def test_immigration_constructor(
-    min_timepoint, timepoint, age, max_age, sex, province, population_growth_type,
+    min_timepoint, timepoint, age, max_age, sex, province, projection_scenario,
     prop_immigrants_birth, prop_immigrants_timepoint
 ):
     immigration = Immigration(
         min_timepoint=min_timepoint,
         province=province,
-        population_growth_type=population_growth_type,
+        projection_scenario=projection_scenario,
         max_age=max_age
     )
     df = immigration.table.get_group((timepoint))
@@ -52,7 +52,7 @@ def test_immigration_constructor(
 
 @pytest.mark.parametrize(
     (
-        "min_timepoint, timepoint, max_age, province, population_growth_type,"
+        "min_timepoint, timepoint, max_age, province, projection_scenario,"
         "num_new_born, num_new_immigrants"
     ),
     [
@@ -68,13 +68,13 @@ def test_immigration_constructor(
     ]
 )
 def test_immigration_get_num_new_immigrants(
-    min_timepoint, timepoint, max_age, province, population_growth_type, num_new_born,
+    min_timepoint, timepoint, max_age, province, projection_scenario, num_new_born,
     num_new_immigrants
 ):
     immigration = Immigration(
         min_timepoint=min_timepoint,
         province=province,
-        population_growth_type=population_growth_type,
+        projection_scenario=projection_scenario,
         max_age=max_age
     )
     assert immigration.get_num_new_immigrants(num_new_born, timepoint) == num_new_immigrants

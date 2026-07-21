@@ -89,8 +89,8 @@ def get_parser() -> argparse.ArgumentParser:
     )
     args.add_argument(
         "-gt",
-        "--population-growth-type",
-        dest="population_growth_type",
+        "--projection-scenario",
+        dest="projection_scenario",
         required=False,
         type=str,
         help="""Population growth type for the simulation. Must be one of:
@@ -320,7 +320,7 @@ def run_main():
         time_horizon=(
             TimeDelta(years=args.time_horizon) if args.time_horizon is not None else None
         ),
-        population_growth_type=args.population_growth_type,
+        projection_scenario=args.projection_scenario,
         num_births_initial=args.num_births_initial,
         ignore_pollution_flag=args.ignore_pollution,
     )
@@ -329,7 +329,7 @@ def run_main():
     # Check if path_output argument is supplied or not
     if args.path_output is None or args.path_output == "":
         # Default dir name based on simulation arguments
-        dir_name = f"{simulation.province}-{simulation.max_age}-{simulation.min_timepoint.year}-{simulation.time_horizon.years}-{simulation.population_growth_type}-{simulation.num_births_initial}"
+        dir_name = f"{simulation.province}-{simulation.max_age}-{simulation.min_timepoint.year}-{simulation.time_horizon.years}-{simulation.projection_scenario}-{simulation.num_births_initial}"
     else:
         # Get the name of the dir to store outputs in
         dir_name = args.path_output
@@ -388,7 +388,7 @@ def run_main():
         "max_age": simulation.max_age,
         "min_year": simulation.min_timepoint.year,
         "time_horizon": simulation.time_horizon.years,
-        "population_growth_type": simulation.population_growth_type,
+        "projection_scenario": simulation.projection_scenario,
         "num_births_initial": simulation.num_births_initial,
         "pollution ignored": args.ignore_pollution,
         "max_year": simulation.max_timepoint.year,

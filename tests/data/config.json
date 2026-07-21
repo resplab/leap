@@ -3,7 +3,7 @@
         "min_timepoint": "2001-01-01 00:00:00",
         "time_horizon": "P19Y",
         "province": "BC",
-        "population_growth_type": "LG",
+        "projection_scenario": "LG",
         "num_births_initial": 100,
         "max_age": 111,
         "until_all_die": false,

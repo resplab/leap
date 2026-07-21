@@ -386,7 +386,7 @@ After running ``leap --help``, you should see:
 .. code-block:: bash
 
   usage: leap [-r] [-c CONFIG] [-p PROVINCE] [-ma MAX_AGE] [-my MIN_YEAR] [-th TIME_HORIZON]
-              [-gt POPULATION_GROWTH_TYPE] [-nb NUM_BIRTHS_INITIAL] [-ip] [-o PATH_OUTPUT] [-f]
+              [-gt PROJECTION_SCENARIO] [-nb NUM_BIRTHS_INITIAL] [-ip] [-o PATH_OUTPUT] [-f]
               [-v] [-h]
 
   options:

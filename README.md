@@ -53,7 +53,7 @@ To specify the province and population growth scenario:
 
 ```sh
 leap --run-simulation --time-horizon 1 --num-births-initial 10 --max-age 4 --province "CA" \
---min-year 2024 --population-growth-type "M3" --path-output PATH/TO/OUTPUT/FOLDER
+--min-year 2024 --projection-scenario "M3" --path-output PATH/TO/OUTPUT/FOLDER
 ```
 
 If you would like to use your own `config.json` file instead of the default one:
