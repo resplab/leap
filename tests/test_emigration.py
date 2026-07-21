@@ -1,13 +1,14 @@
 import pytest
 import datetime as dt
 from leap.emigration import Emigration
-from leap.utils import round_number
+from leap.utils import round_number, TimeDelta
 
 
 @pytest.mark.parametrize(
-    "min_timepoint, timepoint, age, sex, province, projection_scenario, value",
+    "time_delta, min_timepoint, timepoint, age, sex, province, population_growth_type, value",
     [
         (
+            TimeDelta(years=1),
             dt.datetime(2024, 1, 1),
             dt.datetime(2025, 1, 1),
             89,
@@ -17,6 +18,7 @@ from leap.utils import round_number
             0.02836
         ),
         (
+            TimeDelta(years=1),
             dt.datetime(2000, 1, 1),
             dt.datetime(2001, 1, 1),
             5,
@@ -28,12 +30,13 @@ from leap.utils import round_number
     ]
 )
 def test_emigration_constructor(
-    min_timepoint, timepoint, age, sex, province, projection_scenario, value
+    time_delta, min_timepoint, timepoint, age, sex, province, projection_scenario, value
 ):
     emigration = Emigration(
         min_timepoint=min_timepoint,
         province=province,
-        projection_scenario=projection_scenario
+        projection_scenario=projection_scenario,
+        time_delta=time_delta
     )
 
     df = emigration.table.get_group((timepoint))
