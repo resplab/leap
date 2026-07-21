@@ -1,0 +1,1629 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="model-control.html">
+      
+      
+        <link rel="next" href="model-exacerbation-severity.html">
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>Asthma Exacerbations Model - </title>
+      
+    
+    
+      
+        
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+        <link rel="stylesheet" type="text/css" href="../_static/sphinx_immaterial_theme.cf2c65c97ee1b6f01.min.css?v=0a68cab4" />
+        <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+        <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c4bbe126" />
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#data" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="" class="md-header__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../_static/logo.png" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Asthma Exacerbations Model
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="" class="md-nav__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../_static/logo.png" alt="logo">
+    </a>
+    
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/cli/index.rst (reference label)"><span>Running LEAP</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/index.rst (reference label)"><span>Model</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/model/index.rst (reference label)"><span>Model</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-simulation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-simulation.rst (reference label)"><span>Simulation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-birth.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-birth.rst (reference label)"><span>Birth Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="death/model-death.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/death/model-death.rst (reference label)"><span>Mortality Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-migration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-migration.rst (reference label)"><span>Immigration / Emigration Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-antibiotics.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-antibiotics.rst (reference label)"><span>Antibiotic Exposure Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-family-history.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-family-history.rst (reference label)"><span>Family History Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-occurrence.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-occurrence.rst (reference label)"><span>Asthma Occurrence Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-reassessment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-reassessment.rst (reference label)"><span>Asthma Reassessment Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-control.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-control.rst (reference label)"><span>Asthma Control Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-exacerbation.rst (reference label)"><span>Asthma Exacerbations Model</span></span>
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-exacerbation.rst (reference label)"><span>Asthma Exacerbations Model</span></span>
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/model/model-exacerbation.rst (reference label)"><span>Asthma Exacerbations Model</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#data (reference label)"><span>Data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#population-data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#population-data (reference label)"><span>Population Data</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#occurrence-data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#occurrence-data (reference label)"><span>Occurrence Data</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hospitalization-data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#hospitalization-data (reference label)"><span>Hospitalization Data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hospitalization Data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-province-structure" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#per-province-structure (reference label)"><span>Per-<wbr>province Structure</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tab1-rate-csv-columns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#tab1-rate-csv-columns (reference label)"><span>tab1_<wbr>rate.<wbr>csv Columns</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#province-coverage" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="province-coverage (reference label)"><span>Province Coverage</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#model (reference label)"><span>Model</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#calibration" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#calibration (reference label)"><span>Calibration</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Calibration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#processed-data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#processed-data (reference label)"><span>Processed Data</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-exacerbation-severity.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-exacerbation-severity.rst (reference label)"><span>Asthma Exacerbation Severity Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-cost.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-cost.rst (reference label)"><span>Cost Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-utility.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-utility.rst (reference label)"><span>Utility Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-pollution.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-pollution.rst (reference label)"><span>Pollution Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-statistical-background.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-statistical-background.rst (reference label)"><span>Statistical Background</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/index.rst (reference label)"><span>Developers</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../references.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/references.rst (reference label)"><span>References</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/model/model-exacerbation.rst (reference label)"><span>Asthma Exacerbations Model</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#data (reference label)"><span>Data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#population-data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#population-data (reference label)"><span>Population Data</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#occurrence-data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#occurrence-data (reference label)"><span>Occurrence Data</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hospitalization-data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#hospitalization-data (reference label)"><span>Hospitalization Data</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hospitalization Data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-province-structure" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#per-province-structure (reference label)"><span>Per-<wbr>province Structure</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tab1-rate-csv-columns" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#tab1-rate-csv-columns (reference label)"><span>tab1_<wbr>rate.<wbr>csv Columns</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#province-coverage" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="province-coverage (reference label)"><span>Province Coverage</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#model (reference label)"><span>Model</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#calibration" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#calibration (reference label)"><span>Calibration</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Calibration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#processed-data" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-exacerbation.rst#processed-data (reference label)"><span>Processed Data</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                
+                
+                  
+
+
+  
+  
+
+<h1 id="asthma-exacerbations-model"><span id="exacerbation-model"></span>Asthma Exacerbations Model<a class="headerlink" href="#asthma-exacerbations-model" title="Link to this heading">¶</a></h1>
+<h2 id="data">Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h2>
+<h3 id="population-data"><span id="exacerbation-model-population-data"></span>Population Data<a class="headerlink" href="#population-data" title="Link to this heading">¶</a></h3>
+<p>We use the Statistics Canada population data that was generated and saved as:
+<a class="reference external" href="https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/birth/initial_population.csv">processed_data/{time_delta_tag}/birth/initial_population.csv</a>.
+This file is produced by the same data-generation script as <code class="docutils literal notranslate"><span class="pre">birth_estimate.csv</span></code> — see
+<a class="reference internal" href="model-birth.html#birth-model"><span class="std std-ref">Birth Model</span></a> for details on how it is generated from Statistics Canada population data.</p>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timepoint</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">datetime</span></code></p></td>
+<td><p>the starting date / time of the time interval that the data applies to</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">age</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p>the age of the person in years</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">province</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p>the province of the person
+(e.g., <code class="docutils literal notranslate"><span class="pre">AB</span></code> = Alberta, <code class="docutils literal notranslate"><span class="pre">BC</span></code> = British Columbia, etc.)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_age</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p>the number of people in a given age group, time interval, province, and projection scenario</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">n_birth</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p>the number of births in that time interval, province, and projection scenario</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">prop</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the proportion of the population in that age group, time interval, province, and projection
+scenario relative to the number of births in that time interval, province, and projection
+scenario</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">prop_male</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the proportion of the population in a given age group, time interval, province, and
+projection scenario who are male</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">projection_scenario</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p>the projection scenario used to generate the data</p></td>
+</tr>
+</tbody>
+</table>
+<p>This dataset has no <code class="docutils literal notranslate"><span class="pre">sex</span></code> column, so wherever a sex-specific population count
+<span class="math notranslate nohighlight">\(N(a, s, t)\)</span> is needed elsewhere in this document, it is derived from age <span class="math notranslate nohighlight">\(a\)</span> and
+timepoint <span class="math notranslate nohighlight">\(t\)</span>’s <code class="docutils literal notranslate"><span class="pre">n_age</span></code> and <code class="docutils literal notranslate"><span class="pre">prop_male</span></code> values:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}N(a, \text{M}, t) &amp;= n_{\text{age}} \cdot p_{\text{male}} \\
+N(a, \text{F}, t) &amp;= n_{\text{age}} \cdot (1 - p_{\text{male}})\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(n_{\text{age}}\)</span> and <span class="math notranslate nohighlight">\(p_{\text{male}}\)</span> are the <code class="docutils literal notranslate"><span class="pre">n_age</span></code> and <code class="docutils literal notranslate"><span class="pre">prop_male</span></code>
+columns respectively.</p>
+<h3 id="occurrence-data">Occurrence Data<a class="headerlink" href="#occurrence-data" title="Link to this heading">¶</a></h3>
+<p>We use the occurrence data that was generated and saved as:
+<a class="reference external" href="https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/asthma_occurrence_predictions.csv">processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv</a></p>
+<p>See <a class="reference internal" href="model-occurrence.html#occurrence-model-1"><span class="std std-ref">Occurrence Model 1: Crude Occurrence</span></a> for more details about this dataset.</p>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timepoint</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">datetime</span></code></p></td>
+<td><p>The start of the time interval, e.g. 2024-01-01</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sex</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">F</span></code> = female, <code class="docutils literal notranslate"><span class="pre">M</span></code> = male</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">age</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p>the age of the patient in years</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">incidence</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the predicted asthma incidence for the given time interval, age, and sex</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">prevalence</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the predicted asthma prevalence for the given time interval, age, and sex</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="hospitalization-data">Hospitalization Data<a class="headerlink" href="#hospitalization-data" title="Link to this heading">¶</a></h3>
+<p>The data is from the <code class="docutils literal notranslate"><span class="pre">Hospital</span> <span class="pre">Morbidity</span> <span class="pre">Database</span> <span class="pre">(HMDB)</span></code> from the
+<a class="reference external" href="https://www.cihi.ca/en/hospital-morbidity-database-hmdb-metadata">Canadian Institute for Health Information (CIHI)</a>.</p>
+<p>The hospitalization data was collected from patients presenting to a hospital in Canada
+due to an asthma exacerbation. We will use this data to calibrate the exacerbation model.</p>
+<h4 id="per-province-structure">Per-province Structure<a class="headerlink" href="#per-province-structure" title="Link to this heading">¶</a></h4>
+<p>The raw data is saved under
+<a class="reference external" href="https://github.com/resplab/leap/tree/main/leap/original_data/asthma_hosp">original_data/asthma_hosp/{province}/</a>,
+with one subfolder per province/territory: <code class="docutils literal notranslate"><span class="pre">AB</span></code>, <code class="docutils literal notranslate"><span class="pre">BC</span></code>, <code class="docutils literal notranslate"><span class="pre">MB</span></code>, <code class="docutils literal notranslate"><span class="pre">NB</span></code>, <code class="docutils literal notranslate"><span class="pre">NL</span></code>, <code class="docutils literal notranslate"><span class="pre">NS</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ON</span></code>, <code class="docutils literal notranslate"><span class="pre">PE</span></code>, <code class="docutils literal notranslate"><span class="pre">QC</span></code>, <code class="docutils literal notranslate"><span class="pre">SK</span></code>. In addition there are two combined regions:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CA</span></code>: all of Canada combined.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TR</span></code>: Nunavut, Northwest Territories, and Yukon combined into a single category, since
+each of these territories individually has too few cases to report reliably.</p></li>
+</ul>
+<p>Each province subfolder contains 5 files that share the same columns and shape, differing
+only in what value is reported. Of these, only <code class="docutils literal notranslate"><span class="pre">tab1_rate.csv</span></code> (the hospitalization rate per
+100 000 people) is used to calibrate the exacerbation model (see below); the remaining 4 files
+(<code class="docutils literal notranslate"><span class="pre">tab1_count.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">tab1_N.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">tab1_lower.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">tab1_upper.csv</span></code>) and the
+per-province <code class="docutils literal notranslate"><span class="pre">los.csv</span></code> file are documented in <a class="reference internal" href="../dev/api/data_generation/leap.data_generation.exacerbation_data.html#exacerbation-raw-data-files"><span class="std std-ref">Raw Data Files</span></a> in the
+Developers section.</p>
+<h4 id="tab1-rate-csv-columns"><span id="tab1-rate-columns"></span><code class="docutils literal notranslate"><span class="pre">tab1_rate.csv</span></code> Columns<a class="headerlink" href="#tab1-rate-csv-columns" title="Link to this heading">¶</a></h4>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fiscal_year</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p>the year the data was collected</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">N</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the hospitalization rate for all ages and sexes in that year.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the rate for all ages who are male in that year.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">F</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the rate for all ages who are female in that year.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the rate for all sexes aged 0 in that year.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the rate for all sexes aged 1 in that year.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">...</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">...</span></code></p></td>
+<td><p>…</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">90</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the rate for all sexes aged 90 in that year.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">90+</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the rate for all sexes aged over 90 in that year.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">F_0</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the rate for all females aged 0 in that year.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">...</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">...</span></code></p></td>
+<td><p>…</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">F_90+</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the rate for all females aged over 90 in that year.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">M_0</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the rate for all males aged 0 in that year.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">...</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">...</span></code></p></td>
+<td><p>…</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">M_90+</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the rate for all males aged over 90 in that year.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The hospitalization rate in this table is the hospitalization rate per 100 000 people.
+For example, in the category <code class="docutils literal notranslate"><span class="pre">F_90+</span></code>, the value would be the rate for people hospitalized who
+are female and over 90 during the given year.</p>
+<p>Therefore, the observed number of hospitalizations for a given age <span class="math notranslate nohighlight">\(a\)</span>, sex <span class="math notranslate nohighlight">\(s\)</span>, and
+timepoint <span class="math notranslate nohighlight">\(t\)</span> can be recovered from the rate:</p>
+<div class="math notranslate nohighlight">
+\[N_{\text{hosp}}(a, s, t) = \dfrac{\text{hospitalization rate}(a, s, t)}{100\,000} \cdot N(a, s, t)\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(N(a, s, t)\)</span> is the population count from the <a class="reference internal" href="#exacerbation-model-population-data"><span class="std std-ref">Population Data</span></a>
+described above.</p>
+<p>This is used to calibrate <span class="math notranslate nohighlight">\(\alpha\)</span> below.</p>
+<p>The calibration step only uses the per-sex, per-age columns (<code class="docutils literal notranslate"><span class="pre">F_0</span></code> … <code class="docutils literal notranslate"><span class="pre">F_90+</span></code> and
+<code class="docutils literal notranslate"><span class="pre">M_0</span></code> … <code class="docutils literal notranslate"><span class="pre">M_90+</span></code>); the sex- and age-aggregated columns (<code class="docutils literal notranslate"><span class="pre">N</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, <code class="docutils literal notranslate"><span class="pre">0</span></code> … <code class="docutils literal notranslate"><span class="pre">90+</span></code>)
+are not used.</p>
+<h4 id="province-coverage"><span id="id1"></span>Province Coverage<a class="headerlink" href="#province-coverage" title="Link to this heading">¶</a></h4>
+<p>Although hospitalization data is available for every province/territory listed above,
+calibration is currently only implemented for <code class="docutils literal notranslate"><span class="pre">BC</span></code> and <code class="docutils literal notranslate"><span class="pre">CA</span></code> using the corresponding
+<code class="docutils literal notranslate"><span class="pre">tab1_rate.csv</span></code> file (see
+<a class="reference external" href="https://github.com/resplab/leap/blob/main/leap/data_generation/exacerbation_data.py">leap/data_generation/exacerbation_data.py</a>).
+The resulting <code class="docutils literal notranslate"><span class="pre">exacerbation_calibration.csv</span></code> used at runtime therefore only contains
+calibration multipliers for these two regions.</p>
+<h2 id="model">Model<a class="headerlink" href="#model" title="Link to this heading">¶</a></h2>
+<p>The number of exacerbations in a given time interval is modelled using a Poisson distribution.
+The formula is:</p>
+<div class="math notranslate nohighlight">
+\[N_{\text{exacerbations}}^{(i)} \sim \text{Poisson}(\lambda^{(i)}) = \dfrac{{\lambda^{(i)}}^{\kappa} e^{-\lambda^{(i)}}}{\kappa!}\]</div>
+<p>Here <span class="math notranslate nohighlight">\(\lambda^{(i)}\)</span> is the expected number of exacerbations per time interval for agent
+<span class="math notranslate nohighlight">\(i\)</span>, and <span class="math notranslate nohighlight">\(\kappa\)</span> is the number of exacerbations (a non-negative integer) for which we
+are computing the probability. To obtain <span class="math notranslate nohighlight">\(\lambda^{(i)}\)</span>, we must perform a Poisson
+regression. The Poisson regression assumes that the value we are interested in can be
+approximated using the following formula:</p>
+<div class="math notranslate nohighlight">
+\[\ln(\lambda^{(i)}) = \ln(\alpha) + \beta_0^{(i)} + \sum_{k=1}^3 \beta_k c_k^{(i)}\]</div>
+<p>where:</p>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 33.3%" />
+<col style="width: 66.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\alpha\)</span></p></td>
+<td><p>the calibration multiplier that adjusts the model to match the hospitalization data</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\beta_0^{(i)}\)</span></p></td>
+<td><p>patient-specific random effect; <span class="math notranslate nohighlight">\(\beta_0^{(i)} \sim \mathcal{N}(0, \sigma^2)\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(c_k^{(i)}\)</span></p></td>
+<td><p>relative time spent in control level <span class="math notranslate nohighlight">\(k\)</span>, given by the probability of control level
+<span class="math notranslate nohighlight">\(k\)</span> from the <a class="reference internal" href="model-control.html#control-model"><span class="std std-ref">Control Model</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\beta_k\)</span></p></td>
+<td><p>control level constant, derived from the EBA and GOAL studies (see Calibration below)</p></td>
+</tr>
+</tbody>
+</table>
+<p>For each agent with asthma, <span class="math notranslate nohighlight">\(\beta_0^{(i)}\)</span> is sampled once and held fixed for their
+simulated lifetime, representing individual heterogeneity in exacerbation risk beyond what is
+explained by age, sex, control level, and the population-level calibration <span class="math notranslate nohighlight">\(\alpha\)</span>. The
+mean and variance of this distribution are configuration-dependent; in the current default
+configuration they are set to approximately <span class="math notranslate nohighlight">\(\mathcal{N}(0, 0)\)</span>, effectively disabling this
+source of individual variation.</p>
+<p>This gives us the rate <span class="math notranslate nohighlight">\(\lambda^{(i)}\)</span> of exacerbations of <em>any</em> severity. Once an individual’s
+total number of exacerbations for a time interval is drawn from this Poisson model, each
+exacerbation is further assigned a severity level (mild, moderate, severe, or very severe) — see
+the <a class="reference internal" href="model-exacerbation-severity.html#exacerbation-severity-model"><span class="std std-ref">Asthma Exacerbation Severity Model</span></a>.</p>
+<p>The diagram below summarises how these pieces fit together conceptually, for agent <span class="math notranslate nohighlight">\(i\)</span> with
+a given age <span class="math notranslate nohighlight">\(a\)</span> and sex <span class="math notranslate nohighlight">\(s\)</span>, from calibration through to the final severity-level
+counts.</p>
+<div class="mermaid-diagram docutils">
+<pre class="mermaid">
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span><code>flowchart TD
+    ALPHA[&quot;&lt;b&gt;Calibration multiplier&lt;/b&gt;&amp;nbsp;&lt;span style=&#39;font-size:1.3em&#39;&gt;$$\alpha$$&lt;/span&gt;&lt;br/&gt;predicted vs. observed&lt;br/&gt;hospitalizations in CIHI data&quot;]
+    BI[&quot;&lt;b&gt;Control-level rate constants&lt;/b&gt;&amp;nbsp;&lt;span style=&#39;font-size:1.3em&#39;&gt;$$\beta_k$$&lt;/span&gt;&lt;br/&gt;derived from EBA + GOAL studies&quot;]
+    CI[&quot;&lt;b&gt;Control-level probabilities&lt;/b&gt;&amp;nbsp;&lt;span style=&#39;font-size:1.3em&#39;&gt;$$c_k^{(i)}$$&lt;/span&gt;&lt;br/&gt;predicted by the Control Model&quot;]
+
+    RATE[&quot;&lt;b&gt;Rate of exacerbations&lt;/b&gt;&amp;nbsp;&lt;span style=&#39;font-size:1.3em&#39;&gt;$$\lambda^{(i)}$$&lt;/span&gt;&lt;br/&gt;(any severity)&quot;]
+
+    ALPHA --&gt; RATE
+    BI --&gt; RATE
+    CI --&gt; RATE
+
+    COUNT[&quot;&lt;b&gt;Total exacerbations&lt;/b&gt;&amp;nbsp;&lt;span style=&#39;font-size:1.3em&#39;&gt;$$N_{\text{exacerbations}}^{(i)}$$&lt;/span&gt;&lt;br/&gt;this time interval&quot;]
+    RATE --&gt; COUNT
+
+    SEV[&quot;&lt;b&gt;Severity probabilities&lt;/b&gt;&amp;nbsp;&lt;span style=&#39;font-size:1.3em&#39;&gt;$$\mathbf{w}^{(i)}$$&lt;/span&gt;&lt;br/&gt;based on SYGMA II&lt;br/&gt;severity/hospitalization proportions&quot;]
+    HIST[&quot;&lt;b&gt;History of very severe&lt;/b&gt;&lt;br/&gt;&lt;b&gt;exacerbations&lt;/b&gt;&amp;nbsp;&lt;span style=&#39;font-size:1.3em&#39;&gt;$$\beta_{\text{prev hosp}}^{(i)}$$&lt;/span&gt;&lt;br/&gt;(hospitalization)&quot;]
+    HIST --&gt;|&quot;increases probability&lt;br/&gt;of very severe&quot;| SEV
+
+    OUTPUT[&quot;&lt;b&gt;Exacerbations by&lt;/b&gt;&lt;br/&gt;&lt;b&gt;severity level&lt;/b&gt;&amp;nbsp;&lt;span style=&#39;font-size:1.3em&#39;&gt;$$(n_{\text{mild}}^{(i)}, \ldots, n_{\text{very severe}}^{(i)})$$&lt;/span&gt;&quot;]
+    COUNT --&gt; OUTPUT
+    SEV --&gt; OUTPUT
+
+    classDef input fill:#fff3e0,stroke:#e65100,color:#3a2400;
+    classDef stage fill:#e3f2fd,stroke:#1565c0,color:#0d2b45;
+    classDef output fill:#e8f5e9,stroke:#2e7d32,color:#10300f;
+    class ALPHA,BI,CI,HIST input;
+    class RATE,COUNT,SEV stage;
+    class OUTPUT output;
+
+    classDef input fill:#fff3e0,stroke:#e65100,color:#3a2400;
+    classDef formula fill:#e3f2fd,stroke:#1565c0,color:#0d2b45;
+    classDef sim fill:#e8f5e9,stroke:#2e7d32,color:#10300f;
+    class ALPHA,B0,BI,CI input;
+    class FORMULA,POISSON formula;
+    class W,HIST,MULTI sim;
+</code></pre></div>
+</div>
+</pre></div>
+<h3 id="calibration"><span id="exacerbation-calibration"></span>Calibration<a class="headerlink" href="#calibration" title="Link to this heading">¶</a></h3>
+<p>We are interested in calculating <span class="math notranslate nohighlight">\(\alpha\)</span>. If we rewrite the equation, the meaning of
+<span class="math notranslate nohighlight">\(\alpha\)</span> becomes more apparent:</p>
+<div class="math notranslate nohighlight">
+\[\lambda^{(i)} = \alpha \cdot e^{\beta_0^{(i)}} \prod_{k=1}^3 e^{\beta_k c_k^{(i)}}\]</div>
+<p>How do we obtain <span class="math notranslate nohighlight">\(\alpha\)</span>? We again assume that the mean value has the same form as in a
+Poisson regression, with the following formula:</p>
+<div class="math notranslate nohighlight">
+\[\ln(\lambda_{C}(a, s)) = \sum_{k=1}^3 \beta_k c_k\]</div>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\lambda_C(a, s)\)</span>: the predicted mean number of exacerbations per year for a given age
+<span class="math notranslate nohighlight">\(a\)</span> and sex <span class="math notranslate nohighlight">\(s\)</span> — note this has no timepoint argument, since the
+<a class="reference internal" href="model-control.html#control-model"><span class="std std-ref">Control Model</span></a> assumes control level probabilities do not vary by
+calendar year</p></li>
+<li><p><span class="math notranslate nohighlight">\(c_k\)</span>: the age- and sex-specific probability of control level <span class="math notranslate nohighlight">\(k\)</span>,
+<span class="math notranslate nohighlight">\(P(y^{(i)} = k)\)</span>, from the <a class="reference internal" href="model-control.html#control-model"><span class="std std-ref">Control Model</span></a>’s ordinal regression —
+obtained by subtracting consecutive cumulative probabilities,
+<span class="math notranslate nohighlight">\(P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\beta_k\)</span>: control level constant, derived below from the EBA and GOAL studies</p></li>
+</ul>
+<p>The <span class="math notranslate nohighlight">\(\beta_k\)</span> values are derived by combining two literature sources, as described in
+<span class="bibtex-citation" id="id2">[<a class="reference internal" href="../references.html#id2" title="Tae Yoon Lee, John Petkau, Kate M. Johnson, Stuart E. Turvey, Amin Adibi, Padmaja Subbarao, Ainsleigh Hill, Mark Ewert, and Mohsen Sadatsafavi. Development of an asthma policy model for canada: lifetime exposures and asthma outcomes projection. PLOS One, 21(5):e0348878, 2026. URL: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0348878, doi:10.1371/journal.pone.0348878.">Lee, 2026</a>]</span>:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://bmjopen.bmj.com/content/3/9/e003360.long">Economic Burden of Asthma (EBA) study</a>
+(Chen et al. 2013) — a prospective, representative observational study of 618 participants aged
+1-85 years (74% aged 18 or older) with self-reported, physician-diagnosed asthma from BC, in
+which asthma control and the number of exacerbations were measured every 3 months over a year.
+EBA gives us the overall mean annual exacerbation rate for a person with asthma,
+<span class="math notranslate nohighlight">\(r = 0.347\)</span>, and the overall proportion of time the EBA cohort as a whole spent in each
+control level over the study period: <span class="math notranslate nohighlight">\(\text{prop}_{\text{wc}} = 0.340\)</span> (well-controlled),
+<span class="math notranslate nohighlight">\(\text{prop}_{\text{pc}} = 0.474\)</span> (partially-controlled), and
+<span class="math notranslate nohighlight">\(\text{prop}_{\text{uc}} = 0.186\)</span> (uncontrolled).</p></li>
+<li><p><a class="reference external" href="https://doi.org/10.1164/rccm.200401-033OC">GOAL Study</a>
+(Bateman et al. 2004) — a one-year, randomized, double-blind clinical trial of 3421
+participants aged 12-80 years with uncontrolled asthma at study entry, with asthma
+exacerbations as the primary outcome. An analysis of the GOAL data gives rounded annual
+exacerbation rates for each control level: well-controlled = 0.1, partially-controlled = 0.2,
+uncontrolled = 0.3 — i.e. the partially-controlled rate is twice the well-controlled rate, and
+the uncontrolled rate is three times the well-controlled rate.</p></li>
+</ul>
+<p>Combining these two sources was necessary because the EBA cohort, while representative, did not
+have enough exacerbation events on its own to robustly estimate a rate for each control level.
+Instead, we take only the <em>relative</em> rates from GOAL, and solve for an absolute well-controlled
+rate <span class="math notranslate nohighlight">\(r_{\text{wc}}\)</span> such that the population-weighted average across the three control
+levels — using the EBA time-in-control proportions together with the GOAL rate ratios — equals
+the EBA overall rate <span class="math notranslate nohighlight">\(r\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[r = \text{prop}_{\text{wc}} \cdot r_{\text{wc}} + \text{prop}_{\text{pc}} \cdot (2 r_{\text{wc}})
+    + \text{prop}_{\text{uc}} \cdot (3 r_{\text{wc}})
+\quad \Longrightarrow \quad
+r_{\text{wc}} = \dfrac{r}{\text{prop}_{\text{wc}} + 2 \cdot \text{prop}_{\text{pc}}
+    + 3 \cdot \text{prop}_{\text{uc}}}\]</div>
+<p>The partially-controlled and uncontrolled rates follow directly from the GOAL ratios:
+<span class="math notranslate nohighlight">\(r_{\text{pc}} = 2 r_{\text{wc}}\)</span> and <span class="math notranslate nohighlight">\(r_{\text{uc}} = 3 r_{\text{wc}}\)</span>. Taking the
+natural log of each rate gives the <span class="math notranslate nohighlight">\(\beta_k\)</span> values:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\beta_1 &amp;:= \ln(r_{\text{wc}}) = \ln(0.1880058) \\
+\beta_2 &amp;:= \ln(r_{\text{pc}}) = \ln(0.3760116) \\
+\beta_3 &amp;:= \ln(r_{\text{uc}}) = \ln(0.5640174)\end{split}\]</div>
+<p>The number of exacerbations predicted by the model is then:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}N_{\text{asthma}}(a, s, t) &amp;= N(a, s, t) \cdot \eta_{\text{prev}}(a, s, t) \\
+N_{\text{exac}}^{\text{(pred)}}(a, s, t) &amp;= \lambda_C(a, s) \cdot N_{\text{asthma}}(a, s, t) \\\end{split}\]</div>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(N_{\text{asthma}}(a, s, t)\)</span>: the number of people of age <span class="math notranslate nohighlight">\(a\)</span>, sex <span class="math notranslate nohighlight">\(s\)</span>, at
+timepoint <span class="math notranslate nohighlight">\(t\)</span> with asthma</p></li>
+<li><p><span class="math notranslate nohighlight">\(N(a, s, t)\)</span>: the number of people of age <span class="math notranslate nohighlight">\(a\)</span>, sex <span class="math notranslate nohighlight">\(s\)</span>, at timepoint <span class="math notranslate nohighlight">\(t\)</span>,
+from the <a class="reference internal" href="#exacerbation-model-population-data"><span class="std std-ref">Population Data</span></a> described above</p></li>
+<li><p><span class="math notranslate nohighlight">\(\eta_{\text{prev}}(a, s, t)\)</span>: the prevalence of asthma for age <span class="math notranslate nohighlight">\(a\)</span>, sex <span class="math notranslate nohighlight">\(s\)</span>,
+at timepoint <span class="math notranslate nohighlight">\(t\)</span>, from <a class="reference internal" href="model-occurrence.html#occurrence-model-1"><span class="std std-ref">Occurrence Model 1: Crude Occurrence</span></a></p></li>
+<li><p><span class="math notranslate nohighlight">\(\lambda_C(a, s)\)</span>: as defined above</p></li>
+</ul>
+<p>and number of hospitalizations is:</p>
+<div class="math notranslate nohighlight">
+\[N_{\text{hosp}}^{\text{(pred)}}(a, s, t) = N_{\text{exac}}^{\text{(pred)}}(a, s, t) \cdot P(\text{hosp})\]</div>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(N_{\text{exac}}^{\text{(pred)}}(a, s, t)\)</span>: the predicted number of exacerbations (of any
+severity) for age <span class="math notranslate nohighlight">\(a\)</span>, sex <span class="math notranslate nohighlight">\(s\)</span>, at timepoint <span class="math notranslate nohighlight">\(t\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(P(\text{hosp})\)</span>: the probability of hospitalization due to asthma given the patient has an
+asthma exacerbation (a single constant, not stratified by <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(s\)</span>, or <span class="math notranslate nohighlight">\(t\)</span>)</p></li>
+</ul>
+<p>As described in the <a class="reference internal" href="model-exacerbation-severity.html#exacerbation-severity-model"><span class="std std-ref">Asthma Exacerbation Severity Model</span></a>, exacerbations are classified into four
+severity levels, where <strong>very severe</strong> is defined as requiring hospital admission. We treat
+<span class="math notranslate nohighlight">\(P(\text{hosp})\)</span> as the proportion of all exacerbations that are very severe, taken from the
+<a class="reference external" href="https://www.nejm.org/doi/10.1056/NEJMoa1715275">Symbicort Given as Needed in Mild Asthma II (SYGMA II) study</a> (Bateman et al. 2018), a double-blind,
+multi-centre clinical trial of 4176 individuals with mild asthma. SYGMA II reports the
+distribution of exacerbation severity as 49.5% mild, 19.5% moderate, 28.3% severe, and 2.6% very
+severe, giving <span class="math notranslate nohighlight">\(P(\text{hosp}) = 0.026\)</span> <span class="bibtex-citation" id="id3">[<a class="reference internal" href="../references.html#id2" title="Tae Yoon Lee, John Petkau, Kate M. Johnson, Stuart E. Turvey, Amin Adibi, Padmaja Subbarao, Ainsleigh Hill, Mark Ewert, and Mohsen Sadatsafavi. Development of an asthma policy model for canada: lifetime exposures and asthma outcomes projection. PLOS One, 21(5):e0348878, 2026. URL: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0348878, doi:10.1371/journal.pone.0348878.">Lee, 2026</a>]</span>.</p>
+<p>Finally, <span class="math notranslate nohighlight">\(\alpha\)</span> can be computed as the ratio of the <strong>observed</strong> to the <strong>predicted</strong>
+number of hospitalizations, for a given age <span class="math notranslate nohighlight">\(a\)</span>, sex <span class="math notranslate nohighlight">\(s\)</span>, and timepoint <span class="math notranslate nohighlight">\(t\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\alpha(a, s, t) = \dfrac{N_{\text{hosp}}(a, s, t)}{N_{\text{hosp}}^{\text{(pred)}}(a, s, t)}\]</div>
+<p>where <span class="math notranslate nohighlight">\(N_{\text{hosp}}(a, s, t)\)</span> is the <strong>observed</strong> number of hospitalizations, determined
+from the observed hospitalization rate in CIHI as described in <a class="reference internal" href="#tab1-rate-columns"><span class="std std-ref">tab1_rate.csv Columns</span></a> above.</p>
+<details class="info admonition">
+<summary class="admonition-title">Math: Why α (from Hospitalizations) Applies to λ (All Severities)</summary><p>Although <span class="math notranslate nohighlight">\(\alpha\)</span> is computed from hospitalizations alone, it is applied to
+<span class="math notranslate nohighlight">\(\lambda^{(i)}\)</span>, the rate of exacerbations of <em>any</em> severity — this is valid because
+<span class="math notranslate nohighlight">\(P(\text{hosp})\)</span> is treated as a fixed constant, independent of age, sex, province, and
+timepoint. Substituting
+<span class="math notranslate nohighlight">\(N_{\text{hosp}}^{\text{(pred)}} = N_{\text{exac}}^{\text{(pred)}} \cdot P(\text{hosp})\)</span>,
+and writing the <em>observed</em> hospitalizations as the <em>true</em> total number of exacerbations times
+that same constant, <span class="math notranslate nohighlight">\(N_{\text{hosp}} = N_{\text{exac}}^{\text{(true)}} \cdot P(\text{hosp})\)</span>,
+the <span class="math notranslate nohighlight">\(P(\text{hosp})\)</span> terms cancel:</p>
+<div class="math notranslate nohighlight">
+\[\alpha = \dfrac{N_{\text{hosp}}}{N_{\text{hosp}}^{\text{(pred)}}}
+    = \dfrac{N_{\text{exac}}^{\text{(true)}} \cdot P(\text{hosp})}
+        {N_{\text{exac}}^{\text{(pred)}} \cdot P(\text{hosp})}
+    = \dfrac{N_{\text{exac}}^{\text{(true)}}}{N_{\text{exac}}^{\text{(pred)}}}\]</div>
+<p>So <span class="math notranslate nohighlight">\(\alpha\)</span> computed from the hospitalization ratio is algebraically identical to the
+ratio of true to predicted <em>total</em> exacerbations, provided <span class="math notranslate nohighlight">\(P(\text{hosp})\)</span> is indeed
+constant by age, sex, province, and timepoint (otherwise variation in <span class="math notranslate nohighlight">\(P(\text{hosp})\)</span>
+would be attributed to <span class="math notranslate nohighlight">\(\alpha\)</span>). Hospitalizations are used to compute it — rather than
+total exacerbations directly — because they are captured completely in CIHI’s national data,
+stratified by age/sex/province/year.</p>
+</details>
+<p><span class="math notranslate nohighlight">\(\alpha\)</span> is computed once per province, age, sex, and timepoint as part of data generation,
+and saved as:
+<a class="reference external" href="https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/exacerbation_calibration.csv">processed_data/{time_delta_tag}/exacerbation_calibration.csv</a>.
+This file is looked up at simulation runtime — by province, timepoint, sex, and age — to
+calibrate each agent’s <span class="math notranslate nohighlight">\(\lambda^{(i)}\)</span>.</p>
+<h4 id="processed-data">Processed Data<a class="headerlink" href="#processed-data" title="Link to this heading">¶</a></h4>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timepoint</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">datetime</span></code></p></td>
+<td><p>The start of the time interval, e.g. 2024-01-01</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sex</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">F</span></code> = female, <code class="docutils literal notranslate"><span class="pre">M</span></code> = male</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">age</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p>the age of the patient in years</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">province</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p>the 2-letter province abbreviation (currently only <code class="docutils literal notranslate"><span class="pre">BC</span></code> and <code class="docutils literal notranslate"><span class="pre">CA</span></code>, see
+<a class="reference internal" href="#province-coverage"><span class="std std-ref">Province Coverage</span></a> above)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">calibrator_multiplier</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>the calibration multiplier <span class="math notranslate nohighlight">\(\alpha(a, s, t)\)</span> for the given age, sex, timepoint, and
+province</p></td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        &#169; Copyright 2024, Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert.
+        
+    </div>
+  
+    Created using
+    <a href="https://www.sphinx-doc.org/" target="_blank" rel="noopener">Sphinx</a>
+    9.1.0.
+     and
+    <a href="https://github.com/jbms/sphinx-immaterial/" target="_blank" rel="noopener">Sphinx-Immaterial</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/resplab/leap/" target="_blank" rel="noopener" title="Source on github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.expand", "navigation.sections", "navigation.top", "search.share", "toc.follow", "toc.sticky", "content.tabs.link", "announce.dismiss", "content.code.annotate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+        <script src="../_static/sphinx_immaterial_theme.32136f45f91ae6956.min.js?v=a7a9472a"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script id="MathJax-script" src="../_static/mathjax/tex-mml-chtml.js"></script>
+    
+  </body>
+</html>
