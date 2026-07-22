@@ -147,6 +147,143 @@ province, and projection scenario.
 Data Processing
 ****************
 
+1. Load Life Table
+------------------------
+
+First, we load the life tables from 
+``processed_data/{time_delta_tag}/death/life_table_{province}.csv`` and concatenate them.
+
+If we are using a ``time_delta`` less than that of the original data (1 year), we need to split
+the ages into smaller intervals. Under the constant hazard rate assumption,
+:math:`\mu(x, t)` is constant over the time interval :math:`[x, x + \Delta x_a)`:
+
+
+.. math::
+
+  \mu(x + s, t + s) = \lambda(x, t) \quad \forall ~ s \in [0, \Delta x_a)
+
+
+This means that the probability of death is constant over the time interval
+:math:`[x, x + \Delta x_a)`:
+
+.. math::
+
+  q(x + s, \Delta x_b, t + s) = q(x, \Delta x_b, t) \quad \forall ~ s \in [0, \Delta x_a)
+
+
+We end up with:
+
+.. list-table::
+   :class: long-table
+   :widths: 15 10 75
+   :header-rows: 1
+
+   * - Name
+     - Type
+     - Description
+   * - ``province``
+     - ``str``
+     - The two-letter abbreviation of the province, e.g. ``BC`` for British Columbia, or ``CA`` for
+       Canada.
+   * - ``projection_scenario``
+     - :code:`str`
+     - ``past`` for historical data, or one of the projection scenario IDs for future data:
+
+       * ``LG``: low-growth projection
+       * ``HG``: high-growth projection
+       * ``M1``: medium-growth 1 projection
+       * ``M2``: medium-growth 2 projection
+       * ``M3``: medium-growth 3 projection
+       * ``M4``: medium-growth 4 projection
+       * ``M5``: medium-growth 5 projection
+       * ``M6``: medium-growth 6 projection
+       * ``FA``: fast-aging projection
+       * ``SA``: slow-aging projection
+   * - ``age``
+     - ``Age``
+     - The age of the person, in years.
+   * - ``sex``
+     - ``str``
+     - One of ``"M"`` = male, ``"F"`` = female.
+   * - ``timepoint``
+     - ``datetime``
+     - The starting timepoint of the interval during which the data was collected.
+   * - ``prob_death``
+     - ``float``
+     - The probability that a person of the given age and sex, living in the given province, will
+       die in the time interval ``[timepoint, timepoint + time_delta)``.
+
+.. info:: Example: Life Table
+  :collapsible:
+
+  .. list-table::
+    :class: max-width-table
+    :widths: 10 10 10 10 20 30
+    :header-rows: 1
+
+    * - ``province``
+      - ``projection_scenario``
+      - ``age``
+      - ``sex``
+      - ``timepoint``
+      - ``prob_death``
+    * - BC
+      - LG
+      - 0.00000 years
+      - M     
+      - 2000-01-01
+      - 0.00565
+    * - BC
+      - LG
+      - 0.08333 years
+      - M      
+      - 2000-01-01
+      - 0.00565
+    * - BC
+      - LG
+      - ...
+      - M      
+      - 2000-01-01
+      - 0.00565
+    * - BC
+      - LG
+      - 0.91667 years
+      - M      
+      - 2000-01-01
+      - 0.00565
+    * - BC
+      - LG
+      - 1.00000 years
+      - M      
+      - 2000-01-01
+      - 0.00687
+    * - BC
+      - LG
+      - ...
+      - M      
+      - 2000-01-01
+      - ...
+    * - BC
+      - LG
+      - 110.91667 years
+      - M      
+      - 2000-01-01
+      - 1.000000
+    * - BC
+      - LG
+      - 110.91667 years
+      - M      
+      - 2068-12-01
+      - 1.000000
+    * - BC
+      - LG
+      - 0.00000 years
+      - F     
+      - 2000-01-01
+      - 0.00463
+
+
+
 To obtain the net migration, for anyone of ``age > 0``, we compute the number of people in each age
 group projected to die during that year based on the ``prob_death`` column in the ``life_table.csv``.
 Then we calculate the net change in people using the ``n_age`` column in the
