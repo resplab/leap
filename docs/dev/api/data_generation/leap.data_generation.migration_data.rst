@@ -518,16 +518,491 @@ We end up with:
       - 0.00463
 
 
+3. Compute Net Migration
+------------------------
 
 To obtain the net migration, for anyone of ``age > 0``, we compute the number of people in each age
-group projected to die during that year based on the ``prob_death`` column in the ``life_table.csv``.
-Then we calculate the net change in people using the ``n_age`` column in the
-``initial_population.csv``. We subtract the number of people who died from the net
-population change to get the net number of people who migrated:
+group projected to die during that time interval based on the ``prob_death`` column in the
+``life_table.csv``. Then we calculate the net change in people using the ``n`` column in the
+``initial_population.csv``. 
 
-.. code-block:: python
+.. math::
 
-   delta_n = n - n_prev * (1 - prob_death)
+    \Delta n_{\text{total}} (x,\ t; s)
+      = \Delta n_{\text{migration}}(x,\ t; s) + \Delta n_{\text{deaths}}(x,\ t; s)
+
+Solving for :math:`\Delta n_{\text{migration}}` gives us the net migration during that time interval:
+
+.. math::
+
+    \Delta n_{\text{migration}}(x,\ t; s) &= \textcolor{magenta}{\Delta n(x,\ t; s)_{\text{total}}}
+      - \textcolor{orange}{\Delta n(x,\ t; s)_{\text{deaths}}} \\
+    &= \textcolor{magenta}{
+      \underbrace{\ell(x,\ t; s)}_{\text{no. people alive age $x$ at time } t} - 
+      \underbrace{\ell(x-\Delta t,\ t-\Delta t; s)}_{
+        \text{no. people alive age $x-\Delta t$ at previous time } t - \Delta t
+      }} \\ 
+    &+ \textcolor{orange}{
+       \underbrace{
+        \left(\ell(x-\Delta t,\ t-\Delta t; s) \cdot q(x-\Delta t,\ t-\Delta t; s)\right)
+      }_{\text{no. deaths age $x - \Delta t$ between $[t - \Delta t, t]$}}
+    }
+
+.. info:: Example: Calculating Net Migration
+  :collapsible:
+
+  For example, suppose we start with the following data:
+
+  .. list-table::
+    :class: max-width-table
+    :widths: 10 10 20 10 20 10 10
+    :header-rows: 1
+
+    * - ``province``
+      - ``projection_scenario``
+      - ``age``
+      - ``sex``
+      - ``timepoint``
+      - ``n``
+      - ``prob_death``
+    * - BC
+      - LG
+      - 1.00000 years
+      - M     
+      - 2000-01-01
+      - 100
+      - 0.000235
+    * - BC
+      - LG
+      - 1.083333 years
+      - M     
+      - 2000-01-01
+      - 100
+      - 0.000235
+    * - BC
+      - LG
+      - 1.166667 years
+      - M     
+      - 2000-01-01
+      - 100
+      - 0.000235
+    * - BC
+      - LG
+      - 1.250000 years
+      - M     
+      - 2000-01-01
+      - 100
+      - 0.000235
+    * - BC
+      - LG
+      - 1.333333 years
+      - M     
+      - 2000-01-01
+      - 100
+      - 0.000235
+    * - BC
+      - LG
+      - 1.416667 years
+      - M     
+      - 2000-01-01
+      - 100
+      - 0.000235
+    * - BC
+      - LG
+      - 1.500000 years
+      - M     
+      - 2000-01-01
+      - 100
+      - 0.000235
+    * - BC
+      - LG
+      - 1.583333 years
+      - M     
+      - 2000-01-01
+      - 100
+      - 0.000235
+    * - BC
+      - LG
+      - 1.666667 years
+      - M     
+      - 2000-01-01
+      - 100
+      - 0.000235
+    * - BC
+      - LG
+      - 1.750000 years
+      - M     
+      - 2000-01-01
+      - 100
+      - 0.000235
+    * - BC
+      - LG
+      - 1.833333 years
+      - M     
+      - 2000-01-01
+      - 100
+      - 0.000235
+    * - BC
+      - LG
+      - 1.916667 years
+      - M     
+      - 2000-01-01
+      - 100
+      - 0.000235
+    * - BC
+      - LG
+      - 2.00000 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 0.000369
+    * - BC
+      - LG
+      - 2.083333 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 0.000369
+    * - BC
+      - LG
+      - 2.166667 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 0.000369
+    * - BC
+      - LG
+      - 2.250000 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 0.000369
+    * - BC
+      - LG
+      - 2.333333 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 0.000369
+    * - BC
+      - LG
+      - 2.416667 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 0.000369
+    * - BC
+      - LG
+      - 2.500000 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 0.000369
+    * - BC
+      - LG
+      - 2.583333 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 0.000369
+    * - BC
+      - LG
+      - 2.666667 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 0.000369
+    * - BC
+      - LG
+      - 2.750000 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 0.000369
+    * - BC
+      - LG
+      - 2.833333 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 0.000369
+    * - BC
+      - LG
+      - 2.916667 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 0.000369
+
+  Then we would add an ``n_prev`` column and calculate the net change in people,
+  :math:`\Delta n_{\text{total}}`, using the ``n`` and ``n_prev`` columns:
+
+  .. code-block:: python
+
+    delta_n = n - n_prev * (1 - prob_death)
+
+
+  .. list-table::
+    :class: max-width-table
+    :widths: 10 10 10 10 10 10 10 10 10 10
+    :header-rows: 1
+
+    * - ``province``
+      - ``projection_scenario``
+      - ``age``
+      - ``sex``
+      - ``timepoint``
+      - ``n``
+      - ``n_prev``
+      - ``prob_death``
+      - ``prob_death_prev``
+      - ``delta_n``
+    * - BC
+      - LG
+      - 1.00000 years
+      - M     
+      - 2000-01-01
+      - 100
+      - nan
+      - 0.000235
+      - nan
+      - nan
+    * - BC
+      - LG
+      - 1.083333 years
+      - M     
+      - 2000-01-01
+      - 100
+      - nan
+      - 0.000235
+      - nan
+      - nan
+    * - BC
+      - LG
+      - 1.166667 years
+      - M     
+      - 2000-01-01
+      - 100
+      - nan
+      - 0.000235
+      - nan
+      - nan
+    * - BC
+      - LG
+      - 1.250000 years
+      - M     
+      - 2000-01-01
+      - 100
+      - nan
+      - 0.000235
+      - nan
+      - nan
+    * - BC
+      - LG
+      - 1.333333 years
+      - M     
+      - 2000-01-01
+      - 100
+      - nan
+      - 0.000235
+      - nan
+      - nan
+    * - BC
+      - LG
+      - 1.416667 years
+      - M     
+      - 2000-01-01
+      - 100
+      - nan
+      - 0.000235
+      - nan
+      - nan
+    * - BC
+      - LG
+      - 1.500000 years
+      - M     
+      - 2000-01-01
+      - 100
+      - nan
+      - 0.000235
+      - nan
+      - nan
+    * - BC
+      - LG
+      - 1.583333 years
+      - M     
+      - 2000-01-01
+      - 100
+      - nan
+      - 0.000235
+      - nan
+      - nan
+    * - BC
+      - LG
+      - 1.666667 years
+      - M     
+      - 2000-01-01
+      - 100
+      - nan
+      - 0.000235
+      - nan
+      - nan
+    * - BC
+      - LG
+      - 1.750000 years
+      - M     
+      - 2000-01-01
+      - 100
+      - nan
+      - 0.000235
+      - nan
+      - nan
+    * - BC
+      - LG
+      - 1.833333 years
+      - M     
+      - 2000-01-01
+      - 100
+      - nan
+      - 0.000235
+      - nan
+      - nan
+    * - BC
+      - LG
+      - 1.916667 years
+      - M     
+      - 2000-01-01
+      - 100
+      - nan
+      - 0.000235
+      - nan
+      - nan
+    * - BC
+      - LG
+      - 2.00000 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 100
+      - 0.000369
+      - 0.000235
+      - 15.0235
+    * - BC
+      - LG
+      - 2.083333 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 100
+      - 0.000369
+      - 0.000235
+      - 15.0235
+    * - BC
+      - LG
+      - 2.166667 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 100
+      - 0.000369
+      - 0.000235
+      - 15.0235
+    * - BC
+      - LG
+      - 2.250000 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 100
+      - 0.000369
+      - 0.000235
+      - 15.0235
+    * - BC
+      - LG
+      - 2.333333 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 100
+      - 0.000369
+      - 0.000235
+      - 15.0235
+    * - BC
+      - LG
+      - 2.416667 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 100
+      - 0.000369
+      - 0.000235
+      - 15.0235
+    * - BC
+      - LG
+      - 2.500000 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 100
+      - 0.000369
+      - 0.000235
+      - 15.0235
+    * - BC
+      - LG
+      - 2.583333 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 100
+      - 0.000369
+      - 0.000235
+      - 15.0235
+    * - BC
+      - LG
+      - 2.666667 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 100
+      - 0.000369
+      - 0.000235
+      - 15.0235
+    * - BC
+      - LG
+      - 2.750000 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 100
+      - 0.000369
+      - 0.000235
+      - 15.0235
+    * - BC
+      - LG
+      - 2.833333 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 100
+      - 0.000235
+      - 0.000369
+      - 15.0235
+    * - BC
+      - LG
+      - 2.916667 years
+      - M     
+      - 2001-01-01
+      - 115
+      - 100
+      - 0.000369
+      - 0.000235
+      - 15.0235
+
+
+
+
+
+
 
 
 leap.data\_generation.migration\_data module
