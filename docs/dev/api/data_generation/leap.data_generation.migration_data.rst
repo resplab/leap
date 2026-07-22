@@ -283,6 +283,241 @@ We end up with:
       - 0.00463
 
 
+2. Load Population Data
+------------------------
+
+First, we load the population data from 
+``processed_data/{time_delta_tag}/birth/initial_population.csv``.
+
+If we are using a ``time_delta`` less than that of the original data (1 year), we need to split
+the ages into smaller intervals. We assume that the population is uniformly distributed over the age
+interval :math:`[x, x + \Delta x_a)`:
+
+.. math::
+
+  \ell(x + s, \Delta x_b, t) = \ell(x, \Delta x_b, t) \dfrac{\Delta x_b}{\Delta x_a} \quad \forall ~ s \in [0, \Delta x_a)
+
+For example, if we have:
+
+.. list-table::
+  :class: max-width-table
+  :widths: 10 10 20 10 20 20
+  :header-rows: 1
+
+  * - ``province``
+    - ``projection_scenario``
+    - ``age``
+    - ``sex``
+    - ``timepoint``
+    - ``n``
+  * - BC
+    - LG
+    - 0
+    - M     
+    - 2000-01-01
+    - 1200
+
+
+then this would become:
+
+
+.. list-table::
+  :class: max-width-table long-table
+  :widths: 10 10 20 10 20 20
+  :header-rows: 1
+
+  * - ``province``
+    - ``projection_scenario``
+    - ``age``
+    - ``sex``
+    - ``timepoint``
+    - ``n``
+  * - BC
+    - LG
+    - 0.00000 years
+    - M     
+    - 2000-01-01
+    - 100
+  * - BC
+    - LG
+    - 0.083333 years
+    - M     
+    - 2000-01-01
+    - 100
+  * - BC
+    - LG
+    - 0.166667 years
+    - M     
+    - 2000-01-01
+    - 100
+  * - BC
+    - LG
+    - 0.250000 years
+    - M     
+    - 2000-01-01
+    - 100
+  * - BC
+    - LG
+    - 0.333333 years
+    - M     
+    - 2000-01-01
+    - 100
+  * - BC
+    - LG
+    - 0.416667 years
+    - M     
+    - 2000-01-01
+    - 100
+  * - BC
+    - LG
+    - 0.500000 years
+    - M     
+    - 2000-01-01
+    - 100
+  * - BC
+    - LG
+    - 0.583333 years
+    - M     
+    - 2000-01-01
+    - 100
+  * - BC
+    - LG
+    - 0.666667 years
+    - M     
+    - 2000-01-01
+    - 100
+  * - BC
+    - LG
+    - 0.750000 years
+    - M     
+    - 2000-01-01
+    - 100
+  * - BC
+    - LG
+    - 0.833333 years
+    - M     
+    - 2000-01-01
+    - 100
+  * - BC
+    - LG
+    - 0.916667 years
+    - M     
+    - 2000-01-01
+    - 100
+
+
+We end up with:
+
+.. list-table::
+   :class: long-table
+   :widths: 15 10 75
+   :header-rows: 1
+
+   * - Name
+     - Type
+     - Description
+   * - ``province``
+     - ``str``
+     - The two-letter abbreviation of the province, e.g. ``BC`` for British Columbia, or ``CA`` for
+       Canada.
+   * - ``projection_scenario``
+     - :code:`str`
+     - ``past`` for historical data, or one of the projection scenario IDs for future data:
+
+       * ``LG``: low-growth projection
+       * ``HG``: high-growth projection
+       * ``M1``: medium-growth 1 projection
+       * ``M2``: medium-growth 2 projection
+       * ``M3``: medium-growth 3 projection
+       * ``M4``: medium-growth 4 projection
+       * ``M5``: medium-growth 5 projection
+       * ``M6``: medium-growth 6 projection
+       * ``FA``: fast-aging projection
+       * ``SA``: slow-aging projection
+   * - ``age``
+     - ``Age``
+     - The age of the person, in years.
+   * - ``sex``
+     - ``str``
+     - One of ``"M"`` = male, ``"F"`` = female.
+   * - ``timepoint``
+     - ``datetime``
+     - The starting timepoint of the interval during which the data was collected.
+   * - ``n``
+     - ``float``
+     - The number of people of the given age and sex, living in the given province, at the
+       given timepoint, for the projection scenario.
+
+.. info:: Example: Population Data
+  :collapsible:
+
+  .. list-table::
+    :class: max-width-table
+    :widths: 10 10 10 10 20 30
+    :header-rows: 1
+
+    * - ``province``
+      - ``projection_scenario``
+      - ``age``
+      - ``sex``
+      - ``timepoint``
+      - ``n``
+    * - BC
+      - LG
+      - 0.00000 years
+      - M     
+      - 2000-01-01
+      - 0.00565
+    * - BC
+      - LG
+      - 0.08333 years
+      - M      
+      - 2000-01-01
+      - 0.00565
+    * - BC
+      - LG
+      - ...
+      - M      
+      - 2000-01-01
+      - 0.00565
+    * - BC
+      - LG
+      - 0.91667 years
+      - M      
+      - 2000-01-01
+      - 0.00565
+    * - BC
+      - LG
+      - 1.00000 years
+      - M      
+      - 2000-01-01
+      - 0.00687
+    * - BC
+      - LG
+      - ...
+      - M      
+      - 2000-01-01
+      - ...
+    * - BC
+      - LG
+      - 110.91667 years
+      - M      
+      - 2000-01-01
+      - 1.000000
+    * - BC
+      - LG
+      - 110.91667 years
+      - M      
+      - 2068-12-01
+      - 1.000000
+    * - BC
+      - LG
+      - 0.00000 years
+      - F     
+      - 2000-01-01
+      - 0.00463
+
+
 
 To obtain the net migration, for anyone of ``age > 0``, we compute the number of people in each age
 group projected to die during that year based on the ``prob_death`` column in the ``life_table.csv``.
