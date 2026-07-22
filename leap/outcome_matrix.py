@@ -4,7 +4,7 @@ import itertools
 import datetime as dt
 from dateutil.relativedelta import relativedelta
 import pathlib
-from leap.utils import timer, date_range, TimeDelta
+from leap.utils import date_range, TimeDelta
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -18,17 +18,45 @@ class OutcomeTable:
             data: The data for the table.
             group_by: The columns to group the data by.
         """
-        self.data = data
         self.group_by = group_by
-        if group_by is not None:
-            self.grouped_data = data.groupby(group_by)
-        else:
-            self.grouped_data = None
+        self.data = data  # the setter (re)sets the lazy ``grouped_data`` cache
 
     def __repr__(self):
         return self.data.__repr__()
 
-    @timer(log_level=20)
+    @property
+    def data(self) -> pd.DataFrame:
+        """The underlying dataframe for the table."""
+        return self._data
+
+    @data.setter
+    def data(self, data: pd.DataFrame):
+        self._data = data
+        # Invalidate the cached groupby; it is rebuilt lazily on next access. Rebuilding it
+        # eagerly on every construction/copy is pure overhead on the simulation's hot path,
+        # since ``grouped_data`` is not read during a simulation run.
+        self._grouped_data = None
+
+    @property
+    def grouped_data(self):
+        """The dataframe grouped by ``group_by``, built lazily and cached on first access."""
+        if self._grouped_data is None and self.group_by is not None:
+            self._grouped_data = self._data.groupby(self.group_by)
+        return self._grouped_data
+
+    @grouped_data.setter
+    def grouped_data(self, grouped_data):
+        self._grouped_data = grouped_data
+
+    def copy(self) -> "OutcomeTable":
+        """Return a deep copy of this table.
+
+        Copies the underlying typed arrays directly (via ``DataFrame.copy``) rather than
+        re-parsing Python lists and datetimes the way ``OutcomeMatrix.create_table`` does, which
+        makes it far cheaper than reconstructing the table from scratch.
+        """
+        return OutcomeTable(self._data.copy(deep=True), self.group_by)
+
     def increment(self, column: str, filter_columns: dict | None = None, amount: float | int = 1):
         """Increment the value of a column in the table.
 
@@ -36,27 +64,26 @@ class OutcomeTable:
             column: The column to increment.
             filter_columns: A dictionary of columns to filter by.
             amount: The amount to increment the column by.
-            
+
+        .. note::
+
+            When ``group_by`` is set, ``grouped_data`` is *not* rebuilt here. Because
+            ``increment`` mutates ``self.data`` in place and only touches value columns (never the
+            grouping keys or the row set), the existing ``grouped_data`` object still references the
+            same underlying frame and reflects the updated values via ``get_group``. Rebuilding the
+            groupby on every call was a large, unnecessary cost on the simulation's hottest path.
         """
 
         if filter_columns is not None:
-            # f = "".join(
-            #     [
-            #         f"({key} == '{value}') & " if isinstance(value, (str, dt.datetime)) else
-            #         f"({key} == {value}) & "
-            #         for key, value in filter_columns.items()]
-            # )[:-3]  # Remove the last '&'
-            f = " & ".join(
-                f"({key} == @{key})"
-                for key in filter_columns
-            )
-            df_filtered = self.data.query(f, local_dict=filter_columns)
-            self.data.loc[df_filtered.index, column] += amount
+            # Build a boolean mask directly instead of parsing a ``DataFrame.query`` string
+            # (numexpr) on every call. ``filter_columns`` uniquely identifies the row(s) to update.
+            mask = None
+            for key, value in filter_columns.items():
+                column_mask = self.data[key] == value
+                mask = column_mask if mask is None else (mask & column_mask)
+            self.data.loc[mask, column] += amount
         else:
             self.data[column] += amount
-
-        if self.group_by is not None:
-            self.grouped_data = self.data.groupby(self.group_by)
 
     def combine(self, outcome_table: "OutcomeTable", columns: list[str]):
         """Combine two outcome tables via summation.
@@ -102,8 +129,7 @@ class OutcomeTable:
                 axis=1
             )
             df.drop(columns=[f"{column}_x", f"{column}_y"], inplace=True)
-        self.data = df
-        self.grouped_data = self.data.groupby(self.group_by)
+        self.data = df  # invalidates the cached ``grouped_data`` (rebuilt lazily on access)
 
     def get(self, columns: str | list[str], **kwargs) -> float | int | pd.Series | pd.DataFrame:
         """Get the value of a column in the table.
@@ -677,6 +703,23 @@ class OutcomeMatrix:
         )
         table = OutcomeTable(df, group_by)
         return table
+
+    def copy(self) -> "OutcomeMatrix":
+        """Return a copy of this outcome matrix with independent, freshly-copied tables.
+
+        This lets each simulated agent get its own zero-initialized outcome matrix by copying a
+        shared template, instead of rebuilding all ~17 tables from scratch via ``create_table``
+        (Cartesian product + DataFrame parsing) for every agent. The scalar attributes
+        (timepoints, ``max_age``, ``value_columns`` etc.) are shared by reference since they are
+        never mutated; only the ``OutcomeTable`` s are deep-copied.
+        """
+        new = OutcomeMatrix.__new__(OutcomeMatrix)
+        for attribute, value in self.__dict__.items():
+            if isinstance(value, OutcomeTable):
+                setattr(new, attribute, value.copy())
+            else:
+                setattr(new, attribute, value)
+        return new
 
     def combine(self, outcome_matrix: "OutcomeMatrix"):
         """Combine two outcome matrices via summation.
