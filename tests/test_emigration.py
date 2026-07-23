@@ -51,14 +51,14 @@ def test_emigration_constructor(
             0
         ),
         (
-            dt.datetime(2020, 1, 1),
-            dt.datetime(2023, 1, 1),
-            99,
+            dt.datetime(2000, 1, 1),
+            dt.datetime(2003, 1, 1),
+            73,
             "M",
             "BC",
-            "M2",
-            42400,
-            43800
+            "past",
+            160,
+            190
         ),
     ]
 )
