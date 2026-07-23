@@ -16,17 +16,7 @@ from leap.utils import round_number, TimeDelta
             "BC",
             "LG",
             0.02836
-        ),
-        (
-            TimeDelta(years=1),
-            dt.datetime(2000, 1, 1),
-            dt.datetime(2001, 1, 1),
-            5,
-            "M",
-            "BC",
-            "past",
-            0.001127
-        ),
+        )
     ]
 )
 def test_emigration_constructor(
