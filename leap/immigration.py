@@ -46,7 +46,7 @@ class Immigration:
         * ``prop_immigrants_timepoint``: The proportion of immigrants for a given age and sex
           relative to the total number of immigrants for a given timepoint and projection scenario.
 
-        See ``processed_data/migration/migration_table_{province}_{projection_scenario}.csv``.
+        See ``processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv``.
         """
         return self._table
 
@@ -62,7 +62,7 @@ class Immigration:
         max_age: int,
         time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
-        """Load the data from ``processed_data/migration/migration_table_{province}_{projection_scenario}.csv``.
+        """Load the data from ``migration_table_{province}_{projection_scenario}.csv``.
 
         Args:
             min_timepoint: The timepoint for the data to start at. Must be between ``2001-2068``
