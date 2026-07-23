@@ -5,7 +5,7 @@ from leap.utils import round_number, TimeDelta
 
 
 @pytest.mark.parametrize(
-    "time_delta, min_timepoint, timepoint, age, sex, province, population_growth_type, value",
+    "time_delta, min_timepoint, timepoint, age, sex, province, projection_scenario, value",
     [
         (
             TimeDelta(years=1),
