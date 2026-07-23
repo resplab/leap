@@ -1000,7 +1000,14 @@ Solving for :math:`\Delta n_{\text{migration}}` gives us the net migration durin
 
 
 
+4. Compute Probability of Emigration
+--------------------------------------
 
+.. math::
+
+    p_{\text{emigration}}(x,\ t; s) = \dfrac{\Delta n_{\text{migration}}(x,\ t; s)}{
+      \ell(x,\ t; s)
+    }
 
 
 
