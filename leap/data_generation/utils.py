@@ -3,7 +3,7 @@ import numpy as np
 import datetime as dt
 import argparse
 import itertools
-from leap.utils import TimeDelta, date_range, PROVINCE_MAP
+from leap.utils import date_range, TimeDelta, PROVINCE_MAP, Age
 from leap.logger import get_logger
 from typing import Optional, Tuple, List, Callable, Dict, Any, Literal
 
@@ -481,5 +481,30 @@ def interpolate(
 
     return df
 
-    
 
+def split_ages(
+    df: pd.DataFrame, time_delta: TimeDelta, time_delta_od: TimeDelta, cols_divide: List[str]
+) -> pd.DataFrame:
+    """Split the age groups in the ``age`` column into finer age groups based on the time delta.
+    
+    Args:
+        df: A Pandas dataframe containing an ``age`` column.
+        time_delta: The time delta to split the age groups by, e.g. 1 year, 5 years, etc.
+        time_delta_od: The original time delta of the data, i.e. the time delta that the data was
+            originally collected at.
+        cols_divide: A list of column names whose values should be divided proportionally to the
+            age groups.
+    
+    Returns:
+        A Pandas dataframe with the age groups in the ``age`` column split into finer age groups.
+    """
+
+    n_intervals = time_delta_od // time_delta
+    df = df.loc[
+        df.index.repeat(n_intervals)
+    ].reset_index(drop=True)
+    df["age"] = df["age"] + np.arange(len(df)) % n_intervals / n_intervals
+    df["age"] = [Age(value=x) for x in df["age"]]
+    for col in cols_divide:
+        df[col] = df[col] / n_intervals
+    return df

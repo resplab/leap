@@ -1,30 +1,32 @@
 import pytest
 import datetime as dt
 from leap.emigration import Emigration
-from leap.utils import round_number
+from leap.utils import round_number, TimeDelta
 
 
 @pytest.mark.parametrize(
-    "min_timepoint, timepoint, age, sex, province, projection_scenario, value",
+    "time_delta, min_timepoint, timepoint, age, sex, province, projection_scenario, value",
     [
         (
-            dt.datetime(2024, 1, 1),
-            dt.datetime(2025, 1, 1),
-            89,
-            "F",
+            TimeDelta(years=1),
+            dt.datetime(2000, 1, 1),
+            dt.datetime(2001, 1, 1),
+            5,
+            "M",
             "BC",
-            "LG",
-            0.02836
-        ),
+            "past",
+            0.001127
+        )
     ]
 )
 def test_emigration_constructor(
-    min_timepoint, timepoint, age, sex, province, projection_scenario, value
+    time_delta, min_timepoint, timepoint, age, sex, province, projection_scenario, value
 ):
     emigration = Emigration(
         min_timepoint=min_timepoint,
         province=province,
-        projection_scenario=projection_scenario
+        projection_scenario=projection_scenario,
+        time_delta=time_delta
     )
 
     df = emigration.table.get_group((timepoint))
@@ -49,14 +51,14 @@ def test_emigration_constructor(
             0
         ),
         (
-            dt.datetime(2020, 1, 1),
-            dt.datetime(2023, 1, 1),
-            99,
+            dt.datetime(2000, 1, 1),
+            dt.datetime(2003, 1, 1),
+            73,
             "M",
             "BC",
-            "M2",
-            42400,
-            43800
+            "past",
+            160,
+            190
         ),
     ]
 )
@@ -69,7 +71,8 @@ def test_emigration_compute_probability(
     whether the agent emigrates in a given timepoint. This is computed using the binomial distribution.
     For the purposes of testing, we will run the method 100,000 times and check that the number of
     emigrants falls within a certain range. Please see
-    ``processed_data/migration/migration_table.csv`` for the corresponding values.
+    ``processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv``
+    for the corresponding values.
     """
 
     emigration = Emigration(

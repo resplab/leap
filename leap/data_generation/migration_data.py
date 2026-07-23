@@ -1,255 +1,476 @@
 import pandas as pd
 import numpy as np
-from leap.utils import get_data_path, TimeDelta, get_time_delta_tag
+import datetime as dt
+import plotly.express as px
+import pathlib
+from typing import Dict
+from leap.utils import get_data_path, get_time_delta_tag, TimeDelta, DATE_FORMAT
 from leap.logger import get_logger
+from leap.data_generation.utils import get_parser, split_ages, CENSUS_TIMEPOINT
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-STARTING_YEAR = 2000
-STARTING_YEAR_PROJ = 2021
-MAX_YEAR = 2065
+MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
+MAX_TIMEPOINT = dt.datetime(2065, 1, 1)
 PROVINCES = ["CA", "BC"]
 TIME_DELTA_OD = TimeDelta(years=1) # migration data is generated at annual resolution
 
 
-def get_prev_year_population(
-    df: pd.DataFrame, sex: str, year: int, age: int, min_year: int, min_age: int
-) -> pd.Series:
-    """Get the age, sex, probability of death, and population for the previous year.
-
-    Args:
-        df: A dataframe with the following columns:
-
-            * ``year``: The calendar year.
-            * ``sex``: One of ``M`` = male, ``F`` = female.
-            * ``age``: The integer age.
-            * ``N``: The population for a given year, age, sex, province, and projection scenario.
-            * ``prob_death``: The probability that a person in the given year, age, sex,
-              province, and projection scenario will die within the year.
-
-        sex: One of ``F`` = female, ``M`` = male.
-        year: The calendar year.
-        age: The integer age.
-        min_year: The minimum year in the dataframe.
-        min_age: The minimum age in the dataframe.
-
-    Returns:
-        The age, sex, probability of death, and population for the previous year.
-    """
-    if year == min_year or age == min_age:
-        return pd.Series(
-            [np.nan, np.nan, np.nan, np.nan],
-            index=["year_prev", "age_prev", "n_prev", "prob_death_prev"]
-        )
-    else:
-        return df.loc[
-            (df["sex"] == sex) & 
-            (df["year"] == year - 1) & 
-            (df["age"] == age - 1)
-        ][["year", "age", "N", "prob_death"]].iloc[0].rename({
-            "year": "year_prev",
-            "age": "age_prev",
-            "N": "n_prev",
-            "prob_death": "prob_death_prev"
-        })
-    
-
 def get_delta_n(n: float, n_prev: float, prob_death: float) -> float:
-    """Get the population change due to migration for a given age and sex in a single year.
+    """Get the population change due to migration for a given age and sex in a single time interval.
 
     Args:
-        n: The number of people living in Canada for a single age, sex, year, province, and
+        n: The number of people living in Canada for a single age, sex, timepoint, province, and
             projection scenario.
-        n_prev: The number of people living in Canada in the previous year for the same
+        n_prev: The number of people living in Canada in the previous time interval for the same
             age, sex, province, and projection scenario as defined for ``n``.
             So if ``n`` is the number of females aged ``10`` in the year
             ``2020``, ``n_prev`` is the number of females aged ``9`` in the year ``2019``.
-        prob_death: The probability that a person with a given age and sex in a given
-            year will die between the previous year and this year. So if the person is
+        prob_death: The probability that a person with a given age and sex at a given
+            timepoint will die between the previous timepoint and this timepoint. So if the person is
             a female aged ``10`` in ``2020``, ``prob_death`` is the probability that a
             female aged ``9`` in ``2019`` will die by the age of ``10``.
 
     Returns:
-        The change in population for a given year, age, and sex due to migration.
+        The change in population for a given timepoint, age, and sex due to migration.
     """
     return n - n_prev * (1 - prob_death)
 
 
-def load_migration_data() -> pd.DataFrame:
+def convert_age_to_int(
+    df: pd.DataFrame,
+    agg: Dict[str, str],
+    groupby_cols: list[str]
+) -> pd.DataFrame:
+    """Convert age values to integer years.
+    
+    Args:
+        df: A dataframe containing an ``age`` column with age values which may be non-integer
+            years.
+        agg: A dictionary specifying the aggregation method to use for other columns when
+            grouping by integer age. The keys should be the column names, and the values should be
+            the aggregation method to use for that column, e.g. ``"sum"`` or ``"mean"``.
+        groupby_cols: The columns to group by when converting age to integer. Should not include
+            the ``age`` column, but should include all other columns which are needed to uniquely
+            identify rows after grouping by integer age.
+
+    Returns:
+        A dataframe with the same columns as the input dataframe, but with the ``age`` column
+        converted to integer years. The values in the other columns are aggregated according to the
+        specified aggregation methods when grouping by integer age.
+    """
+    # Convert the age back to integer
+    df["age_int"] = df["age"].apply(lambda x: x.years)
+    df = df.groupby(
+        groupby_cols + ["age_int"],
+        as_index=False
+    ).agg(agg)
+    df.rename(columns={"age_int": "age"}, inplace=True)
+    return df
+
+
+def load_mortality_data(time_delta: TimeDelta) -> pd.DataFrame:
+    """Load the mortality data for the given time delta.
+
+    Args:
+        time_delta: The duration of time between subsequent data points.
+    
+    Returns:
+        A dataframe with the following columns:
+
+        * ``timepoint``: The timepoint which the data applies to.
+        * ``province``: A string indicating the 2-letter province abbreviation, e.g. ``"BC"``.
+          For all of Canada, set province to ``"CA"``.
+        * ``age``: The integer age.
+        * ``sex``: One of ``M`` = male, ``F`` = female.
+        * ``prob_death``: The probability that a person with a given age and sex at a
+          given timepoint will die between the previous timepoint and this timepoint.
+    """
+    time_delta_tag = get_time_delta_tag(time_delta)
+
+    dfs = []
+    for file_path in get_data_path(f"processed_data/{time_delta_tag}/death").glob("life_table_*.csv"):
+        logger.info(f"Loading mortality data from {file_path}")
+        df = pd.read_csv(file_path, parse_dates=["timepoint"])
+        dfs.append(df)
+
+    life_table = pd.concat(dfs, ignore_index=True)
+
+    life_table = life_table.loc[life_table["timepoint"] >= MIN_TIMEPOINT]
+    life_table = life_table[["province", "projection_scenario", "timepoint", "sex", "age", "prob_death"]]
+    life_table.sort_values(["province","projection_scenario", "timepoint", "sex", "age"], inplace=True)
+
+    if time_delta <= TimeDelta(years=1):
+        life_table = split_ages(life_table, time_delta, TimeDelta(years=1), [])
+
+    return life_table
+
+
+def load_population_data(time_delta: TimeDelta) -> pd.DataFrame:
+    """Load the population data for the given time delta.
+
+    Args:
+        time_delta: The duration of time between subsequent data points.
+    
+    Returns:
+        A dataframe with the following columns:
+
+        * ``timepoint``: The timepoint which the data applies to.
+        * ``province``: A string indicating the 2-letter province abbreviation, e.g. ``"BC"``.
+          For all of Canada, set province to ``"CA"``.
+        * ``age``: The integer age.
+        * ``sex``: One of ``M`` = male, ``F`` = female.
+        * ``n``: The number of people living in Canada for a single age, sex, timepoint, province,
+          and projection scenario.
+        * ``projection_scenario``: The projection scenario.
+    """
+    logger.info("Loading initial population data from CSV file...")
+    time_delta_tag = get_time_delta_tag(time_delta)
+    df = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/birth/initial_population.csv"),
+        parse_dates=["timepoint"]
+    )
+
+    # Select only the data for timepoints after the min timepoint
+    df = df.loc[df["timepoint"] >= MIN_TIMEPOINT]
+
+    df = df[["province", "projection_scenario", "timepoint", "age",  "n_age", "prop_male"]]
+
+    # Get the total number of M / F for each year, age, and projection scenario
+    df["prop_female"] = 1 - df["prop_male"]
+    df.rename(columns={"prop_female": "F", "prop_male": "M"}, inplace=True)
+    df = df.melt(
+        id_vars=["timepoint", "age", "province", "projection_scenario", "n_age"],
+        value_vars=["M", "F"],
+        var_name="sex",
+        value_name="prop"
+    )
+    df["n"] = (df["n_age"] * df["prop"])
+    df.drop(columns=["n_age", "prop"], inplace=True)
+
+    df.sort_values(["province", "projection_scenario", "timepoint", "sex", "age"], inplace=True)
+
+    if time_delta <= TimeDelta(years=1):
+        df = split_ages(df, time_delta, TimeDelta(years=1), ["n"])
+
+    return df
+
+
+def load_migration_data(
+    df_population: pd.DataFrame,
+    life_table: pd.DataFrame,
+    time_delta: TimeDelta
+) -> pd.DataFrame:
     """Generate migration data for the given provinces and years.
+
+    Args:
+        df_population: A dataframe containing the population data. Must have columns:
+            * ``timepoint (dt.datetime)``: The given timepoint.
+            * ``province (str)``: The 2-letter province ID, e.g. ``BC``.
+            * ``age (int)``: The integer age.
+            * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+            * ``projection_scenario (str)``: The projection scenario abbreviation.
+            * ``n (float)``: The number of people living in Canada for a single age, sex, timepoint,
+              province, and projection scenario.
+        life_table: A dataframe containing the life table data. Must have columns:
+            * ``timepoint (dt.datetime)``: The given timepoint.
+            * ``province (str)``: The 2-letter province ID, e.g. ``BC``.
+            * ``age (int)``: The integer age.
+            * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+            * ``prob_death (float)``: The probability that a person with a given age and sex at a
+              given timepoint will die between the previous timepoint and this timepoint.
+        time_delta: The duration of time between subsequent data points.
 
     Returns:
         A dataframe with the following columns:
 
-        * ``year``: The calendar year.
+        * ``timepoint``: The timepoint which the data applies to.
         * ``province``: A string indicating the 2-letter province abbreviation, e.g. ``"BC"``.
           For all of Canada, set province to ``"CA"``.
         * ``sex``: One of ``M`` = male, ``F`` = female.
         * ``age``: The integer age.
         * ``projection_scenario``: The projection scenario.
-        * ``delta_n``: The signed change in population for a given year, age, sex, province, and
+        * ``delta_n``: The signed change in population for a given timepoint, age, sex, province, and
           projection scenario due to net migration. Positive values indicate net immigration;
           negative values indicate net emigration.
         * ``prop_migrants_birth``: The signed proportion of ``delta_n`` relative to the total
-          number of births in that year for the given province and projection scenario.
+          number of births in that time interval for the given province and projection scenario.
           Positive = net immigration, negative = net emigration.
-        * ``prop_immigrants_year``: For cells where ``delta_n > 0``, the proportion of immigrants
-          for this age and sex relative to the total number of immigrants in that year. Zero for
-          emigration cells. Denominator includes only immigration cells.
-        * ``prop_emigrants_year``: For cells where ``delta_n < 0``, the proportion of emigrants
-          for this age and sex relative to the total number of emigrants in that year. Zero for
-          immigration cells. Denominator includes only emigration cells.
+        * ``prop_immigrants_timepoint``: For cells where ``delta_n > 0``, the proportion of immigrants
+          for this age and sex relative to the total number of immigrants in that time interval.
+          Zero for emigration cells. Denominator includes only immigration cells.
+        * ``prop_emigrants_timepoint``: For cells where ``delta_n < 0``, the proportion of emigrants
+          for this age and sex relative to the total number of emigrants in that time interval.
+          Zero for immigration cells. Denominator includes only emigration cells.
         * ``prob_emigration``: For cells where ``delta_n < 0``, the per-person probability of
           emigrating (``abs(delta_n) / N``). Zero for immigration cells.
 
     """
-    logger.info("Loading initial population data from CSV file...")
-    df_population = pd.read_csv(
-        get_data_path("processed_data/birth/initial_population.csv")
+
+    # Join the mortality data to the population data
+    logger.info("Joining mortality data to population data...")
+    df = pd.merge(
+        df_population,
+        life_table,
+        on=["province", "projection_scenario", "timepoint", "sex", "age"],
+        how="left"
     )
-    logger.info("Loading mortality data from CSV file...")
-    life_table = pd.DataFrame({
-        "province": [],
-        "projection_scenario": [],
-        "timepoint": [],
-        "age": np.array([], dtype=int),
-        "sex": [],
-        "prob_death": np.array([], dtype=float)
-    })
-    time_delta_tag = get_time_delta_tag(TIME_DELTA_OD)
-    for file_path in get_data_path(f"processed_data/{time_delta_tag}/death").glob("life_table_*.csv"):
-        df = pd.read_csv(file_path, parse_dates=["timepoint"])
-        life_table = pd.concat([life_table, df], axis=0)
 
-    df_migration = pd.DataFrame({
-        "year": np.array([], dtype=int),
-        "province": [],
-        "age": np.array([], dtype=int),
-        "sex": [],
-        "projection_scenario": [],
-        "delta_n": [],
-        "prop_migrants_birth": [],
-        "prop_immigrants_year": [],
-        "prop_emigrants_year": [],
-        "prob_emigration": []
-    })
-
-    for province in PROVINCES:
-        logger.info(f"Processing migration data for province {province}...")
-
-        # Select only the data for the given province and the years after the starting year
-        df = df_population.loc[
-            (df_population["year"] >= STARTING_YEAR) &
-            (df_population["province"] == province)
-        ]
-        df = df[["year", "age", "province", "n_age", "prop_male", "projection_scenario"]]
-
-        # Get the total number of M / F for each year, age, and projection scenario
-        df_male = df.copy()
-        df_female = df.copy()
-        df_male["N"] = df_male.apply(
-            lambda x: int(x["n_age"] * x["prop_male"]), axis=1
+    if df_population.shape[0] != df.shape[0]:
+        raise ValueError(
+            f"Population data and life table data do not have the same number of rows after merging. "
+            f"Population data has {df_population.shape[0]} rows; life table has {life_table.shape[0]} rows; "
+            f"merged data has {df.shape[0]} rows."
         )
-        df_male["sex"] = ["M"] * df_male.shape[0]
-        df_female["N"] = df_female.apply(
-            lambda x: int(x["n_age"] * (1 - x["prop_male"])), axis=1
-        )
-        df_female["sex"] = ["F"] * df_female.shape[0]
-        df = pd.concat([df_male, df_female], axis=0)
-        df.drop(columns=["n_age", "prop_male"], inplace=True)
 
-        # Get the list of projection scenarios, excluding "past"
-        projection_scenarios = df.loc[df["projection_scenario"] != "past", "projection_scenario"].unique()
-        min_year = df["year"].min()
-        min_age = 0
+    # get the number of births in each year
+    df_birth = df.loc[df["age"] == 0]
+    grouped_df = df_birth.groupby(["timepoint", "province", "projection_scenario"])
+    df_birth["n_birth"] = grouped_df.transform("sum")["n"]
+    df_birth = df_birth.loc[
+        df_birth["sex"] == "F",
+        ["province", "projection_scenario", "timepoint", "n_birth"]
+    ]
 
-        for projection_scenario in projection_scenarios:
-            logger.info(f"Projection scenario: {projection_scenario}")
+    # get the previous timepoint's cohort for each entry
+    df["age_prev"] = df["age"] - time_delta.total_years()
+    df["timepoint_prev"] = df["timepoint"].apply(
+        lambda x: x - time_delta
+    )
 
-            # select only the current projection scenario and the past projection scenario
-            df_proj = df.loc[
-                (df["projection_scenario"].isin(["past", projection_scenario])) &
-                ~((df["projection_scenario"] == "past") & (df["year"] == STARTING_YEAR_PROJ))
-            ]
+    df_prev = df[
+        ["province", "projection_scenario", "sex", "age", "timepoint", "n", "prob_death"]
+    ].rename(columns={
+        "age": "age_prev",
+        "timepoint": "timepoint_prev",
+        "n": "n_prev",
+        "prob_death": "prob_death_prev"
+    })
 
-            # join to the life table to get death probabilities
-            df_proj = df_proj.merge(
-                life_table, on=["year", "age", "province", "sex"], how="left"
-            )
+    df = df.merge(
+        df_prev,
+        on=["province", "projection_scenario", "sex", "age_prev", "timepoint_prev"],
+        how="left"
+    )
 
-            # get the number of births in each year
-            df_birth = df_proj.loc[df_proj["age"] == 0]
-            grouped_df = df_birth.groupby("year")
-            df_birth["n_birth"] = grouped_df.transform("sum")["N"]
-            df_birth = df_birth.loc[df_birth["sex"] == "F", ["year", "n_birth"]]
+    # remove the missing data
+    df = df.dropna(subset=["n_prev"])
 
-            # get the previous year's cohort for each entry
-            df_proj[["year_prev", "age_prev", "n_prev", "prob_death_prev"]] = df_proj.apply(
-                lambda x: get_prev_year_population(
-                    df_proj, x["sex"], x["year"], x["age"], min_year, min_age
+    # compute the signed population change due to net migration
+    df["delta_n"] = df["n"] - df["n_prev"] * (1 - df["prob_death_prev"])
+
+    # number of migrants
+    df["n_immigrants"] = df["delta_n"].clip(lower=0)
+    df["n_emigrants"] = (-df["delta_n"]).clip(lower=0)
+
+    # add the n_birth column to df
+    df = pd.merge(
+        df, df_birth, on=["province", "projection_scenario", "timepoint"], how="left"
+    )
+
+    # signed proportion relative to births
+    df["prop_migrants_birth"] = df["delta_n"] / df["n_birth"]
+
+    # timepoint proportions with separate denominators for immigration and emigration
+    grouped_df = df.groupby(["timepoint", "province", "projection_scenario"])
+    df["n_immigrants_timepoint"] = grouped_df["n_immigrants"].transform("sum")
+    df["n_emigrants_timepoint"] = grouped_df["n_emigrants"].transform("sum")
+    df["prop_immigrants_timepoint"] = df["n_immigrants"] / df["n_immigrants_timepoint"]
+    df["prop_emigrants_timepoint"] = df["n_emigrants"] / df["n_emigrants_timepoint"]
+    df = df.fillna(0)
+
+    # per-person probability of emigrating
+    df["prob_emigration"] = df["n_emigrants"] / df["n"]
+
+    df = df.drop(columns=["n_prev", "prob_death_prev", "age_prev", "timepoint_prev"])
+
+    return df
+
+
+def generate_migration_data(time_delta: TimeDelta, to_csv: bool = True) -> pd.DataFrame | None:
+    """Generate immigration/emigration data.
+    
+    Args:
+        time_delta: The duration of time between subsequent data points.
+    """
+
+    time_delta_tag = get_time_delta_tag(time_delta)
+
+    # Load the mortality data from the CSV files
+    life_table = load_mortality_data(time_delta)
+
+    # Load the population data from the CSV file
+    df_population = load_population_data(time_delta)
+
+    df_migration = load_migration_data(df_population, life_table, time_delta)
+
+    # Convert the age back to integer
+    df_migration = convert_age_to_int(
+        df_migration.copy(),
+        agg={
+            "delta_n": "sum",
+            "prop_migrants_birth": "mean",
+            "prop_immigrants_timepoint": "mean",
+            "prop_emigrants_timepoint": "mean",
+            "prob_emigration": "mean",
+            "n_immigrants": "sum",
+            "n_emigrants": "sum"
+        },
+        groupby_cols=["province", "projection_scenario", "timepoint", "sex"]
+    )
+
+    df_migration.sort_values(
+        ["province", "projection_scenario","timepoint", "sex",  "age"], inplace=True
+    )
+
+    # Create validation plots for the migration data
+    timepoints = df_migration.loc[df_migration["timepoint"] > CENSUS_TIMEPOINT, "timepoint"].unique()
+    indices = np.arange(0, stop=len(timepoints), step=max(1, len(timepoints) // 4))
+    timepoints = timepoints[indices]
+
+    df = df_migration.loc[df_migration["timepoint"].isin(timepoints)].copy()
+    df = df.melt(
+        id_vars=["age", "sex", "province", "timepoint", "projection_scenario"],
+        value_vars=[
+            "n_immigrants",
+            "n_emigrants",
+            "delta_n",
+            "prop_immigrants_timepoint",
+            "prop_emigrants_timepoint",
+            "prob_emigration"
+        ],
+        var_name="series",
+        value_name="value"
+    )
+    for province in df["province"].unique():
+        for sex in df["sex"].unique():
+            plot(
+                df=df.loc[
+                    (df["series"].isin(["n_immigrants", "n_emigrants", "delta_n"])) &
+                    (df["province"] == province) &
+                    (df["sex"] == sex)
+                ],
+                y="value",
+                ylabel="N",
+                color="series",
+                title=f"Net Migration, Sex = {sex}, Province = {province}",
+                file_path=get_data_path(
+                    f"data_generation/figures/{time_delta_tag}/migration/delta_n_{province}_{sex}.png",
+                    mkdirs=True
                 ),
-                axis=1
+                height=5000,
+                width=3000
             )
-
-            # remove the missing data
-            df_proj = df_proj.dropna(subset=["n_prev"])
-
-            # compute the signed population change due to net migration
-            df_proj["delta_n"] = df_proj.apply(
-                lambda x: get_delta_n(x["N"], x["n_prev"], x["prob_death_prev"]), axis=1
+            plot(
+                df=df.loc[
+                    (df["series"].isin(
+                        ["prop_immigrants_timepoint", "prop_emigrants_timepoint", "prob_emigration"]
+                    )) &
+                    (df["province"] == province) &
+                    (df["sex"] == sex)
+                ],
+                y="value",
+                ylabel="Proportion",
+                color="series",
+                title=f"Migration Proportions, Sex = {sex}, Province = {province}",
+                file_path=get_data_path(
+                    f"data_generation/figures/{time_delta_tag}/migration/proportions_{province}_{sex}.png",
+                    mkdirs=True
+                ),
+                height=5000,
+                width=3000
             )
+    
+    df_migration.drop(
+        columns=["n_immigrants", "n_emigrants"],
+        inplace=True
+    )
 
-            # add the n_birth column to df_proj
-            df_proj = pd.merge(df_proj, df_birth, on="year", how="left")
-
-            # signed proportion relative to births
-            df_proj["prop_migrants_birth"] = df_proj["delta_n"] / df_proj["n_birth"]
-
-            # year proportions with separate denominators for immigration and emigration
-            df_proj["n_immigrants_year"] = df_proj.groupby("year")["delta_n"].transform(
-                lambda x: x.clip(lower=0).sum()
+    # Save the migration data to CSV files, one for each province
+    if to_csv:
+        grouped_df = df_migration.groupby(["province", "projection_scenario"])
+        for group_name, df in grouped_df:
+            province, projection_scenario = group_name
+            file_path = get_data_path(
+                f"processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv",
+                mkdirs=True
             )
-            df_proj["n_emigrants_year"] = df_proj.groupby("year")["delta_n"].transform(
-                lambda x: (-x).clip(lower=0).sum()
-            )
-            df_proj["prop_immigrants_year"] = df_proj.apply(
-                lambda x: x["delta_n"] / x["n_immigrants_year"]
-                    if x["delta_n"] > 0 and x["n_immigrants_year"] > 0 else 0.0,
-                axis=1
-            )
-            df_proj["prop_emigrants_year"] = df_proj.apply(
-                lambda x: -x["delta_n"] / x["n_emigrants_year"]
-                    if x["delta_n"] < 0 and x["n_emigrants_year"] > 0 else 0.0,
-                axis=1
-            )
-
-            # per-person probability of emigrating
-            df_proj["prob_emigration"] = df_proj.apply(
-                lambda x: -x["delta_n"] / x["N"] if x["delta_n"] < 0 and x["N"] > 0 else 0.0,
-                axis=1
-            )
-
-            df_migration_proj = df_proj[[
-                "year", "province", "age", "sex", "projection_scenario",
-                "delta_n", "prop_migrants_birth",
-                "prop_immigrants_year", "prop_emigrants_year", "prob_emigration"
-            ]].copy()
-
-            # convert the "past" projection scenario to the given projection scenario
-            df_migration_proj["projection_scenario"] = projection_scenario
-
-            df_migration = pd.concat([df_migration, df_migration_proj], axis=0)
-
-    return df_migration
+            logger.info(f"Saving data to {file_path}")
+            df.to_csv(file_path, index=False, date_format=DATE_FORMAT)
+    else:
+        return df_migration
 
 
-def generate_migration_data():
-    df_migration = load_migration_data()
-    file_path = get_data_path("processed_data/migration") / "migration_table.csv"
-    logger.info(f"Saving data to {file_path}")
-    df_migration.to_csv(file_path, index=False)
+def plot(
+    df: pd.DataFrame,
+    y: str,
+    color: str,
+    title: str = "",
+    ylabel: str = "",
+    file_path: pathlib.Path | None = None,
+    width: int = 2000,
+    height: int = 1500
+):
+    """Plot the migration data for validation.
+    
+    Args:
+        df: A dataframe containing the life table data. Must have columns:
+
+            * ``timepoint (dt.datetime)``: The given timepoint.
+            * ``province (str)``: The 2-letter province ID, e.g. ``BC``.
+            * ``age (int)``: The integer age.
+            * ``sex (str)``: One of ``M`` = male, ``F`` = female.
+            * ``projection_scenario (str)``: The projection scenario abbreviation.
+
+        y: The name of the column in the dataframe which will be plotted as the ``y`` data.
+        color: The name of the column in the dataframe which will be used to color the data.
+        title: The title of the plot.
+        ylabel: The label for the y-axis.
+        file_path: The path to save the plot to.
+        width: The width of the plot.
+        height: The height of the plot.
+    """
+
+    fig = px.line(
+        df.loc[df["province"].isin(["BC", "CA"])].dropna(),
+        x="age",
+        y=y,
+        render_mode="svg",
+        color=color,
+        markers=True,
+        facet_row="projection_scenario",
+        facet_col="timepoint",
+        facet_row_spacing=0.01,  # Shrink vertical gap to 1%
+        facet_col_spacing=0.01,   # Shrink horizontal gap to 1%
+        title=title,
+        labels={y: ylabel}
+    )
+    fig.update_yaxes(matches=None)
+    
+    fig.update_layout(
+        font=dict(size=30),
+        title=dict(font=dict(size=50)),
+        showlegend=True,
+        width=width,
+        height=height,
+        autosize=False,
+        margin=dict(l=120, r=220, t=120, b=120)
+    )
+
+    fig.for_each_annotation(
+        lambda annotation: annotation.update(
+            text=annotation.text.split("=")[-1],
+            font=dict(size=30),
+            textangle=0,
+        )
+    )
+
+    fig.write_image(str(file_path), scale=2, width=width, height=height)
 
 
 if __name__ == "__main__":
-    generate_migration_data()
+    parser = get_parser()
+    args = parser.parse_args()
+    time_delta = TimeDelta(iso_string=args.time_delta)
+    generate_migration_data(time_delta=time_delta)

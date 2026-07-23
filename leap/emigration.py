@@ -42,7 +42,7 @@ class Emigration:
         * ``prob_emigration``: the per-person probability of emigrating. Zero for cells where
           the net population change was non-negative (i.e. no net emigration).
 
-        See ``processed_data/{time_delta_tag}/migration/migration_table.csv``.
+        See ``processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv``.
         """
         return self._table
 
@@ -57,7 +57,7 @@ class Emigration:
         projection_scenario: str,
         time_delta: dt.timedelta | relativedelta | TimeDelta
     ) -> DataFrameGroupBy:
-        """Load the data from ``processed_data/{time_delta_tag}/migration/migration_table.csv``.
+        """Load the data from ``processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv``.
 
         Args:
             min_timepoint: the timepoint for the data to start at. Must be between 2001-2068 (CA)
@@ -86,19 +86,24 @@ class Emigration:
             age, province, sex, and growth scenario.
         """
         time_delta_tag = get_time_delta_tag(time_delta)
-        df = pd.read_csv(
-            get_data_path(f"processed_data/{time_delta_tag}/migration/migration_table.csv"),
-            parse_dates=["timepoint"]
-        )
+
         check_province(province)
         check_projection_scenario(projection_scenario)
+
+        df = pd.read_csv(
+            get_data_path(f"processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv"),
+            parse_dates=["timepoint"]
+        )
+        df_past = pd.read_csv(
+            get_data_path(f"processed_data/{time_delta_tag}/migration/migration_table_{province}_past.csv"),
+            parse_dates=["timepoint"]
+        )
+
+        df = pd.concat([df, df_past], ignore_index=True)
+
         check_timepoint(min_timepoint + time_delta, df[df["province"] == province])
 
-        df = df[
-            (df["timepoint"] >= min_timepoint) &
-            (df["province"] == province) &
-            (df["projection_scenario"] == projection_scenario)
-        ]
+        df = df[(df["timepoint"] >= min_timepoint)]
 
         df.drop(columns=["province", "projection_scenario"], inplace=True)
         grouped_df = df.groupby("timepoint")
