@@ -142,7 +142,6 @@ def test_load_population_data(time_delta):
 def test_load_migration_data(df_populations, life_tables, time_delta):
     df_population = df_populations[time_delta.to_isoformat()]
     life_table = life_tables[time_delta.to_isoformat()]
-    print(df_population)
     df = load_migration_data(df_population, life_table, time_delta)
     assert set(df.columns) == set([
         "province", "projection_scenario", "timepoint", "age", "sex",
@@ -150,15 +149,17 @@ def test_load_migration_data(df_populations, life_tables, time_delta):
         "delta_n", "prop_migrants_birth", "prop_immigrants_timepoint", "prop_emigrants_timepoint",
         "prob_death", "n_immigrants", "n_immigrants_timepoint", "n_emigrants_timepoint"
     ])
+    assert not df.empty
     assert df["province"].isin(list(PROVINCE_MAP.values())).all()
     assert df["projection_scenario"].isin(PROJECTION_SCENARIOS).all()
     assert df["sex"].isin(["F", "M"]).all()
     row = df.loc[
-        (df["timepoint"] == dt.datetime(2026, 1, 1)) &
+        (df["timepoint"] == dt.datetime(2027, 1, 1)) &
         (df["sex"] == "F") &
         (df["age"] == 2.0) &
         (df["province"] == "BC") &
         (df["projection_scenario"] == "LG")
     ]
     assert row["n"].iloc[0] == 1000
+    assert row["delta_n"].iloc[0] == 1000 - 1500 * (1 - 0.5)
 
