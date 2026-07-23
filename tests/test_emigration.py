@@ -9,13 +9,13 @@ from leap.utils import round_number, TimeDelta
     [
         (
             TimeDelta(years=1),
-            dt.datetime(2024, 1, 1),
-            dt.datetime(2025, 1, 1),
-            89,
-            "F",
+            dt.datetime(2000, 1, 1),
+            dt.datetime(2001, 1, 1),
+            5,
+            "M",
             "BC",
-            "LG",
-            0.02836
+            "past",
+            0.001127
         )
     ]
 )
