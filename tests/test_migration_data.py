@@ -6,7 +6,7 @@ import itertools
 from leap.data_generation.migration_data import get_delta_n,  \
     load_population_data, load_migration_data, MIN_TIMEPOINT
 from leap.logger import get_logger
-from leap.utils import TimeDelta, date_range, PROJECTION_SCENARIOS, PROVINCE_MAP
+from leap.utils import TimeDelta, date_range, PROJECTION_SCENARIOS, PROVINCE_MAP, Age
 
 logger = get_logger(__name__)
 
@@ -15,16 +15,16 @@ logger = get_logger(__name__)
 def df_populations():
     time_deltas = [TimeDelta(years=1), TimeDelta(months=1)]
     min_timepoint = dt.datetime(2025, 1, 1)
-    max_timepoint = dt.datetime(2026, 1, 1)
+    max_timepoint = dt.datetime(2027, 1, 1)
     population_dict = {}
     for time_delta in time_deltas:
         n_intervals = TimeDelta(years=1) // time_delta
         df = pd.DataFrame(
             list(itertools.product(
                 ["BC", "CA"],
-                PROJECTION_SCENARIOS,
+                ["past", "LG"],
                 list(date_range(min_timepoint, max_timepoint + time_delta, time_delta)),
-                np.arange(0, 4, 1/n_intervals),
+                [Age(value=x) for x in np.arange(0, 4, 1/n_intervals)],
                 ["F", "M"]
             )),
             columns=[
@@ -32,7 +32,7 @@ def df_populations():
             ]
         )
         df["n"] = np.random.randint(1000, 10000, df.shape[0])
-        df["age"] = df["age"].round(6)
+
         df.loc[
             (df["timepoint"] == max_timepoint) &
             (df["sex"] == "F") &
@@ -43,10 +43,11 @@ def df_populations():
         df.loc[
             (df["timepoint"] == max_timepoint - time_delta) &
             (df["sex"] == "F") &
-            (df["age"] == round(2.0 - time_delta.total_years(), 6)) &
+            (df["age"] == 2.0 - time_delta.total_years()) &
             (df["province"] == "BC") &
             (df["projection_scenario"] == "LG"), "n"
         ] = 1500
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
         key = time_delta.to_isoformat()
         population_dict[key] = df.copy()
     return population_dict
@@ -56,7 +57,7 @@ def df_populations():
 def life_tables():
     time_deltas = [TimeDelta(years=1), TimeDelta(months=1)]
     min_timepoint = dt.datetime(2025, 1, 1)
-    max_timepoint = dt.datetime(2026, 1, 1)
+    max_timepoint = dt.datetime(2027, 1, 1)
     life_table_dict = {}
     for time_delta in time_deltas:
         n_intervals = TimeDelta(years=1) // time_delta
@@ -64,13 +65,12 @@ def life_tables():
             list(itertools.product(
                 ["BC", "CA"],
                 ["past", "LG"],
-                np.arange(0, 4, 1/n_intervals),
+                [Age(value=x) for x in np.arange(0, 4, 1/n_intervals)],
                 ["F", "M"],
                 list(date_range(min_timepoint, max_timepoint + time_delta, time_delta))
             )),
             columns=["province", "projection_scenario", "age", "sex", "timepoint"]
         )
-        life_table["age"] = life_table["age"].round(6)
         life_table["prob_death"] = np.random.sample(life_table.shape[0]) / 1000.0
         life_table.loc[
             (life_table["timepoint"] == max_timepoint - time_delta) &
