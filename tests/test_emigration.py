@@ -58,7 +58,7 @@ def test_emigration_constructor(
             "BC",
             "LG",
             155,
-            190
+            195
         ),
     ]
 )
