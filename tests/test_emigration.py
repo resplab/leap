@@ -14,7 +14,7 @@ from leap.utils import round_number, TimeDelta
             5,
             "M",
             "BC",
-            "past",
+            "LG",
             0.001127
         )
     ]
@@ -56,7 +56,7 @@ def test_emigration_constructor(
             73,
             "M",
             "BC",
-            "past",
+            "LG",
             160,
             190
         ),
