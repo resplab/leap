@@ -95,7 +95,7 @@ class Immigration:
         time_delta_tag = get_time_delta_tag(time_delta)
 
         check_province(province)
-        check_projection_scenario(projection_scenario)
+        check_projection_scenario(projection_scenario, include_past=False)
 
         df = pd.read_csv(
             get_data_path(
