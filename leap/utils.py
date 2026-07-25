@@ -325,19 +325,24 @@ def check_province(province: str):
         ) 
 
 
-def check_projection_scenario(projection_scenario: str):
+def check_projection_scenario(projection_scenario: str, include_past: bool = True):
     """Check if the projection scenario is valid.
 
     Args:
         projection_scenario: The projection scenario abbreviation.
+        include_past: Whether to include the "past" projection scenario.
 
     Raises:
         ValueError: If the projection scenario is not valid.
     """
+    if include_past:
+        projection_scenarios = PROJECTION_SCENARIOS
+    else:
+        projection_scenarios = PROJECTION_SCENARIOS_FUTURE
 
-    if projection_scenario not in PROJECTION_SCENARIOS:
+    if projection_scenario not in projection_scenarios:
         raise ValueError(
-            f"projection_scenario must be one of {PROJECTION_SCENARIOS}, "
+            f"projection_scenario must be one of {projection_scenarios}, "
             f"received {projection_scenario}"
         )
 
