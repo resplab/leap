@@ -57,13 +57,13 @@ def test_immigration_constructor(
     ),
     [
         (
-            dt.datetime(2024, 1, 1),
-            dt.datetime(2025, 1, 1),
+            dt.datetime(2000, 1, 1),
+            dt.datetime(2003, 1, 1),
             111,
             "BC",
             "LG",
             1000,
-            1013
+            383
         )
     ]
 )
