@@ -1010,6 +1010,33 @@ Solving for :math:`\Delta n_{\text{migration}}` gives us the net migration durin
     }
 
 
+5. Compute Proportions of Migrants
+--------------------------------------
+
+We calculate the proportion of migrants of a given age, sex, province, and projection scenario,
+relative to the total number of births in that province and projection scenario:
+
+.. math::
+
+    \text{prop_migrants_birth}(x,\ t; s) = \dfrac{\Delta n_{\text{migration}}(x,\ t; s)}{
+      \sum_{s} \ell(x=0,\ t; s)
+    }
+
+Next we calculate the proportion of immigrants/emigrants of a given age, sex, province, and
+projection scenario at a given timepoint, relative to the total number of immigrants/emigrants in
+that province and projection scenario, at that timepoint:
+
+.. math::
+
+    \text{prop_immigrants_timepoint}(x,\ t; s) = \dfrac{\Delta n_{\text{migration}}(x,\ t; s)}{
+      \sum_{x} \sum_{s} \ell(x,\ t; s)
+    } \quad \text{for } \Delta n_{\text{migration}}(x,\ t; s) > 0
+
+.. math::
+
+    \text{prop_emigrants_timepoint}(x,\ t; s) = \dfrac{\Delta n_{\text{migration}}(x,\ t; s)}{
+      \sum_{x} \sum_{s} \ell(x,\ t; s)
+    } \quad \text{for } \Delta n_{\text{migration}}(x,\ t; s) < 0
 
 
 leap.data\_generation.migration\_data module
