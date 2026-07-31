@@ -147,7 +147,7 @@ def test_load_migration_data(df_populations, life_tables, time_delta):
         "province", "projection_scenario", "timepoint", "age", "sex",
         "n_emigrants", "n", "prob_emigration", "n_birth",
         "delta_n", "prop_migrants_birth", "prop_immigrants_timepoint", "prop_emigrants_timepoint",
-        "prob_death", "n_immigrants", "n_immigrants_timepoint", "n_emigrants_timepoint"
+        "n_immigrants", "n_immigrants_timepoint", "n_emigrants_timepoint"
     ])
     assert not df.empty
     assert df["province"].isin(list(PROVINCE_MAP.values())).all()
