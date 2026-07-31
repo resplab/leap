@@ -543,7 +543,7 @@ class Sex:
 
 class Age:
     """A class to handle the age variable."""
-    __slots__ = ("value", "years", "months")
+    __slots__ = ("value", "years", "months", "tolerance")
 
     def __init__(
         self,
@@ -578,15 +578,16 @@ class Age:
             self.value = self.years + self.months / 12
         else:
             raise ValueError("Either 'value' or 'years' and/or 'months' must be provided.")
+        self.tolerance = 0.083  # Tolerance for comparison, equivalent to 1 month
         
     def __hash__(self):
         return hash((self.years, self.months))
 
     def __eq__(self, age: int | float | Age) -> bool:
         if isinstance(age, Age):
-            return math.isclose(self.value, age.value, abs_tol=0.083)
+            return math.isclose(self.value, age.value, abs_tol=self.tolerance)
         elif isinstance(age, (int, float)):
-            return math.isclose(self.value, age, abs_tol=0.083)
+            return math.isclose(self.value, age, abs_tol=self.tolerance)
         else:
             return False
         
