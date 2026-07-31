@@ -229,10 +229,8 @@ def load_migration_data(
     df_birth = df.loc[df["age"] < 1.0]
     grouped_df = df_birth.groupby(["timepoint", "province", "projection_scenario"])
     df_birth["n_birth"] = grouped_df.transform("sum")["n"]
-    df_birth = df_birth.loc[
-        df_birth["sex"] == "F",
-        ["province", "projection_scenario", "timepoint", "n_birth"]
-    ]
+    df_birth = df_birth[["province", "projection_scenario", "timepoint", "n_birth"]]
+    df_birth.drop_duplicates(inplace=True)
 
     # get the previous timepoint's cohort for each entry
     df["age_prev"] = df["age"] - time_delta.total_years()
