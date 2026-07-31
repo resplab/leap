@@ -226,7 +226,7 @@ def load_migration_data(
         )
 
     # get the total number of births in each time interval, both sexes combined
-    df_birth = df.loc[df["age"] == 0]
+    df_birth = df.loc[df["age"] < 1.0]
     grouped_df = df_birth.groupby(["timepoint", "province", "projection_scenario"])
     df_birth["n_birth"] = grouped_df.transform("sum")["n"]
     df_birth = df_birth.loc[
