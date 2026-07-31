@@ -270,6 +270,22 @@ def load_migration_data(
         df, df_birth, on=["province", "projection_scenario", "timepoint"], how="left"
     )
 
+    df = df.drop(columns=["n_prev", "prob_death_prev", "age_prev", "timepoint_prev"])
+
+
+    # Convert the age back to integer
+    df = convert_age_to_int(
+        df.copy(),
+        agg={
+            "delta_n": "sum",
+            "n_immigrants": "sum",
+            "n_emigrants": "sum",
+            "n_birth": "sum",
+            "n": "sum"
+        },
+        groupby_cols=["province", "projection_scenario", "timepoint", "sex"]
+    )
+
     # signed proportion relative to births
     df["prop_migrants_birth"] = df["delta_n"] / df["n_birth"]
 
@@ -284,7 +300,9 @@ def load_migration_data(
     # per-person probability of emigrating
     df["prob_emigration"] = df["n_emigrants"] / df["n"]
 
-    df = df.drop(columns=["n_prev", "prob_death_prev", "age_prev", "timepoint_prev"])
+    df.sort_values(
+        ["province", "projection_scenario","timepoint", "sex",  "age"], inplace=True
+    )
 
     return df
 
@@ -306,24 +324,6 @@ def generate_migration_data(time_delta: TimeDelta, to_csv: bool = True) -> pd.Da
 
     df_migration = load_migration_data(df_population, life_table, time_delta)
 
-    # Convert the age back to integer
-    df_migration = convert_age_to_int(
-        df_migration.copy(),
-        agg={
-            "delta_n": "sum",
-            "prop_migrants_birth": "mean",
-            "prop_immigrants_timepoint": "mean",
-            "prop_emigrants_timepoint": "mean",
-            "prob_emigration": "mean",
-            "n_immigrants": "sum",
-            "n_emigrants": "sum"
-        },
-        groupby_cols=["province", "projection_scenario", "timepoint", "sex"]
-    )
-
-    df_migration.sort_values(
-        ["province", "projection_scenario","timepoint", "sex",  "age"], inplace=True
-    )
 
     # Create validation plots for the migration data
     timepoints = df_migration.loc[df_migration["timepoint"] > CENSUS_TIMEPOINT, "timepoint"].unique()
