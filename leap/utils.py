@@ -596,33 +596,33 @@ class Age:
         
     def __lt__(self, age: int | float | Age) -> bool:
         if isinstance(age, Age):
-            return self.value < age.value
+            return age.value - self.value > self.tolerance
         elif isinstance(age, (int, float)):
-            return self.value < age
+            return age - self.value > self.tolerance
         else:
             raise TypeError(f"Unsupported type for comparison: {type(age)}")
         
     def __le__(self, age: int | float | Age) -> bool:
         if isinstance(age, Age):
-            return self.value <= age.value
+            return self.value <= age.value + self.tolerance
         elif isinstance(age, (int, float)):
-            return self.value <= age
+            return self.value <= age + self.tolerance
         else:
             raise TypeError(f"Unsupported type for comparison: {type(age)}")
         
     def __gt__(self, age: int | float | Age) -> bool:
         if isinstance(age, Age):
-            return self.value > age.value
+            return self.value > age.value + self.tolerance
         elif isinstance(age, (int, float)):
-            return self.value > age
+            return self.value > age + self.tolerance
         else:
             raise TypeError(f"Unsupported type for comparison: {type(age)}")
         
     def __ge__(self, age: int | float | Age) -> bool:
         if isinstance(age, Age):
-            return self.value >= age.value
+            return self.value >= age.value - self.tolerance
         elif isinstance(age, (int, float)):
-            return self.value >= age
+            return self.value >= age - self.tolerance
         else:
             raise TypeError(f"Unsupported type for comparison: {type(age)}")
         
