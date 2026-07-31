@@ -572,6 +572,9 @@ class Age:
             self.value = value
             self.years = int(value)
             self.months = int(round((value - self.years) * 12))
+            if self.months == 12:
+                self.years += 1
+                self.months = 0
         elif years is not None or months is not None:
             self.years = years if years is not None else 0
             self.months = months if months is not None else 0
