@@ -14,7 +14,9 @@ logger = get_logger(__name__, 20)
 MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
 MAX_TIMEPOINT = dt.datetime(2065, 1, 1)
 PROVINCES = ["CA", "BC"]
-TIME_DELTA_OD = TimeDelta(years=1) # migration data is generated at annual resolution
+
+# Amount of time between data points in the original migration data (1 year)
+TIME_DELTA_OD = TimeDelta(years=1)
 
 
 def get_delta_n(n: float, n_prev: float, prob_death: float) -> float:
@@ -125,12 +127,11 @@ def load_population_data(time_delta: TimeDelta) -> pd.DataFrame:
           and projection scenario.
         * ``projection_scenario``: The projection scenario.
     """
-    logger.info("Loading initial population data from CSV file...")
+
     time_delta_tag = get_time_delta_tag(time_delta)
-    df = pd.read_csv(
-        get_data_path(f"processed_data/{time_delta_tag}/birth/initial_population.csv"),
-        parse_dates=["timepoint"]
-    )
+    file_path = get_data_path(f"processed_data/{time_delta_tag}/birth/initial_population.csv")
+    logger.info(f"Loading initial population data from {file_path}...")
+    df = pd.read_csv(file_path, parse_dates=["timepoint"])
 
     # Select only the data for timepoints after the min timepoint
     df = df.loc[df["timepoint"] >= MIN_TIMEPOINT]
@@ -224,7 +225,7 @@ def load_migration_data(
             f"merged data has {df.shape[0]} rows."
         )
 
-    # get the number of births in each year
+    # get the total number of births in each time interval, both sexes combined
     df_birth = df.loc[df["age"] == 0]
     grouped_df = df_birth.groupby(["timepoint", "province", "projection_scenario"])
     df_birth["n_birth"] = grouped_df.transform("sum")["n"]
