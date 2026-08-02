@@ -278,7 +278,7 @@ def load_migration_data(
             "delta_n": "sum",
             "n_immigrants": "sum",
             "n_emigrants": "sum",
-            "n_birth": "sum",
+            "n_birth": "mean",
             "n": "sum"
         },
         groupby_cols=["province", "projection_scenario", "timepoint", "sex"]
