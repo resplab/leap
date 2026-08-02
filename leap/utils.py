@@ -564,9 +564,9 @@ class Age:
             >>> age.value
             10
 
-            >>> age = Age(5, years=2, months=6)
+            >>> age = Age(years=2, months=6)
             >>> age.value
-            7.5
+            2.5
         """
         if value is not None:
             self.value = value
