@@ -521,6 +521,13 @@ We end up with:
 3. Compute Net Migration
 ------------------------
 
+Let us define the notation:
+
+.. math::
+
+    \theta := \{\text{sex}, \text{province}, \text{projection scenario}\}
+
+
 To obtain the net migration, for anyone of ``age > 0``, we compute the number of people in each age
 group projected to die during that time interval based on the ``prob_death`` column in the
 ``life_table.csv``. Then we calculate the net change in people using the ``n`` column in the
@@ -528,23 +535,23 @@ group projected to die during that time interval based on the ``prob_death`` col
 
 .. math::
 
-    \Delta n_{\text{total}} (x,\ t; s)
-      = \Delta n_{\text{migration}}(x,\ t; s) + \Delta n_{\text{deaths}}(x,\ t; s)
+    \Delta n_{\text{total}} (x,\ t; \theta)
+      = \Delta n_{\text{migration}}(x,\ t; \theta) + \Delta n_{\text{deaths}}(x,\ t; \theta)
 
 Solving for :math:`\Delta n_{\text{migration}}` gives us the net migration during that time interval:
 
 .. math::
 
-    \Delta n_{\text{migration}}(x,\ t; s) &= \textcolor{magenta}{\Delta n(x,\ t; s)_{\text{total}}}
-      - \textcolor{orange}{\Delta n(x,\ t; s)_{\text{deaths}}} \\
+    \Delta n_{\text{migration}}(x,\ t; \theta) &= \textcolor{magenta}{\Delta n(x,\ t; \theta)_{\text{total}}}
+      - \textcolor{orange}{\Delta n(x,\ t; \theta)_{\text{deaths}}} \\
     &= \textcolor{magenta}{
-      \underbrace{\ell(x,\ t; s)}_{\text{no. people alive age $x$ at time } t} - 
-      \underbrace{\ell(x-\Delta t,\ t-\Delta t; s)}_{
+      \underbrace{\ell(x,\ t; \theta)}_{\text{no. people alive age $x$ at time } t} - 
+      \underbrace{\ell(x-\Delta t,\ t-\Delta t; \theta)}_{
         \text{no. people alive age $x-\Delta t$ at previous time } t - \Delta t
       }} \\ 
     &+ \textcolor{orange}{
        \underbrace{
-        \left(\ell(x-\Delta t,\ t-\Delta t; s) \cdot q(x-\Delta t,\ t-\Delta t; s)\right)
+        \left(\ell(x-\Delta t,\ t-\Delta t; \theta) \cdot q(x-\Delta t,\ t-\Delta t; \theta)\right)
       }_{\text{no. deaths age $x - \Delta t$ between $[t - \Delta t, t]$}}
     }
 
@@ -1005,8 +1012,8 @@ Solving for :math:`\Delta n_{\text{migration}}` gives us the net migration durin
 
 .. math::
 
-    p_{\text{emigration}}(x,\ t; s) = \dfrac{\Delta n_{\text{migration}}(x,\ t; s)}{
-      \ell(x,\ t; s)
+    p_{\text{emigration}}(x,\ t; \theta) = \dfrac{\Delta n_{\text{migration}}(x,\ t; \theta)}{
+      \ell(x,\ t; \theta)
     }
 
 
@@ -1018,8 +1025,8 @@ relative to the total number of births in that province and projection scenario:
 
 .. math::
 
-    \text{prop_migrants_birth}(x,\ t; s) = \dfrac{\Delta n_{\text{migration}}(x,\ t; s)}{
-      \sum_{s} \ell(x=0,\ t; s)
+    \text{prop_migrants_birth}(x,\ t; \theta) = \dfrac{\Delta n_{\text{migration}}(x,\ t; \theta)}{
+      \sum_{s} \ell(x=0,\ t; \theta(\text{sex}=s))
     }
 
 Next we calculate the proportion of immigrants/emigrants of a given age, sex, province, and
@@ -1028,15 +1035,15 @@ that province and projection scenario, at that timepoint:
 
 .. math::
 
-    \text{prop_immigrants_timepoint}(x,\ t; s) = \dfrac{\Delta n_{\text{migration}}(x,\ t; s)}{
-      \sum_{x} \sum_{s} \ell(x,\ t; s)
-    } \quad \text{for } \Delta n_{\text{migration}}(x,\ t; s) > 0
+    \text{prop_immigrants_timepoint}(x,\ t; \theta) = \dfrac{\Delta n_{\text{migration}}(x,\ t; \theta)}{
+      \sum_{x} \sum_{s} \ell(x,\ t; \theta(\text{sex}=s))
+    } \quad \text{for } \Delta n_{\text{migration}}(x,\ t; \theta) > 0
 
 .. math::
 
-    \text{prop_emigrants_timepoint}(x,\ t; s) = \dfrac{\Delta n_{\text{migration}}(x,\ t; s)}{
-      \sum_{x} \sum_{s} \ell(x,\ t; s)
-    } \quad \text{for } \Delta n_{\text{migration}}(x,\ t; s) < 0
+    \text{prop_emigrants_timepoint}(x,\ t; \theta) = \dfrac{\Delta n_{\text{migration}}(x,\ t; \theta)}{
+      \sum_{x} \sum_{s} \ell(x,\ t; \theta(\text{sex}=s))
+    } \quad \text{for } \Delta n_{\text{migration}}(x,\ t; \theta) < 0
 
 
 leap.data\_generation.migration\_data module
