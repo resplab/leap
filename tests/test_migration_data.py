@@ -36,14 +36,16 @@ def df_populations():
         df.loc[
             (df["timepoint"] == max_timepoint) &
             (df["sex"] == "F") &
-            (df["age"] == 2.0) &
+            (df["age"] >= 2.0) &
+            (df["age"] < 3.0) &
             (df["province"] == "BC") &
             (df["projection_scenario"] == "LG"), "n"
         ] = 1000
         df.loc[
             (df["timepoint"] == max_timepoint - time_delta) &
             (df["sex"] == "F") &
-            (df["age"] == 2.0 - time_delta.total_years()) &
+            (df["age"] >= Age(2.0 - time_delta.total_years())) &
+            (df["age"] < Age(3.0 - time_delta.total_years())) &
             (df["province"] == "BC") &
             (df["projection_scenario"] == "LG"), "n"
         ] = 1500
@@ -75,7 +77,8 @@ def life_tables():
         life_table.loc[
             (life_table["timepoint"] == max_timepoint - time_delta) &
             (life_table["sex"] == "F") &
-            (life_table["age"] == round(2.0 - time_delta.total_years(), 6)) &
+            (life_table["age"] >= Age(2.0 - time_delta.total_years())) &
+            (life_table["age"] < Age(3.0 - time_delta.total_years())) &
             (life_table["province"] == "BC") &
             (life_table["projection_scenario"] == "LG"), "prob_death"
         ] = 0.5
@@ -160,6 +163,6 @@ def test_load_migration_data(df_populations, life_tables, time_delta):
         (df["province"] == "BC") &
         (df["projection_scenario"] == "LG")
     ]
-    assert row["n"].iloc[0] == 1000
-    assert row["delta_n"].iloc[0] == 1000 - 1500 * (1 - 0.5)
-
+    n_intervals = TimeDelta(years=1) // time_delta
+    assert row["n"].iloc[0] == 1000 * n_intervals
+    assert row["delta_n"].iloc[0] == (1000 - 1500 * (1 - 0.5)) * n_intervals
