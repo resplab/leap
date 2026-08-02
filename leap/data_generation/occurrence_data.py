@@ -414,7 +414,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
         "incidence",
         time_delta,
         max_age=110,
-        min_timepoint=dt.datetime(1999, 1, 1),
+        min_timepoint=MIN_TIMEPOINT,
         max_timepoint=dt.datetime(2066, 12, 31)
     )
     df_prevalence = get_predicted_data(
@@ -422,7 +422,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
         "prevalence",
         time_delta,
         max_age=110,
-        min_timepoint=dt.datetime(1999, 1, 1),
+        min_timepoint=MIN_TIMEPOINT,
         max_timepoint=dt.datetime(2066, 12, 31)
     )
     df = pd.merge(df_incidence, df_prevalence, on=["timepoint", "sex", "age"], how="left")
@@ -430,7 +430,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
         df,
         y="incidence",
         title="Predicted Asthma Incidence per 100 in BC",
-        min_timepoint=dt.datetime(2000, 1, 1),
+        min_timepoint=MIN_TIMEPOINT,
         max_timepoint=dt.datetime(2025, 12, 31),
         time_interval=TimeDelta(years=5),
         max_age=63,
@@ -443,7 +443,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
         df,
         y="prevalence",
         title="Predicted Asthma Prevalence per 100 in BC",
-        min_timepoint=dt.datetime(2000, 1, 1),
+        min_timepoint=MIN_TIMEPOINT,
         max_timepoint=dt.datetime(2025, 12, 31),
         time_interval=TimeDelta(years=5),
         max_age=63,
