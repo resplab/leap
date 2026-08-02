@@ -1006,8 +1006,19 @@ Solving for :math:`\Delta n_{\text{migration}}` gives us the net migration durin
       - 15.0235
 
 
+4. Convert the Age to Integer Years
+--------------------------------------
 
-4. Compute Probability of Emigration
+Next, we convert the age back to integer years, by summing the number of migrants in each age
+interval :math:`[x, x + \Delta x_a)`:
+
+.. math::
+
+    \Delta n_{\text{migration}}(x, \Delta x_a, t; \theta) 
+    = \sum_k \Delta n_{\text{migration}}(x + k \Delta x_b, \Delta x_b, t; \theta)
+
+
+5. Compute Probability of Emigration
 --------------------------------------
 
 .. math::
@@ -1017,7 +1028,7 @@ Solving for :math:`\Delta n_{\text{migration}}` gives us the net migration durin
     }
 
 
-5. Compute Proportions of Migrants
+6. Compute Proportions of Migrants
 --------------------------------------
 
 We calculate the proportion of migrants of a given age, sex, province, and projection scenario,
