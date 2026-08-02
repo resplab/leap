@@ -18,16 +18,16 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-STARTING_TIMEPOINT = dt.datetime(2000, 1, 1)
+MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
 MAX_TIMEPOINT = dt.datetime(2019, 12, 31)
 MAX_AGE = 65
 
 
-def load_asthma_df(starting_timepoint: dt.datetime = STARTING_TIMEPOINT) -> pd.DataFrame:
+def load_asthma_df(min_timepoint: dt.datetime = MIN_TIMEPOINT) -> pd.DataFrame:
     """Load the asthma incidence and prevalence data.
 
     Args:
-        starting_timepoint: The starting date / time for the data. Data before this timepoint will
+        min_timepoint: The starting date / time for the data. Data before this timepoint will
             be excluded from the analysis.
     
     Returns:
@@ -55,8 +55,8 @@ def load_asthma_df(starting_timepoint: dt.datetime = STARTING_TIMEPOINT) -> pd.D
         inplace=True
     )
 
-    # Filter for timepoint >= starting_timepoint
-    df = df.loc[df["timepoint"] >= starting_timepoint]
+    # Filter for timepoint >= min_timepoint
+    df = df.loc[df["timepoint"] >= min_timepoint]
 
     # Age groups are in the format "X-Y" or "80+"
     # Set the age to the average of the age group
@@ -238,7 +238,7 @@ def get_predicted_data(
     time_delta: TimeDelta,
     min_age: int = 3,
     max_age: int = 100,
-    min_timepoint: dt.datetime = STARTING_TIMEPOINT,
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
     max_timepoint: dt.datetime = MAX_TIMEPOINT
 ) -> pd.DataFrame:
     """Get predicted data from a GLM model.
@@ -293,7 +293,7 @@ def plot_occurrence(
     y: str,
     title: str = "",
     file_path: pathlib.Path | None = None,
-    min_timepoint: dt.datetime = STARTING_TIMEPOINT,
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
     max_timepoint: dt.datetime = MAX_TIMEPOINT,
     time_interval: TimeDelta = TimeDelta(years=2),
     max_age: int = 110,
