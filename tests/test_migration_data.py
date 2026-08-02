@@ -3,8 +3,8 @@ import datetime as dt
 import numpy as np
 import pandas as pd
 import itertools
-from leap.data_generation.migration_data import get_delta_n,  \
-    load_population_data, load_migration_data, MIN_TIMEPOINT
+from leap.data_generation.migration_data import get_delta_n,  load_population_data, \
+    load_migration_data
 from leap.logger import get_logger
 from leap.utils import TimeDelta, date_range, PROJECTION_SCENARIOS, PROVINCE_MAP, Age
 
