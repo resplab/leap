@@ -565,7 +565,17 @@ class Timepoint(dt.datetime):
 
     @classmethod
     def from_datetime(cls, timepoint: dt.datetime) -> Timepoint:
-        """Construct a Timepoint instance from a datetime object."""
+        """Construct a Timepoint instance from a datetime object.
+
+        Args:
+            timepoint: A ``dt.datetime`` object to convert into a Timepoint instance.
+        
+        Examples:
+
+            >>> timepoint = Timepoint.from_datetime(dt.datetime(2024, 6, 1, 12, 30))
+            >>> print(timepoint)
+            2024-06-01 12:30:00
+        """
         return cls(
             year=timepoint.year,
             month=timepoint.month,
