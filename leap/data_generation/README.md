@@ -460,14 +460,14 @@ cd LEAP
 python3 leap/data_generation/occurrence_data.py --time-delta P1Y
 ```
 
-This will update the file `leap/processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv`. This file
-contains the predicted 
+This will update the file `leap/processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv`.
+This file contains the predicted asthma incidence / prevalence.
 This will also create 4 figures:
 
-1. `leap/data_generation/figures/asthma_incidence_comparison.png`
-2. `leap/data_generation/figures/asthma_incidence_predicted.png`
-3. `leap/data_generation/figures/asthma_prevalence_comparison.png`
-4. `leap/data_generation/figures/asthma_prevalence_predicted.png`
+1. `leap/data_generation/figures/{time_delta_tag}/occurrence/asthma_incidence_comparison.png`
+2. `leap/data_generation/figures/{time_delta_tag}/occurrence/asthma_incidence_predicted.png`
+3. `leap/data_generation/figures/{time_delta_tag}/occurrence/asthma_prevalence_comparison.png`
+4. `leap/data_generation/figures/{time_delta_tag}/occurrence/asthma_prevalence_predicted.png`
 
 The `--time-delta` argument must be in **ISO 8601** format:
 
