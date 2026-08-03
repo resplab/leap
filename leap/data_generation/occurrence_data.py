@@ -148,7 +148,7 @@ def generate_occurrence_model(
     plot_occurrence(
         df, y=occ_type, title=f"Asthma {occ_type.capitalize()} per 100 in BC",
         file_path=get_data_path(
-            f"data_generation/figures/{time_delta_tag}/asthma_{occ_type}_comparison.png",
+            f"data_generation/figures/{time_delta_tag}/occurrence/asthma_{occ_type}_comparison.png",
             mkdirs=True
         )
     )
@@ -393,10 +393,10 @@ def generate_occurrence_data(time_delta: TimeDelta):
 
     The data is also plotted and saved to the following files:
     
-    * ``data_generation/figures/asthma_incidence_predicted.png``: The predicted asthma
-      incidence per 100 in BC.
-    * ``data_generation/figures/asthma_prevalence_predicted.png``: The predicted asthma
-      prevalence per 100 in BC.
+    * ``data_generation/figures/{time_delta_tag}/occurrence/asthma_incidence_predicted.png``: The
+      predicted asthma incidence per 100 in BC.
+    * ``data_generation/figures/{time_delta_tag}/occurrence/asthma_prevalence_predicted.png``: The
+      predicted asthma prevalence per 100 in BC.
 
     Args:
         time_delta: The duration of time between subsequent timepoints in the data, e.g. 1 month,
@@ -435,7 +435,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
         time_interval=TimeDelta(years=5),
         max_age=63,
         file_path=get_data_path(
-            f"data_generation/figures/{time_delta_tag}/asthma_incidence_predicted.png",
+            f"data_generation/figures/{time_delta_tag}/occurrence/asthma_incidence_predicted.png",
             mkdirs=True
         )
     )
@@ -448,7 +448,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
         time_interval=TimeDelta(years=5),
         max_age=63,
         file_path=get_data_path(
-            f"data_generation/figures/{time_delta_tag}/asthma_prevalence_predicted.png",
+            f"data_generation/figures/{time_delta_tag}/occurrence/asthma_prevalence_predicted.png",
             mkdirs=True
         )
     )
