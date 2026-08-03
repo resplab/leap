@@ -169,7 +169,7 @@ def convert_timepoint_to_numeric(timepoint: dt.datetime) -> float:
     return total_days / 365.25
 
 
-def convert_numeric_to_timepoint(timepoint: float) -> dt.datetime:
+def convert_numeric_to_timepoint(timepoint: float) -> Timepoint:
     """Convert a numeric value to a datetime object.
 
     Args:
