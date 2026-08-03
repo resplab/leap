@@ -540,6 +540,46 @@ class Sex:
             return self._value_bool == value
 
 
+
+class Timepoint(dt.datetime):
+    """A class to handle the timepoint variable."""
+
+    def __new__(
+        cls,
+        year: int,
+        month: int,
+        day: int,
+        hour: int = 0,
+        minute: int = 0,
+        second: int = 0,
+        microsecond: int = 0,
+        tzinfo: dt.tzinfo | None = None,
+        *,
+        fold: int = 0
+    ) -> Timepoint:
+
+        self = super().__new__(
+            cls, year, month, day, hour, minute, second, microsecond, tzinfo, fold=fold
+        )
+        return self
+
+    @classmethod
+    def from_datetime(cls, timepoint: dt.datetime) -> Timepoint:
+        """Construct a Timepoint instance from a datetime object."""
+        return cls(
+            year=timepoint.year,
+            month=timepoint.month,
+            day=timepoint.day,
+            minute=timepoint.minute,
+            second=timepoint.second,
+            microsecond=timepoint.microsecond,
+            tzinfo=timepoint.tzinfo
+        )
+
+    def __hash__(self):
+        return hash((self.year, self.month))
+
+
 def date_range(
     start: dt.datetime, stop: dt.datetime, step: dt.timedelta | relativedelta | TimeDelta
 ) -> Generator[dt.datetime, None, None]:
