@@ -3,7 +3,7 @@ import numpy as np
 import datetime as dt
 import argparse
 import itertools
-from leap.utils import date_range, TimeDelta, PROVINCE_MAP, Age
+from leap.utils import date_range, TimeDelta, Timepoint, PROVINCE_MAP, Age
 from leap.logger import get_logger
 from typing import Optional, Tuple, List, Callable, Dict, Any, Literal
 
@@ -181,7 +181,9 @@ def convert_numeric_to_timepoint(timepoint: float) -> dt.datetime:
     total_seconds = timepoint * 365.25 * 24 * 3600
     time_delta = dt.timedelta(seconds=total_seconds)
 
-    return dt.datetime(year=1, month=1, day=1) + time_delta - dt.timedelta(days=366)  # Subtract 1 year to account for the fact that the first year is 1
+    # Subtract 1 year to account for the fact that the first year is 1
+    timepoint_dt = dt.datetime(year=1, month=1, day=1) + time_delta - dt.timedelta(days=366)  
+    return Timepoint.from_datetime(timepoint_dt)
 
 
 def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float) -> int | list[int]:
