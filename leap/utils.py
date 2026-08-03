@@ -570,6 +570,7 @@ class Timepoint(dt.datetime):
             year=timepoint.year,
             month=timepoint.month,
             day=timepoint.day,
+            hour=timepoint.hour,
             minute=timepoint.minute,
             second=timepoint.second,
             microsecond=timepoint.microsecond,
