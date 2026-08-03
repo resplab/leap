@@ -584,8 +584,8 @@ class Timepoint(dt.datetime):
             minute=timepoint.minute,
             second=timepoint.second,
             microsecond=timepoint.microsecond,
-            tzinfo=timepoint.tzinfo
-        )
+            tzinfo=timepoint.tzinfo,
+            fold=timepoint.fold,
 
     def __hash__(self):
         return hash((self.year, self.month))
