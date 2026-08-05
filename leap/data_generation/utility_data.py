@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 import itertools
 import re
-from leap.utils import get_data_path
+from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
-from leap.data_generation.utils import parse_age_group
+from leap.data_generation.utils import parse_age_group, get_parser
 
 pd.options.mode.copy_on_write = True
 
@@ -251,17 +251,25 @@ def interpolate_eq5d_data(df_utility: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def generate_eq5d_data():
+def generate_eq5d_data(time_delta: TimeDelta):
     """Generate EQ-5D data for ages 0 to 111."""
 
     df_utility_adult = load_eq5d_data()
     df_utility_child = interpolate_eq5d_data(df_utility_adult)
     df_utility = pd.concat([df_utility_child, df_utility_adult], ignore_index=True)
     df_utility.sort_values(by=["sex", "age"], inplace=True)
-    df_utility.to_csv(get_data_path("processed_data/eq5d_canada.csv"), index=False)
+
+    time_delta_tag = get_time_delta_tag(time_delta)
+    df_utility.to_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/eq5d_canada.csv", mkdirs=True),
+        index=False
+    )
     logger.info("EQ-5D data generated and saved to 'processed_data/eq5d_canada.csv'.")
 
 
 if __name__ == "__main__":
-    generate_eq5d_data()
+    parser = get_parser()
+    args = parser.parse_args()
+    time_delta = TimeDelta(iso_string=args.time_delta)
+    generate_eq5d_data(time_delta)
 
