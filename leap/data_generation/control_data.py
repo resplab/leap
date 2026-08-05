@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 import json
-from leap.utils import get_data_path
+from leap.utils import get_data_path, TimeDelta
 from leap.logger import get_logger
 from typing import Tuple
+from leap.data_generation.utils import get_parser
 from leap.data_generation.rutils import ordinal_regression_r
 
 pd.options.mode.copy_on_write = True
@@ -305,6 +306,9 @@ def generate_control_data():
 
 
 if __name__ == "__main__":
+    parser = get_parser()
+    args = parser.parse_args()
+    time_delta = TimeDelta(iso_string=args.time_delta)
     generate_control_data()
 
 
