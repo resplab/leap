@@ -101,9 +101,44 @@ Since our model projects into the future, we would like to be able to extend thi
 ``2019``. Our model also makes predictions at customized age intervals, not 5-year age intervals.
 To obtain these projections, we use a ``Generalized Linear Model (GLM)`` with a
 ``Poisson distribution`` and ``log link function``. Incidence and prevalence are counts of
-people diagnosed with or living with asthma in a given time interval, making the Poisson distribution a
-natural choice. See :doc:`model-statistical-background` for more information on ``GLMs``, including the Poisson
-distribution and log link function.
+people diagnosed with or living with asthma in a given time interval, making the Poisson distribution
+a natural choice. See :doc:`model-statistical-background` for more information on ``GLMs``,
+including the Poisson distribution and log link function.
+
+.. info:: Probability Distribution: Poisson Distribution
+  :collapsible:
+
+
+  When fitting a ``GLM``, first you must choose a distribution for the ``response variable``. In our
+  case, the response variable is the asthma prevalence or incidence. Incidence and prevalence are
+  counts of the number of people diagnosed with asthma and the number of people with asthma,
+  respectively, in a given time interval (a year, in our case). Since these are counts, we need a
+  discrete probability distribution. The ``Poisson distribution`` is a good choice for our data.
+
+  .. math::
+
+      P(Y = y) = p(y; \mu^{(i)}) = \dfrac{(\mu^{(i)})^{y} ~ e^{-\mu^{(i)}}}{y!}
+
+
+.. info:: Link Function: Log Link Function
+  :collapsible:
+
+  We also need to choose a ``link function``. Recall that the link function :math:`g(\mu^{(i)})`
+  is used to relate the mean to the predicted value :math:`\eta^{(i)}`:
+
+  .. math::
+
+      g(\mu^{(i)}) &= \eta^{(i)} \\
+      \mu^{(i)} &= E(Y \mid X = x^{(i)})
+
+  How do we choose a link function? Well, we are free to choose any link function we like, but there
+  are some constraints. For example, in the Poisson distribution, the mean is always positive.
+  However, :math:`\eta^{(i)}` can be any real number. Therefore, we need a link function that maps
+  real numbers to positive numbers. The ``log link function`` is a good choice for this:
+
+  .. math::
+
+      g(\mu^{(i)}) = \log(\mu^{(i)}) = \eta^{(i)}
 
 Formula
 -----------------
