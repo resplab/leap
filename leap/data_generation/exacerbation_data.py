@@ -382,6 +382,7 @@ def exacerbation_calibrator(
         get_data_path(f"processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv"),
         parse_dates=["timepoint"]
     )
+    df_prev = df_prev_inc[["timepoint", "age", "sex", "prevalence"]]
     df_prev["sex"] = df_prev.apply(
         lambda x: "F" if x["sex"]==0 else "M", axis=1
     )
