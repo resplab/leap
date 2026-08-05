@@ -1,0 +1,639 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Generalized Linear Models"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%load_ext autoreload\n",
+    "%autoreload 2\n",
+    "\n",
+    "import plotly.io as pio\n",
+    "pio.renderers.default = \"sphinx_gallery\"\n",
+    "import plotly.express as px\n",
+    "import pandas as pd\n",
+    "from sklearn import datasets\n",
+    "import statsmodels.api as sm\n",
+    "import statsmodels.formula.api as smf"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "\n",
+    "## Background: Ordinary Linear Regression\n",
+    "\n",
+    "A generalized linear model is a generalization of ordinary linear regression. In ordinary linear\n",
+    "regression, we assume that the `response variable`, `y`, can be described by the equation:\n",
+    "\n",
+    "$$\n",
+    "    y^{(i)} = \\beta_0 + \\beta_1 x_1^{(i)} + \\beta_2 x_2^{(i)} + \\ldots + \\beta_n x_n^{(i)}\n",
+    "$$\n",
+    "\n",
+    "where:\n",
+    "\n",
+    "* $i$ is the index of the sample\n",
+    "* $n$ is the number of features\n",
+    "* $\\beta_0, \\beta_1, \\ldots, \\beta_n$ are the coefficients of the model\n",
+    "* $x_1^{(i)}, x_2^{(i)}, \\ldots, x_n^{(i)}$ are the features of the $i$-th sample\n",
+    "* $y^{(i)}$ is the response variable for the $i$-th sample\n",
+    "\n",
+    "For example, let's suppose we look at the `diabetes` dataset:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Load diabetes dataset\n",
+    "dataset = datasets.load_diabetes()\n",
+    "x_data = pd.DataFrame(dataset.data, columns=dataset.feature_names)\n",
+    "y_data = pd.DataFrame(dataset.target, columns=[\"disease_progression\"])\n",
+    "data = pd.concat([x_data, y_data], axis=1)\n",
+    "data.sort_values([\"age\", \"sex\"], inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The diabetes dataset has been transformed into numbers that are somewhat meaningless; for example:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Sex is one of: [-0.04464164  0.05068012]\n",
+      "Age is one of:\n",
+      "[-0.10722563 -0.10359309 -0.09996055 -0.09632802 -0.09269548 -0.08906294\n",
+      " -0.0854304  -0.08179786 -0.07816532 -0.07453279 -0.07090025 -0.06726771\n",
+      " -0.06363517 -0.06000263 -0.05637009 -0.05273755 -0.04910502 -0.04547248\n",
+      " -0.04183994 -0.0382074  -0.03457486 -0.03094232 -0.02730979 -0.02367725\n",
+      " -0.02004471 -0.01641217 -0.01277963 -0.00914709 -0.00551455 -0.00188202\n",
+      "  0.00175052  0.00538306  0.0090156   0.01264814  0.01628068  0.01991321\n",
+      "  0.02354575  0.02717829  0.03081083  0.03444337  0.03807591  0.04170844\n",
+      "  0.04534098  0.04897352  0.05260606  0.0562386   0.05987114  0.06350368\n",
+      "  0.06713621  0.07076875  0.07440129  0.07803383  0.08166637  0.08529891\n",
+      "  0.08893144  0.09256398  0.09619652  0.11072668]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(f\"Sex is one of: {data['sex'].unique()}\")\n",
+    "print(f\"Age is one of:\\n{data['age'].unique()}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Before using this dataset, we would like `sex` and `age` to having meaningful values. To do so,\n",
+    "we transform the data using information from `Table 1` in the original study:\n",
+    "\n",
+    "* [Least Angle Regression](https://hastie.su.domains/Papers/LARS/LeastAngle_2002.pdf)\n",
+    "* [Diabetes Original Data](https://www4.stat.ncsu.edu/~boos/var.select/diabetes.tab.txt)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Original ages\n",
+    "ages_orig = data[\"age\"].unique()\n",
+    "\n",
+    "# Correct ages\n",
+    "MIN_AGE = 19\n",
+    "MAX_AGE = MIN_AGE + len(ages_orig)\n",
+    "ages = list(range(MIN_AGE, MAX_AGE))\n",
+    "\n",
+    "# Transform the ages in the dataset\n",
+    "age_map = {age_orig: age for age_orig, age in zip(ages_orig, ages)}\n",
+    "data[\"age\"] = data.apply(lambda x: age_map[x[\"age\"]], axis=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Original sexes\n",
+    "sexes_orig = data[\"sex\"].unique()\n",
+    "\n",
+    "# Correct sexes\n",
+    "sexes = [1, 2]\n",
+    "\n",
+    "# Transform the sexes in the dataset\n",
+    "sex_map = {sex_orig: sex for sex_orig, sex, in zip(sexes_orig, sexes)}\n",
+    "data[\"sex\"] = data.apply(lambda x: sex_map[x[\"sex\"]], axis=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>age</th>\n",
+       "      <th>sex</th>\n",
+       "      <th>bmi</th>\n",
+       "      <th>bp</th>\n",
+       "      <th>s1</th>\n",
+       "      <th>s2</th>\n",
+       "      <th>s3</th>\n",
+       "      <th>s4</th>\n",
+       "      <th>s5</th>\n",
+       "      <th>s6</th>\n",
+       "      <th>disease_progression</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>26</th>\n",
+       "      <td>19</td>\n",
+       "      <td>1</td>\n",
+       "      <td>-0.077342</td>\n",
+       "      <td>-0.026328</td>\n",
+       "      <td>-0.089630</td>\n",
+       "      <td>-0.096198</td>\n",
+       "      <td>0.026550</td>\n",
+       "      <td>-0.076395</td>\n",
+       "      <td>-0.042571</td>\n",
+       "      <td>-0.005220</td>\n",
+       "      <td>137.0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>344</th>\n",
+       "      <td>19</td>\n",
+       "      <td>1</td>\n",
+       "      <td>-0.011595</td>\n",
+       "      <td>-0.040099</td>\n",
+       "      <td>0.049341</td>\n",
+       "      <td>0.064447</td>\n",
+       "      <td>-0.013948</td>\n",
+       "      <td>0.034309</td>\n",
+       "      <td>0.007027</td>\n",
+       "      <td>-0.030072</td>\n",
+       "      <td>200.0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>374</th>\n",
+       "      <td>19</td>\n",
+       "      <td>1</td>\n",
+       "      <td>-0.034229</td>\n",
+       "      <td>-0.067642</td>\n",
+       "      <td>-0.063487</td>\n",
+       "      <td>-0.070520</td>\n",
+       "      <td>0.008142</td>\n",
+       "      <td>-0.039493</td>\n",
+       "      <td>-0.000612</td>\n",
+       "      <td>-0.079778</td>\n",
+       "      <td>140.0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>79</th>\n",
+       "      <td>20</td>\n",
+       "      <td>1</td>\n",
+       "      <td>-0.037463</td>\n",
+       "      <td>-0.026328</td>\n",
+       "      <td>0.002559</td>\n",
+       "      <td>0.019980</td>\n",
+       "      <td>0.011824</td>\n",
+       "      <td>-0.002592</td>\n",
+       "      <td>-0.068332</td>\n",
+       "      <td>-0.025930</td>\n",
+       "      <td>113.0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>226</th>\n",
+       "      <td>20</td>\n",
+       "      <td>2</td>\n",
+       "      <td>-0.046085</td>\n",
+       "      <td>-0.026328</td>\n",
+       "      <td>-0.024960</td>\n",
+       "      <td>-0.024800</td>\n",
+       "      <td>0.030232</td>\n",
+       "      <td>-0.039493</td>\n",
+       "      <td>-0.039809</td>\n",
+       "      <td>-0.054925</td>\n",
+       "      <td>77.0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "     age  sex       bmi        bp        s1        s2        s3        s4  \\\n",
+       "26    19    1 -0.077342 -0.026328 -0.089630 -0.096198  0.026550 -0.076395   \n",
+       "344   19    1 -0.011595 -0.040099  0.049341  0.064447 -0.013948  0.034309   \n",
+       "374   19    1 -0.034229 -0.067642 -0.063487 -0.070520  0.008142 -0.039493   \n",
+       "79    20    1 -0.037463 -0.026328  0.002559  0.019980  0.011824 -0.002592   \n",
+       "226   20    2 -0.046085 -0.026328 -0.024960 -0.024800  0.030232 -0.039493   \n",
+       "\n",
+       "           s5        s6  disease_progression  \n",
+       "26  -0.042571 -0.005220                137.0  \n",
+       "344  0.007027 -0.030072                200.0  \n",
+       "374 -0.000612 -0.079778                140.0  \n",
+       "79  -0.068332 -0.025930                113.0  \n",
+       "226 -0.039809 -0.054925                 77.0  "
+      ]
+     },
+     "execution_count": 18,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "data.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Here we have `10` features:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6']\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(dataset.feature_names)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "and a response variable `y = disease_progression`, indicating the disease progression one year after baseline."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Our equation for linear regression would be:\n",
+    "\n",
+    "$$\n",
+    "y^{(i)} = \\beta_0 + \\beta_1 x_1^{(i)} + \\ldots + \\beta_{10} x_{10}^{(i)}\n",
+    "$$\n",
+    "\n",
+    "For the first data point (sample), this would be:\n",
+    "\n",
+    "$$\n",
+    "137.0 = \\beta_0 + \\beta_1 * 19 + \\beta_2 * 1 + \\beta_3 * -0.077342 + \\ldots \\beta_{10} * -0.005220\n",
+    "$$\n",
+    "\n",
+    "In ordinary linear regression, we would try to optimize a cost function, typically the least\n",
+    "squares cost function, to find values of $\\beta$ which optimize the correct prediction of the\n",
+    "$y$-values."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## GLM: Linear Predictor\n",
+    "\n",
+    "For a generalized linear model (GLM), we assume that the relationship between different terms is linear,\n",
+    "but the terms themselves aren't necessarily linear.\n",
+    "\n",
+    "### Examples\n",
+    "For example, we may want to do a polynomial fit (I'm dropping the $(i)$ superscript here for readability):\n",
+    "\n",
+    "$$\n",
+    "\\eta = \\beta_0 + \\beta_{11} x_1+ \\beta_{12} x_1^2 + \\beta_{21} x_2 + \\beta_{22} x_2^2 + \\beta_{31} x_3\n",
+    "    + \\beta_{32} x_3^2 + \\beta_{41} x_4 + \\beta_{42} x_4^2\n",
+    "$$\n",
+    "\n",
+    "or, perhaps some of the variables may interact:\n",
+    "\n",
+    "$$\n",
+    "\\eta = \\beta_0 + \\beta_{12} x_1 x_2 + \\beta_{3} x_3 + \\beta_{4} x_4\n",
+    "$$\n",
+    "\n",
+    "or, maybe there's an exponential function:\n",
+    "\n",
+    "$$\n",
+    "\\eta = \\beta_0 + \\beta_1 e^{x_1} + \\beta_{2} x_2 + \\beta_{3} x_3 + \\beta_{4} x_4\n",
+    "$$\n",
+    "\n",
+    "### Invalid Examples\n",
+    "\n",
+    "An example of what is **not** a valid function for a GLM:\n",
+    "\n",
+    "$$\n",
+    "\\eta = \\beta_0 + \\beta_1 x_1^{\\beta_5} + \\beta_{2} x_2 + \\beta_{3} x_3 + \\beta_{4} x_4\n",
+    "$$\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## GLM: Exponential Distribution\n",
+    "\n",
+    "The second component of a GLM is called the `random component`. We assume that the observed data $Y$\n",
+    "comes from an exponential family of distributions, such as:\n",
+    "`Gaussian`, `Poisson`, `binomial`, `gamma`, etc.\n",
+    "\n",
+    "$$\n",
+    "p(y^{(i)}; \\theta^{(i)}) = a(\\theta^{(i)})b(y^{(i)})e^{y^{(i)}Q(\\theta^{(i)})}\n",
+    "$$\n",
+    "\n",
+    "where:\n",
+    "\n",
+    "* $p$ is the probability density function\n",
+    "* $y^{(i)}$ is the observed target value, e.g. the `disease_progression` in the `diabetes` example\n",
+    "* $\\theta^{(i)}$ is a function of the explanatory variables $x_n^{(i)}$\n",
+    "* $Q(\\theta)$ is the natural parameter"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## GLM: Link Function\n",
+    "\n",
+    "The third component of a GLM is called the `link function`:\n",
+    "\n",
+    "$$\n",
+    "g(\\mu^{(i)}) = \\eta^{(i)}\n",
+    "$$\n",
+    "\n",
+    "We differentiate here between $\\eta^{(i)}$, the predicted value of the $i^{th}$ sample, and\n",
+    "$y^{(i)} \\in Y$, the observed value of the $i^{th}$ sample. We can think of $\\mu^{(i)}$ as the\n",
+    "expectation value (mean) of an exponential distribution:\n",
+    "\n",
+    "$$\n",
+    "\\mu^{(i)} = E(Y | X = x^{(i)})\n",
+    "$$\n",
+    "\n",
+    "**Our goal is to estimate** $\\mu$**, not** $\\eta$.\n",
+    "\n",
+    "The link function that transforms the mean $\\mu$ to the natural parameter $Q(\\theta)$ is called the\n",
+    "*canonical link function*."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Example 1: Identity Link Function, Ordinary Linear Regression\n",
+    "\n",
+    "Let's start with the example of ordinary linear regression. In that case, the predicted output is\n",
+    "simply the expectation value; in other words:\n",
+    "\n",
+    "$$\n",
+    "g(\\mu^{(i)}) = \\mu^{(i)} = E(Y | X = x^{(i)}) = \\eta^{(i)}\n",
+    "$$\n",
+    "\n",
+    "So, the **link function** $g(\\mu)$ is simply the **identity function**.\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The `random component`, the exponential function, is given by the `Gaussian distribution`, where $\\theta = \\mu$:\n",
+    "\n",
+    "$$\n",
+    "p(y^{(i)}; \\mu^{(i)}) = \\dfrac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{(y^{(i)}-\\mu^{(i)})^2}{2\\sigma^2}}\n",
+    "$$\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Applying this to the `diabetes` example, we first define a formula (see [Fitting models using R-style formulas](https://www.statsmodels.org/stable/example_formulas.html]) for details on how to write formulas in Python):"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "formula = \"disease_progression ~ age + bmi + sex\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "                  Generalized Linear Model Regression Results                  \n",
+      "===============================================================================\n",
+      "Dep. Variable:     disease_progression   No. Observations:                  442\n",
+      "Model:                             GLM   Df Residuals:                      438\n",
+      "Model Family:                 Gaussian   Df Model:                            3\n",
+      "Link Function:                Identity   Scale:                          3885.1\n",
+      "Method:                           IRLS   Log-Likelihood:                -2451.7\n",
+      "Date:                 Mon, 17 Mar 2025   Deviance:                   1.7017e+06\n",
+      "Time:                         13:55:12   Pearson chi2:                 1.70e+06\n",
+      "No. Iterations:                      3   Pseudo R-squ. (CS):             0.4146\n",
+      "Covariance Type:             nonrobust                                         \n",
+      "==============================================================================\n",
+      "                 coef    std err          z      P>|z|      [0.025      0.975]\n",
+      "------------------------------------------------------------------------------\n",
+      "Intercept    132.8957     13.567      9.795      0.000     106.304     159.487\n",
+      "age            0.4998      0.234      2.136      0.033       0.041       0.958\n",
+      "bmi          927.0815     63.541     14.590      0.000     802.543    1051.620\n",
+      "sex           -3.4098      6.043     -0.564      0.573     -15.253       8.433\n",
+      "==============================================================================\n"
+     ]
+    }
+   ],
+   "source": [
+    "model = smf.glm(formula=formula, data=data, family=sm.families.Gaussian())\n",
+    "results = model.fit(maxiter=100)\n",
+    "\n",
+    "print(results.summary())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now that we have trained our GLM, which is technically just a linear regression, let's\n",
+    "see how well it predicts on our data:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "26      67.280918\n",
+       "344    128.233317\n",
+       "374    107.249704\n",
+       "79     104.751886\n",
+       "226     93.348294\n",
+       "          ...    \n",
+       "211    200.689430\n",
+       "311    204.186929\n",
+       "321    215.178345\n",
+       "204    170.301126\n",
+       "402    133.329999\n",
+       "Length: 442, dtype: float64"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "disease_progression_pred = results.predict(data, which=\"mean\", transform=True)\n",
+    "disease_progression_pred"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = data.copy()\n",
+    "df[\"disease_progression_pred\"] = disease_progression_pred"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>            <script src=\"https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG\"></script><script type=\"text/javascript\">if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: \"STIX-Web\"}});}</script>                <script type=\"text/javascript\">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>\n",
+       "        <script charset=\"utf-8\" src=\"https://cdn.plot.ly/plotly-3.0.0.min.js\"></script>                <div id=\"bd2a862b-be4c-4141-aafe-678861e04475\" class=\"plotly-graph-div\" style=\"height:525px; width:100%;\"></div>            <script type=\"text/javascript\">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById(\"bd2a862b-be4c-4141-aafe-678861e04475\")) {                    Plotly.newPlot(                        \"bd2a862b-be4c-4141-aafe-678861e04475\",                        [{\"hovertemplate\":\"sex=2\\u003cbr\\u003ebmi=%{x}\\u003cbr\\u003edisease_progression=%{y}\\u003cextra\\u003e\\u003c\\u002fextra\\u003e\",\"legendgroup\":\"observed\",\"line\":{\"color\":\"#636efa\",\"dash\":\"solid\"},\"marker\":{\"symbol\":\"circle\"},\"mode\":\"lines\",\"name\":\"\",\"orientation\":\"v\",\"showlegend\":false,\"x\":{\"dtype\":\"f8\",\"bdata\":\"h1SFI0gct793iulzpdW2v+lvb0ftWbS\\u002fyds36KfMs7+qRwCJYj+zv3vpLHp6a7K\\u002f1Z1lm4Tfr7+Wdfbc+cSuv1hNhx5vqq2\\u002fGiUYYOSPrL8aJRhg5I+svxolGGDkj6y\\u002f3PyooVl1q78bhFtmuSWovxuEW2a5Jai\\u002f+e8jB3SYp7\\u002f57yMHdJinv9xb7KcuC6e\\u002fu8e0SOl9pr98n0WKXmOlv3yfRYpeY6W\\u002fWwsOKxnWpL9bCw4rGdakvz531svTSKS\\u002fPnfWy9NIpL8+d9bL00ikvxzjnmyOu6O\\u002f\\u002f05nDUkuo7\\u002feui+uA6Giv7wm+E6+E6K\\u002fvCb4Tr4Tor+gksDveIahv37+iJAz+aC\\u002ffv6IkDP5oL9+\\u002foiQM\\u002fmgv2JqUTHua6C\\u002fYmpRMe5roL9\\u002frDOkUb2fv3+sM6RRvZ+\\u002ff6wzpFG9n79\\u002frDOkUb2fv3+sM6RRvZ+\\u002ff6wzpFG9n79\\u002frDOkUb2fvzqExOXGop6\\u002fOoTE5cainr86hMTlxqKevzqExOXGop6\\u002fOoTE5cainr8CXFUnPIidv74z5mixbZy\\u002fQeMH7Js4mr9B4wfsmziav0HjB+ybOJq\\u002fQeMH7Js4mr9B4wfsmziav\\u002f+6mC0RHpm\\u002f\\u002f7qYLREemb\\u002f\\u002fupgtER6Zv\\u002f+6mC0RHpm\\u002f\\u002f7qYLREemb\\u002f\\u002fupgtER6Zv8aSKW+GA5i\\u002fxpIpb4YDmL+Barqw++iWv4FqurD76Ja\\u002fgWq6sPvolr9JQkvycM6VvwUa3DPms5S\\u002fBRrcM+azlL8FGtwz5rOUv8HxbHVbmZO\\u002fiMn9ttB+kr+Iyf220H6Sv4jJ\\u002fbbQfpK\\u002fiMn9ttB+kr9FoY74RWSRvwx5Hzq7SZC\\u002fDHkfOrtJkL8MeR86u0mQv5ChYPdgXo6\\u002fkKFg92Bejr8JUYJ6SymMv5cApP019Im\\u002flwCk\\u002fTX0ib8QsMWAIL+HvxCwxYAgv4e\\u002fnl\\u002fnAwuKhb+eX+cDC4qFvxcPCYf1VIO\\u002fFw8Jh\\u002fVUg78XDwmH9VSDvxcPCYf1VIO\\u002fj74qCuAfgb+PvioK4B+Bv4++KgrgH4G\\u002fj74qCuAfgb873JgaldV9vzvcmBqV1X2\\u002fKzvcIGpreb8rO9wgamt5vys73CBqa3m\\u002fSJofJz8Bdb9Imh8nPwF1v0iaHyc\\u002fAXW\\u002fOfliLRSXcL9UsExn0llov1SwTGfSWWi\\u002fHd2m5\\u002fgKX78d3abn+Apfvx3dpuf4Cl+\\u002fHd2m5\\u002fgKX7+9sWgBmsRKv7Sq+Jh7GTE\\u002f6q4wzQrvVT\\u002fqrjDNCu9VP+quMM0K71U\\u002f6q4wzQrvVT+UmRFa28tjP5SZEVrby2M\\u002flJkRWtvLYz9a24pNMaBsP7wOgqBDunI\\u002fvA6CoEO6cj+frz6abiR3P5+vPppuJHc\\u002fn68+mm4kdz+vUPuTmY57P69Q+5OZjns\\u002fUEm6w3cxgj\\u002fXmZhAjWaEP9eZmECNZoQ\\u002f15mYQI1mhD9J6na9opuGP9E6VTq40Ig\\u002f0TpVOrjQiD\\u002fK2xE04zqNP8rbETTjOo0\\u002fytsRNOM6jT\\u002fK2xE04zqNP8rbETTjOo0\\u002fUizwsPhvjz9hPucWh9KQP2E+5xaH0pA\\u002fpmZW1RHtkT+mZlbVEe2RP+mOxZOcB5M\\u002fIrc0UicilD8itzRSJyKUP2bfoxCyPJU\\u002fnwcTzzxXlj\\u002fiL4KNx3GXP1+AYArdppk\\u002fo6jPyGfBmj8g+a1FffacPyD5rUV99pw\\u002fnEmMwpIrnz+cSYzCkiufP5xJjMKSK58\\u002fDE21H1SwoD9QdSTe3sqhP20JXD0kWKI\\u002fzMUCW\\u002fT\\u002foz8L7nEZfxqlPy2CqXjEp6U\\u002fa6oYN0\\u002fCpj+NPlCWlE+nP40+UJaUT6c\\u002fqdKH9dncpz8Jjy4TqoSpP2pL1TB6LKs\\u002fhd8MkL+5qz+oc0TvBEesP8oHfE5K1Kw\\u002fCDDrDNXurT8lxCJsGnyuPyXEImwafK4\\u002fJcQibBp8rj9GWFrLXwmvP0ZYWstfCa8\\u002fRlhay18Jrz9o7JEqpZavP2jskSqllq8\\u002faOyRKqWWrz9RioD0l1iwP5Sy77Iic7E\\u002foHyLYsW5sT\\u002fCEMPBCkeyP8IQw8EKR7I\\u002fwhDDwQpHsj\\u002fT2l5xrY2yP+9ultDyGrM\\u002fEQPOLziosz8izWnf2u6zP08rPe7CwrQ\\u002fwLF\\u002fuzWxtj\\u002fAsX+7NbG2Pw+kiiljErg\\u002fKzjCiKifuD9OzPnn7Sy5P66IoAW+1Lo\\u002fDUVHI458vD+48\\u002fiui4W\\u002fP+1DGIdoCcA\\u002f\\u002fg20NgtQwD9FG\\u002fFM543BPzvX3+7A1MU\\u002f\"},\"xaxis\":\"x\",\"y\":{\"dtype\":\"f8\",\"bdata\":\"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\"},\"yaxis\":\"y\",\"type\":\"scatter\"},{\"hovertemplate\":\"sex=1\\u003cbr\\u003ebmi=%{x}\\u003cbr\\u003edisease_progression=%{y}\\u003cextra\\u003e\\u003c\\u002fextra\\u003e\",\"legendgroup\":\"observed\",\"line\":{\"color\":\"#636efa\",\"dash\":\"solid\"},\"marker\":{\"symbol\":\"circle\"},\"mode\":\"lines\",\"name\":\"observed\",\"orientation\":\"v\",\"showlegend\":true,\"x\":{\"dtype\":\"f8\",\"bdata\":\"OGJ6tRq7tb8nmN4FeHS1vwgEp6Yy57S\\u002fCASnpjLntL\\u002f6OQv3j6C0v8nbN+inzLO\\u002fuRGcOAWGs7+afWTZv\\u002fiyv4mzyCkdsrK\\u002fibPIKR2ysr9qH5HK1ySyv1tV9Ro13rG\\u002fW1X1GjXesb9bVfUaNd6xv0uLWWuSl7G\\u002fOcG9u+9Qsb8s9yEMTQqxvyz3IQxNCrG\\u002fLPchDE0Ksb8aLYZcqsOwvxothlyqw7C\\u002fGi2GXKrDsL8aLYZcqsOwvwxj6qwHfbC\\u002fDGPqrAd9sL8MY+qsB32wv\\u002fuYTv1kNrC\\u002f+5hO\\u002fWQ2sL\\u002fVnWWbhN+vv9WdZZuE36+\\u002fuAkuPD9Sr7+4CS48P1Kvv5Z19tz5xK6\\u002feeG+fbQ3rr954b59tDeuv1hNhx5vqq2\\u002fWE2HHm+qrb9YTYceb6qtv1hNhx5vqq2\\u002fNblPvykdrb81uU+\\u002fKR2tvxolGGDkj6y\\u002f95DgAJ8CrL\\u002f3kOAAnwKsv\\u002feQ4ACfAqy\\u002fuWhxQhToqr+X1Dnjzlqqv3pAAoSJzam\\u002fekAChInNqb9ZrMokRECpvzwYk8X+sqi\\u002fPBiTxf6yqL8bhFtmuSWov\\u002fnvIwd0mKe\\u002f+e8jB3SYp7\\u002f57yMHdJinv\\u002fnvIwd0mKe\\u002f+e8jB3SYp7\\u002fcW+ynLgunv9xb7KcuC6e\\u002fnjN96aPwpb98n0WKXmOlv3yfRYpeY6W\\u002fWwsOKxnWpL9bCw4rGdakv1sLDisZ1qS\\u002fPnfWy9NIpL8c455sjrujvxzjnmyOu6O\\u002fHOOebI67o78c455sjrujv\\u002f9OZw1JLqO\\u002f\\u002f05nDUkuo7\\u002feui+uA6Giv966L64DoaK\\u002f3rovrgOhor\\u002feui+uA6Giv7wm+E6+E6K\\u002fvCb4Tr4Tor+gksDveIahv6CSwO94hqG\\u002ffv6IkDP5oL9+\\u002foiQM\\u002fmgv37+iJAz+aC\\u002fYmpRMe5roL9ialEx7mugv3+sM6RRvZ+\\u002fAlxVJzyInb+GC3eqJlObv0HjB+ybOJq\\u002fQeMH7Js4mr\\u002f\\u002fupgtER6Zv\\u002f+6mC0RHpm\\u002fxpIpb4YDmL\\u002fGkilvhgOYv8aSKW+GA5i\\u002fxpIpb4YDmL+Barqw++iWv0lCS\\u002fJwzpW\\u002fSUJL8nDOlb8FGtwz5rOUvwUa3DPms5S\\u002fBRrcM+azlL\\u002fB8Wx1W5mTv4jJ\\u002fbbQfpK\\u002fRaGO+EVkkb8MeR86u0mQvwx5Hzq7SZC\\u002fCVGCekspjL+XAKT9NfSJv5cApP019Im\\u002fELDFgCC\\u002fh78QsMWAIL+HvxCwxYAgv4e\\u002fnl\\u002fnAwuKhb+eX+cDC4qFv55f5wMLioW\\u002fFw8Jh\\u002fVUg7+PvioK4B+Bv4++KgrgH4G\\u002fj74qCuAfgb873JgaldV9vzvcmBqV1X2\\u002fO9yYGpXVfb8rO9wgamt5vys73CBqa3m\\u002fSJofJz8Bdb85+WItFJdwvzn5Yi0Ul3C\\u002fOfliLRSXcL85+WItFJdwv1SwTGfSWWi\\u002fvbFoAZrESr+9sWgBmsRKv+quMM0K71U\\u002f6q4wzQrvVT9a24pNMaBsP7wOgqBDunI\\u002fvA6CoEO6cj+8DoKgQ7pyP7wOgqBDunI\\u002fn68+mm4kdz+frz6abiR3P69Q+5OZjns\\u002fr1D7k5mOez+vUPuTmY57P1BJusN3MYI\\u002f15mYQI1mhD9J6na9opuGP9E6VTq40Ig\\u002fytsRNOM6jT9SLPCw+G+PP1Is8LD4b48\\u002fYT7nFofSkD+mZlbVEe2RP6ZmVtUR7ZE\\u002f6Y7Fk5wHkz\\u002fpjsWTnAeTP+mOxZOcB5M\\u002fIrc0UicilD9m36MQsjyVP2bfoxCyPJU\\u002f4i+Cjcdxlz8nWPFLUoyYPydY8UtSjJg\\u002fX4BgCt2mmT+jqM\\u002fIZ8GaP6Ooz8hnwZo\\u002f29A+h\\u002fLbmz8g+a1FffacP5xJjMKSK58\\u002fnEmMwpIrnz\\u002fvuH3ADiOgPy7h7H6ZPaE\\u002fLuHsfpk9oT8u4ex+mT2hP1B1JN7eyqE\\u002fbQlcPSRYoj+OnZOcaeWiP46dk5xp5aI\\u002fqzHL+65yoz\\u002fMxQJb9P+jP8zFAlv0\\u002f6M\\u002fzMUCW\\u002fT\\u002foz\\u002fvWTq6OY2kP+9ZOro5jaQ\\u002f71k6ujmNpD8L7nEZfxqlPy2CqXjEp6U\\u002fSRbh1wk1pj9JFuHXCTWmP2uqGDdPwqY\\u002fjT5QlpRPpz+NPlCWlE+nP6nSh\\u002fXZ3Kc\\u002fy2a\\u002fVB9qqD\\u002fLZr9UH2qoPwmPLhOqhKk\\u002fCY8uE6qEqT9Ht53RNJ+qP0e3ndE0n6o\\u002fhd8MkL+5qz+F3wyQv7mrP4XfDJC\\u002fuas\\u002fqHNE7wRHrD\\u002fKB3xOStSsP8oHfE5K1Kw\\u002fCDDrDNXurT8lxCJsGnyuPyXEImwafK4\\u002fRlhay18Jrz9GWFrLXwmvP2jskSqllq8\\u002fYVQcpDqfsD9hVBykOp+wP4ToUwOALLE\\u002flLLvsiJzsT+gfItixbmxP7BGJxJoALI\\u002fwhDDwQpHsj\\u002fCEMPBCkeyP+Ok+iBQ1LI\\u002fPmGhPiB8tD+NU6ysTd21P41TrKxN3bU\\u002fwLF\\u002fuzWxtj\\u002f+2e55wMu3P\\u002f7Z7nnAy7c\\u002f\\u002ftnuecDLtz89Al44S+a4P66IoAW+1Lo\\u002f\\u002fnqrc+s1vD88oxoydlC9PwTzgY5cc8A\\u002f8smi2OSWxD8=\"},\"xaxis\":\"x2\",\"y\":{\"dtype\":\"f8\",\"bdata\":\"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\"},\"yaxis\":\"y2\",\"type\":\"scatter\"},{\"hovertemplate\":\"sex=2\\u003cbr\\u003ebmi=%{x}\\u003cbr\\u003edisease_progression_pred=%{y}\\u003cextra\\u003e\\u003c\\u002fextra\\u003e\",\"legendgroup\":\"predicted\",\"line\":{\"color\":\"orange\",\"dash\":\"solid\"},\"marker\":{\"symbol\":\"circle\"},\"mode\":\"lines\",\"name\":\"\",\"orientation\":\"v\",\"showlegend\":false,\"x\":{\"dtype\":\"f8\",\"bdata\":\"h1SFI0gct793iulzpdW2v+lvb0ftWbS\\u002fyds36KfMs7+qRwCJYj+zv3vpLHp6a7K\\u002f1Z1lm4Tfr7+Wdfbc+cSuv1hNhx5vqq2\\u002fGiUYYOSPrL8aJRhg5I+svxolGGDkj6y\\u002f3PyooVl1q78bhFtmuSWovxuEW2a5Jai\\u002f+e8jB3SYp7\\u002f57yMHdJinv9xb7KcuC6e\\u002fu8e0SOl9pr98n0WKXmOlv3yfRYpeY6W\\u002fWwsOKxnWpL9bCw4rGdakvz531svTSKS\\u002fPnfWy9NIpL8+d9bL00ikvxzjnmyOu6O\\u002f\\u002f05nDUkuo7\\u002feui+uA6Giv7wm+E6+E6K\\u002fvCb4Tr4Tor+gksDveIahv37+iJAz+aC\\u002ffv6IkDP5oL9+\\u002foiQM\\u002fmgv2JqUTHua6C\\u002fYmpRMe5roL9\\u002frDOkUb2fv3+sM6RRvZ+\\u002ff6wzpFG9n79\\u002frDOkUb2fv3+sM6RRvZ+\\u002ff6wzpFG9n79\\u002frDOkUb2fvzqExOXGop6\\u002fOoTE5cainr86hMTlxqKevzqExOXGop6\\u002fOoTE5cainr8CXFUnPIidv74z5mixbZy\\u002fQeMH7Js4mr9B4wfsmziav0HjB+ybOJq\\u002fQeMH7Js4mr9B4wfsmziav\\u002f+6mC0RHpm\\u002f\\u002f7qYLREemb\\u002f\\u002fupgtER6Zv\\u002f+6mC0RHpm\\u002f\\u002f7qYLREemb\\u002f\\u002fupgtER6Zv8aSKW+GA5i\\u002fxpIpb4YDmL+Barqw++iWv4FqurD76Ja\\u002fgWq6sPvolr9JQkvycM6VvwUa3DPms5S\\u002fBRrcM+azlL8FGtwz5rOUv8HxbHVbmZO\\u002fiMn9ttB+kr+Iyf220H6Sv4jJ\\u002fbbQfpK\\u002fiMn9ttB+kr9FoY74RWSRvwx5Hzq7SZC\\u002fDHkfOrtJkL8MeR86u0mQv5ChYPdgXo6\\u002fkKFg92Bejr8JUYJ6SymMv5cApP019Im\\u002flwCk\\u002fTX0ib8QsMWAIL+HvxCwxYAgv4e\\u002fnl\\u002fnAwuKhb+eX+cDC4qFvxcPCYf1VIO\\u002fFw8Jh\\u002fVUg78XDwmH9VSDvxcPCYf1VIO\\u002fj74qCuAfgb+PvioK4B+Bv4++KgrgH4G\\u002fj74qCuAfgb873JgaldV9vzvcmBqV1X2\\u002fKzvcIGpreb8rO9wgamt5vys73CBqa3m\\u002fSJofJz8Bdb9Imh8nPwF1v0iaHyc\\u002fAXW\\u002fOfliLRSXcL9UsExn0llov1SwTGfSWWi\\u002fHd2m5\\u002fgKX78d3abn+Apfvx3dpuf4Cl+\\u002fHd2m5\\u002fgKX7+9sWgBmsRKv7Sq+Jh7GTE\\u002f6q4wzQrvVT\\u002fqrjDNCu9VP+quMM0K71U\\u002f6q4wzQrvVT+UmRFa28tjP5SZEVrby2M\\u002flJkRWtvLYz9a24pNMaBsP7wOgqBDunI\\u002fvA6CoEO6cj+frz6abiR3P5+vPppuJHc\\u002fn68+mm4kdz+vUPuTmY57P69Q+5OZjns\\u002fUEm6w3cxgj\\u002fXmZhAjWaEP9eZmECNZoQ\\u002f15mYQI1mhD9J6na9opuGP9E6VTq40Ig\\u002f0TpVOrjQiD\\u002fK2xE04zqNP8rbETTjOo0\\u002fytsRNOM6jT\\u002fK2xE04zqNP8rbETTjOo0\\u002fUizwsPhvjz9hPucWh9KQP2E+5xaH0pA\\u002fpmZW1RHtkT+mZlbVEe2RP+mOxZOcB5M\\u002fIrc0UicilD8itzRSJyKUP2bfoxCyPJU\\u002fnwcTzzxXlj\\u002fiL4KNx3GXP1+AYArdppk\\u002fo6jPyGfBmj8g+a1FffacPyD5rUV99pw\\u002fnEmMwpIrnz+cSYzCkiufP5xJjMKSK58\\u002fDE21H1SwoD9QdSTe3sqhP20JXD0kWKI\\u002fzMUCW\\u002fT\\u002foz8L7nEZfxqlPy2CqXjEp6U\\u002fa6oYN0\\u002fCpj+NPlCWlE+nP40+UJaUT6c\\u002fqdKH9dncpz8Jjy4TqoSpP2pL1TB6LKs\\u002fhd8MkL+5qz+oc0TvBEesP8oHfE5K1Kw\\u002fCDDrDNXurT8lxCJsGnyuPyXEImwafK4\\u002fJcQibBp8rj9GWFrLXwmvP0ZYWstfCa8\\u002fRlhay18Jrz9o7JEqpZavP2jskSqllq8\\u002faOyRKqWWrz9RioD0l1iwP5Sy77Iic7E\\u002foHyLYsW5sT\\u002fCEMPBCkeyP8IQw8EKR7I\\u002fwhDDwQpHsj\\u002fT2l5xrY2yP+9ultDyGrM\\u002fEQPOLziosz8izWnf2u6zP08rPe7CwrQ\\u002fwLF\\u002fuzWxtj\\u002fAsX+7NbG2Pw+kiiljErg\\u002fKzjCiKifuD9OzPnn7Sy5P66IoAW+1Lo\\u002fDUVHI458vD+48\\u002fiui4W\\u002fP+1DGIdoCcA\\u002f\\u002fg20NgtQwD9FG\\u002fFM543BPzvX3+7A1MU\\u002f\"},\"xaxis\":\"x\",\"y\":{\"dtype\":\"f8\",\"bdata\":\"TV0\\u002fnp3wSkDJMeawZPBMQGWofw2691BAiI1RUqgXUUAGO1wjjLdRQDR0na4pV1VA6hmOpuVWVUA6Y3yxzrZVQBIAXFCLNlhAHLMfMnw2WEDA6ualhrZXQJKGyt+LdldAy52qh3e2V0Dt3ZFuLRZZQJEVWeI3llhAMfqsdEpWV0Aqb4E59HVbQNysf3DntVtAMknhXMjVXEA6I0GAnDVeQG45JcPQtVtAKCnrdv01WUD362ry5VVaQI5Fk0miNV1AMn1avay1XEC+ghPOuRVcQLR92G+IFV5A9MCPt4i1XUC+VziTXHVfQOho4Xdf9V5AdG6aiGxVXkA+3qYiXbVeQA4nF3tqtV1AJFkl3mfVXUDUadlZj6pgQHj1hspI9V5A6u\\u002fNuTuVX0AgxhdTjlpgQOdIdNuUCmBAXXAFhlMVXkD+eoI+kipgQCwzhQE8NV9AelTbZYp1W0As354EjWpgQD45vMQk9V9AQ+uDQV41XUAmB65hJ9VfQD45vMQk9V9A++SW7od6YEAgtDqALxVfQHkpACst1V5AYmCTXG76YEBARpnjJXVeQIXcwwwe1V5AkMSvImk6YUBXRwyrb+pgQJi7Xo4jNV5AX8qnDGRKYUAOG\\u002fYxbdpgQOC22WtymmBAr+1s8SBVXkDERheWAdVfQNUlshcHNV9A8QmI9z2VXECgDV9UZOpgQBpCzR0kdV1AREUmyG5qYEAofSwVZ5pgQBrOuRNe2mBA94Ik\\u002f2GqYEC7LB3JS7phQPTsOK9X+mBAt\\u002ftFddmUX0Atz\\u002fAi6dReQGYq+AxdimBA+2\\u002fUEExaYUA+cBPqOQpiQLrGWfk9qmFA4OpSzFZ6YEAlgX31TtpgQOaUim8uOmJAleXYlDfKYUBk69B+MtphQAONrKIyqmFA7zMC\\u002flEqYED3tp1fRopgQI38eWM1WmFAxbyVSUGaYEC6ow6YQopgQPnK6bITmmJAy2bN7BhaYkBmXnFtQWpgQL9NRjsaSmJAjlM+JRVaYkA+pIxKHuphQBtZ9zUiumFAvLda6w+aYkCw4UuoI3phQOaFi2EAKmNAN3i1qgmKYkC2i4NL+zljQObIA9ASGmJA1xmRzglaYkAeiR+2HlphQMDngmsMOmJAXrD60O9pY0BxTB3k4tljQP5R1vTvOWNAEu74B+OpY0Bldg6h9rliQFldh+\\u002f3qWJAtSXAe+0pY0C0aDjq\\u002fxliQCPNk4noCWNAdL+90vFpYkDFbm+t6NliQNnHGVLJWWRAuVXo++nJYkDYCpLA20ljQHxCWTTmyWJA5CMZctpZY0AkJFhLyAlkQN\\u002fQpZDimWJA6+ksQuGpYkDPITOP2dliQM1Iz9C8OWRAthbBbb8ZZEAaYpVbqflkQFTfONOiSWVARHM+QKx5ZEDZ+5KyrTlkQFgPYVOf6WRA5BQaZKxJZECFtvWHrBlkQN3oQsSX6WRAOrF7UI1pZUAH+uuommlkQJEmQfuKKWVAiOYdCKm5Y0BBd48glLlkQEyQFtKSyWRAKYj5K6mJY0A5S7iAf1llQH7h4ql3uWVA8R6iB31JZUCsiHfehOlkQJLAfSt9GWVA0sC8BGvJZUDe2UO2adllQP6O7XpbWWZAtGLXAVlJZkCamt1OUXlmQOb2G0hQKWZAcWbpCFPZZUC8wicCUollQIuFp306qWZAzMhexTpJZkDj+mwoOGlmQO8T9Nk2eWZA5+ccOiIZZ0BLdmmWHulmQDvH9pQVKWdA+mD06xlpZkATp06i5JhoQC31ODIRSWZA8rJ9T8hoaUBz4icd6ahnQP0OfW\\u002fZaGhA+XiRH8+4aEBnY92b3IhnQHH6xFCe+GlAzt7ZCcMIaEB7mTzfwehnQKOOCZeV2GlAkEmrRYJoakBsQY6fmChpQNQiTt2MuGlAMOuGaYI4akBSeZTskFhpQFJ5lOyQWGlAOG4iy3aYakDO9nY9eFhqQAd0GrVxqGpA\\u002fFqTA3OYakClWG5HhGhpQC9GnAtKeGtAlGrUt1D4akCwiZIsOMhrQCZdPdpHCGtAs2L26lRoakA7+V\\u002ftOnhrQFQYHmIiSGxAK6GxrRG4bEBQCCPvPHhqQHDRGAf8B21AlA2vDconbkBmqZJHz+dtQGOt4ye3J25A9XiwCMvXbEDOAURUukdtQNCvzNd5R29AjeZxIacjcEBRQrtbgfNwQBUvLJR983BAn575VICjcEBFRZnKaPNwQLEgbyz\\u002fMnNA\"},\"yaxis\":\"y\",\"type\":\"scatter\"},{\"hovertemplate\":\"sex=1\\u003cbr\\u003ebmi=%{x}\\u003cbr\\u003edisease_progression_pred=%{y}\\u003cextra\\u003e\\u003c\\u002fextra\\u003e\",\"legendgroup\":\"predicted\",\"line\":{\"color\":\"orange\",\"dash\":\"solid\"},\"marker\":{\"symbol\":\"circle\"},\"mode\":\"lines\",\"name\":\"predicted\",\"orientation\":\"v\",\"showlegend\":true,\"x\":{\"dtype\":\"f8\",\"bdata\":\"OGJ6tRq7tb8nmN4FeHS1vwgEp6Yy57S\\u002fCASnpjLntL\\u002f6OQv3j6C0v8nbN+inzLO\\u002fuRGcOAWGs7+afWTZv\\u002fiyv4mzyCkdsrK\\u002fibPIKR2ysr9qH5HK1ySyv1tV9Ro13rG\\u002fW1X1GjXesb9bVfUaNd6xv0uLWWuSl7G\\u002fOcG9u+9Qsb8s9yEMTQqxvyz3IQxNCrG\\u002fLPchDE0Ksb8aLYZcqsOwvxothlyqw7C\\u002fGi2GXKrDsL8aLYZcqsOwvwxj6qwHfbC\\u002fDGPqrAd9sL8MY+qsB32wv\\u002fuYTv1kNrC\\u002f+5hO\\u002fWQ2sL\\u002fVnWWbhN+vv9WdZZuE36+\\u002fuAkuPD9Sr7+4CS48P1Kvv5Z19tz5xK6\\u002feeG+fbQ3rr954b59tDeuv1hNhx5vqq2\\u002fWE2HHm+qrb9YTYceb6qtv1hNhx5vqq2\\u002fNblPvykdrb81uU+\\u002fKR2tvxolGGDkj6y\\u002f95DgAJ8CrL\\u002f3kOAAnwKsv\\u002feQ4ACfAqy\\u002fuWhxQhToqr+X1Dnjzlqqv3pAAoSJzam\\u002fekAChInNqb9ZrMokRECpvzwYk8X+sqi\\u002fPBiTxf6yqL8bhFtmuSWov\\u002fnvIwd0mKe\\u002f+e8jB3SYp7\\u002f57yMHdJinv\\u002fnvIwd0mKe\\u002f+e8jB3SYp7\\u002fcW+ynLgunv9xb7KcuC6e\\u002fnjN96aPwpb98n0WKXmOlv3yfRYpeY6W\\u002fWwsOKxnWpL9bCw4rGdakv1sLDisZ1qS\\u002fPnfWy9NIpL8c455sjrujvxzjnmyOu6O\\u002fHOOebI67o78c455sjrujv\\u002f9OZw1JLqO\\u002f\\u002f05nDUkuo7\\u002feui+uA6Giv966L64DoaK\\u002f3rovrgOhor\\u002feui+uA6Giv7wm+E6+E6K\\u002fvCb4Tr4Tor+gksDveIahv6CSwO94hqG\\u002ffv6IkDP5oL9+\\u002foiQM\\u002fmgv37+iJAz+aC\\u002fYmpRMe5roL9ialEx7mugv3+sM6RRvZ+\\u002fAlxVJzyInb+GC3eqJlObv0HjB+ybOJq\\u002fQeMH7Js4mr\\u002f\\u002fupgtER6Zv\\u002f+6mC0RHpm\\u002fxpIpb4YDmL\\u002fGkilvhgOYv8aSKW+GA5i\\u002fxpIpb4YDmL+Barqw++iWv0lCS\\u002fJwzpW\\u002fSUJL8nDOlb8FGtwz5rOUvwUa3DPms5S\\u002fBRrcM+azlL\\u002fB8Wx1W5mTv4jJ\\u002fbbQfpK\\u002fRaGO+EVkkb8MeR86u0mQvwx5Hzq7SZC\\u002fCVGCekspjL+XAKT9NfSJv5cApP019Im\\u002fELDFgCC\\u002fh78QsMWAIL+HvxCwxYAgv4e\\u002fnl\\u002fnAwuKhb+eX+cDC4qFv55f5wMLioW\\u002fFw8Jh\\u002fVUg7+PvioK4B+Bv4++KgrgH4G\\u002fj74qCuAfgb873JgaldV9vzvcmBqV1X2\\u002fO9yYGpXVfb8rO9wgamt5vys73CBqa3m\\u002fSJofJz8Bdb85+WItFJdwvzn5Yi0Ul3C\\u002fOfliLRSXcL85+WItFJdwv1SwTGfSWWi\\u002fvbFoAZrESr+9sWgBmsRKv+quMM0K71U\\u002f6q4wzQrvVT9a24pNMaBsP7wOgqBDunI\\u002fvA6CoEO6cj+8DoKgQ7pyP7wOgqBDunI\\u002fn68+mm4kdz+frz6abiR3P69Q+5OZjns\\u002fr1D7k5mOez+vUPuTmY57P1BJusN3MYI\\u002f15mYQI1mhD9J6na9opuGP9E6VTq40Ig\\u002fytsRNOM6jT9SLPCw+G+PP1Is8LD4b48\\u002fYT7nFofSkD+mZlbVEe2RP6ZmVtUR7ZE\\u002f6Y7Fk5wHkz\\u002fpjsWTnAeTP+mOxZOcB5M\\u002fIrc0UicilD9m36MQsjyVP2bfoxCyPJU\\u002f4i+Cjcdxlz8nWPFLUoyYPydY8UtSjJg\\u002fX4BgCt2mmT+jqM\\u002fIZ8GaP6Ooz8hnwZo\\u002f29A+h\\u002fLbmz8g+a1FffacP5xJjMKSK58\\u002fnEmMwpIrnz\\u002fvuH3ADiOgPy7h7H6ZPaE\\u002fLuHsfpk9oT8u4ex+mT2hP1B1JN7eyqE\\u002fbQlcPSRYoj+OnZOcaeWiP46dk5xp5aI\\u002fqzHL+65yoz\\u002fMxQJb9P+jP8zFAlv0\\u002f6M\\u002fzMUCW\\u002fT\\u002foz\\u002fvWTq6OY2kP+9ZOro5jaQ\\u002f71k6ujmNpD8L7nEZfxqlPy2CqXjEp6U\\u002fSRbh1wk1pj9JFuHXCTWmP2uqGDdPwqY\\u002fjT5QlpRPpz+NPlCWlE+nP6nSh\\u002fXZ3Kc\\u002fy2a\\u002fVB9qqD\\u002fLZr9UH2qoPwmPLhOqhKk\\u002fCY8uE6qEqT9Ht53RNJ+qP0e3ndE0n6o\\u002fhd8MkL+5qz+F3wyQv7mrP4XfDJC\\u002fuas\\u002fqHNE7wRHrD\\u002fKB3xOStSsP8oHfE5K1Kw\\u002fCDDrDNXurT8lxCJsGnyuPyXEImwafK4\\u002fRlhay18Jrz9GWFrLXwmvP2jskSqllq8\\u002fYVQcpDqfsD9hVBykOp+wP4ToUwOALLE\\u002flLLvsiJzsT+gfItixbmxP7BGJxJoALI\\u002fwhDDwQpHsj\\u002fCEMPBCkeyP+Ok+iBQ1LI\\u002fPmGhPiB8tD+NU6ysTd21P41TrKxN3bU\\u002fwLF\\u002fuzWxtj\\u002f+2e55wMu3P\\u002f7Z7nnAy7c\\u002f\\u002ftnuecDLtz89Al44S+a4P66IoAW+1Lo\\u002f\\u002fnqrc+s1vD88oxoydlC9PwTzgY5cc8A\\u002f8smi2OSWxD8=\"},\"xaxis\":\"x2\",\"y\":{\"dtype\":\"f8\",\"bdata\":\"PioYWBUSUkAemNjdfmRPQNKPIWkbslBAjfn2PyNSUEAmLINV\\u002fNFRQAAot4\\u002f60VBA+fvf7+VxUUBennifr1FTQFhyof+a8VNAiK8hhLLRUkDreFZ1XxFWQP1X8fZkcVVAh4RGSVUxVkAwbtU5mfFSQKrjJ7EecVhAgrfDRIJRU0CiPUHuLvFWQKQWpaxLkVVAAd\\u002fdOEERVkAT5RT8KdFWQG+tTYgfUVdAWlSj4z7RVUDOTurSMXFWQN4thVQ30VVACrk9XBVxV0AeEugA9vBYQDLxgoL7UFhAHpjY3RrRVkAyd3NfIDFWQEbQHQQBsVdA\\u002fb\\u002fjty0xVUDcKUZbvZBaQDpR04L0kFdAviq18+yQV0DvZzV4BHFWQHCPT2zDMFlAzFeI+LiwWUCyTBbXnvBaQIxzJUz6kFZAzN141d2QV0DKBBUXwfBYQGbpaKnTsFdAeO+fbLxwWEDr6eZbrxBZQL9eLlTRcFdAapfxLJOwWUB6nSjwe3BaQMxgJh5A8FxA\\u002fJ2molfQW0Dk8Ygcf5BZQMK6P1tQcFtAgP148HSwWUC8jmi7OxBcQIvX2BNJEFtAdKXKsEvwWkAx6ANGcDBZQBUELmY50FtAccxm8i5QXEDEaMjeD3BdQCMKZSkikFxAWkjhEvEvXkCjFsSVR7BZQA6G30nkb15Aners9TJQWkALM2xo7K9dQEEitGk90FlAS3YjsOxPXUCeOSHesM9fQM52oWLIr15A6IEThOJvXUDUKGnfAfBbQMz8kT\\u002ftj1xAFkWE5R4wWkB+YSy4wy9eQKzFSH6+b15A8Vtzp7bPXkD55p7iDLBaQKhy1ZzGr11AY9yqc85PXUBBpWGyny9fQBvMcCf7z1pAO3mKEovPX0DkYhkDz49cQG6PblW\\u002fT11AY4oz941PX0CZplk5uzdgQBjIMS6Bj19A1lMlMbEnYEBRFIDwqhdgQMF424+TB2FAWpcbUp93YEAonRM8modgQD\\u002fPIZ+Xp2BAvCVorptHYEDx997IY29eQCQHKOyP12BAUJl7E3aPXUDc2hFzjcdgQFZY9MN0x2FAPybmYHenYUDVrjrTeGdhQJAYEKqAB2FAmzGXW38XYUDdMdY0bcdhQNBbx\\u002fGAp2BAEjjGrxnPX0C9FmmgbTdhQI+yTNpy92BAWyJZdGNXYUDBRpEgatdgQITwiepT52FAKGvJzHBXYECQTIkKZedgQO7tJVV3B2BAo+irHVhXYUDoftZGULdhQDDuZC5lt2BAT6MO81Y3YUDWOXj1PEdiQFVNRpYu92JAVU1Gli73YkAACKlrLddiQC5sxTEoF2NAFzq3zir3YkAUpMt+IEdjQBSky34gR2NAPnL89BDXY0ApXMq+QkdhQFfA5oQ9h2FA3xPYGBGnY0A+tXRjI8diQCPterAb92JAH5oHzyM3YkCEomNO+yZkQLyl96IZV2JArrMMM\\u002f6mY0ACUG4f38ZkQMgVQxb4ZmNARykRt+kWZEBsTQqKAudiQEcpEbfpFmRAQ5MlZ99mZEB\\u002f6Syd9VZjQNVCFhvEhmVA4zQBi982ZEARmR1R2nZkQF71W0rZJmRA0DIbqN62Y0AGGtPPzVZkQN1f7qyq1mVAzvPzGbQGZUD7mohOwTZkQLMr+masNmVAgDHyUKdGZUAIyFtTjVZmQHKCf0+ehmVA2aa3+6QGZUCGHqJikfZlQAUycAODpmZAPfKL6Y7mZUAA3\\u002fwhi+ZlQL4hNrevJmRAqAN0p38WZkBKpU\\u002fLf+ZlQI47evR3RmZAmJd5FIlGZUBCeXgra4ZmQDdg8XlsdmZAg3m3BFk2Z0Ccx6GUheZkQCvhpvhfVmZAzxhubGrWZUA8pGVNNiZoQAcUcucmhmhA\\u002ftNO9EQWZ0AsOGu6P1ZnQMoA4x8jhmhA7WdUYU5GZkC4u4TODxZpQGcM0\\u002fMYpmhATh09\\u002fy12Z0BkksPQPYZmQLVBdas09mZA1bOmARSGaEBRMYlS+4VpQNX2HnAmdmdAgm4J1xJmaEB0mPqTJkZnQMKxwB4TBmhAnNA\\u002fugwmaEDB9DiNJfZmQMl31O4ZVmdAfnJat\\u002fqlaEAXkZp5BhZoQNl9C7ICFmhAvrUR\\u002f\\u002fpFaECQUfU4AAZoQB9r+pzadWlA2tTPc+IVaUCuhP8AteVqQA0mnEvHBWpAKh6+fst1aUD8uaG40DVpQIm\\u002fWsndlWhAKIjSLsHFaUDUQjUEwKVpQLo3w+Kl5WpAqsvIT68VakCD6kfrqDVqQCciD1+ztWlAI4wjD6kFakDnNRzZkhVrQHKl6ZmVxWpAojku4IylakBcowO3lEVqQPCVbNmLVWpAPa8yZHgVa0D7wj\\u002feV3VsQECc4nVixWtAKa1MgXeVakBgUYw6VEVsQLjGUeVRBWxAR1P3NzsFbEDLqjms9mRuQJ8fgaQYxWxAGErwEwgFbUAj\\u002fbP1+ARtQPWYly\\u002f+xGxALD3X6Np0bkD+cvdS0iRuQJep1EiT5G9A4Qih9zoycEDk9VAJJeJwQLWtmWMQsnBAbmOFzrGBckA=\"},\"yaxis\":\"y2\",\"type\":\"scatter\"}],                        {\"template\":{\"data\":{\"histogram2dcontour\":[{\"type\":\"histogram2dcontour\",\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]]}],\"choropleth\":[{\"type\":\"choropleth\",\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}],\"histogram2d\":[{\"type\":\"histogram2d\",\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]]}],\"heatmap\":[{\"type\":\"heatmap\",\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]]}],\"contourcarpet\":[{\"type\":\"contourcarpet\",\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}],\"contour\":[{\"type\":\"contour\",\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]]}],\"surface\":[{\"type\":\"surface\",\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"},\"colorscale\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]]}],\"mesh3d\":[{\"type\":\"mesh3d\",\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}],\"scatter\":[{\"fillpattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2},\"type\":\"scatter\"}],\"parcoords\":[{\"type\":\"parcoords\",\"line\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}}],\"scatterpolargl\":[{\"type\":\"scatterpolargl\",\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}}],\"bar\":[{\"error_x\":{\"color\":\"#2a3f5f\"},\"error_y\":{\"color\":\"#2a3f5f\"},\"marker\":{\"line\":{\"color\":\"#E5ECF6\",\"width\":0.5},\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"bar\"}],\"scattergeo\":[{\"type\":\"scattergeo\",\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}}],\"scatterpolar\":[{\"type\":\"scatterpolar\",\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}}],\"histogram\":[{\"marker\":{\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"histogram\"}],\"scattergl\":[{\"type\":\"scattergl\",\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}}],\"scatter3d\":[{\"type\":\"scatter3d\",\"line\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}}],\"scattermap\":[{\"type\":\"scattermap\",\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}}],\"scattermapbox\":[{\"type\":\"scattermapbox\",\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}}],\"scatterternary\":[{\"type\":\"scatterternary\",\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}}],\"scattercarpet\":[{\"type\":\"scattercarpet\",\"marker\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}}}],\"carpet\":[{\"aaxis\":{\"endlinecolor\":\"#2a3f5f\",\"gridcolor\":\"white\",\"linecolor\":\"white\",\"minorgridcolor\":\"white\",\"startlinecolor\":\"#2a3f5f\"},\"baxis\":{\"endlinecolor\":\"#2a3f5f\",\"gridcolor\":\"white\",\"linecolor\":\"white\",\"minorgridcolor\":\"white\",\"startlinecolor\":\"#2a3f5f\"},\"type\":\"carpet\"}],\"table\":[{\"cells\":{\"fill\":{\"color\":\"#EBF0F8\"},\"line\":{\"color\":\"white\"}},\"header\":{\"fill\":{\"color\":\"#C8D4E3\"},\"line\":{\"color\":\"white\"}},\"type\":\"table\"}],\"barpolar\":[{\"marker\":{\"line\":{\"color\":\"#E5ECF6\",\"width\":0.5},\"pattern\":{\"fillmode\":\"overlay\",\"size\":10,\"solidity\":0.2}},\"type\":\"barpolar\"}],\"pie\":[{\"automargin\":true,\"type\":\"pie\"}]},\"layout\":{\"autotypenumbers\":\"strict\",\"colorway\":[\"#636efa\",\"#EF553B\",\"#00cc96\",\"#ab63fa\",\"#FFA15A\",\"#19d3f3\",\"#FF6692\",\"#B6E880\",\"#FF97FF\",\"#FECB52\"],\"font\":{\"color\":\"#2a3f5f\"},\"hovermode\":\"closest\",\"hoverlabel\":{\"align\":\"left\"},\"paper_bgcolor\":\"white\",\"plot_bgcolor\":\"#E5ECF6\",\"polar\":{\"bgcolor\":\"#E5ECF6\",\"angularaxis\":{\"gridcolor\":\"white\",\"linecolor\":\"white\",\"ticks\":\"\"},\"radialaxis\":{\"gridcolor\":\"white\",\"linecolor\":\"white\",\"ticks\":\"\"}},\"ternary\":{\"bgcolor\":\"#E5ECF6\",\"aaxis\":{\"gridcolor\":\"white\",\"linecolor\":\"white\",\"ticks\":\"\"},\"baxis\":{\"gridcolor\":\"white\",\"linecolor\":\"white\",\"ticks\":\"\"},\"caxis\":{\"gridcolor\":\"white\",\"linecolor\":\"white\",\"ticks\":\"\"}},\"coloraxis\":{\"colorbar\":{\"outlinewidth\":0,\"ticks\":\"\"}},\"colorscale\":{\"sequential\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"sequentialminus\":[[0.0,\"#0d0887\"],[0.1111111111111111,\"#46039f\"],[0.2222222222222222,\"#7201a8\"],[0.3333333333333333,\"#9c179e\"],[0.4444444444444444,\"#bd3786\"],[0.5555555555555556,\"#d8576b\"],[0.6666666666666666,\"#ed7953\"],[0.7777777777777778,\"#fb9f3a\"],[0.8888888888888888,\"#fdca26\"],[1.0,\"#f0f921\"]],\"diverging\":[[0,\"#8e0152\"],[0.1,\"#c51b7d\"],[0.2,\"#de77ae\"],[0.3,\"#f1b6da\"],[0.4,\"#fde0ef\"],[0.5,\"#f7f7f7\"],[0.6,\"#e6f5d0\"],[0.7,\"#b8e186\"],[0.8,\"#7fbc41\"],[0.9,\"#4d9221\"],[1,\"#276419\"]]},\"xaxis\":{\"gridcolor\":\"white\",\"linecolor\":\"white\",\"ticks\":\"\",\"title\":{\"standoff\":15},\"zerolinecolor\":\"white\",\"automargin\":true,\"zerolinewidth\":2},\"yaxis\":{\"gridcolor\":\"white\",\"linecolor\":\"white\",\"ticks\":\"\",\"title\":{\"standoff\":15},\"zerolinecolor\":\"white\",\"automargin\":true,\"zerolinewidth\":2},\"scene\":{\"xaxis\":{\"backgroundcolor\":\"#E5ECF6\",\"gridcolor\":\"white\",\"linecolor\":\"white\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"white\",\"gridwidth\":2},\"yaxis\":{\"backgroundcolor\":\"#E5ECF6\",\"gridcolor\":\"white\",\"linecolor\":\"white\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"white\",\"gridwidth\":2},\"zaxis\":{\"backgroundcolor\":\"#E5ECF6\",\"gridcolor\":\"white\",\"linecolor\":\"white\",\"showbackground\":true,\"ticks\":\"\",\"zerolinecolor\":\"white\",\"gridwidth\":2}},\"shapedefaults\":{\"line\":{\"color\":\"#2a3f5f\"}},\"annotationdefaults\":{\"arrowcolor\":\"#2a3f5f\",\"arrowhead\":0,\"arrowwidth\":1},\"geo\":{\"bgcolor\":\"white\",\"landcolor\":\"#E5ECF6\",\"subunitcolor\":\"white\",\"showland\":true,\"showlakes\":true,\"lakecolor\":\"white\"},\"title\":{\"x\":0.05},\"mapbox\":{\"style\":\"light\"}}},\"xaxis\":{\"anchor\":\"y\",\"domain\":[0.0,0.49],\"title\":{\"text\":\"BMI\"}},\"yaxis\":{\"anchor\":\"x\",\"domain\":[0.0,1.0],\"title\":{\"text\":\"Disease Progression\"}},\"xaxis2\":{\"anchor\":\"y2\",\"domain\":[0.51,1.0],\"matches\":\"x\",\"title\":{\"text\":\"BMI\"}},\"yaxis2\":{\"anchor\":\"x2\",\"domain\":[0.0,1.0],\"matches\":\"y\",\"showticklabels\":false},\"annotations\":[{\"font\":{},\"showarrow\":false,\"text\":\"sex=2\",\"x\":0.245,\"xanchor\":\"center\",\"xref\":\"paper\",\"y\":1.0,\"yanchor\":\"bottom\",\"yref\":\"paper\"},{\"font\":{},\"showarrow\":false,\"text\":\"sex=1\",\"x\":0.755,\"xanchor\":\"center\",\"xref\":\"paper\",\"y\":1.0,\"yanchor\":\"bottom\",\"yref\":\"paper\"}],\"legend\":{\"tracegroupgap\":0},\"margin\":{\"t\":60},\"title\":{\"text\":\"Diabetes Disease Progression Linear Regression\"}},                        {\"responsive\": true}                    )                };            </script>        </div>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "fig = px.line(\n",
+    "    df.sort_values(\"bmi\"),\n",
+    "    x=\"bmi\",\n",
+    "    y=\"disease_progression\",\n",
+    "    facet_col=\"sex\",\n",
+    "    title=\"\"\n",
+    ")\n",
+    "px_data = px.line(\n",
+    "    df.sort_values(\"bmi\"),\n",
+    "    x=\"bmi\",\n",
+    "    y=\"disease_progression_pred\",\n",
+    "    facet_col=\"sex\",\n",
+    "    title=\"\"\n",
+    ").data\n",
+    "px_data[0]['line']= {'color': 'orange', 'dash': 'solid'}\n",
+    "px_data[1]['line']= {'color': 'orange', 'dash': 'solid'}\n",
+    "px_data[0]['legendgroup']= \"predicted\"\n",
+    "px_data[1]['legendgroup']= \"predicted\"\n",
+    "px_data[1][\"showlegend\"] = True\n",
+    "px_data[1][\"name\"] = \"predicted\"\n",
+    "fig.add_traces(\n",
+    "    px_data\n",
+    ")\n",
+    "fig.data[0].legendgroup = \"observed\"\n",
+    "fig.data[1].legendgroup = \"observed\"\n",
+    "fig.data[1].name = \"observed\"\n",
+    "fig.data[1].showlegend = True\n",
+    "fig.layout.yaxis.title = {'text': 'Disease Progression'}\n",
+    "fig.update_xaxes(title_text=\"BMI\")\n",
+    "fig.update_layout(title=\"Diabetes Disease Progression Linear Regression\")\n",
+    "fig.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "env",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.11"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
