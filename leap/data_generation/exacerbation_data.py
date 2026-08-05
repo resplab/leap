@@ -3,7 +3,7 @@ import numpy as np
 import re
 import json
 from leap.control import Control
-from leap.utils import get_data_path, Sex, TimeDelta
+from leap.utils import get_data_path, get_time_delta_tag, Sex, TimeDelta
 from leap.logger import get_logger
 from leap.data_generation.utils import get_parser
 pd.options.mode.copy_on_write = True
@@ -444,8 +444,13 @@ def exacerbation_calibrator(
 
 
 
-def generate_exacerbation_calibration_data():
-    """Generate the exacerbation calibration data for all provinces."""
+def generate_exacerbation_calibration_data(time_delta: TimeDelta):
+    """Generate the exacerbation calibration data for all provinces.
+    
+    Args:
+        time_delta: The duration of time between data points.
+        
+    """
 
     beta_control = compute_beta_control()
 
@@ -461,7 +466,8 @@ def generate_exacerbation_calibration_data():
 
 
     # Update the config file with the beta coefficients
-    config_path = get_data_path("processed_data/config.json")
+    time_delta_tag = get_time_delta_tag(time_delta)
+    config_path = get_data_path(f"processed_data/{time_delta_tag}/config.json", mkdirs=True)
     with open(config_path) as f:
         config = json.load(f)
     config["exacerbation"]["parameters"] = {
@@ -474,11 +480,14 @@ def generate_exacerbation_calibration_data():
     logger.message("Exacerbation beta coefficients generated and saved to config.json")
 
     # Save the calibration data
-    df.to_csv(get_data_path("processed_data/exacerbation_calibration.csv"), index=False)
+    df.to_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/exacerbation_calibration.csv", mkdirs=True),
+        index=False
+    )
 
 
 if __name__ == "__main__":
     parser = get_parser()
     args = parser.parse_args()
     time_delta = TimeDelta(iso_string=args.time_delta)
-    generate_exacerbation_calibration_data()
+    generate_exacerbation_calibration_data(time_delta)
