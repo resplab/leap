@@ -154,7 +154,7 @@ where:
    * - :math:`\beta_{\text{time,sex}}`
      -  
      - :math:`t_i \cdot s_i`
-     - timepoint × sex interaction
+     - timepoint :math:`\times` sex interaction
    * - :math:`\beta_{\text{age},k}`
      - :math:`k \in \{1, \ldots, 5\}`
      - :math:`a_i^k`
@@ -162,7 +162,7 @@ where:
    * - :math:`\beta_{\text{age,sex},k}`
      - :math:`k \in \{1, \ldots, 5\}`
      - :math:`a_i^k \cdot s_i`
-     - age × sex interaction terms
+     - age :math:`\times` sex interaction terms
 
 And :math:`a_i` is the age, :math:`t_i` is the timepoint, :math:`s_i` is the sex of individual :math:`i`.
 
@@ -239,15 +239,15 @@ where:
    * - :math:`\beta_{\text{time,sex},\ell}`
      - :math:`\ell \in \{1, 2\}`
      - :math:`(t_i)^\ell \cdot s_i`
-     - timepoint × sex interactions
+     - timepoint :math:`\times` sex interactions
    * - :math:`\beta_{\text{age,time},k,\ell}`
      - :math:`k \in \{1, \ldots, 5\}`, :math:`\ell \in \{1, 2\}`
      - :math:`a_i^k \cdot (t_i)^\ell`
-     - age × timepoint interactions
+     - age :math:`\times` timepoint interactions
    * - :math:`\beta_{\text{age,time,sex},k,\ell}`
      - :math:`k \in \{1, \ldots, 5\}`, :math:`\ell \in \{1, 2\}`
      - :math:`a_i^k \cdot (t_i)^\ell \cdot s_i`
-     - age × timepoint × sex interactions
+     - age :math:`\times` timepoint :math:`\times` sex interactions
 
 and :math:`a_i` is the age, :math:`t_i` is the timepoint, :math:`s_i` is the sex of individual :math:`i`.
 
