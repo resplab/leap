@@ -183,7 +183,8 @@ There are :math:`4 + 5 + 5 = 14` coefficients in the incidence model.
 
   where:
 
-  * :math:`\beta_{k\ell m}` is the coefficient for the feature :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
+  * :math:`\beta_{k\ell m}` is the coefficient for the feature 
+    :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
   * :math:`a^{(i)}` is the age
   * :math:`t^{(i)}` is the timepoint
   * :math:`s^{(i)}` is the sex
@@ -271,7 +272,8 @@ There are :math:`(1 + 1 + 5 + 5) + (2 + 2 + 10 + 10) = 36` coefficients in the p
 
   where:
 
-  * :math:`\beta_{k\ell m}` is the coefficient for the feature :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
+  * :math:`\beta_{k\ell m}` is the coefficient for the feature 
+    :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
   * :math:`a^{(i)}` is the age
   * :math:`t^{(i)}` is the timepoint
   * :math:`s^{(i)}` is the sex
@@ -299,8 +301,8 @@ Processed Data
 
 The processed data produced by this model is stored in ``asthma_occurrence_predictions.csv``
 (under the ``time_delta_<days>`` directory, where ``<days>`` is the number of days in the
-simulation's time step — e.g. ``time_delta_365`` for yearly intervals). The data contains predicted asthma incidence and
-prevalence at 1-year age intervals, for each timepoint and sex. The variables are:
+simulation's time step — e.g. ``time_delta_365`` for yearly intervals). The data contains predicted
+asthma incidence and prevalence at 1-year age intervals, for each timepoint and sex. The variables are:
 
 .. raw:: html
 
