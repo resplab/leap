@@ -374,7 +374,7 @@ def exacerbation_calibrator(
     Returns:
         A dataframe with the following columns:
 
-        * ``year``: The year of the data, a value in ``[starting_year, max_year]``.
+        * ``timepoint``: The year of the data, a value in ``[starting_year, max_year]``.
         * ``age``: The integer age, a value in ``[min_age, max_age]``.
         * ``sex``: One of ``M`` or ``F``.
         * ``calibrator_multiplier``: The ratio between the observed and predicted number of
@@ -394,13 +394,13 @@ def exacerbation_calibrator(
     # Canada Institute for Health Information (CIHI) data on hospitalizations due to asthma
     df_hosp = load_hospitalization_data(province, min_timepoint, min_age)
 
-    final_year = max(df_hosp["year"])
+    final_year = max(df_hosp["timepoint"])
     future_years = list(range(final_year + 1, max_timepoint + 1))
     
     # Append a copy of the final year data for each of the future years, changing the year column
     for year in future_years:
-        df_hosp_year = df_hosp[df_hosp["year"] == final_year].copy()
-        df_hosp_year["year"] = [year] * df_hosp_year.shape[0]
+        df_hosp_year = df_hosp[df_hosp["timepoint"] == final_year].copy()
+        df_hosp_year["timepoint"] = [year] * df_hosp_year.shape[0]
         df_hosp = pd.concat([df_hosp, df_hosp_year])
 
     # Load population data
@@ -411,7 +411,7 @@ def exacerbation_calibrator(
     # Calculate the number of hospitalizations for a given year, age, and sex
     # hospitalization_rate: The observed number of hospitalizations per 100 000 people.
     # n: The number of people in a given year, age, and sex.
-    df_target = pd.merge(df_population, df_hosp, on=["year", "sex", "age"], how="left")
+    df_target = pd.merge(df_population, df_hosp, on=["timepoint", "sex", "age"], how="left")
     df_target["n_hosp"] = df_target.apply(
         lambda x: x["hospitalization_rate"] * x["n"] / 100000, axis=1
     )
@@ -419,7 +419,7 @@ def exacerbation_calibrator(
     # Calculate the number of people with asthma for a given year, age, and sex
     # prev: The prevalence of asthma for a given year, age, and sex.
     # n: The number of people in a given year, age, and sex.
-    df_target = pd.merge(df_target, df_prev, on=["year", "sex", "age"], how="left")
+    df_target = pd.merge(df_target, df_prev, on=["timepoint", "sex", "age"], how="left")
     df_target["n_asthma"] = df_target.apply(
         lambda x: x["prevalence"] * x["n"], axis=1
     )
@@ -449,7 +449,7 @@ def exacerbation_calibrator(
     )
 
     # Drop unnecessary columns
-    df = df_target[["year", "sex", "age", "calibrator_multiplier"]]
+    df = df_target[["timepoint", "sex", "age", "calibrator_multiplier"]]
 
     # Add province column
     df["province"] = [province] * df.shape[0]
@@ -469,7 +469,7 @@ def generate_exacerbation_calibration_data(time_delta: TimeDelta):
     beta_control = compute_beta_control()
 
     df = pd.DataFrame({
-        "year": np.array([], dtype=int),
+        "timepoint": np.array([], dtype=dt.datetime),
         "sex": [],
         "age": np.array([], dtype=int),
         "calibrator_multiplier": []
