@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import datetime as dt
 import re
 import json
 from leap.control import Control
@@ -160,7 +161,7 @@ def parse_age(x: str) -> int | float:
     
 
 def load_hospitalization_data(
-    province: str = "CA", starting_year: int = 2000, min_age: int = 3
+    province: str = "CA", min_timepoint: dt.datetime = dt.datetime(2000, 1, 1), min_age: int = 3
 ) -> pd.DataFrame:
     """Load the hospitalization data for the given province and starting year.
 
@@ -173,15 +174,15 @@ def load_hospitalization_data(
     
     Args:
         province: The province for which to load the hospitalization data.
-        starting_year: The starting year for which to load the hospitalization data.
+        min_timepoint: The minimum timepoint for which to load the hospitalization data.
         min_age: The minimum age for to be used in the data. We are assuming that
             asthma diagnoses are made at age 3 and older, so the default is 3.
         
     Returns:
-        The hospitalization data for the given province and starting year.
+        The hospitalization data for the given province and minimum timepoint.
         Columns:
 
-        * ``year``: The year of the data.
+        * ``timepoint``: The timepoint of the data.
         * ``sex``: One of ``M`` = male, ``F`` = female.
         * ``age``: Integer age, a value in ``[3, 90]``.
         * ``hospitalization_rate``: The observed number of hospitalizations per ``100 000`` people
@@ -189,12 +190,15 @@ def load_hospitalization_data(
     """
 
     # Load the hospitalization data
-    df = pd.read_csv(get_data_path(f"original_data/asthma_hosp/{province}/tab1_rate.csv"))
-    df.rename(columns={"fiscal_year": "year"}, inplace=True)
-    df = df[df["year"] >= starting_year]
+    df = pd.read_csv(
+        get_data_path(f"original_data/asthma_hosp/{province}/tab1_rate.csv"),
+        parse_dates=["fiscal_year"]
+    )
+    df.rename(columns={"fiscal_year": "timepoint"}, inplace=True)
+    df = df[df["timepoint"] >= min_timepoint]
 
     # Convert the columns M, F, N, M_1, M_2, etc to single column "type"
-    df = df.melt(id_vars=["year"], var_name="type", value_name="hospitalization_rate")
+    df = df.melt(id_vars=["timepoint"], var_name="type", value_name="hospitalization_rate")
     df["type"] = df.apply(
         lambda x: x["type"].replace("+", ""), axis=1
     )
@@ -230,8 +234,8 @@ def load_hospitalization_data(
     # Filter out age < 3
     df = df.loc[df["age"] >= min_age]
 
-    # Sort by year, sex, and age
-    df = df.sort_values(by=["year", "sex", "age"])
+    # Sort by timepoint, sex, and age
+    df = df.sort_values(by=["timepoint", "sex", "age"])
 
     return df
 
