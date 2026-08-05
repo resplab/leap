@@ -330,6 +330,7 @@ def load_population_data(
 
 def exacerbation_calibrator(
     beta_control: np.ndarray,
+    time_delta: TimeDelta,
     province: str = "CA",
     starting_year: int = 2000,
     max_year: int = 2065,
@@ -342,6 +343,7 @@ def exacerbation_calibrator(
     
     Args:
         beta_control: A list of three floats, the control beta coefficients.
+        time_delta: The duration of time between data points.
         province: The 2-letter abbreviation for the province.
         starting_year: The starting year for the calibration.
         max_year: The maximum year for the calibration.
@@ -375,8 +377,11 @@ def exacerbation_calibrator(
           hospitalizations.
     """
 
-    df_prev_inc = pd.read_csv(get_data_path("processed_data/asthma_occurrence_predictions.csv"))
-    df_prev = df_prev_inc[["year", "age", "sex", "prevalence"]]
+    time_delta_tag = get_time_delta_tag(time_delta)
+    df_prev_inc = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv"),
+        parse_dates=["timepoint"]
+    )
     df_prev["sex"] = df_prev.apply(
         lambda x: "F" if x["sex"]==0 else "M", axis=1
     )
@@ -465,7 +470,9 @@ def generate_exacerbation_calibration_data(time_delta: TimeDelta):
         "calibrator_multiplier": []
     })
     for province in PROVINCES:
-        df_province = exacerbation_calibrator(beta_control, province, max_year=MAX_YEARS[province])
+        df_province = exacerbation_calibrator(
+            beta_control, time_delta, province, max_year=MAX_YEARS[province]
+        )
         df = pd.concat([df, df_province], axis=0)
 
 
