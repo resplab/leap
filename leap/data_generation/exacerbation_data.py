@@ -332,8 +332,8 @@ def exacerbation_calibrator(
     beta_control: np.ndarray,
     time_delta: TimeDelta,
     province: str = "CA",
-    starting_year: int = 2000,
-    max_year: int = 2065,
+    min_timepoint: dt.datetime = dt.datetime(2000, 1, 1),
+    max_timepoint: dt.datetime = dt.datetime(2065, 12, 31),
     min_age: int = MIN_AGE,
     max_age: int = MAX_AGE,
     prob_hosp: float = PROB_HOSP,
@@ -345,8 +345,8 @@ def exacerbation_calibrator(
         beta_control: A list of three floats, the control beta coefficients.
         time_delta: The duration of time between data points.
         province: The 2-letter abbreviation for the province.
-        starting_year: The starting year for the calibration.
-        max_year: The maximum year for the calibration.
+        min_timepoint: The minimum timepoint for the calibration.
+        max_timepoint: The maximum timepoint for the calibration.
         min_age: The minimum age for the calibration.
         max_age: The maximum age for the calibration.
         prob_hosp: The probability of a very severe exacerbation, defined as an
@@ -388,10 +388,10 @@ def exacerbation_calibrator(
     )
 
     # Canada Institute for Health Information (CIHI) data on hospitalizations due to asthma
-    df_hosp = load_hospitalization_data(province, starting_year, min_age)
+    df_hosp = load_hospitalization_data(province, min_timepoint, min_age)
 
     final_year = max(df_hosp["year"])
-    future_years = list(range(final_year + 1, max_year + 1))
+    future_years = list(range(final_year + 1, max_timepoint + 1))
     
     # Append a copy of the final year data for each of the future years, changing the year column
     for year in future_years:
@@ -401,7 +401,7 @@ def exacerbation_calibrator(
 
     # Load population data
     df_population = load_population_data(
-        province, starting_year, projection_scenario, max_year, min_age, max_age
+        province, min_timepoint, projection_scenario, max_timepoint, min_age, max_age
     )
 
     # Calculate the number of hospitalizations for a given year, age, and sex
@@ -472,7 +472,7 @@ def generate_exacerbation_calibration_data(time_delta: TimeDelta):
     })
     for province in PROVINCES:
         df_province = exacerbation_calibrator(
-            beta_control, time_delta, province, max_year=MAX_YEARS[province]
+            beta_control, time_delta, province, max_timepoint=MAX_YEARS[province]
         )
         df = pd.concat([df, df_province], axis=0)
 
