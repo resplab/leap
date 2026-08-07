@@ -11,26 +11,26 @@ from leap.utils import round_number
     ),
     [
         (
-            dt.datetime(2024, 1, 1),
-            dt.datetime(2026, 1, 1),
-            4,
-            111,
-            0,
-            "BC",
-            "LG",
-            0.004955,
-            0.004911
-        ),
-        (
-            dt.datetime(2024, 1, 1),
-            dt.datetime(2025, 1, 1),
+            dt.datetime(2000, 1, 1),
+            dt.datetime(2005, 1, 1),
             4,
             111,
             1,
             "BC",
             "LG",
-            0.007408,
-            0.007319
+            0.006876,
+            0.008984
+        ),
+        (
+            dt.datetime(2000, 1, 1),
+            dt.datetime(2003, 1, 1),
+            4,
+            111,
+            0,
+            "BC",
+            "LG",
+            0.002131,
+            0.005572
         ),
     ]
 )
@@ -57,13 +57,13 @@ def test_immigration_constructor(
     ),
     [
         (
-            dt.datetime(2024, 1, 1),
-            dt.datetime(2025, 1, 1),
+            dt.datetime(2000, 1, 1),
+            dt.datetime(2003, 1, 1),
             111,
             "BC",
             "LG",
             1000,
-            1013
+            383
         )
     ]
 )

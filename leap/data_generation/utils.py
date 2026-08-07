@@ -3,7 +3,7 @@ import numpy as np
 import datetime as dt
 import argparse
 import itertools
-from leap.utils import TimeDelta, date_range, PROVINCE_MAP
+from leap.utils import date_range, TimeDelta, Timepoint, PROVINCE_MAP, Age
 from leap.logger import get_logger
 from typing import Optional, Tuple, List, Callable, Dict, Any, Literal
 
@@ -118,6 +118,72 @@ def format_age_group(age_group: str, upper_age_group: str = "100 years and over"
         age = age.replace(" year", "")
         age = int(age)
     return age
+
+
+def convert_sex_to_numeric(sex: str) -> int:
+    """Convert a sex string to a numeric value.
+
+    Args:
+        sex: One of ``M`` = male, ``F`` = female.
+
+    Returns:
+        1 for female, 2 for male.
+    """
+    if sex == "F":
+        return 1
+    elif sex == "M":
+        return 2
+    else:
+        raise ValueError(f"Invalid sex: {sex}")
+
+
+def convert_numeric_to_sex(sex: int) -> str:
+    """Convert a numeric sex value to a string.
+
+    Args:
+        sex: One of ``1`` = female, ``2`` = male.
+
+    Returns:
+        ``F`` for female, ``M`` for male.
+    """
+    if sex == 1:
+        return "F"
+    elif sex == 2:
+        return "M"
+    else:
+        raise ValueError(f"Invalid sex: {sex}")
+
+
+def convert_timepoint_to_numeric(timepoint: dt.datetime) -> float:
+    """Convert a datetime object to a numeric value.
+
+    Args:
+        timepoint: A datetime object.
+
+    Returns:
+        A number representing the year of the timepoint.
+    """
+    time_delta = timepoint - dt.datetime(1, 1, 1)
+    time_delta += dt.timedelta(days=366)  # Add 1 year to account for the fact that the first year is 1
+    total_days = time_delta.total_seconds() / (24 * 3600)
+    return total_days / 365.25
+
+
+def convert_numeric_to_timepoint(timepoint: float) -> Timepoint:
+    """Convert a numeric value to a datetime object.
+
+    Args:
+        timepoint: The number of years since the year 0.0 AD/BC.
+
+    Returns:
+        A datetime object representing the timepoint.
+    """
+    total_seconds = timepoint * 365.25 * 24 * 3600
+    time_delta = dt.timedelta(seconds=total_seconds)
+
+    # Subtract 1 year to account for the fact that the first year is 1
+    timepoint_dt = dt.datetime(year=1, month=1, day=1) + time_delta - dt.timedelta(days=366)  
+    return Timepoint.from_datetime(timepoint_dt)
 
 
 def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float) -> int | list[int]:
@@ -481,5 +547,30 @@ def interpolate(
 
     return df
 
-    
 
+def split_ages(
+    df: pd.DataFrame, time_delta: TimeDelta, time_delta_od: TimeDelta, cols_divide: List[str]
+) -> pd.DataFrame:
+    """Split the age groups in the ``age`` column into finer age groups based on the time delta.
+    
+    Args:
+        df: A Pandas dataframe containing an ``age`` column.
+        time_delta: The time delta to split the age groups by, e.g. 1 year, 5 years, etc.
+        time_delta_od: The original time delta of the data, i.e. the time delta that the data was
+            originally collected at.
+        cols_divide: A list of column names whose values should be divided proportionally to the
+            age groups.
+    
+    Returns:
+        A Pandas dataframe with the age groups in the ``age`` column split into finer age groups.
+    """
+
+    n_intervals = time_delta_od // time_delta
+    df = df.loc[
+        df.index.repeat(n_intervals)
+    ].reset_index(drop=True)
+    df["age"] = df["age"] + np.arange(len(df)) % n_intervals / n_intervals
+    df["age"] = [Age(value=x) for x in df["age"]]
+    for col in cols_divide:
+        df[col] = df[col] / n_intervals
+    return df
