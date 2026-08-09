@@ -14,6 +14,8 @@ DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 # Most recent census date from StatCan; data switches from past to projected at this timepoint
 CENSUS_TIMEPOINT = dt.datetime(2021, 1, 1)
 
+SECONDS_PER_YEAR = 365.25 * 24 * 3600
+
 
 def get_parser() -> argparse.ArgumentParser:
     """Get the command line interface parser."""
@@ -165,8 +167,7 @@ def convert_timepoint_to_numeric(timepoint: dt.datetime) -> float:
     """
     time_delta = timepoint - dt.datetime(1, 1, 1)
     time_delta += dt.timedelta(days=366)  # Add 1 year to account for the fact that the first year is 1
-    total_days = time_delta.total_seconds() / (24 * 3600)
-    return total_days / 365.25
+    return time_delta.total_seconds() / SECONDS_PER_YEAR
 
 
 def convert_numeric_to_timepoint(timepoint: float) -> Timepoint:
@@ -178,7 +179,7 @@ def convert_numeric_to_timepoint(timepoint: float) -> Timepoint:
     Returns:
         A datetime object representing the timepoint.
     """
-    total_seconds = timepoint * 365.25 * 24 * 3600
+    total_seconds = round(timepoint * SECONDS_PER_YEAR)
     time_delta = dt.timedelta(seconds=total_seconds)
 
     # Subtract 1 year to account for the fact that the first year is 1
