@@ -4,7 +4,7 @@ import datetime as dt
 import re
 import json
 from leap.control import Control
-from leap.utils import get_data_path, get_time_delta_tag, date_range, Sex, TimeDelta
+from leap.utils import get_data_path, get_time_delta_tag, date_range, Sex, TimeDelta, Timepoint
 from leap.logger import get_logger
 from leap.data_generation.utils import get_parser, CENSUS_TIMEPOINT
 pd.options.mode.copy_on_write = True
@@ -414,6 +414,8 @@ def exacerbation_calibrator(
     # Calculate the number of hospitalizations for a given year, age, and sex
     # hospitalization_rate: The observed number of hospitalizations per 100 000 people.
     # n: The number of people in a given year, age, and sex.
+    df_hosp["timepoint"] = df_hosp["timepoint"].apply(lambda x: Timepoint.from_datetime(x))
+    df_population["timepoint"] = df_population["timepoint"].apply(lambda x: Timepoint.from_datetime(x))
     df_target = pd.merge(df_population, df_hosp, on=["timepoint", "sex", "age"], how="left")
     df_target["n_hosp"] = df_target.apply(
         lambda x: x["hospitalization_rate"] * x["n"] / 100000, axis=1
@@ -422,6 +424,7 @@ def exacerbation_calibrator(
     # Calculate the number of people with asthma for a given year, age, and sex
     # prev: The prevalence of asthma for a given year, age, and sex.
     # n: The number of people in a given year, age, and sex.
+    df_prev["timepoint"] = df_prev["timepoint"].apply(lambda x: Timepoint.from_datetime(x))
     df_target = pd.merge(df_target, df_prev, on=["timepoint", "sex", "age"], how="left")
     df_target["n_asthma"] = df_target["prevalence"] * df_target["n"]
 
