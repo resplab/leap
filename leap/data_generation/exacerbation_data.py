@@ -287,15 +287,13 @@ def load_population_data(
 
     # Add a sex column and compute n_age for each sex (n_age_sex)
     df_male = df.copy()
-    df_male["sex"] = ["M"] * df.shape[0]
-    df_male["n_age_sex"] = df.apply(
-        lambda x: x["n_age"] * x["prop_male"], axis=1
-    )
+    df_male["sex"] = "M"
+    df_male["n_age_sex"] = df["n_age"] * df["prop_male"]
+
     df_female = df.copy()
-    df_female["sex"] = ["F"] * df.shape[0]
-    df_female["n_age_sex"] = df.apply(
-        lambda x: x["n_age"] * (1 - x["prop_male"]), axis=1
-    )
+    df_female["sex"] = "F"
+    df_female["n_age_sex"] = df["n_age"] * (1 - df["prop_male"])
+
     df = pd.concat([df_female, df_male])
     df["n_age_sex"] = df["n_age_sex"].astype(int)
 
@@ -320,13 +318,11 @@ def load_population_data(
     df = df.loc[df["age"] >= min_age]
 
     # Set any age > max_age to the max_age
-    df["age"] = df["age"].apply(
-        lambda x: min(x, max_age)
-    )
+    df["age"] = df["age"].clip(upper=max_age)
 
     # Sum the max_age rows to a single value of n
     grouped_df = df.groupby(["timepoint", "sex", "age"])
-    df["n"] = grouped_df["n"].transform(lambda x: sum(x))
+    df["n"] = grouped_df["n"].transform("sum")
     df.drop_duplicates(inplace=True)
 
     return df
