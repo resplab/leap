@@ -4,13 +4,14 @@ import datetime as dt
 import re
 import json
 from leap.control import Control
-from leap.utils import get_data_path, get_time_delta_tag, Sex, TimeDelta
+from leap.utils import get_data_path, get_time_delta_tag, date_range, Sex, TimeDelta
 from leap.logger import get_logger
 from leap.data_generation.utils import get_parser, CENSUS_TIMEPOINT
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
+TIME_DELTA_OD = TimeDelta(years=1)
 
 # We assume that asthma diagnoses are made at age 3 and older
 MIN_AGE = 3
@@ -390,14 +391,20 @@ def exacerbation_calibrator(
     # Canada Institute for Health Information (CIHI) data on hospitalizations due to asthma
     df_hosp = load_hospitalization_data(province, min_timepoint, min_age)
 
-    final_year = max(df_hosp["timepoint"])
-    future_years = list(range(final_year + 1, max_timepoint + 1))
+    final_timepoint = max(df_hosp["timepoint"])
+    future_timepoints = list(date_range(
+        final_timepoint + TIME_DELTA_OD, max_timepoint + TIME_DELTA_OD, TIME_DELTA_OD
+    ))
     
     # Append a copy of the final year data for each of the future years, changing the year column
-    for year in future_years:
-        df_hosp_year = df_hosp[df_hosp["timepoint"] == final_year].copy()
-        df_hosp_year["timepoint"] = [year] * df_hosp_year.shape[0]
-        df_hosp = pd.concat([df_hosp, df_hosp_year])
+    df_hosp_final_timepoint = df_hosp.loc[df_hosp["timepoint"] == final_timepoint]
+    n_repeats = len(future_timepoints)
+    df_repeated = df_hosp_final_timepoint.loc[
+        df_hosp_final_timepoint.index.repeat(n_repeats)
+    ].copy()
+    df_repeated["timepoint"] = np.tile(np.asarray(future_timepoints), len(df_hosp_final_timepoint))
+
+    df_hosp = pd.concat([df_hosp, df_repeated], ignore_index=True)
 
     # Load population data
     df_population = load_population_data(
