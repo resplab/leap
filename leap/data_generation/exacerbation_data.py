@@ -416,9 +416,7 @@ def exacerbation_calibrator(
     # prev: The prevalence of asthma for a given year, age, and sex.
     # n: The number of people in a given year, age, and sex.
     df_target = pd.merge(df_target, df_prev, on=["timepoint", "sex", "age"], how="left")
-    df_target["n_asthma"] = df_target.apply(
-        lambda x: x["prevalence"] * x["n"], axis=1
-    )
+    df_target["n_asthma"] = df_target["prevalence"] * df_target["n"]
 
     # Calculate the mean number of exacerbations for a given age and sex
     df_target["mean_annual_exacerbation"] = df_target.apply(
