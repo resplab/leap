@@ -436,9 +436,7 @@ def exacerbation_calibrator(
     # Calculate the predicted number of exacerbations for a given year, age, and sex
     # mean_annual_exacerbation: The mean number of exacerbations for a given year, age, and sex.
     # n_asthma: The number of people with asthma for a given age, sex, and year.
-    df_target["n_exacerbations_pred"] = df_target.apply(
-        lambda x: x["mean_annual_exacerbation"] * x["n_asthma"], axis=1
-    )
+    df_target["n_exacerbations_pred"] = df_target["mean_annual_exacerbation"] * df_target["n_asthma"]
 
     # Calculate the predicted number of hospitalizations for a given year, age, and sex.
     # prob_hosp: the number of exacerbations per year per person with asthma.
@@ -456,7 +454,7 @@ def exacerbation_calibrator(
     df = df_target[["timepoint", "sex", "age", "calibrator_multiplier"]]
 
     # Add province column
-    df["province"] = [province] * df.shape[0]
+    df["province"] = province
 
     return df
 
