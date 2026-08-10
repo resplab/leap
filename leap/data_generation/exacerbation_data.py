@@ -19,9 +19,9 @@ MIN_AGE = 3
 MAX_AGE = 90
 
 PROVINCES = ["BC", "CA"]
-MAX_YEARS = {
-    "BC": 2043,
-    "CA": 2065
+MAX_TIMEPOINTS = {
+    "BC": dt.datetime(2043,1,1),
+    "CA": dt.datetime(2065,1,1)
 }
 
 # Probability of a very severe exacerbation:
@@ -478,7 +478,7 @@ def generate_exacerbation_calibration_data(time_delta: TimeDelta):
     })
     for province in PROVINCES:
         df_province = exacerbation_calibrator(
-            beta_control, time_delta, province, max_timepoint=MAX_YEARS[province]
+            beta_control, time_delta, province, max_timepoint=MAX_TIMEPOINTS[province]
         )
         df = pd.concat([df, df_province], axis=0)
 
