@@ -441,14 +441,10 @@ def exacerbation_calibrator(
     # Calculate the predicted number of hospitalizations for a given year, age, and sex.
     # prob_hosp: the number of exacerbations per year per person with asthma.
     # n_exacerbations_pred: The predicted number of exacerbations for a given year, age, and sex.
-    df_target["n_hosp_pred"] = df_target.apply(
-        lambda x: prob_hosp * x["n_exacerbations_pred"], axis=1
-    )
+    df_target["n_hosp_pred"] = prob_hosp * df_target["n_exacerbations_pred"]
 
     # Calculate the ratio between the observed and predicted number of hospitalizations
-    df_target["calibrator_multiplier"] = df_target.apply(
-        lambda x: x["n_hosp"] / x["n_hosp_pred"], axis=1
-    )
+    df_target["calibrator_multiplier"] = df_target["n_hosp"] / df_target["n_hosp_pred"]
 
     # Drop unnecessary columns
     df = df_target[["timepoint", "sex", "age", "calibrator_multiplier"]]
