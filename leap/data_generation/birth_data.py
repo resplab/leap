@@ -121,7 +121,8 @@ def load_past_births_population_data(
         col_pred="N",
         time_delta=time_delta,
         time_delta_od=TIME_DELTA_OD,
-        columns_group=["province", "projection_scenario"]
+        columns_group=["province", "projection_scenario"],
+        columns_variable=["province"]
     ).reset_index(drop=True)
     df.sort_values(["province", "projection_scenario", "timepoint"], inplace=True)
     df = df[["province", "projection_scenario", "timepoint", "N", "prop_male"]]
@@ -232,7 +233,8 @@ def load_projected_births_population_data(
         col_pred="N",
         time_delta=time_delta,
         time_delta_od=TIME_DELTA_OD,
-        columns_group=["province", "projection_scenario"]
+        columns_group=["province", "projection_scenario"],
+        columns_variable=["province"]
     ).reset_index(drop=True)
     df.sort_values(["province", "projection_scenario", "timepoint"], inplace=True)
     df = df[["province", "projection_scenario", "timepoint", "N", "prop_male"]]
@@ -355,7 +357,8 @@ def load_past_initial_population_data(
         col_pred="n_age",
         time_delta=time_delta,
         time_delta_od=TIME_DELTA_OD,
-        columns_group=["province", "age"]
+        columns_group=["province", "age"],
+        columns_variable=["province"]
     ).reset_index(drop=True)
 
     # get the total number of births for a given time interval and province
@@ -480,7 +483,8 @@ def load_projected_initial_population_data(
         col_pred="n_age",
         time_delta=time_delta,
         time_delta_od=TIME_DELTA_OD,
-        columns_group=["province", "projection_scenario", "age"]
+        columns_group=["province", "projection_scenario", "age"],
+        columns_variable=["province"]
     ).reset_index(drop=True)
 
     # get the total number of births for a given timepoint, province, and projection scenario
