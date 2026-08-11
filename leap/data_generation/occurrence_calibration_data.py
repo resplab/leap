@@ -1,16 +1,16 @@
 import pandas as pd
 import json
 import numpy as np
-import argparse
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 from scipy import optimize
 import itertools
-from leap.utils import get_data_path
+from leap.utils import get_data_path, TimeDelta
 from leap.data_generation.prevalence_calibration import optimize_prevalence_β_parameters, \
     compute_asthma_prevalence_λ, get_asthma_prevalence_correction
 from leap.data_generation.incidence_calibration import inc_correction_calculator, \
     compute_odds_ratio_difference
 from leap.data_generation.antibiotic_data import get_predicted_abx_data, generate_antibiotic_data
+from leap.data_generation.utils import get_parser
 from leap.logger import get_logger
 from typing import Tuple, Dict, TypedDict, Literal
 from scipy.stats import nbinom
@@ -1179,8 +1179,8 @@ def generate_occurrence_calibration_data(
 
     
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    args = parser.add_argument_group("ARGUMENTS")
+    parser = get_parser()
+    args = next(g for g in parser._action_groups if g.title == "ARGUMENTS")
     args.add_argument(
         "-r",
         "--retrain-beta",
@@ -1196,4 +1196,7 @@ if __name__ == "__main__":
     logger.message(
         f"Calibrating the asthma occurrence model. Retrain beta parameters? {args.retrain_beta}"
     )
-    generate_occurrence_calibration_data(retrain_beta=args.retrain_beta)
+    time_delta = TimeDelta(iso_string=args.time_delta)
+    generate_occurrence_calibration_data(
+        retrain_beta=args.retrain_beta
+    )
