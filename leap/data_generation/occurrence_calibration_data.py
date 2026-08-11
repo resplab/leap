@@ -21,8 +21,8 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 PROVINCE = "CA"
-MAX_YEAR = 2065 # 2065 for CA; 2043 for BC
-MIN_YEAR = 2000
+MAX_TIMEPOINT = 2065 # 2065 for CA; 2043 for BC
+MIN_TIMEPOINT = 2000
 STABILIZATION_YEAR = 2025
 BASELINE_YEAR = 2001
 MAX_AGE = 63
@@ -96,15 +96,15 @@ def get_asthma_occurrence_prediction(
 
 def load_occurrence_data(
     province: str = PROVINCE,
-    min_year: int = MIN_YEAR,
-    max_year: int = MAX_YEAR
+    min_timepoint: int = MIN_TIMEPOINT,
+    max_timepoint: int = MAX_TIMEPOINT
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Load the asthma incidence and prevalence data for the given province and year range.
 
     Args:
         province: The province to load data for.
-        min_year: The minimum year to load data for.
-        max_year: The maximum year to load data for.
+        min_timepoint: The minimum year to load data for.
+        max_timepoint: The maximum year to load data for.
 
     Returns:
         A tuple of two DataFrames.
@@ -127,7 +127,7 @@ def load_occurrence_data(
     """
 
     df_asthma = pd.DataFrame(
-        list(itertools.product(range(3, 111), ["F", "M"], range(min_year, max_year + 1))),
+        list(itertools.product(range(3, 111), ["F", "M"], range(min_timepoint, max_timepoint + 1))),
         columns=["age", "sex", "year"]
     )
 
@@ -727,7 +727,7 @@ def calibrate_asthma_incidence(
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     β_risk_factors: Dict[str, Dict[str, float]] = β_RISK_FACTORS,
-    min_year: int = MIN_YEAR
+    min_timepoint: int = MIN_TIMEPOINT
 ) -> ResultsIncidence:
     """Calibrate the asthma incidence for the given year, age, and sex.
 
@@ -758,7 +758,7 @@ def calibrate_asthma_incidence(
               odds ratio calculation. Must contain the keys ``β_abx_0``, ``β_abx_age``,
               and ``β_abx_dose``.
 
-        min_year: The minimum year to consider for the calibration.
+        min_timepoint: The minimum year to consider for the calibration.
 
     Returns:
         A dictionary containing the calibrated asthma incidence for the given year, age, and sex.
@@ -807,12 +807,12 @@ def calibrate_asthma_incidence(
     # target asthma prevalence for the previous year and age from BC Ministry of Health data
     past_asthma_prev_target = df_prevalence.loc[
         (df_prevalence["age"] == age - 1) &
-        (df_prevalence["year"] == max(min_year, year - 1)) &
+        (df_prevalence["year"] == max(min_timepoint, year - 1)) &
         (df_prevalence["sex"] == sex) 
     ]["prevalence"].iloc[0]
 
     past_risk_set = risk_factor_generator(
-        year=max(min_year, year - 1),
+        year=max(min_timepoint, year - 1),
         sex=sex,
         age=age - 1,
         model_abx=model_abx
@@ -827,7 +827,7 @@ def calibrate_asthma_incidence(
         )
     elif age - 1 == MAX_ABX_AGE:
         prev_calibration_past = calibrate_asthma_prevalence(
-            year=max(min_year, year - 1),
+            year=max(min_timepoint, year - 1),
             sex=sex,
             age=age - 1,
             model_abx=model_abx,
@@ -900,7 +900,7 @@ def compute_mean_diff_log_OR(
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
-    min_year: int = MIN_YEAR
+    min_timepoint: int = MIN_TIMEPOINT
 ) -> float:
 
     """Compute the mean difference in log odds ratio for the given model and data.
@@ -937,7 +937,7 @@ def compute_mean_diff_log_OR(
             * ``prob (float)``: the probability that someone diagnosed with asthma previously
               will maintain their asthma diagnosis in the given year.
 
-        min_year: The minimum year to consider for the calibration.
+        min_timepoint: The minimum year to consider for the calibration.
 
     Returns:
         The mean difference in log odds ratio for the given model and data.
@@ -957,7 +957,7 @@ def compute_mean_diff_log_OR(
     inc_calibration_results = df.apply(
         lambda x: calibrate_asthma_incidence(
             x["year"], x["sex"], x["age"], model_abx, df_incidence, df_prevalence,
-            β_risk_factors, min_year
+            β_risk_factors, min_timepoint
         ),
         axis=1
     )
@@ -991,7 +991,7 @@ def beta_params_age_optimizer(
     baseline_year: int = BASELINE_YEAR,
     stabilization_year: int = STABILIZATION_YEAR,
     max_age: int = MAX_AGE,
-    min_year: int = MIN_YEAR,
+    min_timepoint: int = MIN_TIMEPOINT,
     β_risk_factors_age: list[float] = [
         β_RISK_FACTORS["fam_history"]["β_fhx_age"], β_RISK_FACTORS["abx"]["β_abx_age"]
     ]
@@ -1025,7 +1025,7 @@ def beta_params_age_optimizer(
         baseline_year: The baseline year for the calibration.
         stabilization_year: The stabilization year for the calibration.
         max_age: The maximum age to consider for the calibration.
-        min_year: The minimum year to consider for the calibration.
+        min_timepoint: The minimum year to consider for the calibration.
         β_risk_factors_age: A list of two beta parameters, ``β_fhx_age`` and ``β_abx_age``, to be
             used as the initial values in the optimization.
     """
@@ -1043,7 +1043,7 @@ def beta_params_age_optimizer(
         fun=compute_mean_diff_log_OR,
         x0=β_risk_factors_age,
         args=(
-            df, model_abx, df_incidence, df_prevalence, df_reassessment, min_year
+            df, model_abx, df_incidence, df_prevalence, df_reassessment, min_timepoint
         ),
         method="BFGS",
         options={"maxiter": 1, "disp": True, "gtol": 1e-2}
@@ -1062,8 +1062,8 @@ def beta_params_age_optimizer(
 def generate_occurrence_calibration_data(
     time_delta: TimeDelta,
     province: str = PROVINCE,
-    min_year: int = MIN_YEAR,
-    max_year: int = MAX_YEAR,
+    min_timepoint: int = MIN_TIMEPOINT,
+    max_timepoint: int = MAX_TIMEPOINT,
     baseline_year: int = BASELINE_YEAR,
     stabilization_year: int = STABILIZATION_YEAR,
     max_age: int = MAX_AGE,
@@ -1074,8 +1074,8 @@ def generate_occurrence_calibration_data(
     Args:
         time_delta: The duration of time between data points.
         province: The province to load data for.
-        min_year: The minimum year to load data for.
-        max_year: The maximum year to load data for.
+        min_timepoint: The minimum year to load data for.
+        max_timepoint: The maximum year to load data for.
         baseline_year: The baseline year for the calibration.
         stabilization_year: The stabilization year for the calibration.
         max_age: The maximum age to consider for the calibration.
@@ -1085,8 +1085,8 @@ def generate_occurrence_calibration_data(
 
     df_incidence, df_prevalence = load_occurrence_data(
         province=province,
-        min_year=min_year,
-        max_year=max_year
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint
     )
 
     df_reassessment = load_reassessment_data(province=province)
@@ -1147,7 +1147,7 @@ def generate_occurrence_calibration_data(
             df_incidence=df_incidence,
             df_prevalence=df_prevalence,
             β_risk_factors=β_risk_factors,
-            min_year=min_year
+            min_timepoint=min_timepoint
         )["α"], axis=1
     ).reset_index(drop=True)
 
