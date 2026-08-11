@@ -384,9 +384,6 @@ def exacerbation_calibrator(
         parse_dates=["timepoint"]
     )
     df_prev = df_prev_inc[["timepoint", "age", "sex", "prevalence"]]
-    df_prev["sex"] = df_prev.apply(
-        lambda x: "F" if x["sex"]==0 else "M", axis=1
-    )
 
     # Canada Institute for Health Information (CIHI) data on hospitalizations due to asthma
     df_hosp = load_hospitalization_data(province, min_timepoint, min_age)
