@@ -6,7 +6,7 @@ import json
 from leap.control import Control
 from leap.utils import get_data_path, get_time_delta_tag, date_range, Sex, TimeDelta, Timepoint
 from leap.logger import get_logger
-from leap.data_generation.utils import get_parser, CENSUS_TIMEPOINT
+from leap.data_generation.utils import get_parser, interpolate, CENSUS_TIMEPOINT
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
@@ -234,6 +234,18 @@ def load_hospitalization_data(
 
     # Filter out age < 3
     df = df.loc[df["age"] >= min_age]
+
+    # Interpolate the missing q_x points for the new time delta
+    df = interpolate(
+        data=df.copy().reset_index(drop=True),
+        time_delta=time_delta,
+        time_delta_od=TIME_DELTA_OD,
+        columns_group=["age", "sex"],
+        columns_variable=None,
+        col_pred="hospitalization_rate",
+        func="constant"
+    )
+
 
     # Sort by timepoint, sex, and age
     df = df.sort_values(by=["timepoint", "sex", "age"])
