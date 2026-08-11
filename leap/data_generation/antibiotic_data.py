@@ -1,11 +1,13 @@
 import pandas as pd
 import numpy as np
+import datetime as dt
 import json
 import itertools
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-from leap.utils import get_data_path
-from leap.data_generation.utils import get_province_id, get_sex_id, heaviside
+from leap.utils import get_data_path, get_time_delta_tag, date_range, TimeDelta
+from leap.data_generation.utils import get_parser, convert_numeric_to_sex, convert_sex_to_numeric, \
+    convert_timepoint_to_numeric, convert_numeric_to_timepoint, heaviside
 from leap.logger import get_logger
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 
@@ -13,13 +15,16 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-MIN_YEAR = 2000
-MAX_YEAR = 2019
+MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
+MAX_TIMEPOINT = dt.datetime(2019, 12, 31)
 MAX_AGE = 65
+TIME_DELTA_OD = TimeDelta(years=1)
+
+
 
 
 def estimate_alpha(
-    df: pd.DataFrame,
+    df_abx: pd.DataFrame,
     formula: str,
     offset: np.ndarray | None = None,
     maxiter: int = 5000
@@ -33,7 +38,7 @@ def estimate_alpha(
         \alpha := \dfrac{1}{\theta} = \dfrac{\sigma^2 - \mu}{\mu^2}
     
     Args:
-        df: A Pandas dataframe with data to be fitted.
+        df_abx: A Pandas dataframe with data to be fitted.
         formula: The formula for the GLM model. See the `statsmodels documentation
             <https://www.statsmodels.org/stable/examples/notebooks/generated/glm_formula.html>`_
             for more information.
@@ -43,6 +48,10 @@ def estimate_alpha(
     Returns:
         The estimated alpha parameter for the negative binomial model.
     """
+    df = df_abx.copy()
+
+    df["sex"] = df["sex"].apply(convert_sex_to_numeric)
+    df["timepoint"] = df["timepoint"].apply(convert_timepoint_to_numeric)
 
     model = smf.negativebinomial(
         formula=formula, data=df, offset=offset
@@ -54,55 +63,57 @@ def estimate_alpha(
 
 
 def load_birth_data(
-    province: str = "BC", min_year: int = 2000, max_year: int = 2018
+    time_delta_od: TimeDelta = TIME_DELTA_OD,
+    province: str = "BC",
+    min_timepoint: dt.datetime = dt.datetime(2000, 1, 1),
+    max_timepoint: dt.datetime = dt.datetime(2018, 12, 31)
 ) -> pd.DataFrame:
     """Load the StatCan birth data.
     
     Args:
+        time_delta_od: The duration of the time intervals in the original antibiotic data.
         province: The province to load the data for.
-        min_year: The minimum year to load the data for. Must be an integer in the range
-            ``[1999, 2021]``.
-        max_year: The maximum year to load the data for. Must be an integer in the range
-            ``[1999, 2021]``, and ```max_year >= min_year``.
+        min_timepoint: The minimum timepoint to load the data for. Must be a ``datetime`` object in
+            the range ``[1999, 2021]``.
+        max_timepoint: The maximum timepoint to load the data for. Must be a ``datetime`` object in
+            the range ``[1999, 2021]``, and ``max_timepoint >= min_timepoint``.
 
     Returns:
-        A pandas dataframe with the number of births in a province, stratified by year and sex.
+        A pandas dataframe with the number of births in a province, stratified by timepoint and sex.
         Columns:
         
-        * ``year (int)``: The calendar year.
+        * ``timepoint (dt.datetime)``: The date and time.
         * ``province (str)``: The province name.
         * ``sex (str)``: One of ``M`` = male, ``F`` = female
         * ``n_birth (int)``: The number of births in the given year, province, and sex.
 
     """
-    df = pd.read_csv(get_data_path("original_data/17100005.csv"), low_memory=False)
 
-    # rename columns
-    df.rename(
-        columns={"REF_DATE": "year", "GEO": "province", "SEX": "sex", "VALUE": "n_birth"},
-        inplace=True
+    time_delta_tag = get_time_delta_tag(time_delta_od)
+    df = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/birth/birth_estimate.csv"),
+        parse_dates=["timepoint"]
     )
 
-    # select only the age = 0 age group and the years where min_year <= year <= max_year
+    # select only the province and the timepoints where min_timepoint <= timepoint <= max_timepoint
     df = df.loc[
-        (df["year"] >= min_year) & 
-        (df["year"] <= max_year) & 
-        (df["AGE_GROUP"] == "0 years")
+        (df["timepoint"] >= min_timepoint) & 
+        (df["timepoint"] <= max_timepoint) & 
+        (df["province"] == province)
     ]
 
-    # select only the columns we need
-    df = df[["year", "province", "sex", "n_birth"]]
-
-    # convert province names to 2-letter province IDs and select the province
-    df["province"] = df["province"].apply(get_province_id)
-    df = df.loc[df["province"] == province]
-
-    # convert sex to 1-letter ID ("F", "M", "B") and remove the "B" (both) rows
-    df["sex"] = df["sex"].apply(get_sex_id)
-    df = df.loc[df["sex"] != "B"]
+    # pivot table to have separate rows for M and F
+    df["F"] = df["N"] * (1 - df["prop_male"])
+    df["M"] = df["N"] * df["prop_male"]
+    df = df.melt(
+        id_vars=["timepoint", "province"],
+        value_vars=["F", "M"],
+        var_name="sex",
+        value_name="n_birth"
+    )
 
     # convert N to integer
-    df["n_birth"] = df["n_birth"].apply(lambda x: int(x))
+    df["n_birth"] = df["n_birth"].astype("int")
 
     df.reset_index(drop=True, inplace=True)
 
@@ -117,12 +128,12 @@ def load_antibiotic_data() -> pd.DataFrame:
     2000 to 2018.
 
     The birth data is from StatCan census data and contains the number of births in BC,
-    stratified by year and sex.
+    stratified by timepoint and sex.
     
     Returns:
         A Pandas dataframe. Columns:
         
-        * ``year (int)``: The calendar year.
+        * ``timepoint (dt.datetime)``: The date and time.
         * ``sex (str)``: One of ``M`` = male, ``F`` = female.
         * ``n_abx (int)``: The number total number of courses of antibiotics dispensed to
             infants in BC for the given year and sex.
@@ -130,14 +141,19 @@ def load_antibiotic_data() -> pd.DataFrame:
 
     """
 
-    df_abx = pd.read_csv(get_data_path("original_data/private/bc_abx_dose_data.csv"))
+    df_abx = pd.read_csv(
+        get_data_path("original_data/private/bc_abx_dose_data.csv"),
+        parse_dates=["year"]
+    )
+    df_abx.rename(columns={"year": "timepoint"}, inplace=True)
+
     df_birth = load_birth_data()
 
     df_abx = pd.merge(
         df_abx,
         df_birth,
         how="left",
-        on=["year", "sex"]
+        on=["timepoint", "sex"]
     )
 
     return df_abx
@@ -146,7 +162,7 @@ def load_antibiotic_data() -> pd.DataFrame:
 
 def generate_antibiotic_model(
     df_abx: pd.DataFrame,
-    formula: str = "n_abx ~ year + sex + heaviside(year, 2005) * year",
+    formula: str = "n_abx ~ timepoint + sex + heaviside(timepoint, 2005.0) * timepoint",
     alpha: float = 1.0,
     maxiter: int = 1000
 ) -> GLMResultsWrapper:
@@ -154,14 +170,14 @@ def generate_antibiotic_model(
 
     In this function, we fit a generalized linear model (GLM) to the antibiotic prescription data
     using the negative binomial family. The model predicts the number of courses of antibiotics
-    dispensed to infants in BC, given the year and sex.
+    dispensed to infants in BC, given the timepoint and sex.
 
     For more details, see :ref:`antibiotic_exposure_model`.
     
     Args:
         df_abx: The antibiotic prescription data. Contains the following columns:
 
-            * ``year (int)``: The calendar year.
+            * ``timepoint (dt.datetime)``: The date and time.
             * ``sex (str)``: One of ``M`` = male, ``F`` = female.
             * ``n_abx (int)``: The number total number of courses of antibiotics dispensed to
               infants in BC for the given year and sex.
@@ -181,10 +197,10 @@ def generate_antibiotic_model(
     df = df_abx.copy()
 
     # Convert sex string to 1 or 2
-    df["sex"] = df.apply(
-        lambda x: 1 if x["sex"] == "F" else 2,
-        axis=1
-    )
+    df["sex"] = df["sex"].apply(convert_sex_to_numeric)
+
+    # Convert timepoint to numeric for the GLM model
+    df["timepoint"] = df["timepoint"].apply(convert_timepoint_to_numeric)
 
     # Fit the GLM model
     model = smf.glm(
@@ -202,70 +218,73 @@ def generate_antibiotic_model(
 
 def get_predicted_abx_data(
     model: GLMResultsWrapper,
+    time_delta: TimeDelta,
     df: pd.DataFrame | None = None,
-    min_year: int = MIN_YEAR,
-    max_year: int = MAX_YEAR
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
+    max_timepoint: dt.datetime = MAX_TIMEPOINT
 ) -> pd.DataFrame:
     """Get predicted data from a GLM model.
 
     The GLM model must be fitted on the following columns:
 
-    * ``year (int)``: The calendar year.
+    * ``timepoint (dt.datetime)``: The date and time.
     * ``sex (int)``: One of ``0`` = female, ``1`` = male.
     
     Args:
         model: The fitted GLM model for predicting the number of courses of antibiotics during
             the first year of life, given year and sex.
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
+            Note that this must match the time intervals used to fit the model; in our case, we
+            used 1-year intervals.
         df: (optional) If provided, the function will use this dataframe to predict the data. The
             dataframe must contain the following columns:
 
-            * ``year (int)``: The calendar year.
+            * ``timepoint (dt.datetime)``: The date and time.
             * ``sex (str)``: One of ``M`` = male, ``F`` = female.
 
             If not provided, the function will generate a dataframe with all combinations of
-            year and sex in the range of ``min_year`` to ``max_year``.
-        min_year: The minimum year to predict.
-        max_year: The maximum year to predict.
+            timepoint and sex in the range of ``min_timepoint`` to ``max_timepoint``.
+        min_timepoint: The minimum timepoint to predict.
+        max_timepoint: The maximum timepoint to predict.
         
     Returns:
         A dataframe containing the predicted number of antibiotics prescribed per person during
-        infancy for a given birth year and sex.
+        infancy for a given birth timepoint and sex.
         Columns:
         
-        * ``year (int)``: The calendar year.
+        * ``timepoint (dt.datetime)``: The date and time.
         * ``sex (str)``: One of ``M`` = male, ``F`` = female.
         * ``n_abx_μ (float)``: The predicted number of antibiotics prescribed per person during
-          infancy for the given birth year and sex.
+          infancy for the given birth timepoint and sex.
     """
 
     if df is None:
         df = pd.DataFrame(
             data=list(itertools.product(
-                list(range(min_year, max_year + 1)), [1, 2]
+                list(date_range(start=min_timepoint, stop=max_timepoint + time_delta, step=time_delta)),
+                ["F", "M"]
             )),
-            columns=["year", "sex"]
+            columns=["timepoint", "sex"]
         )
-    else:
-        df["sex"] = df.apply(
-            lambda x: 1 if x["sex"] == "F" else 2,
-            axis=1
-        )
+
+    df["sex"] = df["sex"].apply(convert_sex_to_numeric)
+    df["timepoint"] = df["timepoint"].apply(convert_timepoint_to_numeric)
 
 
     df["n_abx_μ"] = np.exp(model.predict(df, which="linear"))
-    df["sex"] = df.apply(
-        lambda x: "F" if x["sex"] == 1 else "M",
-        axis=1
-    )
+    df["sex"] = df["sex"].apply(convert_numeric_to_sex)
+    df["timepoint"] = df["timepoint"].apply(convert_numeric_to_timepoint)
     return df
 
 
 def generate_antibiotic_data(
+    time_delta: TimeDelta,
     return_type: str = "csv"
 ) -> GLMResultsWrapper | None:
     """Fit a ``GLM`` for antibiotic prescriptions in the first year of life and generate data.
 
     Args:
+        time_delta: The duration of the time intervals to use for the data, e.g. 1 year, 5 years, etc.
         return_type: The type of data to return. If ``csv``, the function will save a CSV file
             with the predicted data. If ``model``, the function will return the fitted GLM model.
     
@@ -274,27 +293,34 @@ def generate_antibiotic_data(
         the number of antibiotic prescriptions during the first year of life.
 
     """
-    formula = "n_abx ~ year + sex + heaviside(year, 2005) * year"
+    formula = "n_abx ~ timepoint + sex + heaviside(timepoint, 2005.0) * timepoint"
     df_abx = load_antibiotic_data()
     alpha = estimate_alpha(df_abx, formula, offset=np.log(df_abx["n_birth"]))
     model_abx = generate_antibiotic_model(df_abx, formula, alpha)
     if return_type == "csv":
-        df_abx_pred = get_predicted_abx_data(model_abx)
+        time_delta_tag = get_time_delta_tag(time_delta)
+        df_abx_pred = get_predicted_abx_data(model_abx, TIME_DELTA_OD)
         df_abx_pred.to_csv(
-            get_data_path("processed_data/antibiotic_predictions.csv"),
+            get_data_path(
+                f"processed_data/{time_delta_tag}/antibiotic_predictions.csv",
+                mkdirs=True
+            ),
             index=False
         )
 
         # Update the config file with the beta coefficients and thresholds
-        config_path = get_data_path("processed_data/config.json")
+        config_path = get_data_path(
+            f"processed_data/{time_delta_tag}/config.json",
+            mkdirs=True
+        )
         with open(config_path) as f:
             config = json.load(f)
 
         config["antibiotic_exposure"]["parameters"]["β0"] = model_abx.params["Intercept"]
-        config["antibiotic_exposure"]["parameters"]["βyear"] = model_abx.params["year"]
+        config["antibiotic_exposure"]["parameters"]["βtime"] = model_abx.params["timepoint"]
         config["antibiotic_exposure"]["parameters"]["βsex"] = model_abx.params["sex"]
-        config["antibiotic_exposure"]["parameters"]["β2005"] = model_abx.params["heaviside(year, 2005)"]
-        config["antibiotic_exposure"]["parameters"]["β2005_year"] = model_abx.params["heaviside(year, 2005):year"]
+        config["antibiotic_exposure"]["parameters"]["β2005"] = model_abx.params["heaviside(timepoint, 2005.0)"]
+        config["antibiotic_exposure"]["parameters"]["β2005_time"] = model_abx.params["heaviside(timepoint, 2005.0):timepoint"]
         config["antibiotic_exposure"]["parameters"]["θ"] = 1 / alpha
 
         with open(config_path, "w", encoding="utf-8") as f:
@@ -306,4 +332,7 @@ def generate_antibiotic_data(
 
 
 if __name__ == "__main__":
-    generate_antibiotic_data()
+    parser = get_parser()
+    args = parser.parse_args()
+    time_delta = TimeDelta(iso_string=args.time_delta)
+    generate_antibiotic_data(time_delta)

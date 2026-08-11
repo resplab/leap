@@ -40,13 +40,13 @@ def config():
             4,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             {
                 "β0": -20,
@@ -88,13 +88,13 @@ def config():
             4,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             {
                 "β0": -0.01,
@@ -216,13 +216,13 @@ def test_simulation_generate_initial_asthma(
             4,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             {
                 "β_fhx_0": 100,
@@ -252,13 +252,13 @@ def test_simulation_generate_initial_asthma(
             4,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             {
                 "β_fhx_0": -100,
@@ -375,13 +375,13 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
             4,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             [100, 0],
             {"p": 1.0},
@@ -518,13 +518,13 @@ def test_simulation_update_asthma_effects(
             100,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             [100, 0],
             {"p": 1.0},
@@ -655,16 +655,16 @@ def test_reassess_asthma_diagnosis(
             pd.Series([False] * 1071, dtype=bool, name="immigrant")
         ),
         (
-            dt.datetime(2024, 1, 1),
+            dt.datetime(2000, 1, 1),
             TimeDelta(years=3),
             TimeDelta(years=1),
             "CA",
             "M3",
             10,
             111,
-            dt.datetime(2025, 1, 1),
-            21,
-            pd.Series([True] * 10 + [False] * 11, dtype=bool, name="immigrant")
+            dt.datetime(2001, 1, 1),
+            18,
+            pd.Series([True] * 8 + [False] * 10, dtype=bool, name="immigrant")
         )
     ]
 )
@@ -717,13 +717,13 @@ def test_simulation_get_new_agents(
             4, # max_age
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             # incidence_parameter_β_fam_hist
             {
@@ -849,7 +849,7 @@ def test_run_simulation_one_year(
     diagnosed with asthma is 100.
 
     For the year 2024, province "CA", growth type "M3", ages 0 - 4, the probability of emigration
-    is 0. See ``processed_data/migration/migration_table.csv``.
+    is 0. See ``processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv``.
 
     Setting the exacerbation hyperparameter ``β0_μ = 20.0`` ensures that every agent aged 4 has an
     asthma exacerbation.
@@ -973,13 +973,13 @@ def test_run_simulation_one_year(
             4,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             {
                 "β_fhx_0": 100,
@@ -1097,7 +1097,8 @@ def test_run_simulation_two_years(
     asthma exacerbation.
 
     For the years 2024 and 2025, province "CA", growth type "M3", ages 0 - 4, the probability of
-    emigration is 0. See ``processed_data/migration/migration_table.csv``.
+    emigration is 0.
+    See ``processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv``.
 
     Setting the ``prevalence`` parameters below ensures that the prevalence is 0.
 
