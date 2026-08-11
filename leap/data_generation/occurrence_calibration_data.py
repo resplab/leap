@@ -1060,6 +1060,7 @@ def beta_params_age_optimizer(
 
 
 def generate_occurrence_calibration_data(
+    time_delta: TimeDelta,
     province: str = PROVINCE,
     min_year: int = MIN_YEAR,
     max_year: int = MAX_YEAR,
@@ -1071,6 +1072,7 @@ def generate_occurrence_calibration_data(
     """Generate the occurrence calibration data for the given province and year range.
 
     Args:
+        time_delta: The duration of time between data points.
         province: The province to load data for.
         min_year: The minimum year to load data for.
         max_year: The maximum year to load data for.
@@ -1198,5 +1200,6 @@ if __name__ == "__main__":
     )
     time_delta = TimeDelta(iso_string=args.time_delta)
     generate_occurrence_calibration_data(
-        retrain_beta=args.retrain_beta
+        retrain_beta=args.retrain_beta,
+        time_delta=time_delta
     )
