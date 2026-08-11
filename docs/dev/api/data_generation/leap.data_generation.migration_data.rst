@@ -155,12 +155,13 @@ First, we load the life tables from
 
 If we are using a ``time_delta`` less than that of the original data (1 year), we need to split
 the ages into smaller intervals. Under the constant hazard rate assumption,
-:math:`\mu(x, t)` is constant over the time interval :math:`[x, x + \Delta x_a)`:
+:math:`\mu(x, t)` is constant over the time interval :math:`[x, x + \Delta x_a)`,
+where :math:`\Delta x_a` is the age interval of the original data (1 year):
 
 
 .. math::
 
-  \mu(x + s, t + s) = \lambda(x, t) \quad \forall ~ s \in [0, \Delta x_a)
+  \mu(x + \tau, t + \tau) = \lambda(x, t) \quad \forall ~ \tau \in [0, \Delta x_a)
 
 
 This means that the probability of death is constant over the time interval
@@ -168,7 +169,7 @@ This means that the probability of death is constant over the time interval
 
 .. math::
 
-  q(x + s, \Delta x_b, t + s) = q(x, \Delta x_b, t) \quad \forall ~ s \in [0, \Delta x_a)
+  q(x + \tau, \Delta x_b, t + \tau) = q(x, \Delta x_b, t) \quad \forall ~ \tau \in [0, \Delta x_a)
 
 
 We end up with:
@@ -283,7 +284,7 @@ We end up with:
       - 0.00463
 
 
-2. Load Population Data
+1. Load Population Data
 ------------------------
 
 First, we load the population data from 
@@ -295,7 +296,8 @@ interval :math:`[x, x + \Delta x_a)`:
 
 .. math::
 
-  \ell(x + s, \Delta x_b, t) = \ell(x, \Delta x_b, t) \dfrac{\Delta x_b}{\Delta x_a} \quad \forall ~ s \in [0, \Delta x_a)
+  \ell(x + \tau, \Delta x_b, t) = \ell(x, \Delta x_b, t) \dfrac{\Delta x_b}{\Delta x_a} 
+    \quad \forall ~ \tau \in [0, \Delta x_a)
 
 For example, if we have:
 
