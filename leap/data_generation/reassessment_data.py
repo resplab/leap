@@ -11,7 +11,7 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 MIN_TIMEPOINT = 1999
-STABILIZATION_YEAR = 2025
+STABILIZATION_TIMEPOINT = 2025
 MIN_ASTHMA_AGE = 3  # Minimum age for asthma diagnosis
 MAX_ASTHMA_AGE = 62
 MAX_AGE = 110
@@ -28,7 +28,7 @@ def get_asthma_df(
     min_age: int = MIN_ASTHMA_AGE,
     max_age: int = MAX_AGE,
     max_asthma_age: int = MAX_ASTHMA_AGE,
-    stabilization_year: int = STABILIZATION_YEAR
+    stabilization_timepoint: int = STABILIZATION_TIMEPOINT
 ) -> pd.DataFrame:
     """Loads the asthma prevalence / incidence predictions from Model 1.
 
@@ -39,7 +39,7 @@ def get_asthma_df(
         max_age: The maximum age for asthma prediction.
         max_asthma_age: The maximum age for for which the asthma prevalence / incidence
             model can accurately make predictions.
-        stabilization_year: The year when asthma stabilization occurs.
+        stabilization_timepoint: The year when asthma stabilization occurs.
 
     Returns:
         A DataFrame containing asthma occurrence predictions.
@@ -63,13 +63,13 @@ def get_asthma_df(
 
     df_asthma["incidence"] = df_asthma.apply(
         lambda x: get_asthma_occurrence_prediction(
-            x["age"], x["sex"], x["year"], "incidence", max_asthma_age, stabilization_year
+            x["age"], x["sex"], x["year"], "incidence", max_asthma_age, stabilization_timepoint
         ),
         axis=1
     )
     df_asthma["prevalence"] = df_asthma.apply(
         lambda x: get_asthma_occurrence_prediction(
-            x["age"], x["sex"], x["year"], "prevalence", max_asthma_age, stabilization_year
+            x["age"], x["sex"], x["year"], "prevalence", max_asthma_age, stabilization_timepoint
         ),
         axis=1
     )
@@ -213,7 +213,7 @@ def generate_reassessment_data(time_delta: TimeDelta):
             min_age=MIN_ASTHMA_AGE,
             max_age=MAX_AGE,
             max_asthma_age=MAX_ASTHMA_AGE,
-            stabilization_year=STABILIZATION_YEAR
+            stabilization_timepoint=STABILIZATION_TIMEPOINT
         )
         df = get_reassessment_data(
             df_asthma=df_asthma,
