@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
+import datetime as dt
 import itertools
-from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
+from leap.utils import get_data_path, get_time_delta_tag, date_range, TimeDelta
 from leap.logger import get_logger
 from leap.data_generation.occurrence_calibration_data import get_asthma_occurrence_prediction
 from leap.data_generation.utils import get_parser
@@ -10,29 +11,31 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-MIN_TIMEPOINT = 1999
-STABILIZATION_TIMEPOINT = 2025
+MIN_TIMEPOINT = dt.datetime(1999, 1, 1)
+STABILIZATION_TIMEPOINT = dt.datetime(2025, 1, 1)
 MIN_ASTHMA_AGE = 3  # Minimum age for asthma diagnosis
 MAX_ASTHMA_AGE = 62
 MAX_AGE = 110
 PROVINCES = ["BC", "CA"]
 MAX_TIMEPOINTS = {
-    "BC": 2043,
-    "CA": 2066
+    "BC": dt.datetime(2043, 1, 1),
+    "CA": dt.datetime(2066, 1, 1)
 }
 
 
 def get_asthma_df(
-    min_timepoint: int = MIN_TIMEPOINT,
-    max_timepoint: int = 2065,
+    time_delta: TimeDelta,
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
+    max_timepoint: dt.datetime = dt.datetime(2065, 1, 1),
     min_age: int = MIN_ASTHMA_AGE,
     max_age: int = MAX_AGE,
     max_asthma_age: int = MAX_ASTHMA_AGE,
-    stabilization_timepoint: int = STABILIZATION_TIMEPOINT
+    stabilization_timepoint: dt.datetime = STABILIZATION_TIMEPOINT
 ) -> pd.DataFrame:
     """Loads the asthma prevalence / incidence predictions from Model 1.
 
     Args:
+        time_delta: The duration of time between two data points.
         min_timepoint: The starting timepoint for the dataframe.
         max_timepoint: The ending timepoint for the dataframe.
         min_age: The minimum age for asthma prediction.
@@ -47,7 +50,7 @@ def get_asthma_df(
 
         * ``age (int)``: age in years, range ``[min_age, max_age]``.
         * ``sex (str)``: one of ``"M"`` or ``"F"``.
-        * ``timepoint (int)``: timepoint, range ``[min_timepoint, max_timepoint]``.
+        * ``timepoint (datetime)``: timepoint, range ``[min_timepoint, max_timepoint]``.
         * ``incidence (float)``: predicted asthma incidence for the given age, sex, and timepoint.
         * ``prevalence (float)``: predicted asthma prevalence for the given age, sex, and timepoint.
 
@@ -56,7 +59,7 @@ def get_asthma_df(
         list(itertools.product(
             range(min_age, max_age + 1),
             ["F", "M"],
-            range(min_timepoint, max_timepoint + 1)
+            list(date_range(min_timepoint, max_timepoint + time_delta, time_delta))
         )),
         columns=["age", "sex", "timepoint"]
     )
@@ -104,8 +107,8 @@ def calculate_reassessment_probability(
 def get_reassessment_data(
     df_asthma: pd.DataFrame,
     province: str = "CA",
-    min_timepoint: int = MIN_TIMEPOINT,
-    max_timepoint: int = 2065,
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
+    max_timepoint: dt.datetime = dt.datetime(2065, 1, 1),
     max_age: int = MAX_AGE
 ) -> pd.DataFrame:
     """Generates reassessment data for asthma prevalence and incidence.
@@ -140,14 +143,14 @@ def get_reassessment_data(
     df_asthma_grouped = df_asthma.groupby("timepoint")
 
     df_reassessment = pd.DataFrame({
-        "timepoint": np.array([], dtype=int),
+        "timepoint": np.array([], dtype=dt.datetime),
         "province": [],
         "age": np.array([], dtype=int),
         "sex": [],
         "prob": []
     })
 
-    for timepoint in range(min_timepoint + 1, max_timepoint + 1):
+    for timepoint in date_range(min_timepoint + time_delta, max_timepoint + time_delta, time_delta):
 
         # Get the predicted prevalence for the previous timepoint
         df_timepoint_0 = df_asthma_grouped.get_group(timepoint - 1)
@@ -199,7 +202,7 @@ def generate_reassessment_data(time_delta: TimeDelta):
     """
 
     df_reassessment = pd.DataFrame({
-        "timepoint": np.array([], dtype=int),
+        "timepoint": np.array([], dtype=dt.datetime),
         "province": [],
         "age": np.array([], dtype=int),
         "sex": [],
@@ -208,6 +211,7 @@ def generate_reassessment_data(time_delta: TimeDelta):
 
     for province in PROVINCES:
         df_asthma = get_asthma_df(
+            time_delta=time_delta,
             min_timepoint=MIN_TIMEPOINT,
             max_timepoint=MAX_TIMEPOINTS[province],
             min_age=MIN_ASTHMA_AGE,
