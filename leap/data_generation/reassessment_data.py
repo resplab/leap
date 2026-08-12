@@ -10,21 +10,21 @@ pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-STARTING_YEAR = 1999
+MIN_TIMEPOINT = 1999
 STABILIZATION_YEAR = 2025
 MIN_ASTHMA_AGE = 3  # Minimum age for asthma diagnosis
 MAX_ASTHMA_AGE = 62
 MAX_AGE = 110
 PROVINCES = ["BC", "CA"]
-MAX_YEARS = {
+MAX_TIMEPOINTS = {
     "BC": 2043,
     "CA": 2066
 }
 
 
 def get_asthma_df(
-    starting_year: int = STARTING_YEAR,
-    max_year: int = 2065,
+    min_timepoint: int = MIN_TIMEPOINT,
+    max_timepoint: int = 2065,
     min_age: int = MIN_ASTHMA_AGE,
     max_age: int = MAX_AGE,
     max_asthma_age: int = MAX_ASTHMA_AGE,
@@ -33,8 +33,8 @@ def get_asthma_df(
     """Loads the asthma prevalence / incidence predictions from Model 1.
 
     Args:
-        starting_year: The starting year for the dataframe.
-        max_year: The ending year for the dataframe.
+        min_timepoint: The starting year for the dataframe.
+        max_timepoint: The ending year for the dataframe.
         min_age: The minimum age for asthma prediction.
         max_age: The maximum age for asthma prediction.
         max_asthma_age: The maximum age for for which the asthma prevalence / incidence
@@ -47,7 +47,7 @@ def get_asthma_df(
 
         * ``age (int)``: age in years, range ``[min_age, max_age]``.
         * ``sex (str)``: one of ``"M"`` or ``"F"``.
-        * ``year (int)``: calendar year, range ``[starting_year, max_year]``.
+        * ``year (int)``: calendar year, range ``[min_timepoint, max_timepoint]``.
         * ``incidence (float)``: predicted asthma incidence for the given age, sex, and year.
         * ``prevalence (float)``: predicted asthma prevalence for the given age, sex, and year.
 
@@ -56,7 +56,7 @@ def get_asthma_df(
         list(itertools.product(
             range(min_age, max_age + 1),
             ["F", "M"],
-            range(starting_year, max_year + 1)
+            range(min_timepoint, max_timepoint + 1)
         )),
         columns=["age", "sex", "year"]
     )
@@ -104,8 +104,8 @@ def calculate_reassessment_probability(
 def get_reassessment_data(
     df_asthma: pd.DataFrame,
     province: str = "CA",
-    starting_year: int = STARTING_YEAR,
-    max_year: int = 2065,
+    min_timepoint: int = MIN_TIMEPOINT,
+    max_timepoint: int = 2065,
     max_age: int = MAX_AGE
 ) -> pd.DataFrame:
     """Generates reassessment data for asthma prevalence and incidence.
@@ -116,20 +116,20 @@ def get_reassessment_data(
 
             * ``age (int)``: age in years, range ``[3, max_age]``.
             * ``sex (str)``: one of ``"M"`` or ``"F"``.
-            * ``year (int)``: calendar year, range ``[starting_year, max_year]``.
+            * ``year (int)``: calendar year, range ``[min_timepoint, max_timepoint]``.
             * ``incidence (float)``: predicted asthma incidence for the given age, sex, and year.
             * ``prevalence (float)``: predicted asthma prevalence for the given age, sex, and year.
 
         province: The 2-letter province code, e.g. ``"CA"``.
-        starting_year: The starting year for the data.
-        max_year: The ending year for the data.
+        min_timepoint: The starting year for the data.
+        max_timepoint: The ending year for the data.
         max_age: The maximum age for asthma prediction.
 
     Returns:
         A DataFrame containing the reassessment data.
         Columns:
 
-        * ``year (int)``: calendar year, range ``[starting_year + 1, max_year]``.
+        * ``year (int)``: calendar year, range ``[min_timepoint + 1, max_timepoint]``.
         * ``province (str)``: the 2-letter province code, e.g. ``"CA"``.
         * ``age (int)``: age in years, range ``[4, max_age]``.
         * ``sex (str)``: one of ``"M"`` or ``"F"``.
@@ -147,7 +147,7 @@ def get_reassessment_data(
         "prob": []
     })
 
-    for year in range(starting_year + 1, max_year + 1):
+    for year in range(min_timepoint + 1, max_timepoint + 1):
 
         # Get the predicted prevalence for the previous year
         df_year_0 = df_asthma_grouped.get_group(year - 1)
@@ -208,8 +208,8 @@ def generate_reassessment_data(time_delta: TimeDelta):
 
     for province in PROVINCES:
         df_asthma = get_asthma_df(
-            starting_year=STARTING_YEAR,
-            max_year=MAX_YEARS[province],
+            min_timepoint=MIN_TIMEPOINT,
+            max_timepoint=MAX_TIMEPOINTS[province],
             min_age=MIN_ASTHMA_AGE,
             max_age=MAX_AGE,
             max_asthma_age=MAX_ASTHMA_AGE,
@@ -218,7 +218,7 @@ def generate_reassessment_data(time_delta: TimeDelta):
         df = get_reassessment_data(
             df_asthma=df_asthma,
             province=province,
-            max_year=MAX_YEARS[province],
+            max_timepoint=MAX_TIMEPOINTS[province],
             max_age=MAX_AGE
         )
         df_reassessment = pd.concat([df_reassessment, df], axis=0)
