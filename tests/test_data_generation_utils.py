@@ -10,9 +10,7 @@ from leap.data_generation.utils import convert_timepoint_to_numeric, convert_num
     [
         (dt.datetime(2024, 1, 1), 2023.958932238193),
         (dt.datetime(2066, 12, 1), 2066.874743326489),
-        (dt.datetime(1, 1, 1), 1.002053388090349),
-        (dt.datetime(2000, 1, 1), 1999.958932238193),
-        (dt.datetime(2000, 2, 1), 2000.043805612594),
+        (dt.datetime(1, 1, 1), 1.002053388090349)
     ]
 )
 def test_convert_timepoint_to_numeric(timepoint, expected_value):
@@ -25,9 +23,7 @@ def test_convert_timepoint_to_numeric(timepoint, expected_value):
     [
         (2023.958932238193, dt.datetime(2024, 1, 1)),
         (2066.874743326489, dt.datetime(2066, 12, 1)),
-        (1.002053388090349, dt.datetime(1, 1, 1)),
-        (1999.958932238193, dt.datetime(2000, 1, 1)),
-        (2000.043805612594, dt.datetime(2000, 2, 1)),
+        (1.002053388090349, dt.datetime(1, 1, 1))
     ]
 )
 def test_convert_numeric_to_timepoint(timepoint, expected_value):

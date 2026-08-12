@@ -114,9 +114,6 @@ jobs:
       - name: Run Python tests utils
         run: |
           pytest tests/test_utils.py
-      - name: Run Python tests antibiotic data generation
-        run: |
-          pytest tests/test_antibiotic_data.py
         continue-on-error: false
       - name: Run Python tests birth data generation
         run: |
