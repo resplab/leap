@@ -7,7 +7,6 @@ from leap.utils import date_range, TimeDelta, Timepoint, PROVINCE_MAP
 from leap.logger import get_logger
 from typing import Optional, Tuple, List, Callable, Dict, Any, Literal
 
-
 logger = get_logger(__name__)
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
@@ -152,40 +151,6 @@ def convert_numeric_to_timepoint(timepoint: float) -> Timepoint:
     # Subtract 1 year to account for the fact that the first year is 1
     timepoint_dt = dt.datetime(year=1, month=1, day=1) + time_delta - dt.timedelta(days=366)  
     return Timepoint.from_datetime(timepoint_dt)
-
-
-def convert_sex_to_numeric(sex: str) -> int:
-    """Convert a sex string to a numeric value.
-
-    Args:
-        sex: One of ``M`` = male, ``F`` = female.
-
-    Returns:
-        1 for female, 2 for male.
-    """
-    if sex == "F":
-        return 1
-    elif sex == "M":
-        return 2
-    else:
-        raise ValueError(f"Invalid sex: {sex}")
-
-
-def convert_numeric_to_sex(sex: int) -> str:
-    """Convert a numeric sex value to a string.
-
-    Args:
-        sex: One of ``1`` = female, ``2`` = male.
-
-    Returns:
-        ``F`` for female, ``M`` for male.
-    """
-    if sex == 1:
-        return "F"
-    elif sex == 2:
-        return "M"
-    else:
-        raise ValueError(f"Invalid sex: {sex}")
 
 
 def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float) -> int | list[int]:
