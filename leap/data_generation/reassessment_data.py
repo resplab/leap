@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import itertools
-from leap.utils import get_data_path, TimeDelta
+from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
 from leap.data_generation.occurrence_calibration_data import get_asthma_occurrence_prediction
 from leap.data_generation.utils import get_parser
@@ -190,8 +190,13 @@ def get_reassessment_data(
     return df_reassessment
 
 
-def generate_reassessment_data():
-    """Generate reassessment data for asthma prevalence and incidence across different provinces."""
+def generate_reassessment_data(time_delta: TimeDelta):
+    """Generate reassessment data for asthma prevalence and incidence across different provinces.
+    
+    Args:
+        time_delta: The duration of time between two data points.
+        
+    """
 
     df_reassessment = pd.DataFrame({
         "year": np.array([], dtype=int),
@@ -219,11 +224,16 @@ def generate_reassessment_data():
         df_reassessment = pd.concat([df_reassessment, df], axis=0)
 
     df_reassessment.reset_index(drop=True, inplace=True)
-    df_reassessment.to_csv(get_data_path("processed_data/asthma_reassessment.csv"), index=False)
+
+    time_delta_tag = get_time_delta_tag(time_delta)
+    df_reassessment.to_csv(
+        get_data_path(f"processed_data/asthma_reassessment_{time_delta_tag}.csv", mkdirs=True),
+        index=False
+    )
 
 
 if __name__ == "__main__":
     parser = get_parser()
     args = parser.parse_args()
     time_delta = TimeDelta(iso_string=args.time_delta)
-    generate_reassessment_data()
+    generate_reassessment_data(time_delta=time_delta)
