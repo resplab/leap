@@ -96,16 +96,22 @@ def get_asthma_occurrence_prediction(
 
 
 def load_occurrence_data(
+    time_delta: TimeDelta,
     province: str = PROVINCE,
     min_timepoint: dt.datetime = MIN_TIMEPOINT,
     max_timepoint: dt.datetime = MAX_TIMEPOINT,
+    max_asthma_age: int = MAX_ASTHMA_AGE,
+    stabilization_timepoint: dt.datetime = STABILIZATION_TIMEPOINT
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Load the asthma incidence and prevalence data for the given province and year range.
 
     Args:
+        time_delta: The duration of time between data points.
         province: The province to load data for.
         min_timepoint: The minimum timepoint to load data for.
         max_timepoint: The maximum timepoint to load data for.
+        max_asthma_age: The maximum age for asthma prediction (default is ``62``).
+        stabilization_timepoint: The timepoint when asthma stabilization occurs (default is ``2025``).
 
     Returns:
         A tuple of two DataFrames.
@@ -113,14 +119,14 @@ def load_occurrence_data(
 
         1. Incidence dataframe with columns:
 
-           * ``year (int)``: The year of the prediction.
+           * ``timepoint (dt.datetime)``: The year of the prediction.
            * ``age (int)``: The age of the individual in years, ranging from 3 to 110.
            * ``sex (str)``: One of ``"M"`` or ``"F"``.
            * ``incidence (float)``: The predicted asthma incidence for the given year, age,
              and sex.
         2. Prevalence dataframe with columns:
 
-           * ``year (int)``: The year of the prediction.
+           * ``timepoint (dt.datetime)``: The year of the prediction.
            * ``age (int)``: The age of the individual in years, ranging from 3 to 110.
            * ``sex (str)``: One of ``"M"`` or ``"F"``.
            * ``prevalence (float)``: The predicted asthma prevalence for the given year, age,
@@ -128,26 +134,40 @@ def load_occurrence_data(
     """
 
     df_asthma = pd.DataFrame(
-        list(itertools.product(range(3, 111), ["F", "M"], range(min_timepoint, max_timepoint + 1))),
-        columns=["age", "sex", "year"]
+        list(itertools.product(
+            range(3, 111),
+            ["F", "M"],
+            list(date_range(min_timepoint, max_timepoint + time_delta, time_delta))
+        )),
+        columns=["age", "sex", "timepoint"]
     )
 
-    df_asthma["incidence"] = df_asthma.apply(
-        lambda x: get_asthma_occurrence_prediction(x["age"], x["sex"], x["year"], "incidence"),
-        axis=1
+    time_delta_tag = get_time_delta_tag(time_delta)
+    df_pred = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv"),
+        parse_dates=["timepoint"]
     )
-    df_asthma["prevalence"] = df_asthma.apply(
-        lambda x: get_asthma_occurrence_prediction(x["age"], x["sex"], x["year"], "prevalence"),
-        axis=1
-    )
-    df_asthma["incidence"] = df_asthma.apply(
-        lambda x: x["prevalence"] if x["age"] == 3 else x["incidence"],
-        axis=1
-    )
-    df_asthma["province"] = [province] * df_asthma.shape[0]
 
-    df_incidence = df_asthma[["year", "age", "sex", "incidence"]].copy()
-    df_prevalence = df_asthma[["year", "age", "sex", "prevalence"]].copy()
+    # Clip to the same bounds get_asthma_occurrence_prediction used to apply per-row
+    df_asthma["age_lookup"] = df_asthma["age"].clip(upper=max_asthma_age)
+    df_asthma["timepoint_lookup"] = df_asthma["timepoint"].clip(upper=stabilization_timepoint)
+
+    df_pred.rename(
+        columns={"age": "age_lookup", "timepoint": "timepoint_lookup"},
+        inplace=True
+    )
+
+    df_asthma = pd.merge(
+        df_asthma, df_pred, how="left", on=["age_lookup", "sex", "timepoint_lookup"]
+    )
+    df_asthma.drop(columns=["age_lookup", "timepoint_lookup"], inplace=True)
+
+    # At age 3, incidence == prevalence (no prior population to have "become incident" from)
+    df_asthma["incidence"] = df_asthma["prevalence"].where(df_asthma["age"] == 3, df_asthma["incidence"])
+    df_asthma["province"] = province
+
+    df_incidence = df_asthma[["timepoint", "age", "sex", "incidence"]].copy()
+    df_prevalence = df_asthma[["timepoint", "age", "sex", "prevalence"]].copy()
 
     return df_incidence, df_prevalence
 
@@ -1085,9 +1105,11 @@ def generate_occurrence_calibration_data(
     """
 
     df_incidence, df_prevalence = load_occurrence_data(
+        time_delta=time_delta,
         province=province,
         min_timepoint=min_timepoint,
-        max_timepoint=max_timepoint
+        max_timepoint=max_timepoint,
+        stabilization_timepoint=stabilization_timepoint
     )
 
     df_reassessment = load_reassessment_data(province=province)
