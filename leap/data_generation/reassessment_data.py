@@ -227,7 +227,7 @@ def generate_reassessment_data(time_delta: TimeDelta):
 
     time_delta_tag = get_time_delta_tag(time_delta)
     df_reassessment.to_csv(
-        get_data_path(f"processed_data/asthma_reassessment_{time_delta_tag}.csv", mkdirs=True),
+        get_data_path(f"processed_data/{time_delta_tag}/asthma_reassessment.csv", mkdirs=True),
         index=False
     )
 
