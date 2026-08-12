@@ -40,13 +40,13 @@ def config():
             4,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             {
                 "β0": -20,
@@ -88,13 +88,13 @@ def config():
             4,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             {
                 "β0": -0.01,
@@ -216,13 +216,13 @@ def test_simulation_generate_initial_asthma(
             4,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             {
                 "β_fhx_0": 100,
@@ -252,13 +252,13 @@ def test_simulation_generate_initial_asthma(
             4,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             {
                 "β_fhx_0": -100,
@@ -375,13 +375,13 @@ def test_check_if_agent_gets_new_asthma_diagnosis(
             4,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             [100, 0],
             {"p": 1.0},
@@ -518,13 +518,13 @@ def test_simulation_update_asthma_effects(
             100,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             [100, 0],
             {"p": 1.0},
@@ -717,13 +717,13 @@ def test_simulation_get_new_agents(
             4, # max_age
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             # incidence_parameter_β_fam_hist
             {
@@ -973,13 +973,13 @@ def test_run_simulation_one_year(
             4,
             {
                 "β0": -100000,
-                "βyear": -0.01,
+                "βtime": -0.01,
                 "βsex": -1,
                 "θ": 500,
                 "fixyear": None,
                 "βfloor": 0.0,
                 "β2005": 1,
-                "β2005_year": 1
+                "β2005_time": 1
             },
             {
                 "β_fhx_0": 100,

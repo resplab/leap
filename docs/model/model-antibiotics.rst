@@ -56,10 +56,10 @@ data is formatted as follows:
     </table>
 
 Since the ``n_abx`` column gives us the *total* number of antibiotics prescribed, we need to use
-population data to convert this to a *per infant* value. We obtained population data from
-`Table 17-10-00005-01 from Statistics Canada
-<https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=1710000501>`_,
-the same past-data source used in the :ref:`birth-model`:
+population data to convert this to a *per infant* value. We use the processed birth estimate data described in :ref:`birth-model`
+(``birth_estimate.csv``). That file provides ``N`` (total births, both sexes combined) and
+``prop_male`` (proportion of births that are male) per timepoint and province; we derive the
+per-sex counts shown below as ``N * prop_male`` (male) and ``N * (1 - prop_male)`` (female):
 
 .. raw:: html
 
@@ -83,10 +83,11 @@ the same past-data source used in the :ref:`birth-model`:
       </tr>
         <td><code class="notranslate">sex</code></td>
         <td>
-          <code class="notranslate">int</code>
+          <code class="notranslate">str</code>
         </td>
         <td>
-          <code>"M"</code> = male, <code>"F"</code> = female
+          <code>"M"</code> = male, <code>"F"</code> = female (derived from <code>N</code> and
+          <code>prop_male</code>, see above)
         </td>
       </tr>
       <tr>
@@ -201,9 +202,9 @@ for years from ``2005`` onward.
 
     \log(\mu^{(i)}) = \beta_0
         + \beta_{\text{sex}} \cdot s^{(i)}
-        + \beta_{\text{year}} \cdot t^{(i)}
+        + \beta_{\text{time}} \cdot t^{(i)}
         + \beta_{\text{2005}} \cdot H(t^{(i)} - 2005)
-        + \beta_{\text{year,2005}} \cdot t^{(i)} \cdot H(t^{(i)} - 2005)
+        + \beta_{\text{time,2005}} \cdot t^{(i)} \cdot H(t^{(i)} - 2005)
 
 where:
 
@@ -220,18 +221,19 @@ where:
    * - :math:`\beta_{\text{sex}}`
      - :math:`s^{(i)}`
      - sex main effect
-   * - :math:`\beta_{\text{year}}`
+   * - :math:`\beta_{\text{time}}`
      - :math:`t^{(i)}`
-     - birth year main effect
+     - birth timepoint main effect
    * - :math:`\beta_{\text{2005}}`
      - :math:`H(t^{(i)} - 2005)`
      - Heaviside step at 2005
-   * - :math:`\beta_{\text{year,2005}}`
+   * - :math:`\beta_{\text{time,2005}}`
      - :math:`t^{(i)} \cdot H(t^{(i)} - 2005)`
-     - birth year × Heaviside interaction
+     - birth timepoint × Heaviside interaction
 
-And :math:`s^{(i)}` is the sex, :math:`t^{(i)}` is the birth year, and :math:`H` is the Heaviside
-step function.
+And :math:`s^{(i)}` is the sex and :math:`H` is the Heaviside step function. :math:`t^{(i)}` is
+the birth timepoint; since the underlying data is only available at yearly granularity, this is
+simply the agent's birth year (e.g. ``2008``).
 
 
 Usage in Simulation
