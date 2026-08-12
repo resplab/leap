@@ -24,8 +24,8 @@ logger = get_logger(__name__, 20)
 PROVINCE = "CA"
 MAX_TIMEPOINT = dt.datetime(2065, 1, 1) # 2065 for CA; 2043 for BC
 MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
-STABILIZATION_YEAR = 2025
-BASELINE_YEAR = 2001
+STABILIZATION_TIMEPOINT = dt.datetime(2025, 1, 1)
+BASELINE_TIMEPOINT = dt.datetime(2001, 1, 1)
 MAX_AGE = 63
 MAX_AGE = 9
 MAX_ASTHMA_AGE = 62
@@ -69,7 +69,7 @@ def get_asthma_occurrence_prediction(
     year: int,
     occurrence_type: str,
     max_asthma_age: int = MAX_ASTHMA_AGE,
-    stabilization_year: int = STABILIZATION_YEAR
+    stabilization_timepoint: dt.datetime = STABILIZATION_TIMEPOINT
 ) -> float:
     """Predicts the asthma prevalence or incidence based on the given parameters.
 
@@ -79,14 +79,14 @@ def get_asthma_occurrence_prediction(
         year: Year of the prediction.
         occurrence_type: One of ``"prevalence"`` or ``"incidence"``.
         max_asthma_age: The maximum age for asthma prediction (default is ``62``).
-        stabilization_year: The year when asthma stabilization occurs (default is ``2025``).
+        stabilization_timepoint: The timepoint when asthma stabilization occurs (default is ``2025``).
 
     Returns:
         A float representing the predicted asthma prevalence or incidence.
     """
 
     age = min(age, max_asthma_age)
-    year = min(year, stabilization_year)
+    year = min(year, stabilization_timepoint)
 
     return DF_OCC_PRED.loc[
         (DF_OCC_PRED["age"] == age) &
@@ -777,7 +777,7 @@ def calibrate_asthma_incidence(
             odds ratios for the previous year.
     """
 
-    if year < BASELINE_YEAR or age == MIN_ASTHMA_AGE:
+    if year < BASELINE_TIMEPOINT or age == MIN_ASTHMA_AGE:
         return {
             "α": np.nan,
             "ζ_λ": [],
@@ -989,8 +989,8 @@ def beta_params_age_optimizer(
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
-    baseline_year: int = BASELINE_YEAR,
-    stabilization_year: int = STABILIZATION_YEAR,
+    baseline_timepoint: dt.datetime = BASELINE_TIMEPOINT,
+    stabilization_timepoint: dt.datetime = STABILIZATION_TIMEPOINT,
     max_age: int = MAX_AGE,
     min_timepoint: dt.datetime = MIN_TIMEPOINT,
     β_risk_factors_age: list[float] = [
@@ -1023,8 +1023,8 @@ def beta_params_age_optimizer(
             * ``prob (float)``: the probability that someone diagnosed with asthma previously
               will maintain their asthma diagnosis in the given year.
 
-        baseline_year: The baseline year for the calibration.
-        stabilization_year: The stabilization year for the calibration.
+        baseline_timepoint: The baseline timepoint for the calibration.
+        stabilization_timepoint: The stabilization timepoint for the calibration.
         max_age: The maximum age to consider for the calibration.
         min_timepoint: The minimum year to consider for the calibration.
         β_risk_factors_age: A list of two beta parameters, ``β_fhx_age`` and ``β_abx_age``, to be
@@ -1033,7 +1033,7 @@ def beta_params_age_optimizer(
 
     df = pd.DataFrame(
         list(itertools.product(
-            range(baseline_year, stabilization_year + 2),
+            range(baseline_timepoint, stabilization_timepoint + 2),
             ["F", "M"],
             range(4, max_age + 1)
         )),
@@ -1065,8 +1065,8 @@ def generate_occurrence_calibration_data(
     province: str = PROVINCE,
     min_timepoint: dt.datetime = MIN_TIMEPOINT,
     max_timepoint: dt.datetime = MAX_TIMEPOINT,
-    baseline_year: int = BASELINE_YEAR,
-    stabilization_year: int = STABILIZATION_YEAR,
+    baseline_timepoint: dt.datetime = BASELINE_TIMEPOINT,
+    stabilization_timepoint: dt.datetime = STABILIZATION_TIMEPOINT,
     max_age: int = MAX_AGE,
     retrain_beta: bool = False
 ):
@@ -1077,8 +1077,8 @@ def generate_occurrence_calibration_data(
         province: The province to load data for.
         min_timepoint: The minimum timepoint to load data for.
         max_timepoint: The maximum timepoint to load data for.
-        baseline_year: The baseline year for the calibration.
-        stabilization_year: The stabilization year for the calibration.
+        baseline_timepoint: The baseline year for the calibration.
+        stabilization_timepoint: The stabilization year for the calibration.
         max_age: The maximum age to consider for the calibration.
         retrain_beta: If ``True``, re-run the fit for the ``β_risk_factors``. Otherwise, load
             the saved parameters from a ``json`` file.
@@ -1100,8 +1100,8 @@ def generate_occurrence_calibration_data(
             df_incidence=df_incidence,
             df_prevalence=df_prevalence,
             df_reassessment=df_reassessment,
-            baseline_year=baseline_year,
-            stabilization_year=stabilization_year,
+            baseline_timepoint=baseline_timepoint,
+            stabilization_timepoint=stabilization_timepoint,
             max_age=max_age
         )
     
@@ -1122,7 +1122,7 @@ def generate_occurrence_calibration_data(
 
     df_correction = pd.DataFrame(
         list(itertools.product(
-            range(baseline_year - 1, stabilization_year + 1),
+            range(baseline_timepoint - time_delta, stabilization_timepoint + time_delta, time_delta),
             ["F", "M"],
             range(3, max_age + 1)
         )),
@@ -1155,7 +1155,7 @@ def generate_occurrence_calibration_data(
     # Set incidence = prevalence for age = 3
     df_correction["inc_correction"] = df_correction.apply(
         lambda x: x["prev_correction"] 
-            if x["year"] >= BASELINE_YEAR and x["age"] == MIN_ASTHMA_AGE 
+            if x["year"] >= BASELINE_TIMEPOINT and x["age"] == MIN_ASTHMA_AGE 
             else x["inc_correction"],
         axis=1
     ).reset_index(drop=True)
