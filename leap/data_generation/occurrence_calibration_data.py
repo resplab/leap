@@ -1,4 +1,5 @@
 import pandas as pd
+import datetime as dt
 import json
 import numpy as np
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
@@ -21,8 +22,8 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 PROVINCE = "CA"
-MAX_TIMEPOINT = 2065 # 2065 for CA; 2043 for BC
-MIN_TIMEPOINT = 2000
+MAX_TIMEPOINT = dt.datetime(2065, 1, 1) # 2065 for CA; 2043 for BC
+MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
 STABILIZATION_YEAR = 2025
 BASELINE_YEAR = 2001
 MAX_AGE = 63
@@ -96,15 +97,15 @@ def get_asthma_occurrence_prediction(
 
 def load_occurrence_data(
     province: str = PROVINCE,
-    min_timepoint: int = MIN_TIMEPOINT,
-    max_timepoint: int = MAX_TIMEPOINT
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
+    max_timepoint: dt.datetime = MAX_TIMEPOINT,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Load the asthma incidence and prevalence data for the given province and year range.
 
     Args:
         province: The province to load data for.
-        min_timepoint: The minimum year to load data for.
-        max_timepoint: The maximum year to load data for.
+        min_timepoint: The minimum timepoint to load data for.
+        max_timepoint: The maximum timepoint to load data for.
 
     Returns:
         A tuple of two DataFrames.
@@ -727,7 +728,7 @@ def calibrate_asthma_incidence(
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     β_risk_factors: Dict[str, Dict[str, float]] = β_RISK_FACTORS,
-    min_timepoint: int = MIN_TIMEPOINT
+    min_timepoint: dt.datetime = MIN_TIMEPOINT
 ) -> ResultsIncidence:
     """Calibrate the asthma incidence for the given year, age, and sex.
 
@@ -758,7 +759,7 @@ def calibrate_asthma_incidence(
               odds ratio calculation. Must contain the keys ``β_abx_0``, ``β_abx_age``,
               and ``β_abx_dose``.
 
-        min_timepoint: The minimum year to consider for the calibration.
+        min_timepoint: The minimum timepoint to consider for the calibration.
 
     Returns:
         A dictionary containing the calibrated asthma incidence for the given year, age, and sex.
@@ -900,7 +901,7 @@ def compute_mean_diff_log_OR(
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
-    min_timepoint: int = MIN_TIMEPOINT
+    min_timepoint: dt.datetime = MIN_TIMEPOINT
 ) -> float:
 
     """Compute the mean difference in log odds ratio for the given model and data.
@@ -937,7 +938,7 @@ def compute_mean_diff_log_OR(
             * ``prob (float)``: the probability that someone diagnosed with asthma previously
               will maintain their asthma diagnosis in the given year.
 
-        min_timepoint: The minimum year to consider for the calibration.
+        min_timepoint: The minimum timepoint to consider for the calibration.
 
     Returns:
         The mean difference in log odds ratio for the given model and data.
@@ -991,7 +992,7 @@ def beta_params_age_optimizer(
     baseline_year: int = BASELINE_YEAR,
     stabilization_year: int = STABILIZATION_YEAR,
     max_age: int = MAX_AGE,
-    min_timepoint: int = MIN_TIMEPOINT,
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
     β_risk_factors_age: list[float] = [
         β_RISK_FACTORS["fam_history"]["β_fhx_age"], β_RISK_FACTORS["abx"]["β_abx_age"]
     ]
@@ -1062,8 +1063,8 @@ def beta_params_age_optimizer(
 def generate_occurrence_calibration_data(
     time_delta: TimeDelta,
     province: str = PROVINCE,
-    min_timepoint: int = MIN_TIMEPOINT,
-    max_timepoint: int = MAX_TIMEPOINT,
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
+    max_timepoint: dt.datetime = MAX_TIMEPOINT,
     baseline_year: int = BASELINE_YEAR,
     stabilization_year: int = STABILIZATION_YEAR,
     max_age: int = MAX_AGE,
@@ -1074,8 +1075,8 @@ def generate_occurrence_calibration_data(
     Args:
         time_delta: The duration of time between data points.
         province: The province to load data for.
-        min_timepoint: The minimum year to load data for.
-        max_timepoint: The maximum year to load data for.
+        min_timepoint: The minimum timepoint to load data for.
+        max_timepoint: The maximum timepoint to load data for.
         baseline_year: The baseline year for the calibration.
         stabilization_year: The stabilization year for the calibration.
         max_age: The maximum age to consider for the calibration.
