@@ -121,6 +121,8 @@ class Simulation:
         self.pollution_table = PollutionTable()
         self.SSP = config["pollution"]["SSP"]
         self.outcome_matrix = None
+        # The run seed, stored so multiprocessing workers can derive reproducible per-worker seeds.
+        self._seed = None
 
     def __repr__(self):
         return (
@@ -556,6 +558,16 @@ class Simulation:
             queue: A queue for returning the results and updating the
                 progress bar.
         """
+        # Deterministically seed this worker so multiprocessing runs are reproducible. Workers are
+        # spawned via a ``forkserver`` context and do NOT inherit the parent's seeded RNG state, so
+        # without this each worker would draw from OS entropy and results would vary run to run.
+        # Each (timepoint, process) gets its own independent stream derived from the run seed.
+        if self._seed is not None:
+            worker_seed = np.random.SeedSequence(
+                [int(self._seed), int(timepoint_index), int(process_id)]
+            ).generate_state(1)[0]
+            np.random.seed(worker_seed)
+
         for index in indices:
             agent_id, outcome_matrix = self.simulate_agent(
                 sex=new_agents_df["sex"].iloc[index],
@@ -787,6 +799,7 @@ class Simulation:
             The outcome matrix.
         """
 
+        self._seed = seed
         if seed is not None:
             np.random.seed(seed)
 
@@ -925,9 +938,19 @@ class Simulation:
                     pbar.close()
 
             time_bar.update()
-            logger.message("Combining OutcomeMatrix list...", tqdm=True)
-            outcome_matrix = combine_outcome_matrices(outcome_matrices)
         time_bar.close()
+
+        # Combine the per-agent outcome matrices once, after all timepoints have been simulated.
+        # Previously this was called inside the timepoint loop over the ever-growing
+        # ``outcome_matrices`` list, re-combining every agent from every prior timepoint on each
+        # iteration (O(timepoints x cumulative agents)) while discarding all intermediate results.
+        logger.message("Combining OutcomeMatrix list...", tqdm=True)
+        if outcome_matrices:
+            outcome_matrix = combine_outcome_matrices(outcome_matrices)
+        else:
+            logger.warning(
+                "No agents were simulated across the entire run; returning an empty OutcomeMatrix."
+            )
         sys.stdout.write('\033[F')    # Move cursor up one line
         sys.stdout.write('\033[2K') 
         sys.stdout.flush()

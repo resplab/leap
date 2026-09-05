@@ -4,7 +4,7 @@ import itertools
 import datetime as dt
 from dateutil.relativedelta import relativedelta
 import pathlib
-from leap.utils import timer, date_range, TimeDelta
+from leap.utils import date_range, TimeDelta
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -28,7 +28,6 @@ class OutcomeTable:
     def __repr__(self):
         return self.data.__repr__()
 
-    @timer(log_level=20)
     def increment(self, column: str, filter_columns: dict | None = None, amount: float | int = 1):
         """Increment the value of a column in the table.
 
@@ -36,27 +35,26 @@ class OutcomeTable:
             column: The column to increment.
             filter_columns: A dictionary of columns to filter by.
             amount: The amount to increment the column by.
-            
+
+        .. note::
+
+            When ``group_by`` is set, ``grouped_data`` is *not* rebuilt here. Because
+            ``increment`` mutates ``self.data`` in place and only touches value columns (never the
+            grouping keys or the row set), the existing ``grouped_data`` object still references the
+            same underlying frame and reflects the updated values via ``get_group``. Rebuilding the
+            groupby on every call was a large, unnecessary cost on the simulation's hottest path.
         """
 
         if filter_columns is not None:
-            # f = "".join(
-            #     [
-            #         f"({key} == '{value}') & " if isinstance(value, (str, dt.datetime)) else
-            #         f"({key} == {value}) & "
-            #         for key, value in filter_columns.items()]
-            # )[:-3]  # Remove the last '&'
-            f = " & ".join(
-                f"({key} == @{key})"
-                for key in filter_columns
-            )
-            df_filtered = self.data.query(f, local_dict=filter_columns)
-            self.data.loc[df_filtered.index, column] += amount
+            # Build a boolean mask directly instead of parsing a ``DataFrame.query`` string
+            # (numexpr) on every call. ``filter_columns`` uniquely identifies the row(s) to update.
+            mask = None
+            for key, value in filter_columns.items():
+                column_mask = self.data[key] == value
+                mask = column_mask if mask is None else (mask & column_mask)
+            self.data.loc[mask, column] += amount
         else:
             self.data[column] += amount
-
-        if self.group_by is not None:
-            self.grouped_data = self.data.groupby(self.group_by)
 
     def combine(self, outcome_table: "OutcomeTable", columns: list[str]):
         """Combine two outcome tables via summation.
