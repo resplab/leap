@@ -5,11 +5,10 @@ import time
 import pandas as pd
 import numpy as np
 import datetime as dt
-from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
+from leap.utils import get_data_path, get_time_delta_tag, TimeDelta, Sex
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
-    from leap.utils import Sex
     from dateutil.relativedelta import relativedelta
 
 
@@ -118,6 +117,7 @@ class AntibioticExposure:
             get_data_path(f"processed_data/{time_delta_tag}/antibiotic_predictions.csv"),
             parse_dates=["timepoint"]
         )
+        df["sex"] = df["sex"].apply(lambda sex: int(Sex(sex)))
         grouped_df = df.groupby(["timepoint", "sex"])
         return grouped_df
 
