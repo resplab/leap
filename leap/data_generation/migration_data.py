@@ -268,6 +268,12 @@ def load_migration_data(
     df["n_immigrants"] = df["delta_n"].clip(lower=0)
     df["n_emigrants"] = (-df["delta_n"]).clip(lower=0)
 
+    # age < 1 is handled entirely by the birth model, not migration. For a sub-annual time_delta,
+    # age is split into fractional sub-ages within a year, so only the very first sub-age (age 0)
+    # is excluded by the age_prev dropna above; the rest still find a predecessor within the same
+    # age < 1 cohort and would otherwise leak into the age = 0 row of the final table.
+    df = df.loc[df["age"] >= 1.0]
+
     # add the n_birth column to df
     df = pd.merge(
         df, df_birth, on=["province", "projection_scenario", "timepoint"], how="left"
