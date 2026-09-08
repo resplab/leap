@@ -1,0 +1,2036 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="index.html">
+      
+      
+        <link rel="next" href="model-birth.html">
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>Simulation - </title>
+      
+    
+    
+      
+        
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+        <link rel="stylesheet" type="text/css" href="../_static/sphinx_immaterial_theme.cf2c65c97ee1b6f01.min.css?v=0a68cab4" />
+        <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+        <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c4bbe126" />
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#iterating-over-timepoints" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="" class="md-header__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../_static/logo.png" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Simulation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="" class="md-nav__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../_static/logo.png" alt="logo">
+    </a>
+    
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/cli/index.rst (reference label)"><span>Running LEAP</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/index.rst (reference label)"><span>Model</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/model/index.rst (reference label)"><span>Model</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-simulation.rst (reference label)"><span>Simulation</span></span>
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-simulation.rst (reference label)"><span>Simulation</span></span>
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/model/model-simulation.rst (reference label)"><span>Simulation</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#iterating-over-timepoints" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#iterating-over-timepoints (reference label)"><span>Iterating Over Timepoints</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Iterating Over Timepoints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initial-timepoint" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#initial-timepoint (reference label)"><span>Initial Timepoint</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subsequent-timepoints" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#subsequent-timepoints (reference label)"><span>Subsequent Timepoints</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#example (reference label)"><span>Example</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iterating-over-agents" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#iterating-over-agents (reference label)"><span>Iterating Over Agents</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Iterating Over Agents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agent-initialization" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#agent-initialization (reference label)"><span>Agent Initialization</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Agent Initialization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-check-if-the-agent-is-over-3-years-old" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-1-check-if-the-agent-is-over-3-years-old (reference label)"><span>Step 1:<wbr> Check if the agent is over 3 years old</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-check-if-the-agent-has-asthma" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-2-check-if-the-agent-has-asthma (reference label)"><span>Step 2:<wbr> Check if the agent has asthma</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-determine-the-age-of-asthma-diagnosis" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-3-determine-the-age-of-asthma-diagnosis (reference label)"><span>Step 3:<wbr> Determine the age of asthma diagnosis</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-check-hospitalizations" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="step-4-check-hospitalizations (reference label)"><span>Step 4:<wbr> Check hospitalizations</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-determine-asthma-control-levels" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-5-determine-asthma-control-levels (reference label)"><span>Step 5:<wbr> Determine asthma control levels</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-compute-the-number-of-asthma-exacerbations-in-the-current-timepoint" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-6-compute-the-number-of-asthma-exacerbations-in-the-current-timepoint (reference label)"><span>Step 6:<wbr> Compute the number of asthma exacerbations in the current timepoint</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-compute-the-severity-of-the-asthma-exacerbations-in-the-current-timepoint" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-7-compute-the-severity-of-the-asthma-exacerbations-in-the-current-timepoint (reference label)"><span>Step 7:<wbr> Compute the severity of the asthma exacerbations in the current timepoint</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-8-update-the-number-of-hospitalizations" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-8-update-the-number-of-hospitalizations (reference label)"><span>Step 8:<wbr> Update the number of hospitalizations</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iterating-over-lifetime" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#iterating-over-lifetime (reference label)"><span>Iterating Over Lifetime</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Iterating Over Lifetime">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-check-if-agent-has-asthma" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-1-check-if-agent-has-asthma (reference label)"><span>Step 1:<wbr> Check if agent has asthma</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-check-if-agent-gets-a-new-asthma-diagnosis" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-2-check-if-agent-gets-a-new-asthma-diagnosis (reference label)"><span>Step 2:<wbr> Check if agent gets a new asthma diagnosis</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-compute-the-control-levels" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-3-compute-the-control-levels (reference label)"><span>Step 3:<wbr> Compute the control levels</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-compute-the-number-of-asthma-exacerbations-in-the-current-timepoint" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-4-compute-the-number-of-asthma-exacerbations-in-the-current-timepoint (reference label)"><span>Step 4:<wbr> Compute the number of asthma exacerbations in the current timepoint</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-compute-the-severity-of-the-asthma-exacerbations-in-the-current-timepoint" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-5-compute-the-severity-of-the-asthma-exacerbations-in-the-current-timepoint (reference label)"><span>Step 5:<wbr> Compute the severity of the asthma exacerbations in the current timepoint</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-update-the-number-of-hospitalizations" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-6-update-the-number-of-hospitalizations (reference label)"><span>Step 6:<wbr> Update the number of hospitalizations</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-reassess-asthma-diagnosis" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-7-reassess-asthma-diagnosis (reference label)"><span>Step 7:<wbr> Reassess asthma diagnosis</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-8-compute-utility" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-8-compute-utility (reference label)"><span>Step 8:<wbr> Compute utility</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-9-compute-cost" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-9-compute-cost (reference label)"><span>Step 9:<wbr> Compute cost</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-10-check-if-agent-dies" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-10-check-if-agent-dies (reference label)"><span>Step 10:<wbr> Check if agent dies</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-11-check-if-agent-emigrates" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-11-check-if-agent-emigrates (reference label)"><span>Step 11:<wbr> Check if agent emigrates</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-birth.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-birth.rst (reference label)"><span>Birth Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="death/model-death.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/death/model-death.rst (reference label)"><span>Mortality Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-migration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-migration.rst (reference label)"><span>Immigration / Emigration Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-antibiotics.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-antibiotics.rst (reference label)"><span>Antibiotic Exposure Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-family-history.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-family-history.rst (reference label)"><span>Family History Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-occurrence.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-occurrence.rst (reference label)"><span>Asthma Occurrence Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-reassessment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-reassessment.rst (reference label)"><span>Asthma Reassessment Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-control.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-control.rst (reference label)"><span>Asthma Control Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-exacerbation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-exacerbation.rst (reference label)"><span>Asthma Exacerbations Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-exacerbation-severity.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-exacerbation-severity.rst (reference label)"><span>Asthma Exacerbation Severity Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-cost.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-cost.rst (reference label)"><span>Cost Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-utility.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-utility.rst (reference label)"><span>Utility Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-pollution.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-pollution.rst (reference label)"><span>Pollution Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-statistical-background.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-statistical-background.rst (reference label)"><span>Statistical Background</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/index.rst (reference label)"><span>Developers</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../references.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/references.rst (reference label)"><span>References</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/model/model-simulation.rst (reference label)"><span>Simulation</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#iterating-over-timepoints" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#iterating-over-timepoints (reference label)"><span>Iterating Over Timepoints</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Iterating Over Timepoints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initial-timepoint" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#initial-timepoint (reference label)"><span>Initial Timepoint</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subsequent-timepoints" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#subsequent-timepoints (reference label)"><span>Subsequent Timepoints</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#example (reference label)"><span>Example</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iterating-over-agents" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#iterating-over-agents (reference label)"><span>Iterating Over Agents</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Iterating Over Agents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agent-initialization" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#agent-initialization (reference label)"><span>Agent Initialization</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Agent Initialization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-check-if-the-agent-is-over-3-years-old" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-1-check-if-the-agent-is-over-3-years-old (reference label)"><span>Step 1:<wbr> Check if the agent is over 3 years old</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-check-if-the-agent-has-asthma" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-2-check-if-the-agent-has-asthma (reference label)"><span>Step 2:<wbr> Check if the agent has asthma</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-determine-the-age-of-asthma-diagnosis" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-3-determine-the-age-of-asthma-diagnosis (reference label)"><span>Step 3:<wbr> Determine the age of asthma diagnosis</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-check-hospitalizations" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="step-4-check-hospitalizations (reference label)"><span>Step 4:<wbr> Check hospitalizations</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-determine-asthma-control-levels" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-5-determine-asthma-control-levels (reference label)"><span>Step 5:<wbr> Determine asthma control levels</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-compute-the-number-of-asthma-exacerbations-in-the-current-timepoint" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-6-compute-the-number-of-asthma-exacerbations-in-the-current-timepoint (reference label)"><span>Step 6:<wbr> Compute the number of asthma exacerbations in the current timepoint</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-compute-the-severity-of-the-asthma-exacerbations-in-the-current-timepoint" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-7-compute-the-severity-of-the-asthma-exacerbations-in-the-current-timepoint (reference label)"><span>Step 7:<wbr> Compute the severity of the asthma exacerbations in the current timepoint</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-8-update-the-number-of-hospitalizations" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-8-update-the-number-of-hospitalizations (reference label)"><span>Step 8:<wbr> Update the number of hospitalizations</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iterating-over-lifetime" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#iterating-over-lifetime (reference label)"><span>Iterating Over Lifetime</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Iterating Over Lifetime">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-check-if-agent-has-asthma" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-1-check-if-agent-has-asthma (reference label)"><span>Step 1:<wbr> Check if agent has asthma</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-check-if-agent-gets-a-new-asthma-diagnosis" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-2-check-if-agent-gets-a-new-asthma-diagnosis (reference label)"><span>Step 2:<wbr> Check if agent gets a new asthma diagnosis</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-compute-the-control-levels" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-3-compute-the-control-levels (reference label)"><span>Step 3:<wbr> Compute the control levels</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-compute-the-number-of-asthma-exacerbations-in-the-current-timepoint" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-4-compute-the-number-of-asthma-exacerbations-in-the-current-timepoint (reference label)"><span>Step 4:<wbr> Compute the number of asthma exacerbations in the current timepoint</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-compute-the-severity-of-the-asthma-exacerbations-in-the-current-timepoint" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-5-compute-the-severity-of-the-asthma-exacerbations-in-the-current-timepoint (reference label)"><span>Step 5:<wbr> Compute the severity of the asthma exacerbations in the current timepoint</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-update-the-number-of-hospitalizations" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-6-update-the-number-of-hospitalizations (reference label)"><span>Step 6:<wbr> Update the number of hospitalizations</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-reassess-asthma-diagnosis" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-7-reassess-asthma-diagnosis (reference label)"><span>Step 7:<wbr> Reassess asthma diagnosis</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-8-compute-utility" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-8-compute-utility (reference label)"><span>Step 8:<wbr> Compute utility</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-9-compute-cost" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-9-compute-cost (reference label)"><span>Step 9:<wbr> Compute cost</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-10-check-if-agent-dies" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-10-check-if-agent-dies (reference label)"><span>Step 10:<wbr> Check if agent dies</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-11-check-if-agent-emigrates" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-simulation.rst#step-11-check-if-agent-emigrates (reference label)"><span>Step 11:<wbr> Check if agent emigrates</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                
+                
+                  
+
+
+  
+  
+
+<h1 id="simulation">Simulation<a class="headerlink" href="#simulation" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">LEAP</span></code> model simulates asthma outcomes over a lifetime, incorporating different factors such
+as age, sex, location, antibiotic use, and other health-related variables.</p>
+<p>First, let us take a look at the different input parameters:</p>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">province</span></code></p></td>
+<td><p>The province in Canada to run the simulation. Currently only <code class="docutils literal notranslate"><span class="pre">BC</span></code> and <code class="docutils literal notranslate"><span class="pre">CA</span></code> are
+supported.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">projection_scenario</span></code></p></td>
+<td><p>Statistics Canada uses different population growth types to model different population
+growth possibilities.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">num_births_initial</span></code></p></td>
+<td><p>The number of agents aged 0 in the initial timepoint of the simulation. This acts as a
+scaling factor: agents at all other ages are created in proportion to the Statistics
+Canada age distribution for the starting timepoint and province, so the total initial
+population is typically much larger than this value.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_age</span></code></p></td>
+<td><p>The maximum age of a person in the model.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">until_all_die</span></code></p></td>
+<td><p>Whether or not to keep the simulation running until all members of the population have
+died.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min_timepoint</span></code></p></td>
+<td><p>The date and time to start the simulation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">time_horizon</span></code></p></td>
+<td><p>How long to run the simulation for.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">time_delta</span></code></p></td>
+<td><p>The time delta to use for the simulation. For example, if <code class="docutils literal notranslate"><span class="pre">time_delta</span></code> is 1 year,
+then we will simulate the population at yearly time intervals. If <code class="docutils literal notranslate"><span class="pre">time_delta</span></code> is 1 month,
+then we will simulate the population at monthly time intervals.</p></td>
+</tr>
+</tbody>
+</table>
+<h2 id="iterating-over-timepoints">Iterating Over Timepoints<a class="headerlink" href="#iterating-over-timepoints" title="Link to this heading">¶</a></h2>
+<h3 id="initial-timepoint">Initial Timepoint<a class="headerlink" href="#initial-timepoint" title="Link to this heading">¶</a></h3>
+<p>To start the simulation, we begin with the initial timepoint, <code class="docutils literal notranslate"><span class="pre">min_timepoint</span></code>. At each timepoint,
+a time interval is defined as:</p>
+<div class="math notranslate nohighlight">
+\[\text{time interval} = [\text{timepoint}, \text{timepoint} + \text{time delta})\]</div>
+<p>For example, if the <code class="docutils literal notranslate"><span class="pre">min_timepoint</span></code> is January 1, 2020, and the <code class="docutils literal notranslate"><span class="pre">time_delta</span></code> is 1 year, then the
+first time interval would be <code class="docutils literal notranslate"><span class="pre">[2020-01-01,</span> <span class="pre">2021-01-01)</span></code>, i.e., the year <code class="docutils literal notranslate"><span class="pre">2020</span></code>.</p>
+<p>Unlike at subsequent timepoints, at the initial timepoint the simulation does not introduce only
+newborns — instead, it creates a cross-sectional population spanning all ages from <code class="docutils literal notranslate"><span class="pre">0</span></code> to
+<code class="docutils literal notranslate"><span class="pre">max_age</span></code>, representing the full age distribution of the province at the initial timepoint, drawn
+from Statistics Canada population data (see the <a class="reference internal" href="model-birth.html#birth-model"><span class="std std-ref">Birth Model</span></a>).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">num_births_initial</span></code> parameter sets the number of agents at age 0. The number of agents at
+every other age is determined by multiplying <code class="docutils literal notranslate"><span class="pre">num_births_initial</span></code> by that age group’s <code class="docutils literal notranslate"><span class="pre">prop</span></code>
+value — the ratio of that age group’s size to the newborn cohort in the Statistics Canada data.
+As a result, the total number of agents created in the initial timepoint is generally much larger
+than <code class="docutils literal notranslate"><span class="pre">num_births_initial</span></code>, but is determined by this value.</p>
+<h3 id="subsequent-timepoints">Subsequent Timepoints<a class="headerlink" href="#subsequent-timepoints" title="Link to this heading">¶</a></h3>
+<p>For all subsequent timepoints, we create a list of agents who are either born during that time
+interval or who immigrated to the province during that time interval. The number of births at
+subsequent timepoints is determined by the <a class="reference internal" href="model-birth.html#birth-model"><span class="std std-ref">Birth Model</span></a>, which factors in the population
+growth type and the number of births during the previous time interval. The number of immigrants is
+determined by the <a class="reference internal" href="model-migration.html#migration-model"><span class="std std-ref">Immigration / Emigration Model</span></a>.</p>
+<h3 id="example">Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h3>
+<p>Let’s suppose we have:</p>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>starting timepoint</p></td>
+<td><p>2021-01-01 00:00:00</p></td>
+</tr>
+<tr class="row-odd"><td><p>time horizon</p></td>
+<td><p>10 years</p></td>
+</tr>
+<tr class="row-even"><td><p>time delta</p></td>
+<td><p>1 year</p></td>
+</tr>
+<tr class="row-odd"><td><p>province</p></td>
+<td><p>BC</p></td>
+</tr>
+<tr class="row-even"><td><p>population growth type</p></td>
+<td><p>HG (High Growth)</p></td>
+</tr>
+<tr class="row-odd"><td><p>number of births in initial time interval</p></td>
+<td><p>100</p></td>
+</tr>
+<tr class="row-even"><td><p>maximum age</p></td>
+<td><p>90</p></td>
+</tr>
+</tbody>
+</table>
+<p>In the first time interval, we would create agents at all ages from 0 to 90, with the count at each
+age scaled from <code class="docutils literal notranslate"><span class="pre">num_births_initial</span></code> using Statistics Canada population proportions. For example,
+if age 30 has a <code class="docutils literal notranslate"><span class="pre">prop</span></code> of 2.5, then <code class="docutils literal notranslate"><span class="pre">100</span> <span class="pre">×</span> <span class="pre">2.5</span> <span class="pre">=</span> <span class="pre">250</span></code> agents are created at age 30. The
+total initial population is the sum of <code class="docutils literal notranslate"><span class="pre">num_births_initial</span> <span class="pre">×</span> <span class="pre">prop</span></code> across all age groups.
+A simplified excerpt:</p>
+<table class="docutils data align-default" id="id2">
+<caption><span class="caption-text">Year: 2021 (initial population, all ages)</span><a class="headerlink" href="#id2" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Agent</p></th>
+<th class="head"><p>age</p></th>
+<th class="head"><p>sex</p></th>
+<th class="head"><p>immigrant</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Agent 1</p></td>
+<td><p>0</p></td>
+<td><p>F</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p>Agent 2</p></td>
+<td><p>0</p></td>
+<td><p>M</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-even"><td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+<tr class="row-odd"><td><p>Agent 100</p></td>
+<td><p>0</p></td>
+<td><p>F</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-even"><td><p>Agent 101</p></td>
+<td><p>1</p></td>
+<td><p>M</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+<tr class="row-even"><td><p>Agent N</p></td>
+<td><p>90</p></td>
+<td><p>F</p></td>
+<td><p>no</p></td>
+</tr>
+</tbody>
+</table>
+<p>In the second time interval, which is the year 2022, we would calculate the number of births using
+the birth model:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}n(2022) &amp;= n(2021) * \dfrac{N(2022)}{N(2021)} \\
+&amp;= 100 * \dfrac{49200}{42653} \\
+&amp;\approx 115\end{split}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(n(2022)\)</span> is the number of births in 2022, in the simulation</p></li>
+<li><p><span class="math notranslate nohighlight">\(n(2021)\)</span> is the number of births in 2021, in the simulation</p></li>
+<li><p><span class="math notranslate nohighlight">\(N(2022)\)</span> is the total number of births in 2022, for the <code class="docutils literal notranslate"><span class="pre">HG</span></code> scenario, from Statistics Canada</p></li>
+<li><p><span class="math notranslate nohighlight">\(N(2021)\)</span> is the total number of births in 2021, for the <code class="docutils literal notranslate"><span class="pre">HG</span></code> scenario, from Statistics Canada</p></li>
+</ul>
+<p>We would then create 115 new agents, all aged 0, and add them to the list of agents for that
+time interval.
+For the number of immigrants:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}i(2022) &amp;= n(2022) * \dfrac{I(2022)}{N(2022)} \\
+&amp;= 115 * \dfrac{67190}{49200} \\
+&amp;\approx 157\end{split}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(i(2022)\)</span> is the number of immigrants to Canada in 2022, in the simulation</p></li>
+<li><p><span class="math notranslate nohighlight">\(I(2022)\)</span> is the total number of immigrants to Canada in 2022, for the <code class="docutils literal notranslate"><span class="pre">HG</span></code> scenario,
+from our model</p></li>
+</ul>
+<p>Now that we have the total number of immigrants for 2022, we want to distribute them across age
+and sex. We do this using the data from the immigration model.</p>
+<p>So we have a list of agents for 2022 that looks like this:</p>
+<table class="docutils data align-default" id="id3">
+<caption><span class="caption-text">Year: 2022</span><a class="headerlink" href="#id3" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Agent</p></th>
+<th class="head"><p>age</p></th>
+<th class="head"><p>sex</p></th>
+<th class="head"><p>immigrant</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Agent 1</p></td>
+<td><p>0</p></td>
+<td><p>F</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p>Agent 2</p></td>
+<td><p>0</p></td>
+<td><p>M</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-even"><td><p>Agent 3</p></td>
+<td><p>0</p></td>
+<td><p>M</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+<tr class="row-even"><td><p>Agent 115</p></td>
+<td><p>0</p></td>
+<td><p>F</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p>Agent 116</p></td>
+<td><p>29</p></td>
+<td><p>M</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p>Agent 117</p></td>
+<td><p>54</p></td>
+<td><p>F</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+<tr class="row-even"><td><p>Agent 272</p></td>
+<td><p>45</p></td>
+<td><p>M</p></td>
+<td><p>yes</p></td>
+</tr>
+</tbody>
+</table>
+<p>Since our time horizon is 10 years, we would continue this process for each year until we
+reach 2031.</p>
+<h2 id="iterating-over-agents">Iterating Over Agents<a class="headerlink" href="#iterating-over-agents" title="Link to this heading">¶</a></h2>
+<p>Once we have our list of agents for a given timepoint, we then simulate the lifetime of each agent,
+from birth or immigration until either death or the maximum age is reached.</p>
+<h3 id="agent-initialization">Agent Initialization<a class="headerlink" href="#agent-initialization" title="Link to this heading">¶</a></h3>
+<p>To initialize an agent, we set the following initial attributes:</p>
+<table class="docutils data align-default" id="id4">
+<caption><span class="caption-text">Agent Initialization</span><a class="headerlink" href="#id4" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>age</p></td>
+<td><p>Either newborn, or the age at which the agent immigrated to the province.</p></td>
+</tr>
+<tr class="row-odd"><td><p>sex</p></td>
+<td><p>Randomly assigned based on either sex proportions at birth or immigration data.</p></td>
+</tr>
+<tr class="row-even"><td><p>immigrant</p></td>
+<td><p>A boolean indicating whether the agent is an immigrant.</p></td>
+</tr>
+<tr class="row-odd"><td><p>census division</p></td>
+<td><p>Each agent is randomly assigned to a census division based on the population distribution
+in the province.</p></td>
+</tr>
+<tr class="row-even"><td><p>asthma control levels</p></td>
+<td><p>Initial asthma control levels are set to:</p>
+<ul class="simple">
+<li><p>probability of fully-controlled asthma: 0.33</p></li>
+<li><p>probability of partially-controlled asthma: 0.33</p></li>
+<li><p>probability of uncontrolled asthma: 0.33</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>family history of asthma</p></td>
+<td><p>Assigned via a Bernoulli draw using the population prevalence of parental asthma.
+1 = at least one parent has asthma, 0 = neither parent has asthma.
+See <a class="reference internal" href="model-family-history.html#family-history-model"><span class="std std-ref">Family History Model</span></a> for details on the assignment process, and
+<a class="reference internal" href="model-occurrence.html#occurrence-model-2"><span class="std std-ref">Occurrence Model 2: Risk Factors</span></a> for how this affects the asthma probability.</p></td>
+</tr>
+<tr class="row-even"><td><p>antibiotic exposure in infancy</p></td>
+<td><p>Assigned via a Negative Binomial draw using the fitted GLM parameters for the agent’s
+sex and birth year. This gives the number of antibiotic courses taken during the first
+year of life and can be 0, 1, 2, or 3. See <a class="reference internal" href="model-antibiotics.html#antibiotic-exposure-model"><span class="std std-ref">Antibiotic Exposure Model</span></a> for details on the assignment process,
+and <a class="reference internal" href="model-occurrence.html#occurrence-model-2"><span class="std std-ref">Occurrence Model 2: Risk Factors</span></a> for how this affects the asthma probability.</p></td>
+</tr>
+<tr class="row-odd"><td><p>has asthma?</p></td>
+<td><p>If the agent is less than 3 years old, they do not have asthma. Otherwise, they are assigned
+an asthma status based on the asthma prevalence model (see Step 2 below).</p></td>
+</tr>
+<tr class="row-even"><td><p>exacerbation history</p></td>
+<td><p>Initial exacerbation history is set to:</p>
+<ul class="simple">
+<li><p>number of exacerbations previous timepoint: 0</p></li>
+<li><p>number of exacerbations current timepoint: 0</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>total hospitalizations</p></td>
+<td><p>The agent’s cumulative count of very severe (hospitalized) exacerbations. For an agent with
+asthma, this is initialized via the mini-simulation described in
+<a class="reference internal" href="#step-4-check-hospitalizations"><span class="std std-ref">Step 4: Check hospitalizations</span></a> below; otherwise it starts at 0. It is incremented
+each subsequent time interval — see Step 8 and Step 6.</p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="step-1-check-if-the-agent-is-over-3-years-old">Step 1: Check if the agent is over 3 years old<a class="headerlink" href="#step-1-check-if-the-agent-is-over-3-years-old" title="Link to this heading">¶</a></h4>
+<p>If the agent is over 3 years old, go to Step 2. If not, skip to Step 3.</p>
+<h4 id="step-2-check-if-the-agent-has-asthma">Step 2: Check if the agent has asthma<a class="headerlink" href="#step-2-check-if-the-agent-has-asthma" title="Link to this heading">¶</a></h4>
+<p>We use the asthma prevalence model (<a class="reference internal" href="model-occurrence.html#occurrence-model-2"><span class="std std-ref">Occurrence Model 2: Risk Factors</span></a>) to assign a probability of
+asthma at the agent’s current age, sex, and timepoint, adjusted for their individual risk factors:</p>
+<div class="math notranslate nohighlight">
+\[\text{logit}(p_{\text{prev}}) = \text{logit}(\bar{p}_{\text{prev}}) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha\]</div>
+<p>where <span class="math notranslate nohighlight">\(\bar{p}_{\text{prev}}\)</span> is the Model 1 prevalence target for the agent’s stratum,
+<span class="math notranslate nohighlight">\(\omega_{\text{fhx}}\)</span> and <span class="math notranslate nohighlight">\(\omega_{\text{abx}}\)</span> are the odds ratios for the agent’s
+family history and antibiotic exposure, and <span class="math notranslate nohighlight">\(\alpha\)</span> is the per-stratum calibration term
+looked up from <code class="docutils literal notranslate"><span class="pre">asthma_occurrence_correction.csv</span></code>. The agent is then assigned an asthma status
+via a Bernoulli draw:</p>
+<div class="math notranslate nohighlight">
+\[\text{has asthma} \sim \text{Bernoulli}(p_{\text{prev}})\]</div>
+<h4 id="step-3-determine-the-age-of-asthma-diagnosis">Step 3: Determine the age of asthma diagnosis<a class="headerlink" href="#step-3-determine-the-age-of-asthma-diagnosis" title="Link to this heading">¶</a></h4>
+<p>If the agent was determined to have asthma in Step 2, we need to determine the age at which
+the agent was diagnosed with asthma.</p>
+<p>If the agent is 3 years old, the age of asthma diagnosis is 3.</p>
+<p>If the agent is older than 3, we use the asthma incidence model to determine the age of asthma
+diagnosis.</p>
+<h4 id="step-4-check-hospitalizations"><span id="id1"></span>Step 4: Check hospitalizations<a class="headerlink" href="#step-4-check-hospitalizations" title="Link to this heading">¶</a></h4>
+<p>Next, we determine whether the agent has previously had a very severe (i.e. hospitalized)
+exacerbation at some point since their asthma diagnosis (Step 3). This is used in the <a class="reference internal" href="model-exacerbation-severity.html#exacerbation-severity-model"><span class="std std-ref">Asthma Exacerbation Severity Model</span></a> to increase the probability of a very severe exacerbation
+for agents with a prior hospitalization.</p>
+<p>Since this agent’s asthma history was not directly simulated cycle-by-cycle (it was assigned all
+at once in Steps 2 and 3), we cannot just look up whether a hospitalization occurred. Instead, we assume the agent’s asthma was <strong>not reversible</strong> between their diagnosis age and
+two years before their current age: that is, we treat the agent as having had asthma
+continuously over that span. Under this assumption, we run a mini-simulation that sums the
+expected exacerbation rate <span class="math notranslate nohighlight">\(\lambda^{(i)}\)</span> for this agent <span class="math notranslate nohighlight">\(i\)</span> (using the Step 6
+formula below, with that year’s age, sex, and control levels) over every year from the asthma
+diagnosis age up to two years before the agent’s current age:</p>
+<div class="math notranslate nohighlight">
+\[\text{total rate}^{(i)} = \sum_{y} \lambda_y^{(i)}\]</div>
+<p>where <span class="math notranslate nohighlight">\(y\)</span> ranges over each year (not the simulation’s own timepoint, but a calendar
+year) from the asthma diagnosis age up to two years before the agent’s current age, and
+<span class="math notranslate nohighlight">\(\lambda_y^{(i)}\)</span> is <span class="math notranslate nohighlight">\(\lambda^{(i)}\)</span> evaluated at that year (Step 6 below).</p>
+<p>We then compute the probability that <em>none</em> of the agent’s exacerbations over this span were very
+severe. Each agent’s probability of a very severe exacerbation is
+<span class="math notranslate nohighlight">\(w^{\text{pre},(i)}_{\text{very severe}}\)</span> — the same pre-adjustment Dirichlet-drawn quantity
+described in the <a class="reference internal" href="model-exacerbation-severity.html#exacerbation-severity-model"><span class="std std-ref">Asthma Exacerbation Severity Model</span></a>. This
+probability of zero very severe exacerbations out of <code class="docutils literal notranslate"><span class="pre">total</span> <span class="pre">rate</span></code> expected exacerbations is the
+marginal (Dirichlet-multinomial) probability, expressed using the Gamma function <span class="math notranslate nohighlight">\(\Gamma\)</span>
+(the continuous extension of the factorial, <span class="math notranslate nohighlight">\(\Gamma(n+1) = n!\)</span>):</p>
+<div class="math notranslate nohighlight">
+\[P(\text{no very severe exacerbations}) = \dfrac{1}{\Gamma(\text{total rate}^{(i)} + 1)} \cdot
+    \dfrac{\Gamma(\text{total rate}^{(i)} + 1 - w^{\text{pre},(i)}_{\text{very severe}})}
+        {\Gamma(1 - w^{\text{pre},(i)}_{\text{very severe}})}\]</div>
+<p>Finally, we toss a coin — a Bernoulli draw — to decide whether the agent had at least one very
+severe exacerbation over this span:</p>
+<div class="math notranslate nohighlight">
+\[\text{prev hosp} \sim \text{Bernoulli}\left(1 - P(\text{no very severe exacerbations})\right)\]</div>
+<h4 id="step-5-determine-asthma-control-levels">Step 5: Determine asthma control levels<a class="headerlink" href="#step-5-determine-asthma-control-levels" title="Link to this heading">¶</a></h4>
+<p>We next determine the asthma control levels for the agent. The asthma control levels give the
+probability of the agent having fully-controlled, partially-controlled, or uncontrolled asthma
+(<span class="math notranslate nohighlight">\(k = 1, 2, 3\)</span> respectively). The probabilities are given by the <a class="reference internal" href="model-control.html#control-model"><span class="std std-ref">Asthma Control Model</span></a>:</p>
+<div class="math notranslate nohighlight">
+\[\small
+\text{logit}(P(y^{(i)} \leq k)) = \theta_k
+    + \beta_{\text{age}} \cdot a^{(i)}
+    + \beta_{\text{sex}} \cdot s^{(i)}
+    + \beta_{\text{age}^2} \cdot {a^{(i)}}^2
+    + \beta_{\text{age,sex}} \cdot a^{(i)} \cdot s^{(i)}
+    + \beta_{\text{age}^2\text{,sex}} \cdot {a^{(i)}}^2 \cdot s^{(i)}
+    + \beta_0^{(i)}\]</div>
+<div class="math notranslate nohighlight">
+\[P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)\]</div>
+<h4 id="step-6-compute-the-number-of-asthma-exacerbations-in-the-current-timepoint">Step 6: Compute the number of asthma exacerbations in the current timepoint<a class="headerlink" href="#step-6-compute-the-number-of-asthma-exacerbations-in-the-current-timepoint" title="Link to this heading">¶</a></h4>
+<p>To compute the number of asthma exacerbations in the current timepoint, we use the exacerbation
+model, which draws a count from a Poisson distribution parameterized by the agent’s control
+levels, patient-specific random effect, and the calibration multiplier <span class="math notranslate nohighlight">\(\alpha\)</span> for their
+age, sex, province, and timepoint. See <a class="reference internal" href="model-exacerbation.html#exacerbation-model"><span class="std std-ref">Asthma Exacerbations Model</span></a> for the full derivation.</p>
+<p>If the number of exacerbations is <code class="docutils literal notranslate"><span class="pre">0</span></code>, skip to the end. Otherwise, go to Step 7.</p>
+<h4 id="step-7-compute-the-severity-of-the-asthma-exacerbations-in-the-current-timepoint">Step 7: Compute the severity of the asthma exacerbations in the current timepoint<a class="headerlink" href="#step-7-compute-the-severity-of-the-asthma-exacerbations-in-the-current-timepoint" title="Link to this heading">¶</a></h4>
+<p>Each of the <span class="math notranslate nohighlight">\(n\)</span> exacerbations from Step 6 is assigned a severity level (mild, moderate,
+severe, or very severe) via the Dirichlet-Multinomial model described in
+<a class="reference internal" href="model-exacerbation-severity.html#exacerbation-severity-model"><span class="std std-ref">Asthma Exacerbation Severity Model</span></a>, including the adjustment applied if the agent has a history
+of very severe exacerbations (hospitalization).</p>
+<h4 id="step-8-update-the-number-of-hospitalizations">Step 8: Update the number of hospitalizations<a class="headerlink" href="#step-8-update-the-number-of-hospitalizations" title="Link to this heading">¶</a></h4>
+<p>We add the current timepoint’s number of very severe exacerbations to <code class="docutils literal notranslate"><span class="pre">total_hosp</span></code>, the
+agent’s cumulative hospitalization count first set during <a class="reference internal" href="#step-4-check-hospitalizations"><span class="std std-ref">Step 4: Check hospitalizations</span></a>
+of Agent Initialization above:</p>
+<div class="math notranslate nohighlight">
+\[\text{total hosp}^{(i)} = \text{total hosp}^{(i)} + n_{\text{very severe}}^{(i)}\]</div>
+<h3 id="iterating-over-lifetime">Iterating Over Lifetime<a class="headerlink" href="#iterating-over-lifetime" title="Link to this heading">¶</a></h3>
+<p>For each agent, we simulate their lifetime by iterating over the time intervals of their life.</p>
+<p>We start with the timepoint when they were born or immigrated, and we continue until they reach the
+maximum age or until they die. At each timepoint, we update their age and check if they are still
+alive based on the mortality model. If they are still alive, we update their health status, asthma control,
+and other health-related variables based on the model’s parameters and the agent’s characteristics.
+During a given time interval, the following events can occur:</p>
+<ol class="arabic simple">
+<li><p>Agent dies or reaches the maximum age. If so, we finish simulating that agent and go on to the next agent.</p></li>
+<li><p>Agent has an asthma exacerbation.</p></li>
+<li><p>Agent is hospitalized due to asthma.</p></li>
+<li><p>Agent gets diagnosed with asthma.</p></li>
+<li><p>Agent finds out that previous asthma diagnosis was incorrect.</p></li>
+<li><p>Agent emigrates to another province or country.</p></li>
+</ol>
+<p>Let’s begin the simulation.</p>
+<h4 id="step-1-check-if-agent-has-asthma"><span id="step-1-lifetime-iteration"></span>Step 1: Check if agent has asthma<a class="headerlink" href="#step-1-check-if-agent-has-asthma" title="Link to this heading">¶</a></h4>
+<p>If the agent has asthma, go to Step 7. If not continue to Step 2.</p>
+<h4 id="step-2-check-if-agent-gets-a-new-asthma-diagnosis">Step 2: Check if agent gets a new asthma diagnosis<a class="headerlink" href="#step-2-check-if-agent-gets-a-new-asthma-diagnosis" title="Link to this heading">¶</a></h4>
+<p>We use the asthma incidence model (<a class="reference internal" href="model-occurrence.html#occurrence-model-2"><span class="std std-ref">Occurrence Model 2: Risk Factors</span></a>) to compute the probability that
+the agent receives a new asthma diagnosis in the current time interval, adjusted for their
+individual risk factors:</p>
+<div class="math notranslate nohighlight">
+\[\text{logit}(p_{\text{inc}}) = \text{logit}(\bar{p}_{\text{inc}}) + \log(\omega_{\text{fhx}}) + \log(\omega_{\text{abx}}) - \alpha\]</div>
+<p>where <span class="math notranslate nohighlight">\(\bar{p}_{\text{inc}}\)</span> is the Model 1 incidence target for the agent’s stratum,
+<span class="math notranslate nohighlight">\(\omega_{\text{fhx}}\)</span> and <span class="math notranslate nohighlight">\(\omega_{\text{abx}}\)</span> are the odds ratios for the agent’s
+family history and antibiotic exposure (both age-dependent and zero once the agent ages out of
+the relevant windows), and <span class="math notranslate nohighlight">\(\alpha\)</span> is the per-stratum calibration term looked up from
+<code class="docutils literal notranslate"><span class="pre">asthma_occurrence_correction.csv</span></code>.</p>
+<div class="math notranslate nohighlight">
+\[\text{new diagnosis} \sim \text{Bernoulli}(p_{\text{inc}})\]</div>
+<p>If they do not receive a diagnosis, skip to Step 4. If they do, we set the age of diagnosis
+to the current age of the agent and go to Step 3.</p>
+<h4 id="step-3-compute-the-control-levels">Step 3: Compute the control levels<a class="headerlink" href="#step-3-compute-the-control-levels" title="Link to this heading">¶</a></h4>
+<p>We next determine the asthma control levels for the agent using the <a class="reference internal" href="model-control.html#control-model"><span class="std std-ref">Asthma Control Model</span></a>.
+The asthma control levels give the probability of the agent having fully-controlled,
+partially-controlled, or uncontrolled asthma
+(<span class="math notranslate nohighlight">\(k = 1, 2, 3\)</span> respectively). The probabilities are given by the <a class="reference internal" href="model-control.html#control-model"><span class="std std-ref">Asthma Control Model</span></a>:</p>
+<div class="math notranslate nohighlight">
+\[\small
+\text{logit}(P(y^{(i)} \leq k)) = \theta_k
+    + \beta_{\text{age}} \cdot a^{(i)}
+    + \beta_{\text{sex}} \cdot s^{(i)}
+    + \beta_{\text{age}^2} \cdot {a^{(i)}}^2
+    + \beta_{\text{age,sex}} \cdot a^{(i)} \cdot s^{(i)}
+    + \beta_{\text{age}^2\text{,sex}} \cdot {a^{(i)}}^2 \cdot s^{(i)}
+    + \beta_0^{(i)}\]</div>
+<div class="math notranslate nohighlight">
+\[P(y^{(i)} = k) = P(y^{(i)} \leq k) - P(y^{(i)} \leq k-1)\]</div>
+<h4 id="step-4-compute-the-number-of-asthma-exacerbations-in-the-current-timepoint">Step 4: Compute the number of asthma exacerbations in the current timepoint<a class="headerlink" href="#step-4-compute-the-number-of-asthma-exacerbations-in-the-current-timepoint" title="Link to this heading">¶</a></h4>
+<p>To compute the number of asthma exacerbations in the current timepoint, we use the
+<a class="reference internal" href="model-exacerbation.html#exacerbation-model"><span class="std std-ref">Asthma Exacerbations Model</span></a>, which draws a count from a Poisson distribution parameterized by the
+agent’s control levels, patient-specific random effect, and the calibration multiplier
+<span class="math notranslate nohighlight">\(\alpha\)</span> for their age, sex, province, and timepoint.</p>
+<p>If the number of exacerbations is <code class="docutils literal notranslate"><span class="pre">0</span></code>, skip to Step 8. Otherwise, go to Step 5.</p>
+<h4 id="step-5-compute-the-severity-of-the-asthma-exacerbations-in-the-current-timepoint">Step 5: Compute the severity of the asthma exacerbations in the current timepoint<a class="headerlink" href="#step-5-compute-the-severity-of-the-asthma-exacerbations-in-the-current-timepoint" title="Link to this heading">¶</a></h4>
+<p>Each of the <span class="math notranslate nohighlight">\(n\)</span> exacerbations from Step 4 is assigned a severity level (mild, moderate,
+severe, or very severe) via the Dirichlet-Multinomial model described in
+<a class="reference internal" href="model-exacerbation-severity.html#exacerbation-severity-model"><span class="std std-ref">Asthma Exacerbation Severity Model</span></a>, including the adjustment applied if the agent has a history
+of very severe exacerbations (hospitalization).</p>
+<h4 id="step-6-update-the-number-of-hospitalizations">Step 6: Update the number of hospitalizations<a class="headerlink" href="#step-6-update-the-number-of-hospitalizations" title="Link to this heading">¶</a></h4>
+<p>We add the current timepoint’s number of very severe exacerbations to <code class="docutils literal notranslate"><span class="pre">total_hosp</span></code>, the
+agent’s cumulative hospitalization count first set during <a class="reference internal" href="#step-4-check-hospitalizations"><span class="std std-ref">Step 4: Check hospitalizations</span></a>
+of Agent Initialization above:</p>
+<div class="math notranslate nohighlight">
+\[\text{total hosp}^{(i)} = \text{total hosp}^{(i)} + n_{\text{very severe}}^{(i)}\]</div>
+<p>Continue to Step 8.</p>
+<h4 id="step-7-reassess-asthma-diagnosis">Step 7: Reassess asthma diagnosis<a class="headerlink" href="#step-7-reassess-asthma-diagnosis" title="Link to this heading">¶</a></h4>
+<p>If the agents has been diagnosed with asthma, we want to check if they were misdiagnosed, or if
+they lose their diagnosis. For this we use a Bernoulli distribution:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}p &amp;:= \text{probability of a person with asthma keeping their diagnosis} \\
+P(\text{agent keeps diagnosis}) &amp;= p \\
+P(\text{agent loses diagnosis}) &amp;= q = 1 - p\end{split}\]</div>
+<h4 id="step-8-compute-utility">Step 8: Compute utility<a class="headerlink" href="#step-8-compute-utility" title="Link to this heading">¶</a></h4>
+<p>Health state utility is a measure of the agent’s quality of life, which can be affected by
+asthma control and exacerbations. We compute the health state utility for the agent in the
+current timepoint using the <a class="reference internal" href="model-utility.html#utility-model"><span class="std std-ref">Utility Model</span></a>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\small
+u^{(i)} =
+\begin{cases}
+    u_{\text{age}, \text{sex}}^{(i)} &amp; \text{if agent } i \text{ does not have asthma} \\[6pt]
+    \max\left(0,\ u_{\text{age}, \text{sex}}^{(i)} - \left(
+      \sum_{S=1}^{4} n_E^{(i)}(S) \cdot d_E(S) + \sum_{k=1}^{3} P(y^{(i)} = k) \cdot d_C(k)
+    \right)\right) &amp; \text{if agent } i \text{ has asthma}
+\end{cases}\end{split}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(u_{\text{age}, \text{sex}}^{(i)}\)</span> is the baseline utility for agent <span class="math notranslate nohighlight">\(i\)</span>, of the
+given age and sex (without asthma)</p></li>
+<li><p><span class="math notranslate nohighlight">\(n_E^{(i)}(S)\)</span> is the number of exacerbations at severity level <span class="math notranslate nohighlight">\(S\)</span> in a
+time interval, for agent <span class="math notranslate nohighlight">\(i\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(d_E(S)\)</span> is the disutility due to an asthma exacerbation of severity level <span class="math notranslate nohighlight">\(S\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(S \in \{\text{mild}, \text{moderate}, \text{severe}, \text{very severe}\}\)</span> is the asthma
+exacerbation severity level</p></li>
+<li><p><span class="math notranslate nohighlight">\(P(y^{(i)} = k)\)</span> is the probability of agent <span class="math notranslate nohighlight">\(i\)</span> being at asthma control level
+<span class="math notranslate nohighlight">\(k\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(d_C(k)\)</span> is the disutility due to being at asthma control level <span class="math notranslate nohighlight">\(k\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(k \in \{\text{well-controlled}, \text{partially-controlled}, \text{uncontrolled}\}\)</span> is
+the asthma control level</p></li>
+</ul>
+<h4 id="step-9-compute-cost">Step 9: Compute cost<a class="headerlink" href="#step-9-compute-cost" title="Link to this heading">¶</a></h4>
+<p>Next, we compute the cost for the agent using the
+<a class="reference internal" href="model-cost.html#cost-model"><span class="std std-ref">Cost Model</span></a>:</p>
+<div class="math notranslate nohighlight">
+\[\text{cost}^{(i)} = \sum_{S=1}^4 n_E^{(i)}(S) \cdot \text{cost}_E(S) +
+  \sum_{k=1}^3 P(y^{(i)} = k) \cdot \text{cost}_C(k)\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(n_E^{(i)}(S)\)</span> is the number of exacerbations at severity level <span class="math notranslate nohighlight">\(S\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{cost}_E(S)\)</span> is the cost of an exacerbation at severity level <span class="math notranslate nohighlight">\(S\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(P(y^{(i)} = k)\)</span> is the probability of agent <span class="math notranslate nohighlight">\(i\)</span> being at asthma control level
+<span class="math notranslate nohighlight">\(k\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{cost}_C(k)\)</span> is the cost of being at asthma control level <span class="math notranslate nohighlight">\(k\)</span></p></li>
+</ul>
+<h4 id="step-10-check-if-agent-dies">Step 10: Check if agent dies<a class="headerlink" href="#step-10-check-if-agent-dies" title="Link to this heading">¶</a></h4>
+<p>We use the <a class="reference internal" href="death/model-death.html#mortality-model"><span class="std std-ref">Mortality Model</span></a> to determine if the agent dies in the current time interval of
+their lifetime. If the agent dies, we finish simulating that agent and go on to the next agent.
+If the agent does not die, we increment their age by 1 and go back to <a class="reference internal" href="#step-1-lifetime-iteration"><span class="std std-ref">Step 1: Check if agent has asthma</span></a>
+to repeat the process for the next time interval of their life.</p>
+<p>To compute the probability of death, we use the following formula:</p>
+<div class="math notranslate nohighlight">
+\[\sigma^{-1}(q_x(\text{sex}, \text{age})) =
+    \sigma^{-1}(q_{x_0}(\text{sex}, \text{age})) -
+    \beta_{\text{sex}}(\text{timepoint} - \text{timepoint}_0)\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(q_x\)</span> is the probability of death between age <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(x + 1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\sigma^{-1}\)</span> is the logit function</p></li>
+<li><p><span class="math notranslate nohighlight">\(q_{x_0}\)</span> is the baseline probability of death between age <span class="math notranslate nohighlight">\(x_0\)</span> and <span class="math notranslate nohighlight">\(x_0 + 1\)</span>,
+where <span class="math notranslate nohighlight">\(x_0\)</span> is the age at the base timepoint <span class="math notranslate nohighlight">\(\text{timepoint}_0\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{timepoint}\)</span> is the current timepoint in the simulation</p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{timepoint}_0\)</span> is the starting timepoint in the simulation</p></li>
+</ul>
+<p>Finally, we determine if the agent dies using a Bernoulli distribution:</p>
+<div class="math notranslate nohighlight">
+\[\text{is dead} \sim \text{Bernoulli}(q_x(\text{sex}, \text{age}))\]</div>
+<h4 id="step-11-check-if-agent-emigrates">Step 11: Check if agent emigrates<a class="headerlink" href="#step-11-check-if-agent-emigrates" title="Link to this heading">¶</a></h4>
+<p>We use the <a class="reference internal" href="model-migration.html#migration-model"><span class="std std-ref">Immigration / Emigration Model</span></a> to determine if the agent emigrates to another province or country
+in the current time interval of their lifetime. If the agent emigrates, we finish simulating that agent and
+go on to the next agent. If the agent does not emigrate, we increment their age by 1 and go back to
+<a class="reference internal" href="#step-1-lifetime-iteration"><span class="std std-ref">Step 1: Check if agent has asthma</span></a> to repeat the process for the next time interval of their life.</p>
+<div class="math notranslate nohighlight">
+\[\text{emigrates} \sim \text{Bernoulli}(p_{\text{emigrate}}(\text{sex}, \text{age}, \text{timepoint}))\]</div>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        &#169; Copyright 2024, Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert.
+        
+    </div>
+  
+    Created using
+    <a href="https://www.sphinx-doc.org/" target="_blank" rel="noopener">Sphinx</a>
+    9.1.0.
+     and
+    <a href="https://github.com/jbms/sphinx-immaterial/" target="_blank" rel="noopener">Sphinx-Immaterial</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/resplab/leap/" target="_blank" rel="noopener" title="Source on github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.expand", "navigation.sections", "navigation.top", "search.share", "toc.follow", "toc.sticky", "content.tabs.link", "announce.dismiss", "content.code.annotate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+        <script src="../_static/sphinx_immaterial_theme.32136f45f91ae6956.min.js?v=a7a9472a"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script id="MathJax-script" src="../_static/mathjax/tex-mml-chtml.js"></script>
+    
+  </body>
+</html>

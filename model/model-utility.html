@@ -1,0 +1,1321 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="model-cost.html">
+      
+      
+        <link rel="next" href="model-pollution.html">
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>Utility Model - </title>
+      
+    
+    
+      
+        
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+        <link rel="stylesheet" type="text/css" href="../_static/sphinx_immaterial_theme.cf2c65c97ee1b6f01.min.css?v=0a68cab4" />
+        <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+        <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c4bbe126" />
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#datasets" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="" class="md-header__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../_static/logo.png" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Utility Model
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="" class="md-nav__button md-logo" aria-label="" data-md-component="logo">
+      <img src="../_static/logo.png" alt="logo">
+    </a>
+    
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/resplab/leap/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LEAP
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/installation.rst (reference label)"><span>Installation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/cli/index.rst (reference label)"><span>Running LEAP</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/index.rst (reference label)"><span>Model</span></span>
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            <span title="/model/index.rst (reference label)"><span>Model</span></span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-simulation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-simulation.rst (reference label)"><span>Simulation</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-birth.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-birth.rst (reference label)"><span>Birth Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="death/model-death.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/death/model-death.rst (reference label)"><span>Mortality Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-migration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-migration.rst (reference label)"><span>Immigration / Emigration Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-antibiotics.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-antibiotics.rst (reference label)"><span>Antibiotic Exposure Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-family-history.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-family-history.rst (reference label)"><span>Family History Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-occurrence.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-occurrence.rst (reference label)"><span>Asthma Occurrence Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-reassessment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-reassessment.rst (reference label)"><span>Asthma Reassessment Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-control.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-control.rst (reference label)"><span>Asthma Control Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-exacerbation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-exacerbation.rst (reference label)"><span>Asthma Exacerbations Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-exacerbation-severity.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-exacerbation-severity.rst (reference label)"><span>Asthma Exacerbation Severity Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-cost.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-cost.rst (reference label)"><span>Cost Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-utility.rst (reference label)"><span>Utility Model</span></span>
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-utility.rst (reference label)"><span>Utility Model</span></span>
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/model/model-utility.rst (reference label)"><span>Utility Model</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#datasets" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-utility.rst#datasets (reference label)"><span>Datasets</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Datasets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#eq5d" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-utility.rst#eq5d (reference label)"><span>EQ5D</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disutility-due-to-asthma-exacerbations" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-utility.rst#disutility-due-to-asthma-exacerbations (reference label)"><span>Disutility Due to Asthma Exacerbations</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disutility-due-to-asthma-control-levels" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-utility.rst#disutility-due-to-asthma-control-levels (reference label)"><span>Disutility Due to Asthma Control Levels</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-calculating-utility" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-utility.rst#model-calculating-utility (reference label)"><span>Model:<wbr> Calculating Utility</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-pollution.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-pollution.rst (reference label)"><span>Pollution Model</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-statistical-background.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/model/model-statistical-background.rst (reference label)"><span>Statistical Background</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/dev/index.rst (reference label)"><span>Developers</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../references.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span title="/references.rst (reference label)"><span>References</span></span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      <span title="/model/model-utility.rst (reference label)"><span>Utility Model</span></span>
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#datasets" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-utility.rst#datasets (reference label)"><span>Datasets</span></span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Datasets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#eq5d" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-utility.rst#eq5d (reference label)"><span>EQ5D</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disutility-due-to-asthma-exacerbations" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-utility.rst#disutility-due-to-asthma-exacerbations (reference label)"><span>Disutility Due to Asthma Exacerbations</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disutility-due-to-asthma-control-levels" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-utility.rst#disutility-due-to-asthma-control-levels (reference label)"><span>Disutility Due to Asthma Control Levels</span></span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-calculating-utility" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span title="/model/model-utility.rst#model-calculating-utility (reference label)"><span>Model:<wbr> Calculating Utility</span></span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                
+                
+                  
+
+
+  
+  
+
+<h1 id="utility-model"><span id="id1"></span>Utility Model<a class="headerlink" href="#utility-model" title="Link to this heading">¶</a></h1>
+<p>In <code class="docutils literal notranslate"><span class="pre">LEAP</span></code>, we quantify the health-related quality of life of individuals with asthma using
+<strong>health state utilities</strong>, which range from 0 to 1, where 1 represents perfect health and 0
+represents death.</p>
+<h2 id="datasets">Datasets<a class="headerlink" href="#datasets" title="Link to this heading">¶</a></h2>
+<h3 id="eq5d">EQ5D<a class="headerlink" href="#eq5d" title="Link to this heading">¶</a></h3>
+<p>The <a class="reference external" href="https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-5l/">EQ5D</a> is a
+standardized instrument used to measure health-related quality of life. It consists of
+five dimensions: mobility, self-care, usual activities, pain/discomfort, and anxiety/depression. Each dimension has five levels of severity, ranging from no problems to extreme problems.</p>
+<p>EQ-5D-5L data for the general population was obtained from
+<a class="reference external" href="https://link.springer.com/article/10.1007/s10198-023-01570-1/tables/3">Table 3</a> in the paper
+<a class="reference external" href="https://doi.org/10.1007/s10198-023-01570-1">Canada population norms for the EQ-5D-5L</a>
+<span class="bibtex-citation" id="id3">[<a class="reference internal" href="../references.html#id10" title="Jiajun Yan, Shitong Xie, Jeffrey A. Johnson, Eleanor Pullenayegum, Arto Ohinmaa, Bryan Stirling, and Feng Xie. Canada population norms for the eq-5d-5l. The European Journal of Health Economics, 25:147-155, 2 2024. URL: https://doi.org/10.1007/s10198-023-01570-1, doi:10.1007/s10198-023-01570-1.">Yan, 2024</a>]</span>.</p>
+<p>After processing the EQ5D data,
+<a class="reference external" href="https://github.com/resplab/leap/blob/main/leap/processed_data/eq5d_canada.csv">leap/processed_data/eq5d_canada.csv</a>,
+is formatted as follows:</p>
+<table class="table">
+  <thead>
+    <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="notranslate">age</code></td>
+      <td>
+        <code class="notranslate">int</code>
+      </td>
+      <td>
+        A person's age in years, range <code class="notranslate">[0, 110]</code>
+      </td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">sex</code></td>
+      <td>
+        <code class="notranslate">str</code>
+      </td>
+      <td>
+          F = Female, M = Male
+      </td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">eq5d</code></td>
+      <td>
+        <code class="notranslate">float</code>
+      </td>
+      <td>
+        The health state utility for a person of a given age and sex.
+        Range <code class="notranslate">[0, 1]</code>.
+      </td>
+    </tr>
+    <tr>
+      <td><code class="notranslate">sd</code></td>
+      <td>
+        <code class="notranslate">float</code>
+      </td>
+      <td>
+          The standard deviation of the utility value, used to account for uncertainty in the
+          utility value.
+      </td>
+    </tr>
+  </tbody>
+  </table><p>Since the EQ-5D-5L data described above only covers individuals aged 18 and older, the utility
+values for ages 0 to 17 are interpolated. We assume that utility decreases linearly from a value
+of 1 (perfect health) at age 0 to the observed EQ-5D value at age 18, <span class="math notranslate nohighlight">\(u_{18}\)</span>, separately
+for each sex:</p>
+<div class="math notranslate nohighlight">
+\[u_{\text{age}} = 1 - \dfrac{1 - u_{18}}{18} \times \text{age}, \quad \text{age} \in [0, 17]\]</div>
+<p>Since these values are derived rather than directly observed, the standard deviation <code class="docutils literal notranslate"><span class="pre">sd</span></code> for
+ages <span class="math notranslate nohighlight">\(&lt; 18\)</span> is set to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+<h3 id="disutility-due-to-asthma-exacerbations"><span id="utility-data-exacerbations"></span>Disutility Due to Asthma Exacerbations<a class="headerlink" href="#disutility-due-to-asthma-exacerbations" title="Link to this heading">¶</a></h3>
+<p>The health state utility values stratified by exacerbation severity come from
+<span class="bibtex-citation" id="id4">[<a class="reference internal" href="../references.html#id12" title="Mohsen Yaghoubi, Amin Adibi, Zafar Zafari, J. Mark FitzGerald, Shawn D. Aaron, Kate M. Johnson, and Mohsen Sadatsafavi. Cost-effectiveness of implementing objective diagnostic verification of asthma in the united states. Journal of Allergy and Clinical Immunology, 145(5):1367-1377.e4, 2020. URL: https://www.sciencedirect.com/science/article/pii/S0091674919316343, doi:https://doi.org/10.1016/j.jaci.2019.11.038.">Yaghoubi, 2020</a>]</span>, in
+<a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S0091674919316343#tbl1">Table I</a>, originally
+sourced from <span class="bibtex-citation" id="id5">[<a class="reference internal" href="../references.html#id13" title="A. Lloyd, D. Price, and R. Brown. The impact of asthma exacerbations on health-related quality of life in moderate to severe asthma patients in the uk. Primary Care Respiratory Journal, 16(1):22-27, 2007. URL: https://doi.org/10.3132/pcrj.2007.00002, doi:10.3132/pcrj.2007.00002.">Lloyd, 2007</a>]</span> and <span class="bibtex-citation" id="id6">[<a class="reference internal" href="../references.html#id14" title="J. D. Campbell, D. E. Spackman, and S. D. Sullivan. The costs and consequences of omalizumab in uncontrolled asthma from a usa payer perspective. Allergy, 65(9):1141-1148, 2010. URL: https://doi.org/10.1111/j.1398-9995.2010.02336.x, doi:10.1111/j.1398-9995.2010.02336.x.">Campbell, 2010</a>]</span>:</p>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 70.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Utility of mild exacerbation</p></td>
+<td><p>0.57</p></td>
+</tr>
+<tr class="row-odd"><td><p>Utility of moderate exacerbation</p></td>
+<td><p>0.45</p></td>
+</tr>
+<tr class="row-even"><td><p>Utility of severe exacerbation</p></td>
+<td><p>0.39 (see <a class="reference internal" href="#utility-severe-exacerbation-note"><span class="std std-ref">note</span></a> below)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Utility of very severe exacerbation</p></td>
+<td><p>0.33</p></td>
+</tr>
+</tbody>
+</table>
+<div class="note admonition" id="utility-severe-exacerbation-note">
+<p class="admonition-title">Note</p>
+<p>In <span class="bibtex-citation" id="id7">[<a class="reference internal" href="../references.html#id12" title="Mohsen Yaghoubi, Amin Adibi, Zafar Zafari, J. Mark FitzGerald, Shawn D. Aaron, Kate M. Johnson, and Mohsen Sadatsafavi. Cost-effectiveness of implementing objective diagnostic verification of asthma in the united states. Journal of Allergy and Clinical Immunology, 145(5):1367-1377.e4, 2020. URL: https://www.sciencedirect.com/science/article/pii/S0091674919316343, doi:https://doi.org/10.1016/j.jaci.2019.11.038.">Yaghoubi, 2020</a>]</span>, <code class="docutils literal notranslate"><span class="pre">severe</span></code> exacerbations are equivalent to our definition of <code class="docutils literal notranslate"><span class="pre">very</span> <span class="pre">severe</span></code>
+exacerbations. Thus, we are missing the utility of <code class="docutils literal notranslate"><span class="pre">severe</span></code> exacerbations. We defined the utility of a <code class="docutils literal notranslate"><span class="pre">severe</span></code> exacerbation as the arithmetic mean of the utilities of <code class="docutils literal notranslate"><span class="pre">moderate</span></code> and <code class="docutils literal notranslate"><span class="pre">very</span> <span class="pre">severe</span></code> exacerbations:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}u_E(\text{severe}) &amp;= \dfrac{
+    u_E(\text{moderate}) + u_E(\text{very severe})
+}{2} \\
+&amp;= \dfrac{0.45 + 0.33}{2} = 0.39\end{split}\]</div>
+</div>
+<p>We need to convert these health state utilities to disutilities due to exacerbations. According to
+<span class="bibtex-citation" id="id8">[<a class="reference internal" href="../references.html#id13" title="A. Lloyd, D. Price, and R. Brown. The impact of asthma exacerbations on health-related quality of life in moderate to severe asthma patients in the uk. Primary Care Respiratory Journal, 16(1):22-27, 2007. URL: https://doi.org/10.3132/pcrj.2007.00002, doi:10.3132/pcrj.2007.00002.">Lloyd, 2007</a>]</span>, the mean EQ-5D utility for asthma patients with no exacerbation was <code class="docutils literal notranslate"><span class="pre">0.89</span></code>; we
+use this as the baseline. Thus, the disutility due to asthma exacerbations is given by:</p>
+<div class="math notranslate nohighlight">
+\[d_E(S) = 0.89 - u_E(S)\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(d_E(S)\)</span> is the disutility due to an asthma exacerbation of severity level <span class="math notranslate nohighlight">\(S\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(u_E(S)\)</span> is the utility due to an asthma exacerbation of severity level <span class="math notranslate nohighlight">\(S\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(S \in \{\text{mild}, \text{moderate}, \text{severe}, \text{very severe}\}\)</span> is the asthma
+exacerbation severity level</p></li>
+</ul>
+<table class="docutils data align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Exacerbation Severity</p></th>
+<th class="head"><p>Utility</p></th>
+<th class="head"><p>Disutility</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Mild</p></td>
+<td><p>0.57</p></td>
+<td><p>0.32</p></td>
+</tr>
+<tr class="row-odd"><td><p>Moderate</p></td>
+<td><p>0.45</p></td>
+<td><p>0.44</p></td>
+</tr>
+<tr class="row-even"><td><p>Severe</p></td>
+<td><p>0.39</p></td>
+<td><p>0.50</p></td>
+</tr>
+<tr class="row-odd"><td><p>Very Severe</p></td>
+<td><p>0.33</p></td>
+<td><p>0.56</p></td>
+</tr>
+</tbody>
+</table>
+<p>The values listed in this table are the disutility for having an asthma exacerbation of a given
+severity for an entire year. We assume that a mild asthma exacerbation lasts for 7 days, while
+all the other severity levels last for 14 days <span class="bibtex-citation" id="id9">[<a class="reference internal" href="../references.html#id15" title="S. Aldington and R. Beasley. Asthma exacerbations. 5: assessment and management of severe asthma in adults in hospital. Thorax, 62(5):447-458, 2007. URL: https://doi.org/10.1136/thx.2005.045203, doi:10.1136/thx.2005.045203.">Aldington, 2007</a>]</span>. To convert these values we
+need the weekly disutility:</p>
+<div class="math notranslate nohighlight">
+\[d_{\text{weekly}} = d_{\text{annual}} \times \dfrac{1}{52}\]</div>
+<table class="docutils data align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Exacerbation Severity</p></th>
+<th class="head"><p>Annual Disutility</p></th>
+<th class="head"><p>Exacerbation Duration</p></th>
+<th class="head"><p>Weekly Disutility</p></th>
+<th class="head"><p>Disutility per Exacerbation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Mild</p></td>
+<td><p>0.32</p></td>
+<td><p>7 days</p></td>
+<td><p>0.00615</p></td>
+<td><p>0.00615</p></td>
+</tr>
+<tr class="row-odd"><td><p>Moderate</p></td>
+<td><p>0.44</p></td>
+<td><p>14 days</p></td>
+<td><p>0.00846</p></td>
+<td><p>0.01692</p></td>
+</tr>
+<tr class="row-even"><td><p>Severe</p></td>
+<td><p>0.50</p></td>
+<td><p>14 days</p></td>
+<td><p>0.00962</p></td>
+<td><p>0.01923</p></td>
+</tr>
+<tr class="row-odd"><td><p>(Very) Severe</p></td>
+<td><p>0.56</p></td>
+<td><p>14 days</p></td>
+<td><p>0.01077</p></td>
+<td><p>0.02154</p></td>
+</tr>
+</tbody>
+</table>
+<h3 id="disutility-due-to-asthma-control-levels"><span id="utility-data-control"></span>Disutility Due to Asthma Control Levels<a class="headerlink" href="#disutility-due-to-asthma-control-levels" title="Link to this heading">¶</a></h3>
+<p>The health state utility values stratified by asthma control level come from a discrete choice
+experiment of 157 adult patients with asthma in Canada <span class="bibtex-citation" id="id10">[<a class="reference internal" href="../references.html#id16" title="H. M. McTaggart-Cowan, P. Shi, J. M. Fitzgerald, A. H. Anis, J. A. Kopec, T. R. Bai, and others. An evaluation of patients' willingness to trade symptom-free days for asthma-related treatment risks: a discrete choice experiment. Journal of Asthma, 45(8):630-638, 2008. URL: https://doi.org/10.1080/02770900802126990, doi:10.1080/02770900802126990.">McTaggart-Cowan, 2008</a>]</span>, as reported in
+<a class="reference external" href="https://www.tandfonline.com/doi/pdf/10.3111/13696998.2015.1025793#page=6.08">Table 3</a> of
+<span class="bibtex-citation" id="id12">[<a class="reference internal" href="../references.html#id17" title="Thomas R. Einarson, Basil G. Bereza, T. Anders Nielsen, and Michiel E. H. Hemels. Utilities for asthma and copd according to category of severity: a comprehensive literature review and meta-analysis. Journal of Medical Economics, 18:550-563, 3 2015. URL: https://doi.org/10.3111/13696998.2015.1025793, doi:10.3111/13696998.2015.1025793.">Einarson, 2015</a>]</span>:</p>
+<table class="docutils data align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Control</p></th>
+<th class="head"><p>Author</p></th>
+<th class="head"><p>Instrument</p></th>
+<th class="head"><p>Baseline (Mean)</p></th>
+<th class="head"><p>SD</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Well controlled</p></td>
+<td><p>McTaggart-Cowan et al.</p></td>
+<td><p>EQ-5D</p></td>
+<td><p>0.840</p></td>
+<td><p>0.200</p></td>
+</tr>
+<tr class="row-odd"><td><p>Adequate</p></td>
+<td><p>McTaggart-Cowan et al.</p></td>
+<td><p>EQ-5D</p></td>
+<td><p>0.810</p></td>
+<td><p>0.220</p></td>
+</tr>
+<tr class="row-even"><td><p>Not controlled</p></td>
+<td><p>McTaggart-Cowan et al.</p></td>
+<td><p>EQ-5D</p></td>
+<td><p>0.800</p></td>
+<td><p>0.210</p></td>
+</tr>
+</tbody>
+</table>
+<p>As with the exacerbation severity, we want to convert these utility values to disutility values.
+We use age 15 as the baseline age, consistent with the minimum age (15 years) of the target population in <span class="bibtex-citation" id="id13">[<a class="reference internal" href="../references.html#id12" title="Mohsen Yaghoubi, Amin Adibi, Zafar Zafari, J. Mark FitzGerald, Shawn D. Aaron, Kate M. Johnson, and Mohsen Sadatsafavi. Cost-effectiveness of implementing objective diagnostic verification of asthma in the united states. Journal of Allergy and Clinical Immunology, 145(5):1367-1377.e4, 2020. URL: https://www.sciencedirect.com/science/article/pii/S0091674919316343, doi:https://doi.org/10.1016/j.jaci.2019.11.038.">Yaghoubi, 2020</a>]</span>. According to the
+<a class="reference external" href="https://github.com/resplab/leap/blob/main/leap/processed_data/eq5d_canada.csv">EQ5D data</a>,
+the baseline utility for a 15-year-old is <code class="docutils literal notranslate"><span class="pre">0.9</span></code>. Thus, the disutility stratified by asthma
+control is given by:</p>
+<div class="math notranslate nohighlight">
+\[d_C(k) = 0.9 - u_C(k)\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(d_C(k)\)</span> is the disutility due to asthma control level <span class="math notranslate nohighlight">\(k\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(u_C(k)\)</span> is the utility due to asthma control level <span class="math notranslate nohighlight">\(k\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(k \in \{\text{well-controlled}, \text{partially-controlled}, \text{uncontrolled}\}\)</span> is
+the asthma control level</p></li>
+</ul>
+<table class="docutils data align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Asthma Control Level</p></th>
+<th class="head"><p>Utility</p></th>
+<th class="head"><p>Disutility</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Well-Controlled</p></td>
+<td><p>0.84</p></td>
+<td><p>0.06</p></td>
+</tr>
+<tr class="row-odd"><td><p>Partially-Controlled</p></td>
+<td><p>0.81</p></td>
+<td><p>0.09</p></td>
+</tr>
+<tr class="row-even"><td><p>Uncontrolled</p></td>
+<td><p>0.80</p></td>
+<td><p>0.10</p></td>
+</tr>
+</tbody>
+</table>
+<h2 id="model-calculating-utility">Model: Calculating Utility<a class="headerlink" href="#model-calculating-utility" title="Link to this heading">¶</a></h2>
+<p>Exacerbation disutility is applied per exacerbation event, i.e. it is incurred each time agent
+<span class="math notranslate nohighlight">\(i\)</span> has an exacerbation of the corresponding severity. Control level disutility is weighted
+by <span class="math notranslate nohighlight">\(P(y^{(i)} = k)\)</span>, which per the <a class="reference internal" href="model-control.html#control-model"><span class="std std-ref">Asthma Control Model</span></a> represents the proportion of the time
+interval agent <span class="math notranslate nohighlight">\(i\)</span> spends at control level <span class="math notranslate nohighlight">\(k\)</span>. The net utility is given by the
+formula:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\small
+u^{(i)} =
+\begin{cases}
+    u_{\text{age}, \text{sex}}^{(i)} &amp; \text{if agent } i \text{ does not have asthma} \\[6pt]
+    \max\left(0,\ u_{\text{age}, \text{sex}}^{(i)} - \left(
+      \sum_{S=1}^{4} n_E^{(i)}(S) \cdot d_E(S) + \sum_{k=1}^{3} P(y^{(i)} = k) \cdot d_C(k)
+    \right)\right) &amp; \text{if agent } i \text{ has asthma}
+\end{cases}\end{split}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(u_{\text{age}, \text{sex}}^{(i)}\)</span> is the baseline utility for agent <span class="math notranslate nohighlight">\(i\)</span>, of the
+given age and sex (without asthma)</p></li>
+<li><p><span class="math notranslate nohighlight">\(n_E^{(i)}(S)\)</span> is the number of exacerbations at severity level <span class="math notranslate nohighlight">\(S\)</span> in a
+time interval, for agent <span class="math notranslate nohighlight">\(i\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(d_E(S)\)</span> is the disutility due to an asthma exacerbation of severity level <span class="math notranslate nohighlight">\(S\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(S \in \{\text{mild}, \text{moderate}, \text{severe}, \text{very severe}\}\)</span> is the asthma
+exacerbation severity level</p></li>
+<li><p><span class="math notranslate nohighlight">\(P(y^{(i)} = k)\)</span> is the probability of agent <span class="math notranslate nohighlight">\(i\)</span> being at asthma control level
+<span class="math notranslate nohighlight">\(k\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(d_C(k)\)</span> is the disutility due to being at asthma control level <span class="math notranslate nohighlight">\(k\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(k \in \{\text{well-controlled}, \text{partially-controlled}, \text{uncontrolled}\}\)</span> is
+the asthma control level</p></li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        &#169; Copyright 2024, Tae Yoon (Harry) Lee, Ainsleigh Hill, Mark Ewert.
+        
+    </div>
+  
+    Created using
+    <a href="https://www.sphinx-doc.org/" target="_blank" rel="noopener">Sphinx</a>
+    9.1.0.
+     and
+    <a href="https://github.com/jbms/sphinx-immaterial/" target="_blank" rel="noopener">Sphinx-Immaterial</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/resplab/leap/" target="_blank" rel="noopener" title="Source on github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.expand", "navigation.sections", "navigation.top", "search.share", "toc.follow", "toc.sticky", "content.tabs.link", "announce.dismiss", "content.code.annotate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+        <script src="../_static/sphinx_immaterial_theme.32136f45f91ae6956.min.js?v=a7a9472a"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script id="MathJax-script" src="../_static/mathjax/tex-mml-chtml.js"></script>
+    
+  </body>
+</html>
