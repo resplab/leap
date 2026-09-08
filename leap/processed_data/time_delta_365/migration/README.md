@@ -12,21 +12,22 @@ Note: The projection table goes to 2068 for Canada (CA), but only to 2043 for Br
 (BC). No other provinces are currently supported.
 
 Since StatsCan does not provide a breakdown of population projections/estimates by emigration
-or immigration, we calculated the net migration for each age, sex, year, province, and projection
-scenario from the population and mortality data. See
+or immigration, we calculated the net migration for each age, sex, timepoint, province, and
+projection scenario from the population and mortality data. See
 `leap/data_generation/migration_data.py` for details, and `docs/model/model-migration.rst` for
 the mathematical description.
 
 ## Migration Table
 
-Both immigration and emigration data are stored in a single file:
+Both immigration and emigration data are stored in the files:
 
-`migration_table.csv`
+`migration_table_{province}_{projection_scenario}.csv`
 
-Each row corresponds to a unique combination of `year`, `province`, `age`, `sex`, and
+Each row corresponds to a unique combination of `timepoint`, `province`, `age`, `sex`, and
 `projection_scenario`. The columns are:
 
-`year`: Integer year. Range is 2001-2068 for CA and 2001-2043 for BC.
+`timepoint`: Datetime, start of the time interval that the data applies to. Range is 2001-2068 for
+  CA and 2001-2043 for BC.
 
 `province`: Province abbreviation. One of `CA` (all of Canada) or `BC` (British Columbia).
 
@@ -41,24 +42,25 @@ Each row corresponds to a unique combination of `year`, `province`, `age`, `sex`
   See [StatCan Projection Scenarios](https://www150.statcan.gc.ca/n1/pub/91-520-x/91-520-x2022001-eng.htm).
   Note: `M6` is a placeholder scenario present in the StatCan data but not yet implemented.
 
-`delta_n`: The signed net migration for this age, sex, year, province, and projection scenario.
+`delta_n`: The signed net migration for this age, sex, timepoint, province, and projection scenario.
   Positive values indicate net immigration; negative values indicate net emigration.
 
-`prop_migrants_birth`: `delta_n` divided by the total number of births in that year, province,
-  and projection scenario. Signed — positive for immigration cells, negative for emigration cells.
-  Used to compute the total number of immigrant agents to create each year, scaled to the
-  simulation's birth count.
+`prop_migrants_birth`: `delta_n` divided by the total number of births in that time interval,
+  province, and projection scenario. Signed — positive for immigration cells, negative for
+  emigration cells. Used to compute the total number of immigrant agents to create at each timepoint,
+  scaled to the simulation's birth count.
 
-`prop_immigrants_year`: For cells where `delta_n > 0`, the proportion of immigrants for this
-  age and sex relative to the total number of immigrants in that year. Zero for emigration cells.
-  Sums to 1.0 across all immigration cells for a given year, province, and projection scenario.
-  Used to sample the age and sex of new immigrant agents.
+`prop_immigrants_timepoint`: For cells where `delta_n > 0`, the proportion of immigrants for this
+  age and sex relative to the total number of immigrants in that time interval. Zero for emigration
+  cells. Sums to 1.0 across all immigration cells for a given timepoint, province, and projection
+  scenario. Used to sample the age and sex of new immigrant agents.
 
-`prop_emigrants_year`: For cells where `delta_n < 0`, the proportion of emigrants for this
-  age and sex relative to the total number of emigrants in that year. Zero for immigration cells.
-  Sums to 1.0 across all emigration cells for a given year, province, and projection scenario.
+`prop_emigrants_timepoint`: For cells where `delta_n < 0`, the proportion of emigrants for this
+  age and sex relative to the total number of emigrants in that time interval. Zero for immigration
+  cells. Sums to 1.0 across all emigration cells for a given timepoint, province, and projection
+  scenario.
 
-`prob_emigration`: For cells where `delta_n < 0`, the per-person annual probability of
-  emigrating, computed as `|delta_n| / N` where `N` is the current-year population for that
-  age, sex, province, and projection scenario. Zero for immigration cells. Applied as a Bernoulli
-  trial to each existing agent each year.
+`prob_emigration`: For cells where `delta_n < 0`, the per-person probability of emigrating in a
+  given time interval, computed as `|delta_n| / n` where `n` is the current-timepoint population for
+  that age, sex, province, and projection scenario. Zero for immigration cells. Applied as a
+  Bernoulli trial to each existing agent at each timepoint.
