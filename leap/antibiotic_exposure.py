@@ -20,7 +20,7 @@ class AntibioticExposure:
         self,
         config: dict | None = None,
         parameters: dict | None = None,
-        mid_trends: DataFrameGroupBy | None = None,
+        data: DataFrameGroupBy | None = None,
         time_delta: dt.timedelta | relativedelta | TimeDelta = TimeDelta(years=1)
     ):
         if config is not None:
@@ -30,10 +30,10 @@ class AntibioticExposure:
         else:
             raise ValueError("Either config dict or parameters must be provided.")
 
-        if mid_trends is None:
-            self.mid_trends = self.load_abx_mid_trends(time_delta)
+        if data is None:
+            self.data = self.load_abx_data(time_delta)
         else:
-            self.mid_trends = mid_trends
+            self.data = data
 
     @property
     def parameters(self) -> dict:
@@ -67,31 +67,31 @@ class AntibioticExposure:
         self._parameters = copy.deepcopy(parameters)
 
     @property
-    def mid_trends(self) -> DataFrameGroupBy:
-        """A set of dataframes grouped by year and sex.
+    def data(self) -> DataFrameGroupBy:
+        """A set of dataframes grouped by timepoint and sex.
 
         Each entry is a dataframe with a single row with the following columns:
 
-        * ``year (int)``: The calendar year, e.g. ``2024``.
+        * ``timepoint (dt.datetime)``: The date and time, e.g. ``2024``.
         * ``sex``: 0 = female, 1 = male
-        * ``rate (float)``: The average number of courses of antibiotics prescribed during
+        * ``n_abx_μ (float)``: The average number of courses of antibiotics prescribed during
           infancy, per person.
         """
-        return self._mid_trends
+        return self._data
     
-    @mid_trends.setter
-    def mid_trends(self, mid_trends: DataFrameGroupBy):
-        self._mid_trends = mid_trends
+    @data.setter
+    def data(self, data: DataFrameGroupBy):
+        self._data = data
 
     def __copy__(self):
         return AntibioticExposure(
-            parameters=self.parameters, mid_trends=self.mid_trends
+            parameters=self.parameters, data=self.data
         )
 
     def __deepcopy__(self):
         return AntibioticExposure(
             parameters=copy.deepcopy(self.parameters),
-            mid_trends=copy.deepcopy(self.mid_trends)
+            data=copy.deepcopy(self.data)
         )
 
     def copy(self, deep: bool = True):
@@ -100,22 +100,22 @@ class AntibioticExposure:
         else:
             return self.__copy__()
 
-    def load_abx_mid_trends(self, time_delta: dt.timedelta | relativedelta | TimeDelta):
-        """Load the antibiotic mid trends table.
+    def load_abx_data(self, time_delta: dt.timedelta | relativedelta | TimeDelta):
+        """Load the antibiotic table.
 
         Returns:
-            A set of data frames grouped by year and sex.
+            A set of data frames grouped by timepoint and sex.
 
             Each entry is a DataFrame with a single row with the following columns:
 
-            * ``year (int)``: The calendar year, e.g. ``2024``.
+            * ``timepoint (dt.datetime)``: The date and time, e.g. ``2024``.
             * ``sex``: 0 = female, 1 = male
-            * ``rate (float)``: The average number of courses of antibiotics prescribed during
+            * ``n_abx_μ (float)``: The average number of courses of antibiotics prescribed during
               infancy, per person.
         """
         time_delta_tag = get_time_delta_tag(time_delta)
         df = pd.read_csv(
-            get_data_path(f"processed_data/{time_delta_tag}/midtrends.csv"),
+            get_data_path(f"processed_data/{time_delta_tag}/antibiotic_predictions.csv"),
             parse_dates=["timepoint"]
         )
         grouped_df = df.groupby(["timepoint", "sex"])
@@ -126,7 +126,7 @@ class AntibioticExposure:
 
         Args:
             sex: Sex of agent, 1 = male, 0 = female.
-            birth_year: The year the agent (person) was born.
+            birth_year: The timepoint (year) the agent (person) was born.
 
         Returns:
             The number of courses of antibiotics used during the first year of life.
@@ -154,7 +154,7 @@ class AntibioticExposure:
                 )
             else:
                 μ = max(
-                    self.mid_trends.get_group((birth_year, int(sex)))["rate"].iloc[0],
+                    self.data.get_group((birth_year, int(sex)))["n_abx_μ"].iloc[0],
                     self.parameters["βfloor"]
                 )
                 p = self.parameters["θ"] / (self.parameters["θ"] + μ)

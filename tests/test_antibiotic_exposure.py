@@ -17,8 +17,8 @@ def config():
 def test_antibiotic_exposure_constructor(config):
     antibiotic_exposure = AntibioticExposure(config=config)
     assert antibiotic_exposure.parameters["β0"] == 110.000442
-    assert antibiotic_exposure.mid_trends.get_group(
-        (dt.datetime(2002, 1, 1), 0)
+    assert antibiotic_exposure.data.get_group(
+        (dt.datetime(2002, 1, 1), "F")
     )["timepoint"].iloc[0] == dt.datetime(2002, 1, 1)
 
 
