@@ -44,7 +44,7 @@ def test_immigration_constructor(
         projection_scenario=projection_scenario,
         max_age=max_age
     )
-    df = immigration.table.get_group((timepoint))
+    df = immigration.get_table_group((timepoint))
     row = df[(df["age"] == age) & (df["sex"] == sex)]
     assert round_number(row["prop_immigrants_birth"].values[0], sigdigits=4) == prop_immigrants_birth
     assert round_number(row["prop_immigrants_timepoint"].values[0], sigdigits=4) == prop_immigrants_timepoint
