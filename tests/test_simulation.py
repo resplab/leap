@@ -655,16 +655,16 @@ def test_reassess_asthma_diagnosis(
             pd.Series([False] * 1071, dtype=bool, name="immigrant")
         ),
         (
-            dt.datetime(2024, 1, 1),
+            dt.datetime(2000, 1, 1),
             TimeDelta(years=3),
             TimeDelta(years=1),
             "CA",
             "M3",
             10,
             111,
-            dt.datetime(2025, 1, 1),
-            21,
-            pd.Series([True] * 10 + [False] * 11, dtype=bool, name="immigrant")
+            dt.datetime(2001, 1, 1),
+            18,
+            pd.Series([True] * 8 + [False] * 10, dtype=bool, name="immigrant")
         )
     ]
 )
@@ -849,7 +849,7 @@ def test_run_simulation_one_year(
     diagnosed with asthma is 100.
 
     For the year 2024, province "CA", growth type "M3", ages 0 - 4, the probability of emigration
-    is 0. See ``processed_data/migration/migration_table.csv``.
+    is 0. See ``processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv``.
 
     Setting the exacerbation hyperparameter ``β0_μ = 20.0`` ensures that every agent aged 4 has an
     asthma exacerbation.
@@ -1097,7 +1097,8 @@ def test_run_simulation_two_years(
     asthma exacerbation.
 
     For the years 2024 and 2025, province "CA", growth type "M3", ages 0 - 4, the probability of
-    emigration is 0. See ``processed_data/migration/migration_table.csv``.
+    emigration is 0.
+    See ``processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv``.
 
     Setting the ``prevalence`` parameters below ensures that the prevalence is 0.
 

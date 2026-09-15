@@ -11,26 +11,26 @@ from leap.utils import round_number
     ),
     [
         (
-            dt.datetime(2024, 1, 1),
-            dt.datetime(2026, 1, 1),
-            4,
-            111,
-            0,
-            "BC",
-            "LG",
-            0.004955,
-            0.004911
-        ),
-        (
-            dt.datetime(2024, 1, 1),
-            dt.datetime(2025, 1, 1),
+            dt.datetime(2000, 1, 1),
+            dt.datetime(2005, 1, 1),
             4,
             111,
             1,
             "BC",
             "LG",
-            0.007408,
-            0.007319
+            0.006876,
+            0.008984
+        ),
+        (
+            dt.datetime(2000, 1, 1),
+            dt.datetime(2003, 1, 1),
+            4,
+            111,
+            0,
+            "BC",
+            "LG",
+            0.002131,
+            0.005572
         ),
     ]
 )
@@ -44,7 +44,7 @@ def test_immigration_constructor(
         projection_scenario=projection_scenario,
         max_age=max_age
     )
-    df = immigration.table.get_group((timepoint))
+    df = immigration.get_table_group((timepoint))
     row = df[(df["age"] == age) & (df["sex"] == sex)]
     assert round_number(row["prop_immigrants_birth"].values[0], sigdigits=4) == prop_immigrants_birth
     assert round_number(row["prop_immigrants_timepoint"].values[0], sigdigits=4) == prop_immigrants_timepoint
@@ -57,13 +57,13 @@ def test_immigration_constructor(
     ),
     [
         (
-            dt.datetime(2024, 1, 1),
-            dt.datetime(2025, 1, 1),
+            dt.datetime(2000, 1, 1),
+            dt.datetime(2003, 1, 1),
             111,
             "BC",
             "LG",
             1000,
-            1013
+            383
         )
     ]
 )
