@@ -237,6 +237,10 @@ def load_migration_data(
     df["timepoint_prev"] = df["timepoint"].apply(
         lambda x: x - time_delta
     )
+    df["projection_scenario_prev"] = df.apply(
+        lambda x: x["projection_scenario"] if x["timepoint"] != CENSUS_TIMEPOINT + time_delta else "past",
+        axis=1
+    )
 
     df_prev = df[
         ["province", "projection_scenario", "sex", "age", "timepoint", "n", "prob_death"]
@@ -244,12 +248,13 @@ def load_migration_data(
         "age": "age_prev",
         "timepoint": "timepoint_prev",
         "n": "n_prev",
-        "prob_death": "prob_death_prev"
+        "prob_death": "prob_death_prev",
+        "projection_scenario": "projection_scenario_prev"
     })
 
     df = df.merge(
         df_prev,
-        on=["province", "projection_scenario", "sex", "age_prev", "timepoint_prev"],
+        on=["province", "projection_scenario_prev", "sex", "age_prev", "timepoint_prev"],
         how="left"
     )
 
@@ -268,7 +273,11 @@ def load_migration_data(
         df, df_birth, on=["province", "projection_scenario", "timepoint"], how="left"
     )
 
-    df = df.drop(columns=["n_prev", "prob_death_prev", "age_prev", "timepoint_prev"])
+    df = df.drop(
+        columns=[
+            "n_prev", "prob_death_prev", "age_prev", "timepoint_prev", "projection_scenario_prev"
+        ]
+    )
 
 
     # Convert the age back to integer
