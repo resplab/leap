@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 from leap.utils import get_data_path, check_province, check_timepoint, check_projection_scenario, \
-    TimeDelta, get_time_delta_tag
+    get_time_delta_tag, TimeDelta, Timepoint
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -53,6 +53,20 @@ class Immigration:
     @table.setter
     def table(self, table: DataFrameGroupBy):
         self._table = table
+        self.group_map = {key: df for key, df in table}
+
+    def get_table_group(self, group_key: Timepoint | dt.datetime) -> pd.DataFrame:
+        """Get the group of data for a given timepoint.
+
+        Args:
+            group_key: The key for the group to retrieve.
+
+        Returns:
+            A dataframe containing the data for the given timepoint.
+        """
+        if isinstance(group_key, dt.datetime):
+            group_key = Timepoint.from_datetime(group_key)
+        return self.group_map[group_key]
 
     def load_immigration_table(
         self,
@@ -128,13 +142,23 @@ class Immigration:
             "prop_migrants_birth": "prop_immigrants_birth"
         })
         df["sex"] = df["sex"].replace({"F": 0, "M": 1})
+
+        df["timepoint"] = pd.Series(
+            [Timepoint.from_datetime(x) for x in df["timepoint"]],
+            index=df.index,
+            dtype=object
+        )
         df["prop_immigrants_timepoint"] = df.groupby("timepoint")["prop_immigrants_timepoint"].transform(
             lambda x: x / x.sum()
         )
-        grouped_df = df.groupby("timepoint")
+
+        keys = pd.Index(
+            df["timepoint"].to_numpy(dtype=object), dtype=object,
+        )
+        grouped_df = df.groupby(keys)
         return grouped_df
 
-    def get_num_new_immigrants(self, num_new_born: int, timepoint: dt.datetime) -> int:
+    def get_num_new_immigrants(self, num_new_born: int, timepoint: Timepoint | dt.datetime) -> int:
         """Get the number of new immigrants to Canada in a given timepoint.
 
         Args:
@@ -147,19 +171,22 @@ class Immigration:
         Examples:
 
             >>> from leap.immigration import Immigration
+            >>> from leap.utils import Timepoint
             >>> import datetime as dt
             >>> immigration = Immigration(
             ...     min_timepoint=dt.datetime(2000, 1, 1), province="BC", projection_scenario="LG"
             ... )
             >>> n_immigrants = immigration.get_num_new_immigrants(
-            ...     num_new_born=1000, timepoint=dt.datetime(2022, 1, 1)
+            ...     num_new_born=1000, timepoint=Timepoint.from_datetime(dt.datetime(2022, 1, 1))
             ... )
             >>> print(f"Number of immigrants to BC in 2022 for low growth scenario: {n_immigrants}")
             Number of immigrants to BC in 2022 for low growth scenario: 973
 
         """
+        if isinstance(timepoint, dt.datetime):
+            timepoint = Timepoint.from_datetime(timepoint)
 
         num_new_immigrants = int(math.ceil(
-            num_new_born * np.sum(self.table.get_group(timepoint)["prop_immigrants_birth"])
+            num_new_born * np.sum(self.get_table_group(timepoint)["prop_immigrants_birth"])
         ))
         return num_new_immigrants
