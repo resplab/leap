@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 import json
-from leap.utils import get_data_path
+from leap.utils import get_data_path, get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
 from typing import Tuple
+from leap.data_generation.utils import get_parser
 from leap.data_generation.rutils import ordinal_regression_r
 
 pd.options.mode.copy_on_write = True
@@ -281,7 +282,7 @@ def fit_ordinal_regression_model(df: pd.DataFrame) -> Tuple[dict, dict, dict]:
     return beta_coefficients, thresholds, random_effects
 
 
-def generate_control_data():
+def generate_control_data(time_delta: TimeDelta):
     """Generate the asthma control coefficients and thresholds."""
 
     # Load the control levels data from the EBA study
@@ -291,7 +292,8 @@ def generate_control_data():
     beta_coefficients, thresholds, random_effects = fit_ordinal_regression_model(df)
 
     # Update the config file with the beta coefficients and thresholds
-    config_path = get_data_path("processed_data/config.json")
+    time_delta_tag = get_time_delta_tag(time_delta)
+    config_path = get_data_path(f"processed_data/{time_delta_tag}/config.json")
     with open(config_path) as f:
         config = json.load(f)
     config["control"]["parameters"] = {
@@ -305,6 +307,9 @@ def generate_control_data():
 
 
 if __name__ == "__main__":
-    generate_control_data()
+    parser = get_parser()
+    args = parser.parse_args()
+    time_delta = TimeDelta(iso_string=args.time_delta)
+    generate_control_data(time_delta)
 
 
