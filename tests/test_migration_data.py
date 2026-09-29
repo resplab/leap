@@ -169,3 +169,7 @@ def test_load_migration_data(df_populations, life_tables, time_delta):
 
     # age < 1 is handled entirely by the birth model; migration should never report age 0
     assert (df["age"] < 1.0).sum() == 0
+
+    # immigrants / emigrants are split from the integer-age delta_n, so a row is never both
+    assert ((df["n_immigrants"] > 0) & (df["n_emigrants"] > 0)).sum() == 0
+    assert np.allclose(df["n_immigrants"] - df["n_emigrants"], df["delta_n"])

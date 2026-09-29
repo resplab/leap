@@ -225,8 +225,10 @@ def load_migration_data(
             f"merged data has {df.shape[0]} rows."
         )
 
-    # get the total number of births in each time interval, both sexes combined
-    df_birth = df.loc[df["age"] < 1.0]
+    # get the total number of births in each time interval, both sexes combined; for a sub-annual
+    # time_delta, this is the youngest sub-age only, so that n_birth matches the per-interval
+    # newborn count from Birth.get_num_newborn
+    df_birth = df.loc[df["age"] < time_delta.total_years()]
     grouped_df = df_birth.groupby(["timepoint", "province", "projection_scenario"])
     df_birth["n_birth"] = grouped_df.transform("sum")["n"]
     df_birth = df_birth[["province", "projection_scenario", "timepoint", "n_birth"]]
@@ -237,9 +239,10 @@ def load_migration_data(
     df["timepoint_prev"] = df["timepoint"].apply(
         lambda x: x - time_delta
     )
-    df["projection_scenario_prev"] = df.apply(
-        lambda x: x["projection_scenario"] if x["timepoint"] != CENSUS_TIMEPOINT + time_delta else "past",
-        axis=1
+    # the previous timepoint for the first projected timepoint is in the past data
+    first_timepoint = df.groupby(["province", "projection_scenario"])["timepoint"].transform("min")
+    df["projection_scenario_prev"] = df["projection_scenario"].where(
+        (df["projection_scenario"] == "past") | (df["timepoint"] != first_timepoint), "past"
     )
 
     df_prev = df[
@@ -264,10 +267,6 @@ def load_migration_data(
     # compute the signed population change due to net migration
     df["delta_n"] = df["n"] - df["n_prev"] * (1 - df["prob_death_prev"])
 
-    # number of migrants
-    df["n_immigrants"] = df["delta_n"].clip(lower=0)
-    df["n_emigrants"] = (-df["delta_n"]).clip(lower=0)
-
     # age < 1 is handled entirely by the birth model, not migration. For a sub-annual time_delta,
     # age is split into fractional sub-ages within a year, so only the very first sub-age (age 0)
     # is excluded by the age_prev dropna above; the rest still find a predecessor within the same
@@ -291,13 +290,16 @@ def load_migration_data(
         df.copy(),
         agg={
             "delta_n": "sum",
-            "n_immigrants": "sum",
-            "n_emigrants": "sum",
             "n_birth": "mean",
             "n": "sum"
         },
         groupby_cols=["province", "projection_scenario", "timepoint", "sex"]
     )
+
+    # number of migrants; computed after aggregating to integer age, since clipping each
+    # sub-age separately would create spurious gross flows that cancel in delta_n
+    df["n_immigrants"] = df["delta_n"].clip(lower=0)
+    df["n_emigrants"] = (-df["delta_n"]).clip(lower=0)
 
     # signed proportion relative to births
     df["prop_migrants_birth"] = df["delta_n"] / df["n_birth"]
