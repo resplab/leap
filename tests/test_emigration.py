@@ -1,5 +1,6 @@
 import pytest
 import datetime as dt
+import numpy as np
 from leap.emigration import Emigration
 from leap.utils import round_number
 
@@ -78,6 +79,9 @@ def test_emigration_compute_probability(
         projection_scenario=projection_scenario
     )
 
+    # fix the random seed so the test is deterministic; unseeded, the count falls outside the
+    # bounds by chance on some runs
+    np.random.seed(1)
     count = 0
     for _ in range(100000):
         if emigration.compute_probability(timepoint, age, sex):
