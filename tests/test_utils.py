@@ -1,43 +1,21 @@
 import pytest
-import pathlib
-import json
-import numpy as np
+import pickle
 import datetime as dt
-from leap.utils import Timepoint
-
-
-
-@pytest.mark.parametrize(
-    "year, month, day, hour, minute, second, microsecond",
-    [
-        (2024, 6, 1, 12, 30, 0, 0),
-    ]
-)
-def test_timepoint_constructor(year, month, day, hour, minute, second, microsecond):
-    timepoint = Timepoint(year, month, day, hour, minute, second, microsecond)
-    assert timepoint.year == year
-    assert timepoint.month == month
-    assert timepoint.day == day
-    assert timepoint.hour == hour
-    assert timepoint.minute == minute
-    assert timepoint.second == second
-    assert timepoint.microsecond == microsecond
+from leap.utils import date_range, TimeDelta
 
 
 @pytest.mark.parametrize(
-    "year, month, day, hour, minute, second, microsecond",
+    "start, stop, time_delta",
     [
-        (2024, 6, 1, 12, 30, 0, 0),
+        (dt.datetime(2000, 1, 1), dt.datetime(2066, 1, 1), TimeDelta(months=1)),
+        (dt.datetime(2000, 1, 1), dt.datetime(2066, 1, 1), TimeDelta(years=1)),
     ]
 )
-def test_timepoint_from_datetime(year, month, day, hour, minute, second, microsecond):
-    dt_obj = dt.datetime(year, month, day, hour, minute, second, microsecond)
-    timepoint = Timepoint.from_datetime(dt_obj)
-    assert isinstance(timepoint, Timepoint)
-    assert timepoint.year == dt_obj.year
-    assert timepoint.month == dt_obj.month
-    assert timepoint.day == dt_obj.day
-    assert timepoint.hour == dt_obj.hour
-    assert timepoint.minute == dt_obj.minute
-    assert timepoint.second == dt_obj.second
-    assert timepoint.microsecond == dt_obj.microsecond
+def test_date_range(start, stop, time_delta):
+    timepoints = list(date_range(start, stop, time_delta))
+    n_intervals = TimeDelta(years=1) // time_delta
+    assert len(timepoints) == 66 * n_intervals
+    # timepoints stay on the first of the month, with no drift
+    assert all(t.day == 1 and t.time() == dt.time(0, 0) for t in timepoints)
+    # timepoints are passed between processes in the simulation, so must survive pickling
+    assert pickle.loads(pickle.dumps(timepoints)) == timepoints
