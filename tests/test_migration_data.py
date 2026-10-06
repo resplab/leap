@@ -166,3 +166,6 @@ def test_load_migration_data(df_populations, life_tables, time_delta):
     n_intervals = TimeDelta(years=1) // time_delta
     assert row["n"].iloc[0] == 1000 * n_intervals
     assert row["delta_n"].iloc[0] == (1000 - 1500 * (1 - 0.5)) * n_intervals
+
+    # age < 1 is handled entirely by the birth model; migration should never report age 0
+    assert (df["age"] < 1.0).sum() == 0
