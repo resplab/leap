@@ -261,6 +261,9 @@ def load_migration_data(
     # remove the missing data
     df = df.dropna(subset=["n_prev"])
 
+    # remove infants under age 1
+    df = df.loc[df["age"] >= 1.0]
+
     # compute the signed population change due to net migration
     df["delta_n"] = df["n"] - df["n_prev"] * (1 - df["prob_death_prev"])
 
