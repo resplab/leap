@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 import datetime as dt
 from leap.birth import Birth
-from leap.utils import round_number
+from leap.utils import round_number, TimeDelta
 from leap.logger import get_logger
 
 logger = get_logger(__name__)
@@ -70,7 +70,7 @@ def test_birth_get_initial_population_indices(
 @pytest.mark.parametrize(
     (
         "min_timepoint, province, projection_scenario, max_age, timepoint, num_births_initial,"
-        "expected_num_newborn"
+        "time_delta, expected_num_newborn"
     ),
     [
         (
@@ -80,19 +80,33 @@ def test_birth_get_initial_population_indices(
             2,
             dt.datetime(2024, 1, 1),
             1000,
+            TimeDelta(years=1),
             993
+        ),
+        (
+            # num_births_initial is an annual quantity, so with a monthly time_delta the
+            # returned count should be roughly 1/12 of the equivalent annual case above.
+            dt.datetime(2023, 1, 1),
+            "BC",
+            "LG",
+            2,
+            dt.datetime(2024, 1, 1),
+            1000,
+            TimeDelta(months=1),
+            84
         ),
     ]
 )
 def test_birth_get_num_newborn(
     min_timepoint, province, projection_scenario, max_age, timepoint, num_births_initial,
-    expected_num_newborn
+    time_delta, expected_num_newborn
 ):
 
     birth = Birth(
         min_timepoint=min_timepoint,
         province=province,
-        projection_scenario=projection_scenario
+        projection_scenario=projection_scenario,
+        time_delta=time_delta
     )
     num_new_born = birth.get_num_newborn(num_births_initial, timepoint)
     assert num_new_born == expected_num_newborn
