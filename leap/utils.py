@@ -25,9 +25,9 @@ logger = get_logger(__name__)
 
 LEAP_PATH = pathlib.Path(__file__).parents[1].absolute()
 
-PROJECTION_SCENARIOS_FUTURE = (
-    "LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", "FA", "SA"
-)
+DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
+
+PROJECTION_SCENARIOS_FUTURE = ("LG", "HG", "M1", "M2", "M3", "M4", "M5", "M6", "FA", "SA")
 PROJECTION_SCENARIOS = ("past",) + PROJECTION_SCENARIOS_FUTURE
 
 PROVINCE_MAP = {
@@ -230,8 +230,8 @@ def get_data_path(data_path: str | pathlib.Path, mkdirs: bool = False) -> pathli
         data_folder = "leap.processed_data"
         data_path = data_path.relative_to("processed_data")
     elif data_path.parts[0] == "data_generation":
-        data_folder = "leap.data_generation" + "." + ".".join(data_path.parts[1:-1])
-        data_path = data_path.parts[-1]
+        data_folder = "leap.data_generation"
+        data_path = data_path.relative_to("data_generation")
     elif data_path.parts[0] == "original_data":
         data_path = data_path.relative_to("original_data")
         data_folder = "leap.original_data"
@@ -538,6 +538,126 @@ class Sex:
             return self._value_int == value
         elif isinstance(value, bool):
             return self._value_bool == value
+        
+
+
+class Age:
+    """A class to handle the age variable."""
+    __slots__ = ("value", "years", "months", "tolerance")
+
+    def __init__(
+        self,
+        value: int | float | None = None,
+        years: int | None = None,
+        months: int | None = None
+    ):
+        """Initialize the ``Age`` class.
+
+        Args:
+            value: The total number of years lived by a person.
+            years: The whole number of years lived by a person.
+            months: The whole number of months lived by a person.
+
+        Examples:
+
+            >>> age = Age(10)
+            >>> age.value
+            10
+
+            >>> age = Age(years=2, months=6)
+            >>> age.value
+            2.5
+        """
+        if value is not None:
+            self.value = value
+            self.years = int(value)
+            self.months = int(round((value - self.years) * 12))
+            if self.months == 12:
+                self.years += 1
+                self.months = 0
+        elif years is not None or months is not None:
+            self.years = years if years is not None else 0
+            self.months = months if months is not None else 0
+            self.value = self.years + self.months / 12
+        else:
+            raise ValueError("Either 'value' or 'years' and/or 'months' must be provided.")
+        self.tolerance = 0.083  # Tolerance for comparison, equivalent to 1 month
+        
+    def __hash__(self):
+        return hash((self.years, self.months))
+
+    def __eq__(self, age: int | float | Age) -> bool:
+        if isinstance(age, Age):
+            return math.isclose(self.value, age.value, abs_tol=self.tolerance)
+        elif isinstance(age, (int, float)):
+            return math.isclose(self.value, age, abs_tol=self.tolerance)
+        else:
+            return False
+        
+    def __lt__(self, age: int | float | Age) -> bool:
+        if isinstance(age, Age):
+            return age.value - self.value > self.tolerance
+        elif isinstance(age, (int, float)):
+            return age - self.value > self.tolerance
+        else:
+            raise TypeError(f"Unsupported type for comparison: {type(age)}")
+        
+    def __le__(self, age: int | float | Age) -> bool:
+        if isinstance(age, Age):
+            return self.value <= age.value + self.tolerance
+        elif isinstance(age, (int, float)):
+            return self.value <= age + self.tolerance
+        else:
+            raise TypeError(f"Unsupported type for comparison: {type(age)}")
+        
+    def __gt__(self, age: int | float | Age) -> bool:
+        if isinstance(age, Age):
+            return self.value > age.value + self.tolerance
+        elif isinstance(age, (int, float)):
+            return self.value > age + self.tolerance
+        else:
+            raise TypeError(f"Unsupported type for comparison: {type(age)}")
+        
+    def __ge__(self, age: int | float | Age) -> bool:
+        if isinstance(age, Age):
+            return self.value >= age.value - self.tolerance
+        elif isinstance(age, (int, float)):
+            return self.value >= age - self.tolerance
+        else:
+            raise TypeError(f"Unsupported type for comparison: {type(age)}")
+        
+    def __str__(self) -> str:
+        return f"{self.value:.5f} years"
+    
+    def __repr__(self) -> str:
+        return f"Age(value={self.value:.5f}, years={self.years}, months={self.months})"
+    
+    def __add__(self, other: int | float | Age) -> Age:
+        if isinstance(other, Age):
+            return Age(value=self.value + other.value)
+        elif isinstance(other, (int, float)):
+            return Age(value=self.value + other)
+        else:
+            raise TypeError(f"Unsupported type for addition: {type(other)}")
+        
+    def __radd__(self, other: int | float | Age) -> Age:
+        return self.__add__(other)
+    
+    def __sub__(self, other: int | float | Age) -> Age:
+        if isinstance(other, Age):
+            return Age(value=self.value - other.value)
+        elif isinstance(other, (int, float)):
+            return Age(value=self.value - other)
+        else:
+            raise TypeError(f"Unsupported type for subtraction: {type(other)}")
+        
+    def __rsub__(self, other: int | float | Age) -> Age:
+        if isinstance(other, Age):
+            return Age(value=other.value - self.value)
+        elif isinstance(other, (int, float)):
+            return Age(value=other - self.value)
+        else:
+            raise TypeError(f"Unsupported type for subtraction: {type(other)}")
 
 
 
@@ -804,7 +924,10 @@ class TimeDelta(relativedelta):
     
     def total_years(self) -> float:
         """Convert the total duration of time into units of years."""
-        return self.total_seconds() / (365 * 24 * 3600)
+        if self.days == 0 and self.hours == 0 and self.minutes == 0 and self.seconds == 0 and self.microseconds == 0:
+            return self.years + self.months / 12
+        else:
+            return self.total_seconds() / (365 * 24 * 3600)
     
     def to_isoformat(self) -> str:
         date_part = "".join([
