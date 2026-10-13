@@ -2,13 +2,13 @@ from __future__ import annotations
 import math
 import pandas as pd
 import datetime as dt
+from dateutil.relativedelta import relativedelta
 from leap.utils import get_data_path, check_timepoint, check_province, check_projection_scenario, \
     get_time_delta_tag, TimeDelta
 from leap.logger import get_logger
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pandas.core.groupby.generic import DataFrameGroupBy
-    from dateutil.relativedelta import relativedelta
 
 logger = get_logger(__name__)
 
@@ -48,7 +48,22 @@ class Birth:
             )
         else:
             self.initial_population = initial_population
-    
+        self.time_delta = time_delta
+
+    @property
+    def time_delta(self) -> TimeDelta:
+        """The time interval of the simulation, e.g. 1 year, 5 years, etc."""
+        return self._time_delta
+
+    @time_delta.setter
+    def time_delta(self, time_delta: dt.timedelta | relativedelta | TimeDelta):
+        if isinstance(time_delta, TimeDelta):
+            self._time_delta = time_delta
+        elif isinstance(time_delta, dt.timedelta):
+            self._time_delta = TimeDelta(td=time_delta)
+        elif isinstance(time_delta, relativedelta):
+            self._time_delta = TimeDelta(rd=time_delta)
+
     @property
     def estimate(self) -> DataFrameGroupBy:
         """A grouped data frame giving the number of births in a given province, grouped by year.
@@ -293,12 +308,16 @@ class Birth:
     def get_num_newborn(self, num_births_initial: int, timepoint: dt.datetime) -> int:
         """Get the number of births in a given time interval.
 
+        ``num_births_initial`` is defined as an annual quantity, so when ``self.time_delta``
+        is shorter than a year, the annual count is split evenly across the
+        ``TimeDelta(years=1) // self.time_delta`` intervals that make up a year.
+
         Args:
             num_births_initial: Number of births in the initial year of the simulation.
             timepoint: The current timepoint of the simulation.
 
         Returns:
-            The number of births for the given year.
+            The number of births for the given time interval.
 
         Examples:
 
@@ -317,9 +336,11 @@ class Birth:
             97
 
         """
+        n_intervals = max(TimeDelta(years=1) // self.time_delta, 1)
         num_new_born = int(
             math.ceil(
                 num_births_initial * self.estimate.get_group((timepoint))["N_relative"].iloc[0] # type: ignore
-            ) 
-        ) 
+                / n_intervals
+            )
+        )
         return num_new_born
