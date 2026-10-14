@@ -267,10 +267,6 @@ def load_migration_data(
     # compute the signed population change due to net migration
     df["delta_n"] = df["n"] - df["n_prev"] * (1 - df["prob_death_prev"])
 
-    # number of migrants
-    df["n_immigrants"] = df["delta_n"].clip(lower=0)
-    df["n_emigrants"] = (-df["delta_n"]).clip(lower=0)
-
     # add the n_birth column to df
     df = pd.merge(
         df, df_birth, on=["province", "projection_scenario", "timepoint"], how="left"
@@ -288,13 +284,15 @@ def load_migration_data(
         df.copy(),
         agg={
             "delta_n": "sum",
-            "n_immigrants": "sum",
-            "n_emigrants": "sum",
             "n_birth": "mean",
             "n": "sum"
         },
         groupby_cols=["province", "projection_scenario", "timepoint", "sex"]
     )
+
+    # number of migrants
+    df["n_immigrants"] = df["delta_n"].clip(lower=0)
+    df["n_emigrants"] = (-df["delta_n"]).clip(lower=0)
 
     # signed proportion relative to births
     df["prop_migrants_birth"] = df["delta_n"] / df["n_birth"]
