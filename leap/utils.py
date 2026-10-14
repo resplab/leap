@@ -666,9 +666,9 @@ class Timepoint(dt.datetime):
 
     def __new__(
         cls,
-        year: int,
-        month: int,
-        day: int,
+        year: int | bytes,
+        month: int | dt.tzinfo | None = None,
+        day: int = 1,
         hour: int = 0,
         minute: int = 0,
         second: int = 0,
@@ -677,7 +677,16 @@ class Timepoint(dt.datetime):
         *,
         fold: int = 0
     ) -> Timepoint:
-
+        if isinstance(year, (bytes, bytearray)):
+            # reconstruction path used by copy.deepcopy / pickle
+            tz_state = month if isinstance(month, dt.tzinfo) else None
+            return super().__new__(
+                cls,
+                year,   # type: ignore[arg-type]
+                tz_state,
+            )
+        if month is None:
+            raise TypeError("month must be provided when constructing Timepoint from date fields")
         self = super().__new__(
             cls, year, month, day, hour, minute, second, microsecond, tzinfo, fold=fold
         )
