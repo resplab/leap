@@ -1,5 +1,6 @@
 import pytest
 import datetime as dt
+import pandas as pd
 from leap.immigration import Immigration
 from leap.utils import round_number
 
@@ -44,7 +45,7 @@ def test_immigration_constructor(
         projection_scenario=projection_scenario,
         max_age=max_age
     )
-    df = immigration.get_table_group((timepoint))
+    df = immigration.table.get_group((timepoint))
     row = df[(df["age"] == age) & (df["sex"] == sex)]
     assert round_number(row["prop_immigrants_birth"].values[0], sigdigits=4) == prop_immigrants_birth
     assert round_number(row["prop_immigrants_timepoint"].values[0], sigdigits=4) == prop_immigrants_timepoint
@@ -78,3 +79,16 @@ def test_immigration_get_num_new_immigrants(
         max_age=max_age
     )
     assert immigration.get_num_new_immigrants(num_new_born, timepoint) == num_new_immigrants
+
+
+def test_immigration_timepoint_key_types():
+    # the table is grouped by pandas Timestamps; lookups must work with plain datetimes too
+    immigration = Immigration(
+        min_timepoint=dt.datetime(2000, 1, 1), province="BC", projection_scenario="LG"
+    )
+    timepoint = dt.datetime(2030, 1, 1)
+    assert immigration.table.get_group(timepoint).equals(
+        immigration.table.get_group(pd.Timestamp(timepoint))
+    )
+    assert immigration.get_num_new_immigrants(1000, timepoint) == \
+        immigration.get_num_new_immigrants(1000, pd.Timestamp(timepoint))

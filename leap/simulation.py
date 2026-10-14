@@ -27,7 +27,7 @@ from leap.reassessment import Reassessment
 from leap.severity import ExacerbationSeverity
 from leap.utility import Utility
 from leap.utils import get_data_path, timer, get_chunk_indices, create_process_bars, \
-    get_time_delta_tag, TimeDelta, Timepoint, date_range
+    get_time_delta_tag, TimeDelta, date_range
 from leap.logger import get_logger
 from typing import Tuple, TYPE_CHECKING
 if TYPE_CHECKING:
@@ -337,9 +337,7 @@ class Simulation:
         """
         # number of newborns and immigrants in the time interval
         num_new_born = self.birth.get_num_newborn(self.num_births_initial, timepoint)
-        num_immigrants = self.immigration.get_num_new_immigrants(
-            num_new_born, Timepoint.from_datetime(timepoint)
-        )
+        num_immigrants = self.immigration.get_num_new_immigrants(num_new_born, timepoint)
         num_new_agents = self.get_num_new_agents(
             timepoint, self.min_timepoint, num_new_born, num_immigrants
         )
@@ -355,12 +353,12 @@ class Simulation:
         else:
             # for a given year, sample from age/sex distribution of immigrants
             immigrant_indices = list(np.random.choice(
-                a=range(self.immigration.get_table_group(timepoint).shape[0]),
+                a=range(self.immigration.table.get_group(timepoint).shape[0]),
                 size=num_immigrants,
-                p=list(self.immigration.get_table_group(timepoint)["prop_immigrants_timepoint"])
+                p=list(self.immigration.table.get_group(timepoint)["prop_immigrants_timepoint"])
             ))
 
-            immigrant_df = self.immigration.get_table_group(timepoint).iloc[immigrant_indices]
+            immigrant_df = self.immigration.table.get_group(timepoint).iloc[immigrant_indices]
             sexes_immigrant = immigrant_df["sex"].tolist()
             ages_immigrant = immigrant_df["age"].tolist()
 
