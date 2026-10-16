@@ -57,7 +57,7 @@ def test_emigration_constructor(
             "M",
             "BC",
             "LG",
-            155,
+            150,
             195
         ),
     ]
@@ -67,9 +67,9 @@ def test_emigration_compute_probability(
 ):
     """Test the ``compute_probability`` method of the ``Emigration`` class.
     
-    The ``compute_probability`` method should return a boolean value indicating
-    whether the agent emigrates in a given timepoint. This is computed using the binomial distribution.
-    For the purposes of testing, we will run the method 100,000 times and check that the number of
+    The ``compute_probability`` method should return a boolean value indicating whether the agent
+    emigrates in a given time interval. This is computed using the binomial distribution.
+    For the purposes of testing, we will run the method 100 000 times and check that the number of
     emigrants falls within a certain range. Please see
     ``processed_data/{time_delta_tag}/migration/migration_table_{province}_{projection_scenario}.csv``
     for the corresponding values.
