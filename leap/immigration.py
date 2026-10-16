@@ -180,7 +180,7 @@ class Immigration:
             ...     num_new_born=1000, timepoint=Timepoint.from_datetime(dt.datetime(2022, 1, 1))
             ... )
             >>> print(f"Number of immigrants to BC in 2022 for low growth scenario: {n_immigrants}")
-            Number of immigrants to BC in 2022 for low growth scenario: 973
+            Number of immigrants to BC in 2022 for low growth scenario: 2672
 
         """
         if isinstance(timepoint, dt.datetime):
