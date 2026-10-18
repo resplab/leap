@@ -39,7 +39,7 @@ class Immigration:
 
         * ``timepoint``: timepoint in the range ``2001-2068`` (CA) or ``2001-2043`` (BC).
         * ``age``: integer age.
-        * ``sex``: integer, ``0 = female``, ``1 = male``.
+        * ``sex``: str, ``F = female``, ``M = male``.
         * ``prop_immigrants_birth``: The number of immigrants relative to the number of
           births in that timepoint. To compute the number of immigrants in a given timepoint, multiply
           the number of births by ``prop_immigrants_birth``.
@@ -141,7 +141,6 @@ class Immigration:
         df = df.rename(columns={
             "prop_migrants_birth": "prop_immigrants_birth"
         })
-        df["sex"] = df["sex"].replace({"F": 0, "M": 1})
 
         df["timepoint"] = pd.Series(
             [Timepoint.from_datetime(x) for x in df["timepoint"]],
