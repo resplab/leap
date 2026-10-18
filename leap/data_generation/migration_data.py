@@ -278,7 +278,6 @@ def load_migration_data(
         ]
     )
 
-
     # Convert the age back to integer
     df = convert_age_to_int(
         df.copy(),
