@@ -123,6 +123,37 @@ def format_age_group(age_group: str, upper_age_group: str = "100 years and over"
     return age
 
 
+def convert_timepoint_to_numeric(timepoint: dt.datetime | Timepoint) -> float:
+    """Convert a datetime object to a numeric value.
+
+    Args:
+        timepoint: A datetime object.
+
+    Returns:
+        A number representing the year of the timepoint.
+    """
+    time_delta = timepoint - dt.datetime(1, 1, 1)
+    time_delta += dt.timedelta(days=366)  # Add 1 year to account for the fact that the first year is 1
+    return time_delta.total_seconds() / SECONDS_PER_YEAR
+
+
+def convert_numeric_to_timepoint(timepoint: float) -> Timepoint:
+    """Convert a numeric value to a datetime object.
+
+    Args:
+        timepoint: The number of years since the year 0.0 AD/BC.
+
+    Returns:
+        A Timepoint object representing the timepoint.
+    """
+    total_seconds = round(timepoint * SECONDS_PER_YEAR)
+    time_delta = dt.timedelta(seconds=total_seconds)
+
+    # Subtract 1 year to account for the fact that the first year is 1
+    timepoint_dt = dt.datetime(year=1, month=1, day=1) + time_delta - dt.timedelta(days=366)  
+    return Timepoint.from_datetime(timepoint_dt)
+
+
 def convert_sex_to_numeric(sex: str) -> int:
     """Convert a sex string to a numeric value.
 
@@ -155,36 +186,6 @@ def convert_numeric_to_sex(sex: int) -> str:
         return "M"
     else:
         raise ValueError(f"Invalid sex: {sex}")
-
-def convert_timepoint_to_numeric(timepoint: dt.datetime | Timepoint) -> float:
-    """Convert a datetime object to a numeric value.
-
-    Args:
-        timepoint: A datetime object.
-
-    Returns:
-        A number representing the year of the timepoint.
-    """
-    time_delta = timepoint - dt.datetime(1, 1, 1)
-    time_delta += dt.timedelta(days=366)  # Add 1 year to account for the fact that the first year is 1
-    return time_delta.total_seconds() / SECONDS_PER_YEAR
-
-
-def convert_numeric_to_timepoint(timepoint: float) -> Timepoint:
-    """Convert a numeric value to a datetime object.
-
-    Args:
-        timepoint: The number of years since the year 0.0 AD/BC.
-
-    Returns:
-        A Timepoint object representing the timepoint.
-    """
-    total_seconds = round(timepoint * SECONDS_PER_YEAR)
-    time_delta = dt.timedelta(seconds=total_seconds)
-
-    # Subtract 1 year to account for the fact that the first year is 1
-    timepoint_dt = dt.datetime(year=1, month=1, day=1) + time_delta - dt.timedelta(days=366)  
-    return Timepoint.from_datetime(timepoint_dt)
 
 
 def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float) -> int | list[int]:
