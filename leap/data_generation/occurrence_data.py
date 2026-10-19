@@ -263,7 +263,8 @@ def get_predicted_data(
         A dataframe containing the predicted data.
         Columns:
         
-        * ``timepoint (dt.datetime)``: The date and time.
+        * ``timepoint (dt.datetime)``: The date and time, starting at ``min_timepoint`` and
+            incrementing by ``time_delta`` until (and including) ``max_timepoint``.
         * ``sex (str)``: One of ``M`` = male, ``F`` = female.
         * ``age (int)``: The age in years.
         * ``pred_col (float)``: The predicted data.
@@ -271,7 +272,7 @@ def get_predicted_data(
 
     df = pd.DataFrame(
         data=list(itertools.product(
-            list(date_range(min_timepoint, max_timepoint, time_delta)),
+            list(date_range(min_timepoint, max_timepoint + time_delta, time_delta)),
             [1, 2],
             list(range(min_age, max_age))
         )),
