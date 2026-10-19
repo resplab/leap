@@ -121,7 +121,7 @@ def format_age_group(age_group: str, upper_age_group: str = "100 years and over"
         age = age.replace(" year", "")
         age = int(age)
     return age
- 
+
 
 def convert_timepoint_to_numeric(timepoint: dt.datetime | Timepoint) -> float:
     """Convert a datetime object to a numeric value.
