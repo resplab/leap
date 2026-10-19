@@ -2,6 +2,7 @@ import pytest
 import datetime as dt
 import numpy as np
 import pandas as pd
+from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 import itertools
 from leap.data_generation.occurrence_data import load_asthma_df, generate_occurrence_model, \
     MIN_TIMEPOINT
@@ -49,3 +50,27 @@ def test_load_asthma_df(min_timepoint):
 
     # Check that prevalence >= incidence
     assert (df["prevalence"] >= df["incidence"]).all()
+
+
+@pytest.mark.parametrize(
+    "time_delta",
+    [
+        (TimeDelta(years=1))
+    ]
+)
+@pytest.mark.parametrize(
+    "occ_type, formula",
+    [
+        ("incidence", "incidence ~ sex*timepoint"),
+        ("prevalence", "prevalence ~ sex*poly(timepoint, degree=2)")
+    ]
+)
+def test_generate_occurrence_model(df_asthma, time_delta, occ_type, formula):
+    results = generate_occurrence_model(
+        df_asthma=df_asthma,
+        formula=formula,
+        occ_type=occ_type,
+        time_delta=time_delta,
+        maxiter=10
+    )
+    assert isinstance(results, GLMResultsWrapper)
