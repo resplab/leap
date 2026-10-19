@@ -98,7 +98,7 @@ def test_generate_incidence_model(df_asthma, time_delta):
     ]
 )
 def test_generate_prevalence_model(df_asthma, time_delta):
-    results = generate_prevalence_model(
+    results, alpha_age, norm2_age, alpha_time, norm2_time = generate_prevalence_model(
         df_asthma=df_asthma,
         time_delta=time_delta,
         maxiter=10
