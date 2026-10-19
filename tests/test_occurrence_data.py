@@ -5,7 +5,7 @@ import pandas as pd
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 import itertools
 from leap.data_generation.occurrence_data import load_asthma_df, generate_occurrence_model, \
-    MIN_TIMEPOINT
+    generate_prevalence_model, generate_incidence_model, MIN_TIMEPOINT
 from leap.logger import get_logger
 from leap.utils import TimeDelta, date_range, PROJECTION_SCENARIOS, Age
 
@@ -70,6 +70,36 @@ def test_generate_occurrence_model(df_asthma, time_delta, occ_type, formula):
         df_asthma=df_asthma,
         formula=formula,
         occ_type=occ_type,
+        time_delta=time_delta,
+        maxiter=10
+    )
+    assert isinstance(results, GLMResultsWrapper)
+
+
+@pytest.mark.parametrize(
+    "time_delta",
+    [
+        (TimeDelta(years=1))
+    ]
+)
+def test_generate_incidence_model(df_asthma, time_delta):
+    results = generate_incidence_model(
+        df_asthma=df_asthma,
+        time_delta=time_delta,
+        maxiter=10
+    )
+    assert isinstance(results, GLMResultsWrapper)
+
+
+@pytest.mark.parametrize(
+    "time_delta",
+    [
+        (TimeDelta(years=1))
+    ]
+)
+def test_generate_prevalence_model(df_asthma, time_delta):
+    results = generate_prevalence_model(
+        df_asthma=df_asthma,
         time_delta=time_delta,
         maxiter=10
     )
