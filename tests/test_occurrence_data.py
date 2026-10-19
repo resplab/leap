@@ -5,9 +5,9 @@ import pandas as pd
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 import itertools
 from leap.data_generation.occurrence_data import load_asthma_df, generate_occurrence_model, \
-    generate_prevalence_model, generate_incidence_model, MIN_TIMEPOINT
+    generate_prevalence_model, generate_incidence_model, get_predicted_data, MIN_TIMEPOINT
 from leap.logger import get_logger
-from leap.utils import TimeDelta, date_range, PROJECTION_SCENARIOS, Age
+from leap.utils import TimeDelta, date_range
 
 logger = get_logger(__name__)
 
@@ -104,3 +104,44 @@ def test_generate_prevalence_model(df_asthma, time_delta):
         maxiter=10
     )
     assert isinstance(results, GLMResultsWrapper)
+
+
+
+
+@pytest.mark.parametrize(
+    "time_delta",
+    [
+        (TimeDelta(years=1)),
+        (TimeDelta(months=1))
+    ]
+)
+@pytest.mark.parametrize(
+    "min_timepoint, max_timepoint",
+    [
+        (dt.datetime(1995,12,2), dt.datetime(2000,12,2))
+    ]
+)
+def test_get_predicted_data(df_asthma, time_delta, min_timepoint, max_timepoint):
+    model = generate_incidence_model(
+        df_asthma, time_delta, maxiter=10
+    )
+    df = get_predicted_data(
+        model=model,
+        pred_col="incidence",
+        time_delta=time_delta,
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint
+    )
+    assert isinstance(df, pd.DataFrame)
+    assert df["timepoint"].min().to_pydatetime() == min_timepoint
+    assert df["timepoint"].max().to_pydatetime() == max_timepoint
+    grouped_df = df.groupby(["age", "sex"])
+    for _, group in grouped_df:
+        pd.testing.assert_series_equal(
+            group["timepoint"],
+            pd.Series(
+                list(date_range(start=min_timepoint, stop=max_timepoint + time_delta, step=time_delta))
+            ),
+            check_index=False,
+            check_names=False
+        )
