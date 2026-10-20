@@ -13,7 +13,7 @@ import uuid
 from tqdm import tqdm
 from scipy.stats import logistic
 import importlib.resources as pkg_resources
-from typing import Callable, Tuple, TYPE_CHECKING
+from typing import Callable, SupportsFloat, Tuple, TYPE_CHECKING
 import multiprocessing as mp
 from leap.logger import get_logger
 
@@ -919,7 +919,36 @@ class TimeDelta(relativedelta):
             return int(self.total_seconds() // other.total_seconds())
         else:
             raise TypeError(f"Unsupported type for floor division: {type(other)}")
-        
+
+    def __mul__(self, other: SupportsFloat) -> TimeDelta:
+
+        f = float(other)
+        years_f = self.years * f
+        years = int(years_f)
+        months_f = self.months * f + (years_f - years) * 12
+        months = int(months_f)
+        days_f = self.days * f + (months_f - months) * 30
+        days = int(days_f)
+        hours_f = self.hours * f + (days_f - days) * 24
+        hours = int(hours_f)
+        minutes_f = self.minutes * f + (hours_f - hours) * 60
+        minutes = int(minutes_f)
+        seconds_f = self.seconds * f + (minutes_f - minutes) * 60
+        seconds = int(seconds_f)
+        microseconds = round(self.microseconds * f + (seconds_f - seconds) * 1e6)
+
+        return self.__class__(
+            years=years, months=months, days=days, hours=hours,
+            minutes=minutes, seconds=seconds, microseconds=microseconds,
+            leapdays=self.leapdays,
+            year=self.year, month=self.month, day=self.day,
+            weekday=self.weekday, hour=self.hour, minute=self.minute,
+            second=self.second, microsecond=self.microsecond,
+        )
+
+    def __rmul__(self, other: SupportsFloat) -> TimeDelta:
+        return self.__mul__(other)
+
     def total_seconds(self) -> float:
         return (
             self.years * 365 * 24 * 3600 +
