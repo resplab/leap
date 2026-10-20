@@ -512,7 +512,7 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
         draw_plot: If ``True``, generate a plot for validation.
     """
     past_population_data = load_past_births_population_data(time_delta)
-    min_timepoint = past_population_data["timepoint"].max() + TIME_DELTA_OD
+    min_timepoint = past_population_data["timepoint"].max() + time_delta
     projected_population_data = load_projected_births_population_data(time_delta, min_timepoint)
     birth_estimate = pd.concat([past_population_data, projected_population_data], axis=0)
     birth_estimate = birth_estimate.loc[birth_estimate["province"].isin(["BC", "CA"])]
