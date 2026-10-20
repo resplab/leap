@@ -1,7 +1,8 @@
 import pytest
 import datetime as dt
+import pandas as pd
 from leap.immigration import Immigration
-from leap.utils import round_number
+from leap.utils import round_number, Timepoint
 
 
 @pytest.mark.parametrize(
@@ -78,3 +79,23 @@ def test_immigration_get_num_new_immigrants(
         max_age=max_age
     )
     assert immigration.get_num_new_immigrants(num_new_born, timepoint) == num_new_immigrants
+
+
+@pytest.mark.parametrize(
+    "timepoint",
+    [
+        dt.datetime(2030, 1, 1),
+        pd.Timestamp(2030, 1, 1),
+        Timepoint(2030, 1, 1),
+        dt.datetime(2030, 1, 1, 0, 0, 0, 15),
+        dt.datetime(2029, 12, 31, 23, 59, 59, 999985),
+        dt.datetime(2030, 1, 15),
+    ]
+)
+def test_immigration_get_table_group(timepoint):
+    # lookups match the month's group whatever the key type, and despite small differences in time
+    immigration = Immigration(
+        min_timepoint=dt.datetime(2000, 1, 1), province="BC", projection_scenario="LG"
+    )
+    expected = immigration.get_table_group(Timepoint(2030, 1, 1))
+    assert immigration.get_table_group(timepoint).equals(expected)

@@ -64,8 +64,11 @@ class Immigration:
         Returns:
             A dataframe containing the data for the given timepoint.
         """
-        if isinstance(group_key, dt.datetime):
-            group_key = Timepoint.from_datetime(group_key)
+        # the table has one group per month, keyed by the first of the month; round to the nearest
+        # minute first, so small floating-point errors (e.g. 2049-11-30T23:59:59.999985) still
+        # match the right month
+        group_key = group_key + dt.timedelta(seconds=30)
+        group_key = Timepoint(group_key.year, group_key.month, 1)
         return self.group_map[group_key]
 
     def load_immigration_table(
