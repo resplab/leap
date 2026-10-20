@@ -80,6 +80,10 @@ jobs:
         run: |
           pytest tests/test_immigration.py
         continue-on-error: false
+      - name: Run Python tests processed migration data
+        run: |
+          pytest tests/test_processed_migration_data.py
+        continue-on-error: false
       - name: Run Python tests occurrence
         run: |
           pytest tests/test_occurrence.py

@@ -1,7 +1,8 @@
 import pytest
 import datetime as dt
 from leap.immigration import Immigration
-from leap.utils import round_number
+from leap.birth import Birth
+from leap.utils import round_number, TimeDelta, date_range
 
 
 @pytest.mark.parametrize(
@@ -78,3 +79,33 @@ def test_immigration_get_num_new_immigrants(
         max_age=max_age
     )
     assert immigration.get_num_new_immigrants(num_new_born, timepoint) == num_new_immigrants
+
+
+def test_immigration_monthly_matches_annual():
+    # births and immigrants over 12 monthly steps should be close to one annual step; this fails if
+    # Birth.get_num_newborn and n_birth in the migration tables use different time intervals
+    num_births = {}
+    num_immigrants = {}
+    for time_delta in [TimeDelta(years=1), TimeDelta(months=1)]:
+        birth = Birth(
+            min_timepoint=dt.datetime(2023, 1, 1), province="BC", projection_scenario="M3",
+            time_delta=time_delta
+        )
+        immigration = Immigration(
+            min_timepoint=dt.datetime(2023, 1, 1), province="BC", projection_scenario="M3",
+            time_delta=time_delta
+        )
+        timepoints = list(date_range(
+            dt.datetime(2030, 1, 1) + time_delta, dt.datetime(2031, 1, 1) + time_delta, time_delta
+        ))
+        newborns = [birth.get_num_newborn(50000, timepoint) for timepoint in timepoints]
+        key = time_delta.to_isoformat()
+        num_births[key] = sum(newborns)
+        num_immigrants[key] = sum(
+            immigration.get_num_new_immigrants(n, timepoint)
+            for n, timepoint in zip(newborns, timepoints)
+        )
+    annual, monthly = TimeDelta(years=1).to_isoformat(), TimeDelta(months=1).to_isoformat()
+    assert num_births[monthly] == pytest.approx(num_births[annual], rel=0.02)
+    # monthly immigration is currently ~28% higher than annual (issue #98); tighten once fixed
+    assert 0.7 <= num_immigrants[monthly] / num_immigrants[annual] <= 1.5
