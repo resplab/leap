@@ -533,6 +533,12 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
             f" < census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
         )
 
+    if min_timepoint_projected - max_timepoint_past > time_delta + 0.1*time_delta:
+        raise ValueError(
+            f"Gap between past and projected birth data is too large: "
+            f"{min_timepoint_projected - max_timepoint_past} > {time_delta}."
+        )
+
     # Save the birth estimate data to a CSV file
     time_delta_tag = get_time_delta_tag(time_delta)
     file_path = get_data_path(
