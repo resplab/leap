@@ -225,8 +225,10 @@ def load_migration_data(
             f"merged data has {df.shape[0]} rows."
         )
 
-    # get the total number of births in each time interval, both sexes combined
-    df_birth = df.loc[df["age"] < 1.0]
+    # get the total number of births in each time interval, both sexes combined; for a sub-annual
+    # time_delta, this is the youngest sub-age only, so that n_birth matches the per-interval
+    # newborn count from Birth.get_num_newborn
+    df_birth = df.loc[df["age"] < time_delta.total_years()]
     grouped_df = df_birth.groupby(["timepoint", "province", "projection_scenario"])
     df_birth["n_birth"] = grouped_df.transform("sum")["n"]
     df_birth = df_birth[["province", "projection_scenario", "timepoint", "n_birth"]]
@@ -237,9 +239,10 @@ def load_migration_data(
     df["timepoint_prev"] = df["timepoint"].apply(
         lambda x: x - time_delta
     )
-    df["projection_scenario_prev"] = df.apply(
-        lambda x: x["projection_scenario"] if x["timepoint"] != CENSUS_TIMEPOINT + time_delta else "past",
-        axis=1
+    # the previous timepoint for the first projected timepoint is in the past data
+    first_timepoint = df.groupby(["province", "projection_scenario"])["timepoint"].transform("min")
+    df["projection_scenario_prev"] = df["projection_scenario"].where(
+        (df["projection_scenario"] == "past") | (df["timepoint"] != first_timepoint), "past"
     )
 
     df_prev = df[
