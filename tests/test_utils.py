@@ -3,6 +3,8 @@ import pathlib
 import json
 import numpy as np
 import datetime as dt
+import copy
+import pickle
 from leap.utils import Timepoint
 
 
@@ -41,3 +43,18 @@ def test_timepoint_from_datetime(year, month, day, hour, minute, second, microse
     assert timepoint.minute == dt_obj.minute
     assert timepoint.second == dt_obj.second
     assert timepoint.microsecond == dt_obj.microsecond
+
+
+def test_timepoint_pickle_and_copy():
+    # timepoints are passed between processes in the simulation, so must survive pickling
+    timepoint = Timepoint(2030, 1, 1)
+    for result in [pickle.loads(pickle.dumps(timepoint)), copy.deepcopy(timepoint)]:
+        assert result == timepoint
+        assert type(result) is Timepoint
+
+
+def test_timepoint_hash():
+    # equal objects must hash equally, so dict lookups work with plain datetimes too
+    timepoint = Timepoint(2030, 1, 1)
+    assert hash(timepoint) == hash(dt.datetime(2030, 1, 1))
+    assert dt.datetime(2030, 1, 1) in {timepoint: 0}

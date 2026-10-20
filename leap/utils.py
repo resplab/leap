@@ -717,9 +717,6 @@ class Timepoint(dt.datetime):
             fold=timepoint.fold
         )
 
-    def __hash__(self):
-        return hash((self.year, self.month))
-
 
 def date_range(
     start: dt.datetime, stop: dt.datetime, step: dt.timedelta | relativedelta | TimeDelta
