@@ -173,3 +173,46 @@ def test_load_migration_data(df_populations, life_tables, time_delta):
     # immigrants / emigrants are split from the integer-age delta_n, so a row is never both
     assert ((df["n_immigrants"] > 0) & (df["n_emigrants"] > 0)).sum() == 0
     assert np.allclose(df["n_immigrants"] - df["n_emigrants"], df["delta_n"])
+
+
+@pytest.mark.parametrize(
+    "time_delta, last_past_timepoint",
+    [
+        (TimeDelta(years=1), dt.datetime(2021, 1, 1)),
+        (TimeDelta(months=1), dt.datetime(2021, 12, 1)),
+    ]
+)
+def test_load_migration_data_first_projected_timepoint(time_delta, last_past_timepoint):
+    # the first projected timepoint has no previous timepoint in its own scenario; its delta_n must
+    # be computed from the last past timepoint, not dropped
+    n_intervals = TimeDelta(years=1) // time_delta
+    first_projected_timepoint = last_past_timepoint + time_delta
+    rows = []
+    for projection_scenario, timepoints in [
+        ("past", [last_past_timepoint - time_delta, last_past_timepoint]),
+        ("LG", [first_projected_timepoint, first_projected_timepoint + time_delta]),
+    ]:
+        rows += list(itertools.product(
+            ["BC"], [projection_scenario], timepoints,
+            [Age(value=x) for x in np.arange(0, 4, 1/n_intervals)], ["F", "M"]
+        ))
+    df_population = pd.DataFrame(
+        rows, columns=["province", "projection_scenario", "timepoint", "age", "sex"]
+    )
+    df_population["n"] = 1000.0
+    # 100 more people per sub-age at age 2, at the first projected timepoint
+    df_population.loc[
+        (df_population["timepoint"] == first_projected_timepoint) &
+        (df_population["age"] >= 2.0) & (df_population["age"] < 3.0), "n"
+    ] = 1100.0
+    life_table = df_population.drop(columns=["n"]).copy()
+    life_table["prob_death"] = 0.0
+
+    df = load_migration_data(df_population, life_table, time_delta)
+    row = df.loc[
+        (df["projection_scenario"] == "LG") &
+        (df["timepoint"] == first_projected_timepoint) &
+        (df["age"] == 2) & (df["sex"] == "F")
+    ]
+    assert row.shape[0] == 1
+    assert row["delta_n"].iloc[0] == pytest.approx(100 * n_intervals)
