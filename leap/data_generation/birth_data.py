@@ -512,7 +512,7 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
         draw_plot: If ``True``, generate a plot for validation.
     """
     past_population_data = load_past_births_population_data(time_delta)
-    min_timepoint = past_population_data["timepoint"].max() + TIME_DELTA_OD
+    min_timepoint = past_population_data["timepoint"].max() + time_delta
     projected_population_data = load_projected_births_population_data(time_delta, min_timepoint)
     birth_estimate = pd.concat([past_population_data, projected_population_data], axis=0)
     birth_estimate = birth_estimate.loc[birth_estimate["province"].isin(["BC", "CA"])]
@@ -532,6 +532,18 @@ def generate_birth_estimate_data(time_delta: TimeDelta, draw_plot: bool = True):
             f"Projected birth data has timepoint {min_timepoint_projected}"
             f" < census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
         )
+
+    past_max = birth_estimate.loc[mask].groupby("province")["timepoint"].max()
+    projected_min = birth_estimate.loc[~mask].groupby(
+        ["province", "projection_scenario"]
+    )["timepoint"].min()
+    for (province, scenario), min_timepoint in projected_min.items():
+        gap = min_timepoint - past_max[province]
+        if gap > time_delta + 0.1*time_delta:
+            raise ValueError(
+                f"Gap between past and projected birth data for "
+                f"{province} ({scenario}) is too large: {gap} > {time_delta}."
+            )
 
     # Save the birth estimate data to a CSV file
     time_delta_tag = get_time_delta_tag(time_delta)
@@ -561,7 +573,7 @@ def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = Tr
          draw_plot: If ``True``, generate a plot for validation.
     """
     past_population_data = load_past_initial_population_data(time_delta=time_delta)
-    min_timepoint = past_population_data["timepoint"].max() + TIME_DELTA_OD
+    min_timepoint = past_population_data["timepoint"].max() + time_delta
     projected_population_data = load_projected_initial_population_data(
         time_delta=time_delta, min_timepoint=min_timepoint
     )
@@ -583,6 +595,18 @@ def generate_initial_population_data(time_delta: TimeDelta, draw_plot: bool = Tr
             f"Projected initial population data has timepoint {min_timepoint_projected}"
             f" < census timepoint ({CENSUS_TIMEPOINT + TIME_DELTA_OD})."
         )
+
+    past_max = initial_population.loc[mask].groupby("province")["timepoint"].max()
+    projected_min = initial_population.loc[~mask].groupby(
+        ["province", "projection_scenario"]
+    )["timepoint"].min()
+    for (province, scenario), min_timepoint in projected_min.items():
+        gap = min_timepoint - past_max[province]
+        if gap > time_delta + 0.1*time_delta:
+            raise ValueError(
+                f"Gap between past and projected initial population data for "
+                f"{province} ({scenario}) is too large: {gap} > {time_delta}."
+            )
 
     # Save the initial population distribution data to a CSV file
 
