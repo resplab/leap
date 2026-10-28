@@ -9,7 +9,8 @@ import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from leap.utils import get_data_path, poly, date_range, get_time_delta_tag, TimeDelta
 from leap.data_generation.utils import parse_age_group, get_parser, convert_numeric_to_sex, \
-    convert_sex_to_numeric, convert_timepoint_to_numeric, convert_numeric_to_timepoint
+    convert_sex_to_numeric, convert_timepoint_to_numeric, convert_numeric_to_timepoint, \
+    get_max_timepoint
 from leap.logger import get_logger
 from typing import Tuple, Dict, Any
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
@@ -19,7 +20,7 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
-MAX_TIMEPOINT = dt.datetime(2019, 12, 31)
+MAX_TIMEPOINT = dt.datetime(2066, 12, 31)
 MAX_AGE = 65
 
 
@@ -76,7 +77,13 @@ def load_asthma_df(min_timepoint: dt.datetime = MIN_TIMEPOINT) -> pd.DataFrame:
 
 
 def generate_occurrence_model(
-    df_asthma: pd.DataFrame, formula: str, occ_type: str, time_delta: TimeDelta, maxiter: int = 1000
+    df_asthma: pd.DataFrame,
+    formula: str,
+    occ_type: str,
+    time_delta: TimeDelta,
+    min_timepoint: dt.datetime,
+    max_timepoint: dt.datetime,
+    maxiter: int = 1000
 ) -> GLMResultsWrapper:
     """Generate a ``GLM`` model for asthma incidence or prevalence.
     
@@ -96,6 +103,8 @@ def generate_occurrence_model(
             ``"prevalence"``.
         time_delta: The duration of time between subsequent timepoints in the data, e.g. 1 month,
             1 year, etc.
+        min_timepoint: The minimum timepoint to include in the model.
+        max_timepoint: The maximum timepoint to include in the model.
         maxiter: The maximum number of iterations to perform while fitting the model.
     
     Returns:
@@ -124,7 +133,7 @@ def generate_occurrence_model(
     # Create prediction dataframe
     df_pred = pd.DataFrame(
         data=list(itertools.product(
-            list(date_range(dt.datetime(2000, 1, 1), dt.datetime(2066, 1, 1) + time_delta, step=time_delta)),
+            list(date_range(min_timepoint, max_timepoint + time_delta, step=time_delta)),
             [1, 2],
             list(range(3, 65))
         )),
@@ -150,14 +159,19 @@ def generate_occurrence_model(
         file_path=get_data_path(
             f"data_generation/figures/{time_delta_tag}/occurrence/asthma_{occ_type}_comparison.png",
             mkdirs=True
-        )
+        ),
+        max_timepoint=dt.datetime(2019, 12, 31)
     )
 
     return results
 
 
 def generate_incidence_model(
-    df_asthma: pd.DataFrame, time_delta: TimeDelta, maxiter: int = 1000
+    df_asthma: pd.DataFrame,
+    time_delta: TimeDelta,
+    min_timepoint: dt.datetime,
+    max_timepoint: dt.datetime,
+    maxiter: int = 1000
 ) -> GLMResultsWrapper:
     """Generate a ``GLM`` model for asthma incidence.
     
@@ -173,6 +187,8 @@ def generate_incidence_model(
 
         time_delta: The duration of time between subsequent timepoints in the data, e.g. 1 month,
             1 year, etc.
+        min_timepoint: The minimum timepoint to include in the model.
+        max_timepoint: The maximum timepoint to include in the model.
         maxiter: The maximum number of iterations to perform while fitting the model.
     
     Returns:
@@ -184,13 +200,20 @@ def generate_incidence_model(
     formula = "incidence ~ sex*timepoint + " + \
         f"sex*poly(age, degree=5, alpha={list(alpha)}, norm2={list(norm2)})"
     results = generate_occurrence_model(
-        df_asthma, formula=formula, occ_type="incidence", time_delta=time_delta, maxiter=maxiter
+        df_asthma, formula=formula, occ_type="incidence", time_delta=time_delta,
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint,
+        maxiter=maxiter
     )
     return results
 
 
 def generate_prevalence_model(
-    df_asthma: pd.DataFrame, time_delta: TimeDelta, maxiter: int = 1000
+    df_asthma: pd.DataFrame,
+    time_delta: TimeDelta,
+    min_timepoint: dt.datetime,
+    max_timepoint: dt.datetime,
+    maxiter: int = 1000
 ) -> Tuple[GLMResultsWrapper, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Generate a ``GLM`` model for asthma prevalence.
     
@@ -206,6 +229,8 @@ def generate_prevalence_model(
 
         time_delta: The duration of time between subsequent timepoints in the data, e.g. 1 month,
             1 year, etc.
+        min_timepoint: The minimum timepoint to include in the model.
+        max_timepoint: The maximum timepoint to include in the model.
         maxiter: The maximum number of iterations to perform while fitting the model.
     
     Returns:
@@ -227,7 +252,10 @@ def generate_prevalence_model(
         f"sex*poly(timepoint, degree=2, alpha={list(alpha_time)}, norm2={list(norm2_time)})" + \
         f"*poly(age, degree=5, alpha={list(alpha_age)}, norm2={list(norm2_age)})"
     results = generate_occurrence_model(
-        df_asthma, formula=formula, occ_type="prevalence", time_delta=time_delta, maxiter=maxiter
+        df_asthma, formula=formula, occ_type="prevalence", time_delta=time_delta,
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint,
+        maxiter=maxiter
     )
     return results, alpha_age, norm2_age, alpha_time, norm2_time
 
@@ -405,10 +433,15 @@ def generate_occurrence_data(time_delta: TimeDelta):
 
     """
     time_delta_tag = get_time_delta_tag(time_delta)
+    max_timepoint = get_max_timepoint(
+        min_timepoint=MIN_TIMEPOINT, max_timepoint=MAX_TIMEPOINT, time_delta=time_delta
+    )
     df_asthma = load_asthma_df()
-    incidence_model = generate_incidence_model(df_asthma, time_delta)
+    incidence_model = generate_incidence_model(
+        df_asthma, time_delta, MIN_TIMEPOINT, max_timepoint
+    )
     prevalence_model, alpha_age, norm2_age, alpha_time, norm2_time = generate_prevalence_model(
-        df_asthma, time_delta
+        df_asthma, time_delta, MIN_TIMEPOINT, max_timepoint
     )
     df_incidence = get_predicted_data(
         incidence_model,
@@ -416,7 +449,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
         time_delta,
         max_age=110,
         min_timepoint=MIN_TIMEPOINT,
-        max_timepoint=dt.datetime(2066, 12, 31)
+        max_timepoint=max_timepoint
     )
     df_prevalence = get_predicted_data(
         prevalence_model,
@@ -424,7 +457,7 @@ def generate_occurrence_data(time_delta: TimeDelta):
         time_delta,
         max_age=110,
         min_timepoint=MIN_TIMEPOINT,
-        max_timepoint=dt.datetime(2066, 12, 31)
+        max_timepoint=max_timepoint
     )
     df = pd.merge(df_incidence, df_prevalence, on=["timepoint", "sex", "age"], how="left")
     plot_occurrence(
