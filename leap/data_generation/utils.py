@@ -188,6 +188,37 @@ def convert_numeric_to_sex(sex: int) -> str:
         raise ValueError(f"Invalid sex: {sex}")
 
 
+def get_max_timepoint(
+    min_timepoint: dt.datetime, max_timepoint: dt.datetime, time_delta: TimeDelta
+) -> dt.datetime:
+    """Get the maximum timepoint that is less than or equal to the specified max_timepoint.
+
+    Args:
+        min_timepoint: The starting date / time.
+        max_timepoint: The maximum allowed date / time.
+        time_delta: The duration of time between subsequent timepoints.
+
+    Returns:
+        The maximum timepoint that is less than or equal to max_timepoint.
+
+
+    Examples:
+
+        >>> from leap.data_generation.utils import get_max_timepoint
+        >>> import datetime as dt
+        >>> min_timepoint = dt.datetime(2000, 1, 1)
+        >>> max_timepoint = dt.datetime(2020, 12, 31)
+        >>> time_delta = dt.timedelta(years=1)
+        >>> get_max_timepoint(min_timepoint, max_timepoint, time_delta)
+        datetime.datetime(2020, 1, 1)
+    """
+    current_timepoint = min_timepoint
+    while current_timepoint + time_delta <= max_timepoint:
+        current_timepoint += time_delta
+    return current_timepoint
+
+
+
 def heaviside(x: float | list[float] | np.ndarray | pd.Series, threshold: float) -> int | list[int]:
     """Heaviside step function.
     
