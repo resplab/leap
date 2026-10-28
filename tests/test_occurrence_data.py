@@ -7,9 +7,10 @@ import itertools
 from leap.data_generation.occurrence_data import load_asthma_df, generate_occurrence_model, \
     generate_prevalence_model, generate_incidence_model, get_predicted_data, MIN_TIMEPOINT
 from leap.logger import get_logger
-from leap.utils import TimeDelta, date_range
+from leap.utils import TimeDelta, date_range, get_time_delta_tag, get_data_path
 
 logger = get_logger(__name__)
+logger.setLevel("INFO")
 
 
 @pytest.fixture
@@ -145,3 +146,46 @@ def test_get_predicted_data(df_asthma, time_delta, min_timepoint, max_timepoint)
             check_index=False,
             check_names=False
         )
+
+
+@pytest.mark.parametrize(
+    "time_delta",
+    [
+        (TimeDelta(years=1)),
+        (TimeDelta(months=1))
+    ]
+)
+def test_processed_data(time_delta):
+    time_delta_tag = get_time_delta_tag(time_delta)
+    df = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv"),
+        parse_dates=["timepoint"]
+    )
+
+    # Check that the timepoints in the dataframe form a complete sequence with the given time delta
+    timepoints = df["timepoint"].unique()
+    min_timepoint = timepoints.min()
+    max_timepoint = timepoints.max()
+    pd.testing.assert_series_equal(
+        pd.Series(timepoints),
+        pd.Series(list(date_range(start=min_timepoint, stop=max_timepoint + time_delta, step=time_delta))),
+        check_index=False,
+        check_names=False
+    )
+
+    # Check that the dataframe contains the expected columns
+    assert set(df.columns) == set(["age", "sex", "timepoint", "incidence", "prevalence"])
+
+    # Check that the sex is one of "M" or "F"
+    assert df["sex"].isin(["M", "F"]).all()
+
+    # Check that the age column contains non-negative integers
+    assert (df["age"] >= 0).all()
+    assert pd.api.types.is_integer_dtype(df["age"])
+
+    # Check that prevalence >= incidence
+    mask = df.loc[df["prevalence"] < df["incidence"]]
+    if not mask.empty:
+        logger.info(mask)
+        raise AssertionError("Prevalence should be greater than or equal to incidence for all rows.")
+    
