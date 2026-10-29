@@ -60,17 +60,21 @@ def test_load_asthma_df(min_timepoint):
     ]
 )
 @pytest.mark.parametrize(
-    "occ_type, formula",
+    "occ_type, formula, min_timepoint, max_timepoint",
     [
-        ("incidence", "incidence ~ sex*timepoint"),
-        ("prevalence", "prevalence ~ sex*poly(timepoint, degree=2)")
+        ("incidence", "incidence ~ sex*timepoint", MIN_TIMEPOINT, dt.datetime(2027, 1, 1)),
+        ("prevalence", "prevalence ~ sex*poly(timepoint, degree=2)", MIN_TIMEPOINT, dt.datetime(2027, 1, 1))
     ]
 )
-def test_generate_occurrence_model(df_asthma, time_delta, occ_type, formula):
+def test_generate_occurrence_model(
+    df_asthma, time_delta, occ_type, formula, min_timepoint, max_timepoint
+):
     results = generate_occurrence_model(
         df_asthma=df_asthma,
         formula=formula,
         occ_type=occ_type,
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint,
         time_delta=time_delta,
         maxiter=10
     )
@@ -78,30 +82,34 @@ def test_generate_occurrence_model(df_asthma, time_delta, occ_type, formula):
 
 
 @pytest.mark.parametrize(
-    "time_delta",
+    "time_delta, min_timepoint, max_timepoint",
     [
-        (TimeDelta(years=1))
+        (TimeDelta(years=1), MIN_TIMEPOINT, dt.datetime(2027, 1, 1))
     ]
 )
-def test_generate_incidence_model(df_asthma, time_delta):
+def test_generate_incidence_model(df_asthma, time_delta, min_timepoint, max_timepoint):
     results = generate_incidence_model(
         df_asthma=df_asthma,
         time_delta=time_delta,
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint,
         maxiter=10
     )
     assert isinstance(results, GLMResultsWrapper)
 
 
 @pytest.mark.parametrize(
-    "time_delta",
+    "time_delta, min_timepoint, max_timepoint",
     [
-        (TimeDelta(years=1))
+        (TimeDelta(years=1), MIN_TIMEPOINT, dt.datetime(2027, 1, 1))
     ]
 )
-def test_generate_prevalence_model(df_asthma, time_delta):
+def test_generate_prevalence_model(df_asthma, time_delta, min_timepoint, max_timepoint):
     results, alpha_age, norm2_age, alpha_time, norm2_time = generate_prevalence_model(
         df_asthma=df_asthma,
         time_delta=time_delta,
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint,
         maxiter=10
     )
     assert isinstance(results, GLMResultsWrapper)
@@ -124,7 +132,7 @@ def test_generate_prevalence_model(df_asthma, time_delta):
 )
 def test_get_predicted_data(df_asthma, time_delta, min_timepoint, max_timepoint):
     model = generate_incidence_model(
-        df_asthma, time_delta, maxiter=10
+        df_asthma, time_delta, min_timepoint=min_timepoint, max_timepoint=max_timepoint, maxiter=10
     )
     df = get_predicted_data(
         model=model,
