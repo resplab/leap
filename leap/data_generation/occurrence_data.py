@@ -200,7 +200,10 @@ def generate_incidence_model(
     formula = "incidence ~ sex*timepoint + " + \
         f"sex*poly(age, degree=5, alpha={list(alpha)}, norm2={list(norm2)})"
     results = generate_occurrence_model(
-        df_asthma, formula=formula, occ_type="incidence", time_delta=time_delta,
+        df_asthma,
+        formula=formula,
+        occ_type="incidence",
+        time_delta=time_delta,
         min_timepoint=min_timepoint,
         max_timepoint=max_timepoint,
         maxiter=maxiter
