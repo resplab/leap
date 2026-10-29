@@ -173,6 +173,7 @@ def load_occurrence_data(
 
 
 def load_reassessment_data(
+    time_delta: TimeDelta,
     province: str = PROVINCE
 ) -> pd.DataFrame:
     """Load the asthma reassessment data for the given province.
@@ -184,15 +185,19 @@ def load_reassessment_data(
         A DataFrame containing the reassessment data.
         Columns:
 
-        * ``year (int)``: The year of the reassessment.
+        * ``timepoint (dt.datetime)``: The date / time of the reassessment.
         * ``age (int)``: The age of the individual in years, a value in ``[4, 110]``.
         * ``sex (str)``: One of ``"M"`` or ``"F"``.
         * ``province (str)``: The two-letter code for the province, e.g. ``"CA"``.
         * ``prob (float)``: The probability that someone diagnosed with asthma previously
-          will maintain their asthma diagnosis in the given year; a value in ``[0, 1]``.
+          will maintain their asthma diagnosis in the given time interval, i.e. between
+          ``[timepoint, timepoint + time_delta]``; a value in ``[0, 1]``.
     """
-
-    df_reassessment = pd.read_csv(get_data_path("processed_data/asthma_reassessment.csv"))
+    time_delta_tag = get_time_delta_tag(time_delta)
+    df_reassessment = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/asthma_reassessment.csv"),
+        parse_dates=["timepoint"]
+    )
     df_reassessment = df_reassessment.loc[df_reassessment["province"] == province]
 
     df_reassessment = df_reassessment.drop(columns=["province"])
@@ -1113,7 +1118,7 @@ def generate_occurrence_calibration_data(
         stabilization_timepoint=stabilization_timepoint
     )
 
-    df_reassessment = load_reassessment_data(province=province)
+    df_reassessment = load_reassessment_data(time_delta=time_delta, province=province)
 
     model_abx: GLMResultsWrapper = generate_antibiotic_data(return_type="model") # type: ignore
 
