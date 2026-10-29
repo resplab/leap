@@ -11,7 +11,7 @@ from leap.data_generation.prevalence_calibration import optimize_prevalence_β_p
 from leap.data_generation.incidence_calibration import inc_correction_calculator, \
     compute_odds_ratio_difference
 from leap.data_generation.antibiotic_data import get_predicted_abx_data, generate_antibiotic_data
-from leap.data_generation.utils import get_parser
+from leap.data_generation.utils import get_parser, get_max_timepoint
 from leap.logger import get_logger
 from typing import Tuple, Dict, TypedDict, Literal
 from scipy.stats import nbinom
@@ -1104,6 +1104,7 @@ def generate_occurrence_calibration_data(
             the saved parameters from a ``json`` file.
     """
 
+    max_timepoint = get_max_timepoint(min_timepoint, max_timepoint, time_delta)
     df_incidence, df_prevalence = load_occurrence_data(
         time_delta=time_delta,
         province=province,
