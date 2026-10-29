@@ -22,7 +22,7 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 PROVINCE = "CA"
-MAX_TIMEPOINT = dt.datetime(2065, 1, 1) # 2065 for CA; 2043 for BC
+MAX_TIMEPOINT = dt.datetime(2065, 12, 31) # 2065 for CA; 2043 for BC
 MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
 STABILIZATION_TIMEPOINT = dt.datetime(2025, 1, 1)
 BASELINE_TIMEPOINT = dt.datetime(2001, 1, 1)
