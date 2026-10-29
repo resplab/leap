@@ -103,7 +103,7 @@ def load_occurrence_data(
     max_asthma_age: int = MAX_ASTHMA_AGE,
     stabilization_timepoint: dt.datetime = STABILIZATION_TIMEPOINT
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Load the asthma incidence and prevalence data for the given province and year range.
+    """Load the asthma incidence and prevalence data for the given province and timepoint range.
 
     Args:
         time_delta: The duration of time between data points.
@@ -119,17 +119,17 @@ def load_occurrence_data(
 
         1. Incidence dataframe with columns:
 
-           * ``timepoint (dt.datetime)``: The year of the prediction.
+           * ``timepoint (dt.datetime)``: The date / time of the prediction.
            * ``age (int)``: The age of the individual in years, ranging from 3 to 110.
            * ``sex (str)``: One of ``"M"`` or ``"F"``.
-           * ``incidence (float)``: The predicted asthma incidence for the given year, age,
+           * ``incidence (float)``: The predicted asthma incidence for the given timepoint, age,
              and sex.
         2. Prevalence dataframe with columns:
 
-           * ``timepoint (dt.datetime)``: The year of the prediction.
+           * ``timepoint (dt.datetime)``: The date / time of the prediction.
            * ``age (int)``: The age of the individual in years, ranging from 3 to 110.
            * ``sex (str)``: One of ``"M"`` or ``"F"``.
-           * ``prevalence (float)``: The predicted asthma prevalence for the given year, age,
+           * ``prevalence (float)``: The predicted asthma prevalence for the given timepoint, age,
              and sex.
     """
 
