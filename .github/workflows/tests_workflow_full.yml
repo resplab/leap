@@ -137,6 +137,10 @@ jobs:
         run: |
           pytest tests/test_occurrence_data.py
         continue-on-error: false
+      - name: Run Python tests reassessment data generation
+        run: |
+          pytest tests/test_reassessment_data.py
+        continue-on-error: false
       - name: Run doctests
         run: |
           TQDM_DISABLE=1 pytest leap/ --doctest-modules

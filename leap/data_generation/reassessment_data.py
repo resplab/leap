@@ -1,44 +1,47 @@
 import pandas as pd
 import numpy as np
+import datetime as dt
 import itertools
-from leap.utils import get_data_path
+from leap.utils import get_data_path, get_time_delta_tag, date_range, TimeDelta
 from leap.logger import get_logger
-from leap.data_generation.occurrence_calibration_data import get_asthma_occurrence_prediction
+from leap.data_generation.utils import get_parser
 
 pd.options.mode.copy_on_write = True
 
 logger = get_logger(__name__, 20)
 
-STARTING_YEAR = 1999
-STABILIZATION_YEAR = 2025
+MIN_TIMEPOINT = dt.datetime(1999, 1, 1)
+STABILIZATION_TIMEPOINT = dt.datetime(2025, 1, 1)
 MIN_ASTHMA_AGE = 3  # Minimum age for asthma diagnosis
 MAX_ASTHMA_AGE = 62
 MAX_AGE = 110
 PROVINCES = ["BC", "CA"]
-MAX_YEARS = {
-    "BC": 2043,
-    "CA": 2066
+MAX_TIMEPOINTS = {
+    "BC": dt.datetime(2043, 1, 1),
+    "CA": dt.datetime(2066, 1, 1)
 }
 
 
 def get_asthma_df(
-    starting_year: int = STARTING_YEAR,
-    max_year: int = 2065,
+    time_delta: TimeDelta,
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
+    max_timepoint: dt.datetime = dt.datetime(2065, 1, 1),
     min_age: int = MIN_ASTHMA_AGE,
     max_age: int = MAX_AGE,
     max_asthma_age: int = MAX_ASTHMA_AGE,
-    stabilization_year: int = STABILIZATION_YEAR
+    stabilization_timepoint: dt.datetime = STABILIZATION_TIMEPOINT
 ) -> pd.DataFrame:
     """Loads the asthma prevalence / incidence predictions from Model 1.
 
     Args:
-        starting_year: The starting year for the dataframe.
-        max_year: The ending year for the dataframe.
+        time_delta: The duration of time between two data points.
+        min_timepoint: The starting timepoint for the dataframe.
+        max_timepoint: The ending timepoint for the dataframe.
         min_age: The minimum age for asthma prediction.
         max_age: The maximum age for asthma prediction.
         max_asthma_age: The maximum age for for which the asthma prevalence / incidence
             model can accurately make predictions.
-        stabilization_year: The year when asthma stabilization occurs.
+        stabilization_timepoint: The timepoint when asthma stabilization occurs.
 
     Returns:
         A DataFrame containing asthma occurrence predictions.
@@ -46,32 +49,35 @@ def get_asthma_df(
 
         * ``age (int)``: age in years, range ``[min_age, max_age]``.
         * ``sex (str)``: one of ``"M"`` or ``"F"``.
-        * ``year (int)``: calendar year, range ``[starting_year, max_year]``.
-        * ``incidence (float)``: predicted asthma incidence for the given age, sex, and year.
-        * ``prevalence (float)``: predicted asthma prevalence for the given age, sex, and year.
+        * ``timepoint (datetime)``: timepoint, range ``[min_timepoint, max_timepoint]``.
+        * ``incidence (float)``: predicted asthma incidence for the given age, sex, and timepoint.
+        * ``prevalence (float)``: predicted asthma prevalence for the given age, sex, and timepoint.
 
     """
+    time_delta_tag = get_time_delta_tag(time_delta)
+
     df_asthma = pd.DataFrame(
         list(itertools.product(
             range(min_age, max_age + 1),
             ["F", "M"],
-            range(starting_year, max_year + 1)
+            list(date_range(min_timepoint, max_timepoint + time_delta, time_delta))
         )),
-        columns=["age", "sex", "year"]
+        columns=["age", "sex", "timepoint"]
     )
 
-    df_asthma["incidence"] = df_asthma.apply(
-        lambda x: get_asthma_occurrence_prediction(
-            x["age"], x["sex"], x["year"], "incidence", max_asthma_age, stabilization_year
-        ),
-        axis=1
+    df_occ_pred = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv"),
+        parse_dates=["timepoint"]
     )
-    df_asthma["prevalence"] = df_asthma.apply(
-        lambda x: get_asthma_occurrence_prediction(
-            x["age"], x["sex"], x["year"], "prevalence", max_asthma_age, stabilization_year
-        ),
-        axis=1
-    )
+
+    df_asthma["age_capped"] = df_asthma["age"].clip(upper=max_asthma_age)
+    df_asthma["timepoint_capped"] = df_asthma["timepoint"].clip(upper=stabilization_timepoint)
+
+    df_occ_pred = df_occ_pred.rename(columns={"age": "age_capped", "timepoint": "timepoint_capped"})
+    df_asthma = pd.merge(
+        df_asthma, df_occ_pred, on=["age_capped", "sex", "timepoint_capped"], how="left"
+    ).drop(columns=["age_capped", "timepoint_capped"])
+
     df_asthma["incidence"] = df_asthma.apply(
         lambda x: x["prevalence"] if x["age"] == 3 else x["incidence"],
         axis=1
@@ -87,13 +93,13 @@ def calculate_reassessment_probability(
     """Calculates the reassessment probability based on asthma prevalence and incidence.
 
     Args:
-        prevalence_past: The prevalence of asthma from the previous year.
-        prevalence_current: The prevalence of asthma in the current year.
-        incidence_current: The incidence of asthma in the current year.
+        prevalence_past: The prevalence of asthma from the previous timepoint.
+        prevalence_current: The prevalence of asthma in the current timepoint.
+        incidence_current: The incidence of asthma in the current timepoint.
 
     Returns:
         The probability that someone diagnosed with asthma will maintain their diagnosis in the
-        current year.
+        current timepoint.
     """
 
     prob = (prevalence_current - incidence_current * (1 - prevalence_past)) / prevalence_past
@@ -102,9 +108,10 @@ def calculate_reassessment_probability(
 
 def get_reassessment_data(
     df_asthma: pd.DataFrame,
+    time_delta: TimeDelta,
     province: str = "CA",
-    starting_year: int = STARTING_YEAR,
-    max_year: int = 2065,
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
+    max_timepoint: dt.datetime = dt.datetime(2065, 1, 1),
     max_age: int = MAX_AGE
 ) -> pd.DataFrame:
     """Generates reassessment data for asthma prevalence and incidence.
@@ -115,56 +122,72 @@ def get_reassessment_data(
 
             * ``age (int)``: age in years, range ``[3, max_age]``.
             * ``sex (str)``: one of ``"M"`` or ``"F"``.
-            * ``year (int)``: calendar year, range ``[starting_year, max_year]``.
-            * ``incidence (float)``: predicted asthma incidence for the given age, sex, and year.
-            * ``prevalence (float)``: predicted asthma prevalence for the given age, sex, and year.
+            * ``timepoint (dt.datetime)``: timepoint, range ``[min_timepoint, max_timepoint]``.
+            * ``incidence (float)``: predicted asthma incidence for the given age, sex, and timepoint.
+            * ``prevalence (float)``: predicted asthma prevalence for the given age, sex, and timepoint.
 
+        time_delta: The duration of time between consecutive timepoints.
         province: The 2-letter province code, e.g. ``"CA"``.
-        starting_year: The starting year for the data.
-        max_year: The ending year for the data.
+        min_timepoint: The starting timepoint for the data.
+        max_timepoint: The ending timepoint for the data.
         max_age: The maximum age for asthma prediction.
 
     Returns:
         A DataFrame containing the reassessment data.
         Columns:
 
-        * ``year (int)``: calendar year, range ``[starting_year + 1, max_year]``.
+        * ``timepoint (dt.datetime)``: timepoint, range
+          ``[min_timepoint + time_delta, max_timepoint]``.
         * ``province (str)``: the 2-letter province code, e.g. ``"CA"``.
         * ``age (int)``: age in years, range ``[4, max_age]``.
         * ``sex (str)``: one of ``"M"`` or ``"F"``.
         * ``prob (float)``: the probability that someone diagnosed with asthma will
-          maintain their asthma diagnosis in the given year. Range: ``[0, 1]``.
+          maintain their asthma diagnosis in the given timepoint. Range: ``[0, 1]``.
     """
+    if df_asthma["timepoint"].min() > min_timepoint:
+        raise ValueError(
+            f"The minimum timepoint in df_asthma is {df_asthma['timepoint'].min()}, "
+            f"which is greater than min_timepoint {min_timepoint}"
+        )
 
-    df_asthma_grouped = df_asthma.groupby("year")
+    if df_asthma["timepoint"].max() < max_timepoint:
+        raise ValueError(
+            f"The maximum timepoint in df_asthma is {df_asthma['timepoint'].max()}, "
+            f"which is less than max_timepoint {max_timepoint}"
+        )
+
+    df_asthma_grouped = df_asthma.groupby("timepoint")
 
     df_reassessment = pd.DataFrame({
-        "year": np.array([], dtype=int),
+        "timepoint": np.array([], dtype=dt.datetime),
         "province": [],
         "age": np.array([], dtype=int),
         "sex": [],
         "prob": []
     })
 
-    for year in range(starting_year + 1, max_year + 1):
+    for timepoint in date_range(min_timepoint + time_delta, max_timepoint + time_delta, time_delta):
 
-        # Get the predicted prevalence for the previous year
-        df_year_0 = df_asthma_grouped.get_group(year - 1)
-        df_year_0 = df_year_0.loc[df_year_0["age"] < max_age]
-        df_year_0["age_current"] = df_year_0.apply(
-             lambda x: x["age"] + 1,
-                axis=1
+        # Get the predicted prevalence for the previous timepoint
+        df_timepoint_0 = df_asthma_grouped.get_group(timepoint - time_delta)
+        df_timepoint_0 = df_timepoint_0.loc[df_timepoint_0["age"] < max_age]
+        df_timepoint_0["age_current"] = df_timepoint_0.apply(
+            lambda x: x["age"] + 1,
+            axis=1
         )
-        df_year_0.rename(columns={"age": "age_past", "year": "year_past"}, inplace=True)
+        df_timepoint_0.rename(columns={"age": "age_past", "timepoint": "timepoint_past"}, inplace=True)
 
-        # Get the predicted prevalence for the current year
-        df_year_1 = df_asthma_grouped.get_group(year)
-        df_year_1 = df_year_1.loc[df_year_1["age"] > 3]
-        df_year_1.rename(columns={"age": "age_current", "year": "year_current"}, inplace=True)
+        # Get the predicted prevalence for the current timepoint
+        df_timepoint_1 = df_asthma_grouped.get_group(timepoint)
+        df_timepoint_1 = df_timepoint_1.loc[df_timepoint_1["age"] > 3]
+        df_timepoint_1.rename(columns={"age": "age_current", "timepoint": "timepoint_current"}, inplace=True)
 
 
         df = pd.merge(
-            df_year_0, df_year_1, on=["age_current", "sex"], suffixes=("_past", "_current"), how="outer"
+            df_timepoint_0, df_timepoint_1,
+            on=["age_current", "sex"],
+            suffixes=("_past", "_current"),
+            how="outer"
         )
         df["prob"] = df.apply(
             lambda x: calculate_reassessment_probability(
@@ -176,24 +199,29 @@ def get_reassessment_data(
         df.drop(
             columns=[
                 "prevalence_past", "prevalence_current", "incidence_current", "incidence_past",
-                "age_past", "year_past"
+                "age_past", "timepoint_past"
             ],
             inplace=True
         )
         df.rename(
-            columns={"year_current": "year", "age_current": "age"}, inplace=True
+            columns={"timepoint_current": "timepoint", "age_current": "age"}, inplace=True
         )
-        df["province"] = [province] * df.shape[0]
+        df["province"] = province
         df_reassessment = pd.concat([df_reassessment, df], axis=0)
     
     return df_reassessment
 
 
-def generate_reassessment_data():
-    """Generate reassessment data for asthma prevalence and incidence across different provinces."""
+def generate_reassessment_data(time_delta: TimeDelta):
+    """Generate reassessment data for asthma prevalence and incidence across different provinces.
+    
+    Args:
+        time_delta: The duration of time between two data points.
+        
+    """
 
     df_reassessment = pd.DataFrame({
-        "year": np.array([], dtype=int),
+        "timepoint": np.array([], dtype=dt.datetime),
         "province": [],
         "age": np.array([], dtype=int),
         "sex": [],
@@ -202,24 +230,34 @@ def generate_reassessment_data():
 
     for province in PROVINCES:
         df_asthma = get_asthma_df(
-            starting_year=STARTING_YEAR,
-            max_year=MAX_YEARS[province],
+            time_delta=time_delta,
+            min_timepoint=MIN_TIMEPOINT,
+            max_timepoint=MAX_TIMEPOINTS[province],
             min_age=MIN_ASTHMA_AGE,
             max_age=MAX_AGE,
             max_asthma_age=MAX_ASTHMA_AGE,
-            stabilization_year=STABILIZATION_YEAR
+            stabilization_timepoint=STABILIZATION_TIMEPOINT
         )
         df = get_reassessment_data(
             df_asthma=df_asthma,
+            time_delta=time_delta,
             province=province,
-            max_year=MAX_YEARS[province],
+            max_timepoint=MAX_TIMEPOINTS[province],
             max_age=MAX_AGE
         )
         df_reassessment = pd.concat([df_reassessment, df], axis=0)
 
     df_reassessment.reset_index(drop=True, inplace=True)
-    df_reassessment.to_csv(get_data_path("processed_data/asthma_reassessment.csv"), index=False)
+
+    time_delta_tag = get_time_delta_tag(time_delta)
+    df_reassessment.to_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/asthma_reassessment.csv", mkdirs=True),
+        index=False
+    )
 
 
 if __name__ == "__main__":
-    generate_reassessment_data()
+    parser = get_parser()
+    args = parser.parse_args()
+    time_delta = TimeDelta(iso_string=args.time_delta)
+    generate_reassessment_data(time_delta=time_delta)
