@@ -149,18 +149,18 @@ def load_occurrence_data(
     )
 
     # Clip to the same bounds get_asthma_occurrence_prediction used to apply per-row
-    df_asthma["age_lookup"] = df_asthma["age"].clip(upper=max_asthma_age)
-    df_asthma["timepoint_lookup"] = df_asthma["timepoint"].clip(upper=stabilization_timepoint)
+    df_asthma["age_capped"] = df_asthma["age"].clip(upper=max_asthma_age)
+    df_asthma["timepoint_capped"] = df_asthma["timepoint"].clip(upper=stabilization_timepoint)
 
     df_pred.rename(
-        columns={"age": "age_lookup", "timepoint": "timepoint_lookup"},
+        columns={"age": "age_capped", "timepoint": "timepoint_capped"},
         inplace=True
     )
 
     df_asthma = pd.merge(
-        df_asthma, df_pred, how="left", on=["age_lookup", "sex", "timepoint_lookup"]
+        df_asthma, df_pred, how="left", on=["age_capped", "sex", "timepoint_capped"]
     )
-    df_asthma.drop(columns=["age_lookup", "timepoint_lookup"], inplace=True)
+    df_asthma.drop(columns=["age_capped", "timepoint_capped"], inplace=True)
 
     # At age 3, incidence == prevalence (no prior population to have "become incident" from)
     df_asthma["incidence"] = df_asthma["prevalence"].where(df_asthma["age"] == 3, df_asthma["incidence"])
