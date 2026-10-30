@@ -122,7 +122,7 @@ def get_reassessment_data(
 
             * ``age (int)``: age in years, range ``[3, max_age]``.
             * ``sex (str)``: one of ``"M"`` or ``"F"``.
-            * ``timepoint (int)``: timepoint, range ``[min_timepoint, max_timepoint]``.
+            * ``timepoint (dt.datetime)``: timepoint, range ``[min_timepoint, max_timepoint]``.
             * ``incidence (float)``: predicted asthma incidence for the given age, sex, and timepoint.
             * ``prevalence (float)``: predicted asthma prevalence for the given age, sex, and timepoint.
 
@@ -136,7 +136,8 @@ def get_reassessment_data(
         A DataFrame containing the reassessment data.
         Columns:
 
-        * ``timepoint (int)``: timepoint, range ``[min_timepoint + 1, max_timepoint]``.
+        * ``timepoint (dt.datetime)``: timepoint, range
+          ``[min_timepoint + time_delta, max_timepoint]``.
         * ``province (str)``: the 2-letter province code, e.g. ``"CA"``.
         * ``age (int)``: age in years, range ``[4, max_age]``.
         * ``sex (str)``: one of ``"M"`` or ``"F"``.
@@ -171,8 +172,8 @@ def get_reassessment_data(
         df_timepoint_0 = df_asthma_grouped.get_group(timepoint - time_delta)
         df_timepoint_0 = df_timepoint_0.loc[df_timepoint_0["age"] < max_age]
         df_timepoint_0["age_current"] = df_timepoint_0.apply(
-             lambda x: x["age"] + 1,
-                axis=1
+            lambda x: x["age"] + 1,
+            axis=1
         )
         df_timepoint_0.rename(columns={"age": "age_past", "timepoint": "timepoint_past"}, inplace=True)
 
@@ -183,7 +184,10 @@ def get_reassessment_data(
 
 
         df = pd.merge(
-            df_timepoint_0, df_timepoint_1, on=["age_current", "sex"], suffixes=("_past", "_current"), how="outer"
+            df_timepoint_0, df_timepoint_1,
+            on=["age_current", "sex"],
+            suffixes=("_past", "_current"),
+            how="outer"
         )
         df["prob"] = df.apply(
             lambda x: calculate_reassessment_probability(
@@ -202,7 +206,7 @@ def get_reassessment_data(
         df.rename(
             columns={"timepoint_current": "timepoint", "age_current": "age"}, inplace=True
         )
-        df["province"] = [province] * df.shape[0]
+        df["province"] = province
         df_reassessment = pd.concat([df_reassessment, df], axis=0)
     
     return df_reassessment
