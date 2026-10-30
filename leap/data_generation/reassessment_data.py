@@ -108,6 +108,7 @@ def calculate_reassessment_probability(
 
 def get_reassessment_data(
     df_asthma: pd.DataFrame,
+    time_delta: TimeDelta,
     province: str = "CA",
     min_timepoint: dt.datetime = MIN_TIMEPOINT,
     max_timepoint: dt.datetime = dt.datetime(2065, 1, 1),
@@ -125,6 +126,7 @@ def get_reassessment_data(
             * ``incidence (float)``: predicted asthma incidence for the given age, sex, and timepoint.
             * ``prevalence (float)``: predicted asthma prevalence for the given age, sex, and timepoint.
 
+        time_delta: The duration of time between consecutive timepoints.
         province: The 2-letter province code, e.g. ``"CA"``.
         min_timepoint: The starting timepoint for the data.
         max_timepoint: The ending timepoint for the data.
@@ -166,7 +168,7 @@ def get_reassessment_data(
     for timepoint in date_range(min_timepoint + time_delta, max_timepoint + time_delta, time_delta):
 
         # Get the predicted prevalence for the previous timepoint
-        df_timepoint_0 = df_asthma_grouped.get_group(timepoint - 1)
+        df_timepoint_0 = df_asthma_grouped.get_group(timepoint - time_delta)
         df_timepoint_0 = df_timepoint_0.loc[df_timepoint_0["age"] < max_age]
         df_timepoint_0["age_current"] = df_timepoint_0.apply(
              lambda x: x["age"] + 1,
@@ -234,6 +236,7 @@ def generate_reassessment_data(time_delta: TimeDelta):
         )
         df = get_reassessment_data(
             df_asthma=df_asthma,
+            time_delta=time_delta,
             province=province,
             max_timepoint=MAX_TIMEPOINTS[province],
             max_age=MAX_AGE
