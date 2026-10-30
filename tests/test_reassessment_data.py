@@ -43,7 +43,7 @@ def test_get_asthma_df(
         stabilization_timepoint=stabilization_timepoint
     )
     assert not df.empty
-    assert set(df.columns) == set(["age", "sex", "timepoint", "province", "prob"])
+    assert set(df.columns) == set(["age", "sex", "timepoint", "prevalence", "incidence"])
 
 
 @pytest.mark.parametrize(
