@@ -141,6 +141,17 @@ def get_reassessment_data(
         * ``prob (float)``: the probability that someone diagnosed with asthma will
           maintain their asthma diagnosis in the given timepoint. Range: ``[0, 1]``.
     """
+    if df_asthma["timepoint"].min() > min_timepoint:
+        raise ValueError(
+            f"The minimum timepoint in df_asthma is {df_asthma['timepoint'].min()}, "
+            f"which is greater than min_timepoint {min_timepoint}"
+        )
+
+    if df_asthma["timepoint"].max() < max_timepoint:
+        raise ValueError(
+            f"The maximum timepoint in df_asthma is {df_asthma['timepoint'].max()}, "
+            f"which is less than max_timepoint {max_timepoint}"
+        )
 
     df_asthma_grouped = df_asthma.groupby("timepoint")
 
