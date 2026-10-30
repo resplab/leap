@@ -1,16 +1,17 @@
 import pandas as pd
+import datetime as dt
 import json
 import numpy as np
-import argparse
 from statsmodels.genmod.generalized_linear_model import GLMResultsWrapper
 from scipy import optimize
 import itertools
-from leap.utils import get_data_path
+from leap.utils import get_data_path, get_time_delta_tag, date_range, TimeDelta
 from leap.data_generation.prevalence_calibration import optimize_prevalence_β_parameters, \
     compute_asthma_prevalence_λ, get_asthma_prevalence_correction
 from leap.data_generation.incidence_calibration import inc_correction_calculator, \
     compute_odds_ratio_difference
 from leap.data_generation.antibiotic_data import get_predicted_abx_data, generate_antibiotic_data
+from leap.data_generation.utils import get_parser, get_max_timepoint
 from leap.logger import get_logger
 from typing import Tuple, Dict, TypedDict, Literal
 from scipy.stats import nbinom
@@ -21,10 +22,10 @@ pd.options.mode.copy_on_write = True
 logger = get_logger(__name__, 20)
 
 PROVINCE = "CA"
-MAX_YEAR = 2065 # 2065 for CA; 2043 for BC
-MIN_YEAR = 2000
-STABILIZATION_YEAR = 2025
-BASELINE_YEAR = 2001
+MAX_TIMEPOINT = dt.datetime(2065, 12, 31) # 2065 for CA; 2043 for BC
+MIN_TIMEPOINT = dt.datetime(2000, 1, 1)
+STABILIZATION_TIMEPOINT = dt.datetime(2025, 1, 1)
+BASELINE_TIMEPOINT = dt.datetime(2001, 1, 1)
 MAX_AGE = 63
 MAX_AGE = 9
 MAX_ASTHMA_AGE = 62
@@ -59,52 +60,24 @@ BETA_ABX_0 = 1.82581
 # the probability that one or more parents have asthma (CHILD Study)
 PROB_FAM_HIST = 0.2927242
 
-DF_OCC_PRED = pd.read_csv(get_data_path("processed_data/asthma_occurrence_predictions.csv"))
-
-
-def get_asthma_occurrence_prediction(
-    age: int,
-    sex: str,
-    year: int,
-    occurrence_type: str,
-    max_asthma_age: int = MAX_ASTHMA_AGE,
-    stabilization_year: int = STABILIZATION_YEAR
-) -> float:
-    """Predicts the asthma prevalence or incidence based on the given parameters.
-
-    Args:
-        age: Age of the individual in years.
-        sex: One of ``"M"`` or ``"F"``.
-        year: Year of the prediction.
-        occurrence_type: One of ``"prevalence"`` or ``"incidence"``.
-        max_asthma_age: The maximum age for asthma prediction (default is ``62``).
-        stabilization_year: The year when asthma stabilization occurs (default is ``2025``).
-
-    Returns:
-        A float representing the predicted asthma prevalence or incidence.
-    """
-
-    age = min(age, max_asthma_age)
-    year = min(year, stabilization_year)
-
-    return DF_OCC_PRED.loc[
-        (DF_OCC_PRED["age"] == age) &
-        (DF_OCC_PRED["year"] == year) &
-        (DF_OCC_PRED["sex"] == sex)
-    ][occurrence_type].values[0]
-
 
 def load_occurrence_data(
+    time_delta: TimeDelta,
     province: str = PROVINCE,
-    min_year: int = MIN_YEAR,
-    max_year: int = MAX_YEAR
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
+    max_timepoint: dt.datetime = MAX_TIMEPOINT,
+    max_asthma_age: int = MAX_ASTHMA_AGE,
+    stabilization_timepoint: dt.datetime = STABILIZATION_TIMEPOINT
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Load the asthma incidence and prevalence data for the given province and year range.
+    """Load the asthma incidence and prevalence data for the given province and timepoint range.
 
     Args:
+        time_delta: The duration of time between data points.
         province: The province to load data for.
-        min_year: The minimum year to load data for.
-        max_year: The maximum year to load data for.
+        min_timepoint: The minimum timepoint to load data for.
+        max_timepoint: The maximum timepoint to load data for.
+        max_asthma_age: The maximum age for asthma prediction (default is ``62``).
+        stabilization_timepoint: The timepoint when asthma stabilization occurs (default is ``2025``).
 
     Returns:
         A tuple of two DataFrames.
@@ -112,46 +85,61 @@ def load_occurrence_data(
 
         1. Incidence dataframe with columns:
 
-           * ``year (int)``: The year of the prediction.
+           * ``timepoint (dt.datetime)``: The date / time of the prediction.
            * ``age (int)``: The age of the individual in years, ranging from 3 to 110.
            * ``sex (str)``: One of ``"M"`` or ``"F"``.
-           * ``incidence (float)``: The predicted asthma incidence for the given year, age,
+           * ``incidence (float)``: The predicted asthma incidence for the given timepoint, age,
              and sex.
         2. Prevalence dataframe with columns:
 
-           * ``year (int)``: The year of the prediction.
+           * ``timepoint (dt.datetime)``: The date / time of the prediction.
            * ``age (int)``: The age of the individual in years, ranging from 3 to 110.
            * ``sex (str)``: One of ``"M"`` or ``"F"``.
-           * ``prevalence (float)``: The predicted asthma prevalence for the given year, age,
+           * ``prevalence (float)``: The predicted asthma prevalence for the given timepoint, age,
              and sex.
     """
 
     df_asthma = pd.DataFrame(
-        list(itertools.product(range(3, 111), ["F", "M"], range(min_year, max_year + 1))),
-        columns=["age", "sex", "year"]
+        list(itertools.product(
+            range(3, 111),
+            ["F", "M"],
+            list(date_range(min_timepoint, max_timepoint + time_delta, time_delta))
+        )),
+        columns=["age", "sex", "timepoint"]
     )
 
-    df_asthma["incidence"] = df_asthma.apply(
-        lambda x: get_asthma_occurrence_prediction(x["age"], x["sex"], x["year"], "incidence"),
-        axis=1
+    time_delta_tag = get_time_delta_tag(time_delta)
+    df_pred = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv"),
+        parse_dates=["timepoint"]
     )
-    df_asthma["prevalence"] = df_asthma.apply(
-        lambda x: get_asthma_occurrence_prediction(x["age"], x["sex"], x["year"], "prevalence"),
-        axis=1
-    )
-    df_asthma["incidence"] = df_asthma.apply(
-        lambda x: x["prevalence"] if x["age"] == 3 else x["incidence"],
-        axis=1
-    )
-    df_asthma["province"] = [province] * df_asthma.shape[0]
 
-    df_incidence = df_asthma[["year", "age", "sex", "incidence"]].copy()
-    df_prevalence = df_asthma[["year", "age", "sex", "prevalence"]].copy()
+    # Clip to the same bounds get_asthma_occurrence_prediction used to apply per-row
+    df_asthma["age_capped"] = df_asthma["age"].clip(upper=max_asthma_age)
+    df_asthma["timepoint_capped"] = df_asthma["timepoint"].clip(upper=stabilization_timepoint)
+
+    df_pred.rename(
+        columns={"age": "age_capped", "timepoint": "timepoint_capped"},
+        inplace=True
+    )
+
+    df_asthma = pd.merge(
+        df_asthma, df_pred, how="left", on=["age_capped", "sex", "timepoint_capped"]
+    )
+    df_asthma.drop(columns=["age_capped", "timepoint_capped"], inplace=True)
+
+    # At age 3, incidence == prevalence (no prior population to have "become incident" from)
+    df_asthma["incidence"] = df_asthma["prevalence"].where(df_asthma["age"] == 3, df_asthma["incidence"])
+    df_asthma["province"] = province
+
+    df_incidence = df_asthma[["timepoint", "age", "sex", "incidence"]].copy()
+    df_prevalence = df_asthma[["timepoint", "age", "sex", "prevalence"]].copy()
 
     return df_incidence, df_prevalence
 
 
 def load_reassessment_data(
+    time_delta: TimeDelta,
     province: str = PROVINCE
 ) -> pd.DataFrame:
     """Load the asthma reassessment data for the given province.
@@ -163,15 +151,19 @@ def load_reassessment_data(
         A DataFrame containing the reassessment data.
         Columns:
 
-        * ``year (int)``: The year of the reassessment.
+        * ``timepoint (dt.datetime)``: The date / time of the reassessment.
         * ``age (int)``: The age of the individual in years, a value in ``[4, 110]``.
         * ``sex (str)``: One of ``"M"`` or ``"F"``.
         * ``province (str)``: The two-letter code for the province, e.g. ``"CA"``.
         * ``prob (float)``: The probability that someone diagnosed with asthma previously
-          will maintain their asthma diagnosis in the given year; a value in ``[0, 1]``.
+          will maintain their asthma diagnosis in the given time interval, i.e. between
+          ``[timepoint, timepoint + time_delta]``; a value in ``[0, 1]``.
     """
-
-    df_reassessment = pd.read_csv(get_data_path("processed_data/asthma_reassessment.csv"))
+    time_delta_tag = get_time_delta_tag(time_delta)
+    df_reassessment = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/asthma_reassessment.csv"),
+        parse_dates=["timepoint"]
+    )
     df_reassessment = df_reassessment.loc[df_reassessment["province"] == province]
 
     df_reassessment = df_reassessment.drop(columns=["province"])
@@ -727,7 +719,7 @@ def calibrate_asthma_incidence(
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     β_risk_factors: Dict[str, Dict[str, float]] = β_RISK_FACTORS,
-    min_year: int = MIN_YEAR
+    min_timepoint: dt.datetime = MIN_TIMEPOINT
 ) -> ResultsIncidence:
     """Calibrate the asthma incidence for the given year, age, and sex.
 
@@ -758,7 +750,7 @@ def calibrate_asthma_incidence(
               odds ratio calculation. Must contain the keys ``β_abx_0``, ``β_abx_age``,
               and ``β_abx_dose``.
 
-        min_year: The minimum year to consider for the calibration.
+        min_timepoint: The minimum timepoint to consider for the calibration.
 
     Returns:
         A dictionary containing the calibrated asthma incidence for the given year, age, and sex.
@@ -776,7 +768,7 @@ def calibrate_asthma_incidence(
             odds ratios for the previous year.
     """
 
-    if year < BASELINE_YEAR or age == MIN_ASTHMA_AGE:
+    if year < BASELINE_TIMEPOINT or age == MIN_ASTHMA_AGE:
         return {
             "α": np.nan,
             "ζ_λ": [],
@@ -807,12 +799,12 @@ def calibrate_asthma_incidence(
     # target asthma prevalence for the previous year and age from BC Ministry of Health data
     past_asthma_prev_target = df_prevalence.loc[
         (df_prevalence["age"] == age - 1) &
-        (df_prevalence["year"] == max(min_year, year - 1)) &
+        (df_prevalence["year"] == max(min_timepoint, year - 1)) &
         (df_prevalence["sex"] == sex) 
     ]["prevalence"].iloc[0]
 
     past_risk_set = risk_factor_generator(
-        year=max(min_year, year - 1),
+        year=max(min_timepoint, year - 1),
         sex=sex,
         age=age - 1,
         model_abx=model_abx
@@ -827,7 +819,7 @@ def calibrate_asthma_incidence(
         )
     elif age - 1 == MAX_ABX_AGE:
         prev_calibration_past = calibrate_asthma_prevalence(
-            year=max(min_year, year - 1),
+            year=max(min_timepoint, year - 1),
             sex=sex,
             age=age - 1,
             model_abx=model_abx,
@@ -900,7 +892,7 @@ def compute_mean_diff_log_OR(
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
-    min_year: int = MIN_YEAR
+    min_timepoint: dt.datetime = MIN_TIMEPOINT
 ) -> float:
 
     """Compute the mean difference in log odds ratio for the given model and data.
@@ -937,7 +929,7 @@ def compute_mean_diff_log_OR(
             * ``prob (float)``: the probability that someone diagnosed with asthma previously
               will maintain their asthma diagnosis in the given year.
 
-        min_year: The minimum year to consider for the calibration.
+        min_timepoint: The minimum timepoint to consider for the calibration.
 
     Returns:
         The mean difference in log odds ratio for the given model and data.
@@ -957,7 +949,7 @@ def compute_mean_diff_log_OR(
     inc_calibration_results = df.apply(
         lambda x: calibrate_asthma_incidence(
             x["year"], x["sex"], x["age"], model_abx, df_incidence, df_prevalence,
-            β_risk_factors, min_year
+            β_risk_factors, min_timepoint
         ),
         axis=1
     )
@@ -988,10 +980,10 @@ def beta_params_age_optimizer(
     df_incidence: pd.DataFrame,
     df_prevalence: pd.DataFrame,
     df_reassessment: pd.DataFrame,
-    baseline_year: int = BASELINE_YEAR,
-    stabilization_year: int = STABILIZATION_YEAR,
+    baseline_timepoint: dt.datetime = BASELINE_TIMEPOINT,
+    stabilization_timepoint: dt.datetime = STABILIZATION_TIMEPOINT,
     max_age: int = MAX_AGE,
-    min_year: int = MIN_YEAR,
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
     β_risk_factors_age: list[float] = [
         β_RISK_FACTORS["fam_history"]["β_fhx_age"], β_RISK_FACTORS["abx"]["β_abx_age"]
     ]
@@ -1022,17 +1014,17 @@ def beta_params_age_optimizer(
             * ``prob (float)``: the probability that someone diagnosed with asthma previously
               will maintain their asthma diagnosis in the given year.
 
-        baseline_year: The baseline year for the calibration.
-        stabilization_year: The stabilization year for the calibration.
+        baseline_timepoint: The baseline timepoint for the calibration.
+        stabilization_timepoint: The stabilization timepoint for the calibration.
         max_age: The maximum age to consider for the calibration.
-        min_year: The minimum year to consider for the calibration.
+        min_timepoint: The minimum year to consider for the calibration.
         β_risk_factors_age: A list of two beta parameters, ``β_fhx_age`` and ``β_abx_age``, to be
             used as the initial values in the optimization.
     """
 
     df = pd.DataFrame(
         list(itertools.product(
-            range(baseline_year, stabilization_year + 2),
+            range(baseline_timepoint, stabilization_timepoint + 2),
             ["F", "M"],
             range(4, max_age + 1)
         )),
@@ -1043,7 +1035,7 @@ def beta_params_age_optimizer(
         fun=compute_mean_diff_log_OR,
         x0=β_risk_factors_age,
         args=(
-            df, model_abx, df_incidence, df_prevalence, df_reassessment, min_year
+            df, model_abx, df_incidence, df_prevalence, df_reassessment, min_timepoint
         ),
         method="BFGS",
         options={"maxiter": 1, "disp": True, "gtol": 1e-2}
@@ -1060,34 +1052,39 @@ def beta_params_age_optimizer(
 
 
 def generate_occurrence_calibration_data(
+    time_delta: TimeDelta,
     province: str = PROVINCE,
-    min_year: int = MIN_YEAR,
-    max_year: int = MAX_YEAR,
-    baseline_year: int = BASELINE_YEAR,
-    stabilization_year: int = STABILIZATION_YEAR,
+    min_timepoint: dt.datetime = MIN_TIMEPOINT,
+    max_timepoint: dt.datetime = MAX_TIMEPOINT,
+    baseline_timepoint: dt.datetime = BASELINE_TIMEPOINT,
+    stabilization_timepoint: dt.datetime = STABILIZATION_TIMEPOINT,
     max_age: int = MAX_AGE,
     retrain_beta: bool = False
 ):
     """Generate the occurrence calibration data for the given province and year range.
 
     Args:
+        time_delta: The duration of time between data points.
         province: The province to load data for.
-        min_year: The minimum year to load data for.
-        max_year: The maximum year to load data for.
-        baseline_year: The baseline year for the calibration.
-        stabilization_year: The stabilization year for the calibration.
+        min_timepoint: The minimum timepoint to load data for.
+        max_timepoint: The maximum timepoint to load data for.
+        baseline_timepoint: The baseline year for the calibration.
+        stabilization_timepoint: The stabilization year for the calibration.
         max_age: The maximum age to consider for the calibration.
         retrain_beta: If ``True``, re-run the fit for the ``β_risk_factors``. Otherwise, load
             the saved parameters from a ``json`` file.
     """
 
+    max_timepoint = get_max_timepoint(min_timepoint, max_timepoint, time_delta)
     df_incidence, df_prevalence = load_occurrence_data(
+        time_delta=time_delta,
         province=province,
-        min_year=min_year,
-        max_year=max_year
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint,
+        stabilization_timepoint=stabilization_timepoint
     )
 
-    df_reassessment = load_reassessment_data(province=province)
+    df_reassessment = load_reassessment_data(time_delta=time_delta, province=province)
 
     model_abx: GLMResultsWrapper = generate_antibiotic_data(return_type="model") # type: ignore
 
@@ -1097,8 +1094,8 @@ def generate_occurrence_calibration_data(
             df_incidence=df_incidence,
             df_prevalence=df_prevalence,
             df_reassessment=df_reassessment,
-            baseline_year=baseline_year,
-            stabilization_year=stabilization_year,
+            baseline_timepoint=baseline_timepoint,
+            stabilization_timepoint=stabilization_timepoint,
             max_age=max_age
         )
     
@@ -1119,7 +1116,7 @@ def generate_occurrence_calibration_data(
 
     df_correction = pd.DataFrame(
         list(itertools.product(
-            range(baseline_year - 1, stabilization_year + 1),
+            range(baseline_timepoint - time_delta, stabilization_timepoint + time_delta, time_delta),
             ["F", "M"],
             range(3, max_age + 1)
         )),
@@ -1145,14 +1142,14 @@ def generate_occurrence_calibration_data(
             df_incidence=df_incidence,
             df_prevalence=df_prevalence,
             β_risk_factors=β_risk_factors,
-            min_year=min_year
+            min_timepoint=min_timepoint
         )["α"], axis=1
     ).reset_index(drop=True)
 
     # Set incidence = prevalence for age = 3
     df_correction["inc_correction"] = df_correction.apply(
         lambda x: x["prev_correction"] 
-            if x["year"] >= BASELINE_YEAR and x["age"] == MIN_ASTHMA_AGE 
+            if x["year"] >= BASELINE_TIMEPOINT and x["age"] == MIN_ASTHMA_AGE 
             else x["inc_correction"],
         axis=1
     ).reset_index(drop=True)
@@ -1179,8 +1176,8 @@ def generate_occurrence_calibration_data(
 
     
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    args = parser.add_argument_group("ARGUMENTS")
+    parser = get_parser()
+    args = next(g for g in parser._action_groups if g.title == "ARGUMENTS")
     args.add_argument(
         "-r",
         "--retrain-beta",
@@ -1196,4 +1193,8 @@ if __name__ == "__main__":
     logger.message(
         f"Calibrating the asthma occurrence model. Retrain beta parameters? {args.retrain_beta}"
     )
-    generate_occurrence_calibration_data(retrain_beta=args.retrain_beta)
+    time_delta = TimeDelta(iso_string=args.time_delta)
+    generate_occurrence_calibration_data(
+        retrain_beta=args.retrain_beta,
+        time_delta=time_delta
+    )
