@@ -81,6 +81,35 @@ def test_get_asthma_df(
         (TimeDelta(months=1))
     ]
 )
+@pytest.mark.parametrize(
+    "province, min_timepoint, max_timepoint, max_age",
+    [
+        ("BC", dt.datetime(2025, 1, 1), dt.datetime(2027, 1, 1), 100),
+    ]
+)
+def test_get_reassessment_data(
+    df_asthma_dict, time_delta, province, min_timepoint, max_timepoint, max_age
+):
+    df_asthma = df_asthma_dict[time_delta.to_isoformat()]
+    df_reassessment = get_reassessment_data(
+        df_asthma=df_asthma,
+        time_delta=time_delta,
+        province=province,
+        min_timepoint=min_timepoint,
+        max_timepoint=max_timepoint,
+        max_age=max_age
+    )
+    assert not df_reassessment.empty
+    assert set(df_reassessment.columns) == set(["age", "sex", "timepoint", "province", "prob"])
+
+
+@pytest.mark.parametrize(
+    "time_delta",
+    [
+        (TimeDelta(years=1)),
+        (TimeDelta(months=1))
+    ]
+)
 def test_processed_data(time_delta):
     time_delta_tag = get_time_delta_tag(time_delta)
     df = pd.read_csv(
