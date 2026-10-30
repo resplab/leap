@@ -60,40 +60,6 @@ BETA_ABX_0 = 1.82581
 # the probability that one or more parents have asthma (CHILD Study)
 PROB_FAM_HIST = 0.2927242
 
-DF_OCC_PRED = pd.read_csv(get_data_path("processed_data/asthma_occurrence_predictions.csv"))
-
-
-def get_asthma_occurrence_prediction(
-    age: int,
-    sex: str,
-    year: int,
-    occurrence_type: str,
-    max_asthma_age: int = MAX_ASTHMA_AGE,
-    stabilization_timepoint: dt.datetime = STABILIZATION_TIMEPOINT
-) -> float:
-    """Predicts the asthma prevalence or incidence based on the given parameters.
-
-    Args:
-        age: Age of the individual in years.
-        sex: One of ``"M"`` or ``"F"``.
-        year: Year of the prediction.
-        occurrence_type: One of ``"prevalence"`` or ``"incidence"``.
-        max_asthma_age: The maximum age for asthma prediction (default is ``62``).
-        stabilization_timepoint: The timepoint when asthma stabilization occurs (default is ``2025``).
-
-    Returns:
-        A float representing the predicted asthma prevalence or incidence.
-    """
-
-    age = min(age, max_asthma_age)
-    year = min(year, stabilization_timepoint)
-
-    return DF_OCC_PRED.loc[
-        (DF_OCC_PRED["age"] == age) &
-        (DF_OCC_PRED["year"] == year) &
-        (DF_OCC_PRED["sex"] == sex)
-    ][occurrence_type].values[0]
-
 
 def load_occurrence_data(
     time_delta: TimeDelta,
