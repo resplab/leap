@@ -2,12 +2,40 @@ import pytest
 import datetime as dt
 import numpy as np
 import pandas as pd
-from leap.data_generation.reassessment_data import get_asthma_df
+import itertools
+from leap.data_generation.reassessment_data import get_asthma_df, get_reassessment_data
 from leap.logger import get_logger
-from leap.utils import TimeDelta, date_range, get_time_delta_tag, get_data_path
+from leap.utils import TimeDelta, Age, date_range, get_time_delta_tag, get_data_path
 
 logger = get_logger(__name__)
 logger.setLevel("INFO")
+
+
+
+@pytest.fixture
+def df_asthma_dict():
+    time_deltas = [TimeDelta(years=1), TimeDelta(months=1)]
+    min_timepoint = dt.datetime(2025, 1, 1)
+    max_timepoint = dt.datetime(2027, 1, 1)
+    df_asthma_dict = {}
+    for time_delta in time_deltas:
+        n_intervals = TimeDelta(years=1) // time_delta
+        df = pd.DataFrame(
+            list(itertools.product(
+                list(date_range(min_timepoint, max_timepoint + time_delta, time_delta)),
+                [Age(value=x) for x in np.arange(0, 4, 1/n_intervals)],
+                ["F", "M"]
+            )),
+            columns=[
+                "timepoint", "age", "sex"
+            ]
+        )
+        df["incidence"] = np.random.uniform(0.0001, 0.01, df.shape[0])
+        df["prevalence"] = np.random.uniform(0.0001, 0.01, df.shape[0])
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+        key = time_delta.to_isoformat()
+        df_asthma_dict[key] = df.copy()
+    return df_asthma_dict
 
 
 @pytest.mark.parametrize(
