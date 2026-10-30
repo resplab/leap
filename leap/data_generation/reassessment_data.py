@@ -4,7 +4,6 @@ import datetime as dt
 import itertools
 from leap.utils import get_data_path, get_time_delta_tag, date_range, TimeDelta
 from leap.logger import get_logger
-from leap.data_generation.occurrence_calibration_data import get_asthma_occurrence_prediction
 from leap.data_generation.utils import get_parser
 
 pd.options.mode.copy_on_write = True
@@ -55,6 +54,8 @@ def get_asthma_df(
         * ``prevalence (float)``: predicted asthma prevalence for the given age, sex, and timepoint.
 
     """
+    time_delta_tag = get_time_delta_tag(time_delta)
+
     df_asthma = pd.DataFrame(
         list(itertools.product(
             range(min_age, max_age + 1),
@@ -64,18 +65,19 @@ def get_asthma_df(
         columns=["age", "sex", "timepoint"]
     )
 
-    df_asthma["incidence"] = df_asthma.apply(
-        lambda x: get_asthma_occurrence_prediction(
-            x["age"], x["sex"], x["timepoint"], "incidence", max_asthma_age, stabilization_timepoint
-        ),
-        axis=1
+    df_occ_pred = pd.read_csv(
+        get_data_path(f"processed_data/{time_delta_tag}/asthma_occurrence_predictions.csv"),
+        parse_dates=["timepoint"]
     )
-    df_asthma["prevalence"] = df_asthma.apply(
-        lambda x: get_asthma_occurrence_prediction(
-            x["age"], x["sex"], x["timepoint"], "prevalence", max_asthma_age, stabilization_timepoint
-        ),
-        axis=1
-    )
+
+    df_asthma["age_capped"] = df_asthma["age"].clip(upper=max_asthma_age)
+    df_asthma["timepoint_capped"] = df_asthma["timepoint"].clip(upper=stabilization_timepoint)
+
+    df_occ_pred = df_occ_pred.rename(columns={"age": "age_capped", "timepoint": "timepoint_capped"})
+    df_asthma = pd.merge(
+        df_asthma, df_occ_pred, on=["age_capped", "sex", "timepoint_capped"], how="left"
+    ).drop(columns=["age_capped", "timepoint_capped"])
+
     df_asthma["incidence"] = df_asthma.apply(
         lambda x: x["prevalence"] if x["age"] == 3 else x["incidence"],
         axis=1
