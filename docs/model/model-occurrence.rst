@@ -101,9 +101,44 @@ Since our model projects into the future, we would like to be able to extend thi
 ``2019``. Our model also makes predictions at customized age intervals, not 5-year age intervals.
 To obtain these projections, we use a ``Generalized Linear Model (GLM)`` with a
 ``Poisson distribution`` and ``log link function``. Incidence and prevalence are counts of
-people diagnosed with or living with asthma in a given time interval, making the Poisson distribution a
-natural choice. See :doc:`model-statistical-background` for more information on ``GLMs``, including the Poisson
-distribution and log link function.
+people diagnosed with or living with asthma in a given time interval, making the Poisson distribution
+a natural choice. See :doc:`model-statistical-background` for more information on ``GLMs``,
+including the Poisson distribution and log link function.
+
+.. info:: Probability Distribution: Poisson Distribution
+  :collapsible:
+
+
+  When fitting a ``GLM``, first you must choose a distribution for the ``response variable``. In our
+  case, the response variable is the asthma prevalence or incidence. Incidence and prevalence are
+  counts of the number of people diagnosed with asthma and the number of people with asthma,
+  respectively, in a given time interval (a year, in our case). Since these are counts, we need a
+  discrete probability distribution. The ``Poisson distribution`` is a good choice for our data.
+
+  .. math::
+
+      P(Y = y) = p(y; \mu^{(i)}) = \dfrac{(\mu^{(i)})^{y} ~ e^{-\mu^{(i)}}}{y!}
+
+
+.. info:: Link Function: Log Link Function
+  :collapsible:
+
+  We also need to choose a ``link function``. Recall that the link function :math:`g(\mu^{(i)})`
+  is used to relate the mean to the predicted value :math:`\eta^{(i)}`:
+
+  .. math::
+
+      g(\mu^{(i)}) &= \eta^{(i)} \\
+      \mu^{(i)} &= E(Y \mid X = x^{(i)})
+
+  How do we choose a link function? Well, we are free to choose any link function we like, but there
+  are some constraints. For example, in the Poisson distribution, the mean is always positive.
+  However, :math:`\eta^{(i)}` can be any real number. Therefore, we need a link function that maps
+  real numbers to positive numbers. The ``log link function`` is a good choice for this:
+
+  .. math::
+
+      g(\mu^{(i)}) = \log(\mu^{(i)}) = \eta^{(i)}
 
 Formula
 -----------------
@@ -125,8 +160,10 @@ in asthma incidence, so we should include sex in our formula.
 
 .. math::
 
-    \log(\bar{p}_{\text{inc},i}) = \beta_0 + \beta_{\text{sex}} \cdot s_i + \beta_{\text{time}} \cdot t_i + \beta_{\text{time,sex}} \cdot t_i \cdot s_i
-        + \sum_{k=1}^{5} \left( \beta_{\text{age},k} \cdot a_i^k + \beta_{\text{age,sex},k} \cdot a_i^k \cdot s_i \right)
+    \log(\bar{p}_{\text{inc}}^{(i)}) = \beta_0 + \beta_{\text{sex}} \cdot s^{(i)} 
+       + \beta_{\text{time}} \cdot t^{(i)} + \beta_{\text{time,sex}} \cdot t^{(i)} \cdot s^{(i)}
+       + \sum_{k=1}^{5} \left( \beta_{\text{age},k} \cdot (a^{(i)})^k 
+       + \beta_{\text{age,sex},k} \cdot (a^{(i)})^k \cdot s^{(i)} \right)
 
 
 where:
@@ -145,26 +182,27 @@ where:
      - intercept
    * - :math:`\beta_{\text{sex}}`
      -  
-     - :math:`s_i`
+     - :math:`s^{(i)}`
      - sex main effect
    * - :math:`\beta_{\text{time}}`
      -
-     - :math:`t_i`
+     - :math:`t^{(i)}`
      - timepoint main effect
    * - :math:`\beta_{\text{time,sex}}`
      -  
-     - :math:`t_i \cdot s_i`
-     - timepoint × sex interaction
+     - :math:`t^{(i)} \cdot s^{(i)}`
+     - timepoint :math:`\times` sex interaction
    * - :math:`\beta_{\text{age},k}`
      - :math:`k \in \{1, \ldots, 5\}`
-     - :math:`a_i^k`
+     - :math:`(a^{(i)})^k`
      - age polynomial terms
    * - :math:`\beta_{\text{age,sex},k}`
      - :math:`k \in \{1, \ldots, 5\}`
-     - :math:`a_i^k \cdot s_i`
-     - age × sex interaction terms
+     - :math:`(a^{(i)})^k \cdot s^{(i)}`
+     - age :math:`\times` sex interaction terms
 
-And :math:`a_i` is the age, :math:`t_i` is the timepoint, :math:`s_i` is the sex of individual :math:`i`.
+And :math:`a^{(i)}` is the age, :math:`t^{(i)}` is the timepoint, :math:`s^{(i)}` is the sex of
+individual :math:`i`.
 
 There are :math:`4 + 5 + 5 = 14` coefficients in the incidence model.
 
@@ -180,7 +218,8 @@ There are :math:`4 + 5 + 5 = 14` coefficients in the incidence model.
 
   where:
 
-  * :math:`\beta_{k\ell m}` is the coefficient for the feature :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
+  * :math:`\beta_{k\ell m}` is the coefficient for the feature 
+    :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
   * :math:`a^{(i)}` is the age
   * :math:`t^{(i)}` is the timepoint
   * :math:`s^{(i)}` is the sex
@@ -198,11 +237,15 @@ in asthma incidence and hence prevalence, so we should include sex in our formul
 .. math::
 
     \begin{align}
-    \log(\bar{p}_{\text{prev},i}) &= \beta_0 + \beta_{\text{sex}} \cdot s_i \\
-        &+ \sum_{k=1}^{5} \left( \beta_{\text{age},k} \cdot a_i^k + \beta_{\text{age,sex},k} \cdot a_i^k \cdot s_i \right) \\
-        &+ \sum_{\ell=1}^{2} \left( \beta_{\text{time},\ell} \cdot t_i^\ell + \beta_{\text{time,sex},\ell} \cdot t_i^\ell \cdot s_i \right) \\
-        &+ \sum_{\ell=1}^{2} \sum_{k=1}^{5} \left( \beta_{\text{age,time},k,\ell} \cdot a_i^k \cdot t_i^\ell
-        + \beta_{\text{age,time,sex},k,\ell} \cdot a_i^k \cdot t_i^\ell \cdot s_i \right)
+    \log(\bar{p}_{\text{prev},i}) &= \beta_0 + \beta_{\text{sex}} \cdot s^{(i)} \\
+        &+ \sum_{k=1}^{5} \left( \beta_{\text{age},k} \cdot (a^{(i)})^k 
+        + \beta_{\text{age,sex},k} \cdot (a^{(i)})^k \cdot s^{(i)} \right) \\
+        &+ \sum_{\ell=1}^{2} \left( \beta_{\text{time},\ell} \cdot (t^{(i)})^\ell 
+        + \beta_{\text{time,sex},\ell} \cdot (t^{(i)})^\ell \cdot s^{(i)} \right) \\
+        &+ \sum_{\ell=1}^{2} \sum_{k=1}^{5} \left(
+          \beta_{\text{age,time},k,\ell} \cdot (a^{(i)})^k \cdot (t^{(i)})^{\ell}
+        + \beta_{\text{age,time,sex},k,\ell} \cdot (a^{(i)})^k \cdot (t^{(i)})^\ell \cdot s^{(i)} 
+        \right)
     \end{align}
 
 
@@ -222,34 +265,35 @@ where:
      - intercept
    * - :math:`\beta_{\text{sex}}`
      - 
-     - :math:`s_i`
+     - :math:`s^{(i)}`
      - sex main effect
    * - :math:`\beta_{\text{age},k}`
      - :math:`k \in \{1, \ldots, 5\}`
-     - :math:`a_i^k`
+     - :math:`(a^{(i)})^k`
      - age polynomial terms
    * - :math:`\beta_{\text{age,sex},k}`
      - :math:`k \in \{1, \ldots, 5\}`
-     - :math:`a_i^k \cdot s_i`
-     - age × sex interactions
+     - :math:`(a^{(i)})^k \cdot s^{(i)}`
+     - age :math:`\times` sex interactions
    * - :math:`\beta_{\text{time},\ell}`
      - :math:`\ell \in \{1, 2\}`
-     - :math:`(t_i)^\ell`
+     - :math:`(t^{(i)})^\ell`
      - timepoint polynomial terms
    * - :math:`\beta_{\text{time,sex},\ell}`
      - :math:`\ell \in \{1, 2\}`
-     - :math:`(t_i)^\ell \cdot s_i`
-     - timepoint × sex interactions
+     - :math:`(t^{(i)})^\ell \cdot s^{(i)}`
+     - timepoint :math:`\times` sex interactions
    * - :math:`\beta_{\text{age,time},k,\ell}`
      - :math:`k \in \{1, \ldots, 5\}`, :math:`\ell \in \{1, 2\}`
-     - :math:`a_i^k \cdot (t_i)^\ell`
-     - age × timepoint interactions
+     - :math:`(a^{(i)})^k \cdot (t^{(i)})^\ell`
+     - age :math:`\times` timepoint interactions
    * - :math:`\beta_{\text{age,time,sex},k,\ell}`
      - :math:`k \in \{1, \ldots, 5\}`, :math:`\ell \in \{1, 2\}`
-     - :math:`a_i^k \cdot (t_i)^\ell \cdot s_i`
-     - age × timepoint × sex interactions
+     - :math:`(a^{(i)})^k \cdot (t^{(i)})^\ell \cdot s^{(i)}`
+     - age :math:`\times` timepoint :math:`\times` sex interactions
 
-and :math:`a_i` is the age, :math:`t_i` is the timepoint, :math:`s_i` is the sex of individual :math:`i`.
+and :math:`a^{(i)}` is the age, :math:`t^{(i)}` is the timepoint, :math:`s^{(i)}` is the sex of
+individual :math:`i`.
 
 There are :math:`(1 + 1 + 5 + 5) + (2 + 2 + 10 + 10) = 36` coefficients in the prevalence model.
 
@@ -263,7 +307,8 @@ There are :math:`(1 + 1 + 5 + 5) + (2 + 2 + 10 + 10) = 36` coefficients in the p
 
   where:
 
-  * :math:`\beta_{k\ell m}` is the coefficient for the feature :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
+  * :math:`\beta_{k\ell m}` is the coefficient for the feature 
+    :math:`(a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m`
   * :math:`a^{(i)}` is the age
   * :math:`t^{(i)}` is the timepoint
   * :math:`s^{(i)}` is the sex
@@ -291,8 +336,8 @@ Processed Data
 
 The processed data produced by this model is stored in ``asthma_occurrence_predictions.csv``
 (under the ``time_delta_<days>`` directory, where ``<days>`` is the number of days in the
-simulation's time step — e.g. ``time_delta_365`` for yearly intervals). The data contains predicted asthma incidence and
-prevalence at 1-year age intervals, for each timepoint and sex. The variables are:
+simulation's time step — e.g. ``time_delta_365`` for yearly intervals). The data contains predicted
+asthma incidence and prevalence at 1-year age intervals, for each timepoint and sex. The variables are:
 
 .. raw:: html
 
