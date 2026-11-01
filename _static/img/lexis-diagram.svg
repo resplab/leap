@@ -1,0 +1,65 @@
+<svg viewBox="0 0 500 320" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+<!-- grid lines: vertical = calendar year -->
+    <g stroke="#ccc" stroke-width="1">
+    <line x1="60"  y1="20" x2="60"  y2="260"/>
+    <line x1="140" y1="20" x2="140" y2="260"/>
+    <line x1="220" y1="20" x2="220" y2="260"/>
+    <line x1="300" y1="20" x2="300" y2="260"/>
+    <line x1="380" y1="20" x2="380" y2="260"/>
+    <line x1="460" y1="20" x2="460" y2="260"/>
+    </g>
+    <!-- grid lines: horizontal = age -->
+    <g stroke="#ccc" stroke-width="1">
+    <line x1="60" y1="260" x2="460" y2="260"/>
+    <line x1="60" y1="220" x2="460" y2="220"/>
+    <line x1="60" y1="180" x2="460" y2="180"/>
+    <line x1="60" y1="140" x2="460" y2="140"/>
+    <line x1="60" y1="100" x2="460" y2="100"/>
+    <line x1="60" y1="60" x2="460" y2="60"/>
+    <line x1="60" y1="20"  x2="460" y2="20"/>
+    </g>
+
+    <!-- axes -->
+    <line x1="60" y1="260" x2="460" y2="260" stroke="black" stroke-width="2"/>
+    <line x1="60" y1="260" x2="60"  y2="20"  stroke="black" stroke-width="2"/>
+
+    <!-- cohort lifelines (45-degree diagonals), clipped to the grid -->
+    <clipPath id="grid">
+    <rect x="60" y="20" width="400" height="260"/>
+    </clipPath>
+    <g clip-path="url(#grid)" stroke="#2069ff" stroke-width="2">
+    <line x1="60"  y1="260" x2="460" y2="60"/>
+    <line x1="140" y1="260" x2="460" y2="100"/>
+    <line x1="220" y1="260" x2="460" y2="140"/>
+    <line x1="300" y1="260" x2="460" y2="180"/>
+    </g>
+
+    <!-- diagonal line labels (birth cohorts), rotated to match slope (~-26.6deg) -->
+    <g fill="#2069ff" font-size="11">
+    <text x="350" y="107" transform="rotate(-26.565 350 107)" text-anchor="middle">Birth Cohort 2018</text>
+    <text x="350" y="147" transform="rotate(-26.565 350 147)" text-anchor="middle">Birth Cohort 2019</text>
+    <text x="350" y="187" transform="rotate(-26.565 350 187)" text-anchor="middle">Birth Cohort 2020</text>
+    <text x="350" y="227" transform="rotate(-26.565 350 227)" text-anchor="middle">Birth Cohort 2021</text>
+    </g>
+
+    <!-- axis labels -->
+    <text x="260" y="305" text-anchor="middle" font-size="14">Time</text>
+    <text x="20" y="160" text-anchor="middle" font-size="14" transform="rotate(-90 20 160)">Age</text>
+
+    <!-- year ticks -->
+    <text x="60"  y="288" text-anchor="middle" font-size="11">2018</text>
+    <text x="140" y="288" text-anchor="middle" font-size="11">2019</text>
+    <text x="220" y="288" text-anchor="middle" font-size="11">2020</text>
+    <text x="300" y="288" text-anchor="middle" font-size="11">2021</text>
+    <text x="380" y="288" text-anchor="middle" font-size="11">2022</text>
+    <text x="460" y="288" text-anchor="middle" font-size="11">2023</text>
+
+    <!-- age ticks -->
+    <text x="45" y="264" text-anchor="end" font-size="11">0</text>
+    <text x="45" y="224" text-anchor="end" font-size="11">20</text>
+    <text x="45" y="184" text-anchor="end" font-size="11">40</text>
+    <text x="45" y="144" text-anchor="end" font-size="11">60</text>
+    <text x="45" y="104"  text-anchor="end" font-size="11">80</text>
+    <text x="45" y="64"  text-anchor="end" font-size="11">100</text>
+    <text x="45" y="24"  text-anchor="end" font-size="11">110</text>
+</svg>
