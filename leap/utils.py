@@ -357,7 +357,7 @@ def poly(
     """Generate a polynomial basis for a vector.
 
     See `Orthogonal polynomial regression in Python
-    <https://davmre.github.io/blog/python/2013/12/15/orthogonal_poly/>`_ for more
+    <https://davmre.github.io/blog/python/2013/12/15/orthogonal_poly>`_ for more
     information on this function.
     
     Args:
