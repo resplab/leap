@@ -269,6 +269,41 @@ PT2H30M	| 2 hours and 30 minutes
 P1M	| 1 month
 PT1M |	1 minute
 
+## Population Projection (Validation)
+
+`population_projection.py` checks that the generated birth, death and migration data reproduce the
+population. It projects the population forward using the same modules as the simulation
+(`Birth`, `Death`, `Emigration`, `Immigration`), but with expected counts by age and sex instead of
+individual agents, so it runs in seconds. Its results have the same shape as the simulation's
+`outcome_matrix_alive.csv`, `outcome_matrix_death.csv`, `outcome_matrix_immigration.csv` and
+`outcome_matrix_emigration.csv`.
+
+Run it after regenerating any birth, death or migration data:
+
+```sh
+cd LEAP
+python3 leap/data_generation/population_projection.py
+```
+
+This projects BC (scenario M3) from 2025 to the end of the migration data, with annual and monthly
+time steps. It logs yearly population, births, deaths, immigrants and emigrants, compares the
+population with StatCan's projection by age group, and saves two figures:
+`leap/data_generation/figures/population_projection_BC_M3.png` (yearly totals) and
+`leap/data_generation/figures/population_projection_age_BC_M3.png` (population by age at the start,
+middle and end of the projection).
+
+The same checks run as tests, outside CI:
+
+```sh
+pytest -m validation tests/test_population_projection.py
+```
+
+They check that the projected population matches StatCan (within 1% overall, 2% by age group and
+10% for each single year of age from 1 to 95),
+that monthly births and population match annual, that monthly deaths are within the expected range
+of annual, and that the annual projection matches a short annual simulation run. Migration is a
+calibration term, so it isn't tested directly; errors in it show up in the population checks.
+
 ## Exacerbation Calibration Data
 
 The number of exacerbations in a given year is modelled using a Poisson distribution. The formula is:
