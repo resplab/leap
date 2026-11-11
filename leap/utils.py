@@ -401,6 +401,8 @@ def poly(
             xbar = np.mean(x)
             x = x - xbar
             X = np.vander(x, n, increasing=True)
+
+            # QR Decomposition
             Q, R = np.linalg.qr(X)
 
             Z = np.diag(np.diag(R))
