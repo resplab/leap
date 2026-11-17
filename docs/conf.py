@@ -121,6 +121,28 @@ html_theme_options = {
     ]
 }
 
+# Custom admonitions: provides `.. theorem::`, `.. lemma::`, and `.. proof::` directives
+sphinx_immaterial_custom_admonitions = [
+    {
+        "name": "theorem",
+        "title": "Theorem",
+        "icon": "material/sigma",
+        "color": (103, 58, 183),
+    },
+    {
+        "name": "lemma",
+        "title": "Lemma",
+        "icon": "material/sigma",
+        "color": (63, 81, 181),
+    },
+    {
+        "name": "proof",
+        "title": "Proof",
+        "icon": "material/pencil-outline",
+        "color": (96, 125, 139),
+    },
+]
+
 
 # Napoleon settings
 napoleon_google_docstring = True
