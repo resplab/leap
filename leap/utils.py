@@ -389,7 +389,6 @@ def poly(
         Z[:,0] = 1
         if degree > 0:
             Z[:, 1] = x - alpha[0]
-        if degree > 1:
             for i in np.arange(1, degree):
                 Z[:, i+1] = (x - alpha[i]) * Z[:, i] - (norm2[i] / norm2[i-1]) * Z[:, i-1]
         Z /= np.sqrt(norm2)
@@ -405,15 +404,16 @@ def poly(
             # QR Decomposition
             Q, R = np.linalg.qr(X)
 
-            Z = np.diag(np.diag(R))
-            raw = np.dot(Q, Z)
+            # Form the diagonal matrix D from the diagonal entries of R
+            D = np.diag(np.diag(R))
+            P = np.dot(Q, D)
 
-            norm2 = np.sum(raw**2, axis=0)
+            norm2 = np.sum(P**2, axis=0)
             alpha = (
-                np.sum((raw**2) * np.reshape(x, (-1, 1)), axis=0)/norm2 + 
+                np.dot(np.transpose(P**2), x) / norm2 + 
                 xbar
             )[:degree]
-            Z = raw / np.sqrt(norm2)
+            Z = P / np.sqrt(norm2)
             return Z[:, 1:], alpha, norm2
         else:
             X = np.vander(x, n, increasing=True)
