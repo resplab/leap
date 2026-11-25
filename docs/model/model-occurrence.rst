@@ -769,8 +769,9 @@ the same study. The log-odds ratio applies to all ages but the age-dependent com
 .. math::
 
   \log(\omega_{\text{fhx}}) =
-    \beta_{\text{fhx}_0} \cdot f_i +
-    \beta_{\text{fhx}_\text{age}} \cdot (\min(a_i, 5) - 3) \cdot f_i
+    \beta_{\text{fhx}_0} \cdot f^{(i)} +
+    \beta_{\text{fhx}_\text{age}} \cdot (\min(a^{(i)}, 5) - 3) \cdot f^{(i)}
+
 
 Both coefficients are derived from the two empirical odds ratios reported by Patrick et al. at
 ages 3 and 5 — OR = 1.13 at age 3 and OR = 2.40 at age 5. The age-dependent slope is the linear
