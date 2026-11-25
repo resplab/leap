@@ -716,7 +716,7 @@ in infancy, and is zero otherwise:
 
 .. math::
 
-  \log(\omega_{\text{abx}}) =
+  \log(\omega(d_{\lambda})) =
     \begin{cases}
       \beta_{\text{abx}_0} +
       \beta_{\text{abx}_\text{age}} \cdot \min(a^{(i)}, 7) +
