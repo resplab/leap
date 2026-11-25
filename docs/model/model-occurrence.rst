@@ -704,8 +704,10 @@ The predicted prevalence for an individual agent is:
 Age-dependent Odds Ratios for Prevalence
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The log-odds ratios for each risk factor are age-dependent — their functional forms and fixed
-coefficients are derived from external published studies.
+For prevalence, all odds ratio coefficients — including the age-dependent slopes — are fully
+determined by the literature before calibration runs. The log-odds ratios for each risk factor are
+age-dependent — their functional forms and fixed coefficients are derived from external published
+studies. 
 
 Antibiotic Exposure
 ~~~~~~~~~~~~~~~~~~~~
@@ -780,10 +782,9 @@ interpolation between those two points on the log-odds ratio scale:
 For ages above 5, the odds ratio is held constant at the age-5 value.
 
 
-For prevalence, all odds ratio coefficients — including the age-dependent slopes — are fully
-determined by the literature before calibration runs. The only quantity calibrated for
-prevalence is the scalar correction term :math:`\alpha`, which shifts the population-weighted
-average onto the :ref:`Model 1 <occurrence-model-1>` target :math:`\bar{p}_{\text{prev}}`.
+The only quantity calibrated for prevalence is the scalar correction term :math:`\alpha`, which
+shifts the population-weighted average onto the :ref:`Model 1 <occurrence-model-1>` target
+:math:`\bar{p}_{\text{prev}}`.
 
 .. list-table::
    :widths: 20 20 60
