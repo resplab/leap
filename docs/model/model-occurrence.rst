@@ -725,13 +725,36 @@ in infancy, and is zero otherwise:
       0 & \text{otherwise}
     \end{cases}
 
-where :math:`a_i` is the agent's age and :math:`d_i` is the number of courses of antibiotics
-taken during the first year of life (capped at 3). All three coefficients are sourced directly
-from the Lee et al. meta-regression, which estimated age as an explicit covariate:
+All three coefficients are sourced directly from the Lee et al. meta-regression, which estimated age
+as an explicit covariate.
 
-* :math:`\beta_{\text{abx}_0} = 1.826`
-* :math:`\beta_{\text{abx}_\text{age}} = 0.225`
-* :math:`\beta_{\text{abx}_\text{dose}} = 0.053`
+
+.. list-table::
+   :widths: 20 20 60
+   :header-rows: 1
+
+   * - Variable
+     - Value
+     - Description
+   * - :math:`a^{(i)}`
+     - integer :math:`\in [0, 7]`
+     - age of the individual agent
+   * - :math:`d^{(i)}`
+     - integer :math:`\in [0, 3]`
+     - number of courses of antibiotics taken during the first year of life (capped at 3)
+   * - :math:`\beta_{\text{abx}_0}`
+     - :math:`1.826`
+     - constant coefficient from Lee et al. :cite:`lee2024`
+   * - :math:`\beta_{\text{abx}_\text{age}}`
+     - :math:`0.225`
+     - constant coefficient from Lee et al. :cite:`lee2024`
+   * - :math:`\beta_{\text{abx}_\text{dose}}`
+     - :math:`0.053`
+     - constant coefficient from Lee et al. :cite:`lee2024`
+   * - :math:`\log(\omega(d_{\lambda}))`
+     - log-odds :math:`\in \mathbb{R}`
+     - log-odds ratio for antibiotic exposure in infancy; from Lee et al. :cite:`lee2024`
+
 
 Family History
 ~~~~~~~~~~~~~~~~
