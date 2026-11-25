@@ -673,7 +673,7 @@ The predicted prevalence for an individual agent is:
 
   .. math::
 
-    \zeta_{\lambda}^{(i)} = \sigma\left(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) + \alpha\right)
+    \varphi_{\lambda}^{(i)} = \sigma\left(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) + \alpha\right)
 
   where:
 
@@ -691,10 +691,10 @@ The predicted prevalence for an individual agent is:
       - the logistic function
     * - :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda}`
       - the correction / calibration term for either the incidence or prevalence
-    * - :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda}^{(i)}`
+    * - :math:`\varphi^{(i)} = \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda}^{(i)}`
       - predicted asthma prevalence / incidence for the model. We want this to be as close as
         possible to :math:`\eta^{(i)}`.
-    * - :math:`\zeta_{\lambda}^{(i)}`
+    * - :math:`\varphi_{\lambda}^{(i)}`
       - the predicted asthma incidence or prevalence from the model for the risk factor combination
         indexed by :math:`\lambda`
     * - :math:`p(\lambda)`
@@ -721,14 +721,14 @@ where :math:`\text{prop}(\lambda)` is the proportion of the population with risk
 
   .. math::
 
-    \zeta_{\text{prev}} &= \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda} \\
+    \varphi_{\text{prev}} &= \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda} \\
     &= \sum_{\lambda=0}^{n} p(\lambda) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha) 
 
 
   We want to find a correction term :math:`\alpha` such that the predicted asthma prevalence
-  :math:`\zeta` is as close as possible to the predicted asthma prevalence :math:`\eta`. To do this,
+  :math:`\varphi` is as close as possible to the predicted asthma prevalence :math:`\eta`. To do this,
   we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the absolute
-  difference between :math:`\zeta` and :math:`\eta`.
+  difference between :math:`\varphi` and :math:`\eta`.
 
 
 
@@ -845,7 +845,7 @@ individual agent is:
 
   .. math::
 
-    \zeta_{\lambda}^{(i)} = \sigma\left(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) + \alpha\right)
+    \varphi_{\lambda}^{(i)} = \sigma\left(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) + \alpha\right)
 
   where:
 
@@ -863,10 +863,10 @@ individual agent is:
       - the logistic function
     * - :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda}`
       - the correction / calibration term for either the incidence or prevalence
-    * - :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda) \zeta_{\lambda}^{(i)}`
+    * - :math:`\varphi^{(i)} = \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda}^{(i)}`
       - predicted asthma prevalence / incidence for the model. We want this to be as close as
         possible to :math:`\eta^{(i)}`.
-    * - :math:`\zeta_{\lambda}^{(i)}`
+    * - :math:`\varphi_{\lambda}^{(i)}`
       - the predicted asthma incidence or prevalence from the model for the risk factor combination
         indexed by :math:`\lambda`
     * - :math:`p(\lambda)`
@@ -899,7 +899,7 @@ asthma-free agents are included because incidence counts new diagnoses only.
 
   .. math::
 
-    \zeta_{\text{prev}}(t-1) &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \zeta_{\text{prev}, \lambda}(t-1) \\
+    \varphi_{\text{prev}}(t-1) &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \varphi_{\text{prev}, \lambda}(t-1) \\
     &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
 
   Now, what we want to find is the joint probability of each risk factor combination,
@@ -913,20 +913,20 @@ asthma-free agents are included because incidence counts new diagnoses only.
 
   .. math::
 
-    P(A = 0 \mid \lambda) = 1 - P(A = 1 \mid \lambda) = 1 - \zeta_{\text{prev}, \lambda}(t-1)
+    P(A = 0 \mid \lambda) = 1 - P(A = 1 \mid \lambda) = 1 - \varphi_{\text{prev}, \lambda}(t-1)
 
   So, we can rewrite the joint probability as:
 
   .. math::
 
-    p(\lambda, A = 0 \mid t-1) = (1 - \zeta_{\text{prev}, \lambda}(t-1)) \cdot p(\lambda, t-1)
+    p(\lambda, A = 0 \mid t-1) = (1 - \varphi_{\text{prev}, \lambda}(t-1)) \cdot p(\lambda, t-1)
 
 
   Next, we find the calibrated asthma incidence for the current timepoint:
 
   .. math::
 
-    \zeta_{\text{inc}}(t) &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \zeta_{\text{inc}, \lambda}(t) \\
+    \varphi_{\text{inc}}(t) &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \varphi_{\text{inc}, \lambda}(t) \\
     &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
 
 
@@ -944,10 +944,10 @@ asthma-free agents are included because incidence counts new diagnoses only.
       - defined above; the predicted incidence from the first model
     * - :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda, A = 0 \mid t-1) \cdot \beta_{\lambda}`
       - the correction / calibration term for the incidence
-    * - :math:`\zeta^{(i)} = \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \zeta_{\lambda}^{(i)}`
+    * - :math:`\varphi^{(i)} = \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \varphi_{\lambda}^{(i)}`
       - predicted asthma incidence for the model. We want this to be as close as
         possible to :math:`\eta^{(i)}`.
-    * - :math:`\zeta_{\lambda}^{(i)}`
+    * - :math:`\varphi_{\lambda}^{(i)}`
       - the predicted asthma incidence from the model for the risk factor combination
         indexed by :math:`\lambda`
     * - :math:`p(\lambda, A = 0 \mid t-1)`
@@ -956,9 +956,9 @@ asthma-free agents are included because incidence counts new diagnoses only.
 
 
   We again want to find a correction term :math:`\alpha` such that the predicted asthma incidence
-  :math:`\zeta` is as close as possible to the asthma incidence from the first model, :math:`\eta`.
+  :math:`\varphi` is as close as possible to the asthma incidence from the first model, :math:`\eta`.
   To do this, we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the
-  absolute difference between :math:`\zeta` and :math:`\eta`.
+  absolute difference between :math:`\varphi` and :math:`\eta`.
 
 .. _optimizing-beta-parameters:
 
@@ -1152,8 +1152,8 @@ marginal totals.
   combination :math:`\lambda`:
 
   .. math::
-      n_2 = (1 - p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\})) \cdot \zeta_{\text{prev}, 0}(t=0) \cdot n +
-        p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) \cdot \zeta_{\text{prev}, \lambda}(t=0) \cdot n
+      n_2 = (1 - p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\})) \cdot \varphi_{\text{prev}, 0}(t=0) \cdot n +
+        p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) \cdot \varphi_{\text{prev}, \lambda}(t=0) \cdot n
 
   From this, we can calculate the values for the contingency table:
 
@@ -1396,10 +1396,10 @@ incidence probability: :math:`p_{\text{inc},\lambda}` for those with risk factor
   To calculate the updated contingency table, we have:
 
   .. math::
-      a_{1, \text{dx}} &= b_0 \cdot \zeta_{\text{inc}, \lambda}(t=1) \\
-      b_{1, \text{dx}} &= b_0 \cdot (1 - \zeta_{\text{inc}, \lambda}(t=1)) \\
-      c_{1, \text{dx}} &= d_0 \cdot \zeta_{\text{inc}, 0}(t=1) \\
-      d_{1, \text{dx}} &= d_0 \cdot (1 - \zeta_{\text{inc}, 0}(t=1))
+      a_{1, \text{dx}} &= b_0 \cdot \varphi_{\text{inc}, \lambda}(t=1) \\
+      b_{1, \text{dx}} &= b_0 \cdot (1 - \varphi_{\text{inc}, \lambda}(t=1)) \\
+      c_{1, \text{dx}} &= d_0 \cdot \varphi_{\text{inc}, 0}(t=1) \\
+      d_{1, \text{dx}} &= d_0 \cdot (1 - \varphi_{\text{inc}, 0}(t=1))
 
   where:
 
