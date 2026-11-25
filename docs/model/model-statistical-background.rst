@@ -320,7 +320,7 @@ Example: Smoking and Lung Cancer
 ----------------------------------
 
 Suppose we observe ``n = 300`` patients and record whether they smoke and whether they have
-lung cancer:
+lung cancer. The categorical variables are ``smoking`` and ``lung cancer``:
 
 .. raw:: html
 
@@ -338,22 +338,37 @@ lung cancer:
             <td>smoker</td>
             <td><code class="notranslate">a = 100</code></td>
             <td><code class="notranslate">b = 50</code></td>
-            <td><code class="notranslate">n₁ = 150</code></td>
+            <td><code class="notranslate">n1 = 150</code></td>
         </tr>
         <tr>
             <td>non-smoker</td>
             <td><code class="notranslate">c = 25</code></td>
             <td><code class="notranslate">d = 125</code></td>
-            <td><code class="notranslate">n₀ = 150</code></td>
+            <td><code class="notranslate">n0 = 150</code></td>
         </tr>
         <tr>
             <td>total</td>
-            <td><code class="notranslate">n₂ = 125</code></td>
+            <td><code class="notranslate">n2 = 125</code></td>
             <td></td>
             <td><code class="notranslate">n = 300</code></td>
         </tr>
         </tbody>
     </table>
+
+
+The variables ``n1`` and ``n2`` are called the marginal totals:
+
+.. math::
+
+    n_1 &= a + b = \text{total number of patients who smoke} \\
+    n_2 &= a + c = \text{total number of patients who with lung cancer}
+
+The variable ``n`` is the total number of patients:
+
+.. math::
+
+    n = a + b + c + d = \text{total number of patients}
+
 
 The odds ratio for this table is:
 
