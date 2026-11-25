@@ -811,12 +811,14 @@ For ages above 5, the odds ratio is held constant at the age-5 value.
 Solving for the Correction Term
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The only quantity calibrated for prevalence is the scalar correction term :math:`\alpha`, which
-shifts the population-weighted average onto the :ref:`Model 1 <occurrence-model-1>` target
-:math:`\bar{p}_{\text{prev}}`. The correction term :math:`\alpha` is solved once, prior to runtime,
-using the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to find the value that minimises the
-difference between the population-weighted average asthma prevalence and the
-:ref:`Model 1 <occurrence-model-1>` target asthma prevalence:
+The only quantity calibrated for prevalence is the correction term :math:`\alpha`, which shifts the
+population-weighted average onto the :ref:`Model 1 <occurrence-model-1>` target :math:`\bar{p}_{\text{prev}}`.
+We want to find a correction term :math:`\alpha` such that the predicted population-weighted
+average asthma prevalence :math:`\varphi` is as close as possible to the target asthma prevalence
+:math:`\phi` from :ref:`Model 1 <occurrence-model-1>`. To do this,
+we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the absolute
+difference between :math:`\varphi` and :math:`\phi`. The correction term :math:`\alpha` is solved once,
+prior to runtime:
 
 .. math::
 
