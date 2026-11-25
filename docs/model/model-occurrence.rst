@@ -822,8 +822,8 @@ prior to runtime:
 
 .. math::
 
-\varphi_{\text{prev}} &= \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda} \\
-&= \sum_{\lambda=0}^{n} p(\lambda) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha) 
+    \varphi_{\text{prev}} &= \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda} \\
+    &= \sum_{\lambda=0}^{n} p(\lambda) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha) 
 
 
 .. info:: Math: Variables for Correction Term
