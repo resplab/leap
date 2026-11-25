@@ -719,9 +719,9 @@ in infancy, and is zero otherwise:
   \log(\omega_{\text{abx}}) =
     \begin{cases}
       \beta_{\text{abx}_0} +
-      \beta_{\text{abx}_\text{age}} \cdot \min(a_i, 7) +
-      \beta_{\text{abx}_\text{dose}} \cdot \min(d_i, 3)
-      & d_i > 0 \text{ and } a_i \leq 7 \\[6pt]
+      \beta_{\text{abx}_\text{age}} \cdot \min(a^{(i)}, 7) +
+      \beta_{\text{abx}_\text{dose}}  \cdot \min(d^{(i)}, 3)
+      & d^{(i)} > 0 \text{ and } a^{(i)} \leq 7 \\[6pt]
       0 & \text{otherwise}
     \end{cases}
 
