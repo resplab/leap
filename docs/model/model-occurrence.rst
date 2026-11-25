@@ -173,7 +173,7 @@ There are :math:`4 + 5 + 5 = 14` coefficients in the incidence model.
 
   .. math::
 
-      \eta^{(i)} = 
+      \phi^{(i)} = 
           \sum_{m=0}^1 \beta_{01m} t^{(i)} \cdot (s^{(i)})^m +
           \sum_{k=0}^{5} \sum_{m=0}^{1} \beta_{k0m} \cdot (a^{(i)})^k \cdot (s^{(i)})^m
 
@@ -258,7 +258,7 @@ There are :math:`(1 + 1 + 5 + 5) + (2 + 2 + 10 + 10) = 36` coefficients in the p
 
   .. math::
 
-      \eta^{(i)} = \sum_{k=0}^{5} \sum_{\ell=0}^2 \sum_{m=0}^1 \beta_{k \ell m} 
+      \phi^{(i)} = \sum_{k=0}^{5} \sum_{\ell=0}^2 \sum_{m=0}^1 \beta_{k \ell m} 
           \cdot (a^{(i)})^k \cdot (t^{(i)})^{\ell} \cdot (s^{(i)})^m
 
   where:
@@ -673,7 +673,7 @@ The predicted prevalence for an individual agent is:
 
   .. math::
 
-    \varphi_{\lambda}^{(i)} = \sigma\left(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) + \alpha\right)
+    \varphi_{\lambda}^{(i)} = \sigma\left(\beta_{\phi} + \log(\omega_{\lambda}^{(i)}) + \alpha\right)
 
   where:
 
@@ -683,9 +683,9 @@ The predicted prevalence for an individual agent is:
 
     * - Variable
       - Description
-    * - :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)})`
+    * - :math:`\beta_{\phi} = \sigma^{-1}(\phi^{(i)})`
       - determined by the output of the first model
-    * - :math:`\eta^{(i)}`
+    * - :math:`\phi^{(i)}`
       - the predicted incidence or prevalence from the first model
     * - :math:`\sigma(x)`
       - the logistic function
@@ -693,7 +693,7 @@ The predicted prevalence for an individual agent is:
       - the correction / calibration term for either the incidence or prevalence
     * - :math:`\varphi^{(i)} = \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda}^{(i)}`
       - predicted asthma prevalence / incidence for the model. We want this to be as close as
-        possible to :math:`\eta^{(i)}`.
+        possible to :math:`\phi^{(i)}`.
     * - :math:`\varphi_{\lambda}^{(i)}`
       - the predicted asthma incidence or prevalence from the model for the risk factor combination
         indexed by :math:`\lambda`
@@ -722,13 +722,13 @@ where :math:`\text{prop}(\lambda)` is the proportion of the population with risk
   .. math::
 
     \varphi_{\text{prev}} &= \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda} \\
-    &= \sum_{\lambda=0}^{n} p(\lambda) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha) 
+    &= \sum_{\lambda=0}^{n} p(\lambda) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha) 
 
 
   We want to find a correction term :math:`\alpha` such that the predicted asthma prevalence
-  :math:`\varphi` is as close as possible to the predicted asthma prevalence :math:`\eta`. To do this,
+  :math:`\varphi` is as close as possible to the predicted asthma prevalence :math:`\phi`. To do this,
   we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the absolute
-  difference between :math:`\varphi` and :math:`\eta`.
+  difference between :math:`\varphi` and :math:`\phi`.
 
 
 
@@ -845,7 +845,7 @@ individual agent is:
 
   .. math::
 
-    \varphi_{\lambda}^{(i)} = \sigma\left(\beta_{\eta} + \log(\omega_{\lambda}^{(i)}) + \alpha\right)
+    \varphi_{\lambda}^{(i)} = \sigma\left(\beta_{\phi} + \log(\omega_{\lambda}^{(i)}) + \alpha\right)
 
   where:
 
@@ -855,9 +855,9 @@ individual agent is:
 
     * - Variable
       - Description
-    * - :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)})`
+    * - :math:`\beta_{\phi} = \sigma^{-1}(\phi^{(i)})`
       - determined by the output of the first model
-    * - :math:`\eta^{(i)}`
+    * - :math:`\phi^{(i)}`
       - the predicted incidence or prevalence from the first model
     * - :math:`\sigma(x)`
       - the logistic function
@@ -865,7 +865,7 @@ individual agent is:
       - the correction / calibration term for either the incidence or prevalence
     * - :math:`\varphi^{(i)} = \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda}^{(i)}`
       - predicted asthma prevalence / incidence for the model. We want this to be as close as
-        possible to :math:`\eta^{(i)}`.
+        possible to :math:`\phi^{(i)}`.
     * - :math:`\varphi_{\lambda}^{(i)}`
       - the predicted asthma incidence or prevalence from the model for the risk factor combination
         indexed by :math:`\lambda`
@@ -900,7 +900,7 @@ asthma-free agents are included because incidence counts new diagnoses only.
   .. math::
 
     \varphi_{\text{prev}}(t-1) &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \varphi_{\text{prev}, \lambda}(t-1) \\
-    &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
+    &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha)
 
   Now, what we want to find is the joint probability of each risk factor combination,
   :math:`p(\lambda, A = 0 \mid t-1)`, for the population without asthma.
@@ -927,7 +927,7 @@ asthma-free agents are included because incidence counts new diagnoses only.
   .. math::
 
     \varphi_{\text{inc}}(t) &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \varphi_{\text{inc}, \lambda}(t) \\
-    &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \sigma(\beta_{\eta} + \log(\omega_{\lambda}) - \alpha)
+    &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha)
 
 
   where we recall that:
@@ -938,15 +938,15 @@ asthma-free agents are included because incidence counts new diagnoses only.
 
     * - Variable
       - Description
-    * - :math:`\beta_{\eta} = \sigma^{-1}(\eta^{(i)}(t))`
+    * - :math:`\beta_{\phi} = \sigma^{-1}(\phi^{(i)}(t))`
       - determined by the output of the first model
-    * - :math:`\eta^{(i)}(t)`
+    * - :math:`\phi^{(i)}(t)`
       - defined above; the predicted incidence from the first model
     * - :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda, A = 0 \mid t-1) \cdot \beta_{\lambda}`
       - the correction / calibration term for the incidence
     * - :math:`\varphi^{(i)} = \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \varphi_{\lambda}^{(i)}`
       - predicted asthma incidence for the model. We want this to be as close as
-        possible to :math:`\eta^{(i)}`.
+        possible to :math:`\phi^{(i)}`.
     * - :math:`\varphi_{\lambda}^{(i)}`
       - the predicted asthma incidence from the model for the risk factor combination
         indexed by :math:`\lambda`
@@ -956,9 +956,9 @@ asthma-free agents are included because incidence counts new diagnoses only.
 
 
   We again want to find a correction term :math:`\alpha` such that the predicted asthma incidence
-  :math:`\varphi` is as close as possible to the asthma incidence from the first model, :math:`\eta`.
+  :math:`\varphi` is as close as possible to the asthma incidence from the first model, :math:`\phi`.
   To do this, we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the
-  absolute difference between :math:`\varphi` and :math:`\eta`.
+  absolute difference between :math:`\varphi` and :math:`\phi`.
 
 .. _optimizing-beta-parameters:
 
