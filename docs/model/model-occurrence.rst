@@ -768,7 +768,7 @@ the same study. The log-odds ratio applies to all ages but the age-dependent com
 
 .. math::
 
-  \log(\omega_{\text{fhx}}) =
+  \log(\omega(f_{\lambda})) = 
     \beta_{\text{fhx}_0} \cdot f^{(i)} +
     \beta_{\text{fhx}_\text{age}} \cdot (\min(a^{(i)}, 5) - 3) \cdot f^{(i)}
 
