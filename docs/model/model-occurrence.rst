@@ -822,25 +822,35 @@ prior to runtime:
 
 .. math::
 
-  \bar{p}_{\text{prev}} = \sum_{\lambda} \text{prop}(\lambda) \cdot p_{\text{prev},\lambda}
-
-where :math:`\text{prop}(\lambda)` is the proportion of the population with risk factor combination
-:math:`\lambda`.
+\varphi_{\text{prev}} &= \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda} \\
+&= \sum_{\lambda=0}^{n} p(\lambda) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha) 
 
 
-.. info:: Math: Prevalence Correction Term
+.. info:: Math: Variables for Correction Term
   :collapsible:
 
-  .. math::
+  .. list-table::
+    :widths: 25 75
+    :header-rows: 1
 
-    \varphi_{\text{prev}} &= \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda} \\
-    &= \sum_{\lambda=0}^{n} p(\lambda) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha) 
-
-
-  We want to find a correction term :math:`\alpha` such that the predicted asthma prevalence
-  :math:`\varphi` is as close as possible to the predicted asthma prevalence :math:`\phi`. To do this,
-  we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the absolute
-  difference between :math:`\varphi` and :math:`\phi`.
+    * - Variable
+      - Description
+    * - :math:`\sigma(x)`
+      - logistic function
+    * - :math:`\beta_{\phi} = \sigma^{-1}(\phi^{(i)})`
+      - determined by the output of the first model
+    * - :math:`p(\lambda)`
+      - the probability of the risk factor combination indexed by :math:`\lambda`
+    * - :math:`\phi^{(i)}`
+      - predicted asthma prevalence from the first model
+    * - :math:`\varphi_{\lambda}^{(i)}`
+      - predicted asthma prevalence from the model for the risk factor combination
+        indexed by :math:`\lambda`
+    * - :math:`\varphi^{(i)} = \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda}^{(i)}`
+      - predicted asthma prevalence for the model. We want this to be as close as
+        possible to :math:`\phi^{(i)}`.
+    * - :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda) \cdot \beta_{\lambda}`
+      - correction term for asthma prevalence
 
 
 .. _occurrence-model-2-incidence:
