@@ -770,9 +770,8 @@ the same study. The log-odds ratio applies to all ages but the age-dependent com
     \beta_{\text{fhx}_0} \cdot f_i +
     \beta_{\text{fhx}_\text{age}} \cdot (\min(a_i, 5) - 3) \cdot f_i
 
-where :math:`f_i = 1` if at least one parent has asthma, 0 otherwise. Both coefficients
-are derived from the two empirical odds ratios reported by Patrick et al. at ages 3 and 5 —
-OR = 1.13 at age 3 and OR = 2.40 at age 5. The age-dependent slope is the linear
+Both coefficients are derived from the two empirical odds ratios reported by Patrick et al. at
+ages 3 and 5 — OR = 1.13 at age 3 and OR = 2.40 at age 5. The age-dependent slope is the linear
 interpolation between those two points on the log-odds ratio scale:
 
 * :math:`\beta_{\text{fhx}_0} = \log(1.13) = 0.122`
@@ -785,6 +784,30 @@ For prevalence, all odds ratio coefficients — including the age-dependent slop
 determined by the literature before calibration runs. The only quantity calibrated for
 prevalence is the scalar correction term :math:`\alpha`, which shifts the population-weighted
 average onto the :ref:`Model 1 <occurrence-model-1>` target :math:`\bar{p}_{\text{prev}}`.
+
+.. list-table::
+   :widths: 20 20 60
+   :header-rows: 1
+
+   * - Variable
+     - Value
+     - Description
+   * - :math:`a^{(i)}`
+     - integer :math:`\in [0, 5]`
+     - age of the individual agent
+   * - :math:`f^{(i)}`
+     - integer :math:`\in [0, 1]`
+     - family history of asthma; 1 = at least one parent has asthma,
+       0 = neither parent has asthma
+   * - :math:`\beta_{\text{fhx}_0}`
+     - :math:`0.122`
+     - constant coefficient from Patrick et al. :cite:`patrick2020`
+   * - :math:`\beta_{\text{fhx}_\text{age}}`
+     - :math:`0.377`
+     - constant coefficient from Patrick et al. :cite:`patrick2020`
+   * - :math:`\log(\omega(f_{\lambda}))`
+     - log-odds :math:`\in \mathbb{R}`
+     - log-odds ratio for family history of asthma; from Patrick et al. :cite:`patrick2020`
 
 
 Solving for the Correction Term
