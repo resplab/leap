@@ -700,37 +700,6 @@ The predicted prevalence for an individual agent is:
     * - :math:`p(\lambda)`
       - the probability of the risk factor combination indexed by :math:`\lambda`
 
-Solving for the Correction Term
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The correction term :math:`\alpha` is solved once, prior to runtime, using the
-``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to find the value that minimises the
-difference between the population-weighted average asthma prevalence and the
-:ref:`Model 1 <occurrence-model-1>` target asthma prevalence:
-
-.. math::
-
-  \bar{p}_{\text{prev}} = \sum_{\lambda} \text{prop}(\lambda) \cdot p_{\text{prev},\lambda}
-
-where :math:`\text{prop}(\lambda)` is the proportion of the population with risk factor combination
-:math:`\lambda`.
-
-
-.. info:: Math: Prevalence Correction Term
-  :collapsible:
-
-  .. math::
-
-    \varphi_{\text{prev}} &= \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda} \\
-    &= \sum_{\lambda=0}^{n} p(\lambda) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha) 
-
-
-  We want to find a correction term :math:`\alpha` such that the predicted asthma prevalence
-  :math:`\varphi` is as close as possible to the predicted asthma prevalence :math:`\phi`. To do this,
-  we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the absolute
-  difference between :math:`\varphi` and :math:`\phi`.
-
-
 
 Age-dependent Odds Ratios for Prevalence
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -793,6 +762,37 @@ For prevalence, all odds ratio coefficients — including the age-dependent slop
 determined by the literature before calibration runs. The only quantity calibrated for
 prevalence is the scalar correction term :math:`\alpha`, which shifts the population-weighted
 average onto the :ref:`Model 1 <occurrence-model-1>` target :math:`\bar{p}_{\text{prev}}`.
+
+
+Solving for the Correction Term
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The correction term :math:`\alpha` is solved once, prior to runtime, using the
+``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to find the value that minimises the
+difference between the population-weighted average asthma prevalence and the
+:ref:`Model 1 <occurrence-model-1>` target asthma prevalence:
+
+.. math::
+
+  \bar{p}_{\text{prev}} = \sum_{\lambda} \text{prop}(\lambda) \cdot p_{\text{prev},\lambda}
+
+where :math:`\text{prop}(\lambda)` is the proportion of the population with risk factor combination
+:math:`\lambda`.
+
+
+.. info:: Math: Prevalence Correction Term
+  :collapsible:
+
+  .. math::
+
+    \varphi_{\text{prev}} &= \sum_{\lambda=0}^{n} p(\lambda) \varphi_{\lambda} \\
+    &= \sum_{\lambda=0}^{n} p(\lambda) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha) 
+
+
+  We want to find a correction term :math:`\alpha` such that the predicted asthma prevalence
+  :math:`\varphi` is as close as possible to the predicted asthma prevalence :math:`\phi`. To do this,
+  we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the absolute
+  difference between :math:`\varphi` and :math:`\phi`.
 
 
 .. _occurrence-model-2-incidence:
@@ -872,93 +872,6 @@ individual agent is:
     * - :math:`p(\lambda)`
       - the probability of the risk factor combination indexed by :math:`\lambda`
 
-
-Solving for the Correction Term
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The correction term :math:`\alpha` is solved once, prior to runtime, using the
-``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to find the value that minimises the
-difference between the population-weighted average asthma incidence and the
-:ref:`Model 1 <occurrence-model-1>` target asthma incidence:
-
-.. math::
-
-  \sum_{\lambda} \text{prop}_{\text{no asthma},\lambda}(t-1) \cdot p_{\text{inc},\lambda} = \bar{p}_{\text{inc}}
-
-where :math:`\text{prop}_{\text{no asthma},\lambda}(t-1)` is the proportion of the population who
-are asthma-free at :math:`t-1` and have risk factor combination :math:`\lambda`. Only
-asthma-free agents are included because incidence counts new diagnoses only.
-
-
-.. info:: Math: Incidence Correction Term
-  :collapsible:
-
-  In our model, asthma incidence is defined as the number of new diagnoses between the previous
-  timepoint and the current timepoint, divided by the total population. To calibrate the incidence,
-  we first find the calibrated prevalence for the previous timepoint:
-
-  .. math::
-
-    \varphi_{\text{prev}}(t-1) &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \varphi_{\text{prev}, \lambda}(t-1) \\
-    &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha)
-
-  Now, what we want to find is the joint probability of each risk factor combination,
-  :math:`p(\lambda, A = 0 \mid t-1)`, for the population without asthma.
-
-  .. math::
-
-    P(\lambda, A = 0) = P(A = 0 \mid \lambda) \cdot P(\lambda)
-
-  Now, we must have:
-
-  .. math::
-
-    P(A = 0 \mid \lambda) = 1 - P(A = 1 \mid \lambda) = 1 - \varphi_{\text{prev}, \lambda}(t-1)
-
-  So, we can rewrite the joint probability as:
-
-  .. math::
-
-    p(\lambda, A = 0 \mid t-1) = (1 - \varphi_{\text{prev}, \lambda}(t-1)) \cdot p(\lambda, t-1)
-
-
-  Next, we find the calibrated asthma incidence for the current timepoint:
-
-  .. math::
-
-    \varphi_{\text{inc}}(t) &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \varphi_{\text{inc}, \lambda}(t) \\
-    &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha)
-
-
-  where we recall that:
-
-  .. list-table::
-    :widths: 25 75
-    :header-rows: 1
-
-    * - Variable
-      - Description
-    * - :math:`\beta_{\phi} = \sigma^{-1}(\phi^{(i)}(t))`
-      - determined by the output of the first model
-    * - :math:`\phi^{(i)}(t)`
-      - defined above; the predicted incidence from the first model
-    * - :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda, A = 0 \mid t-1) \cdot \beta_{\lambda}`
-      - the correction / calibration term for the incidence
-    * - :math:`\varphi^{(i)} = \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \varphi_{\lambda}^{(i)}`
-      - predicted asthma incidence for the model. We want this to be as close as
-        possible to :math:`\phi^{(i)}`.
-    * - :math:`\varphi_{\lambda}^{(i)}`
-      - the predicted asthma incidence from the model for the risk factor combination
-        indexed by :math:`\lambda`
-    * - :math:`p(\lambda, A = 0 \mid t-1)`
-      - the joint probability of the risk factor combination indexed by :math:`\lambda`, for a
-        person who did not have asthma at time :math:`t-1`
-
-
-  We again want to find a correction term :math:`\alpha` such that the predicted asthma incidence
-  :math:`\varphi` is as close as possible to the asthma incidence from the first model, :math:`\phi`.
-  To do this, we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the
-  absolute difference between :math:`\varphi` and :math:`\phi`.
 
 .. _optimizing-beta-parameters:
 
@@ -1581,6 +1494,95 @@ as described in the :ref:`occurrence-model-2-processed-data` section below.
   .. math::
     \min \sum_{i=1}^{N}\sum_{\lambda=1}^{n}
       \dfrac{\left| \log(\hat{\omega}^{(i)}) - \log(\omega_{\lambda}^{(i)}) \right|}{N}
+
+
+
+Solving for the Correction Term
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The correction term :math:`\alpha` is solved once, prior to runtime, using the
+``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to find the value that minimises the
+difference between the population-weighted average asthma incidence and the
+:ref:`Model 1 <occurrence-model-1>` target asthma incidence:
+
+.. math::
+
+  \sum_{\lambda} \text{prop}_{\text{no asthma},\lambda}(t-1) \cdot p_{\text{inc},\lambda} = \bar{p}_{\text{inc}}
+
+where :math:`\text{prop}_{\text{no asthma},\lambda}(t-1)` is the proportion of the population who
+are asthma-free at :math:`t-1` and have risk factor combination :math:`\lambda`. Only
+asthma-free agents are included because incidence counts new diagnoses only.
+
+
+.. info:: Math: Incidence Correction Term
+  :collapsible:
+
+  In our model, asthma incidence is defined as the number of new diagnoses between the previous
+  timepoint and the current timepoint, divided by the total population. To calibrate the incidence,
+  we first find the calibrated prevalence for the previous timepoint:
+
+  .. math::
+
+    \varphi_{\text{prev}}(t-1) &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \varphi_{\text{prev}, \lambda}(t-1) \\
+    &= \sum_{\lambda=0}^{n} p(\lambda, t-1) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha)
+
+  Now, what we want to find is the joint probability of each risk factor combination,
+  :math:`p(\lambda, A = 0 \mid t-1)`, for the population without asthma.
+
+  .. math::
+
+    P(\lambda, A = 0) = P(A = 0 \mid \lambda) \cdot P(\lambda)
+
+  Now, we must have:
+
+  .. math::
+
+    P(A = 0 \mid \lambda) = 1 - P(A = 1 \mid \lambda) = 1 - \varphi_{\text{prev}, \lambda}(t-1)
+
+  So, we can rewrite the joint probability as:
+
+  .. math::
+
+    p(\lambda, A = 0 \mid t-1) = (1 - \varphi_{\text{prev}, \lambda}(t-1)) \cdot p(\lambda, t-1)
+
+
+  Next, we find the calibrated asthma incidence for the current timepoint:
+
+  .. math::
+
+    \varphi_{\text{inc}}(t) &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \varphi_{\text{inc}, \lambda}(t) \\
+    &= \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \sigma(\beta_{\phi} + \log(\omega_{\lambda}) - \alpha)
+
+
+  where we recall that:
+
+  .. list-table::
+    :widths: 25 75
+    :header-rows: 1
+
+    * - Variable
+      - Description
+    * - :math:`\beta_{\phi} = \sigma^{-1}(\phi^{(i)}(t))`
+      - determined by the output of the first model
+    * - :math:`\phi^{(i)}(t)`
+      - defined above; the predicted incidence from the first model
+    * - :math:`\alpha = \sum_{\lambda=1}^{n} p(\lambda, A = 0 \mid t-1) \cdot \beta_{\lambda}`
+      - the correction / calibration term for the incidence
+    * - :math:`\varphi^{(i)} = \sum_{\lambda=0}^{n} p(\lambda, A = 0 \mid t-1) \varphi_{\lambda}^{(i)}`
+      - predicted asthma incidence for the model. We want this to be as close as
+        possible to :math:`\phi^{(i)}`.
+    * - :math:`\varphi_{\lambda}^{(i)}`
+      - the predicted asthma incidence from the model for the risk factor combination
+        indexed by :math:`\lambda`
+    * - :math:`p(\lambda, A = 0 \mid t-1)`
+      - the joint probability of the risk factor combination indexed by :math:`\lambda`, for a
+        person who did not have asthma at time :math:`t-1`
+
+
+  We again want to find a correction term :math:`\alpha` such that the predicted asthma incidence
+  :math:`\varphi` is as close as possible to the asthma incidence from the first model, :math:`\phi`.
+  To do this, we use the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to minimize the
+  absolute difference between :math:`\varphi` and :math:`\phi`.
 
 
 .. _occurrence-model-2-processed-data:
