@@ -781,11 +781,6 @@ interpolation between those two points on the log-odds ratio scale:
 
 For ages above 5, the odds ratio is held constant at the age-5 value.
 
-
-The only quantity calibrated for prevalence is the scalar correction term :math:`\alpha`, which
-shifts the population-weighted average onto the :ref:`Model 1 <occurrence-model-1>` target
-:math:`\bar{p}_{\text{prev}}`.
-
 .. list-table::
    :widths: 20 20 60
    :header-rows: 1
@@ -814,8 +809,10 @@ shifts the population-weighted average onto the :ref:`Model 1 <occurrence-model-
 Solving for the Correction Term
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The correction term :math:`\alpha` is solved once, prior to runtime, using the
-``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to find the value that minimises the
+The only quantity calibrated for prevalence is the scalar correction term :math:`\alpha`, which
+shifts the population-weighted average onto the :ref:`Model 1 <occurrence-model-1>` target
+:math:`\bar{p}_{\text{prev}}`. The correction term :math:`\alpha` is solved once, prior to runtime,
+using the ``Broyden-Fletcher-Goldfarb-Shanno (BFGS)`` algorithm to find the value that minimises the
 difference between the population-weighted average asthma prevalence and the
 :ref:`Model 1 <occurrence-model-1>` target asthma prevalence:
 
