@@ -378,11 +378,11 @@ Computing :math:`\alpha` requires knowing :math:`\log(\omega_{\text{fhx}})` and
 :math:`\log(\omega_{\text{abx}})` for each risk factor combination :math:`\lambda` at each
 (age, sex, timepoint) stratum, since these determine the individual-level probabilities that must be
 population-weighted to match the :ref:`Model 1 <occurrence-model-1>` targets :math:`\bar{p}_{\text{prev}}` and
-:math:`\bar{p}_{\text{inc}}`. The log-ORs depend on age-dependent slope parameters
+:math:`\bar{p}_{\text{inc}}`. The log-odds ratios depend on age-dependent slope parameters
 :math:`\beta_{\lambda,\text{age}}`, which are known from the literature for prevalence but
 must be estimated for incidence — which creates the following sequence:
 
-1. **Prevalence calibration.** The age-dependent OR slope coefficients
+1. **Prevalence calibration.** The age-dependent odds ratio slope coefficients
    (:math:`\beta_{\text{fhx,age}}`, :math:`\beta_{\text{abx,age}}`) for prevalence are
    derived directly from the literature, so :math:`\log(\omega_{\text{fhx}})` and
    :math:`\log(\omega_{\text{abx}})` are fully determined at each age. 
@@ -392,20 +392,20 @@ must be estimated for incidence — which creates the following sequence:
    :math:`\bar{p}_{\text{prev}}`.
 
 2. **Incidence** :math:`\beta_{\lambda,\text{age}}` **estimation.** Because no published
-   studies provide age-dependent OR slopes for incidence, these are estimated by optimisation
+   studies provide age-dependent odds ratio slopes for incidence, these are estimated by optimisation
    under two constraining assumptions: the intercept :math:`\beta_0` and antibiotic dose
-   coefficient :math:`\beta_{\text{abx,dose}}` in the incidence OR equations are inherited
+   coefficient :math:`\beta_{\text{abx,dose}}` in the incidence odds ratio equations are inherited
    directly from the prevalence values and held fixed — only the age slopes
    :math:`\beta_{\text{fhx,age}}` and :math:`\beta_{\text{abx,age}}` are free to vary; and
-   the prevalence and incidence OR equations are equal at age 3, which is guaranteed by the
+   the prevalence and incidence odds ratio equations are equal at age 3, which is guaranteed by the
    shared intercepts. The optimiser is initialised from the prevalence slope values and finds
    the age slopes that simultaneously satisfy two conditions: (i) the average incidence
    across risk factor combinations :math:`\lambda`, weighted by their population proportions
    :math:`\text{prop}(\lambda)` within each (age, sex, timepoint) stratum, matches :math:`\bar{p}_{\text{inc}}`
-   from :ref:`Model 1 <occurrence-model-1>`; and (ii) the ORs implied by
+   from :ref:`Model 1 <occurrence-model-1>`; and (ii) the odds ratios implied by
    the :ref:`contingency tables <optimizing-beta-parameters>` simulated forward one timepoint
    from the calibrated prevalence distribution at age :math:`t-1` match the
-   literature-derived prevalence ORs across age groups. The converged slopes are saved to
+   literature-derived prevalence odds ratios across age groups. The converged slopes are saved to
    ``occurrence_calibration_parameters.json``.
 
 3. **Incidence calibration.** With the estimated :math:`\beta_{\lambda,\text{age}}` slopes
@@ -591,7 +591,7 @@ risk factor has :math:`\omega` times the odds of having asthma compared to a per
 
 We work in log-odds (logit) space rather than probability space because log-odds are additive:
 the combined effect of independent risk factors is simply the sum of their individual
-log-odds contributions. Because independent ORs are multiplicative, their logarithms are additive:
+log-odds contributions. Because independent odds ratios are multiplicative, their logarithms are additive:
 
 .. math::
 
@@ -623,7 +623,7 @@ log-odds contributions. Because independent ORs are multiplicative, their logari
 Prevalence
 --------------------------------------------
 
-Applying individual risk factor ORs directly to the :ref:`Model 1 <occurrence-model-1>` log-odds would shift the
+Applying individual risk factor odds ratios directly to the :ref:`Model 1 <occurrence-model-1>` log-odds would shift the
 population-weighted average probability away from the target :math:`\bar{p}_{\text{prev}}`. The calibration
 term :math:`\alpha` corrects for this: it is a single scalar per (age, sex, timepoint) stratum that
 shifts the baseline log-odds so that the population-weighted average of :math:`p_{\text{prev}}`
@@ -652,11 +652,11 @@ The predicted prevalence for an individual agent is:
    * - :math:`\log(\omega_{\text{fhx}})`
      - log-odds :math:`\in \mathbb{R}`
      - Input
-     - log-OR for family history of asthma; from Patrick et al. :cite:`patrick2020`
+     - log-odds ratio for family history of asthma; from Patrick et al. :cite:`patrick2020`
    * - :math:`\log(\omega_{\text{abx}})`
      - log-odds :math:`\in \mathbb{R}`
      - Input
-     - log-OR for antibiotic exposure in infancy; from Lee et al. :cite:`lee2024`
+     - log-odds ratio for antibiotic exposure in infancy; from Lee et al. :cite:`lee2024`
    * - :math:`\alpha`
      - log-odds :math:`\in \mathbb{R}`
      - Intermediate
@@ -735,13 +735,13 @@ where :math:`\text{prop}(\lambda)` is the proportion of the population with risk
 Age-dependent Odds Ratios for Prevalence
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The log-ORs for each risk factor are age-dependent — their functional forms and fixed
+The log-odds ratios for each risk factor are age-dependent — their functional forms and fixed
 coefficients are derived from external published studies.
 
 Antibiotic Exposure
 ~~~~~~~~~~~~~~~~~~~~
 
-The antibiotic log-OR was derived by Lee et al. :cite:`lee2024` using a random effects
+The antibiotic log-odds ratio was derived by Lee et al. :cite:`lee2024` using a random effects
 meta-regression model. It applies only to children aged 7 or under who received antibiotics
 in infancy, and is zero otherwise:
 
@@ -767,10 +767,10 @@ from the Lee et al. meta-regression, which estimated age as an explicit covariat
 Family History
 ~~~~~~~~~~~~~~~~
 
-The family history log-OR was derived from the ``CHILD Study`` by Patrick et al.
+The family history log-odds ratio was derived from the ``CHILD Study`` by Patrick et al.
 :cite:`patrick2020` using logistic regression. See :ref:`family-history-model` for how the
 family history risk factor is assigned to agents and how :math:`p = 0.2927` is estimated from
-the same study. The log-OR applies to all ages but the age-dependent component plateaus at age 5:
+the same study. The log-odds ratio applies to all ages but the age-dependent component plateaus at age 5:
 
 .. math::
 
@@ -779,17 +779,17 @@ the same study. The log-OR applies to all ages but the age-dependent component p
     \beta_{\text{fhx}_\text{age}} \cdot (\min(a_i, 5) - 3) \cdot f_i
 
 where :math:`f_i = 1` if at least one parent has asthma, 0 otherwise. Both coefficients
-are derived from the two empirical ORs reported by Patrick et al. at ages 3 and 5 —
+are derived from the two empirical odds ratios reported by Patrick et al. at ages 3 and 5 —
 OR = 1.13 at age 3 and OR = 2.40 at age 5. The age-dependent slope is the linear
-interpolation between those two points on the log-OR scale:
+interpolation between those two points on the log-odds ratio scale:
 
 * :math:`\beta_{\text{fhx}_0} = \log(1.13) = 0.122`
 * :math:`\beta_{\text{fhx}_\text{age}} = \dfrac{\log(2.40) - \log(1.13)}{2} = 0.377`
 
-For ages above 5, the OR is held constant at the age-5 value.
+For ages above 5, the odds ratio is held constant at the age-5 value.
 
 
-For prevalence, all OR coefficients — including the age-dependent slopes — are fully
+For prevalence, all odds ratio coefficients — including the age-dependent slopes — are fully
 determined by the literature before calibration runs. The only quantity calibrated for
 prevalence is the scalar correction term :math:`\alpha`, which shifts the population-weighted
 average onto the :ref:`Model 1 <occurrence-model-1>` target :math:`\bar{p}_{\text{prev}}`.
@@ -823,11 +823,11 @@ individual agent is:
    * - :math:`\log(\omega_{\text{fhx}})`
      - log-odds :math:`\in \mathbb{R}`
      - Input
-     - log-OR for family history of asthma; from Patrick et al. :cite:`patrick2020`
+     - log-odds ratio for family history of asthma; from Patrick et al. :cite:`patrick2020`
    * - :math:`\log(\omega_{\text{abx}})`
      - log-odds :math:`\in \mathbb{R}`
      - Input
-     - log-OR for antibiotic exposure in infancy; from Lee et al. :cite:`lee2024`
+     - log-odds ratio for antibiotic exposure in infancy; from Lee et al. :cite:`lee2024`
    * - :math:`\alpha`
      - log-odds :math:`\in \mathbb{R}`
      - Intermediate
@@ -971,9 +971,9 @@ incidence. Instead, the slopes are estimated by optimisation under two constrain
 assumptions:
 
 * The intercept :math:`\beta_0` and antibiotic dose coefficient :math:`\beta_{\text{abx,dose}}`
-  in the incidence OR equations are **inherited from prevalence** and held fixed. Only the age
+  in the incidence odds ratio equations are **inherited from prevalence** and held fixed. Only the age
   slopes :math:`\beta_{\text{fhx,age}}` and :math:`\beta_{\text{abx,age}}` are free to vary.
-* The prevalence and incidence OR equations are **equal at age 3**, which is guaranteed by
+* The prevalence and incidence odds ratio equations are **equal at age 3**, which is guaranteed by
   sharing the same intercept.
 
 The optimiser is initialised from the corresponding prevalence slope values and must
@@ -982,12 +982,12 @@ simultaneously satisfy two conditions:
 1. The average incidence across risk factor combinations :math:`\lambda`, weighted by their
    population proportions :math:`\text{prop}(\lambda)` within each (age, sex, timepoint) stratum, matches
    the :ref:`Model 1 <occurrence-model-1>` target :math:`\bar{p}_{\text{inc}}`.
-2. The ORs implied by the contingency tables — simulated forward one timepoint from the calibrated
-   prevalence distribution at age :math:`t-1` — match the literature-derived prevalence ORs
+2. The odds ratios implied by the contingency tables — simulated forward one timepoint from the calibrated
+   prevalence distribution at age :math:`t-1` — match the literature-derived prevalence odds ratios
    across age groups.
 
 Condition 2 ensures that introducing individual-level incidence risk does not distort the
-aggregate OR structure established by the prevalence literature.
+aggregate odds ratio structure established by the prevalence literature.
 See :ref:`contingency-tables` for an introduction to contingency tables and worked examples.
 
 To evaluate condition 2, we track a cohort across one timepoint using contingency tables of
@@ -995,12 +995,12 @@ risk factor combination :math:`\lambda` against asthma diagnosis. The labels :ma
 :math:`t=1` denote two consecutive timepoints. The procedure is:
 
 1. **Build the baseline table at** :math:`t=0` so that its odds ratio equals the (literature-anchored)
-   prevalence OR at the previous timepoint.
+   prevalence odds ratio at the previous timepoint.
 2. **Step forward one timepoint** by applying reassessment to those who already had asthma and
    **new incidence — computed with the candidate age-slopes** :math:`\beta_{\lambda,\text{age}}` —
    to those who did not, producing the combined table at :math:`t=1`.
-3. **Compare** the odds ratio of that combined table (the prevalence OR the model actually
-   produces at age :math:`a`) against the target prevalence OR, and adjust
+3. **Compare** the odds ratio of that combined table (the prevalence odds ratio the model actually
+   produces at age :math:`a`) against the target prevalence odds ratio, and adjust
    :math:`\beta_{\lambda,\text{age}}` until they match.
 
 The four tables below build this up step by step, and the diagram summarises the flow.
@@ -1565,12 +1565,12 @@ Optimization
 
 We want to find the age-dependent slope values (:math:`\beta_{\lambda, \text{age}}`) 
 that minimize the mean absolute difference between :math:`\log(\hat{\omega})`
-and :math:`\log(\omega_{\lambda})` — the fixed, age-dependent log-ORs for prevalence sourced from
+and :math:`\log(\omega_{\lambda})` — the fixed, age-dependent log-odds ratios for prevalence sourced from
 external studies — averaged across all age groups and all 7 non-baseline risk factor combinations.
 
 Once optimised, these slopes (:math:`\beta_{\lambda, \text{age}}`) are used
 to compute :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
-each (age, sex, timepoint) stratum. BFGS then uses those stratum-specific log-ORs to solve for
+each (age, sex, timepoint) stratum. BFGS then uses those stratum-specific log-odds ratios to solve for
 the calibration term :math:`\alpha` per stratum, which is stored in
 `asthma_occurrence_correction.csv <https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/asthma_occurrence_correction.csv>`_
 as described in the :ref:`occurrence-model-2-processed-data` section below.
