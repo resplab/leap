@@ -1367,25 +1367,19 @@ From these values, we can compute the odds ratio:
 Optimization
 ~~~~~~~~~~~~~
 
-We want to find the age-dependent slope values (:math:`\beta_{\lambda, \text{age}}`) 
-that minimize the mean absolute difference between :math:`\log(\hat{\omega})`
-and :math:`\log(\omega_{\lambda})` — the fixed, age-dependent log-odds ratios for prevalence sourced from
-external studies — averaged across all age groups and all 7 non-baseline risk factor combinations.
+We want to find the age-dependent coefficients (:math:`\beta_{\lambda, \text{age}}`) 
+that minimize the mean absolute difference between the predicted log odds ratio :math:`\log(\hat{\omega})`
+and the observed log odds ratio :math:`\log(\omega_{\lambda})`,
+averaged across all age groups and all 7 non-baseline risk factor combinations:
 
-Once optimised, these slopes (:math:`\beta_{\lambda, \text{age}}`) are used
-to compute :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
-each (age, sex, timepoint) stratum. BFGS then uses those stratum-specific log-odds ratios to solve for
-the calibration term :math:`\alpha` per stratum, which is stored in
-`asthma_occurrence_correction.csv <https://github.com/resplab/leap/blob/main/leap/processed_data/time_delta_365/asthma_occurrence_correction.csv>`_
-as described in the :ref:`occurrence-model-2-processed-data` section below.
+.. math::
 
-.. info:: Math: Optimization
-  :collapsible:
-
-  .. math::
     \min \sum_{i=1}^{N}\sum_{\lambda=1}^{n}
-      \dfrac{\left| \log(\hat{\omega}^{(i)}) - \log(\omega_{\lambda}^{(i)}) \right|}{N}
+        \dfrac{\left| \log(\hat{\omega}^{(i)}) - \log(\omega_{\lambda}^{(i)}) \right|}{N}
 
+Once optimised, these coefficients (:math:`\beta_{\lambda, \text{age}}`) are used
+to compute :math:`\log(\omega_{\text{fhx}})` and :math:`\log(\omega_{\text{abx}})` for
+each (age, sex, timepoint) stratum.
 
 
 Solving for the Correction Term
