@@ -1340,6 +1340,12 @@ at the end of the time interval:
             <td><code class="notranslate">d1</code></td>
             <td><code class="notranslate">n0</code></td>
         </tr>
+        <tr>
+            <td></td>
+            <td><code class="notranslate">n2</code></td>
+            <td></td>
+            <td><code class="notranslate">n</code></td>
+        </tr>
         </tbody>
     </table>
 
@@ -1357,51 +1363,6 @@ From these values, we can compute the odds ratio:
 .. math::
     \hat{\omega} = \dfrac{a_1 \cdot d_1}{b_1 \cdot c_1}
 
-
-.. info:: Math: Combined Contingency Table
-  :collapsible:
-
-  .. raw:: html
-
-      <table class="table">
-          <thead>
-          <tr>
-              <th></th>
-              <th>asthma, outcome +</th>
-              <th>asthma, outcome -</th>
-              <th></th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-              <td>risk factor <code class="notranslate">λ</code>, outcome +</td>
-              <td><code class="notranslate">a1</code></td>
-              <td><code class="notranslate">b1</code></td>
-              <td><code class="notranslate">n1</code></td>
-          </tr>
-          <tr>
-              <td>risk factor <code class="notranslate">λ</code>, outcome -</td>
-              <td><code class="notranslate">c1</code></td>
-              <td><code class="notranslate">d1</code></td>
-              <td></td>
-          </tr>
-          <tr>
-              <td></td>
-              <td><code class="notranslate">n2</code></td>
-              <td></td>
-              <td><code class="notranslate">n</code></td>
-          </tr>
-          </tbody>
-      </table>
-
-
-  where:
-
-  .. math::
-      a_1 &= a_{1, \text{ra}} + a_{1, \text{dx}} \\
-      b_1 &= b_{1, \text{ra}} + b_{1, \text{dx}} \\
-      c_1 &= c_{1, \text{ra}} + c_{1, \text{dx}} \\
-      d_1 &= d_{1, \text{ra}} + d_{1, \text{dx}}
 
 Optimization
 ~~~~~~~~~~~~~
