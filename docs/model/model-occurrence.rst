@@ -1035,108 +1035,59 @@ Baseline Contingency Table (t=0)
     </table>
 
 
-Since the table is 2×2, we compare one risk factor combination at a time against the
+Since the table is :math:`2 \times 2`, we compare one risk factor combination at a time against the
 no-risk-factor baseline (:math:`\lambda = 0`, i.e. no family history and no antibiotic
 exposure). This produces 7 separate tables — one for each non-baseline combination. The
 non-binary nature of antibiotic dose is handled implicitly through the :math:`\lambda`
 indexing: dose levels 1, 2, and 3 each appear as distinct combinations and are each
 compared independently against the baseline rather than against each other.
 
-For each comparison, let :math:`N` be the total population across all risk factor
-combinations (a hypothetical size, e.g. 100,000 — the odds ratio is scale-invariant).
-The row and column totals are then:
+We want to calculate :math:`a_0`, :math:`b_0`, :math:`c_0`, and :math:`d_0` using :math:`n_1`,
+:math:`n_2`, :math:`n`, and :math:`\omega_{\lambda}`. We have the probabilities of each of the
+risk factor combinations, :math:`p(\lambda)`, but for the contingency table, we only want to
+consider one risk factor combination at a time. To do this, we compute the conditional probability:
 
 .. math::
 
-    n_1 &= \text{prop}(\lambda) \cdot N \\
-    n_0 &= \text{prop}(0) \cdot N \\
-    n   &= n_1 + n_0 \\
-    n_2 &= p_{\text{prev},\lambda} \cdot n_1 + p_{\text{prev},0} \cdot n_0
+    p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) = 
+      \dfrac{p(\Lambda = \lambda)}{p(\Lambda = \lambda) + p(\Lambda = 0)}
 
-where :math:`n_1` is the number of people with risk factor :math:`\lambda`, :math:`n_0` is
-the number with no risk factors, :math:`n` is the grand total of the 2×2 table, and
-:math:`n_2` is the total number with asthma across both groups.
+To obtain :math:`n_0`, the number of people with no risk factors, we multiply the conditional
+probability by the total population :math:`n`:
+
+.. math::
+    n_0 = p(\Lambda = 0 \mid \Lambda \in \{0, \lambda\}) \cdot n
+
+To obtain :math:`n_1`, the number of people with risk factor combination :math:`\lambda` with or
+without an asthma diagnosis, we multiply the conditional probability by the total population
+:math:`n`:
+
+.. math::
+    n_1 = p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) \cdot n
+
+
+To obtain :math:`n_2`, the number of people diagnosed with asthma with or without risk factor
+combination :math:`\lambda`:
+
+.. math::
+    n_2 = (1 - p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\})) \cdot \varphi_{\text{prev}, 0}(t=0) \cdot n +
+      p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) \cdot \varphi_{\text{prev}, \lambda}(t=0) \cdot n
+
 
 Given :math:`n_1`, :math:`n_0`, :math:`n_2`, :math:`n`, and the odds ratio :math:`\omega_\lambda`, we
-solve for the cell count :math:`a_0` (people with both risk factor :math:`\lambda` and
-asthma) such that the implied odds ratio of the table matches :math:`\omega_\lambda`. This
-is a non-trivial solve because all four cells are simultaneously constrained by the marginal
+solve for :math:`a_0`, the number people with both risk factor :math:`\lambda` and
+asthma, such that the implied odds ratio of the table matches :math:`\omega_\lambda`. This
+is a non-trivial solve because all four variables are simultaneously constrained by the marginal
 totals and the odds ratio — we use the method from Di Pietrantonj (2006)
-:cite:`dipietrantonj2006`. The remaining cells follow directly from :math:`a_0` and the
-marginal totals.
+:cite:`dipietrantonj2006`. See :doc:`conv_2x2 <../dev/api/data_generation/leap.data_generation.utils>` for the Python
+implementation of this method. The remaining variables follow directly from :math:`a_0` and the
+marginal totals:
 
-.. info:: Math: Baseline Contingency Table
-  :collapsible:
+.. math::
 
-  .. raw:: html
-
-      <table class="table">
-          <thead>
-          <tr>
-              <th></th>
-              <th>variable 2, outcome +</th>
-              <th>variable 2, outcome -</th>
-              <th></th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-              <td>variable 1, outcome +</td>
-              <td><code class="notranslate">a0</code></td>
-              <td><code class="notranslate">b0</code></td>
-              <td><code class="notranslate">n1</code></td>
-          </tr>
-          <tr>
-              <td>variable 1, outcome -</td>
-              <td><code class="notranslate">c0</code></td>
-              <td><code class="notranslate">d0</code></td>
-              <td></td>
-          </tr>
-          <tr>
-              <td></td>
-              <td><code class="notranslate">n2</code></td>
-              <td></td>
-              <td><code class="notranslate">n</code></td>
-          </tr>
-          </tbody>
-      </table>
-
-
-  We want to calculate :math:`a_0`, :math:`b_0`, :math:`c_0`, and :math:`d_0` using :math:`n_1`,
-  :math:`n_2`, :math:`n`, and :math:`\omega_{\lambda}`. Now, we have the probabilities of each of the
-  risk factor combinations, :math:`p(\lambda)`, but for the contingency table, we only want to
-  consider one risk factor combination at a time. To do this, we compute the conditional probability:
-
-  .. math::
-
-      p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) = 
-        \dfrac{p(\Lambda = \lambda)}{p(\Lambda = \lambda) + p(\Lambda = 0)}
-
-  To obtain :math:`n_1`, the number of people with risk factor combination :math:`\lambda` with or
-  without an asthma diagnosis, we multiply the conditional probability by the total population
-  :math:`n`:
-
-  .. math::
-      n_1 = p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) \cdot n
-
-  To obtain :math:`n_2`, the number of people diagnosed with asthma with or without risk factor
-  combination :math:`\lambda`:
-
-  .. math::
-      n_2 = (1 - p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\})) \cdot \varphi_{\text{prev}, 0}(t=0) \cdot n +
-        p(\Lambda = \lambda \mid \Lambda \in \{0, \lambda\}) \cdot \varphi_{\text{prev}, \lambda}(t=0) \cdot n
-
-  From this, we can calculate the values for the contingency table:
-
-  .. math::
-
-      b_0 &= n_1 - a_0 \\
-      c_0 &= n_2 - a_0 \\
-      d_0 &= n - n_1 - n_2 - a_0
-
-  To obtain :math:`a_0`, we follow the methods described in the paper :cite:`dipietrantonj2006`.
-  See :doc:`conv_2x2 <../dev/api/data_generation/leap.data_generation.utils>` for the Python
-  implementation of this method.
+    b_0 &= n_1 - a_0 \\
+    c_0 &= n_2 - a_0 \\
+    d_0 &= n - n_1 - n_2 - a_0  
 
 
 Existing Diagnoses: Reassessment at t=1
