@@ -1200,8 +1200,8 @@ New Diagnoses at t=1
 
 This table tracks what happens at :math:`t=1` to the :math:`b_0 + d_0` people who were
 asthma-free at :math:`t=0`. Each person may receive a new diagnosis based on their
-incidence probability: :math:`p_{\text{inc},\lambda}` for those with risk factor
-:math:`\lambda`, and :math:`p_{\text{inc},0}` for those with no risk factors.
+incidence probability: :math:`\varphi_{\text{inc},\lambda}` for those with risk factor
+:math:`\lambda`, and :math:`\varphi_{\text{inc},0}` for those with no risk factors.
 
 .. raw:: html
 
@@ -1219,74 +1219,32 @@ incidence probability: :math:`p_{\text{inc},\lambda}` for those with risk factor
             <td>risk factor &lambda; +</td>
             <td><code class="notranslate">a1_new</code></td>
             <td><code class="notranslate">b1_new</code></td>
-            <td><code class="notranslate">b0</code></td>
+            <td><code class="notranslate">n1 = b0</code></td>
         </tr>
         <tr>
             <td>risk factor &lambda; -</td>
             <td><code class="notranslate">c1_new</code></td>
             <td><code class="notranslate">d1_new</code></td>
-            <td><code class="notranslate">d0</code></td>
+            <td><code class="notranslate">n0 = d0</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code class="notranslate">n2</code></td>
+            <td></td>
+            <td><code class="notranslate">n</code></td>
         </tr>
         </tbody>
     </table>
 
 .. math::
-    a_{1, \text{new}} &= b_0 \cdot p_{\text{inc},\lambda} \\
-    b_{1, \text{new}} &= b_0 \cdot (1 - p_{\text{inc},\lambda}) \\
-    c_{1, \text{new}} &= d_0 \cdot p_{\text{inc},0} \\
-    d_{1, \text{new}} &= d_0 \cdot (1 - p_{\text{inc},0})
+    a_{1, \text{new}} &= b_0 \cdot \varphi_{\text{inc}, \lambda}(t=1) \\
+    b_{1, \text{new}} &= b_0 \cdot (1 - \varphi_{\text{inc}, \lambda}(t=1)) \\
+    c_{1, \text{new}} &= d_0 \cdot \varphi_{\text{inc}, 0}(t=1) \\
+    d_{1, \text{new}} &= d_0 \cdot (1 - \varphi_{\text{inc}, 0}(t=1))
 
 
-.. info:: Math: New Diagnoses Contingency Table
+.. info:: Variables: New Diagnoses Contingency Table
   :collapsible:
-
-
-  For the reassessment table, we considered only the patients who were diagnosed with asthma.
-  We will now consider those who were not diagnosed with asthma:
-
-  .. raw:: html
-
-      <table class="table">
-          <thead>
-          <tr>
-              <th></th>
-              <th>asthma, outcome +</th>
-              <th>asthma, outcome -</th>
-              <th></th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-              <td>risk factor <code class="notranslate">λ</code>, outcome +</td>
-              <td><code class="notranslate">a1_dx</code></td>
-              <td><code class="notranslate">b1_dx</code></td>
-              <td><code class="notranslate">n1</code></td>
-          </tr>
-          <tr>
-              <td>risk factor <code class="notranslate">λ</code>, outcome -</td>
-              <td><code class="notranslate">c1_dx</code></td>
-              <td><code class="notranslate">d1_dx</code></td>
-              <td></td>
-          </tr>
-          <tr>
-              <td></td>
-              <td><code class="notranslate">n2</code></td>
-              <td></td>
-              <td><code class="notranslate">n</code></td>
-          </tr>
-          </tbody>
-      </table>
-
-
-  To calculate the updated contingency table, we have:
-
-  .. math::
-      a_{1, \text{dx}} &= b_0 \cdot \varphi_{\text{inc}, \lambda}(t=1) \\
-      b_{1, \text{dx}} &= b_0 \cdot (1 - \varphi_{\text{inc}, \lambda}(t=1)) \\
-      c_{1, \text{dx}} &= d_0 \cdot \varphi_{\text{inc}, 0}(t=1) \\
-      d_{1, \text{dx}} &= d_0 \cdot (1 - \varphi_{\text{inc}, 0}(t=1))
-
-  where:
 
   .. raw:: html
 
@@ -1307,28 +1265,28 @@ incidence probability: :math:`p_{\text{inc},\lambda}` for those with risk factor
           </thead>
           <tbody>
           <tr>
-              <td><code class="notranslate">a1_dx</code></td>
+              <td><code class="notranslate">a1_new</code></td>
               <td><code class="notranslate">λ</code></td>
               <td>no asthma diagnosis</td>
               <td>new asthma diagnosis</td>
               <td>asthma</td>
           </tr>
           <tr>
-              <td><code class="notranslate">b1_dx</code></td>
+              <td><code class="notranslate">b1_new</code></td>
               <td><code class="notranslate">λ</code></td>
               <td>no asthma diagnosis</td>
               <td>no new asthma diagnosis</td>
               <td>no asthma</td>
           </tr>
           <tr>
-              <td><code class="notranslate">c1_dx</code></td>
+              <td><code class="notranslate">c1_new</code></td>
               <td>None</td>
               <td>no asthma diagnosis</td>
               <td>new asthma diagnosis</td>
               <td>asthma</td>
           </tr>
           <tr>
-              <td><code class="notranslate">d1_dx</code></td>
+              <td><code class="notranslate">d1_new</code></td>
               <td>None</td>
               <td>no asthma diagnosis</td>
               <td>no new asthma diagnosis</td>
@@ -1337,16 +1295,16 @@ incidence probability: :math:`p_{\text{inc},\lambda}` for those with risk factor
           </tbody>
       </table>
 
-  * :math:`a_{1, \text{dx}}` is the proportion of the population with risk factor combination :math:`\lambda`
+  * :math:`a_{1, \text{new}}` is the proportion of the population with risk factor combination :math:`\lambda`
     who didn't have an asthma diagnosis at :math:`t=0` and were diagnosed at :math:`t=1`
     :math:`\rightarrow` have asthma at :math:`t=1`
-  * :math:`b_{1, \text{dx}}` is the proportion of the population with risk factor combination :math:`\lambda`
+  * :math:`b_{1, \text{new}}` is the proportion of the population with risk factor combination :math:`\lambda`
     who didn't have an asthma diagnosis at :math:`t=0` and were not diagnosed with asthma at :math:`t=1`,
     :math:`\rightarrow` don't have asthma at :math:`t=1`
-  * :math:`c_{1, \text{dx}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
+  * :math:`c_{1, \text{new}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
     who didn't have an asthma diagnosis at :math:`t=0` and were diagnosed at :math:`t=1`
     :math:`\rightarrow` have asthma at :math:`t=1`
-  * :math:`d_{1, \text{dx}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
+  * :math:`d_{1, \text{new}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
     who didn't have an asthma diagnosis at :math:`t=0` and were not diagnosed with asthma at
     :math:`t=1`, :math:`\rightarrow` don't have asthma at :math:`t=1`
 
