@@ -1115,13 +1115,19 @@ baseline cell scaled by :math:`\rho` (retained) or :math:`1 - \rho` (lost):
             <td>risk factor &lambda; +</td>
             <td><code class="notranslate">a1_existing</code></td>
             <td><code class="notranslate">b1_existing</code></td>
-            <td><code class="notranslate">a0</code></td>
+            <td><code class="notranslate">n1 = a0</code></td>
         </tr>
         <tr>
             <td>risk factor &lambda; -</td>
             <td><code class="notranslate">c1_existing</code></td>
             <td><code class="notranslate">d1_existing</code></td>
-            <td><code class="notranslate">c0</code></td>
+            <td><code class="notranslate">n0 = c0</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code class="notranslate">n2</code></td>
+            <td></td>
+            <td><code class="notranslate">n</code></td>
         </tr>
         </tbody>
     </table>
@@ -1135,51 +1141,8 @@ baseline cell scaled by :math:`\rho` (retained) or :math:`1 - \rho` (lost):
 where :math:`\rho` is the probability of retaining an asthma diagnosis from one timepoint to the
 next, applied equally regardless of risk factor status.
 
-.. info:: Math: Reassessment Contingency Table
+.. info:: Variables: Reassessment Contingency Table
   :collapsible:
-
-  .. raw:: html
-
-      <table class="table">
-          <thead>
-          <tr>
-              <th></th>
-              <th>asthma, outcome +</th>
-              <th>asthma, outcome -</th>
-              <th></th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-              <td>risk factor <code class="notranslate">λ</code>, outcome +</td>
-              <td><code class="notranslate">a1_ra</code></td>
-              <td><code class="notranslate">b1_ra</code></td>
-              <td><code class="notranslate">n1</code></td>
-          </tr>
-          <tr>
-              <td>risk factor <code class="notranslate">λ</code>, outcome -</td>
-              <td><code class="notranslate">c1_ra</code></td>
-              <td><code class="notranslate">d1_ra</code></td>
-              <td></td>
-          </tr>
-          <tr>
-              <td></td>
-              <td><code class="notranslate">n2</code></td>
-              <td></td>
-              <td><code class="notranslate">n</code></td>
-          </tr>
-          </tbody>
-      </table>
-
-  To calculate the updated contingency table, we have:
-
-  .. math::
-      a_{1, \text{ra}} &= a_0 \cdot \rho \\
-      b_{1, \text{ra}} &= a_0 \cdot (1 - \rho) \\
-      c_{1, \text{ra}} &= c_0 \cdot \rho \\
-      d_{1, \text{ra}} &= c_0 \cdot (1 - \rho)
-
-  where:
 
   .. raw:: html
 
@@ -1194,25 +1157,25 @@ next, applied equally regardless of risk factor status.
           </thead>
           <tbody>
           <tr>
-              <td><code class="notranslate">a1_ra</code></td>
+              <td><code class="notranslate">a1_existing</code></td>
               <td><code class="notranslate">λ</code></td>
               <td>has asthma diagnosis</td>
               <td>reassessed: has asthma diagnosis</td>
           </tr>
           <tr>
-              <td><code class="notranslate">b1_ra</code></td>
+              <td><code class="notranslate">b1_existing</code></td>
               <td><code class="notranslate">λ</code></td>
               <td>has asthma diagnosis</td>
               <td>reassessed: no asthma diagnosis</td>
           </tr>
           <tr>
-              <td><code class="notranslate">c1_ra</code></td>
+              <td><code class="notranslate">c1_existing</code></td>
               <td>None</td>
               <td>has asthma diagnosis</td>
               <td>reassessed: has asthma diagnosis</td>
           </tr>
           <tr>
-              <td><code class="notranslate">d1_ra</code></td>
+              <td><code class="notranslate">d1_existing</code></td>
               <td>None</td>
               <td>has asthma diagnosis</td>
               <td>reassessed: no asthma diagnosis</td>
@@ -1220,13 +1183,13 @@ next, applied equally regardless of risk factor status.
           </tbody>
       </table>
 
-  * :math:`a_{1, \text{ra}}` is the proportion of the population with risk factor combination :math:`\lambda`
+  * :math:`a_{1, \text{existing}}` is the proportion of the population with risk factor combination :math:`\lambda`
     who had an asthma diagnosis at :math:`t=0` and still have it at :math:`t=1`
-  * :math:`b_{1, \text{ra}}` is the proportion of the population with risk factor combination :math:`\lambda`
+  * :math:`b_{1, \text{existing}}` is the proportion of the population with risk factor combination :math:`\lambda`
     who had an asthma diagnosis at :math:`t=0` but no longer have it at :math:`t=1`
-  * :math:`c_{1, \text{ra}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
+  * :math:`c_{1, \text{existing}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
     who had an asthma diagnosis at :math:`t=0` and still have it at :math:`t=1`
-  * :math:`d_{1, \text{ra}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
+  * :math:`d_{1, \text{existing}}` is the proportion of the population with no risk factors (:math:`\lambda = 0`)
     who had an asthma diagnosis at :math:`t=0` but no longer have it at :math:`t=1`
   * :math:`\rho` is the probability that a person would be reassessed as having an asthma diagnosis
     at :math:`t=1` given that they had an asthma diagnosis at :math:`t=0`
